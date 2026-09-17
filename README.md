@@ -12,15 +12,12 @@ A prototype and academic showcase for **Topic 7: Inland Container Depot (ICD) & 
 - **Topik Pembahasan:** Topik 7 — *Inland Container Depot (ICD) & Dry Port Management*
 
 ---
+1. Zulfikar Jafarudin Fatah — Lead System Architect (Ketua Tim)
+2. Armansyah Muchtarrom — Hardware & Infrastructure Specialist
+3. Afriansayah Ayubi — Software & ERP Process Specialist
+4. Juan Gamaliel — Data Integration Specialist
+5. Naufal Andika Heditya — Business Analyst & QA Specialist
 
-## 👥 Tim Pengembang (Project Team)
-| No | Nama Mahasiswa | NIM | Peran / Spesialisasi |
-|:---:|:---|:---:|:---|
-| 1 | **Zulfikar Jafarudin Fatah** | 2344190003 | Lead Project & System Architect |
-| 2 | **Juan Manuel** | 2344190013 | Yard Layout & Terminal Ops Specialist |
-| 3 | **Muhammad Daffa Al Hafizh** | 2344190001 | Business Process & Workflow Analyst |
-| 4 | **Muhammad Arman** | 2344190012 | Infrastructure, Hardware & Automation Integrator |
-| 5 | **Muhammad Bagoes Syahputra** | 2344190022 | Logistics Data & Standards Officer |
 
 ---
 
