@@ -177,83 +177,83 @@ unset($c);
 $total_containers = count($containers);
 ?>
 
-<div class="space-y-6">
+<div class="space-y-4">
 
-    <!-- Header & Subtitle -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+    <!-- Header & Subtitle (Compact & Clean) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-gray-200/80">
         <div>
-            <div class="flex items-center space-x-3 mb-1">
-                <span class="px-3 py-1 text-xs font-bold uppercase rounded-full bg-blue-50 text-[#0170b9] border border-blue-200">
-                    <i class="fa-solid fa-boxes-stacked mr-1.5"></i> Container Tracking
+            <div class="flex items-center space-x-2 mb-1">
+                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-blue-50 text-[#0170b9] border border-blue-200">
+                    <i class="fa-solid fa-boxes-stacked mr-1"></i> Container Tracking
                 </span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Data Terverifikasi Real-Time
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
                 </span>
             </div>
-            <h2 class="text-2xl font-bold text-gray-900">Pelacakan Kontainer & Audit Perjalanan</h2>
-            <p class="text-gray-500 text-sm mt-1">
-                Ringkasan posisi dan alur kontainer secara bersih. Klik baris kontainer untuk membuka kronologi milestone perjalanan lengkap dari origin hingga tujuan.
+            <h2 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Pelacakan Kontainer & Audit Perjalanan</h2>
+            <p class="text-gray-500 text-xs mt-0.5">
+                Ringkasan posisi dan alur kontainer secara bersih. Klik baris kontainer untuk membuka kronologi milestone perjalanan lengkap.
             </p>
         </div>
-        <div class="flex items-center space-x-3 flex-shrink-0">
-            <a href="dashboard.php?page=simulator" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-cubes mr-2"></i> Buka Simulasi 3D
+        <div class="flex items-center space-x-2 flex-shrink-0">
+            <a href="dashboard.php?page=simulator" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-cubes mr-1.5"></i> Simulasi 3D
             </a>
-            <button onclick="window.print()" class="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-print mr-2 text-gray-500"></i> Cetak Laporan
+            <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak
             </button>
-            <a href="dashboard.php?page=trucking" class="px-4 py-2.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-truck-front mr-2"></i> Ke Arus Trucking <i class="fa-solid fa-arrow-right ml-1.5"></i>
+            <a href="dashboard.php?page=trucking" class="px-3 py-1.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-truck-front mr-1.5"></i> Trucking <i class="fa-solid fa-arrow-right ml-1"></i>
             </a>
         </div>
     </div>
 
-    <!-- 4 KPI Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <!-- 4 KPI Summary Cards (Compact Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-blue-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Total Kontainer</p>
-                <h3 class="text-2xl font-bold text-gray-900 mt-1"><?= $total_containers ?> <span class="text-xs font-normal text-gray-400">Box</span></h3>
-                <div class="mt-1 text-xs text-blue-600 font-medium">Kapasitas Lapangan 200 TEU</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Total Kontainer</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5"><?= $total_containers ?> <span class="text-[10px] font-normal text-gray-400">Box</span></h3>
+                <div class="mt-0.5 text-[10px] text-blue-600 font-medium">Kapasitas 200 TEU</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#0170b9] flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-box-archive"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-emerald-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Komposisi Muatan</p>
-                <div class="flex items-center space-x-1.5 mt-1">
-                    <span class="text-xs font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded"><?= $total_dry ?> Dry</span>
-                    <span class="text-xs font-bold text-cyan-700 bg-cyan-50 px-2 py-0.5 rounded"><?= $total_reefer ?> Reefer</span>
-                    <span class="text-xs font-bold text-red-700 bg-red-50 px-2 py-0.5 rounded"><?= $total_dg ?> DG</span>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Komposisi Muatan</p>
+                <div class="flex items-center space-x-1 mt-0.5">
+                    <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded"><?= $total_dry ?> Dry</span>
+                    <span class="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.2 rounded"><?= $total_reefer ?> Rf</span>
+                    <span class="text-[10px] font-bold text-red-700 bg-red-50 px-1.5 py-0.2 rounded"><?= $total_dg ?> DG</span>
                 </div>
-                <p class="mt-1 text-xs text-gray-400"><?= $total_empty ?> Empty Box</p>
+                <p class="mt-0.5 text-[10px] text-gray-400"><?= $total_empty ?> Empty Box</p>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-chart-pie"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-amber-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Dwell Time</p>
-                <h3 class="text-2xl font-bold text-amber-600 mt-1">1.8 <span class="text-xs font-normal text-gray-400">Hari / Box</span></h3>
-                <div class="mt-1 text-xs text-green-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Sesuai Target (< 3 Hari)</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Dwell Time</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-amber-600 mt-0.5">1.8 <span class="text-[10px] font-normal text-gray-400">Hari</span></h3>
+                <div class="mt-0.5 text-[10px] text-green-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Sesuai Target (&lt; 3 Hari)</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-regular fa-clock"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-purple-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Kliring SPPB Bea Cukai</p>
-                <h3 class="text-2xl font-bold text-emerald-600 mt-1">94.7% <span class="text-xs font-normal text-gray-400">Cleared</span></h3>
-                <div class="mt-1 text-xs text-purple-600 font-medium"><i class="fa-solid fa-barcode mr-1"></i>RFID UHF Valid</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Kliring SPPB Bea Cukai</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">94.7% <span class="text-[10px] font-normal text-gray-400">Cleared</span></h3>
+                <div class="mt-0.5 text-[10px] text-purple-600 font-medium"><i class="fa-solid fa-barcode mr-1"></i>RFID UHF Valid</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
         </div>

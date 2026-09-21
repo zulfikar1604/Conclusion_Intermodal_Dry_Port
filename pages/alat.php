@@ -177,82 +177,82 @@ foreach ($equipment_list as $eq) {
 }
 ?>
 
-<div class="space-y-6">
+<div class="space-y-4">
 
-    <!-- Header & Subtitle -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+    <!-- Header & Subtitle (Compact & Clean) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-gray-200/80">
         <div>
-            <div class="flex items-center space-x-3 mb-1">
-                <span class="px-3 py-1 text-xs font-bold uppercase rounded-full bg-blue-50 text-[#0170b9] border border-blue-200">
-                    <i class="fa-solid fa-satellite-dish mr-1.5"></i> Equipment Positioning & Telemetry
+            <div class="flex items-center space-x-2 mb-1">
+                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-blue-50 text-[#0170b9] border border-blue-200">
+                    <i class="fa-solid fa-satellite-dish mr-1"></i> Equipment Telemetry
                 </span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500 animate-pulse"></span> GPS Telemetri Aktif
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> GPS Aktif
                 </span>
             </div>
-            <h2 class="text-2xl font-bold text-gray-900">Lokasi & Status Alat Berat (Reach Stacker & RTG)</h2>
-            <p class="text-gray-500 text-sm mt-1">
+            <h2 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Lokasi & Status Alat Berat (Reach Stacker & RTG)</h2>
+            <p class="text-gray-500 text-xs mt-0.5">
                 Pantau posisi radar terminal dan kartu unit. Klik pada baris riwayat pekerjaan untuk melihat rincian pemindahan kontainer secara lengkap.
             </p>
         </div>
-        <div class="flex items-center space-x-3 flex-shrink-0">
-            <a href="dashboard.php?page=simulator" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-gamepad mr-2"></i> Buka Simulasi 3D
+        <div class="flex items-center space-x-2 flex-shrink-0">
+            <a href="dashboard.php?page=simulator" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-gamepad mr-1.5"></i> Simulasi 3D
             </a>
-            <button onclick="refreshEquipment()" class="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-rotate mr-2 text-gray-500" id="refreshIcon"></i> Perbarui GPS
+            <button onclick="refreshEquipment()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-rotate mr-1.5 text-gray-500" id="refreshIcon"></i> GPS
             </button>
-            <a href="dashboard.php?page=kontainer" class="px-4 py-2.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-boxes-stacked mr-2"></i> Ke Data Kontainer <i class="fa-solid fa-arrow-right ml-1.5"></i>
+            <a href="dashboard.php?page=kontainer" class="px-3 py-1.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-boxes-stacked mr-1.5"></i> Kontainer <i class="fa-solid fa-arrow-right ml-1"></i>
             </a>
         </div>
     </div>
 
-    <!-- 4 Telemetry Metric Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <!-- 4 Telemetry Metric Cards (Compact Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-blue-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Armada Aktif</p>
-                <h3 class="text-2xl font-bold text-gray-900 mt-1"><?= $total_units ?> <span class="text-xs font-normal text-gray-400">Unit</span></h3>
-                <div class="mt-1 text-xs text-blue-600 font-medium">3 Reach Stacker + 1 RTG</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Armada Aktif</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5"><?= $total_units ?> <span class="text-[10px] font-normal text-gray-400">Unit</span></h3>
+                <div class="mt-0.5 text-[10px] text-blue-600 font-medium">3 RS + 1 RTG</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-[#0170b9] flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-dolly"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-purple-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Status Operasional</p>
-                <div class="flex items-center space-x-2 mt-1">
-                    <span class="text-sm font-bold text-purple-700 bg-purple-50 px-2 py-0.5 rounded"><?= $operating_units ?> Bekerja</span>
-                    <span class="text-sm font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded"><?= $idle_units ?> Standby</span>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Status Operasional</p>
+                <div class="flex items-center space-x-1.5 mt-0.5">
+                    <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded"><?= $operating_units ?> Bekerja</span>
+                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded"><?= $idle_units ?> Standby</span>
                 </div>
-                <p class="mt-1 text-xs text-gray-400">Semua Unit Sehat</p>
+                <p class="mt-0.5 text-[10px] text-gray-400">Semua Unit Sehat</p>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-gears"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-indigo-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Utilisasi</p>
-                <h3 class="text-2xl font-bold text-indigo-600 mt-1">82.5%</h3>
-                <div class="mt-1 text-xs text-emerald-600 font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Sangat Efisien</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Utilisasi</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-indigo-600 mt-0.5">82.5%</h3>
+                <div class="mt-0.5 text-[10px] text-emerald-600 font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Sangat Efisien</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-chart-line"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-emerald-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Produktivitas Gerakan</p>
-                <h3 class="text-2xl font-bold text-emerald-600 mt-1">24.2 <span class="text-xs font-normal text-gray-400">Moves / Jam</span></h3>
-                <div class="mt-1 text-xs text-blue-600 font-medium">Siklus Cepat Lift-Off/On</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Produktivitas Gerakan</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">24.2 <span class="text-[10px] font-normal text-gray-400">M/Jam</span></h3>
+                <div class="mt-0.5 text-[10px] text-blue-600 font-medium">Siklus Cepat Lift-Off/On</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-gauge-high"></i>
             </div>
         </div>

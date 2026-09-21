@@ -182,76 +182,76 @@ unset($t);
 $total_trucks = count($trucks);
 ?>
 
-<div class="space-y-6">
+<div class="space-y-4">
 
-    <!-- Header & Subtitle -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+    <!-- Header & Subtitle (Compact & Clean) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-gray-200/80">
         <div>
-            <div class="flex items-center space-x-3 mb-1">
-                <span class="px-3 py-1 text-xs font-bold uppercase rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    <i class="fa-solid fa-truck-front mr-1.5"></i> Trucking & Gate Traffic
+            <div class="flex items-center space-x-2 mb-1">
+                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    <i class="fa-solid fa-truck-front mr-1"></i> Trucking & Gate Traffic
                 </span>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                    <span class="w-1.5 h-1.5 mr-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Gerbang & Timbangan Aktif
+                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> Gerbang & Timbangan Aktif
                 </span>
             </div>
-            <h2 class="text-2xl font-bold text-gray-900">Manajemen Trucking & Arus Gerbang</h2>
-            <p class="text-gray-500 text-sm mt-1">
+            <h2 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Manajemen Trucking & Arus Gerbang</h2>
+            <p class="text-gray-500 text-xs mt-0.5">
                 Monitoring arus truk secara ringkas dan rapi. Klik pada baris armada untuk melihat rincian milestone perjalanan, slip timbangan, dan dokumen masuk.
             </p>
         </div>
-        <div class="flex items-center space-x-3 flex-shrink-0">
-            <button onclick="window.print()" class="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-print mr-2 text-gray-500"></i> Cetak Rekap
+        <div class="flex items-center space-x-2 flex-shrink-0">
+            <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak Rekap
             </button>
-            <a href="dashboard.php?page=alat" class="px-4 py-2.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center">
-                <i class="fa-solid fa-dolly mr-2"></i> Monitor Alat Berat <i class="fa-solid fa-arrow-right ml-1.5"></i>
+            <a href="dashboard.php?page=alat" class="px-3 py-1.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-dolly mr-1.5"></i> Monitor Alat Berat <i class="fa-solid fa-arrow-right ml-1"></i>
             </a>
         </div>
     </div>
 
-    <!-- 4 KPI Summary Cards -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+    <!-- 4 KPI Summary Cards (Compact Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-indigo-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Armada di Terminal</p>
-                <h3 class="text-2xl font-bold text-indigo-600 mt-1"><?= $total_in_yard ?> <span class="text-xs font-normal text-gray-400">Armada</span></h3>
-                <div class="mt-1 text-xs text-gray-500 font-medium">Bongkar & Muat Lapangan</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Armada di Terminal</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-indigo-600 mt-0.5"><?= $total_in_yard ?> <span class="text-[10px] font-normal text-gray-400">Armada</span></h3>
+                <div class="mt-0.5 text-[10px] text-gray-500 font-medium">Bongkar & Muat Lapangan</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-truck-moving"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-amber-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Antrian Gerbang</p>
-                <h3 class="text-2xl font-bold text-amber-600 mt-1"><?= $total_queuing + $total_at_gate ?> <span class="text-xs font-normal text-gray-400">Truk</span></h3>
-                <div class="mt-1 text-xs text-amber-600 font-medium"><?= $total_at_gate ?> Timbang / <?= $total_queuing ?> Antri Luar</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Antrian Gerbang</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-amber-600 mt-0.5"><?= $total_queuing + $total_at_gate ?> <span class="text-[10px] font-normal text-gray-400">Truk</span></h3>
+                <div class="mt-0.5 text-[10px] text-amber-600 font-medium"><?= $total_at_gate ?> Timbang / <?= $total_queuing ?> Antri</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-scale-balanced"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-emerald-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Turnaround</p>
-                <h3 class="text-2xl font-bold text-emerald-600 mt-1">21.5 <span class="text-xs font-normal text-gray-400">Menit</span></h3>
-                <div class="mt-1 text-xs text-emerald-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Sesuai Target (< 30m)</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Turnaround</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">21.5 <span class="text-[10px] font-normal text-gray-400">Menit</span></h3>
+                <div class="mt-0.5 text-[10px] text-emerald-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Sesuai Target (&lt; 30m)</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-stopwatch-20"></i>
             </div>
         </div>
 
-        <div class="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-blue-300 transition-all flex items-center justify-between">
             <div>
-                <p class="text-xs font-semibold uppercase text-gray-400 tracking-wider">Selesai Gate-Out</p>
-                <h3 class="text-2xl font-bold text-blue-600 mt-1"><?= $total_gate_out ?> <span class="text-xs font-normal text-gray-400">Siklus</span></h3>
-                <div class="mt-1 text-xs text-blue-600 font-medium"><i class="fa-solid fa-file-circle-check mr-1"></i>Tiket Ditutup</div>
+                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Selesai Gate-Out</p>
+                <h3 class="text-xl sm:text-2xl font-bold text-blue-600 mt-0.5"><?= $total_gate_out ?> <span class="text-[10px] font-normal text-gray-400">Siklus</span></h3>
+                <div class="mt-0.5 text-[10px] text-blue-600 font-medium"><i class="fa-solid fa-file-circle-check mr-1"></i>Tiket Ditutup</div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xl shadow-inner">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs shadow-inner">
                 <i class="fa-solid fa-door-open"></i>
             </div>
         </div>

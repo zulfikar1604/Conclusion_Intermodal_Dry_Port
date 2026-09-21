@@ -16,50 +16,50 @@ if (session_status() === PHP_SESSION_NONE) {
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 
-<div class="space-y-6">
+<div class="space-y-4">
     
-    <!-- Top Header Banner -->
-    <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
-        <div class="absolute -right-10 -bottom-10 opacity-10 pointer-events-none">
-            <i class="fa-solid fa-gamepad text-9xl"></i>
+    <!-- Top Header Banner (Compact & Streamlined) -->
+    <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-xl p-3.5 sm:p-4 text-white shadow-sm relative overflow-hidden">
+        <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
+            <i class="fa-solid fa-gamepad text-8xl"></i>
         </div>
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 relative z-10">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 relative z-10">
             <div>
-                <div class="flex items-center space-x-2.5 mb-2">
-                    <span class="bg-emerald-500 text-white text-[11px] font-extrabold uppercase px-2.5 py-0.5 rounded-full flex items-center shadow">
-                        <span class="w-2 h-2 rounded-full bg-white animate-ping mr-1.5"></span> LIVE 3D SIMULATOR
+                <div class="flex items-center space-x-2 mb-1.5">
+                    <span class="bg-emerald-500 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md flex items-center shadow-xs">
+                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping mr-1.5"></span> LIVE 3D SIMULATOR
                     </span>
-                    <span class="bg-white/15 text-blue-100 text-xs px-2.5 py-0.5 rounded-full font-medium border border-white/20">
-                        Three.js WebGL Engine v2.0
+                    <span class="bg-white/15 text-blue-100 text-[11px] px-2 py-0.5 rounded-md font-medium border border-white/20">
+                        Three.js Engine v2.0
                     </span>
-                    <span class="bg-amber-400/20 text-amber-200 text-xs px-2.5 py-0.5 rounded-full font-semibold border border-amber-300/30">
-                        <i class="fa-solid fa-graduation-cap mr-1"></i>Kunci Evaluasi Dosen: Real-Time Stacking Update
+                    <span class="bg-amber-400/20 text-amber-200 text-[11px] px-2 py-0.5 rounded-md font-semibold border border-amber-300/30">
+                        <i class="fa-solid fa-graduation-cap mr-1"></i>Real-Time Stacking Update
                     </span>
                 </div>
-                <h1 class="text-2xl lg:text-3xl font-bold tracking-tight">Pusat Kendali Simulasi 3D Virtual Terminal</h1>
-                <p class="text-blue-100 text-sm mt-1 max-w-3xl">
-                    Simulasi 3D terminal intermodal 35 Ha. Anda dapat melakukan <strong>aksi operasional langsung di lapangan 3D</strong> (Relokasi box oleh Reach Stacker, simulasi gerbang timbangan VGM, alih muat KA oleh RTG) yang tersinkronisasi <em>real-time</em> dengan basis data MySQL.
+                <h1 class="text-base sm:text-lg font-bold tracking-tight">Pusat Kendali Simulasi 3D Virtual Terminal</h1>
+                <p class="text-blue-100 text-xs mt-0.5 max-w-3xl leading-relaxed">
+                    Simulasi 3D terminal intermodal 35 Ha. Anda dapat melakukan <strong>aksi operasional langsung di lapangan 3D</strong> (Relokasi box Reach Stacker, gerbang timbangan VGM, alih muat KA RTG) yang tersinkronisasi <em>real-time</em> dengan basis data MySQL.
                 </p>
             </div>
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="openMoveModal()" class="px-4 py-2.5 bg-amber-500 hover:bg-amber-400 text-gray-900 font-bold text-xs rounded-xl shadow-md transition flex items-center">
-                    <i class="fa-solid fa-dolly mr-2 text-sm"></i>Pindahkan Box (RS)
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <button onclick="openMoveModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-lg shadow-xs transition flex items-center">
+                    <i class="fa-solid fa-dolly mr-1.5 text-xs"></i>Pindahkan Box (RS)
                 </button>
-                <button onclick="triggerGateIn()" class="px-4 py-2.5 bg-white hover:bg-blue-50 text-[#004b87] font-bold text-xs rounded-xl shadow-md transition flex items-center">
-                    <i class="fa-solid fa-truck-ramp-box mr-2 text-sm text-[#0170b9]"></i>Simulasi Gate-In Truk
+                <button onclick="triggerGateIn()" class="px-3 py-1.5 bg-white hover:bg-blue-50 text-[#004b87] font-bold text-xs rounded-lg shadow-xs transition flex items-center">
+                    <i class="fa-solid fa-truck-ramp-box mr-1.5 text-xs text-[#0170b9]"></i>Simulasi Gate-In Truk
                 </button>
-                <button onclick="triggerRailDischarge()" class="px-4 py-2.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow-md transition flex items-center">
-                    <i class="fa-solid fa-train-subway mr-2 text-sm"></i>Bongkar KA (RTG)
+                <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center">
+                    <i class="fa-solid fa-train-subway mr-1.5 text-xs"></i>Bongkar KA (RTG)
                 </button>
-                <button onclick="resetSimulation()" class="px-3 py-2.5 bg-white/10 hover:bg-white/20 text-white font-medium text-xs rounded-xl border border-white/20 transition flex items-center" title="Reset Simulasi ke Posisi Awal">
-                    <i class="fa-solid fa-rotate-left mr-1.5"></i>Reset Demo
+                <button onclick="resetSimulation()" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white font-medium text-xs rounded-lg border border-white/20 transition flex items-center" title="Reset Simulasi ke Posisi Awal">
+                    <i class="fa-solid fa-rotate-left mr-1"></i>Reset
                 </button>
             </div>
         </div>
     </div>
 
     <!-- 3D Canvas Viewport & Floating HUD System -->
-    <div class="relative bg-gray-950 rounded-2xl overflow-hidden shadow-2xl border border-gray-800" style="height: 680px;" id="simulatorViewportContainer">
+    <div class="relative bg-gray-950 rounded-xl overflow-hidden shadow-md border border-gray-800" style="height: 540px;" id="simulatorViewportContainer">
         
         <!-- WebGL Canvas Container -->
         <div id="webglCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
@@ -229,51 +229,51 @@ if (session_status() === PHP_SESSION_NONE) {
 
     </div>
 
-    <!-- 4 Information Cards (Metrik Operasional Simulasi Real-Time) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- 4 Information Cards (Metrik Operasional Simulasi Real-Time - Compact) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
         
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase">Kontainer di Lapangan</p>
-                <h4 class="text-2xl font-bold text-gray-800 mt-1" id="statInYard">19 <span class="text-xs font-normal text-gray-400">box</span></h4>
-                <p class="text-[11px] text-emerald-600 font-medium mt-0.5"><i class="fa-solid fa-check-double mr-1"></i>Tersinkronisasi MySQL</p>
+        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Box di Lapangan</p>
+                <h4 class="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5 leading-none" id="statInYard">19 <span class="text-xs font-normal text-gray-400">box</span></h4>
+                <p class="text-[10px] text-emerald-600 font-medium mt-1 truncate"><i class="fa-solid fa-check-double mr-1"></i>Sync MySQL</p>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-blue-50 text-cdp-blue flex items-center justify-center text-xl">
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-cdp-blue flex items-center justify-center text-sm shrink-0 ml-2">
                 <i class="fa-solid fa-cubes-stacked"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase">Utilisasi Lapangan Yard</p>
-                <h4 class="text-2xl font-bold text-gray-800 mt-1" id="statYardUtil">23.8%</h4>
-                <div class="w-24 bg-gray-100 rounded-full h-1.5 mt-1.5">
-                    <div class="bg-blue-600 h-1.5 rounded-full" id="statYardBar" style="width: 23.8%"></div>
+        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Utilisasi Yard</p>
+                <h4 class="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5 leading-none" id="statYardUtil">23.8%</h4>
+                <div class="w-20 bg-gray-100 rounded-full h-1 mt-1.5">
+                    <div class="bg-blue-600 h-1 rounded-full" id="statYardBar" style="width: 23.8%"></div>
                 </div>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm shrink-0 ml-2">
                 <i class="fa-solid fa-chart-pie"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase">Armada Alat Aktif</p>
-                <h4 class="text-2xl font-bold text-gray-800 mt-1">4 <span class="text-xs font-normal text-gray-400">unit</span></h4>
-                <p class="text-[11px] text-gray-500 mt-0.5">3 RS (Kalmar) + 1 RTG Crane</p>
+        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Armada Aktif</p>
+                <h4 class="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5 leading-none">4 <span class="text-xs font-normal text-gray-400">unit</span></h4>
+                <p class="text-[10px] text-gray-500 mt-1 truncate">3 RS + 1 RTG Crane</p>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm shrink-0 ml-2">
                 <i class="fa-solid fa-dolly"></i>
             </div>
         </div>
 
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-gray-100 flex items-center justify-between">
-            <div>
-                <p class="text-xs font-semibold text-gray-500 uppercase">Kecepatan Angin (Safety)</p>
-                <h4 class="text-2xl font-bold text-emerald-600 mt-1">6.4 <span class="text-xs font-normal text-gray-400">m/s</span></h4>
-                <p class="text-[11px] text-emerald-600 mt-0.5"><i class="fa-solid fa-shield-halved mr-1"></i>Batas Aman RTG &lt; 20 m/s</p>
+        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Angin (Safety)</p>
+                <h4 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5 leading-none">6.4 <span class="text-xs font-normal text-gray-400">m/s</span></h4>
+                <p class="text-[10px] text-emerald-600 mt-1 truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Batas &lt; 20 m/s</p>
             </div>
-            <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shrink-0 ml-2">
                 <i class="fa-solid fa-wind"></i>
             </div>
         </div>
