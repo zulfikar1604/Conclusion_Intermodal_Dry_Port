@@ -654,13 +654,18 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 
                 <!-- Tabel Pelacakan Muatan Klien (Shipper Consignment Tracking) -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-2 border-b border-gray-100">
                         <h3 class="font-bold text-gray-800 text-lg flex items-center">
                             <i class="fa-solid fa-list-check mr-2 text-cdp-blue"></i>Pelacakan Konsinyasi Muatan Klien (Shipper Consignment Tracking)
                         </h3>
-                        <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
-                            <i class="fa-solid fa-satellite-dish mr-1"></i>Live Tracking
-                        </span>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
+                                <i class="fa-solid fa-satellite-dish mr-1"></i>Live Tracking
+                            </span>
+                            <a href="dashboard.php?page=kontainer" class="text-xs font-bold text-[#0170b9] hover:text-[#004b87] bg-blue-50 px-2.5 py-1 rounded border border-blue-200 transition">
+                                Buka Semua Milestone <i class="fa-solid fa-arrow-right ml-1 text-[10px]"></i>
+                            </a>
+                        </div>
                     </div>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
