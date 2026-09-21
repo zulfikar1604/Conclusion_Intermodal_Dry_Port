@@ -1,15 +1,16 @@
-# 📘 PANDUAN UTAMA PROYEK: CIDP YARD MANAGEMENT SYSTEM (YMS)
-### Single Source of Truth (SSOT) untuk Anggota Tim & AI Assistant
-> **PENTING UNTUK DEVELOPER, ANGGOTA TIM, MAUPUN AI:**  
-> **BACA DOKUMEN INI TERLEBIH DAHULU** sebelum melakukan penambahan kode, modifikasi modul, atau integrasi hardware/API. Dokumen ini merangkum seluruh kesepakatan arsitektur, ruang lingkup resmi (Scope of Work), pembagian tugas tim, skema basis data, dan mekanisme integrasi hardware-software berbasis simulasi.
+# 📘 PANDUAN MASTER ARSITEKTUR & PENGEMBANGAN: CIDP YMS
+### Single Source of Truth (SSOT) — Cetak Biru Proyek Konsultan Logistik
+> **WAJIB DIBACA OLEH ANGGOTA TIM & AI ASSISTANT SEBELUM MENULIS KODE:**  
+> Dokumen ini adalah panduan resmi yang mengikat seluruh pengembangan prototipe **Conclusion Intermodal Dry Port (CIDP) - Yard Management System (YMS)**. Dokumen ini merangkum visi proyek, alur pengerjaan teknis, integrasi sistem ERP, analisis finansial (CAPEX & OPEX), skema hardware-software berbasis simulasi, dan arsitektur divisi profesional.
 
 ---
 
 ## 1. 🎯 Identitas & Visi Proyek
 
-* **Identitas Konsultan:** Conclusion Supply Chain Consultant
-* **Institusi:** Institut Transportasi dan Logistik (ITL) Trisakti — Semester 5
+* **Nama Entitas:** Conclusion Supply Chain Consultant
+* **Institusi Akademik:** Institut Transportasi dan Logistik (ITL) Trisakti — Semester 5
 * **Mata Kuliah:** Teknologi dan Perangkat Lunak Logistik
+* **Dosen Pengampu:** Dr. Tigor Franky, S.T., M.T.
 * **Topik Utama:** **Topik 7 — Inland Container Depot (ICD) & Dry Port Management**
 * **Studi Kasus:** Prototype Sistem Manajemen Lapangan Penumpukan (*Yard Management System / YMS*) pada **Conclusion Intermodal Dry Port (CIDP)**.
 
@@ -19,19 +20,17 @@
 
 Berdasarkan silabus dan lembar penugasan resmi proyek:
 > **Scope Wajib:**
-> 1. **Yard Management System (YMS):** Manajemen slot penumpukan lapangan, dwell time, dan visualisasi aktivitas kargo.
-> 2. **Integrasi GPS Reach Stacker:** Pelacakan posisi armada alat berat di area penumpukan kontainer secara real-time.
+> 1. **Yard Management System (YMS):** Manajemen penumpukan kontainer, audit dwell time, dan visualisasi lapangan.
+> 2. **Integrasi GPS Reach Stacker:** Pelacakan posisi armada alat berat di area yard secara real-time.
 > 3. **RFID Tagging Kontainer:** Identifikasi otomatis kontainer (standar RFID UHF EPC Gen2 / ISO 18000-6C) saat masuk gerbang dan verifikasi di lapangan.
 > 4. **Integrasi Data Moda Truk – Kereta Api Logistik:** Konektivitas intermodal antarmoda jalan raya (Gate-In/Out armada truk) dengan jalur rel sepur simpan (*Rail Siding*) KA Logistik.
 > 
-> **Fokus Utama Simulasi (Kunci Penilaian Dosen):**
+> **Fokus Utama Simulasi (Kunci Evaluasi Dosen):**
 > **"Pembaruan posisi stacking kontainer di area yard saat dipindahkan oleh operator Reach Stacker."**
 
 ---
 
-## 3. 👥 Struktur Tim & Pembagian Tanggung Jawab
-
-Setiap anggota memiliki batas wilayah tanggung jawab yang jelas agar tidak tumpang tindih (*conflict of work*):
+## 3. 👥 Struktur Tim & Matriks Tanggung Jawab
 
 | No | Nama & NIM | Peran Utama | Lingkup Pekerjaan & Tanggung Jawab | Status di Web |
 |---|---|---|---|---|
@@ -41,126 +40,186 @@ Setiap anggota memiliki batas wilayah tanggung jawab yang jelas agar tidak tumpa
 | 4 | **Muhammad Daffa Al Hafizh** (2344190001) | **Business Process & ERP Analyst** | • Menyusun Standard Operating Procedure (SOP) alur alih muat KA-Truk.<br>• Perancangan struktur tarif jasa terminal (Lo-Lo, Lift-On, Storage Dwell, Timbang VGM).<br>• Perancangan integrasi data komersial/keuangan ke sistem ERP. | ⏳ Menunggu Alur ERP |
 | 5 | **Muhammad Bagoes Syahputra** (2344190022) | **Logistics Data & Standards Officer** | • Penerapan standar identifikasi logistik global (GS1-128, SSCC-18, e-Labeling).<br>• Perumusan skema data JSON API untuk integrasi sistem eksternal. | ⏳ Menunggu Standar Data |
 
-> [!NOTE]
-> Menu yang masih dalam tanggung jawab rekan tim (Denah, Gate, Yard, Intermodal, Reefer, Billing, Scanner, Settings) saat ini menampilkan **Kartu Status Kolaboratif** (*"Menunggu Input Rekan Tim"*) agar sistem tetap rapi, profesional, dan tidak menampilkan kode pura-pura/mentah sebelum ada input resmi dari anggota bersangkutan.
-
 ---
 
-## 4. 🧠 Konsep Inti: Bagaimana Hardware & Software Terhubung dalam Simulasi?
+## 4. 🧭 Roadmap & Tahapan Pengerjaan Alur Sistem (4 Fase Pengerjaan)
 
-### A. Alur Dunia Nyata (Real-Life Industrial IoT)
-Di pelabuhan kering nyata, data bergerak melalui rantai peristiwa:
-```
-[ SENSOR FISIK ] ➔ [ IOT GATEWAY / EDGE CONTROLLER ] ➔ [ REST API (JSON) ] ➔ [ YMS DATABASE ]
-```
-1. **Gate Masuk:** Sensor loop mendeteksi truk ➔ Kamera ANPR membaca plat nomor ➔ Kamera OCR membaca ISO kontainer ➔ Antena RFID UHF membaca tag ➔ Indikator timbangan load cell mengirim berat kotor ➔ Gateway gerbang mengirim `POST /api/gate/inbound` ➔ Barrier terbuka otomatis & tiket e-Gate tercetak.
-2. **Penumpukan di Yard:** Operator Reach Stacker mengunci spreader ke kontainer (sensor *Twistlock Locked*) ➔ RFID di spreader memverifikasi nomor box ➔ GPS DGPS membaca koordinat fisik boom ➔ Operator menaruh box di slot baru (sensor *Twistlock Unlocked*) ➔ Tablet kabin (VMT) mengirim `POST /api/yard/relocate` ➔ Posisi 3D di YMS ter-update seketika.
-
-### B. Implementasi pada Prototipe Kita (Virtual Hardware Mocking)
-Karena dalam lingkungan akademik perangkat keras fisik (antena UHF 860 MHz, timbangan 80 Ton, crane hidrolik) belum terpasang fisik di kelas:
-* Kita menerapkan prinsip **Decoupling (Pemisahan Lapisan)** standar industri.
-* Software YMS dibangun menggunakan **REST API & JSON Payload standar**.
-* Disediakan **Virtual Simulation Trigger (Aksi Berbasis Peran)** di web UI:
-  - Tombol aksi simulasi gerbang mengirimkan payload yang formatnya **100% sama** dengan hardware aslinya.
-  - Begitu perangkat keras fisik siap, hardware gateway tinggal menembak endpoint API yang sama **tanpa perlu mengubah kode backend YMS sedikit pun**.
-
----
-
-## 5. 🗄️ Arsitektur Basis Data (`cidp_yms`)
-
-Koneksi database dikelola melalui file central [`connection.php`](file:///d:/xampp/htdocs/Conclusion_Intermodal_Dry_Port/connection.php) menggunakan PDO MySQL.
-
-### Tabel Utama:
-1. **`containers`**: Data master kontainer di terminal
-   - `id`, `container_number` (ISO 6346), `iso_code` (42G1, 22G1, 42R1), `size_type`, `cargo_type` (`dry`, `reefer`, `dg`, `empty`), `rfid_tag`, `sscc_code`, `gross_weight_kg`, `owner_company`, `seal_number`, `customs_status` (`SPPB_CLEARED`, `INSPECTION_REQUIRED`), `block`, `bay`, `row`, `tier`, `gate_in_time`, `status` (`in_yard`, `in_transit`, `gate_out`, `on_rail`).
-2. **`trucks`**: Data arus armada pengangkut
-   - `id`, `license_plate`, `rfid_tag`, `driver_name`, `company`, `container_number`, `status` (`queuing`, `at_gate`, `in_yard`, `loading`, `gate_out`), `gate_in_time`, `gate_out_time`.
-3. **`equipment`**: Data armada alat berat
-   - `id`, `equipment_id` (`RS-01`, `RS-02`, `RS-03`, `RTG-01`), `equipment_type`, `brand_model`, `operator_name`, `operator_id`, `status` (`idle`, `operating`, `carrying`, `maintenance`), `gps_x`, `gps_y`, `current_container`, `last_block`, `fuel_percent`, `hours_today`.
-4. **`yard_events`**: Audit log pemindahan kargo
-   - `id`, `event_type` (`GATE_IN`, `LIFT_OFF`, `LIFT_ON`, `RELOCATION`, `RAIL_LOAD`, `GATE_OUT`), `container_number`, `equipment_id`, `from_block`, `from_bay`, `from_row`, `from_tier`, `to_block`, `to_bay`, `to_row`, `to_tier`, `operator_name`, `billable_amount`, `notes`, `created_at`.
-5. **`trains`**: Rangkaian kereta api logistik intermodal
-   - `id`, `train_code`, `origin`, `destination`, `total_wagons`, `loaded_wagons`, `status` (`scheduled`, `arrived`, `loading`, `departed`), `arrival_time`, `departure_time`.
-6. **`login`**: Kredensial autentikasi pengguna.
-
----
-
-## 6. 🎨 Pedoman UI/UX & Standar Desain
-
-Agar aplikasi tetap berkelas konsultan logistik modern (*enterprise level* seperti Flexport, Portbase, atau Navis N4):
-
-1. **Prinsip Tampilan Tabel (Clean & Spacious):**
-   > [!IMPORTANT]
-   > **JANGAN MEMASUKKAN TERLALU BANYAK TEKS DALAM SATU SEL TABEL.**
-   > - Setiap baris tabel harus ringkas dan rapi (1 baris per kolom, tidak boleh ada 3-4 baris teks menumpuk).
-   > - Tampilkan data inti saja di baris tabel.
-   > - Jika pengguna/penguji ingin melihat rincian lengkap, mereka cukup **mengeklik baris atau tombol "Detail & Milestone"** untuk membuka modal interaktif.
-
-2. **Tipografi & Warna Brand:**
-   - **Font:** Plus Jakarta Sans (`font-family: 'Plus Jakarta Sans', sans-serif`)
-   - **Ikon:** FontAwesome 6 Free Solid & Regular
-   - **Warna Identitas CIDP:**
-     - `cdp-navy`: `#004b87` (Aksen navigasi & tombol utama)
-     - `cdp-dark`: `#002f5e` (Background sidebar & header brand)
-     - `cdp-blue`: `#0170b9` (Link aktif & kartu sorotan)
-     - `cdp-light`: `#f4f8fc` (Background canvas aplikasi)
-
-3. **Autentikasi Satu Pintu (*Single-Door Access*):**
-   - Mode simulasi menggunakan akun konsultan superadmin: `admin@cidp.ac.id` / `admin123`.
-   - Tersedia tombol cepat **1-Klik Masuk** di `login.php` untuk mempermudah demonstrasi di depan dosen tanpa kerumitan mengetik kredensial.
-
----
-
-## 7. 📁 Struktur File & Direktori Proyek
+Untuk memastikan proyek selesai dengan *proper* dan sistematis, seluruh alur pengerjaan dibagi menjadi 4 fase:
 
 ```
-Conclusion_Intermodal_Dry_Port/
-├── PANDUAN_PROYEK_CIDP.md    <-- DOKUMEN INI (Single Source of Truth)
-├── README.md                 <-- Ringkasan publik repositori GitHub
-├── connection.php            <-- Koneksi basis data MySQL PDO terpusat
-├── dashboard.php             <-- Shell utama dashboard, routing halaman, & menu navigasi
-├── index.php                 <-- Landing page publik & etalase proyek CIDP
-├── login.php                 <-- Halaman login satu pintu (Single-Door Access)
-├── logout.php                <-- Handler penghancur sesi login
-├── cidp.sql                  <-- File SQL seed database awal
-├── pages/                    <-- MODUL HALAMAN OPERASIONAL MANDIRI
-│   ├── kontainer.php         <-- Pelacakan Kontainer, 3D Yard Coordinate & 5-Step Journey Modal
-│   ├── trucking.php          <-- Manajemen Armada Truk, Gate Traffic, & e-Gate Pass Modal
-│   └── alat.php              <-- Monitoring Radar Lokasi Alat Berat & Audit Log Pemindahan
-├── Materi/                   <-- Dokumen PDF silabus & materi kuliah ITL Trisakti
-└── assets/                   <-- File CSS, JS pendukung, dan logo CIDP
+[ FASE 1: FONDASI & PELACAKAN MANDIRI ]  ✅ SELESAI
+  ├── Single-Door Authentication & Executive Dashboard
+  ├── Pelacakan Kontainer End-to-End (Origin ➔ 3D Yard ➔ Destination)
+  ├── Manajemen Trucking & Jembatan Timbang VGM
+  └── Pemantauan Posisi GPS Alat Berat (RS-01/02/03 & RTG-01)
+                    │
+                    ▼
+[ FASE 2: TATA LETAK TERMINAL & OTOMASI GERBANG ]  ⏳ PROSES (Juan & Arman)
+  ├── Digitalisasi Sketsa Denah Fisik 35 Ha ke Web
+  ├── Stacking Rules & Koordinat 3D Bay-Row-Tier
+  └── Spesifikasi Hardware Sensor Gate (Kamera ANPR, OCR, RFID UHF)
+                    │
+                    ▼
+[ FASE 3: INTEGRASI BISNIS ERP, STANDAR DATA & PABEAN ]  ⏳ PROSES (Daffa & Bagoes)
+  ├── Alur Data Komersial YMS ➔ ERP Billing (Lo-Lo, Storage, VGM)
+  ├── Standar Labeling Logistik Global GS1-128 / SSCC-18
+  └── Integrasi Dokumen Kepabeanan CEISA 4.0 (SPPB Cleared)
+                    │
+                    ▼
+[ FASE 4: VIRTUAL IOT SANDBOX & UJI KELAYAKAN KONSULTAN ]  ⏳ FINALISASI
+  ├── Panel Pemicu Simulasi Operasional (Sandbox Pemicu Sensor)
+  └── Laporan Feasibility Study Finansial (CAPEX, OPEX, Payback Period)
 ```
 
 ---
 
-## 8. 🚀 Alur Kerja Jika Anggota Tim Ingin Menambahkan Modul Baru
+## 5. 🔗 Arsitektur Koneksi Sistem YMS ke Pihak ERP (Enterprise Resource Planning)
 
-Jika **Juan, Arman, Daffa, atau Bagoes** (atau AI yang bertugas) hendak mengaktifkan modul yang sebelumnya berstatus "Menunggu Input Rekan Tim":
+Salah satu pertanyaan paling penting dari penguji dan klien adalah:  
+**"Di mana batas antara YMS dan ERP, serta bagaimana keduanya terhubung?"**
 
-1. **Buat file modul baru** di dalam folder `pages/` (misal: `pages/denah.php`, `pages/gate.php`, dll.).
-2. **Gunakan koneksi PDO central**:
-   ```php
-   require_once __DIR__ . '/../connection.php';
-   ```
-3. **Buka file [`dashboard.php`](file:///d:/xampp/htdocs/Conclusion_Intermodal_Dry_Port/dashboard.php)** dan tambahkan rute `elseif` baru:
-   ```php
-   <?php elseif ($page === 'denah'): ?>
-       <?php include_once __DIR__ . '/pages/denah.php'; ?>
-   ```
-4. **Patuhi aturan tabel bersih**: Tampilkan data ringkas di tabel, dan gunakan modal interaktif untuk rincian data mendalam.
-5. **Verifikasi sintaksis**: Jalankan `php -l <nama_file>.php` sebelum melakukan `git commit`.
+### A. Pembagian Peran (Separation of Concerns)
+* **YMS (Yard Management System / TOS Level):** Berfokus pada **eksekusi fisik di lapangan (*shop floor*)**. Mengatur pergerakan fisik truk, pengangkatan kontainer oleh Reach Stacker, alokasi koordinat 3D slot, dan penimbangan kargo.
+* **ERP (Enterprise Resource Planning / Corporate Level — misal SAP, Oracle, atau Odoo):** Berfokus pada **keuangan (*Finance & General Ledger*), piutang (*Accounts Receivable*), penagihan (*Billing*), pajak (*e-Faktur*), dan pengadaan (*Procurement*)**.
+
+### B. Mekanisme Komunikasi (Event-Driven Webhook / REST API)
+YMS tidak mengurus pembukuan akuntansi, melainkan mengirimkan **Pemicu Tagihan (*Billable Charge Event*)** ke sistem ERP secara otomatis setiap kali ada aktivitas fisik yang selesai:
+
+```
+[ KEJADIAN OPERASIONAL DI YMS ]
+  1. Truk ditimbang di Gate-In       ➔ Jasa Timbang VGM (Rp 50.000)
+  2. RS-02 mengangkat kontainer      ➔ Jasa Lift-Off / Lo-Lo (Rp 250.000)
+  3. Kontainer menginap di Yard      ➔ Jasa Storage Progresif (Rp 45.000/hari)
+  4. Kontainer Reefer dicolok listrik ➔ Jasa Plugging Reefer (Rp 250.000/shift)
+                     │
+                     ▼ (HTTP POST / REST API Webhook)
+[ TERMINAL TARIFF ENGINE (YMS) ]
+  • Menghitung tarif resmi berdasarkan tipe muatan (Dry/Reefer/DG) dan lama inap
+                     │
+                     ▼ (Payload JSON)
+[ ERP CONNECTOR / API GATEWAY ]
+  URL: POST https://erp.cidp.ac.id/api/v1/billing/charge-event
+  Payload:
+  {
+    "event_id": "EVT-20260921-9182",
+    "customer_id": "CUST-SAMUDERA-01",
+    "customer_name": "PT Samudera Logistik Prima",
+    "container_number": "MSKU9182374",
+    "service_type": "LIFT_OFF_AND_STORAGE",
+    "breakdown": [
+      { "item": "Jasa Lift-Off 40ft", "amount": 250000 },
+      { "item": "Jembatan Timbang VGM SOLAS", "amount": 50000 },
+      { "item": "Penumpukan Yard (Dwell 2 Hari - Bebas Masa I)", "amount": 0 }
+    ],
+    "total_billable": 300000,
+    "currency": "IDR",
+    "timestamp": "2026-09-21T14:32:00Z"
+  }
+                     │
+                     ▼
+[ MODUL FINANCE & ACCOUNTING ERP ]
+  • Mencatat Piutang (Accounts Receivable)
+  • Menerbitkan e-Invoice / Faktur Pajak Resmi untuk Shipper
+```
 
 ---
 
-## 9. 💬 Cara Menjelaskan Sistem Ini Saat Sidang / Presentasi Dosen
+## 6. 💰 Analisis Finansial Dry Port: Titik Masuk Perhitungan CAPEX, OPEX, dan Model Pendapatan
+
+Sebagai konsultan rantai pasok profesional, sistem yang kita tawarkan tidak hanya canggih secara teknis, tetapi juga **layak secara finansial (*financially viable*)**.
+
+### A. Struktur CAPEX (Capital Expenditure / Investasi Awal)
+CAPEX adalah seluruh biaya investasi aset tetap untuk membangun infrastruktur CIDP:
+
+| Kategori Aset | Deskripsi Komponen Investasi | Estimasi Anggaran (Konsultan) |
+|---|---|---|
+| **Lahan & Perkerasan Pavement** | Pengadaan & pemadatan lahan 35 Ha, perkerasan beton *Heavy Duty Rigid Pavement* kapasitas beban gandar 80 Ton untuk manuver Reach Stacker. | Rp 130.000.000.000 |
+| **Jalur Rel Siding Intermodal** | Pembangunan 2 sepur simpan rel KA barang (*Double Track* 600 meter), bantalan beton, wesel percabangan ke jalur utama PT KAI. | Rp 35.000.000.000 |
+| **Armada Alat Berat** | • 3 Unit Reach Stacker (Kalmar DRG450 @ Rp 9 Miliar = Rp 27 M)<br>• 1 Unit RTG Crane (Konecranes Electric = Rp 28 Miliar). | Rp 55.000.000.000 |
+| **Otomasi Gerbang & IoT** | 2 Unit Jembatan Timbang 80 Ton, 4 Kamera ANPR Plat Nomor, 4 Kamera OCR ISO 6346, Portal Antena RFID UHF, Barrier Gate Otomatis. | Rp 4.500.000.000 |
+| **Infrastruktur Cold Chain** | Dermaga Reefer Rack 300 colokan listrik (*plugs*), transformator gardu industri 380V, sensor telemetri suhu IoT LoRaWAN. | Rp 6.500.000.000 |
+| **Teknologi Informasi & Software** | Lisensi Server Cloud/On-Premise, Pembangunan Software YMS CIDP, Lisensi ERP Finansial, dan Keamanan Jaringan. | Rp 3.000.000.000 |
+| **TOTAL ESTIMASI CAPEX** | **Investasi Awal Pembangunan Terminal CIDP 35 Ha** | **± Rp 234.000.000.000** |
+
+---
+
+### B. Struktur OPEX (Operational Expenditure / Biaya Operasional Rutin)
+OPEX adalah biaya berkala yang dibutuhkan untuk menjalankan operasi dry port:
+1. **Biaya Energi & Utilitas:** Bahan bakar Solar HSD industri untuk armada Reach Stacker (estimasi 15-20 liter/jam operasi) dan tagihan listrik PLN industri gardu 380V untuk RTG & Reefer.
+2. **Biaya Tenaga Kerja (Payroll):** Gaji operator Reach Stacker, operator RTG Crane, petugas gerbang & timbangan, teknisi mekanik M&R, staf IT YMS, dan admin billing.
+3. **Biaya Perawatan & Suku Cadang (M&R):** Penggantian ban crane *heavy-duty*, pelumas oli hidrolik boom spreader, penggantian twistlock pin, dan kalibrasi tahunan jembatan timbang oleh Badan Metrologi.
+4. **Biaya Akses Rel (*Track Access Charge / TAC*):** Biaya sewa jalur rel dan bagi hasil penggunaan lokomotif/gerbong datar dengan PT Kereta Api Logistik (KAI Logistik).
+
+---
+
+### C. Model Pendapatan (Revenue Streams / Tarif Jasa ICD)
+
+| Jenis Jasa Layanan | Besaran Tarif Layanan | Satuan Pengenaan |
+|---|---|---|
+| **Lift-On / Lift-Off (Lo-Lo)** | Rp 175.000 (20ft) / Rp 275.000 (40ft) | Per Box Kontainer |
+| **Penumpukan Lapangan (*Yard Storage*)** | • Hari 1 - 3: **Masa I (Bebas Tarif / Free Dwell)**<br>• Hari 4 - 10: **Masa II (Rp 45.000 / hari)**<br>• Hari >10: **Masa III Progresif (Rp 90.000 / hari)** | Per Box / Hari |
+| **Jembatan Timbang VGM SOLAS** | Rp 50.000 | Per Truk |
+| **Steker Pendingin Reefer (*Plugging*)** | Rp 250.000 | Per Shift (8 Jam) |
+| **CFS Stuffing / Stripping Muatan** | Rp 450.000 | Per Box Kontainer |
+| **Bagi Hasil Angkutan KA Logistik** | Rp 1.200.000 - Rp 1.800.000 | Per Gerbong (CIDP - Surabaya) |
+
+---
+
+### D. Di Mana Masuknya Perhitungan Ini dalam Sistem Prototipe Kita?
+1. **Di Modul Billing & Faktur (`dashboard.php?page=billing` - Scope Daffa):**
+   * Menjadi mesin kalkulasi otomatis yang menghitung tagihan per pelanggan berdasarkan catatan event dari tabel `yard_events`.
+2. **Di Beranda Eksekutif (`dashboard.php?page=beranda` - Scope Zulfikar):**
+   * Ditampilkan pada KPI Card: **Pendapatan Hari Ini (Gross Daily Revenue)** dan rasio penagihan piutang (*Collection Rate*).
+3. **Di Dokumen Laporan Akhir Kelompok (Feasibility Study):**
+   * Menghitung **Payback Period (PBP)**, **Net Present Value (NPV)**, dan **Internal Rate of Return (IRR)** dengan asumsi throughput 150.000 TEU/tahun untuk meyakinkan dosen penguji bahwa terminal ini menguntungkan secara bisnis.
+
+---
+
+## 7. 🗂️ Arsitektur Navigasi Sidebar: 4 Kluster Divisi Profesional
+
+Untuk mencerminkan arsitektur sistem kelas dunia, menu sidebar dikelompokkan ke dalam **4 Kluster Divisi**:
+
+```markdown
+📂 KLUSTER 1: EXECUTIVE & VISUALIZATION
+├── 📊 Beranda Eksekutif (KPI, Metrik Kinerja & Finansial) [Aktif - Zulfikar]
+└── 🗺️ Denah Terminal 35 Ha (Visual Top-Down Lapangan) [PIC: Juan & Arman]
+
+📂 KLUSTER 2: OPERASIONAL UTAMA TERMINAL (CORE YMS)
+├── 📦 Pelacakan Kontainer (Posisi 3D, Dwell Time & Rute) [Aktif - Zulfikar]
+├── 🚛 Manajemen Trucking (Arus Gerbang, VGM & e-Gate Pass) [Aktif - Zulfikar]
+├── 🚜 Lokasi Alat Berat GPS (Telemetri Reach Stacker & RTG) [Aktif - Zulfikar]
+├── 🏗️ Manajemen Yard & Stacking (Aturan Bay-Row-Tier) [PIC: Juan]
+└── 🚂 Intermodal Rail Siding (Jadwal & Rangkaian KA Logistik) [PIC: Juan & Daffa]
+
+📂 KLUSTER 3: VALUE-ADDED SERVICES & KEPABEANAN
+├── ❄️ Monitor Reefer (Steker Listrik & Telemetri Dingin IoT) [PIC: Arman]
+├── 🏛️ Kepabeanan & Bea Cukai (Integrasi SPPB & Jalur Merah/Hijau) [PROYEKSI PABEAN]
+└── 🏷️ Scanner SSCC / GS1 (Standar Barcode & Verifikasi Box) [PIC: Bagoes]
+
+📂 KLUSTER 4: KOMERSIAL, SIMULASI & SISTEM
+├── 💵 Billing & Faktur (Tarif Lo-Lo, Storage & Integrasi ERP) [PIC: Daffa]
+├── 🎮 Panel Simulasi Operasional (Sandbox Pemicu Sensor IoT) [PROYEKSI SIMULASI]
+└── ⚙️ Pengaturan Sistem (Hak Akses & Konfigurasi Basis Data)
+```
+
+---
+
+## 8. 🧠 Konsep Hardware-Software: Mengapa Virtual IoT Mocking Sangat Kuat?
 
 Jika dosen bertanya:
-> *"Bagaimana sistem YMS kalian bisa membuktikan pergerakan barang secara end-to-end tanpa ada hardware fisik di kelas?"*
+> *"Kalian tidak punya sensor RFID dan Reach Stacker asli di kelas, bagaimana membuktikan sistem ini bisa terhubung ke hardware?"*
 
 **Jawaban Resmi Tim:**
-> *"Sistem CIDP YMS mengadopsi arsitektur **Event-Driven Decoupled Architecture**. Setiap perpindahan kargo dari gerbang (Gate-In), penumpukan lapangan (Yard Stacking), hingga alih moda ke Kereta Api (Rail Siding) digerakkan oleh pemicu data standar (REST API JSON).
+> *"Dalam arsitektur industri enterprise, software YMS tidak pernah berkomunikasi langsung dengan sensor fisik kabel, melainkan melalui **IoT Edge Gateway** menggunakan standar **REST API & JSON Payload** (Decoupled Architecture).
 >
-> Di lapangan sebenarnya, sinyal tersebut dikirimkan oleh IoT Gateway yang membaca sensor ANPR, RFID UHF, load cell jembatan timbang, dan twistlock spreader Reach Stacker. Dalam prototipe simulasi ini, kami membangun **Virtual Simulation Trigger Engine** dengan struktur data yang 100% identik. Sehingga kapan pun perangkat keras fisik diimplementasikan oleh tim infrastruktur, sistem YMS ini langsung siap beroperasi tanpa perubahan kode dasar."*
+> Karena hardware fisik masih dalam tahap spesifikasi pengadaan oleh tim infrastruktur, pada fase prototipe ini kami membangun **Virtual IoT Simulation Engine**. Struktur data JSON yang ditembakkan oleh simulator ini **100% identik** dengan data yang akan dikirimkan gateway fisik nantinya. Ketika hardware asli sudah dipasang di lapangan, hardware tinggal menembak endpoint API yang sama tanpa perlu mengubah satu baris pun kode pada sistem YMS kita."*
+
+---
+
+## 9. 🎨 Pedoman Tampilan UI/UX: Bersih & Ringkas (Clean & Spacious)
+
+1. **Prinsip 1 Baris per Item:** Seluruh tabel operasional (Kontainer, Trucking, Alat Berat) wajib tampil ringkas dalam 1 baris bersih. Tidak boleh menumpuk 3-4 baris teks berjejal dalam satu sel tabel.
+2. **Klik untuk Milestone Lengkap:** Pengguna yang ingin memeriksa rincian teknis, bobot timbangan, nomor dokumen, maupun kronologi perjalanan cukup **mengeklik baris tabel atau tombol Detail & Milestone** untuk membuka modal interaktif.
 
 ---
 *Dokumen ini disusun dan disahkan oleh **Lead Project & System Architect (Zulfikar Jafarudin Fatah)** sebagai standar operasional pengembangan Conclusion Intermodal Dry Port (CIDP).*

@@ -27,20 +27,39 @@ if (!function_exists('can_view')) {
     }
 }
 
-$menu_items = [
-    'beranda' => ['icon' => 'fa-home', 'label' => 'Beranda Eksekutif'],
-    'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => 'Pelacakan Kontainer'],
-    'trucking' => ['icon' => 'fa-truck-front', 'label' => 'Manajemen Trucking'],
-    'alat' => ['icon' => 'fa-dolly', 'label' => 'Lokasi Alat Berat (GPS)'],
-    'gate' => ['icon' => 'fa-door-open', 'label' => 'Manajemen Gate'],
-    'yard' => ['icon' => 'fa-cubes', 'label' => 'Manajemen Yard'],
-    'denah' => ['icon' => 'fa-map-location-dot', 'label' => 'Denah Terminal'],
-    'intermodal' => ['icon' => 'fa-train-subway', 'label' => 'Intermodal & KA'],
-    'reefer' => ['icon' => 'fa-snowflake', 'label' => 'Monitor Reefer'],
-    'billing' => ['icon' => 'fa-file-invoice-dollar', 'label' => 'Billing & Faktur'],
-    'scanner' => ['icon' => 'fa-barcode', 'label' => 'Scanner SSCC/GS1'],
-    'settings' => ['icon' => 'fa-gear', 'label' => 'Pengaturan']
+// Struktur Navigasi Profesional: 4 Kluster Divisi Operasional Dry Port
+$menu_clusters = [
+    'Eksekutif & Visualisasi' => [
+        'beranda' => ['icon' => 'fa-house', 'label' => 'Beranda Eksekutif'],
+        'denah' => ['icon' => 'fa-map-location-dot', 'label' => 'Denah Terminal 35 Ha']
+    ],
+    'Operasional Utama (Core YMS)' => [
+        'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => 'Pelacakan Kontainer'],
+        'trucking' => ['icon' => 'fa-truck-front', 'label' => 'Manajemen Trucking'],
+        'alat' => ['icon' => 'fa-dolly', 'label' => 'Lokasi Alat Berat GPS'],
+        'gate' => ['icon' => 'fa-door-open', 'label' => 'Manajemen Gate'],
+        'yard' => ['icon' => 'fa-cubes', 'label' => 'Manajemen Yard & Stacking'],
+        'intermodal' => ['icon' => 'fa-train-subway', 'label' => 'Intermodal Rail Siding']
+    ],
+    'Fasilitas Khusus & Pabean' => [
+        'reefer' => ['icon' => 'fa-snowflake', 'label' => 'Monitor Reefer Cold Chain'],
+        'customs' => ['icon' => 'fa-shield-halved', 'label' => 'Kepabeanan & Bea Cukai'],
+        'scanner' => ['icon' => 'fa-barcode', 'label' => 'Scanner SSCC / GS1']
+    ],
+    'Komersial & Sistem' => [
+        'billing' => ['icon' => 'fa-file-invoice-dollar', 'label' => 'Billing & Faktur ERP'],
+        'simulator' => ['icon' => 'fa-gamepad', 'label' => 'Panel Simulasi IoT'],
+        'settings' => ['icon' => 'fa-gear', 'label' => 'Pengaturan Global']
+    ]
 ];
+
+// Flatten untuk kemudahan akses judul & routing
+$menu_items = [];
+foreach ($menu_clusters as $c_name => $items) {
+    foreach ($items as $k => $v) {
+        $menu_items[$k] = $v;
+    }
+}
 
 // Helper untuk format tanggal Indonesia
 $bulan = [
@@ -119,19 +138,26 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
             <span class="text-xl font-bold tracking-wide logo-text whitespace-nowrap">CIDP YMS</span>
         </div>
         
-        <!-- Navigation -->
-        <nav class="p-4 space-y-1">
-            <div class="text-xs font-semibold text-white/50 uppercase tracking-wider mb-3 mt-2 logo-text whitespace-nowrap">Menu Utama</div>
-            
-            <?php foreach ($menu_items as $key => $item): ?>
-                <?php if (can_view($key, $role)): ?>
-                    <a href="dashboard.php?page=<?= $key ?>" 
-                       class="flex items-center px-3 py-2.5 rounded-lg transition-colors group <?= $page === $key ? 'bg-cdp-blue text-white shadow-md' : 'text-gray-300 hover:bg-white/10 hover:text-white' ?>"
-                       title="<?= $item['label'] ?>">
-                        <i class="fa-solid <?= $item['icon'] ?> w-6 text-center <?= $page === $key ? 'text-white' : 'text-gray-400 group-hover:text-white' ?>"></i>
-                        <span class="ml-3 font-medium logo-text whitespace-nowrap"><?= $item['label'] ?></span>
-                    </a>
-                <?php endif; ?>
+        <!-- Navigation: 4 Kluster Divisi Operasional -->
+        <nav class="p-3 space-y-4">
+            <?php foreach ($menu_clusters as $cluster_title => $items): ?>
+                <div>
+                    <div class="text-[10px] font-bold text-white/40 uppercase tracking-wider mb-1.5 px-3 logo-text whitespace-nowrap">
+                        <?= $cluster_title ?>
+                    </div>
+                    <div class="space-y-1">
+                        <?php foreach ($items as $key => $item): ?>
+                            <?php if (can_view($key, $role)): ?>
+                                <a href="dashboard.php?page=<?= $key ?>" 
+                                   class="flex items-center px-3 py-2 rounded-lg transition-colors group <?= $page === $key ? 'bg-cdp-blue text-white shadow-md' : 'text-gray-300 hover:bg-white/10 hover:text-white' ?>"
+                                   title="<?= $item['label'] ?>">
+                                    <i class="fa-solid <?= $item['icon'] ?> w-5 text-center text-sm <?= $page === $key ? 'text-white' : 'text-gray-400 group-hover:text-white' ?>"></i>
+                                    <span class="ml-2.5 text-xs font-medium logo-text whitespace-nowrap"><?= $item['label'] ?></span>
+                                </a>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
             <?php endforeach; ?>
         </nav>
     </aside>
@@ -767,6 +793,20 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         'desc' => 'Standar identifikasi logistik global (GS1-128, SSCC-18, format e-Labeling, dan skema konektivitas data API) sedang disusun oleh tim standar data logistik.',
                         'icon' => 'fa-barcode',
                         'status' => 'Menunggu Standar Data GS1 & API dari Bagoes'
+                    ],
+                    'customs' => [
+                        'pic' => 'Tim Kepabeanan & Konsultan Pabean CIDP',
+                        'role' => 'Customs & Inland Port Clearance Specialist',
+                        'desc' => 'Integrasi sistem CEISA 4.0 DJBC untuk rilis dokumen SPPB, penetapan jalur pabean (Merah/Kuning/Hijau), pemeriksaan fisik behandle, dan segel elektronik kontainer.',
+                        'icon' => 'fa-shield-halved',
+                        'status' => 'Proyeksi Kawasan Pabean Mandiri'
+                    ],
+                    'simulator' => [
+                        'pic' => 'Zulfikar Jafarudin Fatah & Muhammad Arman',
+                        'role' => 'Virtual IoT & Hardware Simulation Specialist',
+                        'desc' => 'Pusat simulasi skenario terminal dry port (simulasi kedatangan truk di gerbang, simulasi pergerakan Reach Stacker, dan simulasi jadwal rangkaian KA Logistik).',
+                        'icon' => 'fa-gamepad',
+                        'status' => 'Proyeksi Sandbox Simulasi Virtual IoT'
                     ],
                     'settings' => [
                         'pic' => 'Zulfikar Jafarudin Fatah (2344190003)',
