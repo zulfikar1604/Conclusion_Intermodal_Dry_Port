@@ -1,5 +1,7 @@
 <?php
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Cek sesi login
 if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
@@ -16,19 +18,24 @@ $page = $_GET['page'] ?? 'beranda';
 
 // Badge & Deskripsi Akses Satu Pintu
 $current_badge = ['label' => 'Konsultan (Akses Penuh)', 'color' => 'bg-emerald-100 text-emerald-800 border-emerald-200'];
-$current_desc  = 'Mode Simulasi Satu Pintu Aktif. Anda memiliki hak akses penuh ke seluruh 8 modul operasional YMS.';
+$current_desc  = 'Mode Simulasi Satu Pintu Aktif. Anda memiliki hak akses penuh ke seluruh modul operasional YMS.';
 
-// Menu Visibility Logic: Seluruh 8 modul terbuka penuh untuk kemudahan evaluasi & demonstrasi
-function can_view($menu, $role) {
-    return true;
+// Menu Visibility Logic: Seluruh modul terbuka penuh untuk kemudahan evaluasi & demonstrasi
+if (!function_exists('can_view')) {
+    function can_view($menu, $role) {
+        return true;
+    }
 }
 
 $menu_items = [
-    'beranda' => ['icon' => 'fa-home', 'label' => 'Beranda'],
+    'beranda' => ['icon' => 'fa-home', 'label' => 'Beranda Eksekutif'],
+    'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => 'Pelacakan Kontainer'],
+    'trucking' => ['icon' => 'fa-truck-front', 'label' => 'Manajemen Trucking'],
+    'alat' => ['icon' => 'fa-dolly', 'label' => 'Lokasi Alat Berat (GPS)'],
     'gate' => ['icon' => 'fa-door-open', 'label' => 'Manajemen Gate'],
-    'yard' => ['icon' => 'fa-boxes-stacked', 'label' => 'Manajemen Yard'],
+    'yard' => ['icon' => 'fa-cubes', 'label' => 'Manajemen Yard'],
     'denah' => ['icon' => 'fa-map-location-dot', 'label' => 'Denah Terminal'],
-    'intermodal' => ['icon' => 'fa-train', 'label' => 'Intermodal & Tracking'],
+    'intermodal' => ['icon' => 'fa-train-subway', 'label' => 'Intermodal & KA'],
     'reefer' => ['icon' => 'fa-snowflake', 'label' => 'Monitor Reefer'],
     'billing' => ['icon' => 'fa-file-invoice-dollar', 'label' => 'Billing & Faktur'],
     'scanner' => ['icon' => 'fa-barcode', 'label' => 'Scanner SSCC/GS1'],
@@ -696,6 +703,12 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         </table>
                     </div>
                 </div>
+                <?php elseif ($page === 'kontainer'): ?>
+                    <?php include_once __DIR__ . '/pages/kontainer.php'; ?>
+                <?php elseif ($page === 'trucking'): ?>
+                    <?php include_once __DIR__ . '/pages/trucking.php'; ?>
+                <?php elseif ($page === 'alat'): ?>
+                    <?php include_once __DIR__ . '/pages/alat.php'; ?>
                 <?php else: ?>
                 
                 <?php
