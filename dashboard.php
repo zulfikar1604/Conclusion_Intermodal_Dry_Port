@@ -132,10 +132,10 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 
     <!-- Sidebar -->
     <aside id="sidebar" class="bg-cdp-dark text-white flex-shrink-0 z-20 h-full overflow-y-auto sidebar-transition w-64 absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
-        <!-- Logo -->
-        <div class="h-16 flex items-center px-4 border-b border-white/10 bg-cdp-navy/50">
+        <!-- Logo (Height aligned with top header: h-14 / 56px) -->
+        <div class="h-14 flex items-center px-4 border-b border-white/10 bg-cdp-navy/50">
             <img src="assets/img/logo.png" alt="Logo" class="w-8 h-8 object-contain mr-3 bg-white rounded p-0.5" onerror="this.src='https://via.placeholder.com/32?text=C'">
-            <span class="text-xl font-bold tracking-wide logo-text whitespace-nowrap">CIDP YMS</span>
+            <span class="text-lg font-bold tracking-wide logo-text whitespace-nowrap">CIDP YMS</span>
         </div>
         
         <!-- Navigation: 4 Kluster Divisi Operasional -->
@@ -168,9 +168,8 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
         <!-- Overlay for mobile sidebar -->
         <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900/50 z-10 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
-        <!-- Top Header -->
-        <!-- Top Header (Compact & Crisp) -->
-        <header class="h-13 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 lg:px-6 z-10 flex-shrink-0">
+        <!-- Top Header (Aligned with sidebar logo: h-14 / 56px) -->
+        <header class="h-14 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 lg:px-6 z-10 flex-shrink-0">
             <!-- Left: Toggle & Page Title -->
             <div class="flex items-center">
                 <!-- Mobile Toggle -->
