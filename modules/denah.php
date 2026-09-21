@@ -218,7 +218,6 @@ if (!isset($_SESSION['login'])) {
                     </div>
                 </div>
                 
-                <?php if($_SESSION['role'] === 'superadmin' || $_SESSION['role'] === 'staf'): ?>
                 <div class="border-t border-gray-100 pt-4" id="action-area">
                     <button id="btn-move-mode" onclick="toggleMoveMode()" class="w-full bg-[#0170b9] hover:bg-[#004b87] text-white py-2 rounded-md font-medium transition-colors text-sm mb-2">
                         <i class="fa-solid fa-dolly mr-2"></i> Pindahkan Kontainer
@@ -242,7 +241,6 @@ if (!isset($_SESSION['login'])) {
                         </div>
                     </div>
                 </div>
-                <?php endif; ?>
             </div>
         </div>
         

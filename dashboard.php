@@ -7,41 +7,20 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     exit;
 }
 
-$iduser = $_SESSION['iduser'] ?? 0;
-$nama = $_SESSION['nama'] ?? 'Guest';
-$email = $_SESSION['email'] ?? '';
-$role = $_SESSION['role'] ?? 'user';
+$iduser = $_SESSION['iduser'] ?? 1;
+$nama   = (!empty($_SESSION['nama']) && $_SESSION['nama'] !== 'Guest') ? $_SESSION['nama'] : 'Zulfikar Jafarudin Fatah';
+$email  = $_SESSION['email'] ?? 'admin@cidp.ac.id';
+$role   = 'superadmin'; // Mode Simulasi Satu Pintu: Akses Lengkap
 
 $page = $_GET['page'] ?? 'beranda';
 
-// Role Badge & Description Logic
-$role_badges = [
-    'superadmin' => ['label' => 'Superadmin', 'color' => 'bg-red-100 text-red-800 border-red-200'],
-    'staf' => ['label' => 'Operator', 'color' => 'bg-blue-100 text-blue-800 border-blue-200'],
-    'user' => ['label' => 'Shipper', 'color' => 'bg-green-100 text-green-800 border-green-200'],
-    'driver' => ['label' => 'Driver', 'color' => 'bg-yellow-100 text-yellow-800 border-yellow-200']
-];
-$current_badge = $role_badges[$role] ?? $role_badges['user'];
+// Badge & Deskripsi Akses Satu Pintu
+$current_badge = ['label' => 'Konsultan (Akses Penuh)', 'color' => 'bg-emerald-100 text-emerald-800 border-emerald-200'];
+$current_desc  = 'Mode Simulasi Satu Pintu Aktif. Anda memiliki hak akses penuh ke seluruh 8 modul operasional YMS.';
 
-$role_descriptions = [
-    'superadmin' => 'Anda memiliki akses penuh ke seluruh modul sistem YMS.',
-    'staf' => 'Pantau dan kelola aktivitas operasional lapangan dan gate.',
-    'user' => 'Lacak kontainer dan kelola administrasi billing Anda.',
-    'driver' => 'Cek status antrian gate dan penjadwalan muat/bongkar.'
-];
-$current_desc = $role_descriptions[$role] ?? '';
-
-// Menu Visibility Logic based on Role
+// Menu Visibility Logic: Seluruh 8 modul terbuka penuh untuk kemudahan evaluasi & demonstrasi
 function can_view($menu, $role) {
-    if ($role === 'superadmin') return true;
-    
-    $permissions = [
-        'staf' => ['beranda', 'gate', 'yard', 'denah', 'intermodal', 'reefer', 'scanner'],
-        'user' => ['beranda', 'intermodal', 'billing'],
-        'driver' => ['beranda', 'gate']
-    ];
-    
-    return in_array($menu, $permissions[$role] ?? []);
+    return true;
 }
 
 $menu_items = [
@@ -218,8 +197,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                     </div>
                 </div>
 
-                <!-- 6 KPI Summary Cards -->
-                <?php if (in_array($role, ['superadmin', 'staf'])): ?>
+                <!-- 6 KPI Summary Cards (Konsol Penuh) -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
                     
                     <!-- KPI 1 -->
@@ -321,79 +299,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                     </div>
 
                 </div>
-                <?php elseif ($role === 'user'): ?>
-                <!-- Shipper KPIs -->
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                    <div class="bg-white rounded-xl p-5 shadow-sm border-t-4 border-t-blue-500">
-                        <p class="text-sm font-medium text-gray-500 mb-1">Kontainer Anda di Yard</p>
-                        <h3 class="text-3xl font-bold text-gray-800">12 <span class="text-sm font-normal text-gray-400">unit</span></h3>
-                    </div>
-                    <div class="bg-white rounded-xl p-5 shadow-sm border-t-4 border-t-orange-500">
-                        <p class="text-sm font-medium text-gray-500 mb-1">Menunggu Gate-Out</p>
-                        <h3 class="text-3xl font-bold text-gray-800">3 <span class="text-sm font-normal text-gray-400">unit</span></h3>
-                    </div>
-                    <div class="bg-white rounded-xl p-5 shadow-sm border-t-4 border-t-green-500">
-                        <p class="text-sm font-medium text-gray-500 mb-1">Tagihan Belum Dibayar</p>
-                        <h3 class="text-2xl font-bold text-gray-800">Rp 2.4M</h3>
-                    </div>
-                </div>
-                <!-- Tabel Tracking Shipper -->
-                <div class="mt-6 bg-white rounded-xl shadow-sm border border-gray-100 p-5">
-                    <h3 class="font-bold text-gray-800 text-lg mb-4"><i class="fa-solid fa-list-check mr-2 text-cdp-blue"></i>Status Kontainer Anda</h3>
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-gray-50 text-gray-600 text-sm border-y border-gray-100">
-                                    <th class="py-3 px-4 font-semibold">Nomor Kontainer</th>
-                                    <th class="py-3 px-4 font-semibold">Tipe</th>
-                                    <th class="py-3 px-4 font-semibold">Status</th>
-                                    <th class="py-3 px-4 font-semibold">Lokasi</th>
-                                    <th class="py-3 px-4 font-semibold">Update Terakhir</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-sm">
-                                <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                    <td class="py-3 px-4 font-medium text-gray-800">MSKU9182374</td>
-                                    <td class="py-3 px-4 text-gray-600">40ft HC</td>
-                                    <td class="py-3 px-4"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Di Yard</span></td>
-                                    <td class="py-3 px-4 text-gray-600">Blok A / Bay 12</td>
-                                    <td class="py-3 px-4 text-gray-500">Hari ini, 14:32</td>
-                                </tr>
-                                <tr class="border-b border-gray-100 hover:bg-gray-50">
-                                    <td class="py-3 px-4 font-medium text-gray-800">TCLU8827415</td>
-                                    <td class="py-3 px-4 text-gray-600">20ft Dry</td>
-                                    <td class="py-3 px-4"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Gate Out</span></td>
-                                    <td class="py-3 px-4 text-gray-600">Menuju Pelabuhan</td>
-                                    <td class="py-3 px-4 text-gray-500">Hari ini, 13:55</td>
-                                </tr>
-                                <tr class="hover:bg-gray-50">
-                                    <td class="py-3 px-4 font-medium text-gray-800">TEMU4819203</td>
-                                    <td class="py-3 px-4 text-gray-600">40ft Reefer</td>
-                                    <td class="py-3 px-4"><span class="bg-orange-100 text-orange-700 px-2 py-1 rounded text-xs font-bold">Terkoneksi Power</span></td>
-                                    <td class="py-3 px-4 text-gray-600">Reefer Area R1</td>
-                                    <td class="py-3 px-4 text-gray-500">Kemarin, 16:40</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <?php elseif ($role === 'driver'): ?>
-                <!-- Driver KPIs -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                    <div class="bg-white rounded-xl p-5 shadow-sm border-t-4 border-t-indigo-500">
-                        <p class="text-sm font-medium text-gray-500 mb-1">Antrian Gate-In Saat Ini</p>
-                        <h3 class="text-3xl font-bold text-gray-800">3 <span class="text-sm font-normal text-gray-400">truk di depan</span></h3>
-                    </div>
-                    <div class="bg-white rounded-xl p-5 shadow-sm border-t-4 border-t-blue-500">
-                        <p class="text-sm font-medium text-gray-500 mb-1">Tugas Hari Ini</p>
-                        <h3 class="text-3xl font-bold text-gray-800">2 <span class="text-sm font-normal text-gray-400">pengiriman</span></h3>
-                    </div>
-                </div>
-                <?php endif; ?>
 
-                <!-- Visualisasi Data Ekstra (For Admin/Staf) -->
-                <?php if (in_array($role, ['superadmin', 'staf'])): ?>
-                
                 <!-- Row 1: 2 Charts Side-by-side -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <!-- Line Chart -->
@@ -552,10 +458,8 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         </div>
                     </div>
                 </div>
-                <?php endif; ?>
 
-                <!-- Two-Column Layout Below KPI (For Admin/Staf) -->
-                <?php if (in_array($role, ['superadmin', 'staf'])): ?>
+                <!-- Two-Column Layout: Aktivitas Terkini & Antrian Gerbang -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
                     
                     <!-- Left Col: Aktivitas Terkini (span 2) -->
@@ -740,7 +644,58 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 
                     </div>
                 </div>
-                <?php endif; ?>
+
+                <!-- Tabel Pelacakan Muatan Klien (Shipper Consignment Tracking) -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+                    <div class="flex justify-between items-center mb-4 pb-2 border-b border-gray-100">
+                        <h3 class="font-bold text-gray-800 text-lg flex items-center">
+                            <i class="fa-solid fa-list-check mr-2 text-cdp-blue"></i>Pelacakan Konsinyasi Muatan Klien (Shipper Consignment Tracking)
+                        </h3>
+                        <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded border border-emerald-200">
+                            <i class="fa-solid fa-satellite-dish mr-1"></i>Live Tracking
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-gray-50 text-gray-600 text-xs border-y border-gray-100">
+                                    <th class="py-3 px-4 font-semibold">Nomor Kontainer</th>
+                                    <th class="py-3 px-4 font-semibold">Tipe & Ukuran</th>
+                                    <th class="py-3 px-4 font-semibold">Tag RFID UHF</th>
+                                    <th class="py-3 px-4 font-semibold">Status Muatan</th>
+                                    <th class="py-3 px-4 font-semibold">Posisi di Lapangan</th>
+                                    <th class="py-3 px-4 font-semibold text-right">Pembaruan Terakhir</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-xs divide-y divide-gray-100">
+                                <tr class="hover:bg-blue-50/20 transition">
+                                    <td class="py-3 px-4 font-mono font-bold text-[#0170b9]">MSKU9182374</td>
+                                    <td class="py-3 px-4 text-gray-600">40ft High Cube (Dry)</td>
+                                    <td class="py-3 px-4 font-mono text-purple-700 font-bold">E280117000000001</td>
+                                    <td class="py-3 px-4"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">In Yard (Penumpukan)</span></td>
+                                    <td class="py-3 px-4 font-semibold text-gray-800">Blok B / Bay 08 / Row 03 / Tier 02</td>
+                                    <td class="py-3 px-4 text-gray-500 text-right">Hari ini, 14:32 WIB</td>
+                                </tr>
+                                <tr class="hover:bg-blue-50/20 transition">
+                                    <td class="py-3 px-4 font-mono font-bold text-[#0170b9]">TCLU8827415</td>
+                                    <td class="py-3 px-4 text-gray-600">20ft Standard (Dry)</td>
+                                    <td class="py-3 px-4 font-mono text-purple-700 font-bold">E280117000000002</td>
+                                    <td class="py-3 px-4"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">Gate Out (Menuju Pelabuhan)</span></td>
+                                    <td class="py-3 px-4 text-gray-600">Dalam Armada Truk B 7712 SCK</td>
+                                    <td class="py-3 px-4 text-gray-500 text-right">Hari ini, 13:55 WIB</td>
+                                </tr>
+                                <tr class="hover:bg-blue-50/20 transition">
+                                    <td class="py-3 px-4 font-mono font-bold text-[#0170b9]">TEMU4819203</td>
+                                    <td class="py-3 px-4 text-gray-600">40ft Reefer Cold Chain</td>
+                                    <td class="py-3 px-4 font-mono text-purple-700 font-bold">E280117000000004</td>
+                                    <td class="py-3 px-4"><span class="bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-[10px] font-bold">Terkoneksi Listrik (-18.2°C)</span></td>
+                                    <td class="py-3 px-4 font-semibold text-cyan-700">Reefer Rack R-02 Plug #14</td>
+                                    <td class="py-3 px-4 text-gray-500 text-right">Kemarin, 16:40 WIB</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <?php elseif ($page === 'gate'): ?>
                 
                 <!-- Modul Manajemen Gate & Scanner RFID -->
@@ -843,7 +798,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
     </script>
     
     <!-- Chart.js Initializations -->
-    <?php if ($page === 'beranda' && in_array($role, ['superadmin', 'staf'])): ?>
+    <?php if ($page === 'beranda'): ?>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             Chart.defaults.font.family = '"Plus Jakarta Sans", sans-serif';

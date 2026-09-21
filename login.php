@@ -1048,12 +1048,21 @@ if (isset($_POST['btn_login'])) {
                 </button>
             </div>
 
-            <!-- Badan Modal Form -->
+            <!-- Badan Modal Form (Satu Pintu / Single-Door Simulation Access) -->
             <div class="p-6 space-y-4">
                 
-                <p class="text-xs text-slate-500 leading-relaxed">
-                    Silakan masukkan kredensial secara manual atau pilih salah satu akun pengujian di bawah untuk menyimulasikan berbagai peran pengguna di dalam sistem YMS.
-                </p>
+                <!-- Info Banner Satu Pintu -->
+                <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3.5 flex items-start space-x-3">
+                    <div class="w-8 h-8 rounded-lg bg-[#0170b9] text-white flex items-center justify-center flex-shrink-0 text-sm mt-0.5 shadow-sm">
+                        <i class="fa-solid fa-key"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-bold text-[#002f5e] uppercase tracking-wide">Akses Demonstrasi Satu Pintu</h4>
+                        <p class="text-[11px] text-slate-600 leading-relaxed mt-0.5">
+                            Konsol simulasi disiapkan dengan <strong>satu pintu akses penuh (All-in-One Consultant Access)</strong> agar evaluator dapat langsung menguji seluruh 8 modul operasional (Gate, Yard, Denah 3D, Intermodal KA-Truk, Reefer IoT, Faktur ERP, dan Scanner GS1) tanpa batasan peran.
+                        </p>
+                    </div>
+                </div>
 
                 <!-- Pesan Kesalahan jika login tidak valid -->
                 <?php if (!empty($error_message)): ?>
@@ -1063,119 +1072,48 @@ if (isset($_POST['btn_login'])) {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" action="login.php" class="space-y-3.5">
+                <form method="POST" action="login.php" id="formLoginModal" class="space-y-3.5">
                     <div>
-                        <label for="modalEmail" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-                            Alamat Pos-el (Email)
+                        <label for="modalEmail" class="block text-xs font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                            <span>Alamat Pos-el (Email)</span>
+                            <span class="text-[10px] text-[#0170b9] font-semibold lowercase">akun konsultan utama</span>
                         </label>
-                        <input type="email" id="modalEmail" name="email" value="<?= htmlspecialchars($_POST['email'] ?? 'admin@cidp.ac.id'); ?>" required 
-                               placeholder="nama@cidp.ac.id"
-                               class="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-cdp-blue outline-none bg-slate-50">
+                        <input type="email" id="modalEmail" name="email" value="admin@cidp.ac.id" required 
+                               placeholder="admin@cidp.ac.id"
+                               class="w-full px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cdp-blue outline-none bg-slate-50">
                     </div>
 
                     <div>
-                        <label for="modalPassword" class="block text-xs font-bold text-slate-700 uppercase mb-1">
-                            Kata Sandi (Password)
+                        <label for="modalPassword" class="block text-xs font-bold text-slate-700 uppercase mb-1 flex justify-between">
+                            <span>Kata Sandi (Password)</span>
+                            <span class="text-[10px] text-emerald-600 font-semibold font-mono">admin123</span>
                         </label>
                         <input type="password" id="modalPassword" name="password" value="admin123" required 
                                placeholder="Masukkan kata sandi"
-                               class="w-full px-3.5 py-2.5 text-xs border border-slate-300 rounded-lg focus:ring-2 focus:ring-cdp-blue outline-none bg-slate-50">
+                               class="w-full px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cdp-blue outline-none bg-slate-50">
                     </div>
 
-                    <button type="submit" name="btn_login" 
-                            class="w-full py-2.5 px-4 rounded-lg bg-cdp-navy hover:bg-cdp-blue text-white text-xs font-bold shadow-sm transition flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                        <span>Masuk ke Konsol Demonstrasi</span>
-                    </button>
+                    <div class="pt-1 space-y-2">
+                        <!-- Tombol Utama: Masuk Konsol -->
+                        <button type="submit" name="btn_login" 
+                                class="w-full py-2.5 px-4 rounded-lg bg-cdp-navy hover:bg-cdp-blue text-white text-xs font-bold shadow-sm transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                            <span>Masuk ke Konsol Demonstrasi (Akses Penuh)</span>
+                        </button>
+
+                        <!-- Tombol 1-Klik Cepat -->
+                        <button type="button" onclick="quickSingleDoorLogin()"
+                                class="w-full py-2 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition flex items-center justify-center space-x-2">
+                            <i class="fa-solid fa-bolt text-yellow-300"></i>
+                            <span>Masuk Cepat Langsung (1-Klik Tanpa Ketik)</span>
+                        </button>
+                    </div>
                 </form>
 
-                <!-- Bantuan Kredensial Uji Coba: 4 Peran Pengguna Lengkap -->
-                <div class="pt-3 border-t border-slate-200 space-y-2.5">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[11px] font-extrabold text-slate-800 uppercase tracking-wider flex items-center">
-                            <i class="fa-solid fa-users text-cdp-blue mr-1.5"></i>
-                            Pilihan Akses Uji Coba Manual &amp; Otomatis
-                        </span>
-                        <span class="text-[10px] bg-amber-50 text-amber-800 font-semibold px-2 py-0.5 rounded border border-amber-200">
-                            Sandi Semua: <code>admin123</code>
-                        </span>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                        
-                        <!-- 1. Superadmin (Lead Architect) -->
-                        <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-blue-50/60 hover:border-blue-300 transition flex flex-col justify-between space-y-1.5">
-                            <div>
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-slate-900 text-[11px] flex items-center space-x-1">
-                                        <span class="w-2 h-2 rounded-full bg-blue-600 inline-block"></span>
-                                        <span>Lead Architect</span>
-                                    </span>
-                                    <span class="text-[9px] bg-blue-100 text-blue-800 font-bold px-1.5 py-0.2 rounded">Superadmin</span>
-                                </div>
-                                <div class="font-mono text-[10px] text-slate-600 mt-0.5">admin@cidp.ac.id</div>
-                            </div>
-                            <button type="button" onclick="setCredentials('admin@cidp.ac.id', 'admin123')"
-                                    class="w-full text-center py-1 bg-white hover:bg-cdp-navy hover:text-white text-cdp-navy border border-slate-200 rounded text-[10px] font-bold transition">
-                                Gunakan Akun Ini &rarr;
-                            </button>
-                        </div>
-
-                        <!-- 2. Staf (Operator Kalmar RS-03) -->
-                        <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-cyan-50/60 hover:border-cyan-300 transition flex flex-col justify-between space-y-1.5">
-                            <div>
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-slate-900 text-[11px] flex items-center space-x-1">
-                                        <span class="w-2 h-2 rounded-full bg-cyan-600 inline-block"></span>
-                                        <span>Operator RS-03</span>
-                                    </span>
-                                    <span class="text-[9px] bg-cyan-100 text-cyan-800 font-bold px-1.5 py-0.2 rounded">Staf Alat</span>
-                                </div>
-                                <div class="font-mono text-[10px] text-slate-600 mt-0.5">operator@cidp.ac.id</div>
-                            </div>
-                            <button type="button" onclick="setCredentials('operator@cidp.ac.id', 'admin123')"
-                                    class="w-full text-center py-1 bg-white hover:bg-cyan-700 hover:text-white text-cyan-800 border border-slate-200 rounded text-[10px] font-bold transition">
-                                Gunakan Akun Ini &rarr;
-                            </button>
-                        </div>
-
-                        <!-- 3. User (Shipper Samudera Logistik) -->
-                        <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-emerald-50/60 hover:border-emerald-300 transition flex flex-col justify-between space-y-1.5">
-                            <div>
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-slate-900 text-[11px] flex items-center space-x-1">
-                                        <span class="w-2 h-2 rounded-full bg-emerald-600 inline-block"></span>
-                                        <span>Klien Shipper</span>
-                                    </span>
-                                    <span class="text-[9px] bg-emerald-100 text-emerald-800 font-bold px-1.5 py-0.2 rounded">User Kargo</span>
-                                </div>
-                                <div class="font-mono text-[10px] text-slate-600 mt-0.5">client@cidp.ac.id</div>
-                            </div>
-                            <button type="button" onclick="setCredentials('client@cidp.ac.id', 'admin123')"
-                                    class="w-full text-center py-1 bg-white hover:bg-emerald-700 hover:text-white text-emerald-800 border border-slate-200 rounded text-[10px] font-bold transition">
-                                Gunakan Akun Ini &rarr;
-                            </button>
-                        </div>
-
-                        <!-- 4. Driver (Supir Armada B 9481 UEK) -->
-                        <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-amber-50/60 hover:border-amber-300 transition flex flex-col justify-between space-y-1.5">
-                            <div>
-                                <div class="flex items-center justify-between">
-                                    <span class="font-bold text-slate-900 text-[11px] flex items-center space-x-1">
-                                        <span class="w-2 h-2 rounded-full bg-amber-600 inline-block"></span>
-                                        <span>Supir Armada</span>
-                                    </span>
-                                    <span class="text-[9px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.2 rounded">Driver Truk</span>
-                                </div>
-                                <div class="font-mono text-[10px] text-slate-600 mt-0.5">driver@cidp.ac.id</div>
-                            </div>
-                            <button type="button" onclick="setCredentials('driver@cidp.ac.id', 'admin123')"
-                                    class="w-full text-center py-1 bg-white hover:bg-amber-700 hover:text-white text-amber-800 border border-slate-200 rounded text-[10px] font-bold transition">
-                                Gunakan Akun Ini &rarr;
-                            </button>
-                        </div>
-
-                    </div>
+                <div class="pt-3 border-t border-slate-200 text-center">
+                    <span class="text-[11px] text-slate-400 font-medium">
+                        <i class="fa-solid fa-shield-halved text-emerald-600 mr-1"></i>Hak Akses Superadmin / Lead System Architect otomatis aktif.
+                    </span>
                 </div>
 
             </div>
@@ -1264,6 +1202,21 @@ if (isset($_POST['btn_login'])) {
         function setCredentials(email, password) {
             document.getElementById('modalEmail').value = email;
             document.getElementById('modalPassword').value = password;
+        }
+
+        function quickSingleDoorLogin() {
+            document.getElementById('modalEmail').value = 'admin@cidp.ac.id';
+            document.getElementById('modalPassword').value = 'admin123';
+            const form = document.getElementById('formLoginModal');
+            if (form) {
+                // Buat hidden input btn_login agar terdeteksi oleh PHP
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'btn_login';
+                hiddenInput.value = '1';
+                form.appendChild(hiddenInput);
+                form.submit();
+            }
         }
 
         function fillDemoCredentials() {
