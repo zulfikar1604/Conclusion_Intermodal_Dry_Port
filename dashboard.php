@@ -696,54 +696,109 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         </table>
                     </div>
                 </div>
-                <?php elseif ($page === 'gate'): ?>
-                
-                <!-- Modul Manajemen Gate & Scanner RFID -->
-                <?php include_once __DIR__ . '/modules/gate.php'; ?>
-
-                <?php elseif ($page === 'yard'): ?>
-                
-                <!-- Modul Manajemen Yard & Inventaris Peti Kemas -->
-                <?php include_once __DIR__ . '/modules/yard.php'; ?>
-
-                <?php elseif ($page === 'denah'): ?>
-                
-                <!-- Modul Denah Terminal & Simulasi Stacking (Karya Juan & Arman) -->
-                <?php include_once __DIR__ . '/modules/denah.php'; ?>
-
-                <?php elseif ($page === 'intermodal'): ?>
-                
-                <!-- Modul Integrasi Multimoda Truk - Kereta Api Logistik -->
-                <?php include_once __DIR__ . '/modules/intermodal.php'; ?>
-
-                <?php elseif ($page === 'reefer'): ?>
-                
-                <!-- Modul Monitoring Reefer Cold Chain (IoT) -->
-                <?php include_once __DIR__ . '/modules/reefer.php'; ?>
-
-                <?php elseif ($page === 'billing'): ?>
-                
-                <!-- Modul Finansial & Penerbitan Faktur (ERP) -->
-                <?php include_once __DIR__ . '/modules/billing.php'; ?>
-
-                <?php elseif ($page === 'scanner'): ?>
-                
-                <!-- Modul Scanner SSCC-18 & Standar AIDC GS1 -->
-                <?php include_once __DIR__ . '/modules/scanner.php'; ?>
-
                 <?php else: ?>
                 
-                <!-- Placeholder untuk halaman lain -->
-                <div class="bg-white rounded-xl p-10 shadow-sm border border-gray-100 text-center flex flex-col items-center justify-center min-h-[50vh]">
-                    <div class="w-24 h-24 bg-gray-50 rounded-full flex items-center justify-center mb-6 text-cdp-blue/50">
-                        <i class="fa-solid fa-person-digging text-5xl"></i>
+                <?php
+                // Pemetaan Tanggung Jawab Anggota Tim & Status Menunggu Input
+                $divisi_info = [
+                    'gate' => [
+                        'pic' => 'Muhammad Arman (2344190012)',
+                        'role' => 'Infrastructure, Hardware & Automation Integrator',
+                        'desc' => 'Spesifikasi teknis hardware sensor Gate (Kamera ANPR, OCR Kontainer ISO 6346, Jembatan Timbang VGM 80 Ton, dan Pembaca RFID UHF) sedang disusun oleh tim integrasi hardware.',
+                        'icon' => 'fa-door-open',
+                        'status' => 'Menunggu Finalisasi Hardware dari Arman'
+                    ],
+                    'denah' => [
+                        'pic' => 'Juan Manuel (2344190013) & Muhammad Arman (2344190012)',
+                        'role' => 'Yard Layout Specialist & Automation Integrator',
+                        'desc' => 'Sketsa tata letak fisik terminal 35 Ha (Blok Penumpukan A-E, Jalur Rel, Area Reefer, DG Yard & Depo M&R) sedang digambar oleh Juan dan akan dimasukkan ke dalam prototipe sistem oleh Arman.',
+                        'icon' => 'fa-map-location-dot',
+                        'status' => 'Menunggu Gambar Denah dari Juan & Arman'
+                    ],
+                    'intermodal' => [
+                        'pic' => 'Juan Manuel & Muhammad Daffa Al Hafizh',
+                        'role' => 'Terminal Ops & Business Workflow Analyst',
+                        'desc' => 'Alur perpindahan moda logistik kereta api (Rail Siding) dan armada truk jalan raya sedang diselaraskan dengan SOP operasional alih muat antarmoda dry port.',
+                        'icon' => 'fa-train-subway',
+                        'status' => 'Menunggu Penyelarasan Alur Antarmoda KA-Truk'
+                    ],
+                    'yard' => [
+                        'pic' => 'Juan Manuel (2344190013)',
+                        'role' => 'Yard Layout & Terminal Ops Specialist',
+                        'desc' => 'Aturan penataan kontainer di lapangan (Stacking Rules, Alokasi Bay-Row-Tier, dan Audit Dwell Time) sedang dirumuskan sesuai standar operasional ICD.',
+                        'icon' => 'fa-boxes-stacked',
+                        'status' => 'Menunggu Rumusan Stacking Rules dari Juan'
+                    ],
+                    'reefer' => [
+                        'pic' => 'Muhammad Arman (2344190012)',
+                        'role' => 'Infrastructure, Hardware & Automation Integrator',
+                        'desc' => 'Integrasi sensor telemetri nirkabel (LoRaWAN/IoT), monitoring steker listrik reefer (300 plugs), dan pemantauan suhu komoditas rantai dingin sedang dikoordinasikan dengan tim infrastruktur.',
+                        'icon' => 'fa-snowflake',
+                        'status' => 'Menunggu Spesifikasi Telemetri IoT dari Arman'
+                    ],
+                    'billing' => [
+                        'pic' => 'Muhammad Daffa Al Hafizh (2344190001)',
+                        'role' => 'Business Process & Workflow Analyst',
+                        'desc' => 'Alur proses bisnis komersial, struktur tarif jasa terminal (Lo-Lo, Penumpukan, VGM), serta integrasi data finansial ke Sistem ERP sedang dirancang oleh tim analis proses bisnis.',
+                        'icon' => 'fa-file-invoice-dollar',
+                        'status' => 'Menunggu Perancangan Alur ERP dari Daffa'
+                    ],
+                    'scanner' => [
+                        'pic' => 'Muhammad Bagoes Syahputra (2344190022)',
+                        'role' => 'Logistics Data & Standards Officer',
+                        'desc' => 'Standar identifikasi logistik global (GS1-128, SSCC-18, format e-Labeling, dan skema konektivitas data API) sedang disusun oleh tim standar data logistik.',
+                        'icon' => 'fa-barcode',
+                        'status' => 'Menunggu Standar Data GS1 & API dari Bagoes'
+                    ],
+                    'settings' => [
+                        'pic' => 'Zulfikar Jafarudin Fatah (2344190003)',
+                        'role' => 'Lead Project & System Architect',
+                        'desc' => 'Konfigurasi parameter global sistem YMS, manajemen koneksi basis data, dan kontrol hak akses konsultan.',
+                        'icon' => 'fa-gear',
+                        'status' => 'Konfigurasi Sistem Utama'
+                    ]
+                ];
+
+                $cur_info = $divisi_info[$page] ?? [
+                    'pic' => 'Tim Proyek Conclusion',
+                    'role' => 'Divisi Terkait',
+                    'desc' => 'Halaman ini sedang dalam tahap koordinasi bersama rekan tim.',
+                    'icon' => 'fa-person-digging',
+                    'status' => 'Dalam Koordinasi Tim'
+                ];
+                ?>
+
+                <!-- Kartu Status Modul: Menunggu Input Rekan Tim -->
+                <div class="bg-white rounded-2xl p-8 sm:p-12 shadow-sm border border-gray-100 text-center flex flex-col items-center justify-center max-w-2xl mx-auto my-8 animate-fadeIn">
+                    <div class="w-20 h-20 bg-blue-50 text-[#0170b9] rounded-2xl flex items-center justify-center mb-5 shadow-inner text-3xl">
+                        <i class="fa-solid <?= $cur_info['icon'] ?>"></i>
                     </div>
+                    
+                    <span class="px-3.5 py-1.5 bg-amber-50 text-amber-800 border border-amber-200 rounded-full text-xs font-bold tracking-wide mb-3 flex items-center shadow-xs">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 mr-2 animate-pulse"></span><?= $cur_info['status'] ?>
+                    </span>
+
                     <h2 class="text-2xl font-bold text-gray-800 mb-2">Modul <?= isset($menu_items[$page]) ? $menu_items[$page]['label'] : 'Tidak Dikenal' ?></h2>
-                    <p class="text-gray-500 max-w-md mx-auto">
-                        Halaman ini sedang dalam tahap pengembangan. Silakan kembali lagi nanti untuk melihat pembaruan fitur ini.
+                    
+                    <p class="text-gray-600 text-xs sm:text-sm leading-relaxed mb-6 max-w-lg">
+                        <?= $cur_info['desc'] ?>
                     </p>
-                    <a href="dashboard.php?page=beranda" class="mt-8 px-6 py-2.5 bg-cdp-blue text-white font-medium rounded-lg hover:bg-cdp-navy transition-colors shadow-sm inline-flex items-center">
-                        <i class="fa-solid fa-arrow-left mr-2"></i> Kembali ke Beranda
+
+                    <!-- Kartu PIC Anggota Tim Penanggung Jawab -->
+                    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-4 text-left w-full max-w-md mb-8 flex items-center space-x-3.5">
+                        <div class="w-11 h-11 rounded-full bg-[#002f5e] text-white flex items-center justify-center font-bold text-base flex-shrink-0 shadow-xs">
+                            <i class="fa-solid fa-user-pen"></i>
+                        </div>
+                        <div>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Penanggung Jawab Divisi:</span>
+                            <p class="font-bold text-gray-900 text-xs sm:text-sm mt-0.5"><?= $cur_info['pic'] ?></p>
+                            <span class="text-[11px] text-[#0170b9] font-semibold block"><?= $cur_info['role'] ?></span>
+                        </div>
+                    </div>
+
+                    <a href="dashboard.php?page=beranda" class="px-6 py-2.5 bg-[#0170b9] hover:bg-[#004b87] text-white text-xs font-bold rounded-lg transition-colors shadow-sm inline-flex items-center space-x-2">
+                        <i class="fa-solid fa-arrow-left"></i>
+                        <span>Kembali ke Beranda Eksekutif</span>
                     </a>
                 </div>
 
