@@ -740,6 +740,8 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                     <?php include_once __DIR__ . '/pages/trucking.php'; ?>
                 <?php elseif ($page === 'alat'): ?>
                     <?php include_once __DIR__ . '/pages/alat.php'; ?>
+                <?php elseif ($page === 'simulator'): ?>
+                    <?php include_once __DIR__ . '/pages/simulator.php'; ?>
                 <?php else: ?>
                 
                 <?php

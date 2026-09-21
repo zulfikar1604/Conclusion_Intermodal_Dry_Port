@@ -34,7 +34,7 @@ Berdasarkan silabus dan lembar penugasan resmi proyek:
 
 | No | Nama & NIM | Peran Utama | Lingkup Pekerjaan & Tanggung Jawab | Status di Web |
 |---|---|---|---|---|
-| 1 | **Zulfikar Jafarudin Fatah** (2344190003) | **Lead Project & System Architect** | • Arsitektur sistem web, basis data MySQL, dan auth satu pintu.<br>• Dashboard Eksekutif (Beranda, KPI, Chart Analytics).<br>• Modul mandiri **Pelacakan Kontainer** (`pages/kontainer.php`).<br>• Modul mandiri **Manajemen Trucking** (`pages/trucking.php`).<br>• Modul mandiri **Lokasi Alat Berat GPS** (`pages/alat.php`). | ✅ **Selesai & Aktif** |
+| 1 | **Zulfikar Jafarudin Fatah** (2344190003) | **Lead Project & System Architect** | • Arsitektur sistem web, basis data MySQL, dan auth satu pintu.<br>• Dashboard Eksekutif (Beranda, KPI, Chart Analytics).<br>• Modul mandiri **Pelacakan Kontainer** (`pages/kontainer.php`).<br>• Modul mandiri **Manajemen Trucking** (`pages/trucking.php`).<br>• Modul mandiri **Lokasi Alat Berat GPS** (`pages/alat.php`).<br>• Modul **Simulasi 3D Virtual Terminal** (`pages/simulator.php`). | ✅ **Selesai & Aktif** |
 | 2 | **Juan Manuel** (2344190013) | **Yard Layout Specialist** | • Menggambar sketsa fisik denah terminal CIDP (35 Ha): Blok A-E, Jalur Rel, Dermaga Reefer, DG Yard, Depo M&R.<br>• Merumuskan aturan penataan (*Stacking Rules* Bay-Row-Tier). | ⏳ Menunggu Gambar Denah |
 | 3 | **Muhammad Arman** (2344190012) | **Hardware & Automation Integrator** | • Memasukkan gambar denah dari Juan ke prototipe web.<br>• Spesifikasi teknis sensor: Kamera ANPR, OCR ISO 6346, Jembatan Timbang VGM 80 Ton, RFID UHF Reader.<br>• Integrasi telemetri nirkabel IoT pemantauan steker reefer. | ⏳ Menunggu Integrasi Hardware |
 | 4 | **Muhammad Daffa Al Hafizh** (2344190001) | **Business Process & ERP Analyst** | • Menyusun Standard Operating Procedure (SOP) alur alih muat KA-Truk.<br>• Perancangan struktur tarif jasa terminal (Lo-Lo, Lift-On, Storage Dwell, Timbang VGM).<br>• Perancangan integrasi data komersial/keuangan ke sistem ERP. | ⏳ Menunggu Alur ERP |
@@ -198,7 +198,7 @@ Untuk mencerminkan arsitektur sistem kelas dunia, menu sidebar dikelompokkan ke 
 
 📂 KLUSTER 4: KOMERSIAL, SIMULASI & SISTEM
 ├── 💵 Billing & Faktur (Tarif Lo-Lo, Storage & Integrasi ERP) [PIC: Daffa]
-├── 🎮 Panel Simulasi Operasional (Sandbox Pemicu Sensor IoT) [PROYEKSI SIMULASI]
+├── 🎮 Panel Simulasi 3D Virtual Terminal (Three.js WebGL & Live Aksi) [✅ Selesai & Aktif - Zulfikar]
 └── ⚙️ Pengaturan Sistem (Hak Akses & Konfigurasi Basis Data)
 ```
 

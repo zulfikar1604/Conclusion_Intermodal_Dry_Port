@@ -196,6 +196,9 @@ foreach ($equipment_list as $eq) {
             </p>
         </div>
         <div class="flex items-center space-x-3 flex-shrink-0">
+            <a href="dashboard.php?page=simulator" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-xl shadow-xs transition flex items-center">
+                <i class="fa-solid fa-gamepad mr-2"></i> Buka Simulasi 3D
+            </a>
             <button onclick="refreshEquipment()" class="px-4 py-2.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl shadow-xs transition flex items-center">
                 <i class="fa-solid fa-rotate mr-2 text-gray-500" id="refreshIcon"></i> Perbarui GPS
             </button>
