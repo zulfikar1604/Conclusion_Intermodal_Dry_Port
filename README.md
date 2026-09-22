@@ -14,12 +14,7 @@
 * **Kelompok Konsultan:** Conclusion Supply Chain Consultant
 
 ### 👥 Anggota Tim & Pembagian Tugas:
-1. **Zulfikar Jafarudin Fatah** (2344190003) — *Lead Project & System Architect* (Arsitektur Web, Beranda KPI, Pelacakan Kontainer, Trucking, & Lokasi Alat Berat)
-2. **Juan Manuel** (2344190013) — *Yard Layout Specialist & Terminal Ops* (Sketsa Denah Terminal 35 Ha & Stacking Rules Bay-Row-Tier)
-3. **Muhammad Arman** (2344190012) — *Hardware & Automation Integrator* (Integrasi Denah ke Web, Sensor Kamera ANPR/OCR, Timbangan VGM, RFID UHF)
-4. **Muhammad Daffa Al Hafizh** (2344190001) — *Business Process & ERP Analyst* (SOP Alur KA-Truk, Struktur Tarif Jasa Terminal, Alur Finansial ERP)
-5. **Muhammad Bagoes Syahputra** (2344190022) — *Logistics Data & Standards Officer* (Standar GS1-128, SSCC-18, Skema Data JSON API)
-
+Conclusion Grup
 ---
 
 ## 🎯 Scope of Work Resmi
