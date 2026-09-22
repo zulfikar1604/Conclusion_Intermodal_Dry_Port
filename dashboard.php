@@ -128,14 +128,20 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
         }
     </style>
 </head>
-<body class="text-gray-800 antialiased h-screen overflow-hidden flex">
+<body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
     <!-- Sidebar -->
-    <aside id="sidebar" class="bg-cdp-dark text-white flex-shrink-0 z-20 h-full overflow-y-auto sidebar-transition w-64 absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+    <aside id="sidebar" class="bg-cdp-dark text-white flex-shrink-0 z-40 h-full overflow-y-auto sidebar-transition w-64 fixed md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out shadow-xl md:shadow-none">
         <!-- Logo (Height aligned with top header: h-14 / 56px) -->
-        <div class="h-14 flex items-center px-4 border-b border-white/10 bg-cdp-navy/50">
-            <img src="assets/img/logo.png" alt="Logo" class="w-8 h-8 object-contain mr-3 bg-white rounded p-0.5" onerror="this.src='https://via.placeholder.com/32?text=C'">
-            <span class="text-lg font-bold tracking-wide logo-text whitespace-nowrap">CIDP YMS</span>
+        <div class="h-14 flex items-center justify-between px-4 border-b border-white/10 bg-cdp-navy/50">
+            <div class="flex items-center overflow-hidden">
+                <img src="assets/img/logo.png" alt="Logo" class="w-8 h-8 object-contain mr-3 bg-white rounded p-0.5 flex-shrink-0" onerror="this.src='https://via.placeholder.com/32?text=C'">
+                <span class="text-lg font-bold tracking-wide logo-text whitespace-nowrap">CIDP YMS</span>
+            </div>
+            <!-- Mobile Close Button -->
+            <button onclick="toggleSidebar()" class="md:hidden text-white/70 hover:text-white p-1.5 rounded-lg focus:outline-none transition-colors" title="Tutup Menu">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
         </div>
         
         <!-- Navigation: 4 Kluster Divisi Operasional -->
@@ -163,58 +169,60 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
     </aside>
 
     <!-- Main Wrapper -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
         
         <!-- Overlay for mobile sidebar -->
-        <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900/50 z-10 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
+        <div id="sidebarOverlay" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-30 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
         <!-- Top Header (Aligned with sidebar logo: h-14 / 56px) -->
-        <header class="h-14 bg-white border-b border-gray-200/80 flex items-center justify-between px-4 lg:px-6 z-10 flex-shrink-0">
-            <!-- Left: Toggle & Page Title -->
-            <div class="flex items-center">
-                <!-- Mobile Toggle -->
-                <button onclick="toggleSidebar()" class="mr-3 text-gray-500 hover:text-cdp-blue focus:outline-none md:hidden transition-colors">
-                    <i class="fa-solid fa-bars text-base"></i>
-                </button>
-                <!-- Desktop Toggle -->
-                <button onclick="toggleDesktopSidebar()" class="mr-3 text-gray-500 hover:text-cdp-blue focus:outline-none hidden md:block transition-colors">
-                    <i class="fa-solid fa-bars-staggered text-base" id="desktopToggleIcon"></i>
-                </button>
-                <h1 class="text-base font-bold text-gray-800 capitalize">
-                    <?= isset($menu_items[$page]) ? $menu_items[$page]['label'] : 'Dashboard' ?>
-                </h1>
-            </div>
-            
-            <!-- Right: User & Actions -->
-            <div class="flex items-center space-x-3">
-                <button class="relative p-1.5 text-gray-400 hover:text-cdp-blue transition-colors" title="Notifikasi Sistem">
-                    <i class="fa-regular fa-bell text-base"></i>
-                    <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
-                </button>
-                
-                <div class="h-6 w-px bg-gray-200 mx-1"></div>
-                
-                <div class="flex items-center space-x-2.5 group">
-                    <div class="flex flex-col text-right hidden sm:flex">
-                        <span class="text-xs font-bold text-gray-800 leading-tight"><?= htmlspecialchars($nama) ?></span>
-                        <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border <?= $current_badge['color'] ?> inline-block mt-0.5 self-end">
-                            <?= $current_badge['label'] ?>
-                        </span>
-                    </div>
-                    <div class="w-8 h-8 rounded-full bg-cdp-blue text-white flex items-center justify-center font-bold text-xs shadow-xs border border-white ring-1 ring-gray-200 group-hover:ring-cdp-blue/30 transition-all cursor-pointer">
-                        <?= strtoupper(substr($nama, 0, 1)) ?>
-                    </div>
+        <header class="h-14 bg-white border-b border-gray-200/80 z-10 flex-shrink-0">
+            <div class="h-full w-full max-w-[1680px] mx-auto flex items-center justify-between px-3.5 sm:px-5 lg:px-8">
+                <!-- Left: Toggle & Page Title -->
+                <div class="flex items-center min-w-0 mr-2">
+                    <!-- Mobile Toggle -->
+                    <button onclick="toggleSidebar()" class="mr-3 p-1.5 text-gray-500 hover:text-cdp-blue focus:outline-none md:hidden transition-colors rounded-lg hover:bg-gray-100" title="Buka Menu">
+                        <i class="fa-solid fa-bars text-base"></i>
+                    </button>
+                    <!-- Desktop Toggle -->
+                    <button onclick="toggleDesktopSidebar()" class="mr-3 p-1.5 text-gray-500 hover:text-cdp-blue focus:outline-none hidden md:block transition-colors rounded-lg hover:bg-gray-100" title="Kecilkan/Perbesar Menu">
+                        <i class="fa-solid fa-bars-staggered text-base" id="desktopToggleIcon"></i>
+                    </button>
+                    <h1 class="text-sm sm:text-base font-bold text-gray-800 capitalize truncate">
+                        <?= isset($menu_items[$page]) ? $menu_items[$page]['label'] : 'Dashboard' ?>
+                    </h1>
                 </div>
                 
-                <a href="logout.php" class="ml-1 p-1.5 text-gray-400 hover:text-red-500 transition-colors" title="Keluar" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
-                    <i class="fa-solid fa-right-from-bracket text-base"></i>
-                </a>
+                <!-- Right: User & Actions -->
+                <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
+                    <button class="relative p-1.5 text-gray-400 hover:text-cdp-blue transition-colors rounded-lg hover:bg-gray-100" title="Notifikasi Sistem">
+                        <i class="fa-regular fa-bell text-base"></i>
+                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                    </button>
+                    
+                    <div class="h-5 w-px bg-gray-200 mx-0.5 sm:mx-1"></div>
+                    
+                    <div class="flex items-center space-x-2.5 group">
+                        <div class="flex flex-col text-right hidden sm:flex">
+                            <span class="text-xs font-bold text-gray-800 leading-tight"><?= htmlspecialchars($nama) ?></span>
+                            <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border <?= $current_badge['color'] ?> inline-block mt-0.5 self-end">
+                                <?= $current_badge['label'] ?>
+                            </span>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-cdp-blue text-white flex items-center justify-center font-bold text-xs shadow-xs border border-white ring-1 ring-gray-200 group-hover:ring-cdp-blue/30 transition-all cursor-pointer">
+                            <?= strtoupper(substr($nama, 0, 1)) ?>
+                        </div>
+                    </div>
+                    
+                    <a href="logout.php" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50" title="Keluar" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
+                        <i class="fa-solid fa-right-from-bracket text-base"></i>
+                    </a>
+                </div>
             </div>
         </header>
 
-        <!-- Main Content Scrollable Area (Compact Padding) -->
+        <!-- Main Content Scrollable Area (Symmetrical Container) -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-cdp-light relative">
-            <div class="p-3.5 lg:p-5 max-w-7xl mx-auto space-y-4">
+            <div class="p-3.5 sm:p-5 lg:p-8 w-full max-w-[1680px] mx-auto space-y-4 sm:space-y-5">
                 
                 <?php if ($page === 'beranda'): ?>
                 
@@ -226,43 +234,46 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         </h2>
                         <p class="text-gray-500 text-xs mt-0.5"><?= $current_desc ?></p>
                     </div>
-                    <div class="text-xs text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200/80 flex items-center shadow-2xs flex-shrink-0">
-                        <i class="fa-regular fa-calendar mr-1.5 text-cdp-blue text-xs"></i>
-                        <?= $tanggal_sekarang ?>
+                    <div class="text-xs text-gray-600 bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200/80 flex items-center shadow-2xs flex-shrink-0 self-stretch sm:self-auto justify-between sm:justify-start">
+                        <span class="flex items-center">
+                            <i class="fa-regular fa-calendar mr-1.5 text-cdp-blue text-xs"></i>
+                            <?= $tanggal_sekarang ?>
+                        </span>
+                        <span class="sm:hidden text-[10px] font-bold text-emerald-700 bg-emerald-100/70 px-2 py-0.5 rounded ml-2">Live</span>
                     </div>
                 </div>
 
-                <!-- 6 KPI Summary Cards (Compact 1-Row Grid on Desktop) -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3">
+                <!-- 6 KPI Summary Cards (Compact 1-Row Grid on Desktop, Symmetrical 2x3 Grid on Mobile) -->
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2.5 sm:gap-3.5">
                     
                     <!-- KPI 1 -->
-                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-blue-300 hover:shadow-xs transition-all group">
+                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-blue-300 hover:shadow-xs transition-all group flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Yard Stack</p>
+                                <p class="text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Yard Stack</p>
                                 <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5">126 <span class="text-[11px] font-normal text-gray-400">box</span></h3>
                             </div>
-                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
+                            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-boxes-stacked"></i>
                             </div>
                         </div>
-                        <div class="mt-2 flex items-center text-[10px] text-emerald-600 font-medium">
+                        <div class="mt-2.5 flex items-center text-[10px] sm:text-[11px] text-emerald-600 font-medium">
                             <i class="fa-solid fa-arrow-trend-up mr-1 text-[9px]"></i> +8 dari kemarin
                         </div>
                     </div>
 
                     <!-- KPI 2 -->
-                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-indigo-300 hover:shadow-xs transition-all group">
+                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-indigo-300 hover:shadow-xs transition-all group flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Truk Hari Ini</p>
+                                <p class="text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Truk Hari Ini</p>
                                 <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5">14 <span class="text-[11px] font-normal text-gray-400">unit</span></h3>
                             </div>
-                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-truck"></i>
                             </div>
                         </div>
-                        <div class="mt-2 flex items-center text-[10px] text-gray-500 space-x-2">
+                        <div class="mt-2.5 flex items-center text-[10px] sm:text-[11px] text-gray-500 space-x-2">
                             <span class="text-indigo-600 font-medium">In: 9</span>
                             <span class="text-gray-400">•</span>
                             <span>Out: 5</span>
@@ -270,254 +281,274 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                     </div>
 
                     <!-- KPI 3 -->
-                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-purple-300 hover:shadow-xs transition-all group">
+                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-purple-300 hover:shadow-xs transition-all group flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Kereta Api</p>
+                                <p class="text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Kereta Api</p>
                                 <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5">2 <span class="text-[11px] font-normal text-gray-400">KA</span></h3>
                             </div>
-                            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
+                            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-train"></i>
                             </div>
                         </div>
-                        <div class="mt-2 flex items-center text-[10px] text-purple-600 font-medium truncate">
+                        <div class="mt-2.5 flex items-center text-[10px] sm:text-[11px] text-purple-600 font-medium truncate">
                             JKT - SMG Active
                         </div>
                     </div>
 
                     <!-- KPI 4 -->
-                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-cyan-300 hover:shadow-xs transition-all group">
+                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-cyan-300 hover:shadow-xs transition-all group flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Reefer Plug</p>
+                                <p class="text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Reefer Plug</p>
                                 <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5">38 <span class="text-[11px] font-normal text-gray-400">unit</span></h3>
                             </div>
-                            <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
+                            <div class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-snowflake"></i>
                             </div>
                         </div>
-                        <div class="mt-2 flex items-center text-[10px] text-emerald-600 font-medium">
+                        <div class="mt-2.5 flex items-center text-[10px] sm:text-[11px] text-emerald-600 font-medium">
                             <i class="fa-solid fa-check mr-1 text-[9px]"></i> Suhu Aman
                         </div>
                     </div>
 
                     <!-- KPI 5 -->
-                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-red-300 hover:shadow-xs transition-all group">
+                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-red-300 hover:shadow-xs transition-all group flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">DG / IMO</p>
+                                <p class="text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">DG / IMO</p>
                                 <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5">3 <span class="text-[11px] font-normal text-gray-400">box</span></h3>
                             </div>
-                            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
+                            <div class="w-8 h-8 rounded-lg bg-red-50 text-red-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-triangle-exclamation"></i>
                             </div>
                         </div>
-                        <div class="mt-2 flex items-center text-[10px] text-amber-600 font-medium">
+                        <div class="mt-2.5 flex items-center text-[10px] sm:text-[11px] text-amber-600 font-medium">
                             Terisolasi di DG
                         </div>
                     </div>
 
                     <!-- KPI 6 -->
-                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-emerald-300 hover:shadow-xs transition-all group">
+                    <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 hover:border-emerald-300 hover:shadow-xs transition-all group flex flex-col justify-between h-full">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Revenue</p>
-                                <h3 class="text-lg sm:text-xl font-bold text-emerald-700 mt-0.5">Rp 47.2M</h3>
+                                <p class="text-[10px] sm:text-[11px] font-semibold text-gray-500 uppercase tracking-wider">Revenue</p>
+                                <h3 class="text-xl sm:text-2xl font-bold text-emerald-700 mt-0.5">Rp 47.2M</h3>
                             </div>
-                            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-money-bill-wave"></i>
                             </div>
                         </div>
-                        <div class="mt-2 flex items-center text-[10px] text-gray-500 truncate">
+                        <div class="mt-2.5 flex items-center text-[10px] sm:text-[11px] text-gray-500 truncate">
                             Gross hari ini
                         </div>
                     </div>
 
                 </div>
 
-                <!-- Row 1: 2 Charts Side-by-side (Compact Height) -->
+                <!-- Row 1: 2 Charts Side-by-side (Equal Proportions & Symmetrical) -->
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5 sm:gap-4">
                     <!-- Line Chart -->
-                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4">
+                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
                                 <i class="fa-solid fa-chart-line mr-2 text-cdp-blue text-xs"></i>Tren Aktivitas Gate (7 Hari Terakhir)
                             </h3>
                             <span class="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">In vs Out</span>
                         </div>
-                        <div class="h-48 relative w-full">
+                        <div class="h-56 sm:h-60 relative w-full flex-1">
                             <canvas id="gateTrendChart"></canvas>
                         </div>
                     </div>
                     
                     <!-- Doughnut Chart -->
-                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4">
+                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
                                 <i class="fa-solid fa-chart-pie mr-2 text-cdp-blue text-xs"></i>Distribusi Tipe Kontainer
                             </h3>
                             <span class="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">Total 126 Box</span>
                         </div>
-                        <div class="h-48 relative w-full flex items-center justify-center">
+                        <div class="h-56 sm:h-60 relative w-full flex-1 flex items-center justify-center">
                             <canvas id="containerTypeChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Row 2: 3 Columns (Compact Height) -->
+                <!-- Row 2: 3 Columns (Equal Proportions & Aligned Headers) -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
                     <!-- Vertical Bar Chart -->
-                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4">
+                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
                                 <i class="fa-solid fa-chart-column mr-2 text-cdp-blue text-xs"></i>Throughput per Blok Yard
                             </h3>
+                            <span class="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">TEU</span>
                         </div>
-                        <div class="h-48 relative w-full">
+                        <div class="h-56 sm:h-60 relative w-full flex-1">
                             <canvas id="yardBlockChart"></canvas>
                         </div>
                     </div>
 
-                    <!-- Gauges (Compact Proportions) -->
-                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-around">
-                        <!-- Gauge 1 -->
-                        <div class="text-center mb-3">
-                            <h4 class="font-bold text-gray-700 text-xs mb-1.5">Utilisasi Yard</h4>
-                            <div class="relative w-36 h-18 mx-auto overflow-hidden">
-                                <svg viewBox="0 0 200 100" class="w-full h-full">
-                                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="16" stroke-linecap="round"/>
-                                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#eab308" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="92.9"/>
-                                </svg>
-                                <div class="absolute bottom-0 w-full text-center">
-                                    <span class="text-2xl font-bold text-gray-800">63%</span>
-                                </div>
-                            </div>
-                            <p class="text-[10px] text-gray-500 mt-1">126 dari 200 slot terisi</p>
+                    <!-- Gauges (Symmetrical Header, Responsive Side-by-Side on Mobile) -->
+                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
+                                <i class="fa-solid fa-gauge mr-2 text-cdp-blue text-xs"></i>Utilisasi & Efisiensi Yard
+                            </h3>
+                            <span class="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">KPI Yard</span>
                         </div>
                         
-                        <!-- Gauge 2 -->
-                        <div class="text-center">
-                            <h4 class="font-bold text-gray-700 text-xs mb-1.5">Rata-rata Dwell Time</h4>
-                            <div class="relative w-36 h-18 mx-auto overflow-hidden">
-                                <svg viewBox="0 0 200 100" class="w-full h-full">
-                                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="16" stroke-linecap="round"/>
-                                    <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#22c55e" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="75.4"/>
-                                </svg>
-                                <div class="absolute bottom-0 w-full text-center">
-                                    <span class="text-2xl font-bold text-gray-800">2.1</span>
+                        <div class="grid grid-cols-2 lg:grid-cols-1 gap-3 py-1 flex-1 items-center justify-around">
+                            <!-- Gauge 1 -->
+                            <div class="text-center flex flex-col items-center justify-center">
+                                <h4 class="font-bold text-gray-700 text-xs mb-1">Utilisasi Yard</h4>
+                                <div class="relative w-36 h-[72px] mx-auto overflow-hidden">
+                                    <svg viewBox="0 0 200 100" class="w-full h-full">
+                                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="16" stroke-linecap="round"/>
+                                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#eab308" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="92.9"/>
+                                    </svg>
+                                    <div class="absolute bottom-0 w-full text-center">
+                                        <span class="text-xl sm:text-2xl font-bold text-gray-800">63%</span>
+                                    </div>
                                 </div>
+                                <p class="text-[10px] text-gray-500 mt-1">126 dari 200 slot terisi</p>
                             </div>
-                            <p class="text-[10px] text-gray-500 mt-1">Target &lt; 3.0 hari</p>
+                            
+                            <!-- Gauge 2 -->
+                            <div class="text-center flex flex-col items-center justify-center">
+                                <h4 class="font-bold text-gray-700 text-xs mb-1">Rata-rata Dwell Time</h4>
+                                <div class="relative w-36 h-[72px] mx-auto overflow-hidden">
+                                    <svg viewBox="0 0 200 100" class="w-full h-full">
+                                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#e5e7eb" stroke-width="16" stroke-linecap="round"/>
+                                        <path d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="#22c55e" stroke-width="16" stroke-linecap="round" stroke-dasharray="251.2" stroke-dashoffset="75.4"/>
+                                    </svg>
+                                    <div class="absolute bottom-0 w-full text-center">
+                                        <span class="text-xl sm:text-2xl font-bold text-gray-800">2.1</span>
+                                    </div>
+                                </div>
+                                <p class="text-[10px] text-gray-500 mt-1">Target &lt; 3.0 hari</p>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Horizontal Bar Chart -->
-                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4">
+                    <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
                                 <i class="fa-solid fa-list-ol mr-2 text-cdp-blue text-xs"></i>Top 5 Perusahaan Pelanggan
                             </h3>
+                            <span class="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">Volume</span>
                         </div>
-                        <div class="h-48 relative w-full">
+                        <div class="h-56 sm:h-60 relative w-full flex-1">
                             <canvas id="topCustomersChart"></canvas>
                         </div>
                     </div>
                 </div>
 
-                <!-- Row 3: 2 Charts (Grid Cols 5) -->
+                <!-- Row 3: 2 Cards (Balanced Heights on Desktop & Mobile) -->
                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-3.5 sm:gap-4">
                     <!-- Stacked Bar Chart -->
-                    <div class="lg:col-span-3 bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4">
+                    <div class="lg:col-span-3 bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-between">
                         <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
                                 <i class="fa-solid fa-sack-dollar mr-2 text-cdp-blue text-xs"></i>Pendapatan per Jenis Layanan (7 Hari)
                             </h3>
+                            <span class="text-[10px] font-semibold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">Juta Rupiah</span>
                         </div>
-                        <div class="h-48 relative w-full">
+                        <div class="h-64 sm:h-72 lg:h-[290px] relative w-full flex-1">
                             <canvas id="revenueStackedChart"></canvas>
                         </div>
                     </div>
                     
-                    <!-- Summary Stats Card -->
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-center space-y-3">
-                        <h3 class="font-bold text-gray-800 text-xs sm:text-sm border-b border-gray-100 pb-2 flex items-center">
-                            <i class="fa-solid fa-gauge-high mr-2 text-cdp-blue text-xs"></i>Performa Terminal
-                        </h3>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-stopwatch"></i>
-                                </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 font-medium">Rata-rata Waktu Gate-In</p>
-                                    <p class="text-sm font-bold text-gray-800">2 mnt 15 dtk</p>
-                                </div>
-                            </div>
-                            <span class="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-arrow-down mr-1"></i>12s</span>
+                    <!-- Summary Stats Card: Performa Terminal -->
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4 flex flex-col justify-between">
+                        <div class="flex justify-between items-center mb-2.5 pb-2 border-b border-gray-100">
+                            <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
+                                <i class="fa-solid fa-gauge-high mr-2 text-cdp-blue text-xs"></i>Performa Terminal
+                            </h3>
+                            <span class="text-[10px] font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded">Operasional</span>
                         </div>
                         
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-truck-ramp-box"></i>
+                        <div class="space-y-3 py-1 flex-1 flex flex-col justify-around">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs flex-shrink-0">
+                                        <i class="fa-solid fa-stopwatch"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-medium">Rata-rata Waktu Gate-In</p>
+                                        <p class="text-sm font-bold text-gray-800">2 mnt 15 dtk</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 font-medium">Truk Ditangani (Bulan Ini)</p>
-                                    <p class="text-sm font-bold text-gray-800">342 <span class="text-[10px] font-normal text-gray-400">kendaraan</span></p>
-                                </div>
+                                <span class="text-green-600 text-[10px] font-bold bg-green-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-arrow-down mr-1"></i>12s</span>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-file-invoice"></i>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs flex-shrink-0">
+                                        <i class="fa-solid fa-truck-ramp-box"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-medium">Truk Ditangani (Bulan Ini)</p>
+                                        <p class="text-sm font-bold text-gray-800">342 <span class="text-[10px] font-normal text-gray-400">kendaraan</span></p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 font-medium">Invoice Terbit (Bulan Ini)</p>
-                                    <p class="text-sm font-bold text-gray-800">289 <span class="text-[10px] font-normal text-gray-400">faktur</span></p>
-                                </div>
+                                <span class="text-indigo-600 text-[10px] font-bold bg-indigo-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-check mr-1"></i>98% On-Time</span>
                             </div>
-                        </div>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs flex-shrink-0">
+                                        <i class="fa-solid fa-file-invoice"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-medium">Invoice Terbit (Bulan Ini)</p>
+                                        <p class="text-sm font-bold text-gray-800">289 <span class="text-[10px] font-normal text-gray-400">faktur</span></p>
+                                    </div>
+                                </div>
+                                <span class="text-purple-600 text-[10px] font-bold bg-purple-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-arrow-up mr-1"></i>+5.2%</span>
+                            </div>
 
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-money-check-dollar"></i>
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs flex-shrink-0">
+                                        <i class="fa-solid fa-money-check-dollar"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-medium">Total Revenue (Bulan Ini)</p>
+                                        <p class="text-sm font-bold text-gray-800">Rp 1.42 M</p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 font-medium">Total Revenue (Bulan Ini)</p>
-                                    <p class="text-sm font-bold text-gray-800">Rp 1.42 M</p>
-                                </div>
+                                <span class="text-emerald-600 text-[10px] font-bold bg-emerald-50 px-2 py-0.5 rounded-full"><i class="fa-solid fa-arrow-trend-up mr-1"></i>104% Target</span>
                             </div>
-                        </div>
-                        
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-2.5">
-                                <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-shield-halved"></i>
+                            
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center space-x-2.5">
+                                    <div class="w-8 h-8 rounded-lg bg-green-50 text-green-600 flex items-center justify-center text-xs flex-shrink-0">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-[10px] text-gray-500 font-medium">Tingkat Kecelakaan</p>
+                                        <p class="text-sm font-bold text-gray-800">0 <span class="text-[10px] font-normal text-gray-400">insiden</span></p>
+                                    </div>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] text-gray-500 font-medium">Tingkat Kecelakaan</p>
-                                    <p class="text-sm font-bold text-gray-800">0 <span class="text-[10px] font-normal text-gray-400">insiden</span></p>
-                                </div>
+                                <span class="text-green-600 text-[10px] font-bold bg-green-100 px-2 py-0.5 rounded"><i class="fa-solid fa-check mr-1"></i>Zero Incident</span>
                             </div>
-                            <span class="text-green-600 text-[10px] font-bold bg-green-100 px-2 py-0.5 rounded"><i class="fa-solid fa-check mr-1"></i>Aman</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Two-Column Layout: Aktivitas Terkini & Antrian Gerbang -->
+                <!-- Row 4: Two-Column Layout: Aktivitas Terkini & Antrian Gerbang -->
                 <div class="grid grid-cols-1 lg:grid-cols-3 gap-3.5 sm:gap-4">
                     
                     <!-- Left Col: Aktivitas Terkini (span 2) -->
-                    <div class="lg:col-span-2 bg-white rounded-xl shadow-2xs border border-gray-200/80 flex flex-col">
+                    <div class="lg:col-span-2 bg-white rounded-xl shadow-2xs border border-gray-200/80 flex flex-col justify-between">
                         <div class="p-3.5 border-b border-gray-100 flex justify-between items-center bg-gray-50/50 rounded-t-xl">
                             <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
                                 <i class="fa-solid fa-clock-rotate-left mr-2 text-cdp-blue text-xs"></i>Aktivitas Terkini
                             </h3>
-                            <button class="text-xs text-cdp-blue hover:underline font-medium">Lihat Semua</button>
+                            <a href="dashboard.php?page=kontainer" class="text-xs text-cdp-blue hover:underline font-medium">Lihat Semua</a>
                         </div>
                         <div class="p-3.5 flex-1">
                             <div class="relative border-l-2 border-gray-100 ml-2.5 space-y-3.5">
@@ -575,7 +606,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                     </div>
 
                     <!-- Right Col: Panel Ringkasan -->
-                    <div class="flex flex-col space-y-3.5">
+                    <div class="flex flex-col space-y-3.5 sm:space-y-4">
                         
                         <!-- Antrian Gate -->
                         <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5">
@@ -606,53 +637,55 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         </div>
 
                         <!-- Okupansi Yard -->
-                        <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 flex-1">
-                            <div class="border-b border-gray-100 pb-1.5 mb-3 flex justify-between items-center">
-                                <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
-                                    <i class="fa-solid fa-chart-pie mr-2 text-cdp-blue text-xs"></i>Okupansi Yard
-                                </h3>
-                                <span class="text-[10px] font-semibold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">126 / 200 slot</span>
-                            </div>
-                            
-                            <div class="space-y-2.5">
-                                <!-- Block A -->
-                                <div>
-                                    <div class="flex justify-between text-[11px] mb-1">
-                                        <span class="text-gray-600 font-medium">Block A</span>
-                                        <span class="text-gray-800 font-bold">78%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-1">
-                                        <div class="bg-blue-600 h-1 rounded-full" style="width: 78%"></div>
-                                    </div>
+                        <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 flex-1 flex flex-col justify-between">
+                            <div>
+                                <div class="border-b border-gray-100 pb-1.5 mb-3 flex justify-between items-center">
+                                    <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
+                                        <i class="fa-solid fa-chart-pie mr-2 text-cdp-blue text-xs"></i>Okupansi Yard
+                                    </h3>
+                                    <span class="text-[10px] font-semibold text-gray-600 bg-gray-100 px-1.5 py-0.5 rounded">126 / 200 slot</span>
                                 </div>
-                                <!-- Block B -->
-                                <div>
-                                    <div class="flex justify-between text-[11px] mb-1">
-                                        <span class="text-gray-600 font-medium">Block B</span>
-                                        <span class="text-gray-800 font-bold">62%</span>
+                                
+                                <div class="space-y-2.5">
+                                    <!-- Block A -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mb-1">
+                                            <span class="text-gray-600 font-medium">Block A</span>
+                                            <span class="text-gray-800 font-bold">78%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div class="bg-blue-600 h-1.5 rounded-full" style="width: 78%"></div>
+                                        </div>
                                     </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-1">
-                                        <div class="bg-blue-400 h-1 rounded-full" style="width: 62%"></div>
+                                    <!-- Block B -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mb-1">
+                                            <span class="text-gray-600 font-medium">Block B</span>
+                                            <span class="text-gray-800 font-bold">62%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div class="bg-blue-400 h-1.5 rounded-full" style="width: 62%"></div>
+                                        </div>
                                     </div>
-                                </div>
-                                <!-- Reefer Zone -->
-                                <div>
-                                    <div class="flex justify-between text-[11px] mb-1">
-                                        <span class="text-gray-600 font-medium">Reefer Zone</span>
-                                        <span class="text-red-500 font-bold">83%</span>
+                                    <!-- Reefer Zone -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mb-1">
+                                            <span class="text-gray-600 font-medium">Reefer Zone</span>
+                                            <span class="text-red-500 font-bold">83%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div class="bg-cyan-400 h-1.5 rounded-full" style="width: 83%"></div>
+                                        </div>
                                     </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-1">
-                                        <div class="bg-cyan-400 h-1 rounded-full" style="width: 83%"></div>
-                                    </div>
-                                </div>
-                                <!-- DG Yard -->
-                                <div>
-                                    <div class="flex justify-between text-[11px] mb-1">
-                                        <span class="text-gray-600 font-medium">DG Yard</span>
-                                        <span class="text-gray-800 font-bold">33%</span>
-                                    </div>
-                                    <div class="w-full bg-gray-100 rounded-full h-1">
-                                        <div class="bg-red-500 h-1 rounded-full" style="width: 33%"></div>
+                                    <!-- DG Yard -->
+                                    <div>
+                                        <div class="flex justify-between text-[11px] mb-1">
+                                            <span class="text-gray-600 font-medium">DG Yard</span>
+                                            <span class="text-gray-800 font-bold">33%</span>
+                                        </div>
+                                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                                            <div class="bg-red-500 h-1.5 rounded-full" style="width: 33%"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -663,11 +696,11 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 
                 <!-- Tabel Pelacakan Muatan Klien (Shipper Consignment Tracking) -->
                 <div class="bg-white rounded-xl shadow-2xs border border-gray-200/80 p-3.5 sm:p-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2 border-b border-gray-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3 pb-2 border-b border-gray-100">
                         <h3 class="font-bold text-gray-800 text-xs sm:text-sm flex items-center">
                             <i class="fa-solid fa-list-check mr-2 text-cdp-blue text-xs"></i>Pelacakan Konsinyasi Muatan Klien (Shipper Consignment Tracking)
                         </h3>
-                        <div class="flex items-center space-x-2">
+                        <div class="flex items-center space-x-2 flex-wrap">
                             <span class="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
                                 <i class="fa-solid fa-satellite-dish mr-1 text-[9px]"></i>Live Tracking
                             </span>
@@ -677,7 +710,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         </div>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
+                        <table class="w-full text-left border-collapse min-w-[680px]">
                             <thead>
                                 <tr class="bg-gray-50 text-gray-600 text-[11px] border-y border-gray-100">
                                     <th class="py-2.5 px-3 font-semibold">Nomor Kontainer</th>
@@ -690,28 +723,28 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                             </thead>
                             <tbody class="text-xs divide-y divide-gray-100">
                                 <tr class="hover:bg-blue-50/20 transition">
-                                    <td class="py-2 px-3 font-mono font-bold text-[#0170b9]">MSKU9182374</td>
-                                    <td class="py-2 px-3 text-gray-600">40ft High Cube (Dry)</td>
-                                    <td class="py-2 px-3 font-mono text-purple-700 font-bold">E280117000000001</td>
-                                    <td class="py-2 px-3"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">In Yard (Penumpukan)</span></td>
-                                    <td class="py-2 px-3 font-semibold text-gray-800">Blok B / Bay 08 / Row 03 / Tier 02</td>
-                                    <td class="py-2 px-3 text-gray-500 text-right">Hari ini, 14:32 WIB</td>
+                                    <td class="py-2.5 px-3 font-mono font-bold text-[#0170b9]">MSKU9182374</td>
+                                    <td class="py-2.5 px-3 text-gray-600">40ft High Cube (Dry)</td>
+                                    <td class="py-2.5 px-3 font-mono text-purple-700 font-bold">E280117000000001</td>
+                                    <td class="py-2.5 px-3"><span class="bg-green-100 text-green-700 px-2 py-0.5 rounded text-[10px] font-bold">In Yard (Penumpukan)</span></td>
+                                    <td class="py-2.5 px-3 font-semibold text-gray-800">Blok B / Bay 08 / Row 03 / Tier 02</td>
+                                    <td class="py-2.5 px-3 text-gray-500 text-right">Hari ini, 14:32 WIB</td>
                                 </tr>
                                 <tr class="hover:bg-blue-50/20 transition">
-                                    <td class="py-2 px-3 font-mono font-bold text-[#0170b9]">TCLU8827415</td>
-                                    <td class="py-2 px-3 text-gray-600">20ft Standard (Dry)</td>
-                                    <td class="py-2 px-3 font-mono text-purple-700 font-bold">E280117000000002</td>
-                                    <td class="py-2 px-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">Gate Out (Menuju Pelabuhan)</span></td>
-                                    <td class="py-2 px-3 text-gray-600">Dalam Armada Truk B 7712 SCK</td>
-                                    <td class="py-2 px-3 text-gray-500 text-right">Hari ini, 13:55 WIB</td>
+                                    <td class="py-2.5 px-3 font-mono font-bold text-[#0170b9]">TCLU8827415</td>
+                                    <td class="py-2.5 px-3 text-gray-600">20ft Standard (Dry)</td>
+                                    <td class="py-2.5 px-3 font-mono text-purple-700 font-bold">E280117000000002</td>
+                                    <td class="py-2.5 px-3"><span class="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-[10px] font-bold">Gate Out (Menuju Pelabuhan)</span></td>
+                                    <td class="py-2.5 px-3 text-gray-600">Dalam Armada Truk B 7712 SCK</td>
+                                    <td class="py-2.5 px-3 text-gray-500 text-right">Hari ini, 13:55 WIB</td>
                                 </tr>
                                 <tr class="hover:bg-blue-50/20 transition">
-                                    <td class="py-2 px-3 font-mono font-bold text-[#0170b9]">TEMU4819203</td>
-                                    <td class="py-2 px-3 text-gray-600">40ft Reefer Cold Chain</td>
-                                    <td class="py-2 px-3 font-mono text-purple-700 font-bold">E280117000000004</td>
-                                    <td class="py-2 px-3"><span class="bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-[10px] font-bold">Terkoneksi Listrik (-18.2°C)</span></td>
-                                    <td class="py-2 px-3 font-semibold text-cyan-700">Reefer Rack R-02 Plug #14</td>
-                                    <td class="py-2 px-3 text-gray-500 text-right">Kemarin, 16:40 WIB</td>
+                                    <td class="py-2.5 px-3 font-mono font-bold text-[#0170b9]">TEMU4819203</td>
+                                    <td class="py-2.5 px-3 text-gray-600">40ft Reefer Cold Chain</td>
+                                    <td class="py-2.5 px-3 font-mono text-purple-700 font-bold">E280117000000004</td>
+                                    <td class="py-2.5 px-3"><span class="bg-cyan-100 text-cyan-700 px-2 py-0.5 rounded text-[10px] font-bold">Terkoneksi Listrik (-18.2°C)</span></td>
+                                    <td class="py-2.5 px-3 font-semibold text-cyan-700">Reefer Rack R-02 Plug #14</td>
+                                    <td class="py-2.5 px-3 text-gray-500 text-right">Kemarin, 16:40 WIB</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -998,22 +1031,25 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                     plugins: [{
                         id: 'textCenter',
                         beforeDraw: function(chart) {
-                            var width = chart.width,
-                                height = chart.height,
-                                ctx = chart.ctx;
-
-                            ctx.restore();
-                            var fontSize = (height / 120).toFixed(2);
-                            ctx.font = "bold " + fontSize + "em 'Plus Jakarta Sans'";
-                            ctx.textBaseline = "middle";
-                            ctx.fillStyle = "#1f2937";
-
-                            var text = "126 Unit",
-                                textX = Math.round((width - ctx.measureText(text).width) / 2),
-                                textY = height / 2.2;
-
-                            ctx.fillText(text, textX, textY);
+                            const { ctx, chartArea } = chart;
+                            if (!chartArea) return;
                             ctx.save();
+                            const centerX = (chartArea.left + chartArea.right) / 2;
+                            const centerY = (chartArea.top + chartArea.bottom) / 2;
+
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+
+                            // Main count
+                            ctx.font = "bold 1.2rem 'Plus Jakarta Sans', sans-serif";
+                            ctx.fillStyle = "#111827";
+                            ctx.fillText("126 Unit", centerX, centerY - 6);
+
+                            // Subtitle
+                            ctx.font = "600 0.65rem 'Plus Jakarta Sans', sans-serif";
+                            ctx.fillStyle = "#6b7280";
+                            ctx.fillText("Total Yard", centerX, centerY + 12);
+                            ctx.restore();
                         }
                     }]
                 });

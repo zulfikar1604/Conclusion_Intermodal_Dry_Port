@@ -386,7 +386,7 @@ foreach ($equipment_list as $eq) {
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse" id="eventTable">
+            <table class="w-full text-left border-collapse min-w-[720px]" id="eventTable">
                 <thead>
                     <tr class="bg-gray-50/80 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                         <th class="py-3.5 px-4 font-semibold">Alat & Operator</th>

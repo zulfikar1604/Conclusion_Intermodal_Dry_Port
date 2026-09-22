@@ -298,7 +298,7 @@ $total_trucks = count($trucks);
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse" id="truckTable">
+            <table class="w-full text-left border-collapse min-w-[720px]" id="truckTable">
                 <thead>
                     <tr class="bg-gray-50/80 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                         <th class="py-3.5 px-4 font-semibold">Armada / Plat Truk</th>
