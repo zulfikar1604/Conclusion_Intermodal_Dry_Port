@@ -34,11 +34,11 @@ Berdasarkan silabus dan lembar penugasan resmi proyek:
 
 | No | Nama & NIM | Peran Utama | Lingkup Pekerjaan & Tanggung Jawab | Status di Web |
 |---|---|---|---|---|
-| 1 | **Zulfikar Jafarudin Fatah** (2344190003) | **Lead Project & System Architect** | • Arsitektur sistem web, basis data MySQL, dan auth satu pintu.<br>• Dashboard Eksekutif (Beranda, KPI, Chart Analytics).<br>• Modul mandiri **Pelacakan Kontainer** (`pages/kontainer.php`).<br>• Modul mandiri **Manajemen Trucking** (`pages/trucking.php`).<br>• Modul mandiri **Lokasi Alat Berat GPS** (`pages/alat.php`).<br>• Modul **Simulasi 3D Virtual Terminal** (`pages/simulator.php`). | ✅ **Selesai & Aktif** |
-| 2 | **Juan Manuel** (2344190013) | **Yard Layout Specialist** | • Menggambar sketsa fisik denah terminal CIDP (35 Ha): Blok A-E, Jalur Rel, Dermaga Reefer, DG Yard, Depo M&R.<br>• Merumuskan aturan penataan (*Stacking Rules* Bay-Row-Tier). | ⏳ Menunggu Gambar Denah |
-| 3 | **Muhammad Arman** (2344190012) | **Hardware & Automation Integrator** | • Memasukkan gambar denah dari Juan ke prototipe web.<br>• Spesifikasi teknis sensor: Kamera ANPR, OCR ISO 6346, Jembatan Timbang VGM 80 Ton, RFID UHF Reader.<br>• Integrasi telemetri nirkabel IoT pemantauan steker reefer. | ⏳ Menunggu Integrasi Hardware |
-| 4 | **Muhammad Daffa Al Hafizh** (2344190001) | **Business Process & ERP Analyst** | • Menyusun Standard Operating Procedure (SOP) alur alih muat KA-Truk.<br>• Perancangan struktur tarif jasa terminal (Lo-Lo, Lift-On, Storage Dwell, Timbang VGM).<br>• Perancangan integrasi data komersial/keuangan ke sistem ERP. | ⏳ Menunggu Alur ERP |
-| 5 | **Muhammad Bagoes Syahputra** (2344190022) | **Logistics Data & Standards Officer** | • Penerapan standar identifikasi logistik global (GS1-128, SSCC-18, e-Labeling).<br>• Perumusan skema data JSON API untuk integrasi sistem eksternal. | ⏳ Menunggu Standar Data |
+| 1 | **Zulfikar Jafarudin Fatah** | **Lead System Architect (Ketua Tim)** | • Arsitektur sistem web, basis data MySQL, dan auth satu pintu.<br>• Dashboard Eksekutif (Beranda, KPI, Chart Analytics).<br>• Modul mandiri **Pelacakan Kontainer** (`pages/kontainer.php`).<br>• Modul mandiri **Manajemen Trucking** (`pages/trucking.php`).<br>• Modul mandiri **Lokasi Alat Berat GPS** (`pages/alat.php`).<br>• Modul **Simulasi 3D Virtual Terminal** (`pages/simulator.php`). | ✅ **Selesai & Aktif** |
+| 2 | **Armansyah Muchtarrom** | **Hardware & Infrastructure Specialist** | • Analisis infrastruktur fisik lapangan terminal 35 Ha.<br>• Spesifikasi teknis sensor telemetri alat angkat (spreader/twistlock).<br>• Jembatan timbang bersertifikasi VGM SOLAS dan otomasi gerbang masuk/keluar. | ⏳ Menunggu Integrasi Hardware |
+| 3 | **Afriansayah Ayubi** | **Software & ERP Process Specialist** | • Rekayasa logika proses perangkat lunak dan alur penanganan peti kemas.<br>• Perancangan struktur tarif jasa terminal (Lo-Lo, Lift-On, Storage Dwell, Timbang VGM).<br>• Sinkronisasi peristiwa operasional lapangan ke modul keuangan sistem ERP terpadu. | ⏳ Menunggu Alur ERP |
+| 4 | **Juan Gamaliel** | **Data Integration Specialist** | • Integrasi aliran data antarsistem dan pemodelan pertukaran data JSON/API.<br>• Rekonsiliasi basis data waktu-nyata dan sinkronisasi informasi kepabeanan serta pelayaran.<br>• Penyelarasan denah tata letak fisik terminal 35 Ha dan stacking rules. | ⏳ Menunggu Integrasi Data & Denah |
+| 5 | **Naufal Andika Heditya** | **Business Analyst & QA Specialist** | • Analisis kebutuhan proses bisnis operasional pelabuhan kering.<br>• Standardisasi mutu identifikasi logistik global (GS1-128, SSCC-18, e-Labeling).<br>• Pengujian penjaminan kualitas (Quality Assurance) dan kepatuhan regulasi pabean. | ⏳ Menunggu Standar Mutu & QA |
 
 ---
 
@@ -54,13 +54,13 @@ Untuk memastikan proyek selesai dengan *proper* dan sistematis, seluruh alur pen
   └── Pemantauan Posisi GPS Alat Berat (RS-01/02/03 & RTG-01)
                     │
                     ▼
-[ FASE 2: TATA LETAK TERMINAL & OTOMASI GERBANG ]  ⏳ PROSES (Juan & Arman)
+[ FASE 2: TATA LETAK TERMINAL & OTOMASI GERBANG ]  ⏳ PROSES (Juan & Armansyah)
   ├── Digitalisasi Sketsa Denah Fisik 35 Ha ke Web
   ├── Stacking Rules & Koordinat 3D Bay-Row-Tier
   └── Spesifikasi Hardware Sensor Gate (Kamera ANPR, OCR, RFID UHF)
                     │
                     ▼
-[ FASE 3: INTEGRASI BISNIS ERP, STANDAR DATA & PABEAN ]  ⏳ PROSES (Daffa & Bagoes)
+[ FASE 3: INTEGRASI BISNIS ERP, STANDAR DATA & PABEAN ]  ⏳ PROSES (Afriansayah & Naufal)
   ├── Alur Data Komersial YMS ➔ ERP Billing (Lo-Lo, Storage, VGM)
   ├── Standar Labeling Logistik Global GS1-128 / SSCC-18
   └── Integrasi Dokumen Kepabeanan CEISA 4.0 (SPPB Cleared)
@@ -166,7 +166,7 @@ OPEX adalah biaya berkala yang dibutuhkan untuk menjalankan operasi dry port:
 ---
 
 ### D. Di Mana Masuknya Perhitungan Ini dalam Sistem Prototipe Kita?
-1. **Di Modul Billing & Faktur (`dashboard.php?page=billing` - Scope Daffa):**
+1. **Di Modul Billing & Faktur (`dashboard.php?page=billing` - Scope Afriansayah):**
    * Menjadi mesin kalkulasi otomatis yang menghitung tagihan per pelanggan berdasarkan catatan event dari tabel `yard_events`.
 2. **Di Beranda Eksekutif (`dashboard.php?page=beranda` - Scope Zulfikar):**
    * Ditampilkan pada KPI Card: **Pendapatan Hari Ini (Gross Daily Revenue)** dan rasio penagihan piutang (*Collection Rate*).
@@ -182,24 +182,24 @@ Untuk mencerminkan arsitektur sistem kelas dunia, menu sidebar dikelompokkan ke 
 ```markdown
 📂 KLUSTER 1: EXECUTIVE & VISUALIZATION
 ├── 📊 Beranda Eksekutif (KPI, Metrik Kinerja & Finansial) [Aktif - Zulfikar]
-└── 🗺️ Denah Terminal 35 Ha (Visual Top-Down Lapangan) [PIC: Juan & Arman]
+└── 🗺️ Denah Terminal 35 Ha (Visual Top-Down Lapangan) [PIC: Juan & Armansyah]
 
 📂 KLUSTER 2: OPERASIONAL UTAMA TERMINAL (CORE YMS)
 ├── 📦 Pelacakan Kontainer (Posisi 3D, Dwell Time & Rute) [Aktif - Zulfikar]
 ├── 🚛 Manajemen Trucking (Arus Gerbang, VGM & e-Gate Pass) [Aktif - Zulfikar]
 ├── 🚜 Lokasi Alat Berat GPS (Telemetri Reach Stacker & RTG) [Aktif - Zulfikar]
 ├── 🏗️ Manajemen Yard & Stacking (Aturan Bay-Row-Tier) [PIC: Juan]
-└── 🚂 Intermodal Rail Siding (Jadwal & Rangkaian KA Logistik) [PIC: Juan & Daffa]
+└── 🚂 Intermodal Rail Siding (Jadwal & Rangkaian KA Logistik) [PIC: Juan & Afriansayah]
 
 📂 KLUSTER 3: VALUE-ADDED SERVICES & KEPABEANAN
-├── ❄️ Monitor Reefer (Steker Listrik & Telemetri Dingin IoT) [PIC: Arman]
-├── 🏛️ Kepabeanan & Bea Cukai (Integrasi SPPB & Jalur Merah/Hijau) [PROYEKSI PABEAN]
-└── 🏷️ Scanner SSCC / GS1 (Standar Barcode & Verifikasi Box) [PIC: Bagoes]
+├── ❄️ Monitor Reefer (Steker Listrik & Telemetri Dingin IoT) [PIC: Armansyah]
+├── 🏛️ Kepabeanan & Bea Cukai (Integrasi SPPB & Jalur Merah/Hijau) [PIC: Naufal & Tim Pabean]
+└── 🏷️ Scanner SSCC / GS1 (Standar Barcode & Verifikasi Box) [PIC: Naufal]
 
 📂 KLUSTER 4: KOMERSIAL, SIMULASI & SISTEM
-├── 💵 Billing & Faktur (Tarif Lo-Lo, Storage & Integrasi ERP) [PIC: Daffa]
-├── 🎮 Panel Simulasi 3D Virtual Terminal (Three.js WebGL & Live Aksi) [✅ Selesai & Aktif - Zulfikar]
-└── ⚙️ Pengaturan Sistem (Hak Akses & Konfigurasi Basis Data)
+├── 💵 Billing & Faktur (Tarif Lo-Lo, Storage & Integrasi ERP) [PIC: Afriansayah]
+├── 🎮 Panel Simulasi 3D Virtual Terminal (Three.js WebGL & Live Aksi) [✅ Selesai & Aktif - Zulfikar & Armansyah]
+└── ⚙️ Pengaturan Sistem (Hak Akses & Konfigurasi Basis Data) [PIC: Zulfikar]
 ```
 
 ---
