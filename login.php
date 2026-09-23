@@ -56,7 +56,7 @@ if (isset($_POST['btn_login'])) {
 }
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="overflow-x-hidden">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -127,29 +127,29 @@ if (isset($_POST['btn_login'])) {
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-cdp-blue selection:text-white">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-cdp-blue selection:text-white overflow-x-hidden min-h-screen">
 
     <!-- =================================================================== -->
-    <!-- 1. BILAH NAVIGASI ATAS (Standar Cikarang Dry Port) -->
+    <!-- 1. BILAH NAVIGASI ATAS (Standar Cikarang Dry Port - Responsive & Balanced) -->
     <!-- =================================================================== -->
-    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-xs w-full">
-        <div class="w-full px-4 sm:px-6 lg:px-8 xl:px-12 2xl:px-16 py-3 lg:py-3.5 flex items-center justify-between gap-4">
+    <header class="bg-white border-b border-slate-200/80 sticky top-0 z-40 shadow-xs w-full">
+        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-4 w-full">
             
             <!-- LOGO MEREK: Conclusion Supply Chain Consultant (Sisi Kiri) -->
-            <a href="login.php" class="flex items-center space-x-3.5 group flex-shrink-0">
-                <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-10 h-10 lg:w-11 lg:h-11 object-contain transition-transform group-hover:scale-105">
+            <a href="login.php" class="flex items-center space-x-3 group shrink-0">
+                <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain transition-transform group-hover:scale-105">
                 <div>
-                    <div class="font-extrabold text-base sm:text-lg lg:text-xl text-cdp-navy tracking-tight leading-none">
+                    <div class="font-extrabold text-base sm:text-lg text-cdp-navy tracking-tight leading-none">
                         CONCLUSION
                     </div>
-                    <div class="text-[10px] lg:text-xs font-bold text-cdp-blue tracking-wider uppercase mt-0.5">
+                    <div class="text-[9px] sm:text-[10px] font-bold text-cdp-blue tracking-wider uppercase mt-0.5">
                         Supply Chain Consultant
                     </div>
                 </div>
             </a>
 
             <!-- TAUTAN MENU UTAMA (Tengah Layar / Centered) -->
-            <nav class="hidden lg:flex items-center justify-center space-x-6 xl:space-x-10 text-xs lg:text-sm font-bold text-slate-700 flex-1 px-4">
+            <nav class="hidden lg:flex items-center justify-center space-x-5 xl:space-x-8 text-xs font-bold text-slate-700">
                 <a href="#tentang" class="hover:text-cdp-blue transition whitespace-nowrap">Tentang Kami</a>
                 <a href="#fasilitas" class="hover:text-cdp-blue transition whitespace-nowrap">Fasilitas &amp; Solusi</a>
                 <a href="#tiga-alur" class="hover:text-cdp-blue transition whitespace-nowrap">3 Alur Operasional</a>
@@ -157,17 +157,20 @@ if (isset($_POST['btn_login'])) {
             </nav>
 
             <!-- BAGIAN KANAN: PENCARIAN & TOMBOL MASUK DEMO YMS (Sisi Kanan) -->
-            <div class="flex items-center space-x-3 lg:space-x-4 flex-shrink-0">
-                <div class="hidden sm:flex items-center bg-slate-100 rounded-full px-3.5 py-1.5 lg:py-2 border border-slate-200 text-xs lg:text-sm text-slate-500">
-                    <i class="fa-solid fa-magnifying-glass mr-2 text-slate-400"></i>
-                    <input type="text" placeholder="Masukkan No. Peti Kemas / B/L" class="bg-transparent border-none outline-none text-slate-700 w-44 lg:w-56 xl:w-64 text-xs lg:text-sm">
-                    <span class="bg-white px-2.5 py-0.5 rounded-full text-[10px] lg:text-xs font-bold text-slate-600 border ml-1 shadow-2xs">Peti Kemas</span>
+            <div class="flex items-center space-x-2.5 sm:space-x-3 shrink-0">
+                <!-- Search Bar (Hanya tampil di desktop lebar agar navbar tidak sesak) -->
+                <div class="hidden xl:flex items-center bg-slate-100 rounded-full px-3 py-1.5 border border-slate-200 text-xs text-slate-500">
+                    <i class="fa-solid fa-magnifying-glass mr-2 text-slate-400 text-xs"></i>
+                    <input type="text" placeholder="No. Peti Kemas / B/L" class="bg-transparent border-none outline-none text-slate-700 w-32 2xl:w-44 text-xs placeholder:text-slate-400">
+                    <span class="bg-white px-2 py-0.5 rounded-full text-[10px] font-bold text-slate-600 border ml-1 shadow-2xs">Peti Kemas</span>
                 </div>
 
+                <!-- Tombol Masuk Demo YMS -->
                 <button type="button" onclick="openLoginModal()" 
-                        class="bg-cdp-navy hover:bg-cdp-blue text-white px-4 py-2 lg:px-5 lg:py-2.5 rounded-lg text-xs lg:text-sm font-bold shadow-sm transition flex items-center space-x-2 flex-shrink-0">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                    <span>Masuk Demo YMS</span>
+                        class="bg-cdp-navy hover:bg-cdp-blue text-white px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg text-xs font-bold shadow-xs transition flex items-center space-x-2 shrink-0">
+                    <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                    <span class="hidden sm:inline">Masuk Demo YMS</span>
+                    <span class="sm:hidden">Masuk</span>
                 </button>
             </div>
 
@@ -177,132 +180,132 @@ if (isset($_POST['btn_login'])) {
     <!-- =================================================================== -->
     <!-- 2. CAROUSEL BANNER OTOMATIS BERGESER (SMOOTH DRY PORT SLIDER) -->
     <!-- =================================================================== -->
-    <section id="heroCarousel" class="relative overflow-hidden min-h-[580px] lg:min-h-[700px] xl:min-h-[780px] 2xl:min-h-[840px] bg-slate-900 text-white select-none flex items-center">
+    <section id="heroCarousel" class="relative overflow-hidden w-full min-h-[560px] lg:min-h-[640px] xl:min-h-[720px] bg-slate-900 text-white select-none flex items-center">
 
         <!-- SLIDE 1: Terminal Peti Kemas & Derek Gantry Pelabuhan Kering (Outdoor Dry Port) -->
-        <div class="carousel-slide active absolute inset-0 flex items-center justify-center text-center px-4 sm:px-6 lg:px-12 xl:px-16"
+        <div class="carousel-slide active absolute inset-0 w-full h-full flex items-center justify-center text-center px-4 sm:px-6 lg:px-8"
              style="background-image: linear-gradient(rgba(0, 47, 94, 0.78), rgba(0, 75, 135, 0.85)), url('https://images.unsplash.com/photo-1605371924599-2d0365da1ae0?auto=format&fit=crop&w=2000&q=80');">
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto space-y-5 lg:space-y-7 py-20 lg:py-28 xl:py-36">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-md text-xs lg:text-sm font-semibold text-blue-100 border border-white/20">
+            <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-blue-100 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span>Aplikasi Demonstrasi &bull; Prototipe Yard Management System (YMS)</span>
                 </div>
 
-                <h1 class="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-tight lg:leading-[1.15]">
+                <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
                     Simulasi Sistem Manajemen Lapangan Peti Kemas
                 </h1>
 
-                <p class="text-sm sm:text-base lg:text-lg xl:text-xl text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                     Terhubung melalui moda rel kereta api dan jalan raya, kami menyusun rekomendasi arsitektur pelabuhan kering modern. Aplikasi percontohan (demo) ini menyimulasikan integrasi perangkat keras IoT, pemetaan lapangan 3D, dan rekonsiliasi finansial ERP.
                 </p>
 
-                <div class="pt-3 lg:pt-5">
+                <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-8 py-3.5 lg:px-10 lg:py-4 rounded-lg text-xs sm:text-sm lg:text-base shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
+                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
                         <span>Uji Coba Demonstrasi YMS</span>
-                        <i class="fa-solid fa-arrow-right text-xs lg:text-sm"></i>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- SLIDE 2: Rel Kereta Api Logistik (KAI Logistik & Intermodal Siding) -->
-        <div class="carousel-slide inactive absolute inset-0 flex items-center justify-center text-center px-4 sm:px-6 lg:px-12 xl:px-16"
+        <div class="carousel-slide inactive absolute inset-0 w-full h-full flex items-center justify-center text-center px-4 sm:px-6 lg:px-8"
              style="background-image: linear-gradient(rgba(0, 47, 94, 0.78), rgba(0, 75, 135, 0.85)), url('https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=2000&q=80');">
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto space-y-5 lg:space-y-7 py-20 lg:py-28 xl:py-36">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-md text-xs lg:text-sm font-semibold text-cyan-200 border border-white/20">
+            <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-cyan-200 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
                     <span>Konektivitas Rel Kereta Api Antarmoda &bull; Double Track Siding</span>
                 </div>
 
-                <h1 class="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-tight lg:leading-[1.15]">
+                <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
                     Integrasi Angkutan Rel Peti Kemas Antarmoda
                 </h1>
 
-                <p class="text-sm sm:text-base lg:text-lg xl:text-xl text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                     Menghubungkan pusat kawasan industri langsung ke pelabuhan laut Tanjung Priok melalui jalur rel kereta api barang berkapasitas 30 hingga 60 TEUs per rangkaian untuk memangkas kongesti jalan raya.
                 </p>
 
-                <div class="pt-3 lg:pt-5">
+                <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-8 py-3.5 lg:px-10 lg:py-4 rounded-lg text-xs sm:text-sm lg:text-base shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
+                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
                         <span>Pelajari Solusi Antarmoda YMS</span>
-                        <i class="fa-solid fa-arrow-right text-xs lg:text-sm"></i>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- SLIDE 3: Penataan Lapangan Peti Kemas 3D & Alat Angkat Kalmar -->
-        <div class="carousel-slide inactive absolute inset-0 flex items-center justify-center text-center px-4 sm:px-6 lg:px-12 xl:px-16"
+        <div class="carousel-slide inactive absolute inset-0 w-full h-full flex items-center justify-center text-center px-4 sm:px-6 lg:px-8"
              style="background-image: linear-gradient(rgba(0, 47, 94, 0.78), rgba(0, 75, 135, 0.85)), url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=2000&q=80');">
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto space-y-5 lg:space-y-7 py-20 lg:py-28 xl:py-36">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-md text-xs lg:text-sm font-semibold text-amber-200 border border-white/20">
+            <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-amber-200 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
                     <span>Optimasi Penataan Lapangan &bull; Aturan Heaviest-on-Bottom</span>
                 </div>
 
-                <h1 class="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-tight lg:leading-[1.15]">
+                <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
                     Pemetaan Presisi Koordinat Blok, Bay, Row, dan Tier
                 </h1>
 
-                <p class="text-sm sm:text-base lg:text-lg xl:text-xl text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                     Mencegah pergeseran kontainer liar (*unproductive shuffling*) dengan pemetaan visual lapangan 3D dan sensor telemetri RTK pada alat angkat *reach stacker* Kalmar Gloria.
                 </p>
 
-                <div class="pt-3 lg:pt-5">
+                <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-8 py-3.5 lg:px-10 lg:py-4 rounded-lg text-xs sm:text-sm lg:text-base shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
+                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
                         <span>Simulasikan Penataan Lapangan</span>
-                        <i class="fa-solid fa-arrow-right text-xs lg:text-sm"></i>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
             </div>
         </div>
 
         <!-- SLIDE 4: Gerbang Cerdas OCR & Integrasi Penagihan Sistem ERP -->
-        <div class="carousel-slide inactive absolute inset-0 flex items-center justify-center text-center px-4 sm:px-6 lg:px-12 xl:px-16"
+        <div class="carousel-slide inactive absolute inset-0 w-full h-full flex items-center justify-center text-center px-4 sm:px-6 lg:px-8"
              style="background-image: linear-gradient(rgba(0, 47, 94, 0.78), rgba(0, 75, 135, 0.85)), url('https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=2000&q=80');">
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl 2xl:max-w-6xl mx-auto space-y-5 lg:space-y-7 py-20 lg:py-28 xl:py-36">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1.5 lg:px-4 lg:py-2 rounded-full bg-white/10 backdrop-blur-md text-xs lg:text-sm font-semibold text-emerald-200 border border-white/20">
+            <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-emerald-200 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span>Otomasi Gerbang Cerdas &bull; Rekonsiliasi Finansial ERP 100%</span>
                 </div>
 
-                <h1 class="text-3xl sm:text-5xl lg:text-6xl xl:text-7xl font-extrabold tracking-tight text-white leading-tight lg:leading-[1.15]">
+                <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
                     Otomasi Gerbang Masuk &amp; Integrasi Sistem ERP
                 </h1>
 
-                <p class="text-sm sm:text-base lg:text-lg xl:text-xl text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
                     Kamera OCR ISO 6346 dan jembatan timbang terintegrasi secara instan dengan modul akuntansi sistem ERP terpadu untuk menerbitkan faktur komersial otomatis tanpa potensi kebocoran pendapatan.
                 </p>
 
-                <div class="pt-3 lg:pt-5">
+                <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-8 py-3.5 lg:px-10 lg:py-4 rounded-lg text-xs sm:text-sm lg:text-base shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
+                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
                         <span>Eksplorasi Rekonsiliasi Finansial</span>
-                        <i class="fa-solid fa-arrow-right text-xs lg:text-sm"></i>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- TOMBOL NAVIGASI MANUAL KIRI & KANAN -->
+        <!-- TOMBOL NAVIGASI MANUAL KIRI & KANAN (SIMETRIS) -->
         <button type="button" onclick="prevSlide()" aria-label="Slide Sebelumnya"
-                class="absolute left-4 sm:left-8 xl:left-12 2xl:left-16 top-1/2 -translate-y-1/2 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-black/30 hover:bg-black/60 text-white flex items-center justify-center transition backdrop-blur-xs z-20">
-            <i class="fa-solid fa-chevron-left text-sm lg:text-lg"></i>
+                class="absolute left-3 sm:left-6 lg:left-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/30 hover:bg-black/60 text-white flex items-center justify-center transition backdrop-blur-xs z-20 shadow-md">
+            <i class="fa-solid fa-chevron-left text-xs sm:text-sm"></i>
         </button>
         <button type="button" onclick="nextSlide()" aria-label="Slide Berikutnya"
-                class="absolute right-4 sm:right-8 xl:right-12 2xl:right-16 top-1/2 -translate-y-1/2 w-11 h-11 lg:w-14 lg:h-14 rounded-full bg-black/30 hover:bg-black/60 text-white flex items-center justify-center transition backdrop-blur-xs z-20">
-            <i class="fa-solid fa-chevron-right text-sm lg:text-lg"></i>
+                class="absolute right-3 sm:right-6 lg:right-8 top-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-black/30 hover:bg-black/60 text-white flex items-center justify-center transition backdrop-blur-xs z-20 shadow-md">
+            <i class="fa-solid fa-chevron-right text-xs sm:text-sm"></i>
         </button>
 
-        <!-- INDIKATOR TITIK (DOTS) DI BAGIAN BAWAH CAROUSEL -->
-        <div class="absolute bottom-6 lg:bottom-10 left-1/2 -translate-x-1/2 flex items-center space-x-2.5 lg:space-x-3.5 z-20">
-            <button type="button" onclick="goToSlide(0)" class="dot-indicator active w-7 lg:w-9 h-2.5 lg:h-3 rounded-full bg-white transition-all"></button>
-            <button type="button" onclick="goToSlide(1)" class="dot-indicator w-2.5 lg:w-3 h-2.5 lg:h-3 rounded-full bg-white/50 hover:bg-white/80 transition-all"></button>
-            <button type="button" onclick="goToSlide(2)" class="dot-indicator w-2.5 lg:w-3 h-2.5 lg:h-3 rounded-full bg-white/50 hover:bg-white/80 transition-all"></button>
-            <button type="button" onclick="goToSlide(3)" class="dot-indicator w-2.5 lg:w-3 h-2.5 lg:h-3 rounded-full bg-white/50 hover:bg-white/80 transition-all"></button>
+        <!-- INDIKATOR TITIK (DOTS) DI BAGIAN BAWAH CAROUSEL (SIMETRIS) -->
+        <div class="absolute bottom-5 sm:bottom-8 left-1/2 -translate-x-1/2 flex items-center space-x-2 sm:space-x-3 z-20">
+            <button type="button" onclick="goToSlide(0)" class="dot-indicator active w-7 sm:w-8 h-2 sm:h-2.5 rounded-full bg-white transition-all"></button>
+            <button type="button" onclick="goToSlide(1)" class="dot-indicator w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/50 hover:bg-white/80 transition-all"></button>
+            <button type="button" onclick="goToSlide(2)" class="dot-indicator w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/50 hover:bg-white/80 transition-all"></button>
+            <button type="button" onclick="goToSlide(3)" class="dot-indicator w-2 sm:w-2.5 h-2 sm:h-2.5 rounded-full bg-white/50 hover:bg-white/80 transition-all"></button>
         </div>
 
     </section>
