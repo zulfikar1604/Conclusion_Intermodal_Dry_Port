@@ -73,7 +73,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - CIDP YMS</title>
+    <title>Simulation Project Conclusion</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     

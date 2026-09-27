@@ -521,15 +521,19 @@ foreach ($hardware_list as $item) {
 
     <!-- Tab Navigation -->
     <div class="bg-white rounded-xl p-1.5 border border-gray-100 shadow-xs flex flex-wrap gap-1">
-        <button onclick="switchGateTab('tab-simulasi')" id="btn-tab-simulasi" class="tab-btn flex-1 min-w-[160px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-bold transition-all text-[#0170b9] bg-blue-50/80 shadow-xs flex items-center justify-center space-x-2">
+        <button onclick="switchGateTab('tab-simulasi')" id="btn-tab-simulasi" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-bold transition-all text-[#0170b9] bg-blue-50/80 shadow-xs flex items-center justify-center space-x-2">
             <i class="fa-solid fa-microchip"></i>
             <span>Simulasi Alur Gate & Sensor</span>
         </button>
-        <button onclick="switchGateTab('tab-katalog')" id="btn-tab-katalog" class="tab-btn flex-1 min-w-[160px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+        <button onclick="switchGateTab('tab-ocr-iso')" id="btn-tab-ocr-iso" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-camera-retro"></i>
+            <span>Interactive OCR & ISO 6346</span>
+        </button>
+        <button onclick="switchGateTab('tab-katalog')" id="btn-tab-katalog" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-list-check"></i>
             <span>Katalog Hardware & BOM (26 Item)</span>
         </button>
-        <button onclick="switchGateTab('tab-telemetri')" id="btn-tab-telemetri" class="tab-btn flex-1 min-w-[160px] py-2.5 px-4 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+        <button onclick="switchGateTab('tab-telemetri')" id="btn-tab-telemetri" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-tower-broadcast"></i>
             <span>Telemetri IoT Lapangan</span>
         </button>
@@ -754,8 +758,12 @@ foreach ($hardware_list as $item) {
                         </div>
                     </div>
                     <div class="flex items-center space-x-2">
-                        <button onclick="printGatePass()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors">
+                        <button onclick="printGatePass()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors shadow-xs">
                             <i class="fa-solid fa-print mr-1"></i> Cetak Pass
+                        </button>
+                        <button onclick="openEdifactModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-xs">
+                            <i class="fa-solid fa-file-code"></i>
+                            <span>Dokumen EDIFACT CODECO</span>
                         </button>
                     </div>
                 </div>
@@ -819,6 +827,268 @@ foreach ($hardware_list as $item) {
                         </tr>
                     </tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- TAB: INTERACTIVE OCR & ISO 6346 CHECK DIGIT ENGINE -->
+    <!-- ======================================================================= -->
+    <div id="tab-ocr-iso" class="tab-content hidden space-y-6">
+        <!-- Banner Intro -->
+        <div class="bg-gradient-to-r from-[#002f5e] via-[#014d80] to-[#0170b9] rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div class="space-y-1.5">
+                <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-blue-400/20 border border-blue-300/30 text-xs font-mono text-blue-200">
+                    <i class="fa-solid fa-microchip"></i>
+                    <span>ISO 6346:1995 / BIC Standard Modulo 11</span>
+                </div>
+                <h2 class="text-xl font-bold tracking-tight">Portal Optical Character Recognition (OCR) & Check Digit Engine</h2>
+                <p class="text-xs text-blue-100 max-w-2xl">
+                    Simulasi 4-Camera OCR Gantry (Hikvision iDS-TCV300) yang membaca nomor kontainer, kode ukuran/tipe ISO, serta memvalidasi check digit secara matematis sebelum verifikasi Gate-In dry port.
+                </p>
+            </div>
+            <div class="flex items-center space-x-2 flex-shrink-0">
+                <button type="button" onclick="triggerOcrDoorScan()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-md flex items-center space-x-2">
+                    <i class="fa-solid fa-barcode"></i>
+                    <span>Scan OCR Otomatis</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Presets Selection Bar -->
+        <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+            <span class="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-3">
+                <i class="fa-solid fa-images mr-1.5 text-blue-600"></i>Pilih Sampel Kontainer Realistis (Dry Port Test Cases):
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                <button type="button" onclick="selectOcrPreset('MSKU')" id="preset-btn-MSKU" class="ocr-preset-btn p-3 rounded-xl border-2 border-blue-500 bg-blue-50/50 text-left transition-all hover:shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-blue-600 block uppercase">Maersk Line • 40HC</span>
+                        <span class="font-mono font-bold text-sm text-gray-900">MSKU 982145-8</span>
+                        <span class="text-[11px] text-gray-500 block">45G1 • 32.500 kg</span>
+                    </div>
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">Valid</span>
+                </button>
+                <button type="button" onclick="selectOcrPreset('ONEU')" id="preset-btn-ONEU" class="ocr-preset-btn p-3 rounded-xl border border-gray-200 bg-white text-left transition-all hover:shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-pink-600 block uppercase">Ocean Network Express • 40GP</span>
+                        <span class="font-mono font-bold text-sm text-gray-900">ONEU 661298-4</span>
+                        <span class="text-[11px] text-gray-500 block">42G1 • 30.480 kg</span>
+                    </div>
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">Valid</span>
+                </button>
+                <button type="button" onclick="selectOcrPreset('EMCU')" id="preset-btn-EMCU" class="ocr-preset-btn p-3 rounded-xl border border-gray-200 bg-white text-left transition-all hover:shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-emerald-600 block uppercase">Evergreen Marine • 20GP</span>
+                        <span class="font-mono font-bold text-sm text-gray-900">EMCU 551820-2</span>
+                        <span class="text-[11px] text-gray-500 block">22G1 • 24.000 kg</span>
+                    </div>
+                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[10px] font-bold rounded">Valid</span>
+                </button>
+                <button type="button" onclick="selectOcrPreset('INVALID')" id="preset-btn-INVALID" class="ocr-preset-btn p-3 rounded-xl border border-gray-200 bg-white text-left transition-all hover:shadow-xs flex items-center justify-between">
+                    <div>
+                        <span class="text-[10px] font-bold text-rose-600 block uppercase">Test Checksum Gagal</span>
+                        <span class="font-mono font-bold text-sm text-rose-700">MSKU 982145-3</span>
+                        <span class="text-[11px] text-gray-500 block">Digit Salah (Harusnya 8)</span>
+                    </div>
+                    <span class="px-2 py-0.5 bg-rose-100 text-rose-700 text-[10px] font-bold rounded">Invalid</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Main OCR Visualizer & Calculation Engine Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <!-- Left: Simulated Container Door & Camera Detection (5 cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 text-white shadow-sm relative overflow-hidden">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                            <span class="text-xs font-mono font-bold text-slate-300">CAM-02: REAR DOOR OCR GANTRY</span>
+                        </div>
+                        <span id="ocr-fps-tag" class="text-[10px] font-mono text-slate-400">1080P @ 30 FPS • HDR ON</span>
+                    </div>
+
+                    <!-- Visual Container Door Box Graphic -->
+                    <div class="relative w-full aspect-[4/3] bg-gradient-to-b from-slate-800 to-slate-850 rounded-xl border-2 border-slate-700 p-4 flex flex-col justify-between overflow-hidden shadow-inner">
+                        <!-- Scanning Line Animation -->
+                        <div id="ocr-scanline" class="absolute left-0 right-0 h-1 bg-gradient-to-r from-transparent via-cyan-400 to-transparent shadow-[0_0_12px_#38bdf8] opacity-0 transition-opacity duration-300 pointer-events-none z-20 top-0"></div>
+
+                        <!-- Top Door Hinges & Corrugation Effect -->
+                        <div class="flex justify-between items-center text-slate-500 text-[11px] px-2 border-b border-slate-700/60 pb-1">
+                            <span><i class="fa-solid fa-lock"></i> LOCK BAR L</span>
+                            <span class="text-[10px] font-mono text-slate-400" id="door-seal-tag">SEAL: ML-ID992810</span>
+                            <span>LOCK BAR R <i class="fa-solid fa-lock"></i></span>
+                        </div>
+
+                        <!-- Container Identification Decal Graphic -->
+                        <div class="my-auto text-right space-y-1 pr-3">
+                            <!-- Bounding Box Container Number -->
+                            <div id="bbox-container" class="inline-block p-1.5 border-2 border-dashed border-emerald-400 bg-emerald-950/40 rounded transition-all">
+                                <div class="text-[9px] font-mono text-emerald-300 text-left">OCR CONF: 99.6% [BOX-ID]</div>
+                                <div id="door-container-no" class="font-mono text-2xl sm:text-3xl font-black tracking-widest text-white drop-shadow">
+                                    MSKU 982145<span class="ml-1 px-1 border border-white/40 bg-white/10 rounded">8</span>
+                                </div>
+                            </div>
+
+                            <!-- Bounding Box Size Type -->
+                            <div class="block">
+                                <div id="bbox-sizetype" class="inline-block p-1 border border-dashed border-cyan-400 bg-cyan-950/40 rounded mt-1">
+                                    <span class="text-[9px] font-mono text-cyan-300 mr-2">SIZE/TYPE:</span>
+                                    <span id="door-sizetype" class="font-mono text-sm font-bold text-cyan-200">45G1</span>
+                                </div>
+                            </div>
+
+                            <!-- Weight Specifications Stencil -->
+                            <div class="pt-2 text-[10px] sm:text-[11px] font-mono text-slate-300 space-y-0.5">
+                                <div>MAX. GROSS: <span id="door-max-gross" class="font-bold text-white">32.500 KG / 71.650 LBS</span></div>
+                                <div>TARE WT: <span id="door-tare" class="font-bold text-white">3.900 KG / 8.598 LBS</span></div>
+                                <div>NET / PAYLOAD: <span id="door-payload" class="font-bold text-white">28.600 KG / 63.052 LBS</span></div>
+                                <div>MAX CUBE: <span id="door-cube" class="font-bold text-white">76.4 CU.M / 2.700 CU.FT</span></div>
+                            </div>
+                        </div>
+
+                        <!-- CSC Safety Approval Plate & Barcode at bottom -->
+                        <div class="flex items-center justify-between border-t border-slate-700/60 pt-2 text-slate-400 text-[10px]">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-1.5 py-0.5 bg-slate-800 border border-slate-600 rounded font-mono text-slate-300">CSC APPROVED</span>
+                                <span class="font-mono text-slate-400">BV-IND-2024</span>
+                            </div>
+                            <div class="font-mono text-slate-400 flex items-center space-x-1">
+                                <i class="fa-solid fa-barcode text-sm"></i>
+                                <span id="door-bottom-code">MSKU9821458</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- OCR Engine Status Footer -->
+                    <div class="mt-4 grid grid-cols-2 gap-3 text-xs font-mono">
+                        <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
+                            <span class="text-slate-400 block text-[10px]">RECOGNITION LATENCY</span>
+                            <span id="ocr-latency-val" class="font-bold text-emerald-400 text-sm">184 ms</span>
+                            <span class="text-[10px] text-slate-500 block">TensorRT Inference</span>
+                        </div>
+                        <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
+                            <span class="text-slate-400 block text-[10px]">OVERALL CONFIDENCE</span>
+                            <span id="ocr-overall-conf" class="font-bold text-emerald-400 text-sm">99.4%</span>
+                            <span class="text-[10px] text-slate-500 block">4/4 Cameras Voted</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Fast Actions -->
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
+                    <button type="button" onclick="transferOcrToGateLane()" class="w-full py-2.5 px-4 bg-[#002f5e] hover:bg-[#0170b9] text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 shadow-xs">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                        <span>Kirim Kontainer ke Inbound Gate Lane 1</span>
+                    </button>
+                    <button type="button" onclick="openEdifactModalCurrent()" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-file-invoice"></i>
+                        <span>Generate UN/EDIFACT CODECO</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right: ISO 6346 Mathematical Check Digit Engine (7 cols) -->
+            <div class="lg:col-span-7 space-y-4">
+                <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4 mb-4">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-900 flex items-center">
+                                <i class="fa-solid fa-calculator text-[#0170b9] mr-2"></i>
+                                Kalkulator Standar ISO 6346 & Check Digit
+                            </h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Validasi matematis algoritma modulus 11 dengan pembobotan eksponensial 2^i</p>
+                        </div>
+                        <span id="iso-badge-status" class="px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs self-start sm:self-auto flex items-center space-x-1">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span id="iso-badge-text">VALID ISO 6346</span>
+                        </span>
+                    </div>
+
+                    <!-- Interactive Input Field -->
+                    <div class="space-y-2 mb-5">
+                        <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">
+                            Nomor Kontainer (10 atau 11 Karakter):
+                        </label>
+                        <div class="flex gap-2">
+                            <div class="relative flex-1">
+                                <input type="text" id="iso-input-container" value="MSKU9821458" maxlength="11" oninput="handleContainerInput(this.value)" class="w-full px-4 py-2.5 rounded-xl border border-gray-300 font-mono text-base font-bold uppercase tracking-wider text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none uppercase" placeholder="Contoh: MSKU9821458">
+                                <span class="absolute right-3 top-2.5 text-xs font-mono text-gray-400" id="iso-char-count">11/11</span>
+                            </div>
+                            <button type="button" onclick="selectOcrPreset('MSKU')" class="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs rounded-xl transition-colors">
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Breakdown Badges -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mb-5 text-center">
+                        <div class="bg-blue-50/70 border border-blue-100 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-blue-600 uppercase block">Owner Prefix</span>
+                            <span id="iso-owner-code" class="font-mono font-bold text-sm text-gray-900">MSK</span>
+                            <span id="iso-owner-name" class="text-[10px] text-gray-500 block truncate">Maersk Line</span>
+                        </div>
+                        <div class="bg-indigo-50/70 border border-indigo-100 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-indigo-600 uppercase block">Category Identifier</span>
+                            <span id="iso-cat-code" class="font-mono font-bold text-sm text-gray-900">U</span>
+                            <span class="text-[10px] text-gray-500 block">Freight Container</span>
+                        </div>
+                        <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-slate-600 uppercase block">Serial Number</span>
+                            <span id="iso-serial-code" class="font-mono font-bold text-sm text-gray-900">982145</span>
+                            <span class="text-[10px] text-gray-500 block">6 Digit Unik</span>
+                        </div>
+                        <div id="iso-check-box" class="bg-emerald-50 border border-emerald-200 rounded-xl p-2.5">
+                            <span class="text-[10px] font-bold text-emerald-700 uppercase block">Check Digit</span>
+                            <span id="iso-check-digit" class="font-mono font-extrabold text-sm text-emerald-700">8</span>
+                            <span id="iso-check-sub" class="text-[10px] text-emerald-600 font-semibold block">Cocok (Rem 8)</span>
+                        </div>
+                    </div>
+
+                    <!-- Mathematical Step-by-Step Table -->
+                    <div class="border border-gray-100 rounded-xl overflow-hidden mb-4">
+                        <div class="bg-slate-50 px-3.5 py-2 border-b border-gray-200 flex items-center justify-between">
+                            <span class="text-xs font-bold text-gray-700">Tabel Kalkulasi Modulo 11 Langkah Demi Langkah</span>
+                            <span class="text-[11px] text-gray-500 font-mono">Rumus: &sum; (Nilai &times; 2<sup>i</sup>) mod 11</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-64 overflow-y-auto">
+                            <table class="w-full text-xs text-left">
+                                <thead class="bg-slate-100 text-gray-600 font-semibold uppercase tracking-wider text-[10px] sticky top-0">
+                                    <tr>
+                                        <th class="py-2 px-3 text-center">Pos (i)</th>
+                                        <th class="py-2 px-3 text-center">Karakter</th>
+                                        <th class="py-2 px-3 text-center">Nilai Karakter</th>
+                                        <th class="py-2 px-3 text-center">Bobot (2<sup>i</sup>)</th>
+                                        <th class="py-2 px-3 text-right">Hasil Kali</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="iso-calc-tbody" class="divide-y divide-gray-100 font-mono">
+                                    <!-- Populated via JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Modulo 11 Summary Result Panel -->
+                    <div id="iso-calc-summary" class="bg-slate-50 border border-slate-200 rounded-xl p-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                        <div class="space-y-1 text-center sm:text-left">
+                            <div class="text-xs text-gray-600">
+                                Total Penjumlahan Bobot (&sum; Produk): <span id="iso-sum-total" class="font-mono font-bold text-gray-900 text-sm">4958</span>
+                            </div>
+                            <div class="text-xs text-gray-600">
+                                Sisa Bagi Modulo 11: <span id="iso-mod-formula" class="font-mono font-semibold text-blue-700">4958 mod 11 = 8</span>
+                            </div>
+                            <div class="text-[11px] text-gray-500 italic">
+                                *Catatan ISO 6346: Jika sisa bagi adalah 10, digit pemeriksa ditetapkan menjadi 0.
+                            </div>
+                        </div>
+                        <div id="iso-verdict-card" class="bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-center shadow-xs flex-shrink-0 min-w-[140px]">
+                            <span class="text-[10px] uppercase font-bold block opacity-90">Hasil Verifikasi</span>
+                            <span id="iso-verdict-text" class="text-base font-black tracking-wide">VALID PASS</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -1118,6 +1388,92 @@ foreach ($hardware_list as $item) {
     </div>
 </div>
 
+<!-- ======================================================================= -->
+<!-- MODAL: UN/EDIFACT CODECO (Container Gate-In/Out Report) -->
+<!-- ======================================================================= -->
+<div id="edifactModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
+    <div class="bg-white rounded-2xl max-w-4xl w-full border border-gray-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="bg-[#002f5e] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-lg">
+                    <i class="fa-solid fa-file-code"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold tracking-tight">UN/EDIFACT CODECO (D.95B Standard SMDG)</h3>
+                    <p class="text-xs text-blue-200">Container Gate-In / Gate-Out Electronic Data Interchange Transmission</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeEdifactModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 overflow-y-auto space-y-4">
+            <!-- Metadata Strip -->
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="text-[10px] text-gray-500 uppercase font-bold block">Interchange Sender</span>
+                    <span class="text-xs font-mono font-bold text-gray-900">CIDP_YMS</span>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="text-[10px] text-gray-500 uppercase font-bold block">Interchange Receiver</span>
+                    <span id="edi-receiver-tag" class="text-xs font-mono font-bold text-gray-900">MAERSK_LINE</span>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="text-[10px] text-gray-500 uppercase font-bold block">Document Type</span>
+                    <span class="text-xs font-mono font-bold text-blue-700">CODECO (Gate-In: BGM+34)</span>
+                </div>
+                <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                    <span class="text-[10px] text-gray-500 uppercase font-bold block">Format Standard</span>
+                    <span class="text-xs font-mono font-bold text-emerald-700">UN/EDIFACT D.95B</span>
+                </div>
+            </div>
+
+            <!-- Monospace EDIFACT Message Preview -->
+            <div class="relative bg-slate-950 rounded-xl p-4 border border-slate-800 shadow-inner">
+                <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px] font-mono text-slate-400">
+                    <span>TRANSMISSION BUFFER: CODECO_PAYLOAD.EDI</span>
+                    <span class="text-emerald-400">SYNTAX 2 • SEGMENT TERM (')</span>
+                </div>
+                <pre id="edifact-raw-text" class="font-mono text-xs text-emerald-300 leading-relaxed overflow-x-auto whitespace-pre selection:bg-blue-600 selection:text-white max-h-64"></pre>
+            </div>
+
+            <!-- Segment Legend & Technical Explanation -->
+            <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-4 text-xs space-y-2">
+                <h4 class="font-bold text-gray-900 flex items-center">
+                    <i class="fa-solid fa-circle-info text-blue-600 mr-1.5"></i>
+                    Struktur Segmen Standar SMDG CODECO D.95B:
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-[11px] text-gray-600 font-mono">
+                    <div><b class="text-blue-800 font-bold">UNA:+.? '</b> — Service String Advice (delimiter format)</div>
+                    <div><b class="text-blue-800 font-bold">UNB+UNOA:2</b> — Interchange Header (Sender, Receiver, Jam)</div>
+                    <div><b class="text-blue-800 font-bold">BGM+34</b> — 34 = Gate In Confirmation Report</div>
+                    <div><b class="text-blue-800 font-bold">TDT+20</b> — Inland Truck Details & Nomor Polisi</div>
+                    <div><b class="text-blue-800 font-bold">EQD+CN</b> — Equipment Details (No Kontainer & Tipe ISO)</div>
+                    <div><b class="text-blue-800 font-bold">MEA+WT</b> — Measurement (Verified Gross Mass / VGM SOLAS)</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="bg-gray-50 px-6 py-4 border-t border-gray-200 flex flex-col sm:flex-row items-center justify-between gap-3 flex-shrink-0">
+            <span class="text-xs text-gray-500">Kompatibel dengan Navis N4, Pelindo TOS, dan Ocean Carrier Shipping EDI Gateway.</span>
+            <div class="flex items-center space-x-2">
+                <button type="button" onclick="copyEdifactText()" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold rounded-xl text-xs transition-colors flex items-center space-x-1.5">
+                    <i class="fa-regular fa-copy"></i>
+                    <span id="copy-edi-btn-text">Salin Pesan EDI</span>
+                </button>
+                <button type="button" onclick="downloadEdifactFile()" class="px-4 py-2 bg-[#0170b9] hover:bg-[#002f5e] text-white font-bold rounded-xl text-xs transition-colors flex items-center space-x-1.5 shadow-sm">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Unduh File (.edi)</span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- JavaScript Interaktif Modul Gate -->
 <script>
 // Tab Switching Logic
@@ -1354,4 +1710,403 @@ function searchHardwareTable() {
         }
     });
 }
+
+// ===========================================================================
+// OCR ENGINE & ISO 6346 CHECK DIGIT JAVASCRIPT
+// ===========================================================================
+const ISO_LETTER_VALUES = {
+    'A': 10, 'B': 12, 'C': 13, 'D': 14, 'E': 15, 'F': 16, 'G': 17, 'H': 18, 'I': 19, 'J': 20,
+    'K': 21, 'L': 23, 'M': 24, 'N': 25, 'O': 26, 'P': 27, 'Q': 28, 'R': 29, 'S': 30, 'T': 31,
+    'U': 32, 'V': 34, 'W': 35, 'X': 36, 'Y': 37, 'Z': 38
+};
+
+const ocrPresetsData = {
+    'MSKU': {
+        code: 'MSKU9821450',
+        displayMain: 'MSKU 982145',
+        checkDigit: '0',
+        sizeType: '45G1',
+        owner: 'MSK',
+        ownerName: 'Maersk Line A/S',
+        category: 'U',
+        serial: '982145',
+        maxGross: '32.500 KG / 71.650 LBS',
+        tare: '3.900 KG / 8.598 LBS',
+        payload: '28.600 KG / 63.052 LBS',
+        cube: '76.4 CU.M / 2.700 CU.FT',
+        seal: 'SEAL: ML-ID992810',
+        plate: 'B 9812 UIK',
+        weight: '32.450 kg',
+        receiver: 'MAERSK_LINE',
+        yardLoc: 'Block B - Bay 04 - Row 02'
+    },
+    'ONEU': {
+        code: 'ONEU6612988',
+        displayMain: 'ONEU 661298',
+        checkDigit: '8',
+        sizeType: '42G1',
+        owner: 'ONE',
+        ownerName: 'Ocean Network Express',
+        category: 'U',
+        serial: '661298',
+        maxGross: '30.480 KG / 67.200 LBS',
+        tare: '3.820 KG / 8.420 LBS',
+        payload: '26.660 KG / 58.780 LBS',
+        cube: '67.7 CU.M / 2.390 CU.FT',
+        seal: 'SEAL: ONE-JKT88120',
+        plate: 'B 9144 PXT',
+        weight: '24.120 kg',
+        receiver: 'OCEAN_NETWORK_EXPRESS',
+        yardLoc: 'Reefer Yard - Block R02 - Plug 14'
+    },
+    'EMCU': {
+        code: 'EMCU5518200',
+        displayMain: 'EMCU 551820',
+        checkDigit: '0',
+        sizeType: '22G1',
+        owner: 'EMC',
+        ownerName: 'Evergreen Marine Corp',
+        category: 'U',
+        serial: '551820',
+        maxGross: '24.000 KG / 52.910 LBS',
+        tare: '2.280 KG / 5.026 LBS',
+        payload: '21.720 KG / 47.884 LBS',
+        cube: '33.2 CU.M / 1.172 CU.FT',
+        seal: 'SEAL: EMC-TW77192',
+        plate: 'B 9033 BAA',
+        weight: '21.800 kg',
+        receiver: 'EVERGREEN_LINE',
+        yardLoc: 'Block A - Bay 02 - Row 01'
+    },
+    'INVALID': {
+        code: 'MSKU9821453',
+        displayMain: 'MSKU 982145',
+        checkDigit: '3',
+        sizeType: '45G1',
+        owner: 'MSK',
+        ownerName: 'Maersk Line A/S',
+        category: 'U',
+        serial: '982145',
+        maxGross: '32.500 KG / 71.650 LBS',
+        tare: '3.900 KG / 8.598 LBS',
+        payload: '28.600 KG / 63.052 LBS',
+        cube: '76.4 CU.M / 2.700 CU.FT',
+        seal: 'SEAL: ML-ID992810',
+        plate: 'B 9812 UIK',
+        weight: '32.450 kg',
+        receiver: 'MAERSK_LINE',
+        yardLoc: 'Area Behandle / Bea Cukai'
+    }
+};
+
+let activePresetKey = 'MSKU';
+
+function getIsoCharValue(ch) {
+    ch = ch.toUpperCase();
+    if (ch >= '0' && ch <= '9') return parseInt(ch, 10);
+    return ISO_LETTER_VALUES[ch] !== undefined ? ISO_LETTER_VALUES[ch] : 0;
+}
+
+function handleContainerInput(val) {
+    const clean = val.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    document.getElementById('iso-input-container').value = clean;
+    document.getElementById('iso-char-count').textContent = clean.length + '/11';
+    recalculateISO(clean);
+}
+
+function recalculateISO(code) {
+    const tbody = document.getElementById('iso-calc-tbody');
+    tbody.innerHTML = '';
+
+    const ownerCodeEl = document.getElementById('iso-owner-code');
+    const ownerNameEl = document.getElementById('iso-owner-name');
+    const catCodeEl = document.getElementById('iso-cat-code');
+    const serialCodeEl = document.getElementById('iso-serial-code');
+    const checkDigitEl = document.getElementById('iso-check-digit');
+    const checkSubEl = document.getElementById('iso-check-sub');
+    const checkBoxEl = document.getElementById('iso-check-box');
+    const badgeStatus = document.getElementById('iso-badge-status');
+    const badgeText = document.getElementById('iso-badge-text');
+    const sumTotalEl = document.getElementById('iso-sum-total');
+    const modFormulaEl = document.getElementById('iso-mod-formula');
+    const verdictCard = document.getElementById('iso-verdict-card');
+    const verdictText = document.getElementById('iso-verdict-text');
+
+    if (!code || code.length < 4) {
+        ownerCodeEl.textContent = '---';
+        ownerNameEl.textContent = 'Menunggu Input';
+        catCodeEl.textContent = '-';
+        serialCodeEl.textContent = '------';
+        checkDigitEl.textContent = '-';
+        checkSubEl.textContent = 'Belum Lengkap';
+        sumTotalEl.textContent = '0';
+        modFormulaEl.textContent = '-';
+        return;
+    }
+
+    const owner = code.substring(0, 3);
+    ownerCodeEl.textContent = owner;
+    
+    // Lookup owner name
+    const ownerDirectory = {
+        'MSK': 'Maersk Line A/S',
+        'ONE': 'Ocean Network Express',
+        'EMC': 'Evergreen Marine',
+        'TCK': 'Trans Capital Korea',
+        'CMA': 'CMA CGM Group',
+        'HLC': 'Hapag-Lloyd AG',
+        'COS': 'COSCO Shipping',
+        'MSC': 'Mediterranean Shipping Co'
+    };
+    ownerNameEl.textContent = ownerDirectory[owner] || 'International BIC Owner';
+
+    const cat = code.length >= 4 ? code[3] : '-';
+    catCodeEl.textContent = cat;
+
+    const serial = code.length >= 10 ? code.substring(4, 10) : (code.length > 4 ? code.substring(4) : '------');
+    serialCodeEl.textContent = serial;
+
+    // Check calculation
+    let totalSum = 0;
+    const calcLen = Math.min(code.length, 10);
+
+    for (let i = 0; i < calcLen; i++) {
+        const char = code[i];
+        const val = getIsoCharValue(char);
+        const weight = Math.pow(2, i);
+        const product = val * weight;
+        totalSum += product;
+
+        const tr = document.createElement('tr');
+        tr.className = "hover:bg-slate-50 transition-colors";
+        tr.innerHTML = `
+            <td class="py-1.5 px-3 text-center text-gray-400 font-bold">${i}</td>
+            <td class="py-1.5 px-3 text-center font-bold text-gray-900 bg-slate-50/50">${char}</td>
+            <td class="py-1.5 px-3 text-center text-blue-600">${val}</td>
+            <td class="py-1.5 px-3 text-center text-gray-500">2<sup>${i}</sup> = ${weight}</td>
+            <td class="py-1.5 px-3 text-right font-bold text-gray-800">${product.toLocaleString()}</td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    sumTotalEl.textContent = totalSum.toLocaleString();
+
+    if (code.length >= 10) {
+        const rem = totalSum % 11;
+        const expectedCheck = (rem === 10) ? 0 : rem;
+        modFormulaEl.textContent = `${totalSum.toLocaleString()} mod 11 = ${rem} (Harusnya: ${expectedCheck})`;
+
+        if (code.length >= 11) {
+            const actualCheck = parseInt(code[10], 10);
+            checkDigitEl.textContent = actualCheck;
+
+            if (actualCheck === expectedCheck) {
+                // Match
+                badgeStatus.className = "px-3 py-1 bg-emerald-100 text-emerald-800 rounded-full font-bold text-xs self-start sm:self-auto flex items-center space-x-1";
+                badgeStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i><span id="iso-badge-text">VALID ISO 6346</span>';
+                checkBoxEl.className = "bg-emerald-50 border border-emerald-200 rounded-xl p-2.5";
+                checkDigitEl.className = "font-mono font-extrabold text-sm text-emerald-700";
+                checkSubEl.className = "text-[10px] text-emerald-600 font-semibold block";
+                checkSubEl.textContent = `Cocok (Rem: ${expectedCheck})`;
+
+                verdictCard.className = "bg-emerald-500 text-white px-4 py-2.5 rounded-xl text-center shadow-xs flex-shrink-0 min-w-[140px]";
+                verdictText.textContent = "VALID PASS";
+            } else {
+                // Mismatch
+                badgeStatus.className = "px-3 py-1 bg-rose-100 text-rose-800 rounded-full font-bold text-xs self-start sm:self-auto flex items-center space-x-1";
+                badgeStatus.innerHTML = '<i class="fa-solid fa-circle-xmark"></i><span id="iso-badge-text">CHECKSUM GAGAL</span>';
+                checkBoxEl.className = "bg-rose-50 border border-rose-200 rounded-xl p-2.5";
+                checkDigitEl.className = "font-mono font-extrabold text-sm text-rose-700";
+                checkSubEl.className = "text-[10px] text-rose-600 font-semibold block";
+                checkSubEl.textContent = `Salah! Sisa bagi: ${expectedCheck}`;
+
+                verdictCard.className = "bg-rose-600 text-white px-4 py-2.5 rounded-xl text-center shadow-xs flex-shrink-0 min-w-[140px]";
+                verdictText.textContent = "MISMATCH (GAGAL)";
+            }
+        } else {
+            checkDigitEl.textContent = expectedCheck + ' (Estimasi)';
+            checkSubEl.textContent = 'Digit ke-11 Belum Diisi';
+        }
+    } else {
+        modFormulaEl.textContent = 'Minimal 10 karakter untuk hitung modulo 11';
+    }
+}
+
+function selectOcrPreset(key) {
+    activePresetKey = key;
+    const preset = ocrPresetsData[key];
+    if (!preset) return;
+
+    // Update preset buttons styling
+    document.querySelectorAll('.ocr-preset-btn').forEach(btn => {
+        btn.classList.remove('border-2', 'border-blue-500', 'bg-blue-50/50');
+        btn.classList.add('border', 'border-gray-200', 'bg-white');
+    });
+    const currentBtn = document.getElementById('preset-btn-' + key);
+    if (currentBtn) {
+        currentBtn.classList.remove('border', 'border-gray-200', 'bg-white');
+        currentBtn.classList.add('border-2', 'border-blue-500', 'bg-blue-50/50');
+    }
+
+    // Update Door Graphics
+    document.getElementById('door-container-no').innerHTML = `${preset.displayMain}<span class="ml-1 px-1 border border-white/40 bg-white/10 rounded">${preset.checkDigit}</span>`;
+    document.getElementById('door-sizetype').textContent = preset.sizeType;
+    document.getElementById('door-max-gross').textContent = preset.maxGross;
+    document.getElementById('door-tare').textContent = preset.tare;
+    document.getElementById('door-payload').textContent = preset.payload;
+    document.getElementById('door-cube').textContent = preset.cube;
+    document.getElementById('door-seal-tag').textContent = preset.seal;
+    document.getElementById('door-bottom-code').textContent = preset.code;
+
+    // Trigger OCR Input
+    document.getElementById('iso-input-container').value = preset.code;
+    document.getElementById('iso-char-count').textContent = preset.code.length + '/11';
+    recalculateISO(preset.code);
+
+    triggerOcrDoorScan();
+}
+
+function triggerOcrDoorScan() {
+    const scanline = document.getElementById('ocr-scanline');
+    const confTag = document.getElementById('ocr-overall-conf');
+    const latencyTag = document.getElementById('ocr-latency-val');
+    const bbox = document.getElementById('bbox-container');
+
+    // Animasi scanline
+    scanline.style.opacity = '1';
+    scanline.style.top = '0%';
+    scanline.style.transition = 'top 0.6s ease-in-out, opacity 0.3s ease';
+
+    setTimeout(() => {
+        scanline.style.top = '100%';
+    }, 50);
+
+    setTimeout(() => {
+        scanline.style.opacity = '0';
+        scanline.style.top = '0%';
+    }, 700);
+
+    // Randomize telemetry
+    const latency = Math.floor(Math.random() * 40) + 165;
+    const conf = (99.1 + Math.random() * 0.7).toFixed(1);
+    if (latencyTag) latencyTag.textContent = latency + ' ms';
+    if (confTag) confTag.textContent = conf + '%';
+
+    // Bbox highlight
+    if (bbox) {
+        bbox.classList.add('ring-4', 'ring-emerald-400');
+        setTimeout(() => bbox.classList.remove('ring-4', 'ring-emerald-400'), 500);
+    }
+}
+
+function transferOcrToGateLane() {
+    const preset = ocrPresetsData[activePresetKey] || ocrPresetsData['MSKU'];
+    const currentCode = document.getElementById('iso-input-container').value;
+
+    // Update Skenario 1 dengan data OCR terkini
+    scenarios[1].container = currentCode.length === 11 
+        ? currentCode.substring(0, 4) + ' ' + currentCode.substring(4, 10) + '-' + currentCode[10] 
+        : currentCode;
+    scenarios[1].plate = preset.plate;
+    scenarios[1].weight = preset.weight;
+    scenarios[1].yardLoc = preset.yardLoc;
+
+    // Pindah ke tab simulasi dan jalankan
+    switchGateTab('tab-simulasi');
+    
+    // Pilih skenario 1
+    const radio1 = document.querySelector('input[name="sim-scenario"][value="1"]');
+    if (radio1) radio1.checked = true;
+    selectScenario(1);
+
+    // Otomatis picu simulasi gate inbound
+    setTimeout(() => {
+        runGateSimulation();
+    }, 300);
+}
+
+// ===========================================================================
+// UN/EDIFACT CODECO ENGINE JAVASCRIPT
+// ===========================================================================
+let currentEdifactPayload = "";
+
+function generateEdifactCodecoString(preset) {
+    const now = new Date();
+    const ymd = now.getFullYear().toString() + 
+                String(now.getMonth() + 1).padStart(2, '0') + 
+                String(now.getDate()).padStart(2, '0');
+    const hm = String(now.getHours()).padStart(2, '0') + String(now.getMinutes()).padStart(2, '0');
+    const refNum = 'CIDP' + ymd + hm;
+    const cleanPlate = (preset.plate || 'B9812UIK').replace(/\s+/g, '');
+    const cleanWeight = (preset.weight || '32.450 kg').replace(/[^0-9]/g, '');
+
+    return `UNA:+.? '
+UNB+UNOA:2+CIDP_DRY_PORT+${preset.receiver || 'MAERSK_LINE'}+${ymd}:${hm}+${refNum}'
+BGM+34+GP-${ymd}-0042+9'
+TDT+20++1++TRUCK:CIDP_GATE+${cleanPlate}'
+RFF+SI:CIDP-SI-${ymd}'
+NAD+CF+${preset.owner || 'MSK'}:172:20'
+EQD+CN+${preset.code}+${preset.sizeType}:102:5++2+5'
+MEA+WT++KGM:${cleanWeight}'
+SEL+${preset.seal.replace('SEAL: ', '')}+CA'
+UNT+9+${refNum}'
+UNZ+1+${refNum}'`;
+}
+
+function openEdifactModal(customPreset) {
+    const preset = customPreset || ocrPresetsData[activePresetKey] || ocrPresetsData['MSKU'];
+    currentEdifactPayload = generateEdifactCodecoString(preset);
+
+    const rawPre = document.getElementById('edifact-raw-text');
+    const recvTag = document.getElementById('edi-receiver-tag');
+    if (rawPre) rawPre.textContent = currentEdifactPayload;
+    if (recvTag) recvTag.textContent = preset.receiver || 'MAERSK_LINE';
+
+    const modal = document.getElementById('edifactModal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function openEdifactModalCurrent() {
+    openEdifactModal(ocrPresetsData[activePresetKey]);
+}
+
+function closeEdifactModal() {
+    const modal = document.getElementById('edifactModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function copyEdifactText() {
+    if (!currentEdifactPayload) return;
+    navigator.clipboard.writeText(currentEdifactPayload).then(() => {
+        const btnText = document.getElementById('copy-edi-btn-text');
+        if (btnText) {
+            btnText.textContent = "Tersalin ke Clipboard!";
+            setTimeout(() => {
+                btnText.textContent = "Salin Pesan EDI";
+            }, 2000);
+        }
+    }).catch(err => {
+        alert("Pesan EDIFACT:\n\n" + currentEdifactPayload);
+    });
+}
+
+function downloadEdifactFile() {
+    if (!currentEdifactPayload) return;
+    const preset = ocrPresetsData[activePresetKey] || ocrPresetsData['MSKU'];
+    const filename = `CODECO_${preset.code}.edi`;
+    const blob = new Blob([currentEdifactPayload], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+// Inisialisasi awal saat load
+document.addEventListener('DOMContentLoaded', () => {
+    recalculateISO('MSKU9821450');
+});
 </script>

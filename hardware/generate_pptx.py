@@ -30,7 +30,7 @@ def create_presentation():
     C_GREEN_BG = RGBColor(236, 253, 245)
     C_BLUE_BG = RGBColor(239, 246, 255)
 
-    def add_header(slide, title_text, category_text="CONCLUSION INTERMODAL DRY PORT (CIDP) 35 HA"):
+    def add_header(slide, title_text, category_text="TOPIK 7: INLAND CONTAINER DEPOT (ICD) & DRY PORT MANAGEMENT"):
         header_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.4), Inches(11.7), Inches(1.1))
         tf = header_box.text_frame
         tf.word_wrap = True
@@ -55,7 +55,7 @@ def create_presentation():
         tf.word_wrap = True
         tf.margin_left = tf.margin_top = tf.margin_right = tf.margin_bottom = 0
         p = tf.paragraphs[0]
-        p.text = f"Armansyah Muchtarrom — Hardware & Infrastructure Specialist | CIDP 35 Ha YMS & ERP Odoo                    Slide {current_slide} of {TOTAL_SLIDES}"
+        p.text = f"Armansyah Muchtarrom — Hardware Specialist | Topik 7: ICD & Dry Port Management (CIDP 35 Ha)                    Slide {current_slide} of {TOTAL_SLIDES}"
         p.font.size = Pt(9)
         p.font.color.rgb = C_MUTED
 
@@ -79,131 +79,162 @@ def create_presentation():
     bg1.fill.fore_color.rgb = C_NAVY
     bg1.line.fill.background()
 
-    bar = s1.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(1.2), Inches(0.15), Inches(4.5))
+    # Left accent bar
+    bar = s1.shapes.add_shape(MSO_SHAPE.RECTANGLE, Inches(0.8), Inches(0.5), Inches(0.12), Inches(6.4))
     bar.fill.solid()
     bar.fill.fore_color.rgb = C_BLUE
     bar.line.fill.background()
 
-    tbox1 = s1.shapes.add_textbox(Inches(1.2), Inches(1.2), Inches(11.0), Inches(4.8))
+    # Title Box (Top)
+    tbox1 = s1.shapes.add_textbox(Inches(1.1), Inches(0.45), Inches(11.4), Inches(2.2))
     tf1 = tbox1.text_frame
     tf1.word_wrap = True
+    tf1.margin_left = tf1.margin_top = tf1.margin_right = tf1.margin_bottom = 0
     
     p = tf1.paragraphs[0]
-    p.text = "PROYEK YARD MANAGEMENT SYSTEM & LOGISTIK INTERMODAL"
+    p.text = "TOPIK 7 — INLAND CONTAINER DEPOT (ICD) & DRY PORT MANAGEMENT"
     p.font.size = Pt(12)
     p.font.bold = True
     p.font.color.rgb = RGBColor(147, 197, 253)
 
     p = tf1.add_paragraph()
-    p.text = "Arsitektur Perangkat Keras, Otomasi Telemetri Lapangan, & Integrasi Dua Arah YMS–ERP Odoo"
-    p.font.size = Pt(28)
+    p.text = "Sistem Manajemen Lapangan Penumpukan (Yard Management System / YMS) pada Conclusion Intermodal Dry Port (CIDP) 35 Ha"
+    p.font.size = Pt(21)
     p.font.bold = True
     p.font.color.rgb = C_WHITE
-    p.space_before = Pt(12)
+    p.space_before = Pt(4)
 
     p = tf1.add_paragraph()
-    p.text = "Pemetaan 26 Hardware • 11 Perangkat Simulasi Postman JSON • 15 Perangkat Blueprint Fasilitas 35 Ha"
-    p.font.size = Pt(14)
-    p.font.color.rgb = RGBColor(226, 232, 240)
-    p.space_before = Pt(14)
-
-    pbox = s1.shapes.add_textbox(Inches(1.2), Inches(5.2), Inches(11.0), Inches(1.5))
-    ptf = pbox.text_frame
-    ptf.word_wrap = True
-    
-    p = ptf.paragraphs[0]
-    p.text = "Presenter: Armansyah Muchtarrom  |  Role: Hardware & Infrastructure Specialist"
-    p.font.size = Pt(12)
-    p.font.bold = True
-    p.font.color.rgb = C_WHITE
-
-    p = ptf.add_paragraph()
-    p.text = "Mata Kuliah: Teknologi & Perangkat Lunak Logistik  •  Dosen Pengampu: Dr. Tigor Franky, S.T., M.T."
+    p.text = "PROGRES MINGGU INI: PERANCANGAN ARSITEKTUR HARDWARE, TELEMETRI IOT & OTOMASI GERBANG"
     p.font.size = Pt(11)
-    p.font.color.rgb = RGBColor(203, 213, 225)
-    p.space_before = Pt(4)
+    p.font.bold = True
+    p.font.color.rgb = C_AMBER
+    p.space_before = Pt(6)
 
-    p = ptf.add_paragraph()
-    p.text = "Institut Transportasi dan Logistik (ITL) Trisakti  •  Conclusion Supply Chain Consultant  •  September 2026"
+    # Team Members Box (Middle)
+    team_card = s1.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(1.1), Inches(2.8), Inches(11.4), Inches(3.4))
+    team_card.fill.solid()
+    team_card.fill.fore_color.rgb = RGBColor(15, 30, 60)
+    team_card.line.color.rgb = RGBColor(30, 58, 110)
+    team_card.line.width = Pt(1)
+
+    tbox_team = s1.shapes.add_textbox(Inches(1.3), Inches(2.9), Inches(11.0), Inches(3.2))
+    tf_team = tbox_team.text_frame
+    tf_team.word_wrap = True
+    tf_team.margin_left = tf_team.margin_top = tf_team.margin_right = tf_team.margin_bottom = 0
+
+    p = tf_team.paragraphs[0]
+    p.text = "TIM KONSULTAN & PEMBAGIAN TUGAS (CONCLUSION SUPPLY CHAIN CONSULTANT):"
     p.font.size = Pt(10)
+    p.font.bold = True
+    p.font.color.rgb = RGBColor(147, 197, 253)
+
+    team_members = [
+        ("1. Zulfikar Jafarudin Fatah", "24D507001001", "Lead System Architect (Ketua Tim)", "Arsitektur Sistem, Basis Data, & Modul Simulator 3D"),
+        ("2. Armansyah Muchtarrom", "24D507001010", "Hardware & Infrastructure Specialist (Presenter)", "Spesifikasi 26 Hardware, Telemetri IoT & Otomasi Gate"),
+        ("3. Afriansayah Ayubi", "24D507001026", "Software & ERP Process Specialist", "Alur Proses Bisnis Kontainer, Struktur Tarif & Integrasi ERP Odoo"),
+        ("4. Juan Gamaliel", "24D507001016", "Data Integration Specialist", "Integrasi Data Antarsistem, Stacking Rules & Denah Fisik 35 Ha"),
+        ("5. Naufal Andika Heditya", "24D507001012", "Business Analyst & QA Specialist", "Analisis Proses Bisnis, Standardisasi GS1/SSCC & Kepatuhan Bea Cukai")
+    ]
+
+    for name, nim, role, task in team_members:
+        p = tf_team.add_paragraph()
+        p.text = f"• {name} ({nim}) — {role}\n   Tugas: {task}"
+        p.font.size = Pt(9)
+        p.font.color.rgb = C_WHITE if "Presenter" in role else RGBColor(226, 232, 240)
+        p.space_before = Pt(3)
+
+    # Footer Info Box (Bottom)
+    fbox = s1.shapes.add_textbox(Inches(1.1), Inches(6.35), Inches(11.4), Inches(0.6))
+    ftf = fbox.text_frame
+    ftf.word_wrap = True
+    ftf.margin_left = ftf.margin_top = ftf.margin_right = ftf.margin_bottom = 0
+    p = ftf.paragraphs[0]
+    p.text = "Mata Kuliah: Teknologi dan Perangkat Lunak Logistik  •  Dosen Pengampu: Dr. Tigor Franky, S.T., M.T."
+    p.font.size = Pt(10)
+    p.font.bold = True
+    p.font.color.rgb = RGBColor(203, 213, 225)
+    p = ftf.add_paragraph()
+    p.text = "Program Studi Manajemen Logistik  •  Institut Transportasi dan Logistik (ITL) Trisakti  •  September 2026"
+    p.font.size = Pt(9.5)
     p.font.color.rgb = RGBColor(148, 163, 184)
-    p.space_before = Pt(4)
+    p.space_before = Pt(2)
 
     # =========================================================================
-    # SLIDE 2: FILOSOFI ARSITEKTUR & MENGAPA POSTMAN / JSON
+    # SLIDE 2: LANSKAP EKOSISTEM HARDWARE TERMINAL 35 HA
     # =========================================================================
     s2 = prs.slides.add_slide(blank_layout)
-    add_header(s2, "Filosofi Arsitektur: Mengapa Validasi Menggunakan Postman & JSON?")
+    add_header(s2, "Lanskap Ekosistem Hardware: 6 Klaster Operasional Terminal 35 Ha")
     add_footer(s2, 2)
 
     card_w = Inches(3.7)
     card_h = Inches(4.8)
     
-    # Card 1: Layer 1 Sensor Fisik
+    # Card 1: Lingkungan Operasional Fisik
     create_card(s2, Inches(0.8), Inches(1.8), card_w, card_h)
     tb = s2.shapes.add_textbox(Inches(1.0), Inches(2.0), card_w - Inches(0.4), card_h - Inches(0.4))
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "LAYER 1: SENSOR FISIK"
-    p.font.size = Pt(12)
+    p.text = "TANTANGAN FISIK LAPANGAN"
+    p.font.size = Pt(11)
     p.font.bold = True
     p.font.color.rgb = C_BLUE
     p = tf.add_paragraph()
-    p.text = "Menangkap Pemicu Lapangan"
-    p.font.size = Pt(14)
+    p.text = "Standar Maritim & Heavy-Duty"
+    p.font.size = Pt(13)
     p.font.bold = True
     p.font.color.rgb = C_NAVY
     p.space_before = Pt(4)
     p = tf.add_paragraph()
-    p.text = "• Induction loop mendeteksi massa truk.\n• Photocell memicu kamera OCR portal.\n• Load cell 80t membaca bobot kotor.\n• RTK GNSS membaca satelit < 2 cm.\n• Twistlock spreader mendeteksi jepitan box.\n• Current Transformer membaca ampere reefer."
-    p.font.size = Pt(10.5)
+    p.text = "• Luas area 35 Ha dengan manuver rutin truk trailer 40ft & Reach Stacker 45 ton.\n• Operasi 24/7 non-stop di bawah terik matahari, debu semen/kontainer, & kelembapan tinggi.\n• Kebutuhan Proteksi Industri:\n  - Bodi tahan cuaca & air: IP67 / IP68.\n  - Komputer tanpa kipas (Fanless Industrial PC).\n  - Tahan getaran guncangan: MIL-STD-810G.\n  - Standar keselamatan rel KA: SIL 4."
+    p.font.size = Pt(10)
     p.font.color.rgb = C_TEXT
-    p.space_before = Pt(10)
+    p.space_before = Pt(8)
 
-    # Card 2: Layer 2 Edge PC & YMS
+    # Card 2: 6 Klaster Hardware
     create_card(s2, Inches(4.8), Inches(1.8), card_w, card_h, bg_color=C_BLUE_BG, border_color=C_BLUE)
     tb = s2.shapes.add_textbox(Inches(5.0), Inches(2.0), card_w - Inches(0.4), card_h - Inches(0.4))
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "LAYER 2: EDGE AI PC & YMS"
-    p.font.size = Pt(12)
+    p.text = "SEBARAN 26 HARDWARE"
+    p.font.size = Pt(11)
     p.font.bold = True
     p.font.color.rgb = C_BLUE
     p = tf.add_paragraph()
-    p.text = "Penerjemah & Pengendali Lokal"
-    p.font.size = Pt(14)
+    p.text = "6 Klaster Kritis Lapangan"
+    p.font.size = Pt(13)
     p.font.bold = True
     p.font.color.rgb = C_NAVY
     p.space_before = Pt(4)
     p = tf.add_paragraph()
-    p.text = "• Advantech ARK-3532 Fanless memproses data serial/LAN secara lokal (28 detik).\n• Mengonversi sinyal fisik menjadi REST API JSON.\n• Mengendalikan relay buka barrier gate.\n• Mengalokasikan 3D slot Bay-Row-Tier di YMS.\n• Mengapa Postman? Karena data contract JSON di Postman 100% identik dengan output Edge PC!"
-    p.font.size = Pt(10.5)
+    p.text = "1. Otomasi Gate (8 Item): ANPR, OCR, Timbangan 80t, RFID, Barrier, LED, Edge PC.\n2. Yard & Alat Angkat (4 Item): DGPS RTK, Twistlock Spreader, VMT, Rugged PDA.\n3. Cold Chain (2 Item): Smart Socket 380V & Thermal Camera.\n4. Rail Siding (3 Item): Axle Counter, AP WiFi 7, GPS Truk.\n5. Bea Cukai (5 Item): Gantry X-Ray 6 MeV, Smart E-Seal, CCTV.\n6. Core IT (4 Item): Datacenter, Switch PoE+, Online UPS."
+    p.font.size = Pt(9.5)
     p.font.color.rgb = C_TEXT
-    p.space_before = Pt(10)
+    p.space_before = Pt(8)
 
-    # Card 3: Layer 3 ERP Odoo
+    # Card 3: Jembatan ke Slide 3
     create_card(s2, Inches(8.8), Inches(1.8), card_w, card_h)
     tb = s2.shapes.add_textbox(Inches(9.0), Inches(2.0), card_w - Inches(0.4), card_h - Inches(0.4))
     tf = tb.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "LAYER 3: ERP ODOO"
-    p.font.size = Pt(12)
+    p.text = "STRATEGI KONSULTAN"
+    p.font.size = Pt(11)
     p.font.bold = True
     p.font.color.rgb = C_EMERALD
     p = tf.add_paragraph()
-    p.text = "Rekonsiliasi Finansial & Aset"
-    p.font.size = Pt(14)
+    p.text = "Rasionalisasi Menuju Slide 3"
+    p.font.size = Pt(13)
     p.font.bold = True
     p.font.color.rgb = C_NAVY
     p.space_before = Pt(4)
     p = tf.add_paragraph()
-    p.text = "• Menerima Webhook Billable Charge Events dari YMS secara otomatis.\n• Odoo Invoicing: Menerbitkan draf faktur VGM (Rp 50rb), Lo-Lo (Rp 250rb), Reefer (Rp 250rb).\n• Odoo Maintenance: Melacak jam jalan alat berat.\n• Odoo Inventory: Mengunci izin rilis DO jika segel Bea Cukai belum aman.\n• Hasil: Zero Revenue Leakage!"
-    p.font.size = Pt(10.5)
+    p.text = "• Tidak Semua Hardware Bekerja Sama:\n  - Ada perangkat aktif penghasil data transaksi telemetri dinamis.\n  - Ada perangkat infrastruktur pasif sebagai pendukung fasilitas fisik.\n• Efisiensi Anggaran (CAPEX Rp 18,94 M):\n  Pengadaan dirancang berbasis prioritas otomasi & kepatuhan regulasi.\n• Jembatan Implementasi:\n  Diperlukan pemisahan tegas antara hardware yang disimulasikan alur datanya vs hardware blueprint fisik."
+    p.font.size = Pt(10)
     p.font.color.rgb = C_TEXT
-    p.space_before = Pt(10)
+    p.space_before = Pt(8)
 
     # =========================================================================
     # SLIDE 3: STRATEGI KLASIFIKASI: 11 SIMULASI VS 15 BLUEPRINT

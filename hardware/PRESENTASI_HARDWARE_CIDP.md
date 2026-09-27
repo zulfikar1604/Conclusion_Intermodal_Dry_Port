@@ -1,20 +1,22 @@
-# 🖥️ BAHAN TAYANG PRESENTASI: REKAYASA HARDWARE & OTOMASI CIDP 35 HA
-## Panduan Presentasi, Alur Trigger, Pengujian Postman JSON, & Integrasi YMS–ERP Odoo
+# 🖥️ BAHAN TAYANG PRESENTASI: TOPIK 7 — INLAND CONTAINER DEPOT (ICD) & DRY PORT MANAGEMENT
+## Progres Minggu Ini: Perancangan Arsitektur Hardware, Otomasi Telemetri, & Integrasi Dua Arah YMS–ERP Odoo
 
-* **Topik:** Arsitektur Perangkat Keras, Otomasi Telemetri Lapangan, & Integrasi Dua Arah YMS–ERP Odoo pada Conclusion Intermodal Dry Port (CIDP) 35 Ha
-* **Presenter:** Armansyah Muchtarrom (*Hardware & Infrastructure Specialist*)
-* **Entitas Konsultan:** Conclusion Supply Chain Consultant
-* **Institusi:** Institut Transportasi dan Logistik (ITL) Trisakti — Semester 5
 * **Mata Kuliah:** Teknologi dan Perangkat Lunak Logistik
 * **Dosen Pengampu:** Dr. Tigor Franky, S.T., M.T.
+* **Institusi Akademik:** Institut Transportasi dan Logistik (ITL) Trisakti — Semester 5
+* **Entitas Konsultan:** Conclusion Supply Chain Consultant
+* **Topik Utama Silabus:** **Topik 7 — Inland Container Depot (ICD) & Dry Port Management**
+* **Studi Kasus:** Prototype Sistem Manajemen Lapangan Penumpukan (*Yard Management System / YMS*) pada **Conclusion Intermodal Dry Port (CIDP) 35 Ha**
+* **Fokus Progres Minggu Ini:** **Arsitektur Hardware, Telemetri IoT & Integrasi Sistem (YMS & ERP Odoo)**
+* **Presenter:** Armansyah Muchtarrom (*Hardware & Infrastructure Specialist*)
 * **Tanggal Penyusunan:** September 2026
 
 ---
 
 # 📑 DAFTAR ISI SLIDE PRESENTASI
 
-1. **Slide 1:** Cover & Profil Divisi Infrastruktur
-2. **Slide 2:** Filosofi Arsitektur: Mengapa Menggunakan Postman & JSON? (*Decoupled Architecture*)
+1. **Slide 1:** Cover: Topik 7 — ICD & Dry Port Management (Progres Minggu Ini: Hardware)
+2. **Slide 2:** Lanskap Ekosistem Hardware: 6 Klaster Operasional Terminal 35 Ha
 3. **Slide 3:** Strategi Klasifikasi: 11 Simulasi (Data-Driven) vs 15 Blueprint (Infrastruktur Fisik)
 4. **Slide 4:** Klaster 1 — Otomasi Gerbang & Rantai Trigger (Waktu Transaksi 28 Detik)
 5. **Slide 5:** Klaster 2 — Telemetri Alat Berat & Penumpukan 3D (*Auto Bay-Row-Tier*)
@@ -34,43 +36,76 @@
 
 ```
 ========================================================================================
-[SLIDE 1] COVER & PROFIL DIVISI INFRASTRUKTUR
+[SLIDE 1] COVER: TOPIK 7 — ICD & DRY PORT MANAGEMENT (PROGRES: HARDWARE)
 ========================================================================================
 ```
 
 ### 1. Visual Slide
-* **Judul Utama:** Rekayasa Infrastruktur Fisik, Telemetri IoT & Otomasi Gerbang CIDP 35 Ha
-* **Sub-Judul:** Pemetaan 26 Perangkat Keras: 11 Perangkat Simulasi (Data-Driven) & 15 Perangkat Blueprint Fasilitas
-* **Presenter:** Armansyah Muchtarrom (*Hardware & Infrastructure Specialist*)
-* **Total Anggaran Hardware (CAPEX):** Rp 18.943.300.000 (26 Jenis Item / 1.099 Unit Terpasang)
-* **Diagram Alur Inti:**
-  $$\text{Field Sensors (IoT)} \;\longrightarrow\; \text{Edge AI PC} \;\longrightarrow\; \text{CIDP YMS} \;\longrightarrow\; \text{ERP Odoo Enterprise}$$
+* **Kategori / Banner:** TOPIK 7: INLAND CONTAINER DEPOT (ICD) & DRY PORT MANAGEMENT
+* **Judul Utama Slide:** Sistem Manajemen Lapangan Penumpukan (Yard Management System / YMS) pada Conclusion Intermodal Dry Port (CIDP) 35 Ha
+* **Fokus Progres Minggu Ini:** PERANCANGAN ARSITEKTUR HARDWARE, TELEMETRI IOT & OTOMASI GERBANG
+* **Tim Konsultan & Pembagian Tugas (Conclusion Supply Chain Consultant):**
+  1. **Zulfikar Jafarudin Fatah** (24D507001001) — *Lead System Architect (Ketua Tim)*  
+     *Tugas:* Arsitektur Sistem, Basis Data, Dashboard Eksekutif, & Modul Simulator 3D.
+  2. **Armansyah Muchtarrom** (24D507001010) — *Hardware & Infrastructure Specialist (Presenter)*  
+     *Tugas:* Analisis Infrastruktur Fisik 35 Ha, Spesifikasi 26 Hardware, Telemetri IoT & Otomasi Gate.
+  3. **Afriansayah Ayubi** (24D507001026) — *Software & ERP Process Specialist*  
+     *Tugas:* Alur Proses Bisnis Kontainer, Struktur Tarif Jasa Terminal, & Integrasi ERP Odoo.
+  4. **Juan Gamaliel** (24D507001016) — *Data Integration Specialist*  
+     *Tugas:* Integrasi Aliran Data Antarsistem, Stacking Rules, & Denah Tata Letak Fisik 35 Ha.
+  5. **Naufal Andika Heditya** (24D507001012) — *Business Analyst & QA Specialist*  
+     *Tugas:* Analisis Kebutuhan Proses Bisnis, Standardisasi GS1/SSCC, & Kepatuhan Bea Cukai.
+* **Informasi Akademik:**
+  * Mata Kuliah: Teknologi dan Perangkat Lunak Logistik | Dosen Pengampu: Dr. Tigor Franky, S.T., M.T.
+  * Program Studi Manajemen Logistik | Institut Transportasi dan Logistik (ITL) Trisakti (2026)
 
 ### 2. Skrip Pembicara (Speaker Notes)
-> *"Selamat pagi Bapak Dr. Tigor Franky dan rekan-rekan sekalian. Saya Armansyah Muchtarrom, bertindak sebagai Hardware & Infrastructure Specialist dari Conclusion Supply Chain Consultant.  
-> Pada pertemuan hari ini, saya akan mempresentasikan secara menyeluruh mengenai arsitektur perangkat keras (*hardware architecture*) untuk fasilitas Conclusion Intermodal Dry Port seluas 35 Hektar.  
-> Fokus utama bahasan saya adalah membuktikan bagaimana setiap perangkat keras fisik di lapangan mampu menangkap pemicu fisik (*physical triggers*), mengalirkannya ke sistem YMS kita, dan secara otomatis merekonsiliasi penagihan ke sistem ERP Odoo tanpa potensi kebocoran pendapatan (*zero revenue leakage*)."*
+> *"Selamat pagi Bapak Dr. Tigor Franky dan rekan-rekan sekalian.  
+> Kami dari kelompok **Conclusion Supply Chain Consultant**, beranggotakan:  
+> 1. Zulfikar Jafarudin Fatah (24D507001001) selaku Lead System Architect,  
+> 2. Saya sendiri, Armansyah Muchtarrom (24D507001010) selaku Hardware & Infrastructure Specialist,  
+> 3. Afriansayah Ayubi (24D507001026) selaku Software & ERP Specialist,  
+> 4. Juan Gamaliel (24D507001016) selaku Data Integration Specialist, dan  
+> 5. Naufal Andika Heditya (24D507001012) selaku Business Analyst & QA Specialist.  
+>
+> Sesuai penugasan silabus kita pada **Topik 7: Inland Container Depot (ICD) & Dry Port Management**, judul proyek perancangan sistem kami adalah **Sistem Manajemen Lapangan Penumpukan (Yard Management System / YMS) pada Conclusion Intermodal Dry Port (CIDP) 35 Ha**.  
+> Dan pada pertemuan minggu ini, fokus progres yang kami presentasikan adalah **perancangan arsitektur perangkat keras (*hardware architecture*), telemetri IoT lapangan, dan otomasi gerbang masuk/keluar**."*
+
 
 ---
 
 ```
 ========================================================================================
-[SLIDE 2] FILOSOFI ARSITEKTUR: MENGAPA MENGGUNAKAN POSTMAN & JSON?
+[SLIDE 2] LANSKAP EKOSISTEM HARDWARE: 6 KLASTER OPERASIONAL TERMINAL 35 HA
 ========================================================================================
 ```
 
 ### 1. Visual Slide
-* **Judul:** Decoupled Architecture & Validasi Melalui Postman API Mocking
-* **Poin Penjelasan:**
-  1. **Prinsip Industri Enterprise:** Sensor fisik tidak pernah dihubungkan langsung ke kode web aplikasi, melainkan melalui *Industrial Edge PC Gateway*.
-  2. **Metode Validasi Prototipe:** Karena hardware fisik berada pada tahap studi kelayakan belanja modal (CAPEX Rp 18,9 Miliar), pengujian integrasi dilakukan menggunakan **Virtual IoT Simulation Engine & Postman**.
-  3. **Kesesuaian Data 100%:** Struktur JSON Payload yang ditembakkan melalui Postman identik dengan format data (*data contract*) yang akan dipancarkan oleh gateway fisik di lapangan.
-  4. **Kesiapan Masa Depan (*Plug-and-Play*):** Saat hardware fisik dipasang nanti, alat tinggal menembak endpoint API yang sama tanpa mengubah satu baris pun kode pada sistem YMS atau ERP Odoo.
+* **Judul Utama Slide:** Lanskap Ekosistem Hardware: 6 Klaster Operasional Terminal 35 Ha
+* **Sub-Judul:** Pemetaan Kebutuhan Fisik Lapangan Berdasarkan Karakteristik Alur Kargo Intermodal
+* **3 Kartu Pilar Utama:**
+  1. **Tantangan Fisik Lapangan (Standar Maritim & Heavy-Duty):**
+     * Luas area 35 Ha dengan manuver truk trailer 40ft & Reach Stacker 45 ton.
+     * Operasi 24/7 non-stop di bawah terik matahari, debu semen/kontainer, & kelembapan tinggi.
+     * Standar Proteksi: IP67/IP68 tahan cuaca, Fanless PC, getaran MIL-STD-810G, dan safety rel SIL 4.
+  2. **Sebaran 26 Hardware (6 Klaster Kritis Lapangan):**
+     * *Otomasi Gate (8 Item):* ANPR, OCR Portal, Jembatan Timbang 80t, RFID UHF, Barrier Gate, LED Display, Edge AI PC.
+     * *Yard & Crane (4 Item):* DGPS RTK (<2 cm), Spreader Twistlock & Load Cell, VMT Kabin, Rugged PDA.
+     * *Cold Chain (2 Item):* Smart Reefer Socket 380V & Thermal Camera.
+     * *Rail Siding (3 Item):* Axle Counter KA, Access Point WiFi 7, GPS Tracker Truk.
+     * *Bea Cukai (5 Item):* Gantry X-Ray 6 MeV, Smart E-Seal, CCTV 4MP/8MP/PTZ.
+     * *Core IT (4 Item):* Server NVR & DB, Switch PoE+ IP40, Online UPS 5000VA, Scanner Meja.
+  3. **Strategi Rekayasa Konsultan (Jembatan Menuju Slide 3):**
+     * *Pemisahan Peran Sistemik:* Tidak semua hardware bekerja sama; ada instrumen cerdas pengirim data aktif, dan ada infrastruktur utilitas fisik pendukung.
+     * *Efisiensi CAPEX Rp 18,94 M:* Pengadaan dirancang berbasis prioritas otomasi & kepatuhan regulasi.
+     * *Kesiapan Integrasi:* Menjadi dasar klasifikasi mana yang disimulasikan alur datanya vs mana yang menjadi blueprint fasilitas fisik (Slide 3).
 
 ### 2. Skrip Pembicara (Speaker Notes)
-> *"Bapak Dosen yang kami hormati, dalam industri rekayasa pelabuhan modern, pengembang software tidak pernah menunggu alat fisik dipasang di cor beton untuk menguji sistem.  
-> Kami menerapkan **Decoupled Architecture**. Seluruh sensor fisik dihubungkan ke Industrial Edge AI PC yang mengonversi sinyal kabel serial menjadi standar internasional: **REST API dengan payload JSON**.  
-> Dalam fase prototipe konsultan ini, kami membuktikan integrasi hardware tersebut menggunakan **Postman dan Virtual IoT Engine**. Data JSON yang kami tembakkan di Postman memiliki struktur yang 100% sama dengan data yang akan dikeluarkan oleh hardware fisik nantinya. Artinya, sistem kita sudah siap pakai (*plug-and-play*) begitu fasilitas fisik 35 Ha selesai dibangun."*
+> *"Bapak Dosen dan rekan-rekan sekalian, sebelum kita masuk ke rincian teknis, kita perlu memahami terlebih dahulu lanskap tantangan fisik di lapangan pelabuhan kering seluas 35 Hektar.  
+> Mengoperasikan terminal peti kemas dengan skala seperti Cikarang Dry Port membutuhkan perangkat keras dengan standar ketahanan maritim dan *heavy-duty* (IP67/IP68 serta sertifikasi guncangan MIL-STD-810G), karena peralatan beroperasi 24 jam nonstop di tengah debu tebal kontainer dan cuaca ekstrem.  
+> Untuk memenuhi kebutuhan tersebut, kami merancang **26 jenis hardware yang terdistribusi ke dalam 6 klaster operasional**: mulai dari otomasi gerbang, alat angkat penumpukan, rantai dingin reefer, sepur simpan rel kereta api, area pemeriksaan Bea Cukai, hingga pusat data.  
+> Namun, secara rekayasa sistem, ke-26 hardware ini memiliki karakteristik yang berbeda: ada yang menjadi **instrumen aktif penghasil data transaksi telemetri**, dan ada yang menjadi **infrastruktur fisik pendukung**.  
+> Inilah yang mendasari strategi pembagian kami pada slide berikutnya: membedakan antara perangkat yang kita simulasikan aliran datanya dengan perangkat blueprint fasilitas fisik."*
 
 ---
 
