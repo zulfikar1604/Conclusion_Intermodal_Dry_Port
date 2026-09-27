@@ -192,30 +192,80 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                     </h1>
                 </div>
                 
-                <!-- Right: User & Actions -->
-                <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
-                    <button class="relative p-1.5 text-gray-400 hover:text-cdp-blue transition-colors rounded-lg hover:bg-gray-100" title="Notifikasi Sistem">
-                        <i class="fa-regular fa-bell text-base"></i>
-                        <span class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+                <!-- Right: User & Actions (Elegant) -->
+                <div class="flex items-center space-x-1.5 sm:space-x-2 flex-shrink-0">
+                    <!-- Notification Bell -->
+                    <button class="relative w-8 h-8 flex items-center justify-center text-gray-400 hover:text-cdp-blue transition-all rounded-lg hover:bg-blue-50/60" title="Notifikasi Sistem">
+                        <i class="fa-regular fa-bell text-[13px]"></i>
+                        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-red-500 rounded-full ring-2 ring-white"></span>
                     </button>
-                    
-                    <div class="h-5 w-px bg-gray-200 mx-0.5 sm:mx-1"></div>
-                    
-                    <div class="flex items-center space-x-2.5 group">
-                        <div class="flex flex-col text-right hidden sm:flex">
-                            <span class="text-xs font-bold text-gray-800 leading-tight"><?= htmlspecialchars($nama) ?></span>
-                            <span class="text-[9px] uppercase font-bold px-1.5 py-0.5 rounded border <?= $current_badge['color'] ?> inline-block mt-0.5 self-end">
-                                <?= $current_badge['label'] ?>
-                            </span>
-                        </div>
-                        <div class="w-8 h-8 rounded-full bg-cdp-blue text-white flex items-center justify-center font-bold text-xs shadow-xs border border-white ring-1 ring-gray-200 group-hover:ring-cdp-blue/30 transition-all cursor-pointer">
-                            <?= strtoupper(substr($nama, 0, 1)) ?>
+
+                    <div class="h-4 w-px bg-gray-200/80 mx-0.5"></div>
+
+                    <!-- Profile Trigger -->
+                    <div class="relative" id="profileDropdownWrapper">
+                        <button onclick="toggleProfileDropdown()" class="flex items-center space-x-2 py-1 px-1.5 sm:px-2 rounded-xl hover:bg-gray-50 transition-all group focus:outline-none" id="profileTriggerBtn">
+                            <!-- Name & Role (desktop only) -->
+                            <div class="hidden sm:flex flex-col text-right mr-0.5">
+                                <span class="text-[11px] font-semibold text-gray-800 leading-tight tracking-tight"><?= htmlspecialchars($nama) ?></span>
+                                <span class="text-[9px] text-cdp-blue font-medium leading-tight mt-px">Lead System Architect</span>
+                            </div>
+                            <!-- Avatar with gradient ring -->
+                            <div class="relative flex-shrink-0">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cdp-navy via-cdp-blue to-emerald-500 p-[2px] shadow-sm group-hover:shadow-md transition-shadow">
+                                    <div class="w-full h-full rounded-full bg-white flex items-center justify-center">
+                                        <span class="text-[11px] font-bold text-cdp-navy"><?= strtoupper(substr($nama, 0, 2)) ?></span>
+                                    </div>
+                                </div>
+                                <!-- Online status dot -->
+                                <span class="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 rounded-full ring-[2px] ring-white"></span>
+                            </div>
+                            <!-- Chevron -->
+                            <i class="fa-solid fa-chevron-down text-[8px] text-gray-400 group-hover:text-gray-600 transition-colors hidden sm:block" id="profileChevron"></i>
+                        </button>
+
+                        <!-- Profile Dropdown Card -->
+                        <div id="profileDropdownCard" class="hidden absolute right-0 top-12 w-64 bg-white rounded-xl shadow-lg border border-gray-200/80 overflow-hidden z-50 animate-fadeIn">
+                            <!-- Card Header -->
+                            <div class="bg-gradient-to-br from-cdp-navy via-cdp-dark to-cdp-blue p-4 text-white">
+                                <div class="flex items-center space-x-3">
+                                    <div class="w-10 h-10 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/30 flex-shrink-0">
+                                        <span class="text-sm font-bold"><?= strtoupper(substr($nama, 0, 2)) ?></span>
+                                    </div>
+                                    <div class="min-w-0">
+                                        <p class="text-sm font-bold leading-tight truncate"><?= htmlspecialchars($nama) ?></p>
+                                        <p class="text-[10px] text-white/70 truncate"><?= htmlspecialchars($email) ?></p>
+                                    </div>
+                                </div>
+                                <div class="mt-2.5 flex items-center space-x-1.5">
+                                    <span class="px-2 py-0.5 bg-white/15 backdrop-blur-sm rounded-md text-[9px] font-bold uppercase tracking-wider border border-white/20 flex items-center">
+                                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse"></span>
+                                        <?= $current_badge['label'] ?>
+                                    </span>
+                                </div>
+                            </div>
+                            <!-- Card Menu -->
+                            <div class="p-1.5">
+                                <a href="dashboard.php?page=settings" class="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors group/item">
+                                    <i class="fa-solid fa-gear text-[11px] text-gray-400 group-hover/item:text-cdp-blue transition-colors w-4 text-center"></i>
+                                    <span class="text-xs text-gray-700 font-medium">Pengaturan Akun</span>
+                                </a>
+                                <a href="dashboard.php?page=simulator" class="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-gray-50 transition-colors group/item">
+                                    <i class="fa-solid fa-gamepad text-[11px] text-gray-400 group-hover/item:text-cdp-blue transition-colors w-4 text-center"></i>
+                                    <span class="text-xs text-gray-700 font-medium">Panel Simulasi IoT</span>
+                                </a>
+                                <div class="my-1 border-t border-gray-100"></div>
+                                <a href="logout.php" onclick="return confirm('Apakah Anda yakin ingin keluar dari sistem?');" class="flex items-center space-x-2.5 px-3 py-2 rounded-lg hover:bg-red-50 transition-colors group/item">
+                                    <i class="fa-solid fa-right-from-bracket text-[11px] text-gray-400 group-hover/item:text-red-500 transition-colors w-4 text-center"></i>
+                                    <span class="text-xs text-gray-700 group-hover/item:text-red-600 font-medium">Keluar dari Sistem</span>
+                                </a>
+                            </div>
+                            <!-- Card Footer -->
+                            <div class="px-4 py-2 bg-gray-50/80 border-t border-gray-100">
+                                <p class="text-[9px] text-gray-400 text-center font-medium">Conclusion Supply Chain Consultant &copy; 2026</p>
+                            </div>
                         </div>
                     </div>
-                    
-                    <a href="logout.php" class="p-1.5 text-gray-400 hover:text-red-500 transition-colors rounded-lg hover:bg-red-50" title="Keluar" onclick="return confirm('Apakah Anda yakin ingin keluar?');">
-                        <i class="fa-solid fa-right-from-bracket text-base"></i>
-                    </a>
                 </div>
             </div>
         </header>

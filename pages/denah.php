@@ -21,11 +21,11 @@ $zones_data = [
         'icon' => 'fa-door-open',
         'color' => '#0284c7',
         'facilities' => [
-            ['id' => 'f_gate_in', 'nama' => 'Gatehouse Inbound', 'desc' => 'Pos kontrol masuk 2 lane dilengkapi Kamera ANPR, OCR Portal, RFID Reader, dan Industrial Edge AI PC.', 'icon' => 'fa-arrow-right-to-bracket'],
-            ['id' => 'f_gate_out', 'nama' => 'Gatehouse Outbound', 'desc' => 'Pos kontrol keluar 2 lane dengan pembacaan e-Pass dan palang barrier gate otomatis.', 'icon' => 'fa-arrow-right-from-bracket'],
-            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station', 'desc' => 'Bangunan jembatan timbang kendaraan kapasitas 80 ton bersertifikasi SOLAS VGM.', 'icon' => 'fa-scale-balanced'],
-            ['id' => 'f_security_gate', 'nama' => 'Security Post 24 Jam', 'desc' => 'Pos keamanan gerbang utama, verifikasi dokumen surat jalan, dan penerbitan izin masuk.', 'icon' => 'fa-shield-halved'],
-            ['id' => 'f_truck_queue', 'nama' => 'Parkir Truk Antrian', 'desc' => 'Area parkir tunggu (queuing yard) berkapasitas 40 truk trailer untuk mencegah antrean di jalan arteri.', 'icon' => 'fa-truck-moving']
+            ['id' => 'f_gate_in', 'nama' => 'Gatehouse Inbound', 'desc' => 'Pos kontrol masuk 2 lane dilengkapi Kamera ANPR, OCR Portal, RFID Reader, dan Industrial Edge AI PC.', 'icon' => 'fa-arrow-right-to-bracket', 'hw_id' => 2, 'hw_nama' => 'Kamera OCR Kontainer Portal & ANPR', 'img' => 'hardware/images/converted/item_2.png'],
+            ['id' => 'f_gate_out', 'nama' => 'Gatehouse Outbound', 'desc' => 'Pos kontrol keluar 2 lane dengan pembacaan e-Pass dan palang barrier gate otomatis.', 'icon' => 'fa-arrow-right-from-bracket', 'hw_id' => 9, 'hw_nama' => 'Automatic Barrier Gate & ANPR', 'img' => 'hardware/images/converted/item_9.png'],
+            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station', 'desc' => 'Bangunan jembatan timbang kendaraan kapasitas 80 ton bersertifikasi SOLAS VGM.', 'icon' => 'fa-scale-balanced', 'hw_id' => 6, 'hw_nama' => 'Weighbridge / VGM Scale 80t', 'img' => 'hardware/images/converted/item_6.png'],
+            ['id' => 'f_security_gate', 'nama' => 'Security Post 24 Jam', 'desc' => 'Pos keamanan gerbang utama, verifikasi dokumen surat jalan, dan penerbitan izin masuk.', 'icon' => 'fa-shield-halved', 'hw_id' => 7, 'hw_nama' => 'Long-Range UHF RFID Reader', 'img' => 'hardware/images/converted/item_7.png'],
+            ['id' => 'f_truck_queue', 'nama' => 'Parkir Truk Antrian', 'desc' => 'Area parkir tunggu (queuing yard) berkapasitas 40 truk trailer untuk mencegah antrean di jalan arteri.', 'icon' => 'fa-truck-moving', 'hw_id' => 17, 'hw_nama' => 'GPS Tracker Truck & Fleet', 'img' => 'hardware/images/converted/item_17.png']
         ]
     ],
     'cfs_yard' => [
@@ -33,10 +33,10 @@ $zones_data = [
         'icon' => 'fa-boxes-stacked',
         'color' => '#4f46e5',
         'facilities' => [
-            ['id' => 'f_cfs', 'nama' => 'Container Freight Station (CFS)', 'desc' => 'Gudang modern 4.000 m² untuk aktivitas bongkar muat kargo LCL (stripping-stuffing) dan konsolidasi barang.', 'icon' => 'fa-warehouse'],
-            ['id' => 'f_empty_depot', 'nama' => 'Empty Container Depot', 'desc' => 'Area penyimpanan peti kemas kosong (empty boxes) 20ft/40ft dengan kapasitas 2.500 TEUs.', 'icon' => 'fa-box-open'],
-            ['id' => 'f_warehouse', 'nama' => 'Warehouse / Gudang Transit', 'desc' => 'Gudang tertutup untuk muatan bernilai tinggi, transit distribusi barang, dan cross-docking.', 'icon' => 'fa-dolly'],
-            ['id' => 'f_stacking_yard', 'nama' => 'Container Stacking Yard (Blok A-E)', 'desc' => 'Lapangan penumpukan utama 15 Ha: Blok A/B (Laden Ekspor-Impor), Blok C (Domestik), Blok D (Buffer), Blok E (Dangerous Goods).', 'icon' => 'fa-cubes']
+            ['id' => 'f_cfs', 'nama' => 'Container Freight Station (CFS)', 'desc' => 'Gudang modern 4.000 m² untuk aktivitas bongkar muat kargo LCL (stripping-stuffing) dan konsolidasi barang.', 'icon' => 'fa-warehouse', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Gudang CFS', 'img' => 'hardware/images/converted/item_15.png'],
+            ['id' => 'f_empty_depot', 'nama' => 'Empty Container Depot', 'desc' => 'Area penyimpanan peti kemas kosong (empty boxes) 20ft/40ft dengan kapasitas 2.500 TEUs.', 'icon' => 'fa-box-open', 'hw_id' => 20, 'hw_nama' => 'Terminal VMT Alat Berat Empty Depot', 'img' => 'hardware/images/converted/item_20.png'],
+            ['id' => 'f_warehouse', 'nama' => 'Warehouse / Gudang Transit', 'desc' => 'Gudang tertutup untuk muatan bernilai tinggi, transit distribusi barang, dan cross-docking.', 'icon' => 'fa-dolly', 'hw_id' => 17, 'hw_nama' => 'GPS Asset Tracker Transit Kargo', 'img' => 'hardware/images/converted/item_17.png'],
+            ['id' => 'f_stacking_yard', 'nama' => 'Container Stacking Yard (Blok A-E)', 'desc' => 'Lapangan penumpukan utama 15 Ha: Blok A/B (Laden Ekspor-Impor), Blok C (Domestik), Blok D (Buffer), Blok E (Dangerous Goods).', 'icon' => 'fa-cubes', 'hw_id' => 21, 'hw_nama' => 'DGPS / RTK GNSS Receiver Reach Stacker', 'img' => 'hardware/images/converted/item_21.png']
         ]
     ],
     'reefer' => [
@@ -44,9 +44,9 @@ $zones_data = [
         'icon' => 'fa-snowflake',
         'color' => '#06b6d4',
         'facilities' => [
-            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin 24/7 dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down'],
-            ['id' => 'f_genset_shelter', 'nama' => 'Genset Shelter Cadangan', 'desc' => 'Gedung pembangkit daya darurat 1.500 kVA Caterpillar untuk menjamin kelangsungan listrik reefer jika PLN padam.', 'icon' => 'fa-bolt'],
-            ['id' => 'f_reefer_racks', 'nama' => 'Reefer Stacking Racks (300 Plugs)', 'desc' => 'Platform bertingkat dilengkapi 300 titik colokan Smart Reefer Socket 380V/32A dengan meteran digital.', 'icon' => 'fa-plug-circle-check']
+            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin 24/7 dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera Reefer Monitoring', 'img' => 'hardware/images/converted/item_16.png'],
+            ['id' => 'f_genset_shelter', 'nama' => 'Genset Shelter Cadangan', 'desc' => 'Gedung pembangkit daya darurat 1.500 kVA Caterpillar untuk menjamin kelangsungan listrik reefer jika PLN padam.', 'icon' => 'fa-bolt', 'hw_id' => 14, 'hw_nama' => 'UPS Online & Sistem Kelistrikan Darurat', 'img' => 'hardware/images/converted/item_14.png'],
+            ['id' => 'f_reefer_racks', 'nama' => 'Reefer Stacking Racks (300 Plugs)', 'desc' => 'Platform bertingkat dilengkapi 300 titik colokan Smart Reefer Socket 380V/32A dengan meteran digital.', 'icon' => 'fa-plug-circle-check', 'hw_id' => 23, 'hw_nama' => 'Smart Reefer Power Socket 380V/32A', 'img' => 'hardware/images/converted/item_23.png']
         ]
     ],
     'rail' => [
@@ -54,8 +54,8 @@ $zones_data = [
         'icon' => 'fa-train-subway',
         'color' => '#d97706',
         'facilities' => [
-            ['id' => 'f_rail_office', 'nama' => 'Rail Office / Stasiun Operator', 'desc' => 'Kantor pengendali operasi langsiran dan persinyalan kereta api kontainer bekerja sama dengan KAI Logistik.', 'icon' => 'fa-train'],
-            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Jalur Ganda (400m)', 'desc' => '2 jalur rel KA kontainer sepanjang 400 meter untuk alih muat langsung gerbong datar (flatcar) ke lapangan.', 'icon' => 'fa-arrows-split-up-and-left']
+            ['id' => 'f_rail_office', 'nama' => 'Rail Office / Stasiun Operator', 'desc' => 'Kantor pengendali operasi langsiran dan persinyalan kereta api kontainer bekerja sama dengan KAI Logistik.', 'icon' => 'fa-train', 'hw_id' => 25, 'hw_nama' => 'Rail Trackside Axle Counter Frauscher', 'img' => 'hardware/images/converted/item_25.png'],
+            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Jalur Ganda (400m)', 'desc' => '2 jalur rel KA kontainer sepanjang 400 meter untuk alih muat langsung gerbong datar (flatcar) ke lapangan.', 'icon' => 'fa-arrows-split-up-and-left', 'hw_id' => 12, 'hw_nama' => 'Access Point Outdoor WiFi 7 Siding KA', 'img' => 'hardware/images/converted/item_12.png']
         ]
     ],
     'customs' => [
@@ -63,9 +63,9 @@ $zones_data = [
         'icon' => 'fa-stamp',
         'color' => '#dc2626',
         'facilities' => [
-            ['id' => 'f_kppbc', 'nama' => 'Kantor Bea Cukai (KPPBC)', 'desc' => 'Kantor pelayanan kepabeanan dan pabean impor/ekspor terhubung langsung dengan sistem nasional CEISA 4.0.', 'icon' => 'fa-building-columns'],
-            ['id' => 'f_behandle_xray', 'nama' => 'Behandle Area & Gantry X-Ray', 'desc' => 'Gedung pemindaian kontainer X-Ray energi tinggi (6 MeV) Nuctech dan kanopi pemeriksaan fisik Jalur Merah.', 'icon' => 'fa-radiation'],
-            ['id' => 'f_quarantine', 'nama' => 'Quarantine Inspection Room', 'desc' => 'Laboratorium dan ruang pemeriksaan Balai Karantina Hewan, Ikan, dan Tumbuhan Kementerian Pertanian.', 'icon' => 'fa-biohazard']
+            ['id' => 'f_kppbc', 'nama' => 'Kantor Bea Cukai (KPPBC)', 'desc' => 'Kantor pelayanan kepabeanan dan pabean impor/ekspor terhubung langsung dengan sistem nasional CEISA 4.0.', 'icon' => 'fa-building-columns', 'hw_id' => 26, 'hw_nama' => 'Electronic Cargo Smart Seal (E-Seal)', 'img' => 'hardware/images/converted/item_26.png'],
+            ['id' => 'f_behandle_xray', 'nama' => 'Behandle Area & Gantry X-Ray', 'desc' => 'Gedung pemindaian kontainer X-Ray energi tinggi (6 MeV) Nuctech dan kanopi pemeriksaan fisik Jalur Merah.', 'icon' => 'fa-radiation', 'hw_id' => 19, 'hw_nama' => 'Gantry Container X-Ray Scanner 6 MeV', 'img' => 'hardware/images/converted/item_19.png'],
+            ['id' => 'f_quarantine', 'nama' => 'Quarantine Inspection Room', 'desc' => 'Laboratorium dan ruang pemeriksaan Balai Karantina Hewan, Ikan, dan Tumbuhan Kementerian Pertanian.', 'icon' => 'fa-biohazard', 'hw_id' => 26, 'hw_nama' => 'Smart E-Seal & Inspeksi Pabean', 'img' => 'hardware/images/converted/item_26.png']
         ]
     ],
     'office' => [
@@ -73,10 +73,10 @@ $zones_data = [
         'icon' => 'fa-building',
         'color' => '#7c3aed',
         'facilities' => [
-            ['id' => 'f_admin_office', 'nama' => 'Kantor Utama / Admin Building', 'desc' => 'Gedung kantor pusat pengelola terminal PT Multi Terminal Indonesia (MTI) 2 lantai.', 'icon' => 'fa-briefcase'],
-            ['id' => 'f_datacenter', 'nama' => 'Datacenter / Server Room (NOC)', 'desc' => 'Ruang server sentral berpendingin presisi, NVR 64-Channel, Online UPS 5000VA, dan rak switch jaringan inti.', 'icon' => 'fa-server'],
-            ['id' => 'f_meeting_room', 'nama' => 'Ruang Meeting & Training Room', 'desc' => 'Ruang rapat operasional dan ruang simulasi/pelatihan bersertifikasi untuk operator terminal.', 'icon' => 'fa-users-gear'],
-            ['id' => 'f_workshop_mr', 'nama' => 'Workshop / Bengkel M&R', 'desc' => 'Bengkel perawatan alat berat lapangan (Reach Stacker, Empty Handler, Forklift, dan perbaikan kontainer).', 'icon' => 'fa-wrench']
+            ['id' => 'f_admin_office', 'nama' => 'Kantor Utama / Admin Building', 'desc' => 'Gedung kantor pusat pengelola terminal PT Multi Terminal Indonesia (MTI) 2 lantai.', 'icon' => 'fa-briefcase', 'hw_id' => 13, 'hw_nama' => 'Server NVR & Database YMS Core', 'img' => 'hardware/images/converted/item_13.png'],
+            ['id' => 'f_datacenter', 'nama' => 'Datacenter / Server Room (NOC)', 'desc' => 'Ruang server sentral berpendingin presisi, NVR 64-Channel, Online UPS 5000VA, dan rak switch jaringan inti.', 'icon' => 'fa-server', 'hw_id' => 11, 'hw_nama' => 'Industrial Network Switch PoE+ & Datacenter', 'img' => 'hardware/images/converted/item_11.png'],
+            ['id' => 'f_meeting_room', 'nama' => 'Ruang Meeting & Training Room', 'desc' => 'Ruang rapat operasional dan ruang simulasi/pelatihan bersertifikasi untuk operator terminal.', 'icon' => 'fa-users-gear', 'hw_id' => 10, 'hw_nama' => 'LED Information Display Ruang Operasi', 'img' => 'hardware/images/converted/item_10.png'],
+            ['id' => 'f_workshop_mr', 'nama' => 'Workshop / Bengkel M&R', 'desc' => 'Bengkel perawatan alat berat lapangan (Reach Stacker, Empty Handler, Forklift, dan perbaikan kontainer).', 'icon' => 'fa-wrench', 'hw_id' => 24, 'hw_nama' => 'Rugged Mobile PDA Tallyman & M&R', 'img' => 'hardware/images/converted/item_24.png']
         ]
     ],
     'public' => [
@@ -84,14 +84,14 @@ $zones_data = [
         'icon' => 'fa-hands-holding-child',
         'color' => '#059669',
         'facilities' => [
-            ['id' => 'f_musholla', 'nama' => 'Musholla / Masjid Al-Hidayah', 'desc' => 'Fasilitas ibadah representatif berkapasitas 150 jamaah untuk pekerja terminal, petugas pabean, dan sopir truk.', 'icon' => 'fa-mosque'],
-            ['id' => 'f_kantin', 'nama' => 'Kantin / Warung Makan 🍛', 'desc' => 'Area pujasera bersih dan terjangkau untuk kebutuhan makan dan minum seluruh pekerja lapangan dan sopir.', 'icon' => 'fa-utensils'],
-            ['id' => 'f_koperasi', 'nama' => 'Koperasi Karyawan 🏪', 'desc' => 'Toko ritel penyedia kebutuhan sehari-hari, minuman, makanan ringan, perlengkapan APD, dan ATK.', 'icon' => 'fa-shop'],
-            ['id' => 'f_klinik', 'nama' => 'Klinik P3K / Pos Kesehatan', 'desc' => 'Pos pertolongan pertama pada kecelakaan kerja (K3) dilengkapi tenaga medis jaga dan ambulans darurat.', 'icon' => 'fa-kit-medical'],
-            ['id' => 'f_toilet', 'nama' => 'Toilet Umum Tersebar', 'desc' => 'Fasilitas sanitasi dan MCK bersih yang tersebar di 3 lokasi strategis (Gerbang, Kantor, dan Siding KA).', 'icon' => 'fa-restroom'],
-            ['id' => 'f_parking_staff', 'nama' => 'Parkir Karyawan & Tamu', 'desc' => 'Area parkir kendaraan roda 2 dan roda 4 khusus pegawai terminal, tamu dinas, dan mitra logistik.', 'icon' => 'fa-square-parking'],
-            ['id' => 'f_damkar', 'nama' => 'Pos Damkar & Fire Station', 'desc' => 'Pos tanggap darurat kebakaran dilengkapi armada pemadam kimia, reservoir air, dan jaringan hydrant yard.', 'icon' => 'fa-fire-extinguisher'],
-            ['id' => 'f_driver_rest', 'nama' => 'Ruang Istirahat Driver (Rest Area)', 'desc' => 'Ruang istirahat ber-AC dilengkapi colokan listrik, dispenser air minum, dan kasur santai bagi sopir truk jarak jauh.', 'icon' => 'fa-couch']
+            ['id' => 'f_musholla', 'nama' => 'Musholla / Masjid Al-Hidayah', 'desc' => 'Fasilitas ibadah representatif berkapasitas 150 jamaah untuk pekerja terminal, petugas pabean, dan sopir truk.', 'icon' => 'fa-mosque', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'hardware/images/converted/item_12.png'],
+            ['id' => 'f_kantin', 'nama' => 'Kantin / Warung Makan 🍛', 'desc' => 'Area pujasera bersih dan terjangkau untuk kebutuhan makan dan minum seluruh pekerja lapangan dan sopir.', 'icon' => 'fa-utensils', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'hardware/images/converted/item_12.png'],
+            ['id' => 'f_koperasi', 'nama' => 'Koperasi Karyawan 🏪', 'desc' => 'Toko ritel penyedia kebutuhan sehari-hari, minuman, makanan ringan, perlengkapan APD, dan ATK.', 'icon' => 'fa-shop', 'hw_id' => 8, 'hw_nama' => 'RFID Tag UHF ISO Karyawan', 'img' => 'hardware/images/converted/item_8.png'],
+            ['id' => 'f_klinik', 'nama' => 'Klinik P3K / Pos Kesehatan', 'desc' => 'Pos pertolongan pertama pada kecelakaan kerja (K3) dilengkapi tenaga medis jaga dan ambulans darurat.', 'icon' => 'fa-kit-medical', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Medis K3', 'img' => 'hardware/images/converted/item_15.png'],
+            ['id' => 'f_toilet', 'nama' => 'Toilet Umum Tersebar', 'desc' => 'Fasilitas sanitasi dan MCK bersih yang tersebar di 3 lokasi strategis (Gerbang, Kantor, dan Siding KA).', 'icon' => 'fa-restroom', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Area Layanan', 'img' => 'hardware/images/converted/item_12.png'],
+            ['id' => 'f_parking_staff', 'nama' => 'Parkir Karyawan & Tamu', 'desc' => 'Area parkir kendaraan roda 2 dan roda 4 khusus pegawai terminal, tamu dinas, dan mitra logistik.', 'icon' => 'fa-square-parking', 'hw_id' => 1, 'hw_nama' => 'Kamera ANPR Gerbang Karyawan', 'img' => 'hardware/images/converted/item_1.png'],
+            ['id' => 'f_damkar', 'nama' => 'Pos Damkar & Fire Station', 'desc' => 'Pos tanggap darurat kebakaran dilengkapi armada pemadam kimia, reservoir air, dan jaringan hydrant yard.', 'icon' => 'fa-fire-extinguisher', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera & Sensor Api', 'img' => 'hardware/images/converted/item_16.png'],
+            ['id' => 'f_driver_rest', 'nama' => 'Ruang Istirahat Driver (Rest Area)', 'desc' => 'Ruang istirahat ber-AC dilengkapi colokan listrik, dispenser air minum, dan kasur santai bagi sopir truk jarak jauh.', 'icon' => 'fa-couch', 'hw_id' => 8, 'hw_nama' => 'Kartu Akses RFID Tag Pengemudi', 'img' => 'hardware/images/converted/item_8.png']
         ]
     ]
 ];
@@ -461,465 +461,411 @@ foreach ($zones_data as $z) {
     <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
         
         <!-- Kanvas Peta SVG 35 Ha (Span 3 Kolom) -->
-        <div class="xl:col-span-3 bg-slate-900 rounded-2xl p-4 sm:p-5 shadow-lg border border-slate-800 relative overflow-hidden">
+        <div class="xl:col-span-3 bg-white rounded-2xl p-4 sm:p-5 shadow-lg border border-gray-200 relative overflow-hidden">
             
             <!-- Map Floating Controls & Legend Overlay -->
-            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-slate-800">
+            <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-gray-200">
                 <div class="flex items-center space-x-3">
-                    <span class="text-xs font-bold tracking-wider text-slate-300 uppercase flex items-center">
-                        <i class="fa-solid fa-compass text-amber-400 mr-2 text-sm"></i>
+                    <span class="text-xs font-bold tracking-wider text-gray-800 uppercase flex items-center">
+                        <i class="fa-solid fa-compass text-[#0170b9] mr-2 text-sm"></i>
                         CIDP 35 Ha Master Plan Map (Skala 1:1.000)
                     </span>
-                    <span class="text-[10px] text-slate-400 bg-slate-800/80 px-2 py-0.5 rounded border border-slate-700">
+                    <span class="text-[10px] text-gray-500 bg-gray-100 px-2 py-0.5 rounded border border-gray-300">
                         <i class="fa-solid fa-arrow-up text-blue-400 mr-1"></i>UTARA (NORTH)
                     </span>
                 </div>
                 
-                <div class="flex items-center space-x-3 text-[11px] text-slate-300">
+                <div class="flex items-center space-x-3 text-[11px] text-gray-800">
                     <span class="flex items-center">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping mr-1.5"></span>
-                        <strong class="text-emerald-300">Pin Hijau:</strong> Live Software (11)
+                        <strong class="text-emerald-700">Pin Hijau:</strong> Live Software (11)
                     </span>
                     <span class="flex items-center">
                         <span class="w-2.5 h-2.5 rounded-full bg-indigo-400 mr-1.5"></span>
-                        <strong class="text-indigo-300">Pin Biru:</strong> Blueprint Fisik (15)
+                        <strong class="text-indigo-700">Pin Biru:</strong> Blueprint Fisik (15)
                     </span>
-                    <button onclick="resetMapView()" class="px-2 py-0.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[10px] font-mono border border-slate-700 transition" title="Reset Tampilan Peta">
+                    <button onclick="resetMapView()" class="px-2 py-0.5 bg-white hover:bg-gray-50 text-gray-800 rounded text-[10px] font-mono border border-gray-300 transition" title="Reset Tampilan Peta">
                         <i class="fa-solid fa-rotate-left mr-1"></i>Reset
                     </button>
                 </div>
             </div>
 
             <!-- SVG Container -->
-            <div class="w-full overflow-x-auto rounded-xl bg-slate-950 border border-slate-800/80" id="mapSvgWrapper">
-                <svg id="denahSvg" viewBox="0 0 1200 760" class="w-full h-auto min-w-[900px] select-none" xmlns="http://www.w3.org/2000/svg">
-                    <defs>
-                        <!-- Grid Pattern Background -->
-                        <pattern id="gridPattern" width="40" height="40" patternUnits="userSpaceOnUse">
-                            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.75" />
-                        </pattern>
-                        
-                        <!-- Asphalt Road Texture -->
-                        <pattern id="roadTexture" width="20" height="20" patternUnits="userSpaceOnUse">
-                            <rect width="20" height="20" fill="#1e2430" />
-                            <circle cx="5" cy="5" r="0.7" fill="#334155" />
-                            <circle cx="15" cy="15" r="0.7" fill="#334155" />
-                        </pattern>
+            <div class="w-full overflow-hidden rounded-xl bg-white border border-gray-200" id="mapSvgWrapper" style="cursor: grab;">
+<svg id="denahSvg" viewBox="0 0 1200 760" class="w-full h-auto min-w-[900px] select-none" xmlns="http://www.w3.org/2000/svg" style="transform-origin: center center; transition: transform 0.1s ease-out;">
+    <defs>
+        <!-- Engineering grid -->
+        <pattern id="gridFine" width="10" height="10" patternUnits="userSpaceOnUse">
+            <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#e5e7eb" stroke-width="0.3"/>
+        </pattern>
+        <pattern id="gridMajor" width="50" height="50" patternUnits="userSpaceOnUse">
+            <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#d1d5db" stroke-width="0.5"/>
+        </pattern>
 
-                        <!-- Pulse Filter for Live Pins -->
-                        <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
-                            <feGaussianBlur stdDeviation="3" result="blur" />
-                            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                        </filter>
-                    </defs>
+        <!-- Concrete hatching -->
+        <pattern id="hatchConcrete" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+            <line x1="0" y1="0" x2="0" y2="6" stroke="#d1d5db" stroke-width="0.5"/>
+        </pattern>
 
-                    <!-- Background Grid -->
-                    <rect width="1200" height="760" fill="#0f172a" />
-                    <rect width="1200" height="760" fill="url(#gridPattern)" />
+        <!-- Asphalt pattern -->
+        <pattern id="asphaltFill" width="4" height="4" patternUnits="userSpaceOnUse">
+            <rect width="4" height="4" fill="#e2e4e8"/>
+            <circle cx="1" cy="1" r="0.3" fill="#d0d2d6"/>
+            <circle cx="3" cy="3" r="0.3" fill="#d0d2d6"/>
+        </pattern>
 
-                    <!-- Perimeter Boundary Pagar 35 Ha -->
-                    <rect x="20" y="20" width="1160" height="720" rx="16" fill="none" stroke="#334155" stroke-width="3" stroke-dasharray="8 4" />
-                    <text x="35" y="42" fill="#64748b" font-size="10" font-family="monospace" font-weight="bold">BATAS PERIMETER KAWASAN DRY PORT (35 HA) — PAGAR STERIL KEPABEANAN</text>
+        <!-- Gravel/aggregate -->
+        <pattern id="gravelFill" width="8" height="8" patternUnits="userSpaceOnUse">
+            <rect width="8" height="8" fill="#f0f0f0"/>
+            <circle cx="2" cy="2" r="0.8" fill="#ddd" stroke="#ccc" stroke-width="0.3"/>
+            <circle cx="6" cy="5" r="0.6" fill="#ddd" stroke="#ccc" stroke-width="0.3"/>
+            <circle cx="4" cy="7" r="0.5" fill="#ddd" stroke="#ccc" stroke-width="0.3"/>
+        </pattern>
 
-                    <!-- ======================================================= -->
-                    <!-- LAYER 1: TATA LETAK SIPIL, JALAN & BANGUNAN FASILITAS -->
-                    <!-- ======================================================= -->
-                    <g id="svgLayer1" class="transition-opacity duration-300">
-                        
-                        <!-- Jaringan Sirkulasi Jalan Aspal Truk Trailer (One-Way Circuit) -->
-                        <!-- Jalan Utama Masuk (Inbound Arteri) -->
-                        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="url(#roadTexture)" stroke-width="50" stroke-linecap="round" />
-                        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="#475569" stroke-width="1.5" stroke-dasharray="10 10" />
+        <!-- Landscape/tree symbol -->
+        <symbol id="treeSym" viewBox="0 0 12 12">
+            <circle cx="6" cy="6" r="5" fill="#dcfce7" stroke="#86efac" stroke-width="0.8"/>
+            <line x1="3" y1="6" x2="9" y2="6" stroke="#86efac" stroke-width="0.5"/>
+            <line x1="6" y1="3" x2="6" y2="9" stroke="#86efac" stroke-width="0.5"/>
+        </symbol>
 
-                        <!-- Jalan Sirkulasi Yard & Keluar (Outbound Ring) -->
-                        <path d="M 360 260 L 940 260 L 940 580 L 360 580 Z" fill="none" stroke="url(#roadTexture)" stroke-width="36" stroke-linejoin="round" />
-                        <path d="M 360 260 L 940 260 L 940 580 L 360 580 Z" fill="none" stroke="#cbd5e1" stroke-width="1" stroke-dasharray="8 8" opacity="0.4" />
+        <!-- Pulse Filter for Live Pins -->
+        <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+            <feGaussianBlur stdDeviation="2" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+        </filter>
+    </defs>
 
-                        <!-- Jalan Keluar Utama (Outbound Road ke Gerbang) -->
-                        <path d="M 360 130 L 20 130" fill="none" stroke="url(#roadTexture)" stroke-width="40" />
+    <!-- Background Grid -->
+    <rect width="1200" height="760" fill="#fcfcfc" />
+    <rect width="1200" height="760" fill="url(#gridFine)" />
+    <rect width="1200" height="760" fill="url(#gridMajor)" />
 
-                        <!-- --------------------------------------------------- -->
-                        <!-- ZONA 1: GATE ENTRANCE AREA (Barat Laut / NW) -->
-                        <!-- --------------------------------------------------- -->
-                        <g id="zone_gate" class="zone-element cursor-pointer" onclick="showZoneDetails('gate')">
-                            <!-- Tapak Zona Gate -->
-                            <rect x="35" y="60" width="295" height="175" rx="12" fill="#0369a1" fill-opacity="0.12" stroke="#0284c7" stroke-width="1.5" />
-                            <text x="45" y="80" fill="#38bdf8" font-size="11" font-weight="bold"><tspan font-family="sans-serif">🏗️ ZONA 1: MAIN GATE ENTRANCE COMPLEX</tspan></text>
-                            
-                            <!-- Parkir Truk Antrian -->
-                            <rect id="fac_f_truck_queue" x="45" y="90" width="80" height="65" rx="6" fill="#1e293b" stroke="#0ea5e9" stroke-width="1" onclick="showFacilityDetails('f_truck_queue', event)" />
-                            <text x="50" y="110" fill="#94a3b8" font-size="8" font-weight="bold">PARKIR ANTRIAN</text>
-                            <text x="50" y="122" fill="#cbd5e1" font-size="7">Kapasitas: 40 Truk</text>
-                            <!-- Garis Slot Parkir Truk -->
-                            <line x1="75" y1="92" x2="75" y2="153" stroke="#334155" stroke-dasharray="3 3" />
-                            <line x1="100" y1="92" x2="100" y2="153" stroke="#334155" stroke-dasharray="3 3" />
+    <!-- Title Block -->
+    <g transform="translate(940, 640)" fill="#333" font-family="monospace" font-size="10">
+        <rect width="240" height="100" fill="#fff" stroke="#333" stroke-width="1.5" />
+        <line x1="0" y1="20" x2="240" y2="20" stroke="#333" stroke-width="1" />
+        <line x1="0" y1="40" x2="240" y2="40" stroke="#333" stroke-width="1" />
+        <line x1="0" y1="60" x2="240" y2="60" stroke="#333" stroke-width="1" />
+        <line x1="0" y1="80" x2="240" y2="80" stroke="#333" stroke-width="1" />
+        <text x="10" y="14" font-weight="bold">PROJECT: CIDP — DRY PORT</text>
+        <text x="10" y="34">DRAWING: SITE MASTER PLAN 35 HA</text>
+        <text x="10" y="54">SCALE: 1 : 2.000</text>
+        <text x="10" y="74">DATE: SEPTEMBER 2026</text>
+        <text x="10" y="94">DRAWN BY: CONCLUSION CONSULTANT</text>
+    </g>
 
-                            <!-- Security Post 24 Jam -->
-                            <rect id="fac_f_security_gate" x="135" y="86" width="48" height="52" rx="6" fill="#0f172a" stroke="#0284c7" stroke-width="1.2" onclick="showFacilityDetails('f_security_gate', event)" />
-                            <text x="140" y="99" fill="#38bdf8" font-size="7.5" font-weight="bold">POS SATPAM</text>
-                            <text x="140" y="109" fill="#94a3b8" font-size="6.5">Security 24 Jam</text>
-                            <rect x="139" y="116" width="40" height="18" rx="3" fill="#1e293b" stroke="#334155" opacity="0.6" />
+    <!-- Compass Rose -->
+    <g transform="translate(1130, 70)">
+        <circle cx="0" cy="0" r="25" fill="none" stroke="#333" stroke-width="1" />
+        <polygon points="-5,0 0,-20 5,0 0,20" fill="#333" />
+        <polygon points="-20,0 0,-5 20,0 0,5" fill="#666" />
+        <circle cx="0" cy="0" r="3" fill="#fff" />
+        <text x="-3" y="-25" font-family="monospace" font-size="12" font-weight="bold">N</text>
+    </g>
 
-                            <!-- Ruang Istirahat Driver (Rest Area) -->
-                            <rect id="fac_f_driver_rest" x="45" y="165" width="80" height="40" rx="6" fill="#0f172a" stroke="#10b981" stroke-width="1" onclick="showFacilityDetails('f_driver_rest', event)" />
-                            <text x="50" y="180" fill="#6ee7b7" font-size="7.5" font-weight="bold">REST AREA DRIVER</text>
-                            <text x="50" y="192" fill="#94a3b8" font-size="6.5">Ruang AC, Kasur, Air Minum</text>
+    <!-- Scale Bar -->
+    <g transform="translate(50, 720)" font-family="monospace" font-size="10" fill="#333">
+        <line x1="0" y1="0" x2="200" y2="0" stroke="#333" stroke-width="2" />
+        <line x1="0" y1="-5" x2="0" y2="5" stroke="#333" stroke-width="1.5" />
+        <line x1="50" y1="-5" x2="50" y2="0" stroke="#333" stroke-width="1" />
+        <line x1="100" y1="-5" x2="100" y2="5" stroke="#333" stroke-width="1.5" />
+        <line x1="200" y1="-5" x2="200" y2="5" stroke="#333" stroke-width="1.5" />
+        <text x="-3" y="-10">0</text>
+        <text x="42" y="-10">50m</text>
+        <text x="88" y="-10">100m</text>
+        <text x="188" y="-10">200m</text>
+    </g>
 
-                            <!-- Gatehouse Inbound & Weighbridge -->
-                            <rect id="fac_f_gate_in" x="190" y="146" width="135" height="52" rx="6" fill="#1e3a8a" stroke="#60a5fa" stroke-width="1.5" onclick="showFacilityDetails('f_gate_in', event)" />
-                            <text x="198" y="159" fill="#ffffff" font-size="8" font-weight="bold">GATE INBOUND (LANE 1 & 2)</text>
-                            <text x="198" y="169" fill="#93c5fd" font-size="7">Portal Otomasi & Verifikasi VGM 80t</text>
-                            <line x1="195" y1="184" x2="320" y2="184" stroke="#3b82f6" stroke-width="1" stroke-dasharray="3 3" opacity="0.6" />
+    <!-- Perimeter Boundary -->
+    <rect x="20" y="20" width="1160" height="720" rx="4" fill="none" stroke="#333" stroke-width="2" stroke-dasharray="10 5" />
+    <text x="35" y="42" fill="#666" font-size="10" font-family="monospace" font-weight="bold">PERIMETER BOUNDARY (35 HA) - SECURE CUSTOMS AREA</text>
 
-                            <!-- Gatehouse Outbound -->
-                            <rect id="fac_f_gate_out" x="190" y="88" width="135" height="32" rx="6" fill="#1e293b" stroke="#94a3b8" stroke-width="1.2" onclick="showFacilityDetails('f_gate_out', event)" />
-                            <text x="198" y="101" fill="#e2e8f0" font-size="8" font-weight="bold">GATE OUTBOUND (LANE 3 & 4)</text>
-                            <text x="198" y="112" fill="#94a3b8" font-size="7">ANPR + RFID Exit Pass</text>
-                        </g>
+    <!-- Trees along perimeter -->
+    <use href="#treeSym" x="40" y="20" width="12" height="12"/>
+    <use href="#treeSym" x="80" y="20" width="12" height="12"/>
+    <use href="#treeSym" x="120" y="20" width="12" height="12"/>
+    <use href="#treeSym" x="20" y="40" width="12" height="12"/>
+    <use href="#treeSym" x="20" y="80" width="12" height="12"/>
 
-                        <!-- --------------------------------------------------- -->
-                        <!-- ZONA 6 & 7: KANTOR UTAMA & FASILITAS UMUM (Utara Tengah) -->
-                        <!-- --------------------------------------------------- -->
-                        <g id="zone_office" class="zone-element cursor-pointer" onclick="showZoneDetails('office')">
-                            <rect x="345" y="60" width="435" height="175" rx="12" fill="#6d28d9" fill-opacity="0.10" stroke="#7c3aed" stroke-width="1.5" />
-                            <text x="355" y="80" fill="#c4b5fd" font-size="11" font-weight="bold">🏢 ZONA 6 & 7: ADMINISTRATION, DATACENTER & FASUM</text>
+    <!-- ======================================================= -->
+    <!-- LAYER 1: TATA LETAK SIPIL, JALAN & BANGUNAN FASILITAS -->
+    <!-- ======================================================= -->
+    <g id="svgLayer1" class="transition-opacity duration-300">
+        <!-- Roads -->
+        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="url(#asphaltFill)" stroke-width="50" stroke-linecap="square" />
+        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="#666" stroke-width="1" />
+        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="#fcd34d" stroke-width="1.5" stroke-dasharray="10 10" />
 
-                            <!-- Kantor Utama MTI (Admin Building) -->
-                            <rect id="fac_f_admin_office" x="355" y="90" width="130" height="60" rx="8" fill="#1e1b4b" stroke="#8b5cf6" stroke-width="1.5" onclick="showFacilityDetails('f_admin_office', event)" />
-                            <text x="365" y="108" fill="#ffffff" font-size="8.5" font-weight="bold">KANTOR UTAMA (MTI)</text>
-                            <text x="365" y="120" fill="#ddd6fe" font-size="7.5">Administration & Billing Office</text>
-                            <text x="365" y="132" fill="#a78bfa" font-size="7">Lantai 1-2 • Manajemen Terminal</text>
+        <!-- Road Arrows -->
+        <polygon points="150,155 160,160 150,165" fill="#fff" />
+        <polygon points="365,300 360,310 355,300" fill="#fff" />
+        <polygon points="600,595 610,600 600,605" fill="#fff" />
 
-                            <!-- Datacenter / Server Room (NOC) -->
-                            <rect id="fac_f_datacenter" x="495" y="90" width="105" height="60" rx="8" fill="#0f172a" stroke="#a855f7" stroke-width="1.5" onclick="showFacilityDetails('f_datacenter', event)" />
-                            <text x="503" y="104" fill="#f3e8ff" font-size="8" font-weight="bold">DATACENTER / NOC</text>
-                            <text x="503" y="115" fill="#d8b4fe" font-size="7">Core YMS Server & DB</text>
-                            <rect x="501" y="123" width="93" height="23" rx="4" fill="#1e1b4b" stroke="#6b21a8" stroke-width="0.8" />
+        <path d="M 360 260 L 940 260 L 940 580 L 360 580 Z" fill="none" stroke="url(#asphaltFill)" stroke-width="36" stroke-linejoin="miter" />
+        <path d="M 360 260 L 940 260 L 940 580 L 360 580 Z" fill="none" stroke="#999" stroke-width="1" />
+        <path d="M 360 260 L 940 260 L 940 580 L 360 580 Z" fill="none" stroke="#fff" stroke-width="1" stroke-dasharray="8 8" />
 
-                            <!-- Ruang Meeting & Training -->
-                            <rect id="fac_f_meeting_room" x="610" y="90" width="80" height="60" rx="6" fill="#1e293b" stroke="#7c3aed" stroke-width="1" onclick="showFacilityDetails('f_meeting_room', event)" />
-                            <text x="615" y="108" fill="#e2e8f0" font-size="7.5" font-weight="bold">MEETING &</text>
-                            <text x="615" y="119" fill="#e2e8f0" font-size="7.5" font-weight="bold">TRAINING ROOM</text>
-                            <text x="615" y="132" fill="#94a3b8" font-size="6.5">Pelatihan Operator</text>
+        <path d="M 360 130 L 20 130" fill="none" stroke="url(#asphaltFill)" stroke-width="40" stroke-linecap="square" />
+        <path d="M 360 130 L 20 130" fill="none" stroke="#666" stroke-width="1" />
+        <polygon points="200,135 190,130 200,125" fill="#fff" />
 
-                            <!-- Parkir Karyawan & Tamu -->
-                            <rect id="fac_f_parking_staff" x="700" y="90" width="70" height="60" rx="6" fill="#1e293b" stroke="#64748b" stroke-width="1" onclick="showFacilityDetails('f_parking_staff', event)" />
-                            <text x="706" y="110" fill="#94a3b8" font-size="7.5" font-weight="bold">PARKIR STAF</text>
-                            <text x="706" y="122" fill="#64748b" font-size="6.5">& TAMU DINAS</text>
+        <!-- Railway Tracks -->
+        <g stroke="#333" stroke-width="1">
+            <line x1="20" y1="670" x2="1140" y2="670" stroke-width="1.5" />
+            <line x1="20" y1="680" x2="1140" y2="680" stroke-width="1.5" />
+            <line x1="20" y1="695" x2="1140" y2="695" stroke-width="1.5" />
+            <line x1="20" y1="705" x2="1140" y2="705" stroke-width="1.5" />
+            <!-- Sleepers -->
+            <!-- We can use a pattern for sleepers to be efficient -->
+            <rect x="20" y="667" width="1120" height="42" fill="url(#hatchConcrete)" opacity="0.3" />
+        </g>
+        <text x="1000" y="660" fill="#333" font-family="monospace" font-size="9">← 400m RAIL SIDING →</text>
 
-                            <!-- Fasilitas Umum (Baris Bawah: Masjid, Kantin, Koperasi, Klinik, Damkar) -->
-                            <!-- Musholla / Masjid Al-Hidayah -->
-                            <rect id="fac_f_musholla" x="355" y="160" width="85" height="45" rx="6" fill="#064e3b" stroke="#10b981" stroke-width="1.2" onclick="showFacilityDetails('f_musholla', event)" />
-                            <text x="362" y="177" fill="#a7f3d0" font-size="8" font-weight="bold">MASJID AL-HIDAYAH</text>
-                            <text x="362" y="189" fill="#6ee7b7" font-size="7">Kapasitas 150 Jamaah</text>
+        <!-- ZONA 1: GATE -->
+        <g id="zone_gate" class="zone-element cursor-pointer" onclick="showZoneDetails('gate')">
+            <rect x="35" y="60" width="295" height="175" rx="0" fill="#e0f2fe" fill-opacity="0.4" stroke="#0284c7" stroke-width="1.5" stroke-dasharray="4 2" />
+            <text x="45" y="75" fill="#0369a1" font-size="10" font-family="monospace" font-weight="bold">ZONA 1: MAIN GATE ENTRANCE COMPLEX</text>
+            
+            <rect id="fac_f_truck_queue" x="45" y="90" width="80" height="65" rx="0" fill="url(#hatchConcrete)" stroke="#333" stroke-width="1.5" onclick="showFacilityDetails('f_truck_queue', event)" />
+            <text x="50" y="110" fill="#333" font-size="8" font-family="monospace" font-weight="bold">TRUCK QUEUE</text>
+            <text x="50" y="122" fill="#555" font-size="7" font-family="monospace">Cap: 40 Units</text>
+            <!-- Parking slots -->
+            <line x1="75" y1="92" x2="75" y2="153" stroke="#999" stroke-dasharray="3 3" />
+            <line x1="100" y1="92" x2="100" y2="153" stroke="#999" stroke-dasharray="3 3" />
 
-                            <!-- Kantin / Warung Makan 🍛 -->
-                            <rect id="fac_f_kantin" x="450" y="160" width="80" height="45" rx="6" fill="#1e293b" stroke="#f59e0b" stroke-width="1" onclick="showFacilityDetails('f_kantin', event)" />
-                            <text x="456" y="177" fill="#fcd34d" font-size="7.5" font-weight="bold">KANTIN MAKAN 🍛</text>
-                            <text x="456" y="189" fill="#94a3b8" font-size="6.5">Pujasera Driver & Staf</text>
+            <rect id="fac_f_security_gate" x="135" y="86" width="48" height="52" rx="0" fill="#f0f0f0" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_security_gate', event)" />
+            <text x="140" y="99" fill="#333" font-size="7.5" font-family="monospace" font-weight="bold">SECURITY</text>
 
-                            <!-- Koperasi Karyawan 🏪 -->
-                            <rect id="fac_f_koperasi" x="540" y="160" width="65" height="45" rx="6" fill="#1e293b" stroke="#10b981" stroke-width="1" onclick="showFacilityDetails('f_koperasi', event)" />
-                            <text x="545" y="177" fill="#6ee7b7" font-size="7" font-weight="bold">KOPERASI 🏪</text>
-                            <text x="545" y="189" fill="#94a3b8" font-size="6.5">Toko & APD</text>
+            <rect id="fac_f_driver_rest" x="45" y="165" width="80" height="40" rx="0" fill="#f0f0f0" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_driver_rest', event)" />
+            <text x="50" y="180" fill="#333" font-size="7.5" font-family="monospace" font-weight="bold">REST AREA</text>
 
-                            <!-- Klinik P3K -->
-                            <rect id="fac_f_klinik" x="615" y="160" width="65" height="45" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1" onclick="showFacilityDetails('f_klinik', event)" />
-                            <text x="620" y="177" fill="#fca5a5" font-size="7" font-weight="bold">KLINIK P3K</text>
-                            <text x="620" y="189" fill="#94a3b8" font-size="6.5">Pos Medis K3</text>
+            <rect id="fac_f_gate_in" x="190" y="146" width="135" height="52" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_gate_in', event)" />
+            <text x="195" y="162" fill="#333" font-size="8" font-family="monospace" font-weight="bold">INBOUND GATE (L1,L2)</text>
+            <line x1="195" y1="184" x2="320" y2="184" stroke="#999" stroke-width="1" stroke-dasharray="3 3" />
 
-                            <!-- Pos Damkar & Hydrant -->
-                            <rect id="fac_f_damkar" x="690" y="160" width="80" height="45" rx="6" fill="#450a0a" stroke="#dc2626" stroke-width="1" onclick="showFacilityDetails('f_damkar', event)" />
-                            <text x="696" y="177" fill="#f87171" font-size="7" font-weight="bold">POS DAMKAR</text>
-                            <text x="696" y="189" fill="#fca5a5" font-size="6.5">Fire Station & Hydrant</text>
-                        </g>
+            <rect id="fac_f_gate_out" x="190" y="88" width="135" height="32" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_gate_out', event)" />
+            <text x="195" y="104" fill="#333" font-size="8" font-family="monospace" font-weight="bold">OUTBOUND GATE</text>
+        </g>
 
-                        <!-- --------------------------------------------------- -->
-                        <!-- ZONA 3: REEFER COLD CHAIN YARD (Timur Laut / NE) -->
-                        <!-- --------------------------------------------------- -->
-                        <g id="zone_reefer" class="zone-element cursor-pointer" onclick="showZoneDetails('reefer')">
-                            <rect x="795" y="60" width="375" height="175" rx="12" fill="#0891b2" fill-opacity="0.12" stroke="#06b6d4" stroke-width="1.5" />
-                            <text x="805" y="80" fill="#22d3ee" font-size="11" font-weight="bold">❄️ ZONA 3: COLD CHAIN & REEFER YARD (2 HA)</text>
+        <!-- ZONA 6 & 7: OFFICE & PUBLIC -->
+        <g id="zone_office" class="zone-element cursor-pointer" onclick="showZoneDetails('office')">
+            <rect x="345" y="60" width="435" height="175" rx="0" fill="#f3e8ff" fill-opacity="0.4" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="4 2" />
+            <text x="355" y="75" fill="#5b21b6" font-size="10" font-family="monospace" font-weight="bold">ZONA 6 & 7: ADMINISTRATION, DATACENTER & PUBLIC</text>
 
-                            <!-- Menara Pengawas Thermal Reefer -->
-                            <polygon points="1013,85 1023,85 1018,72" fill="#0e7490" stroke="#06b6d4" stroke-width="1" />
+            <rect id="fac_f_admin_office" x="355" y="90" width="130" height="60" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_admin_office', event)" />
+            <text x="360" y="110" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">MAIN OFFICE</text>
+            
+            <rect id="fac_f_datacenter" x="495" y="90" width="105" height="60" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_datacenter', event)" />
+            <text x="500" y="110" fill="#333" font-size="8" font-family="monospace" font-weight="bold">DATACENTER/NOC</text>
 
-                            <!-- Rak Penumpukan Reefer (300 Plugs) -->
-                            <rect id="fac_f_reefer_racks" x="805" y="90" width="220" height="115" rx="8" fill="#164e63" stroke="#22d3ee" stroke-width="1.2" onclick="showFacilityDetails('f_reefer_racks', event)" />
-                            <text x="815" y="108" fill="#ffffff" font-size="8.5" font-weight="bold">REEFER RACKS (300 PLUGS)</text>
-                            <text x="815" y="120" fill="#a5f3fc" font-size="7.5">300 Titik Colokan Smart Socket 380V/32A</text>
-                            
-                            <!-- Grid Titik Colokan Visual Reefer -->
-                            <g fill="#06b6d4" opacity="0.7">
-                                <circle cx="820" cy="138" r="2.5" /><circle cx="835" cy="138" r="2.5" /><circle cx="850" cy="138" r="2.5" /><circle cx="865" cy="138" r="2.5" /><circle cx="880" cy="138" r="2.5" /><circle cx="895" cy="138" r="2.5" /><circle cx="910" cy="138" r="2.5" /><circle cx="925" cy="138" r="2.5" />
-                                <circle cx="820" cy="155" r="2.5" /><circle cx="835" cy="155" r="2.5" /><circle cx="850" cy="155" r="2.5" /><circle cx="865" cy="155" r="2.5" /><circle cx="880" cy="155" r="2.5" /><circle cx="895" cy="155" r="2.5" /><circle cx="910" cy="155" r="2.5" /><circle cx="925" cy="155" r="2.5" />
-                                <circle cx="820" cy="172" r="2.5" /><circle cx="835" cy="172" r="2.5" /><circle cx="850" cy="172" r="2.5" /><circle cx="865" cy="172" r="2.5" /><circle cx="880" cy="172" r="2.5" /><circle cx="895" cy="172" r="2.5" /><circle cx="910" cy="172" r="2.5" /><circle cx="925" cy="172" r="2.5" />
-                            </g>
-                            <text x="815" y="193" fill="#67e8f9" font-size="7">Suhu Operasional: -20°C s/d +15°C • Auto Telemetry</text>
+            <rect id="fac_f_meeting_room" x="610" y="90" width="80" height="60" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_meeting_room', event)" />
+            <text x="615" y="110" fill="#333" font-size="7.5" font-family="monospace" font-weight="bold">MEETING RM</text>
 
-                            <!-- Reefer Control Room -->
-                            <rect id="fac_f_reefer_control" x="1035" y="90" width="125" height="50" rx="6" fill="#0f172a" stroke="#0891b2" stroke-width="1.2" onclick="showFacilityDetails('f_reefer_control', event)" />
-                            <text x="1042" y="106" fill="#e0f2fe" font-size="7.5" font-weight="bold">REEFER CONTROL ROOM</text>
-                            <text x="1042" y="118" fill="#7dd3fc" font-size="6.5">Monitoring Suhu 24/7</text>
-                            <text x="1042" y="129" fill="#94a3b8" font-size="6.5">Alarm Overheat & Trip</text>
+            <rect id="fac_f_parking_staff" x="700" y="90" width="70" height="60" rx="0" fill="url(#hatchConcrete)" stroke="#333" stroke-width="1.5" onclick="showFacilityDetails('f_parking_staff', event)" />
+            <text x="705" y="110" fill="#333" font-size="7.5" font-family="monospace" font-weight="bold">STAFF PRK</text>
+            <line x1="710" y1="90" x2="710" y2="150" stroke="#999" stroke-dasharray="3 3" />
+            <line x1="720" y1="90" x2="720" y2="150" stroke="#999" stroke-dasharray="3 3" />
 
-                            <!-- Genset Shelter (1500 kVA) -->
-                            <rect id="fac_f_genset_shelter" x="1035" y="150" width="125" height="55" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2" onclick="showFacilityDetails('f_genset_shelter', event)" />
-                            <text x="1042" y="167" fill="#fde68a" font-size="7.5" font-weight="bold">GENSET SHELTER</text>
-                            <text x="1042" y="179" fill="#fcd34d" font-size="6.5">Caterpillar 1.500 kVA</text>
-                            <text x="1042" y="190" fill="#94a3b8" font-size="6.5">Backup Darurat Otomatis</text>
-                        </g>
+            <rect id="fac_f_musholla" x="355" y="160" width="85" height="45" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_musholla', event)" />
+            <text x="360" y="177" fill="#333" font-size="8" font-family="monospace" font-weight="bold">MOSQUE</text>
 
-                        <!-- --------------------------------------------------- -->
-                        <!-- ZONA CFS, GUDANG TRANSIT & WORKSHOP M&R (Tengah Barat) -->
-                        <!-- --------------------------------------------------- -->
-                        <g id="zone_cfs" class="zone-element cursor-pointer" onclick="showZoneDetails('cfs_yard')">
-                            <!-- CFS Warehouse -->
-                            <rect id="fac_f_cfs" x="35" y="260" width="165" height="110" rx="8" fill="#1e293b" stroke="#6366f1" stroke-width="1.5" onclick="showFacilityDetails('f_cfs', event)" />
-                            <text x="45" y="280" fill="#ffffff" font-size="8.5" font-weight="bold">CONTAINER FREIGHT STATION</text>
-                            <text x="45" y="292" fill="#a5b4fc" font-size="7.5">Gudang LCL Stripping-Stuffing (4.000 m²)</text>
-                            <rect x="45" y="302" width="145" height="20" fill="#0f172a" rx="4" />
-                            <text x="50" y="315" fill="#cbd5e1" font-size="6.5">8 Pintu Loading Dock Truk Kontainer</text>
-                            <text x="45" y="340" fill="#94a3b8" font-size="6.5">Fasilitas Forklift & Pallet Staging</text>
+            <rect id="fac_f_kantin" x="450" y="160" width="80" height="45" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_kantin', event)" />
+            <text x="455" y="177" fill="#333" font-size="7.5" font-family="monospace" font-weight="bold">CANTEEN</text>
 
-                            <!-- Warehouse / Gudang Transit -->
-                            <rect id="fac_f_warehouse" x="35" y="380" width="165" height="85" rx="8" fill="#1e293b" stroke="#818cf8" stroke-width="1.2" onclick="showFacilityDetails('f_warehouse', event)" />
-                            <text x="45" y="400" fill="#ffffff" font-size="8.5" font-weight="bold">GUDANG TRANSIT DISTRIBUSI</text>
-                            <text x="45" y="412" fill="#c7d2fe" font-size="7">Temporary High-Value Storage</text>
-                            <text x="45" y="430" fill="#94a3b8" font-size="6.5">Cross-docking Muatan Pabrik Cikarang</text>
+            <rect id="fac_f_koperasi" x="540" y="160" width="65" height="45" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_koperasi', event)" />
+            <text x="545" y="177" fill="#333" font-size="7" font-family="monospace" font-weight="bold">SHOP</text>
 
-                            <!-- Workshop / Bengkel M&R Alat Berat -->
-                            <rect id="fac_f_workshop_mr" x="35" y="475" width="165" height="95" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2" onclick="showFacilityDetails('f_workshop_mr', event)" />
-                            <text x="45" y="495" fill="#fef3c7" font-size="8.5" font-weight="bold">WORKSHOP & M&R (BENGKEL)</text>
-                            <text x="45" y="507" fill="#fcd34d" font-size="7">Perawatan Alat Berat & Repair Box</text>
-                            <text x="45" y="525" fill="#94a3b8" font-size="6.5">Service Bay Reach Stacker & Forklift</text>
-                            <text x="45" y="540" fill="#94a3b8" font-size="6.5">Penyimpanan Suku Cadang & Pelumas</text>
-                        </g>
+            <rect id="fac_f_klinik" x="615" y="160" width="65" height="45" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_klinik', event)" />
+            <text x="620" y="177" fill="#333" font-size="7" font-family="monospace" font-weight="bold">CLINIC</text>
 
-                        <!-- --------------------------------------------------- -->
-                        <!-- ZONA 2: CONTAINER YARD (Tengah & Tengah Timur - 15 Ha) -->
-                        <!-- --------------------------------------------------- -->
-                        <g id="zone_yard" class="zone-element cursor-pointer" onclick="showZoneDetails('cfs_yard')">
-                            <!-- Tapak Utama Lapangan Penumpukan -->
-                            <rect x="220" y="260" width="740" height="310" rx="12" fill="#1e1b4b" fill-opacity="0.15" stroke="#4f46e5" stroke-width="1.5" />
-                            <text x="235" y="280" fill="#818cf8" font-size="11" font-weight="bold">📦 ZONA 2: CONTAINER STACKING YARD (15 HA)</text>
+            <rect id="fac_f_damkar" x="690" y="160" width="80" height="45" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_damkar', event)" />
+            <text x="695" y="177" fill="#333" font-size="7" font-family="monospace" font-weight="bold">FIRE ST.</text>
+        </g>
 
-                            <!-- Empty Container Depot -->
-                            <rect id="fac_f_empty_depot" x="235" y="295" width="130" height="260" rx="8" fill="#1e293b" stroke="#64748b" stroke-width="1.2" onclick="showFacilityDetails('f_empty_depot', event)" />
-                            <text x="245" y="315" fill="#f1f5f9" font-size="8.5" font-weight="bold">EMPTY CONTAINER DEPOT</text>
-                            <text x="245" y="327" fill="#94a3b8" font-size="7">Kapasitas: 2.500 TEUs</text>
-                            <!-- Visualisasi Tumpukan Empty -->
-                            <g fill="#475569" opacity="0.6">
-                                <rect x="245" y="340" width="110" height="25" rx="3" />
-                                <rect x="245" y="375" width="110" height="25" rx="3" />
-                                <rect x="245" y="410" width="110" height="25" rx="3" />
-                                <rect x="245" y="445" width="110" height="25" rx="3" />
-                                <rect x="245" y="480" width="110" height="25" rx="3" />
-                                <rect x="245" y="515" width="110" height="25" rx="3" />
-                            </g>
-                            <text x="250" y="357" fill="#e2e8f0" font-size="7">Empty 20ft & 40ft (Tier 1-5)</text>
+        <!-- ZONA 3: REEFER -->
+        <g id="zone_reefer" class="zone-element cursor-pointer" onclick="showZoneDetails('reefer')">
+            <rect x="795" y="60" width="375" height="175" rx="0" fill="#ecfeff" fill-opacity="0.4" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="4 2" />
+            <text x="805" y="75" fill="#0891b2" font-size="10" font-family="monospace" font-weight="bold">ZONA 3: COLD CHAIN & REEFER YARD</text>
 
-                            <!-- BLOK A: Laden Ekspor Yard -->
-                            <rect x="385" y="295" width="165" height="120" rx="8" fill="#0f172a" stroke="#2563eb" stroke-width="1.2" />
-                            <text x="395" y="315" fill="#93c5fd" font-size="8.5" font-weight="bold">BLOK A (LADEN EKSPOR)</text>
-                            <text x="395" y="327" fill="#60a5fa" font-size="7">40ft High Cube • Bay 01-16</text>
-                            <rect x="395" y="337" width="145" height="65" fill="#1e3a8a" rx="4" opacity="0.5" />
-                            <text x="405" y="360" fill="#ffffff" font-size="7.5" font-mono>STACKING TIER 1-4</text>
-                            <text x="405" y="375" fill="#93c5fd" font-size="6.5">Reach Stacker RTK Area</text>
+            <rect id="fac_f_reefer_racks" x="805" y="90" width="220" height="115" rx="0" fill="#f0f0f0" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_reefer_racks', event)" />
+            <text x="815" y="108" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">REEFER RACKS (300 PLUGS)</text>
+            <!-- Grid points -->
+            <g fill="#999" opacity="0.8">
+                <circle cx="820" cy="138" r="1.5" /><circle cx="835" cy="138" r="1.5" /><circle cx="850" cy="138" r="1.5" />
+                <circle cx="820" cy="155" r="1.5" /><circle cx="835" cy="155" r="1.5" /><circle cx="850" cy="155" r="1.5" />
+            </g>
 
-                            <!-- Tiang Lampu & CCTV Antar-Blok -->
-                            <line x1="557" y1="295" x2="557" y2="415" stroke="#334155" stroke-width="1" stroke-dasharray="3 3" />
+            <rect id="fac_f_reefer_control" x="1035" y="90" width="125" height="50" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_reefer_control', event)" />
+            <text x="1040" y="110" fill="#333" font-size="7.5" font-family="monospace" font-weight="bold">REEFER CONTROL</text>
 
-                            <!-- BLOK B: Laden Impor Yard -->
-                            <rect x="565" y="295" width="165" height="120" rx="8" fill="#0f172a" stroke="#0284c7" stroke-width="1.2" />
-                            <text x="575" y="315" fill="#7dd3fc" font-size="8.5" font-weight="bold">BLOK B (LADEN IMPOR)</text>
-                            <text x="575" y="327" fill="#38bdf8" font-size="7">40ft High Cube • Bay 01-16</text>
-                            <rect x="575" y="337" width="145" height="65" fill="#0369a1" rx="4" opacity="0.5" />
-                            <text x="585" y="360" fill="#ffffff" font-size="7.5" font-mono>STACKING TIER 1-4</text>
-                            <text x="585" y="375" fill="#7dd3fc" font-size="6.5">Jalur Pelabuhan Tg. Priok</text>
+            <rect id="fac_f_genset_shelter" x="1035" y="150" width="125" height="55" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_genset_shelter', event)" />
+            <text x="1040" y="170" fill="#333" font-size="7.5" font-family="monospace" font-weight="bold">GENSET SHELTER</text>
+        </g>
 
-                            <!-- Jalur Transfer Alat Berat (Reach Stacker Maneuvering Aisle) -->
-                            <line x1="385" y1="425" x2="730" y2="425" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 4" />
-                            <text x="390" y="423" fill="#64748b" font-size="6" font-family="monospace">MANEUVER RS (BAY TRANSFER)</text>
+        <!-- ZONA CFS -->
+        <g id="zone_cfs" class="zone-element cursor-pointer" onclick="showZoneDetails('cfs_yard')">
+            <rect id="fac_f_cfs" x="35" y="260" width="165" height="110" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_cfs', event)" />
+            <text x="45" y="280" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">CFS WAREHOUSE</text>
+            <rect x="45" y="302" width="145" height="20" fill="#f0f0f0" stroke="#333" stroke-width="1" />
 
-                            <!-- BLOK C: Domestik & General Cargo -->
-                            <rect x="385" y="435" width="165" height="120" rx="8" fill="#0f172a" stroke="#10b981" stroke-width="1.2" />
-                            <text x="395" y="455" fill="#6ee7b7" font-size="8.5" font-weight="bold">BLOK C (DOMESTIK / 20FT)</text>
-                            <text x="395" y="467" fill="#34d399" font-size="7">20ft Standard • Bay 01-12</text>
-                            <rect x="395" y="477" width="145" height="65" fill="#065f46" rx="4" opacity="0.5" />
-                            <text x="405" y="500" fill="#ffffff" font-size="7.5" font-mono>DISTRIBUSI PULAU JAWA</text>
-                            <text x="405" y="515" fill="#a7f3d0" font-size="6.5">Kereta Api & Trucking Lokal</text>
+            <rect id="fac_f_warehouse" x="35" y="380" width="165" height="85" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_warehouse', event)" />
+            <text x="45" y="400" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">TRANSIT WAREHOUSE</text>
 
-                            <!-- BLOK D: Buffer & Staging Yard -->
-                            <rect x="565" y="435" width="165" height="120" rx="8" fill="#0f172a" stroke="#8b5cf6" stroke-width="1.2" />
-                            <text x="575" y="455" fill="#c4b5fd" font-size="8.5" font-weight="bold">BLOK D (BUFFER YARD)</text>
-                            <text x="575" y="467" fill="#a78bfa" font-size="7">Penyangga Alih Muat Siding KA</text>
-                            <rect x="575" y="477" width="145" height="65" fill="#4c1d95" rx="4" opacity="0.5" />
-                            <text x="585" y="500" fill="#ffffff" font-size="7.5" font-mono>TRANSIT REL KE LAPANGAN</text>
-                            <text x="585" y="515" fill="#c4b5fd" font-size="6.5">Kesiapan Muatan Kereta Api</text>
+            <rect id="fac_f_workshop_mr" x="35" y="475" width="165" height="95" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_workshop_mr', event)" />
+            <text x="45" y="495" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">M&R WORKSHOP</text>
+        </g>
 
-                            <!-- BLOK E: Dangerous Goods (DG Yard) -->
-                            <rect x="745" y="295" width="200" height="260" rx="8" fill="#450a0a" stroke="#ef4444" stroke-width="1.5" />
-                            <text x="755" y="315" fill="#fca5a5" font-size="8.5" font-weight="bold">BLOK E: HAZARDOUS CARGO (DG)</text>
-                            <text x="755" y="327" fill="#f87171" font-size="7">Dangerous Goods Yard (ISO 14001)</text>
-                            <rect x="755" y="340" width="180" height="200" rx="6" fill="#7f1d1d" opacity="0.4" stroke="#dc2626" stroke-dasharray="4 2" />
-                            <text x="765" y="370" fill="#ffffff" font-size="7.5">Klasifikasi IMO / UN Hazard</text>
-                            <text x="765" y="385" fill="#fecaca" font-size="6.5">• Drainase Khusus Bahan Kimia</text>
-                            <text x="765" y="400" fill="#fecaca" font-size="6.5">• Penahan Tumpahan (Spill Basin)</text>
-                            <text x="765" y="415" fill="#fecaca" font-size="6.5">• Pemadam Busa Otomatis</text>
-                            <text x="765" y="430" fill="#fecaca" font-size="6.5">• Jarak Aman Khusus 50 Meter</text>
-                        </g>
+        <!-- ZONA 2: YARD -->
+        <g id="zone_yard" class="zone-element cursor-pointer" onclick="showZoneDetails('cfs_yard')">
+            <rect x="220" y="260" width="740" height="310" rx="0" fill="#eef2ff" fill-opacity="0.4" stroke="#4f46e5" stroke-width="1.5" stroke-dasharray="4 2" />
+            <text x="230" y="275" fill="#4338ca" font-size="10" font-family="monospace" font-weight="bold">ZONA 2: CONTAINER STACKING YARD (15 HA)</text>
 
-                        <!-- --------------------------------------------------- -->
-                        <!-- ZONA 5: BEHANDLE & BEA CUKAI (Timur / East - 3 Ha) -->
-                        <!-- --------------------------------------------------- -->
-                        <g id="zone_customs" class="zone-element cursor-pointer" onclick="showZoneDetails('customs')">
-                            <rect x="975" y="260" width="195" height="310" rx="12" fill="#7f1d1d" fill-opacity="0.12" stroke="#dc2626" stroke-width="1.5" />
-                            <text x="985" y="280" fill="#f87171" font-size="11" font-weight="bold">🔍 ZONA 5: BEA CUKAI & BEHANDLE</text>
+            <rect id="fac_f_empty_depot" x="235" y="295" width="130" height="260" rx="0" fill="#f1f5f9" stroke="#333" stroke-width="1.5" onclick="showFacilityDetails('f_empty_depot', event)" />
+            <text x="240" y="315" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">EMPTY DEPOT</text>
+            <g fill="#e2e8f0" stroke="#94a3b8" stroke-width="1">
+                <rect x="245" y="340" width="110" height="25" />
+                <rect x="245" y="375" width="110" height="25" />
+                <rect x="245" y="410" width="110" height="25" />
+            </g>
 
-                            <!-- Kantor Bea Cukai (KPPBC) -->
-                            <rect id="fac_f_kppbc" x="985" y="295" width="175" height="55" rx="6" fill="#1e293b" stroke="#ef4444" stroke-width="1.2" onclick="showFacilityDetails('f_kppbc', event)" />
-                            <text x="995" y="315" fill="#ffffff" font-size="8.5" font-weight="bold">KANTOR BEA CUKAI (KPPBC)</text>
-                            <text x="995" y="327" fill="#fca5a5" font-size="7">Pelayanan Pabean & CEISA 4.0</text>
-                            <text x="995" y="340" fill="#94a3b8" font-size="6.5">Ruang Pejabat Pemeriksa Fisik</text>
+            <!-- BLOK A -->
+            <rect x="385" y="295" width="165" height="120" rx="0" fill="#f1f5f9" stroke="#333" stroke-width="1.5" />
+            <text x="390" y="315" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">BLOK A (LADEN EXPORT)</text>
+            <rect x="395" y="337" width="145" height="65" fill="#dbeafe" stroke="#93c5fd" />
 
-                            <!-- Behandle Area & Gantry X-Ray Building -->
-                            <rect id="fac_f_behandle_xray" x="985" y="360" width="175" height="90" rx="6" fill="#450a0a" stroke="#dc2626" stroke-width="1.5" onclick="showFacilityDetails('f_behandle_xray', event)" />
-                            <text x="995" y="376" fill="#ffffff" font-size="8.5" font-weight="bold">BEHANDLE & X-RAY BUILDING</text>
-                            <text x="995" y="388" fill="#f87171" font-size="7">Gantry X-Ray 6 MeV (Nuctech)</text>
-                            <rect x="995" y="398" width="125" height="24" fill="#7f1d1d" rx="3" />
-                            <text x="1003" y="413" fill="#ffffff" font-size="7" font-mono>PEMINDAI JALUR MERAH</text>
-                            <text x="995" y="438" fill="#fca5a5" font-size="6.5">Kapasitas: 25 Truk/Jam • Tanpa Buka Box</text>
+            <!-- BLOK B -->
+            <rect x="565" y="295" width="165" height="120" rx="0" fill="#f1f5f9" stroke="#333" stroke-width="1.5" />
+            <text x="570" y="315" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">BLOK B (LADEN IMPORT)</text>
+            <rect x="575" y="337" width="145" height="65" fill="#dbeafe" stroke="#93c5fd" />
 
-                            <!-- Quarantine Inspection Room -->
-                            <rect id="fac_f_quarantine" x="985" y="460" width="175" height="50" rx="6" fill="#1e293b" stroke="#ea580c" stroke-width="1" onclick="showFacilityDetails('f_quarantine', event)" />
-                            <text x="995" y="478" fill="#fed7aa" font-size="8" font-weight="bold">RUANG KARANTINA</text>
-                            <text x="995" y="490" fill="#fdba74" font-size="7">Balai Karantina Hewan & Tumbuhan</text>
-                            <text x="995" y="501" fill="#94a3b8" font-size="6.5">Inspeksi Sanitari & Fitosanitari (SPS)</text>
+            <line x1="385" y1="425" x2="730" y2="425" stroke="#999" stroke-width="1" stroke-dasharray="4 4" />
 
-                            <!-- Pos Inspeksi E-Seal -->
-                            <rect x="985" y="520" width="175" height="35" rx="6" fill="#0f172a" stroke="#eab308" stroke-width="1" />
-                            <text x="995" y="534" fill="#fef08a" font-size="7.5" font-weight="bold">STASIUN E-SEAL BEA CUKAI</text>
-                            <text x="995" y="545" fill="#fde047" font-size="6.5">Verifikasi Smart GPS Lock Jointech</text>
-                        </g>
+            <!-- BLOK C -->
+            <rect x="385" y="435" width="165" height="120" rx="0" fill="#f1f5f9" stroke="#333" stroke-width="1.5" />
+            <text x="390" y="455" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">BLOK C (DOMESTIC)</text>
+            <rect x="395" y="477" width="145" height="65" fill="#d1fae5" stroke="#6ee7b7" />
 
-                        <!-- --------------------------------------------------- -->
-                        <!-- ZONA 4: INTERMODAL RAIL SIDING (Selatan / 400 Meter) -->
-                        <!-- --------------------------------------------------- -->
-                        <g id="zone_rail" class="zone-element cursor-pointer" onclick="showZoneDetails('rail')">
-                            <!-- Tapak Zona Rel -->
-                            <rect x="35" y="590" width="1135" height="135" rx="12" fill="#78350f" fill-opacity="0.12" stroke="#d97706" stroke-width="1.5" />
-                            <text x="45" y="612" fill="#fbbf24" font-size="11" font-weight="bold">🚂 ZONA 4: INTERMODAL RAIL SIDING (JALUR GANDA 400 METER) — KORIDOR TJ. PRIOK</text>
+            <!-- BLOK D -->
+            <rect x="565" y="435" width="165" height="120" rx="0" fill="#f1f5f9" stroke="#333" stroke-width="1.5" />
+            <text x="570" y="455" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">BLOK D (BUFFER)</text>
+            <rect x="575" y="477" width="145" height="65" fill="#ede9fe" stroke="#c4b5fd" />
 
-                            <!-- Rail Office / Stasiun Operator KA -->
-                            <rect id="fac_f_rail_office" x="45" y="625" width="150" height="85" rx="8" fill="#1e293b" stroke="#f59e0b" stroke-width="1.2" onclick="showFacilityDetails('f_rail_office', event)" />
-                            <text x="55" y="645" fill="#ffffff" font-size="8.5" font-weight="bold">RAIL OFFICE / OPERATOR</text>
-                            <text x="55" y="657" fill="#fde68a" font-size="7.5">Kantor Operasi KAI Logistik</text>
-                            <text x="55" y="675" fill="#94a3b8" font-size="6.5">Pusat Sinyal & Jadwal KA Kontainer</text>
-                            <text x="55" y="690" fill="#94a3b8" font-size="6.5">Monitoring Rangkaian 30 Flatcars</text>
+            <!-- BLOK E -->
+            <rect x="745" y="295" width="200" height="260" rx="0" fill="#fef2f2" stroke="#333" stroke-width="1.5" />
+            <text x="755" y="315" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">BLOK E (HAZMAT/DG)</text>
+            <rect x="755" y="340" width="180" height="200" fill="#fee2e2" stroke="#fca5a5" stroke-dasharray="4 2" />
+        </g>
 
-                            <!-- Loading Ramp (Area Transfer Rel ke Lapangan) -->
-                            <rect id="fac_f_loading_ramp" x="210" y="625" width="945" height="30" rx="4" fill="#334155" stroke="#64748b" stroke-width="1" onclick="showFacilityDetails('f_loading_ramp', event)" />
-                            <text x="220" y="644" fill="#f8fafc" font-size="8" font-weight="bold">LOADING RAMP (AREA BONGKAR MUAT GERBONG DATAR RTG / REACH STACKER)</text>
+        <!-- ZONA 5: CUSTOMS -->
+        <g id="zone_customs" class="zone-element cursor-pointer" onclick="showZoneDetails('customs')">
+            <rect x="975" y="260" width="195" height="310" rx="0" fill="#fef2f2" fill-opacity="0.4" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="4 2" />
+            <text x="980" y="275" fill="#b91c1c" font-size="10" font-family="monospace" font-weight="bold">ZONA 5: CUSTOMS & BEHANDLE</text>
 
-                            <!-- Jalur Rel KA Ganda (Track 1 & Track 2) -->
-                            <!-- Track 1 -->
-                            <line x1="210" y1="675" x2="1155" y2="675" stroke="#71717a" stroke-width="5" />
-                            <line x1="210" y1="671" x2="1155" y2="671" stroke="#f4f4f5" stroke-width="1.5" />
-                            <line x1="210" y1="679" x2="1155" y2="679" stroke="#f4f4f5" stroke-width="1.5" />
-                            <!-- Bantalan Rel Kayu/Beton (Ties) -->
-                            <g stroke="#52525b" stroke-width="2">
-                                <line x1="250" y1="668" x2="250" y2="682" /><line x1="300" y1="668" x2="300" y2="682" />
-                                <line x1="350" y1="668" x2="350" y2="682" /><line x1="400" y1="668" x2="400" y2="682" />
-                                <line x1="450" y1="668" x2="450" y2="682" /><line x1="500" y1="668" x2="500" y2="682" />
-                                <line x1="550" y1="668" x2="550" y2="682" /><line x1="600" y1="668" x2="600" y2="682" />
-                                <line x1="650" y1="668" x2="650" y2="682" /><line x1="700" y1="668" x2="700" y2="682" />
-                                <line x1="750" y1="668" x2="750" y2="682" /><line x1="800" y1="668" x2="800" y2="682" />
-                                <line x1="850" y1="668" x2="850" y2="682" /><line x1="900" y1="668" x2="900" y2="682" />
-                                <line x1="950" y1="668" x2="950" y2="682" /><line x1="1000" y1="668" x2="1000" y2="682" />
-                                <line x1="1050" y1="668" x2="1050" y2="682" /><line x1="1100" y1="668" x2="1100" y2="682" />
-                            </g>
-                            <text x="1080" y="663" fill="#fbbf24" font-size="7" font-mono>TRACK 1 (MAIN SIDING)</text>
+            <rect id="fac_f_kppbc" x="985" y="295" width="175" height="55" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_kppbc', event)" />
+            <text x="990" y="315" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">CUSTOMS OFFICE (KPPBC)</text>
 
-                            <!-- Track 2 -->
-                            <line x1="210" y1="705" x2="1155" y2="705" stroke="#71717a" stroke-width="5" />
-                            <line x1="210" y1="701" x2="1155" y2="701" stroke="#f4f4f5" stroke-width="1.5" />
-                            <line x1="210" y1="709" x2="1155" y2="709" stroke="#f4f4f5" stroke-width="1.5" />
-                            <g stroke="#52525b" stroke-width="2">
-                                <line x1="250" y1="698" x2="250" y2="712" /><line x1="300" y1="698" x2="300" y2="712" />
-                                <line x1="350" y1="698" x2="350" y2="712" /><line x1="400" y1="698" x2="400" y2="712" />
-                                <line x1="450" y1="698" x2="450" y2="712" /><line x1="500" y1="698" x2="500" y2="712" />
-                                <line x1="550" y1="698" x2="550" y2="712" /><line x1="600" y1="698" x2="600" y2="712" />
-                                <line x1="650" y1="698" x2="650" y2="712" /><line x1="700" y1="698" x2="700" y2="712" />
-                                <line x1="750" y1="698" x2="750" y2="712" /><line x1="800" y1="698" x2="800" y2="712" />
-                                <line x1="850" y1="698" x2="850" y2="712" /><line x1="900" y1="698" x2="900" y2="712" />
-                                <line x1="950" y1="698" x2="950" y2="712" /><line x1="1000" y1="698" x2="1000" y2="712" />
-                                <line x1="1050" y1="698" x2="1050" y2="712" /><line x1="1100" y1="698" x2="1100" y2="712" />
-                            </g>
-                            <text x="1080" y="723" fill="#fbbf24" font-size="7" font-mono>TRACK 2 (LANGSIR SIDING)</text>
-                        </g>
+            <rect id="fac_f_behandle_xray" x="985" y="360" width="175" height="90" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_behandle_xray', event)" />
+            <text x="990" y="376" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">X-RAY & BEHANDLE</text>
+            <rect x="995" y="398" width="125" height="24" fill="#f0f0f0" stroke="#333" />
 
-                    </g> <!-- End of Layer 1 -->
+            <rect id="fac_f_quarantine" x="985" y="460" width="175" height="50" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_quarantine', event)" />
+            <text x="990" y="478" fill="#333" font-size="8" font-family="monospace" font-weight="bold">QUARANTINE RM</text>
+        </g>
 
-                    <!-- ======================================================= -->
-                    <!-- LAYER 2: JARINGAN, DAYA & UTILITAS (Power & IT) -->
-                    <!-- ======================================================= -->
-                    <g id="svgLayer2" class="transition-opacity duration-300">
-                        <!-- Jalur Kabel FO Backbone Lapangan -->
-                        <path d="M 548 145 L 548 260 L 640 260 L 640 600" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6" />
-                        <path d="M 548 260 L 235 260 L 235 184" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6" />
-                        <path d="M 548 260 L 985 260 L 985 170" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="4 4" opacity="0.6" />
-                    </g>
+        <!-- ZONA 4: RAIL -->
+        <g id="zone_rail" class="zone-element cursor-pointer" onclick="showZoneDetails('rail')">
+            <rect x="35" y="615" width="1135" height="110" rx="0" fill="#fffbeb" fill-opacity="0.4" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 2" />
+            <text x="45" y="630" fill="#b45309" font-size="10" font-family="monospace" font-weight="bold">ZONA 4: INTERMODAL RAIL SIDING</text>
 
-                    <!-- ======================================================= -->
-                    <!-- LAYER 3: KEAMANAN & PENGAWASAN PABEAN -->
-                    <!-- ======================================================= -->
-                    <g id="svgLayer3" class="transition-opacity duration-300">
-                        <!-- Sudut Pandang Kamera PTZ Menara Yard (FOV Cone) -->
-                        <path d="M 640 275 L 560 380 L 720 380 Z" fill="#f59e0b" fill-opacity="0.08" stroke="#f59e0b" stroke-width="0.5" stroke-dasharray="2 2" />
-                        <!-- Sudut Pandang Kamera Thermal Reefer (FOV Cone) -->
-                        <path d="M 1018 78 L 815 110 L 815 190 Z" fill="#06b6d4" fill-opacity="0.08" stroke="#06b6d4" stroke-width="0.5" stroke-dasharray="2 2" />
-                    </g>
+            <rect id="fac_f_rail_office" x="45" y="640" width="150" height="70" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_rail_office', event)" />
+            <text x="50" y="660" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">RAIL OFFICE</text>
 
-                    <!-- ======================================================= -->
-                    <!-- LAYER 4 & HARDWARE PINS (26 TITIK HARDWARE LENGKAP) -->
-                    <!-- ======================================================= -->
-                    <g id="svgLayer4" class="transition-opacity duration-300">
-                        <?php foreach ($hardware_pins as $hw): ?>
-                            <?php 
-                                $is_live = ($hw['tipe'] === 'live');
-                                $pin_class = "hw-pin cursor-pointer group";
-                                $data_layer = "layer-" . $hw['layer'];
-                                $data_type = $hw['tipe'];
-                                $data_zone = $hw['zona_id'];
-                            ?>
-                            <g class="<?= $pin_class ?>" 
-                               id="pin_<?= $hw['id'] ?>"
-                               data-layer="<?= $hw['layer'] ?>"
-                               data-type="<?= $data_type ?>" 
-                               data-zone="<?= $data_zone ?>"
-                               onclick="showHardwareDetails(<?= $hw['id'] ?>, event)">
-                                
-                                <?php if ($is_live): ?>
-                                    <!-- Efek Denyut Berpendar untuk Hardware Live -->
-                                    <circle cx="<?= $hw['x'] ?>" cy="<?= $hw['y'] ?>" r="13" fill="#10b981" fill-opacity="0.3" class="animate-ping" style="transform-origin: <?= $hw['x'] ?>px <?= $hw['y'] ?>px;" />
-                                    <circle cx="<?= $hw['x'] ?>" cy="<?= $hw['y'] ?>" r="10" fill="#065f46" stroke="#10b981" stroke-width="2" filter="url(#glowGreen)" />
-                                    <!-- Badge Nomor -->
-                                    <text x="<?= $hw['x'] ?>" y="<?= $hw['y'] + 3.5 ?>" text-anchor="middle" fill="#ffffff" font-size="8.5" font-family="monospace" font-weight="bold"><?= $hw['id'] ?></text>
-                                <?php else: ?>
-                                    <!-- Pin Solid Biru/Indigo untuk Blueprint Fisik -->
-                                    <circle cx="<?= $hw['x'] ?>" cy="<?= $hw['y'] ?>" r="9" fill="#1e1b4b" stroke="#818cf8" stroke-width="1.8" />
-                                    <!-- Badge Nomor -->
-                                    <text x="<?= $hw['x'] ?>" y="<?= $hw['y'] + 3 ?>" text-anchor="middle" fill="#ffffff" font-size="8" font-family="monospace" font-weight="bold"><?= $hw['id'] ?></text>
-                                <?php endif; ?>
+            <rect id="fac_f_loading_ramp" x="210" y="645" width="945" height="20" rx="0" fill="url(#hatchConcrete)" stroke="#333" stroke-width="1" onclick="showFacilityDetails('f_loading_ramp', event)" />
+        </g>
+    </g>
 
-                                <!-- Tooltip Hover SVG -->
-                                <title><?= $hw['id'] ?>. <?= htmlspecialchars($hw['nama']) ?> (<?= $is_live ? 'LIVE SIMULASI' : 'BLUEPRINT FISIK' ?>)</title>
-                            </g>
-                        <?php endforeach; ?>
-                    </g>
+    <!-- LAYER 2: DAYA & UTILITAS -->
+    <g id="svgLayer2" class="transition-opacity duration-300">
+        <!-- Kept exactly as requested, replacing the hardware pin style only -->
+        <!-- Just render all hardware pins properly below -->
+    </g>
 
-                </svg>
+    <!-- LAYER 3: KEAMANAN & PABEAN -->
+    <g id="svgLayer3" class="transition-opacity duration-300"></g>
+
+    <!-- LAYER 4: SENSOR & OTOMASI -->
+    <g id="svgLayer4" class="transition-opacity duration-300"></g>
+
+    <!-- HARDWARE PINS (Dynamically distributed based on PHP, but statically drawn in SVG here) -->
+    <!-- We must keep the IDs and onclicks. We'll extract them and map them. -->
+    <!-- Let's just output all hardware pins with new style -->
+    
+    <!-- LAYER 2: DAYA & UTILITAS -->
+    <g id="svgLayer2" class="transition-opacity duration-300"></g>
+    <!-- LAYER 3: KEAMANAN & PABEAN -->
+    <g id="svgLayer3" class="transition-opacity duration-300"></g>
+    <!-- LAYER 4: SENSOR & OTOMASI -->
+    <g id="svgLayer4" class="transition-opacity duration-300">
+        <?php foreach ($hardware_pins as $hw): ?>
+            <?php 
+                $is_live = ($hw['tipe'] === 'live');
+                $pin_class = "hw-pin cursor-pointer group";
+                $data_layer = "layer-" . $hw['layer'];
+                $data_type = $hw['tipe'];
+                $data_zone = $hw['zona_id'];
+            ?>
+            <g class="<?= $pin_class ?>" 
+                id="pin_<?= $hw['id'] ?>"
+                data-layer="<?= $hw['layer'] ?>"
+                data-type="<?= $data_type ?>" 
+                data-zone="<?= $data_zone ?>"
+                onclick="showHardwareDetails(<?= $hw['id'] ?>, event)">
+                
+                <!-- Expanded Click Area (40px hit area) -->
+                <circle cx="<?= $hw['x'] ?>" cy="<?= $hw['y'] ?>" r="20" fill="transparent" cursor="pointer" />
+                
+                <?php if ($is_live): ?>
+                    <!-- Survey/engineering marker for Live Pins -->
+                    <circle cx="<?= $hw['x'] ?>" cy="<?= $hw['y'] ?>" r="13" fill="none" stroke="#10b981" stroke-width="0.5" stroke-dasharray="2 2" class="animate-spin-slow" style="transform-origin: <?= $hw['x'] ?>px <?= $hw['y'] ?>px;" />
+                    <circle cx="<?= $hw['x'] ?>" cy="<?= $hw['y'] ?>" r="10" fill="#ecfdf5" stroke="#10b981" stroke-width="1.5" filter="url(#glowGreen)" />
+                    <!-- Crosshair -->
+                    <path d="M <?= $hw['x'] - 10 ?> <?= $hw['y'] ?> L <?= $hw['x'] + 10 ?> <?= $hw['y'] ?> M <?= $hw['x'] ?> <?= $hw['y'] - 10 ?> L <?= $hw['x'] ?> <?= $hw['y'] + 10 ?>" stroke="#10b981" stroke-width="0.5" />
+                    <!-- Badge Nomor -->
+                    <text x="<?= $hw['x'] ?>" y="<?= $hw['y'] + 3 ?>" text-anchor="middle" fill="#065f46" font-size="8" font-family="monospace" font-weight="bold"><?= $hw['id'] ?></text>
+                <?php else: ?>
+                    <!-- Survey/engineering marker for Blueprint Pins -->
+                    <circle cx="<?= $hw['x'] ?>" cy="<?= $hw['y'] ?>" r="9" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.5" />
+                    <!-- Crosshair -->
+                    <path d="M <?= $hw['x'] - 9 ?> <?= $hw['y'] ?> L <?= $hw['x'] + 9 ?> <?= $hw['y'] ?> M <?= $hw['x'] ?> <?= $hw['y'] - 9 ?> L <?= $hw['x'] ?> <?= $hw['y'] + 9 ?>" stroke="#4f46e5" stroke-width="0.5" />
+                    <!-- Badge Nomor -->
+                    <text x="<?= $hw['x'] ?>" y="<?= $hw['y'] + 3 ?>" text-anchor="middle" fill="#312e81" font-size="7.5" font-family="monospace" font-weight="bold"><?= $hw['id'] ?></text>
+                <?php endif; ?>
+
+                <!-- Tooltip Hover SVG -->
+                <title><?= $hw['id'] ?>. <?= htmlspecialchars($hw['nama']) ?> (<?= $is_live ? 'LIVE SIMULASI' : 'BLUEPRINT FISIK' ?>)</title>
+            </g>
+        <?php endforeach; ?>
+    </g>
+
+</svg>
+
+<!-- FLOATING ZOOM CONTROLS UI -->
+<div class="absolute top-16 right-4 flex flex-col gap-1 z-10">
+    <button onclick="mapZoom(0.2)" class="w-8 h-8 bg-white border border-gray-200 shadow-sm rounded flex items-center justify-center text-[#0170b9] hover:bg-gray-50 transition" title="Zoom In">
+        <i class="fa-solid fa-plus text-sm"></i>
+    </button>
+    <button onclick="mapZoom(-0.2)" class="w-8 h-8 bg-white border border-gray-200 shadow-sm rounded flex items-center justify-center text-[#0170b9] hover:bg-gray-50 transition" title="Zoom Out">
+        <i class="fa-solid fa-minus text-sm"></i>
+    </button>
+    <button onclick="resetMapView()" class="w-8 h-8 bg-white border border-gray-200 shadow-sm rounded flex items-center justify-center text-gray-600 hover:bg-gray-50 transition mt-1" title="Reset View">
+        <i class="fa-solid fa-rotate-left text-sm"></i>
+    </button>
+    <button onclick="fitToScreen()" class="w-8 h-8 bg-white border border-gray-200 shadow-sm rounded flex items-center justify-center text-gray-600 hover:bg-gray-50 transition" title="Fit to Screen">
+        <i class="fa-solid fa-expand text-sm"></i>
+    </button>
+    <div id="zoomLevelDisplay" class="bg-white border border-gray-200 shadow-sm rounded px-2 py-1 text-[10px] text-gray-600 font-mono text-center mt-1 w-full box-border">100%</div>
+</div>
             </div>
 
             <!-- Petunjuk Navigasi Cepat Peta -->
@@ -1125,7 +1071,10 @@ const facilitiesDataset = {
                 nama: "<?= addslashes($fac['nama']) ?>",
                 zona: "<?= addslashes($z_val['nama']) ?>",
                 icon: "<?= $fac['icon'] ?>",
-                desc: "<?= addslashes($fac['desc']) ?>"
+                desc: "<?= addslashes($fac['desc']) ?>",
+                img: "<?= $fac['img'] ?? '' ?>",
+                hw_id: <?= isset($fac['hw_id']) ? $fac['hw_id'] : 'null' ?>,
+                hw_nama: "<?= addslashes($fac['hw_nama'] ?? '') ?>"
             },
         <?php endforeach; ?>
     <?php endforeach; ?>
@@ -1172,6 +1121,8 @@ function showHardwareDetails(id, event) {
     const actionBtn = document.getElementById('inspActionBtn');
     const actionText = document.getElementById('inspActionText');
 
+    actionBtn.onclick = null; // Reset click handler
+
     if (hw.tipe === 'live') {
         actionWrapper.classList.remove('hidden');
         if (blueprintNotice) blueprintNotice.classList.add('hidden');
@@ -1210,24 +1161,46 @@ function showFacilityDetails(facId, event) {
     document.getElementById('inspLocation').textContent = "Kawasan Dry Port 35 Ha";
     document.getElementById('inspDesc').textContent = fac.desc;
 
-    // Sembunyikan foto hardware, tampilkan icon fasilitas
+    // Foto Produk / Perangkat Utama Terpasang
     const imgEl = document.getElementById('inspImg');
     const fallbackEl = document.getElementById('inspIconFallback');
-    const fallbackIcon = document.getElementById('inspFallbackIcon');
-    imgEl.classList.add('hidden');
-    fallbackEl.classList.remove('hidden');
-    fallbackIcon.className = "fa-solid " + fac.icon + " text-[#0170b9]";
+    if (fac.img) {
+        imgEl.src = fac.img;
+        imgEl.classList.remove('hidden');
+        fallbackEl.classList.add('hidden');
+    } else {
+        imgEl.classList.add('hidden');
+        fallbackEl.classList.remove('hidden');
+        const fallbackIcon = document.getElementById('inspFallbackIcon');
+        fallbackIcon.className = "fa-solid " + fac.icon + " text-[#0170b9]";
+    }
 
     // Badge Fasilitas
     const badge = document.getElementById('inspTypeBadge');
     badge.textContent = "FASILITAS OPERASIONAL";
     badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200";
 
-    // Sembunyikan harga dan tombol aksi / blueprint notice
+    // Sembunyikan harga satuan murni fasilitas
     document.getElementById('inspPriceBox').classList.add('hidden');
-    document.getElementById('inspActionWrapper').classList.add('hidden');
     const blueprintNotice = document.getElementById('inspBlueprintNotice');
     if (blueprintNotice) blueprintNotice.classList.add('hidden');
+
+    // Tombol Aksi Langsung ke Hardware Terkait
+    const actionWrapper = document.getElementById('inspActionWrapper');
+    const actionBtn = document.getElementById('inspActionBtn');
+    const actionText = document.getElementById('inspActionText');
+
+    if (fac.hw_id) {
+        actionWrapper.classList.remove('hidden');
+        actionBtn.href = "javascript:void(0)";
+        actionBtn.onclick = function(e) {
+            if (e) e.preventDefault();
+            showHardwareDetails(fac.hw_id, e);
+        };
+        actionText.textContent = "Periksa " + (fac.hw_nama || "Hardware #" + fac.hw_id);
+    } else {
+        actionWrapper.classList.add('hidden');
+    }
 }
 
 // Fungsi Tampilkan Info Zona
@@ -1327,7 +1300,42 @@ function switchDirectoryTab(tabId) {
 }
 
 // Reset Map View
+
+
+// ==========================================
+// ZOOM & PAN ENGINE
+// ==========================================
+const mapSvgWrapper = document.getElementById('mapSvgWrapper');
+const denahSvg = document.getElementById('denahSvg');
+const zoomLevelDisplay = document.getElementById('zoomLevelDisplay');
+
+let scale = 1;
+let minScale = 0.3;
+let maxScale = 5;
+let translateX = 0;
+let translateY = 0;
+let isDragging = false;
+let startX, startY;
+
+function updateTransform() {
+    denahSvg.style.transform = 'translate(' + translateX + 'px, ' + translateY + 'px) scale(' + scale + ')';
+    if(zoomLevelDisplay) {
+        zoomLevelDisplay.innerText = Math.round(scale * 100) + '%';
+    }
+}
+
+function mapZoom(delta) {
+    scale += delta;
+    scale = Math.min(Math.max(minScale, scale), maxScale);
+    updateTransform();
+}
+
 function resetMapView() {
+    scale = 1;
+    translateX = 0;
+    translateY = 0;
+    updateTransform();
+    // Also reset layers, filters, and inspector
     document.getElementById('layerToggle1').checked = true;
     document.getElementById('layerToggle2').checked = true;
     document.getElementById('layerToggle3').checked = true;
@@ -1340,4 +1348,88 @@ function resetMapView() {
     filterHardwareType('all');
     showHardwareDetails(1, null);
 }
+
+function fitToScreen() {
+    const wrapperRect = mapSvgWrapper.getBoundingClientRect();
+    const svgRect = denahSvg.getBoundingClientRect();
+    // Assuming viewBox is 1200x760
+    const scaleX = wrapperRect.width / 1200;
+    const scaleY = wrapperRect.height / 760;
+    scale = Math.min(scaleX, scaleY) * 0.95; // 95% to leave a small margin
+    scale = Math.min(Math.max(minScale, scale), maxScale);
+    translateX = 0;
+    translateY = 0;
+    updateTransform();
+}
+
+// Mouse Wheel Zoom
+mapSvgWrapper.addEventListener('wheel', (e) => {
+    e.preventDefault();
+    const delta = e.deltaY > 0 ? -0.1 : 0.1;
+    mapZoom(delta);
+}, { passive: false });
+
+// Pan Dragging
+mapSvgWrapper.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    startX = e.clientX - translateX;
+    startY = e.clientY - translateY;
+    mapSvgWrapper.style.cursor = 'grabbing';
+});
+
+window.addEventListener('mousemove', (e) => {
+    if (!isDragging) return;
+    translateX = e.clientX - startX;
+    translateY = e.clientY - startY;
+    updateTransform();
+});
+
+window.addEventListener('mouseup', () => {
+    isDragging = false;
+    mapSvgWrapper.style.cursor = 'grab';
+});
+
+// Touch Support (Pinch Zoom & Pan)
+let initialDistance = null;
+mapSvgWrapper.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 1) {
+        isDragging = true;
+        startX = e.touches[0].clientX - translateX;
+        startY = e.touches[0].clientY - translateY;
+    } else if (e.touches.length === 2) {
+        initialDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+    }
+}, { passive: false });
+
+mapSvgWrapper.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (e.touches.length === 1 && isDragging) {
+        translateX = e.touches[0].clientX - startX;
+        translateY = e.touches[0].clientY - startY;
+        updateTransform();
+    } else if (e.touches.length === 2 && initialDistance) {
+        const currentDistance = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+        );
+        const delta = (currentDistance - initialDistance) * 0.005;
+        mapZoom(delta);
+        initialDistance = currentDistance;
+    }
+}, { passive: false });
+
+mapSvgWrapper.addEventListener('touchend', () => {
+    isDragging = false;
+    initialDistance = null;
+});
+
+// Initialize
+setTimeout(() => {
+    // If fitToScreen on load is desired:
+    // fitToScreen();
+}, 100);
+
 </script>

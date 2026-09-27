@@ -1164,6 +1164,7 @@ foreach ($hardware_list as $item) {
                     <thead>
                         <tr class="bg-slate-50 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-200">
                             <th class="py-3.5 px-3 text-center w-12">No.</th>
+                            <th class="py-3.5 px-2 text-center w-16">Foto</th>
                             <th class="py-3.5 px-3.5">Hardware</th>
                             <th class="py-3.5 px-3.5">Klaster / Kategori</th>
                             <th class="py-3.5 px-3.5">Tipe Integrasi</th>
@@ -1179,6 +1180,11 @@ foreach ($hardware_list as $item) {
                         <?php foreach ($hardware_list as $hw): ?>
                         <tr class="hardware-row hover:bg-slate-50/70 transition-colors" data-category="<?= htmlspecialchars($hw['kategori']) ?>">
                             <td class="py-3 px-3 text-center font-bold text-gray-400"><?= $hw['no'] ?></td>
+                            <td class="py-2 px-2 text-center">
+                                <div class="w-12 h-12 rounded-lg bg-slate-50 border border-gray-200 p-1 flex items-center justify-center overflow-hidden mx-auto shadow-2xs hover:shadow-md transition-shadow group/img relative">
+                                    <img src="hardware/images/converted/item_<?= $hw['no'] ?>.png" alt="<?= htmlspecialchars($hw['nama']) ?>" class="max-w-full max-h-full object-contain group-hover/img:scale-125 transition-transform" loading="lazy">
+                                </div>
+                            </td>
                             <td class="py-3 px-3.5 font-bold text-gray-900"><?= htmlspecialchars($hw['nama']) ?></td>
                             <td class="py-3 px-3.5">
                                 <span class="px-2 py-0.5 rounded text-[11px] font-semibold bg-slate-100 text-slate-700">
