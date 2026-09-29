@@ -16,42 +16,36 @@ if (session_status() === PHP_SESSION_NONE) {
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
 
-<div class="space-y-4">
+<div class="space-y-3.5">
     
-    <!-- Top Header Banner (Compact & Streamlined) -->
-    <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-xl p-3.5 sm:p-4 text-white shadow-sm relative overflow-hidden">
-        <div class="absolute -right-8 -bottom-8 opacity-10 pointer-events-none">
-            <i class="fa-solid fa-gamepad text-8xl"></i>
-        </div>
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 relative z-10">
+    <!-- Top Header Banner (Executive, Clean & Modern) -->
+    <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-xl p-3.5 sm:p-4 text-white shadow-xs border border-blue-900/30">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
-                <div class="flex items-center space-x-2 mb-1.5">
-                    <span class="bg-emerald-500 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-md flex items-center shadow-xs">
-                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping mr-1.5"></span> LIVE 3D SIMULATOR
+                <div class="flex items-center space-x-2 mb-1">
+                    <span class="bg-emerald-500 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded flex items-center tracking-wide shadow-2xs">
+                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping mr-1.5"></span> LIVE 3D TWIN
                     </span>
-                    <span class="bg-white/15 text-blue-100 text-[11px] px-2 py-0.5 rounded-md font-medium border border-white/20">
-                        Three.js Engine v2.0
+                    <span class="bg-white/10 text-blue-100 text-[10px] px-2 py-0.5 rounded font-mono border border-white/15">
+                        CIDP 35 Ha Terminal Hub
                     </span>
-                    <span class="bg-amber-400/20 text-amber-200 text-[11px] px-2 py-0.5 rounded-md font-semibold border border-amber-300/30">
-                        <i class="fa-solid fa-graduation-cap mr-1"></i>Real-Time Stacking Update
+                    <span class="bg-amber-400/20 text-amber-200 text-[10px] px-2 py-0.5 rounded font-semibold border border-amber-300/30 hidden sm:inline-flex items-center">
+                        <i class="fa-solid fa-bolt mr-1 text-[9px]"></i>Real-Time IoT Interlock
                     </span>
                 </div>
-                <h1 class="text-base sm:text-lg font-bold tracking-tight">Pusat Kendali Simulasi 3D Virtual Terminal</h1>
-                <p class="text-blue-100 text-xs mt-0.5 max-w-3xl leading-relaxed">
-                    Simulasi 3D terminal intermodal 35 Ha. Anda dapat melakukan <strong>aksi operasional langsung di lapangan 3D</strong> (Relokasi box Reach Stacker, gerbang timbangan VGM, alih muat KA RTG) yang tersinkronisasi <em>real-time</em> dengan basis data MySQL.
+                <h1 class="text-base sm:text-lg font-bold tracking-tight">Virtual 3D Twin &amp; Konsol Sensor IoT</h1>
+                <p class="text-blue-100/90 text-xs mt-0.5 leading-relaxed">
+                    Emulasi fisik 11 perangkat keras operasional, sinkronisasi data lapangan ke MySQL, dan otomasi pembebanan tarif logistik.
                 </p>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <button onclick="openMoveModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-lg shadow-xs transition flex items-center">
-                    <i class="fa-solid fa-dolly mr-1.5 text-xs"></i>Pindahkan Box (RS)
+                <button onclick="runAutoInboundDemo()" id="btnAutoDemo" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center border border-emerald-400/40">
+                    <i class="fa-solid fa-play mr-1.5 text-xs"></i>Jalankan Alur Otomatis
                 </button>
-                <button onclick="triggerGateIn()" class="px-3 py-1.5 bg-white hover:bg-blue-50 text-[#004b87] font-bold text-xs rounded-lg shadow-xs transition flex items-center">
-                    <i class="fa-solid fa-truck-ramp-box mr-1.5 text-xs text-[#0170b9]"></i>Simulasi Gate-In Truk
+                <button onclick="openEndToEndGuideModal()" class="px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white font-bold text-xs rounded-lg border border-white/20 transition flex items-center">
+                    <i class="fa-solid fa-diagram-project mr-1.5 text-xs text-blue-200"></i>Alur 11 Hardware &amp; Finansial
                 </button>
-                <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center">
-                    <i class="fa-solid fa-train-subway mr-1.5 text-xs"></i>Bongkar KA (RTG)
-                </button>
-                <button onclick="resetSimulation()" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white font-medium text-xs rounded-lg border border-white/20 transition flex items-center" title="Reset Simulasi ke Posisi Awal">
+                <button onclick="resetSimulation()" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg border border-white/15 transition flex items-center" title="Reset Posisi Demo">
                     <i class="fa-solid fa-rotate-left mr-1"></i>Reset
                 </button>
             </div>
@@ -59,155 +53,221 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 
     <!-- 3D Canvas Viewport & Floating HUD System -->
-    <div class="relative bg-gray-950 rounded-xl overflow-hidden shadow-md border border-gray-800" style="height: 540px;" id="simulatorViewportContainer">
+    <div class="relative bg-gray-950 rounded-xl overflow-hidden shadow-xs border border-gray-800" style="height: 600px;" id="simulatorViewportContainer">
         
         <!-- WebGL Canvas Container -->
         <div id="webglCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
 
         <!-- Floating HUD: Top Camera Controls & Environment Toggle -->
-        <div class="absolute top-4 left-4 right-4 flex flex-wrap items-center justify-between gap-3 pointer-events-none">
+        <div class="absolute top-3.5 left-3.5 right-3.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
             
-            <!-- Camera Preset Selector -->
-            <div class="pointer-events-auto bg-gray-900/85 backdrop-blur-md border border-gray-700/60 rounded-xl px-3 py-2 flex items-center space-x-1.5 shadow-xl text-white">
-                <span class="text-xs text-gray-400 font-semibold px-1 mr-1 flex items-center">
-                    <i class="fa-solid fa-video mr-1.5 text-blue-400"></i>Sudut Kamera:
+            <!-- Camera Preset Selector (Engineering CAD & Operational Presets) -->
+            <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 flex items-center space-x-1 shadow-xl text-white overflow-x-auto max-w-full">
+                <span class="text-[11px] text-gray-400 font-semibold px-2 flex items-center shrink-0">
+                    <i class="fa-solid fa-compass-drafting mr-1.5 text-blue-400 text-xs"></i>CAD &amp; 3D:
                 </span>
-                <button onclick="setCameraView('overview')" class="cam-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-blue-600 text-white hover:bg-blue-500 transition" id="btnCamOverview">
-                    🛰️ Drone 35 Ha
+                <button onclick="setCameraView('plan')" class="cam-btn px-2 py-1 text-xs rounded-lg font-bold bg-slate-800 text-cyan-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamPlan" title="Denah 2D Top-Down Sipil (Sama dengan denah.php)">
+                    <i class="fa-solid fa-map text-[11px]"></i><span>Denah 2D CAD</span>
                 </button>
-                <button onclick="setCameraView('gate')" class="cam-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 transition" id="btnCamGate">
-                    🚧 Gate & VGM
+                <button onclick="setCameraView('iso')" class="cam-btn px-2 py-1 text-xs rounded-lg font-bold bg-slate-800 text-purple-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamIso" title="Sudut Isometrik Axonometric 45° BIM">
+                    <i class="fa-solid fa-cube text-[11px]"></i><span>Isometrik 45°</span>
                 </button>
-                <button onclick="setCameraView('yard')" class="cam-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 transition" id="btnCamYard">
-                    🏗️ Blok Yard
+                <button onclick="setCameraView('overview')" class="cam-btn px-2 py-1 text-xs rounded-lg font-bold bg-blue-600 text-white hover:bg-blue-500 transition flex items-center gap-1 shrink-0" id="btnCamOverview" title="Drone 3D Bebas 35 Hektar">
+                    <i class="fa-solid fa-satellite text-[11px]"></i><span>Drone 35 Ha</span>
                 </button>
-                <button onclick="setCameraView('rail')" class="cam-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 transition" id="btnCamRail">
-                    🚂 Rail Siding
+                <div class="h-4 w-px bg-slate-700 mx-0.5 shrink-0"></div>
+                <button onclick="setCameraView('gate')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamGate">
+                    <i class="fa-solid fa-archway text-[11px]"></i><span>Gate &amp; VGM</span>
                 </button>
-                <button onclick="setCameraView('cockpit')" class="cam-btn px-2.5 py-1 text-xs rounded-lg font-medium bg-gray-800 text-gray-300 hover:bg-gray-700 transition" id="btnCamCockpit">
-                    🕹️ Kabin RS (POV)
+                <button onclick="setCameraView('yard')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamYard">
+                    <i class="fa-solid fa-boxes-stacked text-[11px]"></i><span>Yard 15 Ha</span>
+                </button>
+                <button onclick="setCameraView('reefer')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamReefer">
+                    <i class="fa-solid fa-snowflake text-[11px]"></i><span>Reefer</span>
+                </button>
+                <button onclick="setCameraView('rail')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamRail">
+                    <i class="fa-solid fa-train text-[11px]"></i><span>Rail Siding</span>
+                </button>
+                <button onclick="setCameraView('cfs')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamCfs">
+                    <i class="fa-solid fa-warehouse text-[11px]"></i><span>CFS &amp; M&amp;R</span>
+                </button>
+                <button onclick="setCameraView('customs')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamCustoms">
+                    <i class="fa-solid fa-stamp text-[11px]"></i><span>Bea Cukai</span>
+                </button>
+                <button onclick="setCameraView('cockpit')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamCockpit">
+                    <i class="fa-solid fa-vr-cardboard text-[11px]"></i><span>Kabin RS</span>
                 </button>
             </div>
 
-            <!-- Lighting & Environment Controls -->
-            <div class="pointer-events-auto bg-gray-900/85 backdrop-blur-md border border-gray-700/60 rounded-xl px-3 py-2 flex items-center space-x-2 shadow-xl text-white">
-                <div class="flex items-center space-x-1 border-r border-gray-700 pr-2">
-                    <button onclick="setLightingMode('day')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium bg-amber-500/20 text-amber-300 border border-amber-400/30" id="btnLightDay" title="Mode Siang">
-                        ☀️ Siang
-                    </button>
-                    <button onclick="setLightingMode('sunset')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium text-gray-400 hover:text-white" id="btnLightSunset" title="Mode Senja / Sore">
-                        🌅 Senja
-                    </button>
-                    <button onclick="setLightingMode('night')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium text-gray-400 hover:text-white" id="btnLightNight" title="Mode Malam (Lampu Floodlight Aktif)">
-                        🌙 Malam
-                    </button>
-                </div>
-                <button onclick="toggleFullscreen()" class="p-1.5 text-gray-300 hover:text-white hover:bg-gray-800 rounded-lg transition" title="Layar Penuh">
-                    <i class="fa-solid fa-expand text-sm"></i>
+            <!-- Lighting, Technical Overlays & Fullscreen -->
+            <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 flex items-center space-x-1 shadow-xl text-white">
+                <button onclick="toggleTechnicalDimensions()" class="tech-btn px-2 py-1 text-xs rounded-lg font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center gap-1" id="btnToggleDimensions" title="Garis Ukur Dimensi CAD 3D">
+                    <i class="fa-solid fa-ruler-combined text-[11px]"></i><span class="hidden md:inline">Dimensi</span>
+                </button>
+                <button onclick="toggleCADTitleBlock()" class="tech-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:text-white flex items-center gap-1" id="btnToggleTitleBlock" title="Etiket Gambar Teknik Sipil">
+                    <i class="fa-solid fa-id-card-clip text-[11px]"></i><span class="hidden md:inline">Etiket CAD</span>
+                </button>
+                <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+                <button onclick="setLightingMode('day')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium bg-amber-500/20 text-amber-300 border border-amber-400/30 flex items-center gap-1" id="btnLightDay" title="Mode Siang">
+                    <i class="fa-solid fa-sun text-[11px]"></i><span>Siang</span>
+                </button>
+                <button onclick="setLightingMode('sunset')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium text-gray-400 hover:text-white flex items-center gap-1" id="btnLightSunset" title="Mode Senja">
+                    <i class="fa-solid fa-cloud-sun text-[11px]"></i><span>Senja</span>
+                </button>
+                <button onclick="setLightingMode('night')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium text-gray-400 hover:text-white flex items-center gap-1" id="btnLightNight" title="Mode Malam">
+                    <i class="fa-solid fa-moon text-[11px]"></i><span>Malam</span>
+                </button>
+                <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
+                <button onclick="toggleFullscreen()" class="p-1 px-2 text-gray-300 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Layar Penuh">
+                    <i class="fa-solid fa-expand text-xs"></i>
                 </button>
             </div>
         </div>
 
-        <!-- Floating HUD: Bottom Left - Live IoT Activity Ticker -->
-        <div class="absolute bottom-4 left-4 pointer-events-auto max-w-sm w-full">
-            <div class="bg-gray-900/85 backdrop-blur-md border border-gray-700/60 rounded-xl p-3 shadow-2xl text-white">
-                <div class="flex items-center justify-between pb-2 mb-2 border-b border-gray-800">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                        <span class="text-xs font-bold uppercase tracking-wider text-gray-300">Sensor Telemetry Feed</span>
-                    </div>
-                    <span class="text-[10px] text-gray-400 font-mono" id="liveClock">14:35:12 WIB</span>
+        <!-- Floating HUD: CAD Engineering Title Block (Etiket Gambar Teknik) -->
+        <div id="cadTitleBlock" class="absolute top-16 left-3.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 shadow-2xl text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-10 transition-all duration-300">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-700 font-bold text-white">
+                <span class="text-blue-400 flex items-center gap-1"><i class="fa-solid fa-compass-drafting"></i>CIDP 35 HA TWIN</span>
+                <span class="text-[8.5px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1 py-0.2 rounded">AS-BUILT DWG</span>
+            </div>
+            <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9.5px]">
+                <div><span class="text-slate-500">DWG NO:</span> <span class="text-white font-bold">CIDP-35HA-2026</span></div>
+                <div><span class="text-slate-500">SKALA:</span> <span class="text-amber-400 font-bold">1:2.000</span></div>
+                <div><span class="text-slate-500">PROYEKSI:</span> <span id="cadProjectionLabel" class="text-emerald-400 font-bold">PERSPEKTIF 3D</span></div>
+                <div><span class="text-slate-500">DATUM:</span> <span class="text-white font-bold">EL +0.00 M</span></div>
+                <div class="col-span-2 truncate"><span class="text-slate-500">KOORDINAT:</span> UTM 48S (107°08'E 06°18'S)</div>
+                <div class="col-span-2 truncate"><span class="text-slate-500">KONSULTAN:</span> Conclusion Supply Chain</div>
+            </div>
+        </div>
+
+        <!-- Floating HUD: Dynamic 3D Azimuth Compass Rose -->
+        <div id="cadCompassRose" class="absolute top-16 right-3.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-2xl text-center hidden md:flex flex-col items-center justify-center z-10 transition-all duration-300">
+            <div class="relative w-12 h-12 flex items-center justify-center">
+                <div id="compassDial" class="w-10 h-10 rounded-full border border-slate-600/80 flex items-center justify-center transition-transform duration-75">
+                    <div class="w-1 h-8 bg-gradient-to-b from-rose-500 to-slate-400 rounded-full"></div>
                 </div>
-                <div class="space-y-1.5 max-h-24 overflow-y-auto text-[11px] font-mono" id="simLogTicker">
+                <span class="absolute top-0 text-[8px] font-bold font-mono text-rose-400">N</span>
+                <span class="absolute bottom-0 text-[8px] font-bold font-mono text-slate-400">S</span>
+                <span class="absolute left-0 text-[8px] font-bold font-mono text-slate-400">W</span>
+                <span class="absolute right-0 text-[8px] font-bold font-mono text-slate-400">E</span>
+            </div>
+            <span id="compassHeading" class="text-[9px] font-mono font-bold text-slate-300 mt-0.5">360° N</span>
+        </div>
+
+        <!-- Floating HUD: Real-time 3D Navigation Target Indicator -->
+        <div id="hudTargetPill" class="absolute top-14 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 hidden z-20">
+            <div class="bg-slate-900/95 backdrop-blur-md border border-cyan-500/70 text-white px-3.5 py-1.5 rounded-full shadow-2xl flex items-center space-x-2 text-xs font-mono">
+                <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
+                <span class="text-cyan-300 font-bold uppercase text-[10px] shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i>Arah 3D:</span>
+                <span class="text-white font-bold truncate max-w-[200px] sm:max-w-xs" id="hudTargetText">Smart Gate Inbound Lane 1</span>
+                <span class="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 text-[9.5px] shrink-0" id="hudTargetHw">HW-01</span>
+                <span class="text-slate-400 text-[9.5px] hidden sm:inline shrink-0" id="hudTargetCoord">X: -10.0, Z: 55.0</span>
+                <button onclick="dismissTargetPill()" class="text-slate-400 hover:text-white ml-1 text-xs shrink-0" title="Tutup">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Floating HUD: Bottom Left - Compact SCADA Feed Ticker -->
+        <div class="absolute bottom-3.5 left-3.5 pointer-events-auto max-w-xs sm:max-w-sm w-full z-10">
+            <div class="bg-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-xl p-2.5 shadow-xl text-white">
+                <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-[10px]">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="font-bold uppercase tracking-wider text-slate-300">SCADA Telemetry Feed</span>
+                    </div>
+                    <span class="text-slate-400 font-mono" id="liveClock">--:--:-- WIB</span>
+                </div>
+                <div class="space-y-1 max-h-20 overflow-y-auto text-[10.5px] font-mono leading-tight" id="simLogTicker">
                     <div class="text-emerald-400 flex items-start">
-                        <span class="text-gray-500 mr-1.5">[SYS]</span>
-                        <span>Terminal Engine siap. 19 kontainer dimuat dari MySQL.</span>
+                        <span class="text-slate-500 mr-1.5">[SYS]</span>
+                        <span>Terminal Engine aktif. 19 box disinkronkan dari MySQL.</span>
                     </div>
                     <div class="text-blue-400 flex items-start">
-                        <span class="text-gray-500 mr-1.5">[GPS]</span>
-                        <span>RS-02 terhubung di Blok B (Operator: Agus Setiawan).</span>
+                        <span class="text-slate-500 mr-1.5">[GPS]</span>
+                        <span>RS-02 terkoneksi di Blok B (Operator: Agus Setiawan).</span>
                     </div>
                     <div class="text-amber-400 flex items-start">
-                        <span class="text-gray-500 mr-1.5">[GATE]</span>
-                        <span>Kamera ANPR Lane 1 & 2 Standby (Jembatan Timbang 80T Siap).</span>
+                        <span class="text-slate-500 mr-1.5">[GATE]</span>
+                        <span>Kamera ANPR Lane 1 &amp; 2 Siap (Jembatan 80T Siap).</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Floating HUD: Bottom Center - Quick Action Control Dock -->
-        <div class="absolute bottom-4 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center space-x-2 bg-gray-900/90 backdrop-blur-lg border border-gray-700/80 p-2 rounded-2xl shadow-2xl">
-            <button onclick="openMoveModal()" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-xl shadow transition flex items-center space-x-2">
-                <i class="fa-solid fa-arrows-up-down-left-right text-sm"></i>
+        <!-- Floating HUD: Bottom Center - Sleek Action Dock -->
+        <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center space-x-1.5 bg-slate-900/90 backdrop-blur-lg border border-slate-700/70 p-1.5 rounded-xl shadow-xl z-10">
+            <button onclick="triggerGateIn()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-truck text-xs"></i>
+                <span>Gate-In Truk &amp; VGM</span>
+            </button>
+            <button onclick="openMoveModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-arrows-up-down-left-right text-xs"></i>
                 <span>Relokasi Box (RS)</span>
             </button>
-            <button onclick="triggerGateIn()" class="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center space-x-2">
-                <i class="fa-solid fa-truck text-sm"></i>
-                <span>Gate-In Truk & VGM</span>
-            </button>
-            <button onclick="triggerRailDischarge()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-xl shadow transition flex items-center space-x-2">
-                <i class="fa-solid fa-train text-sm"></i>
+            <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-train text-xs"></i>
                 <span>Bongkar KA (RTG)</span>
             </button>
-            <button onclick="refreshStateFromDB()" class="px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-300 hover:text-white text-xs rounded-xl transition" title="Sinkronkan Ulang Data MySQL">
+            <button onclick="refreshStateFromDB()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition" title="Sinkronkan MySQL">
                 <i class="fa-solid fa-rotate text-xs"></i>
             </button>
         </div>
 
-        <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector (Klik Objek 3D) -->
-        <div class="absolute bottom-4 right-4 pointer-events-auto w-80 transition-all duration-300 hidden" id="inspectorCard">
-            <div class="bg-gray-900/95 backdrop-blur-lg border border-blue-500/50 rounded-2xl p-4 shadow-2xl text-white relative overflow-hidden">
+        <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector -->
+        <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-10" id="inspectorCard">
+            <div class="bg-slate-900/95 backdrop-blur-lg border border-blue-500/50 rounded-xl p-3.5 shadow-2xl text-white relative overflow-hidden">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
-                <div class="flex items-center justify-between mb-3">
+                <div class="flex items-center justify-between mb-2.5">
                     <div class="flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-                        <span class="text-xs font-bold uppercase tracking-wider text-blue-300">3D Object Inspector</span>
+                        <span class="w-2 h-2 rounded-full bg-blue-400"></span>
+                        <span class="text-[11px] font-bold uppercase tracking-wider text-blue-300">3D Container Inspector</span>
                     </div>
-                    <button onclick="closeInspector()" class="text-gray-400 hover:text-white text-sm">
+                    <button onclick="closeInspector()" class="text-slate-400 hover:text-white text-xs">
                         <i class="fa-solid fa-xmark"></i>
                     </button>
                 </div>
 
-                <div class="space-y-2 text-xs">
+                <div class="space-y-1.5 text-xs">
                     <div>
-                        <div class="text-[10px] text-gray-400 uppercase font-semibold">Nomor Kontainer (ISO 6346)</div>
-                        <div class="text-base font-bold font-mono text-white tracking-wider flex items-center justify-between" id="inspBoxNum">
+                        <div class="text-[9px] text-slate-400 uppercase font-semibold">Nomor Kontainer (ISO 6346)</div>
+                        <div class="text-sm font-bold font-mono text-white tracking-wider flex items-center justify-between" id="inspBoxNum">
                             MSKU9182374
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-gray-800">
+                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800 text-[11px]">
                         <div>
-                            <span class="text-gray-400 text-[10px] block">Tipe / Ukuran:</span>
-                            <span class="font-semibold text-gray-200" id="inspType">40FT HIGH CUBE</span>
+                            <span class="text-slate-400 text-[9px] block">Tipe / Ukuran:</span>
+                            <span class="font-semibold text-slate-200" id="inspType">40FT HIGH CUBE</span>
                         </div>
                         <div>
-                            <span class="text-gray-400 text-[10px] block">Kategori Muatan:</span>
+                            <span class="text-slate-400 text-[9px] block">Kategori Muatan:</span>
                             <span class="font-semibold" id="inspCargo">Dry General</span>
                         </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-gray-800">
+                    <div class="grid grid-cols-2 gap-2 pt-1 border-t border-slate-800 text-[11px]">
                         <div>
-                            <span class="text-gray-400 text-[10px] block">Posisi 3D Yard:</span>
-                            <span class="font-bold text-amber-400 font-mono text-xs" id="inspSlot">B-05-03-02</span>
+                            <span class="text-slate-400 text-[9px] block">Posisi 3D Yard:</span>
+                            <span class="font-bold text-amber-400 font-mono" id="inspSlot">B-05-03-02</span>
                         </div>
                         <div>
-                            <span class="text-gray-400 text-[10px] block">Berat Kotor (VGM):</span>
-                            <span class="font-semibold text-gray-200" id="inspWeight">28.450 kg</span>
+                            <span class="text-slate-400 text-[9px] block">Berat (VGM):</span>
+                            <span class="font-semibold text-slate-200" id="inspWeight">28.450 kg</span>
                         </div>
                     </div>
-                    <div class="pt-1 border-t border-gray-800">
-                        <span class="text-gray-400 text-[10px] block">Pemilik / Pelayaran:</span>
-                        <span class="font-medium text-gray-300 truncate block" id="inspOwner">Maersk Indonesia</span>
+                    <div class="pt-1 border-t border-slate-800 text-[11px]">
+                        <span class="text-slate-400 text-[9px] block">Pemilik / Pelayaran:</span>
+                        <span class="font-medium text-slate-300 truncate block" id="inspOwner">Maersk Indonesia</span>
                     </div>
-                    <div class="pt-1 border-t border-gray-800">
-                        <span class="text-gray-400 text-[10px] block">Tag RFID UHF:</span>
-                        <span class="font-mono text-purple-300 text-[11px] block" id="inspRfid">E280117000000001</span>
+                    <div class="pt-1 border-t border-slate-800 text-[11px]">
+                        <span class="text-slate-400 text-[9px] block">Tag RFID UHF:</span>
+                        <span class="font-mono text-purple-300 text-[10px] block" id="inspRfid">E280117000000001</span>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-3 border-t border-gray-800 flex items-center space-x-2">
-                    <button onclick="prefillAndOpenMove()" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-bold text-xs rounded-xl shadow transition flex items-center justify-center space-x-1.5">
-                        <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                <div class="mt-3 pt-2.5 border-t border-slate-800">
+                    <button onclick="prefillAndOpenMove()" class="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-arrows-up-down-left-right text-[11px]"></i>
                         <span>Pindahkan Box Ini</span>
                     </button>
                 </div>
@@ -216,26 +276,26 @@ if (session_status() === PHP_SESSION_NONE) {
 
         <!-- Notification Toast (Floating Top Center) -->
         <div id="simToast" class="absolute top-16 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 z-50">
-            <div class="bg-gray-900/95 backdrop-blur-md border border-emerald-500 text-white px-5 py-3 rounded-2xl shadow-2xl flex items-center space-x-3">
-                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-base" id="toastIcon">
+            <div class="bg-slate-900/95 backdrop-blur-md border border-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-3">
+                <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm shrink-0" id="toastIcon">
                     <i class="fa-solid fa-check"></i>
                 </div>
                 <div>
                     <div class="font-bold text-xs text-white" id="toastTitle">Aksi Berhasil Dieksekusi</div>
-                    <div class="text-[11px] text-gray-300" id="toastMsg">Kontainer berhasil dipindahkan.</div>
+                    <div class="text-[11px] text-slate-300" id="toastMsg">Kontainer berhasil dipindahkan.</div>
                 </div>
             </div>
         </div>
 
     </div>
 
-    <!-- 4 Information Cards (Metrik Operasional Simulasi Real-Time - Compact) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
+    <!-- 4 Quick KPI Micro-Cards (Clean & Compact) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
         
-        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
             <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Box di Lapangan</p>
-                <h4 class="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5 leading-none" id="statInYard">19 <span class="text-xs font-normal text-gray-400">box</span></h4>
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Box di Yard</p>
+                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none" id="statInYard">19 <span class="text-xs font-normal text-gray-400">box</span></h4>
                 <p class="text-[10px] text-emerald-600 font-medium mt-1 truncate"><i class="fa-solid fa-check-double mr-1"></i>Sync MySQL</p>
             </div>
             <div class="w-8 h-8 rounded-lg bg-blue-50 text-cdp-blue flex items-center justify-center text-sm shrink-0 ml-2">
@@ -243,10 +303,10 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
             <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Utilisasi Yard</p>
-                <h4 class="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5 leading-none" id="statYardUtil">23.8%</h4>
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Utilisasi Yard</p>
+                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none" id="statYardUtil">23.8%</h4>
                 <div class="w-20 bg-gray-100 rounded-full h-1 mt-1.5">
                     <div class="bg-blue-600 h-1 rounded-full" id="statYardBar" style="width: 23.8%"></div>
                 </div>
@@ -256,10 +316,10 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
             <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Armada Aktif</p>
-                <h4 class="text-xl sm:text-2xl font-bold text-gray-800 mt-0.5 leading-none">4 <span class="text-xs font-normal text-gray-400">unit</span></h4>
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Armada SCADA</p>
+                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none">4 <span class="text-xs font-normal text-gray-400">unit</span></h4>
                 <p class="text-[10px] text-gray-500 mt-1 truncate">3 RS + 1 RTG Crane</p>
             </div>
             <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm shrink-0 ml-2">
@@ -267,15 +327,978 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <div class="bg-white rounded-lg p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
             <div class="min-w-0">
-                <p class="text-[11px] font-semibold text-gray-500 uppercase tracking-wide truncate">Angin (Safety)</p>
-                <h4 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5 leading-none">6.4 <span class="text-xs font-normal text-gray-400">m/s</span></h4>
-                <p class="text-[10px] text-emerald-600 mt-1 truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Batas &lt; 20 m/s</p>
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Kondisi Angin</p>
+                <h4 class="text-xl font-bold text-emerald-600 mt-0.5 leading-none">6.4 <span class="text-xs font-normal text-gray-400">m/s</span></h4>
+                <p class="text-[10px] text-emerald-600 font-medium mt-1 truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Batas Aman &lt; 20 m/s</p>
             </div>
             <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shrink-0 ml-2">
                 <i class="fa-solid fa-wind"></i>
             </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- KONSOL SIMULASI OPERASIONAL LAPANGAN (DUAL-WORKFLOW ENGINE & SCADA HUB)   -->
+    <!-- ========================================================================= -->
+    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-3.5 sm:p-4 rounded-xl border border-slate-700 shadow-md space-y-3">
+        
+        <!-- Baris 1: Judul & Tombol Eksekusi Alur Master -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-700/80">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 text-white flex items-center justify-center text-base shadow-sm shrink-0">
+                    <i class="fa-solid fa-tower-broadcast"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2 flex-wrap">
+                        <h4 class="font-bold text-sm sm:text-base text-white tracking-tight">Konsol Simulasi Operasional Lapangan</h4>
+                        <span class="px-2 py-0.5 rounded text-[9px] font-mono font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">DUAL-WORKFLOW SCADA HUB</span>
+                    </div>
+                    <p class="text-[11px] text-slate-300 mt-0.5">Pilih alur simulasi otomatis terpisah antara armada truk dan kereta api, atau uji sensor mandiri</p>
+                </div>
+            </div>
+
+            <!-- Tombol Master Alur Otomatis (Truk vs Kereta Api) -->
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="runAutoTruckDemo()" id="btnAutoTruck" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-truck-moving text-xs"></i>
+                    <span>1. Alur Otomatis Truk (6 Tahap)</span>
+                </button>
+                <button onclick="runAutoTrainDemo()" id="btnAutoTrain" class="px-3.5 py-2 bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center gap-2">
+                    <i class="fa-solid fa-train-subway text-xs"></i>
+                    <span>2. Alur Otomatis KA (6 Tahap)</span>
+                </button>
+                <button onclick="resetSimulation()" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-lg border border-white/20 transition flex items-center gap-1.5" title="Reset Simulasi ke Posisi Awal">
+                    <i class="fa-solid fa-rotate-left text-xs"></i><span>Reset</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Baris 2: Navigasi Tab Pengendalian Terpadu -->
+        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
+            <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0" id="simTabNav">
+                <button onclick="switchSimTab('truck')" id="tabBtnTruck" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-truck-ramp-box text-[11px]"></i>
+                    <span>Alur Truk (Road-to-Yard)</span>
+                </button>
+                <button onclick="switchSimTab('train')" id="tabBtnTrain" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-train text-[11px]"></i>
+                    <span>Alur Kereta Api (Rail-to-Yard)</span>
+                </button>
+                <button onclick="switchSimTab('scada')" id="tabBtnScada" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-sliders text-[11px]"></i>
+                    <span>11 Sensor SCADA Mandiri</span>
+                </button>
+                <button onclick="switchSimTab('scanner')" id="tabBtnScanner" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-barcode text-[11px]"></i>
+                    <span>Uji Scanner AIDC / GS1</span>
+                </button>
+                <button onclick="switchSimTab('catalog')" id="tabBtnCatalog" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-book-open text-[11px]"></i>
+                    <span>Katalog Hardware &amp; Tarif ERP</span>
+                </button>
+            </div>
+            
+            <div class="flex items-center space-x-2 text-xs">
+                <button onclick="openMoveModal()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 rounded-lg font-bold text-[11px] transition flex items-center gap-1">
+                    <i class="fa-solid fa-arrows-up-down-left-right text-[10px]"></i><span>Relokasi RS</span>
+                </button>
+                <button onclick="triggerRailDischarge()" class="px-2.5 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/40 rounded-lg font-bold text-[11px] transition flex items-center gap-1">
+                    <i class="fa-solid fa-dolly text-[10px]"></i><span>Bongkar RTG</span>
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ========================================================================= -->
+    <!-- WADAH KONTEN TABULASI SIMULASI OPERASIONAL                               -->
+    <!-- ========================================================================= -->
+    <div class="bg-white rounded-xl shadow-xs border border-gray-200/80 p-4 sm:p-5 space-y-4">
+
+        <!-- --------------------------------------------------------------------- -->
+        <!-- TAB 1: ALUR SIMULASI OPERASIONAL TRUK KONTAINER (ROAD-TO-YARD)         -->
+        <!-- --------------------------------------------------------------------- -->
+        <div id="tabContentTruck" class="space-y-4">
+            
+            <!-- Banner Penjelasan Konseptual Alur Truk -->
+            <div class="bg-gradient-to-r from-blue-50 via-slate-50 to-blue-50 border border-blue-200/80 rounded-xl p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex items-start space-x-3">
+                    <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shadow-xs shrink-0 mt-0.5">
+                        <i class="fa-solid fa-truck"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Alur Operasional Truk Kontainer (Road / Highway Inbound)</h4>
+                        <p class="text-[11.5px] text-gray-600 mt-0.5 leading-relaxed max-w-4xl">
+                            Truk tiba dari jalan tol/kawasan industri membawa muatan dry/reefer. Melewati gerbang otomatis berkecepatan tinggi, portal optik OCR, jembatan timbang SOLAS 80 Ton, penguncian spreader Reach Stacker dengan RTK DGPS, hingga plugging cold chain.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
+                    <button onclick="runAutoTruckDemo()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-play text-[10px]"></i><span>Jalankan Alur Truk Lengkap</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stepper 6-Tahap Truk (Visual Card Grid) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                
+                <!-- Tahap 1 Truk -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-blue-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Tahap 01</span>
+                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">Gerbang Inbound</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Pindai Plat Truk &amp; Tag Supir</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Loop sensor aspal mendeteksi truk berhenti. Kamera ANPR membaca plat nomor truk dan antena UHF RFID membaca e-Pass supir dari jarak 20 meter.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-blue-300">HW-01 (ANPR) &amp; HW-04 (RFID)</strong></div>
+                            <div><span class="text-slate-400">Data Input:</span> B 9481 UEK &bull; RFID Tag 24-Hex</div>
+                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Pas Gerbang Truk (Rp 50.000)</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Otentikasi Supir &amp; Saldo</span>
+                        <button onclick="testTruckStep(1)" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 1</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 2 Truk -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-purple-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-purple-100 text-purple-800 uppercase font-mono">Tahap 02</span>
+                            <span class="text-[9.5px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">Portal Optik</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Identifikasi Box ISO 6346</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Portal kamera multi-sudut membaca nomor peti kemas ISO 6346 (4 huruf kode pemilik + 6 digit seri + 1 check digit) dan tipe ukuran (misal 42G1).
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-purple-300">HW-02 (Portal OCR ISO 6346)</strong></div>
+                            <div><span class="text-slate-400">Data Input:</span> MSKU9182374 &bull; 40ft High Cube</div>
+                            <div><span class="text-slate-400">Dampak YMS:</span> <strong class="text-amber-400">Demurrage Free Time Dimulai</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Meniadakan Typo Manual</span>
+                        <button onclick="testTruckStep(2)" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 2</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 3 Truk -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-emerald-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 uppercase font-mono">Tahap 03</span>
+                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">SOLAS VGM</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Penimbangan Jembatan 80 Ton</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Truk melintas di timbangan baja 80T. Sensor strain gauge mencatat bobot Bruto, Tara, dan menerbitkan sertifikat Net VGM sesuai amandemen SOLAS IMO.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-emerald-300">HW-03 (Fangda Truck Scale 80T)</strong></div>
+                            <div><span class="text-slate-400">Data Output:</span> Net 26.450 kg (SOLAS PASS)</div>
+                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Jasa Sertifikasi VGM (Rp 120.000)</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Legalitas Maritim IMO</span>
+                        <button onclick="testTruckStep(3)" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 3</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 4 Truk -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-amber-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 uppercase font-mono">Tahap 04</span>
+                            <span class="text-[9.5px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Interlock Palang</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Buka Palang &amp; Panduan Rute VMS</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Edge AI PC memvalidasi izin masuk dalam latensi 12ms, memicu pulsa relay palang terbuka. Display LED VMS memandu supir langsung ke blok yard tujuan.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-amber-300">HW-06 (Edge PC) &amp; HW-05 (VMS LED)</strong></div>
+                            <div><span class="text-slate-400">Instruksi:</span> "LANE 1: TRUK MENUJU BLOK B-08"</div>
+                            <div><span class="text-slate-400">Dampak TAT:</span> <strong class="text-blue-300">Pangkas Waktu Antre 60%</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Otomasi Tanpa Petugas</span>
+                        <button onclick="testTruckStep(4)" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 4</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 5 Truk -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-blue-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Tahap 05</span>
+                            <span class="text-[9.5px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">Penumpukan Yard</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Bongkar Box oleh Reach Stacker</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Reach Stacker (RS-02) menurunkan spreader Bromma, twistlock mengunci 4 pin corner casting. RTK GNSS memandu penempatan ke slot 3D B-08-03-02 akurasi &lt;2cm.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-blue-300">HW-07 (RTK GNSS) &amp; HW-08 (Spreader)</strong></div>
+                            <div><span class="text-slate-400">Koordinat:</span> Slot B-08-03-02 &bull; Beban 28.45T</div>
+                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Jasa Lo-Lo Lift-Off (Rp 250.000)</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Zero Misplacement Box</span>
+                        <button onclick="testTruckStep(5)" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 5</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 6 Truk -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-cyan-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-800 uppercase font-mono">Tahap 06</span>
+                            <span class="text-[9.5px] font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200">Reefer Cold Chain</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Colok Daya &amp; Monitoring Suhu</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Jika muatan berpendingin, box ditaruh di rak reefer dan dicolokkan ke soket industri 380V. Sensor Modbus membaca arus, tegangan, dan suhu -20.2&deg;C secara live.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-cyan-300">HW-09 (Marechal Smart Socket)</strong></div>
+                            <div><span class="text-slate-400">Telemetri:</span> -20.2&deg;C &bull; 388.4V &bull; 18.2 kW</div>
+                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Reefer Electricity (Rp 35.000/jam)</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Perlindungan Kargo Ekspor</span>
+                        <button onclick="testTruckStep(6)" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 6</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Ringkasan Finansial Alur Truk -->
+            <div class="p-3 bg-blue-50/70 rounded-xl border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
+                <div class="flex items-center space-x-2 text-blue-900 font-semibold">
+                    <i class="fa-solid fa-file-invoice-dollar text-blue-600 text-sm"></i>
+                    <span>Total Billing Terbentuk pada 1 Siklus Truk Masuk (Inbound):</span>
+                </div>
+                <div class="font-mono text-emerald-800 font-bold bg-white px-3 py-1 rounded-lg border border-blue-200 shadow-2xs">
+                    Pas Gerbang (Rp 50.000) + VGM (Rp 120.000) + Lo-Lo (Rp 250.000) = <span class="text-emerald-600 text-sm">Rp 420.000</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- --------------------------------------------------------------------- -->
+        <!-- TAB 2: ALUR SIMULASI OPERASIONAL KERETA API INTERMODAL (RAIL-TO-YARD)    -->
+        <!-- --------------------------------------------------------------------- -->
+        <div id="tabContentTrain" class="space-y-4 hidden">
+            
+            <!-- Banner Penjelasan Konseptual Alur KA -->
+            <div class="bg-gradient-to-r from-purple-50 via-slate-50 to-purple-50 border border-purple-200/80 rounded-xl p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex items-start space-x-3">
+                    <div class="w-9 h-9 rounded-lg bg-purple-700 text-white flex items-center justify-center text-sm shadow-xs shrink-0 mt-0.5">
+                        <i class="fa-solid fa-train"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Alur Operasional Kereta Api Logistik (Rail Intermodal Siding)</h4>
+                        <p class="text-[11.5px] text-gray-600 mt-0.5 leading-relaxed max-w-4xl">
+                            <strong>Mengapa alur KA berbeda total dengan truk?</strong> KA tiba langsung dari pelabuhan internasional (Tanjung Priok) membawa puluhan kontainer di bawah rezim pabean transit (bonded). Tidak melalui gerbang jalan tol dan jembatan timbang statis, melainkan diverifikasi sensor gandar rel SIL 4, Smart E-Seal pabean CEISA 4.0, dan dibongkar oleh RTG Crane.
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
+                    <button onclick="runAutoTrainDemo()" class="px-3.5 py-1.5 bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-play text-[10px]"></i><span>Jalankan Alur Kereta Api Lengkap</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stepper 6-Tahap Kereta Api (Visual Card Grid) -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                
+                <!-- Tahap 1 KA -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-purple-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-purple-100 text-purple-800 uppercase font-mono">Tahap 01</span>
+                            <span class="text-[9.5px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">Rel Siding</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Verifikasi Integritas Rangkaian KA</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            KA 2518 melintasi sensor roda di rel siding. Sensor mencacah tepat 126 gandar (1 Lok CC 206 [6 as] + 30 Gerbong PPCW [120 as]). Standar SIL 4 menjamin tidak ada gerbong terlepas.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-purple-300">HW-10 (Frauscher Axle Counter)</strong></div>
+                            <div><span class="text-slate-400">Hasil Cacah:</span> 126 As Roda (30 Gerbong Lengkap)</div>
+                            <div><span class="text-slate-400">Keselamatan:</span> <strong class="text-emerald-400">Safety Integrity SIL 4 PASS</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Pencegahan Kereta Anjlok</span>
+                        <button onclick="testTrainStep(1)" class="px-2.5 py-1 bg-purple-700 hover:bg-purple-600 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 1</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 2 KA -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-blue-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Tahap 02</span>
+                            <span class="text-[9.5px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">Smart E-Seal</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Pemeriksaan Segel Pabean Nirkabel</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Antena nirkabel membaca Smart E-Seal Jointech JT701 pada pintu peti kemas. Memastikan kawat segel berstatus INTACT (tidak pernah dibuka/dirusak selama transit Priok-Dry Port).
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-blue-300">HW-11 (Jointech JT701 GPS Seal)</strong></div>
+                            <div><span class="text-slate-400">Status Kawat:</span> INTACT &bull; Baterai 96%</div>
+                            <div><span class="text-slate-400">Audit Pabean:</span> <strong class="text-emerald-400">Zero Tamper Transit Verified</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Keamanan Kargo Tersegel</span>
+                        <button onclick="testTrainStep(2)" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 2</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 3 KA -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-emerald-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 uppercase font-mono">Tahap 03</span>
+                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">CEISA 4.0</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Klirens Pabean &amp; SPPB Jalur Hijau</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Data telemetri segel dikirim ke gateway Bea Cukai CEISA 4.0. Sistem pabean menerbitkan SPPB (Surat Persetujuan Pengeluaran Barang) Jalur Hijau dan membebaskan jaminan pabean.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Integrasi:</span> <strong class="text-emerald-300">API Gateway CEISA 4.0 DJBC</strong></div>
+                            <div><span class="text-slate-400">Nomor SPPB:</span> SPPB-86434/KPU.01/2026</div>
+                            <div><span class="text-slate-400">Finansial:</span> <strong class="text-emerald-400">Rilis Jaminan Pabean (Bond Free)</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Legalitas Pabean Kemenkeu</span>
+                        <button onclick="testTrainStep(3)" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 3</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 4 KA -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-indigo-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-indigo-100 text-indigo-800 uppercase font-mono">Tahap 04</span>
+                            <span class="text-[9.5px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">RTG Crane</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Bongkar Box dari Gerbong KA</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            RTG-01 Electric Crane bergerak di atas lintasan siding. Spreader Bromma menurunkan 4 pin twistlock mengunci corner casting kontainer dari atas gerbong datar PPCW.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-indigo-300">RTG-01 &amp; HW-08 (Bromma Spreader)</strong></div>
+                            <div><span class="text-slate-400">Beban Angkat:</span> 26.400 kg &bull; 4/4 Pin Terkunci</div>
+                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Jasa Bongkar KA (Rp 350.000)</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Alih Muat Intermodal Rel-Yard</span>
+                        <button onclick="testTrainStep(4)" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 4</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 5 KA -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-amber-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 uppercase font-mono">Tahap 05</span>
+                            <span class="text-[9.5px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">RTK Positioning</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Penempatan Slot Yard Presisi 3D</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            RTK GNSS Receiver memandu penempatan kontainer dari kereta ke slot penumpukan yard (Blok A) dengan akurasi sub-sentimeter (&lt;1.8 cm). Status box menjadi 'in_yard'.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-amber-300">HW-07 (CHCNAV CGI-610 RTK)</strong></div>
+                            <div><span class="text-slate-400">Koordinat:</span> Blok A-02-01-01 (18 Satelit FIX)</div>
+                            <div><span class="text-slate-400">Dampak YMS:</span> <strong class="text-blue-300">Sinkronisasi Database MySQL Live</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Meniadakan Biaya Shifting Ulang</span>
+                        <button onclick="testTrainStep(5)" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 5</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tahap 6 KA -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-emerald-300 transition group">
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 uppercase font-mono">Tahap 06</span>
+                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">Freight &amp; ESG</span>
+                        </div>
+                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Penerbitan Tagihan Rel &amp; ESG</h5>
+                        <p class="text-[11px] text-gray-600 leading-relaxed">
+                            Dokumen Rail Interchange Manifest diverifikasi. Biaya pengangkutan kereta api (Rp 1.850.000/TEU) tercatat, dan reduksi emisi karbon 78% dibanding truk jalan raya tercatat.
+                        </p>
+                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
+                            <div><span class="text-slate-400">Manifest KA:</span> KA-LOG-JKT-SMG &bull; 48 TEU</div>
+                            <div><span class="text-slate-400">Billing Freight:</span> <strong class="text-emerald-400">Tarif KA (Rp 1.850.000 / TEU)</strong></div>
+                            <div><span class="text-slate-400">Dampak Hijau:</span> <strong class="text-blue-300">Reduksi Karbon 78% (ESG)</strong></div>
+                        </div>
+                    </div>
+                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
+                        <span class="text-[10px] text-gray-500">Green Logistics Terminal</span>
+                        <button onclick="testTrainStep(6)" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 6</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Ringkasan Finansial Alur Kereta Api -->
+            <div class="p-3 bg-purple-50/70 rounded-xl border border-purple-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
+                <div class="flex items-center space-x-2 text-purple-900 font-semibold">
+                    <i class="fa-solid fa-file-invoice-dollar text-purple-600 text-sm"></i>
+                    <span>Total Billing Terbentuk pada 1 Siklus Alih Muat Kereta Api (Intermodal):</span>
+                </div>
+                <div class="font-mono text-emerald-800 font-bold bg-white px-3 py-1 rounded-lg border border-purple-200 shadow-2xs">
+                    Freight KA (Rp 1.850.000) + Jasa RTG (Rp 350.000) = <span class="text-emerald-600 text-sm">Rp 2.200.000 / TEU</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- --------------------------------------------------------------------- -->
+        <!-- TAB 3: SCADA 11 SENSOR MANDIRI (4 STASIUN TELEMETRI LAPANGAN)         -->
+        <!-- --------------------------------------------------------------------- -->
+        <div id="tabContentScada" class="space-y-4 hidden">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-gray-100 gap-2">
+                <div>
+                    <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Uji Coba Mandiri 11 Sensor &amp; Perangkat Keras Lapangan</h4>
+                    <p class="text-[11px] text-gray-500">Setiap tombol di bawah memicu telemetri live, pembaruan database MySQL, dan simulasi tarif billing ERP</p>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1 animate-pulse"></span>11/11 SENSOR SIAP
+                </span>
+            </div>
+
+            <!-- SCADA 2x2 Grid Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
+                
+                <!-- STASIUN 01: GATE OTOMASI & TIMBANGAN VGM (HW-01 s/d HW-06) -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-blue-300 transition group">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Stasiun 01</span>
+                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Smart Gate &amp; Timbangan Inbound (6 Hardware)</h4>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="6 Perangkat Online"></span>
+                        </div>
+                        <p class="text-[10px] text-gray-500 mb-2.5">HW-01 (ANPR), HW-02 (OCR), HW-03 (Timbangan 80T), HW-04 (RFID), HW-05 (VMS), HW-06 (Edge PC)</p>
+
+                        <!-- SCADA Digital Readout Matrix -->
+                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
+                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-01 ANPR Truk:</span>
+                                    <span class="font-bold text-blue-400" id="sensorAnprVal">B 9481 UEK (99.4%)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-02 Portal OCR:</span>
+                                    <span class="font-bold text-purple-400" id="sensorOcrVal">MSKU9182374 (42G1)</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-03 Timbangan 80T:</span>
+                                    <span class="font-bold text-emerald-400" id="sensorVgmVal">Net 26.450 kg (PASS)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-04 RFID Tag:</span>
+                                    <span class="font-bold text-indigo-300" id="sensorRfidVal">E280117000... (AUTH)</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-05 VMS Display:</span>
+                                    <span class="font-bold text-amber-300 truncate block" id="sensorVmsVal">LANE 1 -> BLOK B-08</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-06 Edge Relay:</span>
+                                    <span class="font-bold text-emerald-300" id="sensorEdgeVal">INTERLOCK (12ms / 1.2s)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 6 Dedicated Sensor Test Buttons -->
+                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor Mandiri:</div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
+                            <button onclick="testSensorAction('hw01_anpr')" class="py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-01</span>
+                                <span>ANPR Plat</span>
+                            </button>
+                            <button onclick="testSensorAction('hw02_ocr')" class="py-1.5 px-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-02</span>
+                                <span>OCR Box</span>
+                            </button>
+                            <button onclick="testSensorAction('hw03_vgm')" class="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-03</span>
+                                <span>Timbang 80T</span>
+                            </button>
+                            <button onclick="testSensorAction('hw04_rfid')" class="py-1.5 px-2 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1">
+                                <span class="px-1 py-0.2 bg-indigo-100 rounded text-[9px] font-mono">HW-04</span>
+                                <span>RFID Tag</span>
+                            </button>
+                            <button onclick="testSensorAction('hw05_vms')" class="py-1.5 px-2 bg-white hover:bg-amber-50 text-amber-800 border border-amber-200 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1">
+                                <span class="px-1 py-0.2 bg-amber-100 rounded text-[9px] font-mono">HW-05</span>
+                                <span>VMS LED</span>
+                            </button>
+                            <button onclick="testSensorAction('hw06_edge')" class="py-1.5 px-2 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1">
+                                <span class="px-1 py-0.2 bg-emerald-100 rounded text-[9px] font-mono">HW-06</span>
+                                <span>Relay Palang</span>
+                            </button>
+                        </div>
+                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Auto-Billing ERP:</span>
+                            <span class="font-bold text-emerald-900">Pas Masuk Truk (Rp 50.000) &bull; VGM SOLAS (Rp 120.000)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STASIUN 02: TELEMETRI RTK & SPREADER ALAT BERAT (HW-07 & HW-08) -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-amber-300 transition group">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 uppercase font-mono">Stasiun 02</span>
+                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Telemetri RTK Lapangan &amp; Spreader RS (2 Hardware)</h4>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="2 Perangkat Online"></span>
+                        </div>
+                        <p class="text-[10px] text-gray-500 mb-2.5">HW-07 (CHCNAV RTK GNSS &lt;2cm), HW-08 (Bromma Twistlock &amp; Load Cell Kit)</p>
+
+                        <!-- SCADA Digital Readout Matrix -->
+                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
+                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-07 RTK DGPS:</span>
+                                    <span class="font-bold text-emerald-400" id="sensorRtkVal">FIX (&lt;1.8 cm, 18 Sat)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">Koordinat Slot 3D:</span>
+                                    <span class="font-bold text-amber-400" id="sensorSlotVal">B-08-03-02</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-08 Twistlock:</span>
+                                    <span class="font-bold text-blue-400" id="sensorTwistlockVal">LOCKED (Mengunci 4 Pin)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">Load Cell Sensor:</span>
+                                    <span class="font-bold text-slate-200" id="sensorLoadVal">28.45 Ton</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dedicated Sensor Test Buttons + Operational Move Action -->
+                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor &amp; Aksi Fisik:</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                            <button onclick="testSensorAction('hw07_rtk')" class="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-07</span>
+                                <span>Kalibrasi RTK</span>
+                            </button>
+                            <button onclick="testSensorAction('hw08_twistlock')" class="py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-08</span>
+                                <span>Twistlock &amp; Load</span>
+                            </button>
+                            <button onclick="openMoveModal()" class="py-1.5 px-2 bg-amber-500 hover:bg-amber-400 text-gray-950 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <i class="fa-solid fa-dolly text-[10px]"></i>
+                                <span>Relokasi 3D (RS)</span>
+                            </button>
+                        </div>
+                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Auto-Billing ERP:</span>
+                            <span class="font-bold text-emerald-900">Jasa Lo-Lo Lift-Off Stevedoring (Rp 250.000)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STASIUN 03: PEMANTAUAN RANTAI DINGIN REEFER IOT (HW-09) -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-cyan-300 transition group">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-800 uppercase font-mono">Stasiun 03</span>
+                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Reefer Cold Chain &amp; Smart Socket (1 Hardware)</h4>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Perangkat Online"></span>
+                        </div>
+                        <p class="text-[10px] text-gray-500 mb-2.5">HW-09 (Marechal Smart Socket 380V/32A Modbus RTU &bull; Daya, Voltase, &amp; Suhu)</p>
+
+                        <!-- SCADA Digital Readout Matrix -->
+                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
+                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-09 Colokan Rack:</span>
+                                    <span class="font-bold text-cyan-300">Rack R-02 Plug #14</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">Telemetri Suhu:</span>
+                                    <span class="font-bold text-cyan-400" id="sensorReeferTempVal">-20.2&deg;C (Optimal)</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">Tegangan 3-Fasa:</span>
+                                    <span class="font-bold text-slate-200" id="sensorVoltVal">388.4 V (50 Hz)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">Beban Konsumsi:</span>
+                                    <span class="font-bold text-slate-200" id="sensorKwVal">18.2 kW (28.6 A)</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dedicated Sensor Test Buttons -->
+                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor Modbus &amp; Skenario:</div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button onclick="testSensorAction('hw09_reefer')" class="py-1.5 px-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-09</span>
+                                <span>Baca Modbus Suhu &amp; Daya</span>
+                            </button>
+                            <button onclick="simulateReeferAlarm()" class="py-1.5 px-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-triangle-exclamation text-[11px]"></i>
+                                <span>Simulasi Overheat (+4.8&deg;C)</span>
+                            </button>
+                        </div>
+                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Auto-Billing ERP:</span>
+                            <span class="font-bold text-emerald-900">Pasokan Daya &amp; Monitoring (Rp 35.000 / jam)</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- STASIUN 04: INTERMODAL KA & KEPABEANAN CEISA 4.0 (HW-10 & HW-11) -->
+                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-purple-300 transition group">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <div class="flex items-center space-x-2">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-purple-100 text-purple-800 uppercase font-mono">Stasiun 04</span>
+                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Intermodal Rel KA &amp; Pabean CEISA 4.0 (2 Hardware)</h4>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="2 Perangkat Online"></span>
+                        </div>
+                        <p class="text-[10px] text-gray-500 mb-2.5">HW-10 (Frauscher Axle Counter SIL 4), HW-11 (Jointech JT701 GPS Smart E-Seal)</p>
+
+                        <!-- SCADA Digital Readout Matrix -->
+                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
+                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-10 Gandar Rel KA:</span>
+                                    <span class="font-bold text-purple-300" id="sensorAxleVal">126 As Roda (KA 2518)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">Integritas Rangkaian:</span>
+                                    <span class="font-bold text-emerald-400">30 PPCW (SIL 4 Valid)</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-11 Smart E-Seal:</span>
+                                    <span class="font-bold text-blue-300" id="sensorSealVal">INTACT (JT701 GPS)</span>
+                                </div>
+                                <div>
+                                    <span class="text-[9.5px] text-slate-400 block uppercase">Status Bea Cukai:</span>
+                                    <span class="font-bold text-emerald-400" id="sensorSppbVal">SPPB JALUR HIJAU</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dedicated Sensor Test Buttons + Operational Rail Discharge Action -->
+                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor &amp; Aksi Intermodal:</div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
+                            <button onclick="testSensorAction('hw10_axle')" class="py-1.5 px-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-10</span>
+                                <span>Cacah 126 Gandar</span>
+                            </button>
+                            <button onclick="testSensorAction('hw11_eseal')" class="py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-11</span>
+                                <span>E-Seal &amp; SPPB</span>
+                            </button>
+                            <button onclick="triggerRailDischarge()" class="py-1.5 px-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
+                                <i class="fa-solid fa-train text-[10px]"></i>
+                                <span>Bongkar KA (RTG)</span>
+                            </button>
+                        </div>
+                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
+                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Dampak Operasional:</span>
+                            <span class="font-bold text-emerald-900">Freight Rp 1.850.000/TEU &bull; Rilis Jaminan Pabean</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- --------------------------------------------------------------------- -->
+        <!-- TAB 4: UJI SCANNER OPTIK & VERIFIKASI MUTU AIDC (GS1 / SSCC-18 / ISO) -->
+        <!-- --------------------------------------------------------------------- -->
+        <div id="tabContentScanner" class="space-y-4 hidden">
+            
+            <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-4 rounded-xl border border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-lg border border-purple-500/30 shrink-0">
+                        <i class="fa-solid fa-barcode"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-xs sm:text-sm text-white">Konsol Uji Scanner Optik &amp; Dekoder Mutu AIDC</h4>
+                        <p class="text-[11px] text-slate-300 mt-0.5">Uji verifikasi kode kontainer ISO 6346, Serial Shipping Container Code (SSCC-18), dan QR Pabean CEISA 4.0</p>
+                    </div>
+                </div>
+                <a href="dashboard.php?page=scanner" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-xs">
+                    <i class="fa-solid fa-camera text-[11px]"></i><span>Buka Scanner Kamera Lengkap</span>
+                </a>
+            </div>
+
+            <!-- Interaktif Tester Barcode & Validasi ISO 6346 -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+                
+                <!-- Kolom Kiri: Input & 1-Click Tester -->
+                <div class="lg:col-span-6 bg-slate-50 rounded-xl border border-gray-200 p-4 space-y-3">
+                    <div class="text-xs font-bold text-gray-700 uppercase tracking-wide flex items-center justify-between">
+                        <span>Pilih Skenario Sampel Cepat:</span>
+                        <span class="text-[10px] text-purple-600 font-mono">Standar GS1 v23</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="testScannerSample('dry')" class="p-2.5 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg text-left transition group">
+                            <div class="text-[10px] font-bold text-blue-600 font-mono">ISO 6346 (Dry 40ft)</div>
+                            <div class="font-bold text-gray-800 text-xs group-hover:text-blue-700">MSKU9182374</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">Check Digit 4 &bull; Maersk Line</div>
+                        </button>
+                        <button onclick="testScannerSample('reefer')" class="p-2.5 bg-white hover:bg-cyan-50 border border-gray-200 hover:border-cyan-300 rounded-lg text-left transition group">
+                            <div class="text-[10px] font-bold text-cyan-600 font-mono">ISO 6346 (Reefer 40ft)</div>
+                            <div class="font-bold text-gray-800 text-xs group-hover:text-cyan-700">TEMU4819203</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">Check Digit 3 &bull; Cold Chain</div>
+                        </button>
+                        <button onclick="testScannerSample('sscc')" class="p-2.5 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-lg text-left transition group">
+                            <div class="text-[10px] font-bold text-purple-600 font-mono">GS1-128 (SSCC-18)</div>
+                            <div class="font-bold text-gray-800 text-xs group-hover:text-purple-700">(00) 38991234500000018</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">Serial Shipping Pallet</div>
+                        </button>
+                        <button onclick="testScannerSample('customs')" class="p-2.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-lg text-left transition group">
+                            <div class="text-[10px] font-bold text-emerald-600 font-mono">QR Code CEISA 4.0</div>
+                            <div class="font-bold text-gray-800 text-xs group-hover:text-emerald-700">SPPB-86434/KPU.01/2026</div>
+                            <div class="text-[10px] text-gray-400 mt-0.5">Klirens Pabean Jalur Hijau</div>
+                        </button>
+                    </div>
+
+                    <div class="pt-2 border-t border-gray-200">
+                        <label class="block text-[10px] font-bold text-gray-600 uppercase mb-1">Uji Nomor Kontainer Kustom:</label>
+                        <div class="flex gap-2">
+                            <input type="text" id="customBoxInput" placeholder="Contoh: TCLU8827415" class="flex-1 px-3 py-1.5 text-xs font-mono uppercase bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500">
+                            <button onclick="validateCustomBoxNumber()" class="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold rounded-lg transition">
+                                Verifikasi
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom Kanan: Hasil Dekoder & Penjelasan Logika AIDC -->
+                <div class="lg:col-span-6 bg-slate-900 text-white rounded-xl p-4 flex flex-col justify-between border border-slate-800 font-mono text-xs shadow-inner">
+                    <div>
+                        <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px]">
+                            <span class="text-purple-400 uppercase font-bold tracking-wider">AIDC Decoder Result</span>
+                            <span class="text-emerald-400" id="scanDecoderStatus"><i class="fa-solid fa-circle-check mr-1"></i>STANDBY</span>
+                        </div>
+
+                        <div class="space-y-1.5 text-[11px]" id="scanDecoderOutput">
+                            <div><span class="text-slate-400">Tipe Kode:</span> <span class="text-blue-300 font-bold" id="decType">ISO 6346 Container ID</span></div>
+                            <div><span class="text-slate-400">Payload Mentah:</span> <span class="text-amber-300 font-bold" id="decPayload">MSKU9182374</span></div>
+                            <div><span class="text-slate-400">Owner Prefix:</span> <span class="text-slate-200" id="decOwner">MSKU (Maersk A/S)</span></div>
+                            <div><span class="text-slate-400">Serial Number:</span> <span class="text-slate-200" id="decSerial">918237</span></div>
+                            <div><span class="text-slate-400">Check Digit Calc:</span> <span class="text-emerald-400 font-bold" id="decCheck">4 (VALID - Modulo 11 Match)</span></div>
+                            <div><span class="text-slate-400">Status YMS:</span> <span class="text-cyan-300 font-bold" id="decYms">Tersinkron di Blok B-08-03-02</span></div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-sans leading-relaxed">
+                        <strong class="text-slate-200">Mengapa AIDC Mutlak Dibutuhkan?</strong> Pemindaian optik otomatis mencegah salah catat nomor kontainer (angka 0 dan huruf O, angka 1 dan huruf I), sehingga demurrage, lokasi stack, dan penagihan billing selalu akurat 100%.
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- --------------------------------------------------------------------- -->
+        <!-- TAB 5: KATALOG EDUKASI 11 HARDWARE & ALUR FINANSIAL ERP               -->
+        <!-- --------------------------------------------------------------------- -->
+        <div id="tabContentCatalog" class="space-y-3 hidden">
+            
+            <div class="flex items-center justify-between pb-2 border-b border-gray-100">
+                <div>
+                    <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Matriks Pemetaan 11 Perangkat Keras, Software YMS &amp; Dampak Finansial</h4>
+                    <p class="text-[11px] text-gray-500">Katalog standar akademik untuk ujian Topik 7 Inland Container Depot &amp; Dry Port Management ITL Trisakti</p>
+                </div>
+                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    Conclusion Consultant
+                </span>
+            </div>
+
+            <div class="overflow-x-auto border border-gray-200 rounded-xl">
+                <table class="w-full text-left border-collapse text-xs">
+                    <thead class="bg-slate-50 text-gray-700 font-bold border-b border-gray-200">
+                        <tr>
+                            <th class="p-2.5">Hardware &amp; Tipe</th>
+                            <th class="p-2.5">Model Terpasang</th>
+                            <th class="p-2.5">Pemicu Fisik Lapangan</th>
+                            <th class="p-2.5">Sinyal / Protokol</th>
+                            <th class="p-2.5">Logika Software YMS</th>
+                            <th class="p-2.5">Pemicu Finansial ERP</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 font-sans text-[11px]">
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-01: Kamera ANPR</td>
+                            <td class="p-2.5 text-gray-600">Hikvision DS-TCG406-E</td>
+                            <td class="p-2.5">Truk melintas loop magnetik gerbang</td>
+                            <td class="p-2.5 font-mono text-purple-700">String Plat Nomor via REST API</td>
+                            <td class="p-2.5">Validasi izin armada &amp; catat jam masuk</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Pas Gerbang Truk (Rp 50.000)</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-02: Portal OCR Box</td>
+                            <td class="p-2.5 text-gray-600">Hikvision iDS-TCV300-A6I</td>
+                            <td class="p-2.5">Kontainer melintasi portal multi-sudut</td>
+                            <td class="p-2.5 font-mono text-purple-700">ISO 6346 String via TCP/IP</td>
+                            <td class="p-2.5">Verifikasi Check Digit ISO Modulo 11</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Argo Demurrage Free Time Dimulai</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-03: Timbangan 80T</td>
+                            <td class="p-2.5 text-gray-600">Fangda Electronic Scale 80T</td>
+                            <td class="p-2.5">Gandar truk berhenti di platform baja</td>
+                            <td class="p-2.5 font-mono text-purple-700">Data Bobot via RS-232 / Modbus</td>
+                            <td class="p-2.5">Kalkulasi Net VGM sesuai IMO SOLAS</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Sertifikat VGM SOLAS (Rp 120.000)</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-04: RFID UHF 20m</td>
+                            <td class="p-2.5 text-gray-600">Hopeland Long-Range ISO 18000-6C</td>
+                            <td class="p-2.5">Transponder di kaca truk terbaca 20m</td>
+                            <td class="p-2.5 font-mono text-purple-700">Hex Tag ID via Wiegand-34</td>
+                            <td class="p-2.5">Otentikasi touchless supir &amp; saldo e-wallet</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Auto-debit saldo deposit trucking</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-05: VMS Gate LED</td>
+                            <td class="p-2.5 text-gray-600">Chipshow Outdoor P6/P8</td>
+                            <td class="p-2.5">Seluruh sensor gerbang berstatus VALID</td>
+                            <td class="p-2.5 font-mono text-purple-700">String Pesan Rute via IP UDP</td>
+                            <td class="p-2.5">Menampilkan blok tujuan supir di layar</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Pangkas Waktu Antre (TAT -60%)</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-06: Edge AI PC</td>
+                            <td class="p-2.5 text-gray-600">Advantech ARK-3532 Fanless</td>
+                            <td class="p-2.5">Verifikasi data gerbang tervalidasi</td>
+                            <td class="p-2.5 font-mono text-purple-700">Relay GPIO Dry-Contact 1.2 Detik</td>
+                            <td class="p-2.5">Local interlock buka palang pintu (12ms)</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Eliminasi downtime macet gerbang</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-07: RTK DGPS GNSS</td>
+                            <td class="p-2.5 text-gray-600">CHCNAV CGI-610 Centimeter</td>
+                            <td class="p-2.5">Alat berat bergerak di koridor yard</td>
+                            <td class="p-2.5 font-mono text-purple-700">NMEA-0183 ($GPGGA) Akurasi &lt;2 cm</td>
+                            <td class="p-2.5">Translasi GPS ke Blok, Bay, Row, Tier</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Zero Misplacement (Nol Biaya Shifting)</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-08: Spreader Twistlock</td>
+                            <td class="p-2.5 text-gray-600">Bromma Spreader &amp; Load Cell Kit</td>
+                            <td class="p-2.5">Spreader mendarat di corner casting</td>
+                            <td class="p-2.5 font-mono text-purple-700">4 Proximity Switch + Strain Gauge CAN</td>
+                            <td class="p-2.5">Izin hoist angkat &amp; validasi bobot box</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Jasa Lo-Lo Lift-Off (Rp 250.000)</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-09: Smart Reefer Socket</td>
+                            <td class="p-2.5 text-gray-600">Marechal 380V/32A Modbus RTU</td>
+                            <td class="p-2.5">Steker kontainer reefer dicolokkan ke rak</td>
+                            <td class="p-2.5 font-mono text-purple-700">Register Modbus RS-485 (V, A, kW, &deg;C)</td>
+                            <td class="p-2.5">Logging telemetri suhu &amp; alarm anomali</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Sewa Listrik Reefer (Rp 35.000 / jam)</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-10: Frauscher Axle Counter</td>
+                            <td class="p-2.5 text-gray-600">Frauscher RSR123 Wheel Sensor SIL 4</td>
+                            <td class="p-2.5">Roda kereta melintasi sensor rel</td>
+                            <td class="p-2.5 font-mono text-purple-700">Pulsa Induktif Gandar Kereta Api</td>
+                            <td class="p-2.5">Cacah 126 as roda gerbong KA utuh</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">Verifikasi Integritas Rangkaian KA</td>
+                        </tr>
+                        <tr class="hover:bg-blue-50/20">
+                            <td class="p-2.5 font-bold text-cdp-navy">HW-11: Smart E-Seal Pabean</td>
+                            <td class="p-2.5 text-gray-600">Jointech JT701 GPS Smart Lock</td>
+                            <td class="p-2.5">Peti kemas transit KA Priok-Cikarang</td>
+                            <td class="p-2.5 font-mono text-purple-700">RFID Nirkabel &amp; GPS/GSM Telemetri</td>
+                            <td class="p-2.5">Verifikasi segel INTACT ke CEISA 4.0</td>
+                            <td class="p-2.5 font-semibold text-emerald-700">SPPB Terbit &amp; Rilis Jaminan Pabean</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
 
     </div>
@@ -365,6 +1388,406 @@ if (session_status() === PHP_SESSION_NONE) {
     </div>
 </div>
 
+<!-- ============================================================================= -->
+<!-- MODAL INTERAKTIF: ARSITEKTUR ALUR END-TO-END 11 HARDWARE, SOFTWARE & FINANSIAL -->
+<!-- ============================================================================= -->
+<div id="modalEndToEndGuide" class="fixed inset-0 z-50 hidden bg-black/75 backdrop-blur-md flex items-center justify-center p-3 sm:p-5">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-gray-100 transform transition-all animate-fadeIn">
+        
+        <!-- Modal Header -->
+        <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-emerald-300 text-lg shadow-inner">
+                    <i class="fa-solid fa-network-wired"></i>
+                </div>
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <h3 class="font-bold text-base sm:text-lg leading-tight">Arsitektur Alur End-to-End: Hardware &bull; Software &bull; Finansial</h3>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-500/90 text-white uppercase tracking-wider">Master Guide</span>
+                    </div>
+                    <p class="text-xs text-blue-100 mt-0.5">Panduan Demonstrasi Konsultan: Interaksi 11 Hardware Live, Pengolahan Data YMS, &amp; Pemicu Billing ERP</p>
+                </div>
+            </div>
+            <button onclick="closeEndToEndGuideModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-slate-100/80 px-4 sm:px-5 pt-3 border-b border-gray-200 flex items-center space-x-2 shrink-0 overflow-x-auto">
+            <button onclick="switchGuideTab('pipeline')" id="tabBtnPipeline" class="guide-tab-btn px-3.5 py-2 text-xs font-bold rounded-t-xl transition-all border-b-2 border-[#0170b9] bg-white text-[#004b87] shadow-xs flex items-center space-x-2">
+                <i class="fa-solid fa-diagram-project text-xs"></i>
+                <span>1. Alur 6 Tahap End-to-End</span>
+            </button>
+            <button onclick="switchGuideTab('hardware')" id="tabBtnHardware" class="guide-tab-btn px-3.5 py-2 text-xs font-medium rounded-t-xl transition-all border-b-2 border-transparent text-gray-600 hover:text-gray-900 flex items-center space-x-2">
+                <i class="fa-solid fa-microchip text-xs"></i>
+                <span>2. Matriks 11 Hardware Live Telemetri</span>
+            </button>
+            <button onclick="switchGuideTab('cheatsheet')" id="tabBtnCheatsheet" class="guide-tab-btn px-3.5 py-2 text-xs font-medium rounded-t-xl transition-all border-b-2 border-transparent text-gray-600 hover:text-gray-900 flex items-center space-x-2">
+                <i class="fa-solid fa-graduation-cap text-xs"></i>
+                <span>3. Contekan Presentasi Dosen (Dr. Tigor Franky)</span>
+            </button>
+        </div>
+
+        <!-- Scrollable Tab Content Container -->
+        <div class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-6 text-gray-800 text-xs sm:text-sm">
+            
+            <!-- TAB 1: 6 TAHAP PIPELINE END-TO-END -->
+            <div id="guideTabPipeline" class="space-y-4">
+                <div class="bg-blue-50/70 border border-blue-200 rounded-xl p-3.5 flex items-start space-x-3">
+                    <i class="fa-solid fa-circle-nodes text-cdp-blue text-base mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Triad Aliran Logistik Pelabuhan Kering (Dry Port Triad Flow)</h4>
+                        <p class="text-xs text-gray-600 mt-0.5 leading-relaxed">
+                            Di CIDP, pergerakan <strong>Fisik &amp; Sensor Hardware</strong> memicu pemutakhiran data di <strong>Software CIDP YMS</strong>, yang selanjutnya secara otomatis membentuk pos biaya dan jurnal akuntansi di modul <strong>Finansial &amp; Billing ERP</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- 6 Step Visual Timeline -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    
+                    <!-- Tahap 1 -->
+                    <div class="bg-white rounded-xl border-2 border-blue-200 p-3.5 shadow-2xs hover:shadow-sm transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase">Tahap 01</span>
+                                <span class="text-[10px] font-bold text-gray-400 font-mono">Gate Inbound</span>
+                            </div>
+                            <h5 class="font-bold text-gray-900 text-xs sm:text-sm mb-1">Otomasi Gerbang &amp; Timbangan VGM</h5>
+                            <p class="text-[11px] text-gray-600 leading-relaxed mb-2">
+                                Truk tiba &rarr; RFID membaca e-Pass sopir &rarr; ANPR merekam plat &rarr; Portal OCR memindai kontainer &rarr; Timbangan 80T mencatat tonase.
+                            </p>
+                            <div class="p-2 bg-slate-50 rounded-lg text-[10.5px] space-y-1 font-mono">
+                                <div><strong class="text-blue-700">Hardware:</strong> HW-01, 02, 03, 04, 05, 06</div>
+                                <div><strong class="text-indigo-700">Software:</strong> Validasi SOLAS VGM, Check Digit ISO</div>
+                                <div><strong class="text-emerald-700">Finansial:</strong> Pas Gerbang (Rp 50k) + Sertifikat VGM (Rp 120k)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tahap 2 -->
+                    <div class="bg-white rounded-xl border-2 border-amber-200 p-3.5 shadow-2xs hover:shadow-sm transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 uppercase">Tahap 02</span>
+                                <span class="text-[10px] font-bold text-gray-400 font-mono">Yard Stacking</span>
+                            </div>
+                            <h5 class="font-bold text-gray-900 text-xs sm:text-sm mb-1">Penataan Blok &amp; Telemetri RTK</h5>
+                            <p class="text-[11px] text-gray-600 leading-relaxed mb-2">
+                                Truk ke Blok Yard &rarr; Reach Stacker dengan RTK DGPS mendeteksi koordinat &lt;2 cm &rarr; Spreader Twistlock mengunci &amp; mengangkat box.
+                            </p>
+                            <div class="p-2 bg-slate-50 rounded-lg text-[10.5px] space-y-1 font-mono">
+                                <div><strong class="text-blue-700">Hardware:</strong> HW-07 (RTK GPS), HW-08 (Twistlock)</div>
+                                <div><strong class="text-indigo-700">Software:</strong> Status 'in_yard', kunci slot Bay-Row-Tier</div>
+                                <div><strong class="text-emerald-700">Finansial:</strong> Jasa Lift-Off (Rp 250k) + Argo Storage Dwell Time</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tahap 3 -->
+                    <div class="bg-white rounded-xl border-2 border-cyan-200 p-3.5 shadow-2xs hover:shadow-sm transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-cyan-100 text-cyan-800 uppercase">Tahap 03</span>
+                                <span class="text-[10px] font-bold text-gray-400 font-mono">Cold Chain Yard</span>
+                            </div>
+                            <h5 class="font-bold text-gray-900 text-xs sm:text-sm mb-1">Monitoring Reefer IoT</h5>
+                            <p class="text-[11px] text-gray-600 leading-relaxed mb-2">
+                                Peti kemas reefer ditaruh di rak &rarr; Dicolokkan ke Smart Power Socket 380V &rarr; Sensor Modbus memantau listrik &amp; suhu -20.2&deg;C.
+                            </p>
+                            <div class="p-2 bg-slate-50 rounded-lg text-[10.5px] space-y-1 font-mono">
+                                <div><strong class="text-blue-700">Hardware:</strong> HW-09 (Smart Socket Marechal)</div>
+                                <div><strong class="text-indigo-700">Software:</strong> Telemetri suhu 24 jam &amp; Alarm Ambang Batas</div>
+                                <div><strong class="text-emerald-700">Finansial:</strong> Plugging &amp; Power Fee (Rp 35.000 / jam)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tahap 4 -->
+                    <div class="bg-white rounded-xl border-2 border-rose-200 p-3.5 shadow-2xs hover:shadow-sm transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-800 uppercase">Tahap 04</span>
+                                <span class="text-[10px] font-bold text-gray-400 font-mono">Kepabeanan</span>
+                            </div>
+                            <h5 class="font-bold text-gray-900 text-xs sm:text-sm mb-1">Klirens Pabean CEISA 4.0 &amp; E-Seal</h5>
+                            <p class="text-[11px] text-gray-600 leading-relaxed mb-2">
+                                Muatan transit Priok-Cikarang diamankan Smart E-Seal (GPS Anti-Tamper) &rarr; Integrasi API CEISA Bea Cukai &rarr; SPPB Terbit.
+                            </p>
+                            <div class="p-2 bg-slate-50 rounded-lg text-[10.5px] space-y-1 font-mono">
+                                <div><strong class="text-blue-700">Hardware:</strong> HW-11 (Jointech E-Seal GPS)</div>
+                                <div><strong class="text-indigo-700">Software:</strong> Jalur Hijau/Kuning/Merah, SPPB Auto</div>
+                                <div><strong class="text-emerald-700">Finansial:</strong> Pelepasan Jaminan Pabean (Customs Bond)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tahap 5 -->
+                    <div class="bg-white rounded-xl border-2 border-purple-200 p-3.5 shadow-2xs hover:shadow-sm transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-purple-100 text-purple-800 uppercase">Tahap 05</span>
+                                <span class="text-[10px] font-bold text-gray-400 font-mono">Rail Siding</span>
+                            </div>
+                            <h5 class="font-bold text-gray-900 text-xs sm:text-sm mb-1">Alih Muat Kereta Api Intermodal</h5>
+                            <p class="text-[11px] text-gray-600 leading-relaxed mb-2">
+                                KA 2518 tiba &rarr; Axle Counter menghitung 126 as roda gerbong PPCW &rarr; RTG alih muatkan box ke KA &rarr; Status YMS 'on_rail'.
+                            </p>
+                            <div class="p-2 bg-slate-50 rounded-lg text-[10.5px] space-y-1 font-mono">
+                                <div><strong class="text-blue-700">Hardware:</strong> HW-10 (Frauscher Axle Counter), RTG</div>
+                                <div><strong class="text-indigo-700">Software:</strong> Rail Manifest Interchange, Slot Gerbong Datar</div>
+                                <div><strong class="text-emerald-700">Finansial:</strong> Rail Haulage (Rp 1.85M/TEU) + ESG Karbon</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tahap 6 -->
+                    <div class="bg-white rounded-xl border-2 border-emerald-200 p-3.5 shadow-2xs hover:shadow-sm transition flex flex-col justify-between">
+                        <div>
+                            <div class="flex justify-between items-center mb-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-800 uppercase">Tahap 06</span>
+                                <span class="text-[10px] font-bold text-gray-400 font-mono">Gate-Out &amp; Billing</span>
+                            </div>
+                            <h5 class="font-bold text-gray-900 text-xs sm:text-sm mb-1">Settlement ERP &amp; Pelepasan Truk</h5>
+                            <p class="text-[11px] text-gray-600 leading-relaxed mb-2">
+                                Validasi pelunasan proforma invoice di Billing ERP &rarr; SP2B (Surat Pengeluaran) terbit &rarr; Barrier Gate Out terbuka &rarr; Box keluar.
+                            </p>
+                            <div class="p-2 bg-slate-50 rounded-lg text-[10.5px] space-y-1 font-mono">
+                                <div><strong class="text-blue-700">Hardware:</strong> HW-01 (ANPR Out), HW-04 (RFID), Barrier</div>
+                                <div><strong class="text-indigo-700">Software:</strong> Validasi lunas kasir/deposit, status 'gate_out'</div>
+                                <div><strong class="text-emerald-700">Finansial:</strong> Pelunasan Invoice, e-Faktur Pajak, Resi Bank</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- TAB 2: MATRIKS 11 HARDWARE LIVE TELEMETRI -->
+            <div id="guideTabHardware" class="space-y-3 hidden">
+                <p class="text-xs text-gray-500 mb-2">
+                    Berikut adalah tabel pemetaan 11 perangkat keras yang terintegrasi langsung dengan antarmuka telemetri software CIDP YMS:
+                </p>
+
+                <div class="overflow-x-auto border border-gray-200 rounded-xl">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-50 text-gray-700 font-bold border-b border-gray-200">
+                            <tr>
+                                <th class="p-2.5">No &amp; Hardware</th>
+                                <th class="p-2.5">Model / Spesifikasi</th>
+                                <th class="p-2.5">Pemicu Fisik Lapangan</th>
+                                <th class="p-2.5">Sinyal / Protokol Data</th>
+                                <th class="p-2.5">Pengolahan Data YMS</th>
+                                <th class="p-2.5">Pemicu Finansial ERP</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100 font-sans text-[11px]">
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-01: Kamera ANPR</td>
+                                <td class="p-2.5 text-gray-600">Hikvision DS-TCG406-E</td>
+                                <td class="p-2.5">Truk melintasi sensor loop magnetik di aspal</td>
+                                <td class="p-2.5 font-mono text-purple-700">String Plat Nomor + Foto via REST API</td>
+                                <td class="p-2.5">Validasi izin armada &amp; pencatatan jam gate-in</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Tarif Pas Masuk Gerbang (Rp 50.000)</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-02: Kamera OCR Kontainer</td>
+                                <td class="p-2.5 text-gray-600">Hikvision iDS-TCV300-A6I</td>
+                                <td class="p-2.5">Peti kemas melintasi portal multi-angle 5.5m</td>
+                                <td class="p-2.5 font-mono text-purple-700">Kode ISO 6346 (4 huruf + 7 angka) via TCP/IP</td>
+                                <td class="p-2.5">Validasi Check Digit ISO &amp; pencocokan DO/BL</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Argo Masa Penumpukan / Free Time Aktif</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-03: Timbangan Truk 80T</td>
+                                <td class="p-2.5 text-gray-600">Fangda Electronic 80 Ton</td>
+                                <td class="p-2.5">Gandar truk berhenti 5 detik di platform baja</td>
+                                <td class="p-2.5 font-mono text-purple-700">Data bobot kotor numerik via RS-232 / Modbus</td>
+                                <td class="p-2.5">Kalkulasi Net VGM sesuai amandemen SOLAS</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Biaya Sertifikasi VGM (Rp 120.000)</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-04: RFID Reader UHF</td>
+                                <td class="p-2.5 text-gray-600">Long-Range UHF 20m 860-960MHz</td>
+                                <td class="p-2.5">Kartu e-Pass di kaca truk masuk radius 20 meter</td>
+                                <td class="p-2.5 font-mono text-purple-700">24-digit Hex Tag ID via Wiegand-34 / RS-485</td>
+                                <td class="p-2.5">Otentikasi touchless supir &amp; status deposit armada</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Auto-debit saldo deposit trucking mitra</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-05: LED Display Gate</td>
+                                <td class="p-2.5 text-gray-600">Chipshow Outdoor P6/P8</td>
+                                <td class="p-2.5">Seluruh sensor gerbang berstatus VALID</td>
+                                <td class="p-2.5 font-mono text-purple-700">Paket string teks instruksi ASCII via IP UDP</td>
+                                <td class="p-2.5">Menampilkan blok tujuan: "SILAHKAN KE BLOK B-08"</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Efisiensi TAT (Pangkas waktu antre &gt;60%)</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-06: Industrial Edge PC</td>
+                                <td class="p-2.5 text-gray-600">Advantech ARK-3532 Fanless</td>
+                                <td class="p-2.5">Truk mendekat &amp; menerima aliran data sensor</td>
+                                <td class="p-2.5 font-mono text-purple-700">Relay Digital Output Dry-Contact ke PLC Barrier</td>
+                                <td class="p-2.5">Local interlocking: Buka palang dalam 1.2 detik</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Meniadakan kerugian downtime gerbang</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-07: DGPS/RTK GNSS</td>
+                                <td class="p-2.5 text-gray-600">CHCNAV CGI-610 Centimeter</td>
+                                <td class="p-2.5">Reach Stacker bergerak di koridor yard 35 Ha</td>
+                                <td class="p-2.5 font-mono text-purple-700">Koordinat NMEA-0183 ($GPGGA) akurasi &lt;2 cm</td>
+                                <td class="p-2.5">Translasi GPS &rarr; Blok, Bay, Row, Tier 3D</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Meniadakan biaya Rehandling salah letak</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-08: Spreader Twistlock</td>
+                                <td class="p-2.5 text-gray-600">Bromma SmartSpreader Sensor Kit</td>
+                                <td class="p-2.5">Pin twistlock berputar mengunci &amp; mengangkat box</td>
+                                <td class="p-2.5 font-mono text-purple-700">Sinyal digital biner (LOCKED/UNLOCKED) CANopen</td>
+                                <td class="p-2.5">Deteksi otomatis alih muat ('in_transit'/'in_yard')</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Tagihan Jasa Lift-Off (Rp 250.000 / gerakan)</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-09: Smart Reefer Socket</td>
+                                <td class="p-2.5 text-gray-600">Marechal 380V/32A Receptacle</td>
+                                <td class="p-2.5">Steker kontainer reefer dicolokkan ke stopkontak</td>
+                                <td class="p-2.5 font-mono text-purple-700">Tegangan 380V, arus Ampere, suhu (-20.2&deg;C) Modbus</td>
+                                <td class="p-2.5">Monitoring cold chain 24 jam &amp; alarm darurat</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Tagihan Plugging Listrik (Rp 35.000 / jam)</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-10: Rail Axle Counter</td>
+                                <td class="p-2.5 text-gray-600">Frauscher RSR123 Wheel Sensor</td>
+                                <td class="p-2.5">Gandar roda KA melintas di atas rel sepur simpang</td>
+                                <td class="p-2.5 font-mono text-purple-700">Pulsa induksi medan magnet cacah 126 as roda</td>
+                                <td class="p-2.5">Deteksi kedatangan KA logistik &amp; buka order RTG</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Freight Rail Haulage (Rp 1.850.000 / TEU)</td>
+                            </tr>
+                            <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 font-bold text-cdp-navy">HW-11: Smart E-Seal Pabean</td>
+                                <td class="p-2.5 text-gray-600">Jointech JT701 GPS Smart Lock</td>
+                                <td class="p-2.5">Kawat segel dipasang di Priok / dibuka di CIDP</td>
+                                <td class="p-2.5 font-mono text-purple-700">Status GPS, kawat segel INTACT via 4G ke CEISA</td>
+                                <td class="p-2.5">Validasi Jalur Hijau &amp; penerbitan otomatis SPPB</td>
+                                <td class="p-2.5 font-semibold text-emerald-700">Pelepasan Jaminan Pabean (Customs Bond)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TAB 3: CONTEKAN PRESENTASI DOSEN -->
+            <div id="guideTabCheatsheet" class="space-y-4 hidden">
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex items-start space-x-3">
+                    <i class="fa-solid fa-lightbulb text-amber-600 text-base mt-0.5"></i>
+                    <div>
+                        <h4 class="font-bold text-amber-950 text-xs sm:text-sm">Panduan Menjawab Pertanyaan Kritis Dr. Tigor Franky</h4>
+                        <p class="text-xs text-amber-800 mt-0.5">
+                            Gunakan struktur 3 langkah konsultan: <strong>1. Sinyal Fisik Hardware &rarr; 2. Logika Pemrosesan YMS &rarr; 3. Dampak Finansial &amp; Operasional Terminal</strong>.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <!-- Q1 -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
+                        <span class="text-[10px] font-bold text-cdp-blue uppercase block mb-1">Pertanyaan 1: Integrasi Hardware Gerbang</span>
+                        <h5 class="font-bold text-gray-900 text-sm mb-2">"Bagaimana kamera gerbang, timbangan, dan sistem web Anda saling terhubung tanpa delay?"</h5>
+                        <p class="text-xs text-gray-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-gray-100">
+                            <em>"Izin menjelaskan, Pak. Seluruh sensor di gerbang (ANPR, OCR kontainer, timbangan 80T, dan RFID) tidak mengirim data mentah langsung ke server cloud yang rawan latency. Kami menempatkan <strong>Advantech Fanless Industrial Edge PC</strong> tepat di tiang gerbang. Edge PC memproses OCR dan menimbang bobot kotor VGM secara lokal dalam hitungan milidetik. Begitu seluruh parameter valid, sistem mengirim sinyal relay membuka Barrier Gate dalam 1.2 detik sembari mengarahkan supir via LED Display. Secara finansial, aksi ini seketika membentuk pos piutang Pas Gerbang (Rp 50.000) dan Jasa VGM (Rp 120.000) di modul Billing ERP kami."</em>
+                        </p>
+                    </div>
+
+                    <!-- Q2 -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
+                        <span class="text-[10px] font-bold text-cdp-blue uppercase block mb-1">Pertanyaan 2: Presisi Penumpukan Lapangan</span>
+                        <h5 class="font-bold text-gray-900 text-sm mb-2">"Bagaimana software tahu kontainer ditaruh di Bay-Row-Tier tertentu tanpa operator salah ketik?"</h5>
+                        <p class="text-xs text-gray-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-gray-100">
+                            <em>"Kami menerapkan otomatisasi ganda di Reach Stacker: Pertama, sensor <strong>CHCNAV RTK GNSS</strong> di atap kabin dengan akurasi &lt;2 cm yang terus menerjemahkan koordinat latitude/longitude ke grid 3D Blok-Bay-Row-Tier. Kedua, <strong>Bromma Spreader Twistlock &amp; Load Cell Sensor</strong>. Begitu pin twistlock membuka dan beban terlepas di atas tumpukan, sensor mendeteksi penurunan regangan dan seketika mengunci koordinat slot baru di MySQL tanpa input manual sopir. Momen pelepasan ini juga langsung memicu pencatatan biaya Lift-Off (Rp 250.000) pada tagihan pemilik kargo."</em>
+                        </p>
+                    </div>
+
+                    <!-- Q3 -->
+                    <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
+                        <span class="text-[10px] font-bold text-cdp-blue uppercase block mb-1">Pertanyaan 3: Nilai Tambah Intermodal Rel KA</span>
+                        <h5 class="font-bold text-gray-900 text-sm mb-2">"Mengapa harus ada rel kereta api di dalam dry port dan bagaimana hardware memantau integritasnya?"</h5>
+                        <p class="text-xs text-gray-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-gray-100">
+                            <em>"Pelabuhan kering Cikarang berjarak 54.8 km dari Pelabuhan Tanjung Priok. Mengangkut ribuan kontainer via Tol Cikampek menimbulkan kongesti dan biaya logistik tinggi. Jalur rail siding kami dilengkapi <strong>Frauscher Axle Counter</strong> yang memverifikasi 126 as roda dari 30 gerbong datar PPCW secara otomatis. Begitu KA terdeteksi aman, RTG langsung melakukan alih muat. Biaya angkutan rel (Rp 1.850.000/TEU) jauh lebih ekonomis dan kepastian waktunya terjamin, sekaligus menyumbang reduksi emisi karbon 1.84 Ton CO₂ per rangkaian sebagai nilai jual Green Logistics."</em>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Modal Footer -->
+        <div class="p-3.5 bg-gray-50 border-t border-gray-200 flex items-center justify-between shrink-0">
+            <span class="text-[11px] text-gray-500 font-medium">
+                Conclusion Supply Chain Consultant &copy; 2026 &bull; ITL Trisakti
+            </span>
+            <button onclick="closeEndToEndGuideModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs rounded-xl transition shadow-xs">
+                Tutup Panduan
+            </button>
+        </div>
+
+    </div>
+</div>
+
+<script>
+function openEndToEndGuideModal() {
+    const m = document.getElementById('modalEndToEndGuide');
+    if (m) m.classList.remove('hidden');
+}
+
+function closeEndToEndGuideModal() {
+    const m = document.getElementById('modalEndToEndGuide');
+    if (m) m.classList.add('hidden');
+}
+
+function switchGuideTab(tab) {
+    const tabPipeline = document.getElementById('guideTabPipeline');
+    const tabHardware = document.getElementById('guideTabHardware');
+    const tabCheatsheet = document.getElementById('guideTabCheatsheet');
+    
+    const btnPipeline = document.getElementById('tabBtnPipeline');
+    const btnHardware = document.getElementById('tabBtnHardware');
+    const btnCheatsheet = document.getElementById('tabBtnCheatsheet');
+
+    // Hide all
+    if (tabPipeline) tabPipeline.classList.add('hidden');
+    if (tabHardware) tabHardware.classList.add('hidden');
+    if (tabCheatsheet) tabCheatsheet.classList.add('hidden');
+
+    // Reset styles
+    [btnPipeline, btnHardware, btnCheatsheet].forEach(b => {
+        if (b) {
+            b.classList.remove('border-[#0170b9]', 'bg-white', 'text-[#004b87]', 'shadow-xs');
+            b.classList.add('border-transparent', 'text-gray-600');
+        }
+    });
+
+    if (tab === 'pipeline') {
+        if (tabPipeline) tabPipeline.classList.remove('hidden');
+        if (btnPipeline) {
+            btnPipeline.classList.add('border-[#0170b9]', 'bg-white', 'text-[#004b87]', 'shadow-xs');
+            btnPipeline.classList.remove('border-transparent', 'text-gray-600');
+        }
+    } else if (tab === 'hardware') {
+        if (tabHardware) tabHardware.classList.remove('hidden');
+        if (btnHardware) {
+            btnHardware.classList.add('border-[#0170b9]', 'bg-white', 'text-[#004b87]', 'shadow-xs');
+            btnHardware.classList.remove('border-transparent', 'text-gray-600');
+        }
+    } else if (tab === 'cheatsheet') {
+        if (tabCheatsheet) tabCheatsheet.classList.remove('hidden');
+        if (btnCheatsheet) {
+            btnCheatsheet.classList.add('border-[#0170b9]', 'bg-white', 'text-[#004b87]', 'shadow-xs');
+            btnCheatsheet.classList.remove('border-transparent', 'text-gray-600');
+        }
+    }
+}
+</script>
+
 <!-- SCRIPT UTAMA 3D ENGINE (THREE.JS + TWEEN.JS) -->
 <script>
 // =============================================================================
@@ -390,15 +1813,21 @@ let simState = {
     trains: []
 };
 
-// Layout coordinates mapping for terminal blocks
+// Layout coordinates mapping for terminal blocks (1:1 with denah.php 35 Ha Master Plan)
 const BLOCK_COORDS = {
-    'A':      { x: -35, z: -15, label: 'BLOK A (IMPORT / EXPORT)' },
-    'B':      { x: 5,   z: -15, label: 'BLOK B (DOMESTIC / SIDING)' },
-    'C':      { x: 45,  z: -15, label: 'BLOK C (HIGH DENSITY)' },
-    'REEFER': { x: -35, z: 25,  label: 'REEFER ZONE (300 PLUGS)' },
-    'DG':     { x: 5,   z: 25,  label: 'DG YARD (IMO CLASS)' },
-    'EMPTY':  { x: 45,  z: 25,  label: 'EMPTY DEPOT (REPAIR)' }
+    'A':      { x: -28, z: 2,   label: 'BLOK A (LADEN EXPORT)' },
+    'B':      { x: 8,   z: 2,   label: 'BLOK B (LADEN IMPORT)' },
+    'C':      { x: -28, z: -22, label: 'BLOK C (DOMESTIC CARGO)' },
+    'D':      { x: 8,   z: -22, label: 'BLOK D (BUFFER YARD)' },
+    'DG':     { x: 44,  z: -12, label: 'BLOK E (HAZMAT / DG BUNDED)' },
+    'REEFER': { x: 50,  z: 32,  label: 'REEFER ZONE (300 PLUGS)' },
+    'EMPTY':  { x: -64, z: -12, label: 'EMPTY DEPOT (2.500 TEU)' }
 };
+
+// Technical CAD overlay states
+let showTechnicalDimensions = true;
+let showCADTitleBlock = true;
+let technicalDimensionsGroup = null;
 
 // Shipping Line Color Palette
 const SHIPPING_COLORS = {
@@ -493,12 +1922,60 @@ function setupLighting() {
 // =============================================================================
 // BUILD TERMINAL ENVIRONMENT (GROUND, ZONES, GANTRY, TRACKS, BUILDINGS)
 // =============================================================================
+// =============================================================================
+// BUILD TERMINAL ENVIRONMENT (GROUND, ZONES, GANTRY, TRACKS, BUILDINGS)
+// 1:1 Civil & Industrial Logistics Engineering Master Plan (35 Hektar)
+// =============================================================================
 function buildTerminalEnvironment() {
-    // 1. Concrete Ground Floor (35 Ha Yard)
+    // 1. Civil Ground Floor & Arterial Road Network (35 Ha Yard)
+    buildCivilPavementsAndRoadNetwork();
+
+    // 2. Build Yard Stacking Blocks Markings, Concrete Slabs & Bunded DG Yard
+    for (const [key, bData] of Object.entries(BLOCK_COORDS)) {
+        createBlockZone(key, bData.x, bData.z, bData.label);
+    }
+
+    // 3. Rail Siding Intermodal (400m Dual Tracks + Loading Ramp + Train + Dispatcher)
+    buildRailSiding();
+
+    // 4. Gate Complex (Gate-In 2 Lanes, Weighbridge 80T, OCR, ANPR, Barrier, Security, Rest Area)
+    buildGateComplex();
+
+    // 5. Administration, Datacenter NOC, Masjid, Canteen, Clinic & Damkar
+    buildAdministrationAndPublicZone();
+
+    // 6. CFS Warehouse 4.000m², Transit Warehouse & M&R Heavy Equipment Workshop
+    buildCFSAndWarehouseZone();
+
+    // 7. Customs KPPBC, 6 MeV Gantry X-Ray, Red Line Behandle Canopy & Quarantine
+    buildCustomsAndBehandleZone();
+
+    // 8. Perimeter Boundary Security Fence & 4 Watchtowers
+    buildPerimeterAndSecurity();
+
+    // 9. Engineering CAD 3D Dimension Leader Lines & Benchmark Datum
+    buildEngineeringDimensionLeaders();
+
+    // 10. Yard Floodlight Towers (for 24/7 night lighting)
+    buildFloodlightTowers();
+
+    // 11. Spawn 3D Heavy Equipment Models (RS-01, RS-02, RS-03, RTG-01)
+    spawnEquipmentModels();
+
+    // 12. Spawn Prime Mover Truck on Gate Road
+    spawnTruckModel();
+
+    // 13. Create Holographic 3D Target Marker Beacon & Ground Ring
+    createTargetMarker();
+}
+
+// 1. Civil Concrete Ground Pavements & Arterial Road Network (35 Ha)
+function buildCivilPavementsAndRoadNetwork() {
+    // Base 35 Hektar Ground Floor
     const groundGeo = new THREE.PlaneGeometry(240, 180);
     const groundMat = new THREE.MeshStandardMaterial({
-        color: 0x334155, // Dark asphalt / concrete
-        roughness: 0.85,
+        color: 0x1e293b, // Dark asphalt
+        roughness: 0.88,
         metalness: 0.1
     });
     const ground = new THREE.Mesh(groundGeo, groundMat);
@@ -507,36 +1984,75 @@ function buildTerminalEnvironment() {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Grid Floor Helper (subtle pavement lines)
-    const grid = new THREE.GridHelper(240, 48, 0x64748b, 0x475569);
+    // Fine Engineering Grid Dilatations (Expansion joints)
+    const grid = new THREE.GridHelper(240, 48, 0x475569, 0x334155);
     grid.position.y = 0.02;
     scene.add(grid);
 
-    // 2. Build Yard Stacking Blocks Markings & Concrete Slabs
-    for (const [key, bData] of Object.entries(BLOCK_COORDS)) {
-        createBlockZone(key, bData.x, bData.z, bData.label);
-    }
+    // Concrete Apron Platforms for Each Zone
+    const aprons = [
+        // Container Stacking Yard Apron (15 Ha)
+        { w: 154, d: 60, x: 6, z: -10, color: 0x334155 },
+        // CFS & Warehousing Apron
+        { w: 34, d: 68, x: -88, z: -3, color: 0x3b4758 },
+        // Customs & Behandle Apron
+        { w: 32, d: 68, x: 92, z: -3, color: 0x3b4758 },
+        // Administration & Public Facilities Apron
+        { w: 70, d: 34, x: 4, z: 46, color: 0x475569 },
+        // Gate Complex & Truck Queuing Apron
+        { w: 54, d: 34, x: -62, z: 46, color: 0x334155 },
+        // Reefer Cold Chain Apron
+        { w: 38, d: 34, x: 64, z: 46, color: 0x0f172a }
+    ];
 
-    // 3. Rail Siding Intermodal (Dual Tracks + Train)
-    buildRailSiding();
+    aprons.forEach(ap => {
+        const apGeo = new THREE.BoxGeometry(ap.w, 0.12, ap.d);
+        const apMat = new THREE.MeshStandardMaterial({ color: ap.color, roughness: 0.75 });
+        const mesh = new THREE.Mesh(apGeo, apMat);
+        mesh.position.set(ap.x, 0.06, ap.z);
+        mesh.receiveShadow = true;
+        scene.add(mesh);
+    });
 
-    // 4. Gate Complex (Gate-In, Weighbridge, Barriers, Scanner Gantry)
-    buildGateComplex();
+    // Yellow Dashed Haul Road Center Markings
+    const roadMarkings = [
+        // North Cross Road (Connecting Gate to Admin, Reefer, Customs)
+        { sx: -105, ex: 105, z: 28, orient: 'h' },
+        // Central Yard Spine Road (Between Blok A/B and Blok C/D)
+        { sx: -60, ex: 74, z: -10, orient: 'h' },
+        // South Haul Road (Alongside Rail Siding Loading Ramp)
+        { sx: -105, ex: 105, z: -35, orient: 'h' },
+        // Gate Inbound Corridor
+        { sz: 62, ez: 30, x: -45, orient: 'v' },
+        // East Corridor (Connecting Reefer to Customs)
+        { sz: 28, ez: -35, x: 74, orient: 'v' }
+    ];
 
-    // 5. Yard Floodlight Towers (for 24/7 night lighting)
-    buildFloodlightTowers();
-
-    // 6. Spawn 3D Heavy Equipment Models (RS-01, RS-02, RS-03, RTG-01)
-    spawnEquipmentModels();
-
-    // 7. Spawn Prime Mover Truck on Gate Road
-    spawnTruckModel();
+    roadMarkings.forEach(rm => {
+        if (rm.orient === 'h') {
+            for (let rx = rm.sx; rx <= rm.ex; rx += 6) {
+                const dashGeo = new THREE.BoxGeometry(3.5, 0.02, 0.3);
+                const dashMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+                const dash = new THREE.Mesh(dashGeo, dashMat);
+                dash.position.set(rx, 0.13, rm.z);
+                scene.add(dash);
+            }
+        } else {
+            for (let rz = rm.sz; rz >= rm.ez; rz -= 6) {
+                const dashGeo = new THREE.BoxGeometry(0.3, 0.02, 3.5);
+                const dashMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+                const dash = new THREE.Mesh(dashGeo, dashMat);
+                dash.position.set(rm.x, 0.13, rz);
+                scene.add(dash);
+            }
+        }
+    });
 }
 
-// Create Block Stacking Zone Area
+// 2. Create Block Stacking Zone Area (Blok A-E, Reefer, Empty Depot)
 function createBlockZone(blockKey, centerX, centerZ, labelText) {
-    const blockWidth = 30;
-    const blockDepth = 22;
+    const blockWidth = (blockKey === 'EMPTY' || blockKey === 'DG') ? 28 : 32;
+    const blockDepth = (blockKey === 'EMPTY' || blockKey === 'DG') ? 22 : 20;
 
     // Concrete Slab
     let slabColor = 0x1e293b;
@@ -560,13 +2076,49 @@ function createBlockZone(blockKey, centerX, centerZ, labelText) {
     edge.position.set(centerX + blockWidth/2, 0.21, centerZ + blockDepth/2);
     scene.add(edge);
 
-    // Block Label Billboard Sprite
-    createBlockLabelSprite(labelText, centerX + blockWidth/2, 5.5, centerZ - 2);
+    // If Hazmat DG: build 1.2m reinforced concrete bund wall around it!
+    if (blockKey === 'DG') {
+        buildHazmatBundWall(centerX + blockWidth/2, centerZ + blockDepth/2, blockWidth, blockDepth);
+    }
 
-    // Reefer Power Gantry (if reefer block)
+    // Block Label Billboard Sprite
+    createBlockLabelSprite(labelText, centerX + blockWidth/2, 6.0, centerZ - 2);
+
+    // Reefer Power Racks Structure
     if (blockKey === 'REEFER') {
         createReeferPowerRacks(centerX, centerZ, blockWidth, blockDepth);
     }
+}
+
+// Hazmat / DG Bunded Containment Wall (1.2m Reinforced Concrete)
+function buildHazmatBundWall(cx, cz, bw, bd) {
+    const wallHeight = 1.4;
+    const wallThick = 0.5;
+    const wallMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.5 }); // Hazmat Red/Concrete
+    const capMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 }); // Yellow safety cap
+
+    // 4 Walls: North, South, East, West with containment sump opening
+    const wallDefs = [
+        { w: bw + 0.8, h: wallHeight, d: wallThick, x: cx, z: cz + bd/2 + 0.3 },
+        { w: bw + 0.8, h: wallHeight, d: wallThick, x: cx, z: cz - bd/2 - 0.3 },
+        { w: wallThick, h: wallHeight, d: bd + 0.8, x: cx + bw/2 + 0.3, z: cz },
+        { w: wallThick, h: wallHeight, d: bd + 0.8, x: cx - bw/2 - 0.3, z: cz }
+    ];
+
+    wallDefs.forEach(wd => {
+        const geo = new THREE.BoxGeometry(wd.w, wd.h, wd.d);
+        const mesh = new THREE.Mesh(geo, wallMat);
+        mesh.position.set(wd.x, wd.h / 2 + 0.1, wd.z);
+        mesh.castShadow = true;
+        scene.add(mesh);
+
+        const capGeo = new THREE.BoxGeometry(wd.w, 0.1, wd.d);
+        const cap = new THREE.Mesh(capGeo, capMat);
+        cap.position.set(wd.x, wd.h + 0.15, wd.z);
+        scene.add(cap);
+    });
+
+    createBlockLabelSprite('HAZMAT DG BUNDED YARD (1.2M BUND WALL & SPILL SUMP)', cx, 7.8, cz - bd/2 - 3);
 }
 
 // Block Label Sprite in 3D Space
@@ -576,15 +2128,15 @@ function createBlockLabelSprite(text, x, y, z) {
     canvas.height = 128;
     const ctx = canvas.getContext('2d');
     
-    ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-    ctx.roundRect(10, 10, 492, 108, 20);
+    ctx.fillStyle = 'rgba(15, 23, 42, 0.88)';
+    ctx.roundRect(10, 10, 492, 108, 16);
     ctx.fill();
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 3.5;
     ctx.strokeStyle = '#0170b9';
-    ctx.roundRect(10, 10, 492, 108, 20);
+    ctx.roundRect(10, 10, 492, 108, 16);
     ctx.stroke();
 
-    ctx.font = 'bold 36px Plus Jakarta Sans, sans-serif';
+    ctx.font = 'bold 30px Plus Jakarta Sans, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -596,9 +2148,10 @@ function createBlockLabelSprite(text, x, y, z) {
     sprite.position.set(x, y, z);
     sprite.scale.set(16, 4, 1);
     scene.add(sprite);
+    return sprite;
 }
 
-// Reefer Power Racks Structure
+// Reefer Power Racks Structure (Cold Chain 300 Plugs)
 function createReeferPowerRacks(bx, bz, bw, bd) {
     const rackGeo = new THREE.BoxGeometry(bw - 2, 3.5, 0.4);
     const rackMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.6, roughness: 0.3 });
@@ -607,8 +2160,8 @@ function createReeferPowerRacks(bx, bz, bw, bd) {
     scene.add(rack);
 
     // Blue LED sockets
-    for (let i = -10; i <= 10; i += 3) {
-        const ledGeo = new THREE.SphereGeometry(0.15, 8, 8);
+    for (let i = -10; i <= 10; i += 2.5) {
+        const ledGeo = new THREE.SphereGeometry(0.18, 8, 8);
         const ledMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
         const led = new THREE.Mesh(ledGeo, ledMat);
         led.position.set(bx + bw/2 + i, 2.5, bz + bd/2 + 0.25);
@@ -616,25 +2169,25 @@ function createReeferPowerRacks(bx, bz, bw, bd) {
     }
 }
 
-// Intermodal Rail Siding (Twin Railway Tracks + Freight Train)
+// 3. Intermodal Rail Siding (400m Dual Tracks + Loading Ramp + Train + Dispatcher)
 function buildRailSiding() {
-    const trackZ = -45;
-    const railLength = 200;
+    const trackZ = -48;
+    const railLength = 210;
 
     // Ballast Gravel Bed
-    const ballastGeo = new THREE.BoxGeometry(railLength, 0.3, 14);
-    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.95 });
+    const ballastGeo = new THREE.BoxGeometry(railLength, 0.4, 16);
+    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x3f4c5e, roughness: 0.95 });
     const ballast = new THREE.Mesh(ballastGeo, ballastMat);
-    ballast.position.set(0, 0.15, trackZ);
+    ballast.position.set(0, 0.2, trackZ);
     ballast.receiveShadow = true;
     scene.add(ballast);
 
-    // Sleepers (Bantalan Rel Beton)
-    const sleeperGeo = new THREE.BoxGeometry(0.4, 0.2, 12);
+    // Sleepers (Bantalan Rel Beton PC)
+    const sleeperGeo = new THREE.BoxGeometry(0.4, 0.2, 13);
     const sleeperMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
-    for (let x = -95; x <= 95; x += 2.5) {
+    for (let x = -100; x <= 100; x += 2.5) {
         const sleeper = new THREE.Mesh(sleeperGeo, sleeperMat);
-        sleeper.position.set(x, 0.35, trackZ);
+        sleeper.position.set(x, 0.45, trackZ);
         scene.add(sleeper);
     }
 
@@ -642,24 +2195,56 @@ function buildRailSiding() {
     const railSteelMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 });
     const railOffsets = [-4.5, -2.5, 2.5, 4.5];
     railOffsets.forEach(offsetZ => {
-        const railGeo = new THREE.BoxGeometry(railLength, 0.25, 0.15);
+        const railGeo = new THREE.BoxGeometry(railLength, 0.3, 0.15);
         const rail = new THREE.Mesh(railGeo, railSteelMat);
-        rail.position.set(0, 0.55, trackZ + offsetZ);
+        rail.position.set(0, 0.65, trackZ + offsetZ);
         scene.add(rail);
     });
 
-    // Spawn Freight Train on Track 1
-    buildFreightTrain(trackZ - 3.5);
+    // Concrete Loading Ramp (fac_f_loading_ramp)
+    const rampGeo = new THREE.BoxGeometry(160, 1.2, 5.0);
+    const rampMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const ramp = new THREE.Mesh(rampGeo, rampMat);
+    ramp.position.set(20, 0.6, trackZ + 9);
+    ramp.receiveShadow = true;
+    scene.add(ramp);
+
+    // Rail Office / Stasiun Dispatcher (fac_f_rail_office)
+    const rOffGeo = new THREE.BoxGeometry(18, 6.5, 10);
+    const rOffMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
+    const rOff = new THREE.Mesh(rOffGeo, rOffMat);
+    rOff.position.set(-90, 3.25, trackZ + 7);
+    rOff.castShadow = true;
+    scene.add(rOff);
+
+    // Observation Tower Cabin on Rail Office
+    const towGeo = new THREE.BoxGeometry(8, 3.0, 7);
+    const towMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.8 });
+    const tow = new THREE.Mesh(towGeo, towMat);
+    tow.position.set(-90, 7.5, trackZ + 7);
+    scene.add(tow);
+
+    // Railway Signal Light Post
+    const sigPole = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.12, 7, 8), new THREE.MeshStandardMaterial({ color: 0x334155 }));
+    sigPole.position.set(-78, 3.5, trackZ + 3);
+    scene.add(sigPole);
+
+    const greenSignal = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshBasicMaterial({ color: 0x22c55e }));
+    greenSignal.position.set(-78, 6.5, trackZ + 3);
+    scene.add(greenSignal);
+
+    // Spawn Freight Train on Track 1 (Z = trackZ + 3.5 = -44.5)
+    buildFreightTrain(trackZ + 3.5);
 
     // Rail Siding Signboard
-    createBlockLabelSprite('RAIL SIDING KAI LOGISTIK (INTERMODAL)', 0, 7, trackZ + 9);
+    createBlockLabelSprite('RAIL SIDING KAI LOGISTIK (INTERMODAL 400M)', 0, 8.5, trackZ + 12);
 }
 
-// Freight Train Model
+// Freight Train Model (PT Kereta Api Logistik CC 206)
 function buildFreightTrain(zPos) {
     trainMesh = new THREE.Group();
 
-    // Diesel Locomotive (PT KAI Logistik Orange / White)
+    // Diesel Locomotive (PT KAI Logistik Orange / White / Grey)
     const locoGeo = new THREE.BoxGeometry(16, 4.5, 3.2);
     const locoMat = new THREE.MeshStandardMaterial({ color: 0xe05615, roughness: 0.4 });
     const loco = new THREE.Mesh(locoGeo, locoMat);
@@ -700,38 +2285,36 @@ function buildFreightTrain(zPos) {
     scene.add(trainMesh);
 }
 
-// Gate Complex (Gate-In, Weighbridge, Boom Barriers, Scanner Arch)
+// 4. Gate Complex (Gate-In, Weighbridge 80T, OCR, ANPR, Barrier, Security, Rest Area)
 function buildGateComplex() {
-    const gateZ = 55;
-    const gateX = -10;
+    const gateZ = 52;
+    const gateX = -45;
 
-    // Gate Gantry Arch
+    // Inbound Gate Gantry Arch
     const gantryMat = new THREE.MeshStandardMaterial({ color: 0x004b87, metalness: 0.5, roughness: 0.4 });
     
-    // Pillars
-    const pillarGeo = new THREE.BoxGeometry(1.2, 7, 1.2);
-    const p1 = new THREE.Mesh(pillarGeo, gantryMat);
-    p1.position.set(gateX - 14, 3.5, gateZ);
+    // Inbound Pillars
+    const p1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.5, 1.2), gantryMat);
+    p1.position.set(gateX - 9, 3.75, gateZ);
     scene.add(p1);
 
-    const p2 = new THREE.Mesh(pillarGeo, gantryMat);
-    p2.position.set(gateX + 14, 3.5, gateZ);
+    const p2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.5, 1.2), gantryMat);
+    p2.position.set(gateX + 9, 3.75, gateZ);
     scene.add(p2);
 
     // Crossbeam
-    const beamGeo = new THREE.BoxGeometry(29.2, 1.6, 1.6);
-    const beam = new THREE.Mesh(beamGeo, gantryMat);
-    beam.position.set(gateX, 7.8, gateZ);
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(19.2, 1.6, 1.6), gantryMat);
+    beam.position.set(gateX, 8.0, gateZ);
     scene.add(beam);
 
     // Signboard on Gantry
-    createBlockLabelSprite('MAIN GATE & JEMBATAN TIMBANG VGM (80T)', gateX, 9.8, gateZ);
+    createBlockLabelSprite('MAIN GATE & JEMBATAN TIMBANG VGM (80T)', gateX, 10.0, gateZ);
 
     // Weighbridge Pit & Steel Scale Platform (Lane 1)
     const scaleGeo = new THREE.BoxGeometry(16, 0.15, 4.5);
     const scaleMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7, roughness: 0.3 });
     const scale = new THREE.Mesh(scaleGeo, scaleMat);
-    scale.position.set(gateX - 7, 0.08, gateZ);
+    scale.position.set(gateX - 4, 0.08, gateZ);
     scale.receiveShadow = true;
     scene.add(scale);
 
@@ -739,34 +2322,597 @@ function buildGateComplex() {
     const ledDispGeo = new THREE.BoxGeometry(2.5, 1.2, 0.4);
     const ledDispMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
     const ledDisp = new THREE.Mesh(ledDispGeo, ledDispMat);
-    ledDisp.position.set(gateX - 7, 4.5, gateZ - 3);
+    ledDisp.position.set(gateX - 4, 4.5, gateZ - 3);
     scene.add(ledDisp);
 
     // Boom Barrier Pole (Animated Palang Pintu)
     const barrierBaseGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.4, 16);
     const barrierBaseMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
     const bBase = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
-    bBase.position.set(gateX - 11, 0.7, gateZ + 3);
+    bBase.position.set(gateX - 8, 0.7, gateZ + 3);
     scene.add(bBase);
 
     const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 7, 8);
     const poleMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     boomBarrierMesh = new THREE.Mesh(poleGeo, poleMat);
     boomBarrierMesh.rotation.z = Math.PI / 2;
-    boomBarrierMesh.position.set(gateX - 7.5, 1.2, gateZ + 3);
+    boomBarrierMesh.position.set(gateX - 4.5, 1.2, gateZ + 3);
     scene.add(boomBarrierMesh);
+
+    // Outbound Gate Canopy (Lane 3 & 4)
+    const outCanopyGeo = new THREE.BoxGeometry(16, 0.4, 6);
+    const outCanopyMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
+    const outCanopy = new THREE.Mesh(outCanopyGeo, outCanopyMat);
+    outCanopy.position.set(gateX, 5.5, 38);
+    scene.add(outCanopy);
+
+    createBlockLabelSprite('OUTBOUND GATE (E-PASS & BARRIER)', gateX, 7.5, 38);
+
+    // Security Post 24 Jam (fac_f_security_gate)
+    const secGeo = new THREE.BoxGeometry(8, 4.5, 8);
+    const secMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+    const secPost = new THREE.Mesh(secGeo, secMat);
+    secPost.position.set(-65, 2.25, gateZ);
+    secPost.castShadow = true;
+    scene.add(secPost);
+
+    createBlockLabelSprite('SECURITY POST 24 JAM', -65, 5.5, gateZ);
+
+    // Driver Rest Area & Kiosk (fac_f_driver_rest)
+    const restGeo = new THREE.BoxGeometry(14, 4.5, 8);
+    const restMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+    const restArea = new THREE.Mesh(restGeo, restMat);
+    restArea.position.set(-80, 2.25, 38);
+    restArea.castShadow = true;
+    scene.add(restArea);
+
+    createBlockLabelSprite('REST AREA SOPIR & KIOSK', -80, 5.5, 38);
+
+    // Truck Queuing Parking Yard (fac_f_truck_queue)
+    const queueGeo = new THREE.BoxGeometry(18, 0.1, 14);
+    const queueMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
+    const queueYard = new THREE.Mesh(queueGeo, queueMat);
+    queueYard.position.set(-80, 0.08, 54);
+    scene.add(queueYard);
+
+    // Striped queue parking lines
+    for (let qx = -87; qx <= -73; qx += 3.5) {
+        const lineGeo = new THREE.BoxGeometry(0.15, 0.02, 12);
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+        const line = new THREE.Mesh(lineGeo, lineMat);
+        line.position.set(qx, 0.14, 54);
+        scene.add(line);
+    }
+
+    createBlockLabelSprite('PARKIR TRUK ANTRIAN (40 TRAILER)', -80, 6.0, 54);
 }
 
-// Yard Floodlight High Towers
+// 5. Administration, Datacenter NOC, Mosque, Canteen, Clinic & Damkar
+function buildAdministrationAndPublicZone() {
+    const adminGroup = new THREE.Group();
+    adminGroup.name = "AdministrationZone";
+
+    // 1. Main Office / Admin Building (fac_f_admin_office) - 2 Floors
+    const officeBaseGeo = new THREE.BoxGeometry(22, 4.5, 12);
+    const officeBaseMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.5 });
+    const officeBase = new THREE.Mesh(officeBaseGeo, officeBaseMat);
+    officeBase.position.set(-20, 2.25, 54);
+    officeBase.castShadow = true;
+    adminGroup.add(officeBase);
+
+    // Floor 2 Glass Curtain Wall
+    const glassGeo = new THREE.BoxGeometry(21.6, 3.5, 11.6);
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, transparent: true, opacity: 0.8, metalness: 0.8 });
+    const glassFloor = new THREE.Mesh(glassGeo, glassMat);
+    glassFloor.position.set(-20, 6.25, 54);
+    adminGroup.add(glassFloor);
+
+    // Modern Roof Coping & HVAC
+    const roofCopingGeo = new THREE.BoxGeometry(22.4, 0.4, 12.4);
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const roofCoping = new THREE.Mesh(roofCopingGeo, roofMat);
+    roofCoping.position.set(-20, 8.2, 54);
+    adminGroup.add(roofCoping);
+
+    const hvacGeo = new THREE.BoxGeometry(3, 1.2, 3);
+    const hvacMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.6 });
+    const hvac = new THREE.Mesh(hvacGeo, hvacMat);
+    hvac.position.set(-16, 8.8, 54);
+    adminGroup.add(hvac);
+
+    // Entrance Canopy (Blue corporate MTI)
+    const canopyGeo = new THREE.BoxGeometry(7, 0.3, 4);
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x004b87, roughness: 0.3 });
+    const canopy = new THREE.Mesh(canopyGeo, canopyMat);
+    canopy.position.set(-20, 2.5, 46.5);
+    adminGroup.add(canopy);
+
+    // Indonesian Flag Pole
+    const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, 10, 8);
+    const poleMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, metalness: 0.8 });
+    const pole = new THREE.Mesh(poleGeo, poleMat);
+    pole.position.set(-20, 5, 43);
+    adminGroup.add(pole);
+
+    const flagGeo = new THREE.BoxGeometry(1.8, 1.0, 0.05);
+    const flagMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
+    const flag = new THREE.Mesh(flagGeo, flagMat);
+    flag.position.set(-19, 9.3, 43);
+    adminGroup.add(flag);
+
+    createBlockLabelSprite('MAIN OFFICE PT MTI (HEADQUARTERS)', -20, 10.5, 54);
+
+    // 2. Datacenter / Server Room (NOC) (fac_f_datacenter)
+    const dcGeo = new THREE.BoxGeometry(14, 6.5, 12);
+    const dcMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.7 });
+    const dc = new THREE.Mesh(dcGeo, dcMat);
+    dc.position.set(-4, 3.25, 54);
+    dc.castShadow = true;
+    adminGroup.add(dc);
+
+    // High Microwave & Telecom Lattice Mast
+    const mastGeo = new THREE.CylinderGeometry(0.15, 0.6, 16, 6);
+    const mastMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.6 });
+    const mast = new THREE.Mesh(mastGeo, mastMat);
+    mast.position.set(-4, 14.5, 54);
+    adminGroup.add(mast);
+
+    // Microwave Dish Antenna
+    const dishGeo = new THREE.CylinderGeometry(1.2, 0.2, 0.4, 16);
+    const dishMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4 });
+    const dish = new THREE.Mesh(dishGeo, dishMat);
+    dish.rotation.x = Math.PI / 2;
+    dish.position.set(-4, 18, 54);
+    adminGroup.add(dish);
+
+    createBlockLabelSprite('DATACENTER & NOC (TIER-3 YMS)', -4, 9.0, 54);
+
+    // 3. Meeting & Training Room (fac_f_meeting_room)
+    const meetGeo = new THREE.BoxGeometry(12, 5.5, 12);
+    const meetMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+    const meet = new THREE.Mesh(meetGeo, meetMat);
+    meet.position.set(12, 2.75, 54);
+    meet.castShadow = true;
+    adminGroup.add(meet);
+
+    // 4. Staff & Guest Parking (fac_f_parking_staff)
+    const parkGeo = new THREE.BoxGeometry(12, 0.1, 12);
+    const parkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const park = new THREE.Mesh(parkGeo, parkMat);
+    park.position.set(26, 0.06, 54);
+    adminGroup.add(park);
+
+    // White parking lot lines
+    for (let pz = 49; pz <= 59; pz += 3) {
+        const lineGeo = new THREE.BoxGeometry(10, 0.02, 0.15);
+        const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+        const line = new THREE.Mesh(lineGeo, lineMat);
+        line.position.set(26, 0.12, pz);
+        adminGroup.add(line);
+    }
+
+    // 5. Masjid Al-Hidayah (fac_f_musholla)
+    const mosqueGeo = new THREE.BoxGeometry(14, 5.5, 10);
+    const mosqueMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.4 });
+    const mosque = new THREE.Mesh(mosqueGeo, mosqueMat);
+    mosque.position.set(-20, 2.75, 38);
+    mosque.castShadow = true;
+    adminGroup.add(mosque);
+
+    // Green Dome
+    const domeGeo = new THREE.SphereGeometry(2.5, 16, 12, 0, Math.PI * 2, 0, Math.PI / 2);
+    const domeMat = new THREE.MeshStandardMaterial({ color: 0x10b981, roughness: 0.3, metalness: 0.2 });
+    const dome = new THREE.Mesh(domeGeo, domeMat);
+    dome.position.set(-20, 5.5, 38);
+    adminGroup.add(dome);
+
+    // Minaret
+    const minaretGeo = new THREE.CylinderGeometry(0.6, 0.8, 12, 8);
+    const minaret = new THREE.Mesh(minaretGeo, mosqueMat);
+    minaret.position.set(-12, 6, 38);
+    adminGroup.add(minaret);
+
+    const minaretDome = new THREE.Mesh(new THREE.ConeGeometry(0.9, 2.5, 8), domeMat);
+    minaretDome.position.set(-12, 13.25, 38);
+    adminGroup.add(minaretDome);
+
+    createBlockLabelSprite('MASJID AL-HIDAYAH', -20, 8.5, 38);
+
+    // 6. Canteen & Koperasi Karyawan (fac_f_kantin, fac_f_koperasi)
+    const cantGeo = new THREE.BoxGeometry(14, 4.5, 9);
+    const cantMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6 });
+    const canteen = new THREE.Mesh(cantGeo, cantMat);
+    canteen.position.set(-4, 2.25, 38);
+    canteen.castShadow = true;
+    adminGroup.add(canteen);
+
+    // Canteen Awning
+    const cAwningGeo = new THREE.BoxGeometry(13.6, 0.2, 3);
+    const cAwningMat = new THREE.MeshStandardMaterial({ color: 0x0284c7 });
+    const cAwning = new THREE.Mesh(cAwningGeo, cAwningMat);
+    cAwning.position.set(-4, 2.6, 32.5);
+    adminGroup.add(cAwning);
+
+    // 7. Klinik P3K K3 (fac_f_klinik)
+    const clinicGeo = new THREE.BoxGeometry(10, 4.5, 9);
+    const clinicMat = new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 });
+    const clinic = new THREE.Mesh(clinicGeo, clinicMat);
+    clinic.position.set(12, 2.25, 38);
+    clinic.castShadow = true;
+    adminGroup.add(clinic);
+
+    // Red Cross Symbol on Clinic
+    const cross1Geo = new THREE.BoxGeometry(0.3, 1.8, 0.05);
+    const cross2Geo = new THREE.BoxGeometry(1.8, 0.3, 0.05);
+    const crossMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    const cross1 = new THREE.Mesh(cross1Geo, crossMat);
+    cross1.position.set(12, 3.2, 33.4);
+    const cross2 = new THREE.Mesh(cross2Geo, crossMat);
+    cross2.position.set(12, 3.2, 33.4);
+    adminGroup.add(cross1);
+    adminGroup.add(cross2);
+
+    // 8. Damkar & Fire Station (fac_f_damkar)
+    const fireGeo = new THREE.BoxGeometry(12, 5.5, 10);
+    const fireMat = new THREE.MeshStandardMaterial({ color: 0xb91c1c, roughness: 0.5 });
+    const fireStation = new THREE.Mesh(fireGeo, fireMat);
+    fireStation.position.set(26, 2.75, 38);
+    fireStation.castShadow = true;
+    adminGroup.add(fireStation);
+
+    // 2 Red Roll-up Garage Doors
+    [-3, 3].forEach(dx => {
+        const doorGeo = new THREE.BoxGeometry(4.2, 4.2, 0.2);
+        const doorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
+        const door = new THREE.Mesh(doorGeo, doorMat);
+        door.position.set(26 + dx, 2.1, 32.9);
+        adminGroup.add(door);
+    });
+
+    createBlockLabelSprite('POS DAMKAR & FIRE STATION', 26, 7.5, 38);
+
+    // Reefer Control Room & Genset Shelter (Zone 3 Aux)
+    const rCtlGeo = new THREE.BoxGeometry(14, 5, 8);
+    const rCtlMat = new THREE.MeshStandardMaterial({ color: 0x0891b2, roughness: 0.4 });
+    const rCtl = new THREE.Mesh(rCtlGeo, rCtlMat);
+    rCtl.position.set(88, 2.5, 52);
+    adminGroup.add(rCtl);
+    createBlockLabelSprite('REEFER CONTROL ROOM', 88, 6.0, 52);
+
+    const gensetGeo = new THREE.BoxGeometry(14, 4.5, 8);
+    const gensetMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const genset = new THREE.Mesh(gensetGeo, gensetMat);
+    genset.position.set(88, 2.25, 38);
+    adminGroup.add(genset);
+    createBlockLabelSprite('GENSET SHELTER (1.500 kVA)', 88, 5.5, 38);
+
+    scene.add(adminGroup);
+}
+
+// 6. CFS Warehouse 4.000m², Transit Warehouse & M&R Heavy Equipment Workshop
+function buildCFSAndWarehouseZone() {
+    const cfsGroup = new THREE.Group();
+    cfsGroup.name = "CFSAndWarehousingZone";
+
+    // 1. CFS Warehouse 4.000 m² (fac_f_cfs)
+    const cfsW = 24, cfsH = 8, cfsD = 18;
+    const cfsGeo = new THREE.BoxGeometry(cfsW, cfsH, cfsD);
+    const cfsMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 });
+    const cfs = new THREE.Mesh(cfsGeo, cfsMat);
+    cfs.position.set(-88, cfsH/2, 14);
+    cfs.castShadow = true;
+    cfsGroup.add(cfs);
+
+    // Raised Loading Dock Platform
+    const dockGeo = new THREE.BoxGeometry(3.5, 1.2, cfsD);
+    const dockMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const dock = new THREE.Mesh(dockGeo, dockMat);
+    dock.position.set(-88 + cfsW/2 + 1.75, 0.6, 14);
+    cfsGroup.add(dock);
+
+    // 4 Loading Dock Overhead Doors with Yellow Dock Bumpers
+    for (let dz = 7; dz <= 21; dz += 4.5) {
+        const dDoorGeo = new THREE.BoxGeometry(0.2, 4.0, 3.2);
+        const dDoorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
+        const dDoor = new THREE.Mesh(dDoorGeo, dDoorMat);
+        dDoor.position.set(-88 + cfsW/2 + 0.1, 3.2, dz);
+        cfsGroup.add(dDoor);
+
+        // Dock bumper
+        const bGeo = new THREE.BoxGeometry(0.4, 0.4, 3.2);
+        const bMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+        const b = new THREE.Mesh(bGeo, bMat);
+        b.position.set(-88 + cfsW/2 + 3.5, 0.6, dz);
+        cfsGroup.add(b);
+    }
+
+    createBlockLabelSprite('CFS WAREHOUSE 4.000 M² (LCL)', -88, cfsH + 3.5, 14);
+
+    // 2. Transit Distribution Warehouse (fac_f_warehouse)
+    const trW = 24, trH = 7, trD = 13;
+    const trGeo = new THREE.BoxGeometry(trW, trH, trD);
+    const trMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const trWarehouse = new THREE.Mesh(trGeo, trMat);
+    trWarehouse.position.set(-88, trH/2, -3);
+    trWarehouse.castShadow = true;
+    cfsGroup.add(trWarehouse);
+
+    createBlockLabelSprite('TRANSIT WAREHOUSE & CROSS-DOCKING', -88, trH + 2.5, -3);
+
+    // 3. M&R Workshop / Bengkel Alat Berat (fac_f_workshop_mr)
+    const mrW = 24, mrH = 9, mrD = 16;
+    const mrGeo = new THREE.BoxGeometry(mrW, mrH, mrD);
+    const mrMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+    const mrWorkshop = new THREE.Mesh(mrGeo, mrMat);
+    mrWorkshop.position.set(-88, mrH/2, -20);
+    mrWorkshop.castShadow = true;
+    cfsGroup.add(mrWorkshop);
+
+    // Overhead Gantry Crane Rail extending outside M&R bay
+    const craneBeamGeo = new THREE.BoxGeometry(10, 0.8, 0.8);
+    const craneBeamMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
+    const craneBeam = new THREE.Mesh(craneBeamGeo, craneBeamMat);
+    craneBeam.position.set(-88 + mrW/2 + 3, 7.5, -20);
+    cfsGroup.add(craneBeam);
+
+    createBlockLabelSprite('M&R HEAVY EQUIPMENT WORKSHOP', -88, mrH + 2.5, -20);
+
+    scene.add(cfsGroup);
+}
+
+// 7. Customs KPPBC, 6 MeV Gantry X-Ray, Red Line Behandle Canopy & Quarantine
+function buildCustomsAndBehandleZone() {
+    const custGroup = new THREE.Group();
+    custGroup.name = "CustomsAndBehandleZone";
+
+    // 1. Kantor Bea Cukai KPPBC (fac_f_kppbc)
+    const kppW = 20, kppH = 6, kppD = 10;
+    const kppGeo = new THREE.BoxGeometry(kppW, kppH, kppD);
+    const kppMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+    const kpp = new THREE.Mesh(kppGeo, kppMat);
+    kpp.position.set(92, kppH/2, 18);
+    kpp.castShadow = true;
+    custGroup.add(kpp);
+
+    // Red Customs Fascia
+    const fasGeo = new THREE.BoxGeometry(kppW + 0.2, 1.2, kppD + 0.2);
+    const fasMat = new THREE.MeshStandardMaterial({ color: 0xdc2626 });
+    const fas = new THREE.Mesh(fasGeo, fasMat);
+    fas.position.set(92, 5.4, 18);
+    custGroup.add(fas);
+
+    createBlockLabelSprite('KANTOR BEA CUKAI (KPPBC CEISA 4.0)', 92, kppH + 2.5, 18);
+
+    // 2. Gantry Container X-Ray 6 MeV Nuctech (fac_f_behandle_xray)
+    const archMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7, roughness: 0.2 });
+    
+    // 2 Lead Radiation Shield Towers
+    const towerGeo = new THREE.BoxGeometry(3, 9, 4);
+    const t1 = new THREE.Mesh(towerGeo, archMat);
+    t1.position.set(92 - 6, 4.5, 2);
+    custGroup.add(t1);
+
+    const t2 = new THREE.Mesh(towerGeo, archMat);
+    t2.position.set(92 + 6, 4.5, 2);
+    custGroup.add(t2);
+
+    // Overhead Bridge Emitter
+    const bridgeGeo = new THREE.BoxGeometry(15, 2.2, 4);
+    const bridge = new THREE.Mesh(bridgeGeo, archMat);
+    bridge.position.set(92, 9.5, 2);
+    custGroup.add(bridge);
+
+    // Red Radiation Warning Beacons on X-Ray
+    const beaconGeo = new THREE.SphereGeometry(0.3, 8, 8);
+    const beaconMat = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+    [-6, 6].forEach(bx => {
+        const b = new THREE.Mesh(beaconGeo, beaconMat);
+        b.position.set(92 + bx, 9.5, 2);
+        custGroup.add(b);
+    });
+
+    createBlockLabelSprite('GANTRY CONTAINER X-RAY 6 MeV (NUCTECH)', 92, 12.0, 2);
+
+    // 3. Behandle Physical Inspection Canopy (Jalur Merah)
+    const canopyRoofGeo = new THREE.BoxGeometry(18, 0.4, 14);
+    const canopyRoofMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.4 });
+    const canopyRoof = new THREE.Mesh(canopyRoofGeo, canopyRoofMat);
+    canopyRoof.position.set(92, 7.5, -10);
+    custGroup.add(canopyRoof);
+
+    // 4 Steel Pillars
+    const pillGeo = new THREE.CylinderGeometry(0.25, 0.25, 7.5, 8);
+    const pillMat = new THREE.MeshStandardMaterial({ color: 0x0284c7 });
+    [
+        { x: 92 - 8, z: -10 - 6 }, { x: 92 + 8, z: -10 - 6 },
+        { x: 92 - 8, z: -10 + 6 }, { x: 92 + 8, z: -10 + 6 }
+    ].forEach(pp => {
+        const p = new THREE.Mesh(pillGeo, pillMat);
+        p.position.set(pp.x, 3.75, pp.z);
+        custGroup.add(p);
+    });
+
+    // Elevated Inspection Ramp
+    const rampGeo = new THREE.BoxGeometry(16, 1.2, 10);
+    const rampMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const ramp = new THREE.Mesh(rampGeo, rampMat);
+    ramp.position.set(92, 0.6, -10);
+    custGroup.add(ramp);
+
+    createBlockLabelSprite('BEHANDLE PHYSICAL INSPECTION (JALUR MERAH)', 92, 9.5, -10);
+
+    // 4. Quarantine Inspection Room (fac_f_quarantine)
+    const quarGeo = new THREE.BoxGeometry(18, 5, 8);
+    const quarMat = new THREE.MeshStandardMaterial({ color: 0x0f766e, roughness: 0.4 });
+    const quar = new THREE.Mesh(quarGeo, quarMat);
+    quar.position.set(92, 2.5, -22);
+    quar.castShadow = true;
+    custGroup.add(quar);
+
+    createBlockLabelSprite('QUARANTINE INSPECTION ROOM (KEMENTAN)', 92, 6.0, -22);
+
+    scene.add(custGroup);
+}
+
+// 8. Perimeter Boundary Security Fence & 4 Watchtowers
+function buildPerimeterAndSecurity() {
+    const perimGroup = new THREE.Group();
+    perimGroup.name = "PerimeterAndSecurity";
+
+    // Customs Perimeter Boundary Fence Line (X: [-112, 112], Z: [-66, 66])
+    const fenceMat = new THREE.MeshBasicMaterial({ color: 0x64748b, wireframe: true });
+    
+    // 4 Fence Segments (Height 2.5m)
+    const northFence = new THREE.Mesh(new THREE.BoxGeometry(224, 2.5, 0.1), fenceMat);
+    northFence.position.set(0, 1.25, 66);
+    perimGroup.add(northFence);
+
+    const southFence = new THREE.Mesh(new THREE.BoxGeometry(224, 2.5, 0.1), fenceMat);
+    southFence.position.set(0, 1.25, -66);
+    perimGroup.add(southFence);
+
+    const westFence = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.5, 132), fenceMat);
+    westFence.position.set(-112, 1.25, 0);
+    perimGroup.add(westFence);
+
+    const eastFence = new THREE.Mesh(new THREE.BoxGeometry(0.1, 2.5, 132), fenceMat);
+    eastFence.position.set(112, 1.25, 0);
+    perimGroup.add(eastFence);
+
+    // 4 Corner Security Watchtowers with Searchlights
+    const towerCoords = [
+        { x: -110, z: 64 },
+        { x: 110,  z: 64 },
+        { x: -110, z: -64 },
+        { x: 110,  z: -64 }
+    ];
+
+    towerCoords.forEach(tc => {
+        // Steel Legs
+        const legGeo = new THREE.CylinderGeometry(0.15, 0.35, 12, 6);
+        const legMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7 });
+        [-0.8, 0.8].forEach(dx => {
+            [-0.8, 0.8].forEach(dz => {
+                const leg = new THREE.Mesh(legGeo, legMat);
+                leg.position.set(tc.x + dx, 6, tc.z + dz);
+                perimGroup.add(leg);
+            });
+        });
+
+        // Cabin
+        const cabGeo = new THREE.BoxGeometry(2.4, 2.2, 2.4);
+        const cabMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
+        const cab = new THREE.Mesh(cabGeo, cabMat);
+        cab.position.set(tc.x, 13.1, tc.z);
+        perimGroup.add(cab);
+
+        // Searchlight
+        const searchGeo = new THREE.SphereGeometry(0.3, 8, 8);
+        const searchMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+        const search = new THREE.Mesh(searchGeo, searchMat);
+        search.position.set(tc.x, 14.5, tc.z);
+        perimGroup.add(search);
+    });
+
+    scene.add(perimGroup);
+}
+
+// 9. Engineering CAD 3D Dimension Leader Lines & Benchmark Datum
+function buildEngineeringDimensionLeaders() {
+    technicalDimensionsGroup = new THREE.Group();
+    technicalDimensionsGroup.name = "EngineeringDimensionLeaders";
+
+    // 1. Rail Siding Dimension Line: 400m
+    createDimensionLine(-100, 100, -60, '← 400.00 M RAIL SIDING (INTERMODAL DOUBLE TRACK) →', 0xd97706);
+
+    // 2. Container Stacking Yard Dimension Line: 150m
+    createDimensionLine(-60, 75, 20, '← 150.00 M CONTAINER STACKING YARD (15 HA) →', 0x4f46e5);
+
+    // 3. CFS Logistics Dimension Line: 80m
+    createDimensionLineZ(22, -22, -102, '← 80.00 M CFS & M&R LOGISTICS COMPLEX →', 0x0284c7);
+
+    // 4. Main Haul Road Dimension: 14m
+    createDimensionLine(-52, -38, 28, '← 14.00 M TWO-WAY CONTAINER TRUCK ROAD →', 0x10b981);
+
+    // 5. Benchmark Datum Marker
+    createDatumBenchmarkMarker(-105, 0.5, 60);
+
+    scene.add(technicalDimensionsGroup);
+}
+
+function createDimensionLine(startX, endX, zPos, labelText, colorHex) {
+    const lineMat = new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2 });
+    
+    // Main dimension line
+    const points = [
+        new THREE.Vector3(startX, 1.5, zPos),
+        new THREE.Vector3(endX, 1.5, zPos)
+    ];
+    const geom = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(geom, lineMat);
+    technicalDimensionsGroup.add(line);
+
+    // End tick marks
+    [-1, 1].forEach(side => {
+        const x = side === -1 ? startX : endX;
+        const tickPoints = [
+            new THREE.Vector3(x, 0.5, zPos),
+            new THREE.Vector3(x, 2.5, zPos)
+        ];
+        const tickGeom = new THREE.BufferGeometry().setFromPoints(tickPoints);
+        const tick = new THREE.Line(tickGeom, lineMat);
+        technicalDimensionsGroup.add(tick);
+    });
+
+    // Label Sprite
+    createBlockLabelSprite(labelText, (startX + endX) / 2, 3.2, zPos);
+}
+
+function createDimensionLineZ(startZ, endZ, xPos, labelText, colorHex) {
+    const lineMat = new THREE.LineBasicMaterial({ color: colorHex, linewidth: 2 });
+    
+    const points = [
+        new THREE.Vector3(xPos, 1.5, startZ),
+        new THREE.Vector3(xPos, 1.5, endZ)
+    ];
+    const geom = new THREE.BufferGeometry().setFromPoints(points);
+    const line = new THREE.Line(geom, lineMat);
+    technicalDimensionsGroup.add(line);
+
+    [-1, 1].forEach(side => {
+        const z = side === -1 ? startZ : endZ;
+        const tickPoints = [
+            new THREE.Vector3(xPos, 0.5, z),
+            new THREE.Vector3(xPos, 2.5, z)
+        ];
+        const tickGeom = new THREE.BufferGeometry().setFromPoints(tickPoints);
+        const tick = new THREE.Line(tickGeom, lineMat);
+        technicalDimensionsGroup.add(tick);
+    });
+
+    createBlockLabelSprite(labelText, xPos, 3.2, (startZ + endZ) / 2);
+}
+
+function createDatumBenchmarkMarker(x, y, z) {
+    const markerGeo = new THREE.CylinderGeometry(0.8, 1.0, 0.4, 16);
+    const markerMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3 });
+    const marker = new THREE.Mesh(markerGeo, markerMat);
+    marker.position.set(x, y, z);
+    technicalDimensionsGroup.add(marker);
+
+    createBlockLabelSprite('DATUM BENCHMARK: EL +0.00 M (MSL)', x, y + 2.5, z);
+}
+
+// 10. Yard Floodlight High Towers
 function buildFloodlightTowers() {
     const towerCoords = [
-        { x: -55, z: -35 },
+        { x: -75, z: -35 },
         { x: 75,  z: -35 },
-        { x: -55, z: 45 },
+        { x: -75, z: 45 },
         { x: 75,  z: 45 }
     ];
 
-    towerCoords.forEach((tc, idx) => {
+    towerCoords.forEach((tc) => {
         const mastGeo = new THREE.CylinderGeometry(0.4, 0.8, 24, 8);
         const mastMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
         const mast = new THREE.Mesh(mastGeo, mastMat);
@@ -789,19 +2935,19 @@ function buildFloodlightTowers() {
     });
 }
 
-// Spawn Heavy Equipment (3 Reach Stackers + 1 RTG Crane)
+// 11. Spawn Heavy Equipment (3 Reach Stackers + 1 RTG Crane)
 function spawnEquipmentModels() {
-    // RS-01 (Block A Area)
-    equipmentMeshes['RS-01'] = createReachStackerModel('RS-01', -25, 0, 0);
+    // RS-01 (Empty Depot & Blok A Area)
+    equipmentMeshes['RS-01'] = createReachStackerModel('RS-01', -35, 0, 14);
     
-    // RS-02 (Block B Area - Primary Active)
-    equipmentMeshes['RS-02'] = createReachStackerModel('RS-02', 18, 0, 0);
+    // RS-02 (Central Spine Corridor between Blok A and Blok B - Primary Active)
+    equipmentMeshes['RS-02'] = createReachStackerModel('RS-02', 0, 0, 2);
 
-    // RS-03 (Reefer Area)
-    equipmentMeshes['RS-03'] = createReachStackerModel('RS-03', -25, 0, 38);
+    // RS-03 (Reefer & DG Area)
+    equipmentMeshes['RS-03'] = createReachStackerModel('RS-03', 44, 0, 14);
 
     // RTG-01 (Rail Siding Crane spanning across track and buffer)
-    equipmentMeshes['RTG-01'] = createRTGCraneModel('RTG-01', -15, 0, -38);
+    equipmentMeshes['RTG-01'] = createRTGCraneModel('RTG-01', 0, 0, -46);
 }
 
 // Procedural 3D Reach Stacker Model (Kalmar DRG450)
@@ -925,7 +3071,7 @@ function createRTGCraneModel(name, x, y, z) {
     return rtg;
 }
 
-// Procedural 3D Truck Prime Mover
+// 12. Procedural 3D Truck Prime Mover
 function spawnTruckModel() {
     truckMesh = new THREE.Group();
 
@@ -972,9 +3118,60 @@ function spawnTruckModel() {
     box.castShadow = true;
     truckMesh.add(box);
 
-    truckMesh.position.set(-17, 0, 55); // Parked at Gate-In weighbridge
+    truckMesh.position.set(-49, 0, 52); // Parked at Gate-In weighbridge scale
     scene.add(truckMesh);
 }
+
+// 13. 3D Holographic Target Beacon & Ground Rings
+let targetMarkerGroup = null;
+let targetBeaconLight = null;
+
+function createTargetMarker() {
+    targetMarkerGroup = new THREE.Group();
+    targetMarkerGroup.name = "TargetBeaconMarker";
+
+    // 1. Concentric Hologram Ground Rings (Glowing Cyan & Emerald)
+    const ringGeo = new THREE.RingGeometry(2.5, 3.4, 32);
+    const ringMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4, side: THREE.DoubleSide, transparent: true, opacity: 0.85 });
+    const ring = new THREE.Mesh(ringGeo, ringMat);
+    ring.name = "beaconOuterRing";
+    ring.rotation.x = Math.PI / 2;
+    ring.position.y = 0.25;
+    targetMarkerGroup.add(ring);
+
+    const innerRingGeo = new THREE.RingGeometry(0.8, 1.5, 32);
+    const innerRingMat = new THREE.MeshBasicMaterial({ color: 0x10b981, side: THREE.DoubleSide, transparent: true, opacity: 0.95 });
+    const innerRing = new THREE.Mesh(innerRingGeo, innerRingMat);
+    innerRing.name = "beaconInnerRing";
+    innerRing.rotation.x = Math.PI / 2;
+    innerRing.position.y = 0.28;
+    targetMarkerGroup.add(innerRing);
+
+    // 2. Vertical Beacon Hologram Beam
+    const beamGeo = new THREE.CylinderGeometry(0.3, 3.2, 22, 16, 1, true);
+    const beamMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, transparent: true, opacity: 0.4, side: THREE.DoubleSide });
+    const beam = new THREE.Mesh(beamGeo, beamMat);
+    beam.name = "beaconBeam";
+    beam.position.y = 11;
+    targetMarkerGroup.add(beam);
+
+    // 3. Glowing Diamond / Target Pin
+    const pinGeo = new THREE.OctahedronGeometry(1.4, 0);
+    const pinMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, emissive: 0xd97706, roughness: 0.2 });
+    const pin = new THREE.Mesh(pinGeo, pinMat);
+    pin.name = "beaconPin";
+    pin.position.y = 17;
+    targetMarkerGroup.add(pin);
+
+    // 4. Point Light for illumination
+    targetBeaconLight = new THREE.PointLight(0x38bdf8, 2.5, 35);
+    targetBeaconLight.position.y = 8;
+    targetMarkerGroup.add(targetBeaconLight);
+
+    targetMarkerGroup.visible = false;
+    scene.add(targetMarkerGroup);
+}
+
 
 // =============================================================================
 // DATABASE INTEGRATION: FETCH & RENDER CONTAINERS ACCORDING TO BAY-ROW-TIER
@@ -1126,6 +3323,15 @@ function inspectContainer(data) {
     const card = document.getElementById('inspectorCard');
     card.classList.remove('hidden');
 
+    // 3D Focus & Target Beacon onto inspected container
+    const bCoord = (typeof BLOCK_COORDS !== 'undefined' && BLOCK_COORDS[data.block]) ? BLOCK_COORDS[data.block] : { x: 18, z: 0 };
+    const bayNum = parseInt(data.bay, 10) || 1;
+    const rowNum = parseInt(data.row, 10) || 1;
+    const posX = bCoord.x + 3.0 + ((bayNum - 1) % 5) * 6.2;
+    const posZ = bCoord.z + 2.5 + ((rowNum - 1) % 3) * 3.2;
+    const camPreset = data.cargo_type === 'reefer' ? 'reefer' : 'yard';
+    focusLocation(camPreset, `Peti Kemas ${data.container_number} (${data.block}-${data.bay}-${data.row}-${data.tier})`, { x: posX, y: 0, z: posZ }, (data.cargo_type || 'DRY').toUpperCase());
+
     logTicker(`[INSPECTOR] Kontainer ${data.container_number} dipilih di slot ${data.block}-${data.bay}-${data.row}-${data.tier}.`);
 }
 
@@ -1244,6 +3450,8 @@ function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
     const targetY = 1.2 + ((toTier - 1) * 2.4);
 
     // Step 1: RS moves to source container
+    focusLocation('yard', `Relokasi: ${equipmentId} Menjemput ${boxNumber}`, { x: targetMesh.position.x, y: 0, z: targetMesh.position.z }, equipmentId);
+
     new TWEEN.Tween(rsMesh.position)
         .to({ x: targetMesh.position.x + 8, z: targetMesh.position.z }, 1200)
         .easing(TWEEN.Easing.Quadratic.Out)
@@ -1254,6 +3462,8 @@ function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .onComplete(() => {
                     // Step 3: RS & Container travel together to destination
+                    focusLocation('yard', `Relokasi: Menumpuk ${boxNumber} ke ${toSlot}`, { x: targetX, y: 0, z: targetZ }, `TARGET ${toBlock}`);
+
                     new TWEEN.Tween(rsMesh.position)
                         .to({ x: targetX + 8, z: targetZ }, 1800)
                         .easing(TWEEN.Easing.Quadratic.InOut)
@@ -1288,18 +3498,21 @@ function triggerGateIn() {
     if (!truckMesh || isAnimating) return;
     isAnimating = true;
 
-    logTicker(`[ANPR CAMERA] Mendeteksi truk mendekati Gate 1...`);
+    // Arahkan 3D Viewport ke Gate & Timbangan
+    focusLocation('vgm', 'Gate Inbound & Jembatan Timbang 80T (VGM)', { x: -45, y: 0, z: 52 }, 'GATE-IN & VGM');
+
+    logTicker(`[ANPR CAMERA] Mendeteksi truk mendekati Gate Lane 1...`);
 
     // Reset truck position at highway approach
-    truckMesh.position.set(-17, 0, 75);
+    truckMesh.position.set(-49, 0, 72);
 
     // Step 1: Drive onto Weighbridge scale
     new TWEEN.Tween(truckMesh.position)
-        .to({ z: 55 }, 1500)
+        .to({ z: 52 }, 1500)
         .easing(TWEEN.Easing.Quadratic.Out)
         .onComplete(() => {
             // Weighbridge flash effect
-            logTicker(`[WEIGHBRIDGE] Menimbang muatan kargo...`);
+            logTicker(`[WEIGHBRIDGE] Menimbang muatan kargo 80T...`);
             
             fetch('api/simulator_action.php?action=gate_in')
                 .then(res => res.json())
@@ -1310,25 +3523,32 @@ function triggerGateIn() {
                         logTicker(`[VGM SOLAS] Plat ${trk.license_plate}: Gross ${trk.gross_weight}kg, VGM Net ${trk.vgm_net}kg. Status: ${trk.vgm_status}.`);
 
                         // Step 2: Open Boom Barrier (Rotate up)
-                        new TWEEN.Tween(boomBarrierMesh.rotation)
-                            .to({ x: -Math.PI / 2.5 }, 600)
-                            .easing(TWEEN.Easing.Quadratic.Out)
-                            .onComplete(() => {
-                                // Step 3: Truck enters yard road
-                                new TWEEN.Tween(truckMesh.position)
-                                    .to({ z: 30 }, 1500)
-                                    .easing(TWEEN.Easing.Quadratic.In)
-                                    .onComplete(() => {
-                                        // Close barrier
-                                        new TWEEN.Tween(boomBarrierMesh.rotation)
-                                            .to({ x: 0 }, 600)
-                                            .start();
-                                        isAnimating = false;
-                                        fetchSimulationState();
-                                    })
-                                    .start();
-                            })
-                            .start();
+                        if (boomBarrierMesh) {
+                            new TWEEN.Tween(boomBarrierMesh.rotation)
+                                .to({ x: -Math.PI / 2.5 }, 600)
+                                .easing(TWEEN.Easing.Quadratic.Out)
+                                .onComplete(() => {
+                                    // Step 3: Truck enters yard road towards Blok B
+                                    focusLocation('yard', 'Truk Kontainer Menuju Yard Penumpukan Blok B', { x: 8, y: 0, z: 2 }, 'ROAD TO YARD');
+
+                                    new TWEEN.Tween(truckMesh.position)
+                                        .to({ z: 25 }, 1500)
+                                        .easing(TWEEN.Easing.Quadratic.In)
+                                        .onComplete(() => {
+                                            // Close barrier
+                                            new TWEEN.Tween(boomBarrierMesh.rotation)
+                                                .to({ x: 0 }, 600)
+                                                .start();
+                                            isAnimating = false;
+                                            fetchSimulationState();
+                                        })
+                                        .start();
+                                })
+                                .start();
+                        } else {
+                            isAnimating = false;
+                            fetchSimulationState();
+                        }
                     }
                 });
         })
@@ -1343,6 +3563,7 @@ function triggerRailDischarge() {
     if (!rtg || isAnimating) return;
 
     isAnimating = true;
+    focusLocation('rail', 'Alih Muat Kereta Api Logistik (RTG-01 Crane)', { x: 0, y: 0, z: -46 }, 'RTG-01 & RAIL');
     logTicker(`[RTG-01] Memulai alih muat kontainer dari Rangkaian Kereta Api...`);
 
     fetch('api/simulator_action.php?action=rail_discharge')
@@ -1380,6 +3601,7 @@ function resetSimulation() {
     fetch('api/simulator_action.php?action=reset_simulation')
         .then(res => res.json())
         .then(data => {
+            focusLocation('overview', 'Master Plan CIDP 35 Hektar (Konfigurasi Awal)', { x: 0, y: 0, z: 0 }, 'TERMINAL OVERVIEW');
             showToast('Reset Berhasil', data.message, 'info');
             logTicker(`[RESET] Seluruh posisi terminal dikembalikan ke konfigurasi awal demo.`);
             closeInspector();
@@ -1394,45 +3616,102 @@ function refreshStateFromDB() {
 }
 
 // =============================================================================
-// CAMERA PRESETS & ENVIRONMENT CONTROLS
+// CAMERA PRESETS & ENVIRONMENT CONTROLS (CAD MULTI-VIEW ENGINE)
 // =============================================================================
 function setCameraView(preset) {
     document.querySelectorAll('.cam-btn').forEach(btn => {
         btn.classList.remove('bg-blue-600', 'text-white');
-        btn.classList.add('bg-gray-800', 'text-gray-300');
+        btn.classList.add('bg-slate-800', 'text-gray-300');
     });
+
+    const cadProjectionLabel = document.getElementById('cadProjectionLabel');
 
     let targetPos, targetLook;
 
     switch(preset) {
+        case 'plan':
+            targetPos = { x: 0, y: 175, z: 0.1 };
+            targetLook = { x: 0, y: 0, z: 0 };
+            const bPlan = document.getElementById('btnCamPlan');
+            if (bPlan) { bPlan.classList.add('bg-blue-600', 'text-white'); bPlan.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'ORTOGRAFIK 2D (TOP-DOWN)';
+            break;
+        case 'iso':
+            targetPos = { x: 110, y: 95, z: 110 };
+            targetLook = { x: 0, y: 0, z: 0 };
+            const bIso = document.getElementById('btnCamIso');
+            if (bIso) { bIso.classList.add('bg-blue-600', 'text-white'); bIso.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'AKSONOMETRI ISOMETRIK 45°';
+            break;
         case 'overview':
-            targetPos = { x: 0, y: 75, z: 110 };
-            targetLook = { x: 10, y: 0, z: 5 };
-            document.getElementById('btnCamOverview').classList.add('bg-blue-600', 'text-white');
+            targetPos = { x: 0, y: 85, z: 120 };
+            targetLook = { x: 0, y: 0, z: 0 };
+            const bOver = document.getElementById('btnCamOverview');
+            if (bOver) { bOver.classList.add('bg-blue-600', 'text-white'); bOver.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'PERSPEKTIF DRONE 3D';
             break;
         case 'gate':
-            targetPos = { x: -10, y: 15, z: 80 };
-            targetLook = { x: -10, y: 2, z: 55 };
-            document.getElementById('btnCamGate').classList.add('bg-blue-600', 'text-white');
+            targetPos = { x: -45, y: 22, z: 82 };
+            targetLook = { x: -45, y: 2, z: 52 };
+            const bGate = document.getElementById('btnCamGate');
+            if (bGate) { bGate.classList.add('bg-blue-600', 'text-white'); bGate.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 1 (GATE COMPLEX)';
+            break;
+        case 'vgm':
+            targetPos = { x: -49, y: 16, z: 72 };
+            targetLook = { x: -49, y: 1.5, z: 52 };
+            const bVgm = document.getElementById('btnCamGate');
+            if (bVgm) { bVgm.classList.add('bg-blue-600', 'text-white'); bVgm.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL WEIGHBRIDGE VGM (80T)';
             break;
         case 'yard':
-            targetPos = { x: 25, y: 28, z: 25 };
-            targetLook = { x: 20, y: 4, z: -10 };
-            document.getElementById('btnCamYard').classList.add('bg-blue-600', 'text-white');
+            targetPos = { x: 20, y: 40, z: 40 };
+            targetLook = { x: 0, y: 2, z: -10 };
+            const bYard = document.getElementById('btnCamYard');
+            if (bYard) { bYard.classList.add('bg-blue-600', 'text-white'); bYard.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 2 (STACKING YARD 15 HA)';
+            break;
+        case 'reefer':
+            targetPos = { x: 64, y: 24, z: 70 };
+            targetLook = { x: 64, y: 3, z: 44 };
+            const bReefer = document.getElementById('btnCamReefer');
+            if (bReefer) { bReefer.classList.add('bg-blue-600', 'text-white'); bReefer.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 3 (REEFER COLD CHAIN)';
+            break;
+        case 'cfs':
+            targetPos = { x: -88, y: 30, z: 35 };
+            targetLook = { x: -88, y: 3, z: -3 };
+            const bCfs = document.getElementById('btnCamCfs');
+            if (bCfs) { bCfs.classList.add('bg-blue-600', 'text-white'); bCfs.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL CFS & M&R WORKSHOP';
+            break;
+        case 'customs':
+            targetPos = { x: 92, y: 28, z: 35 };
+            targetLook = { x: 92, y: 3, z: 0 };
+            const bCust = document.getElementById('btnCamCustoms');
+            if (bCust) { bCust.classList.add('bg-blue-600', 'text-white'); bCust.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 5 (BEA CUKAI & X-RAY)';
             break;
         case 'rail':
-            targetPos = { x: 0, y: 25, z: -15 };
-            targetLook = { x: 0, y: 4, z: -45 };
-            document.getElementById('btnCamRail').classList.add('bg-blue-600', 'text-white');
+            targetPos = { x: 0, y: 28, z: -18 };
+            targetLook = { x: 0, y: 3, z: -48 };
+            const bRail = document.getElementById('btnCamRail');
+            if (bRail) { bRail.classList.add('bg-blue-600', 'text-white'); bRail.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 4 (RAIL SIDING 400M)';
             break;
         case 'cockpit':
             const rs = equipmentMeshes['RS-02'];
-            const rsX = rs ? rs.position.x : 18;
-            const rsZ = rs ? rs.position.z : 0;
+            const rsX = rs ? rs.position.x : 0;
+            const rsZ = rs ? rs.position.z : 2;
             targetPos = { x: rsX - 1.2, y: 4.5, z: rsZ };
             targetLook = { x: rsX + 30, y: 4, z: rsZ };
-            document.getElementById('btnCamCockpit').classList.add('bg-blue-600', 'text-white');
+            const bCock = document.getElementById('btnCamCockpit');
+            if (bCock) { bCock.classList.add('bg-blue-600', 'text-white'); bCock.classList.remove('bg-slate-800'); }
+            if (cadProjectionLabel) cadProjectionLabel.innerText = 'FIRST-PERSON CABIN RS-02';
             break;
+        default:
+            targetPos = { x: 0, y: 85, z: 120 };
+            targetLook = { x: 0, y: 0, z: 0 };
     }
 
     new TWEEN.Tween(camera.position)
@@ -1444,6 +3723,98 @@ function setCameraView(preset) {
         .to(targetLook, 1000)
         .easing(TWEEN.Easing.Cubic.Out)
         .start();
+}
+
+function toggleTechnicalDimensions() {
+    showTechnicalDimensions = !showTechnicalDimensions;
+    if (technicalDimensionsGroup) {
+        technicalDimensionsGroup.visible = showTechnicalDimensions;
+    }
+    const btn = document.getElementById('btnToggleDimensions');
+    if (btn) {
+        if (showTechnicalDimensions) {
+            btn.classList.add('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
+            btn.classList.remove('bg-slate-800', 'text-gray-300');
+        } else {
+            btn.classList.remove('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
+            btn.classList.add('bg-slate-800', 'text-gray-300');
+        }
+    }
+    showToast('Overlay CAD', showTechnicalDimensions ? 'Garis Ukur Dimensi CAD 3D Ditampilkan' : 'Garis Ukur Dimensi CAD 3D Disembunyikan', 'info');
+}
+
+function toggleCADTitleBlock() {
+    showCADTitleBlock = !showCADTitleBlock;
+    const titleBlock = document.getElementById('cadTitleBlock');
+    const btn = document.getElementById('btnToggleTitleBlock');
+    if (titleBlock) {
+        if (showCADTitleBlock) {
+            titleBlock.classList.remove('hidden');
+        } else {
+            titleBlock.classList.add('hidden');
+        }
+    }
+    if (btn) {
+        if (showCADTitleBlock) {
+            btn.classList.add('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
+            btn.classList.remove('bg-slate-800', 'text-gray-300');
+        } else {
+            btn.classList.remove('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
+            btn.classList.add('bg-slate-800', 'text-gray-300');
+        }
+    }
+}
+
+function dismissTargetPill() {
+    const hudTargetPill = document.getElementById('hudTargetPill');
+    if (hudTargetPill) {
+        hudTargetPill.classList.remove('opacity-100');
+        hudTargetPill.classList.add('opacity-0');
+        setTimeout(() => hudTargetPill.classList.add('hidden'), 300);
+    }
+}
+
+let targetDismissTimer = null;
+function focusLocation(preset, label, coords, hwTag) {
+    // 1. Ubah sudut kamera secara dinamis
+    setCameraView(preset);
+
+    // 2. Tampilkan Hologram 3D Target Beacon Marker di atas lokasi
+    if (targetMarkerGroup && coords) {
+        targetMarkerGroup.position.set(coords.x, coords.y || 0, coords.z);
+        targetMarkerGroup.visible = true;
+
+        targetMarkerGroup.scale.set(0.1, 0.1, 0.1);
+        new TWEEN.Tween(targetMarkerGroup.scale)
+            .to({ x: 1, y: 1, z: 1 }, 700)
+            .easing(TWEEN.Easing.Back.Out)
+            .start();
+    }
+
+    // 3. Tampilkan HUD Target Indicator Pill di atas viewport 3D
+    const hudTargetPill = document.getElementById('hudTargetPill');
+    const hudTargetText = document.getElementById('hudTargetText');
+    const hudTargetCoord = document.getElementById('hudTargetCoord');
+    const hudTargetHw = document.getElementById('hudTargetHw');
+
+    if (hudTargetPill) {
+        hudTargetPill.classList.remove('hidden', 'opacity-0');
+        hudTargetPill.classList.add('opacity-100');
+    }
+    if (hudTargetText) hudTargetText.innerText = label;
+    if (hudTargetCoord && coords) hudTargetCoord.innerText = `X: ${coords.x.toFixed(1)}, Z: ${coords.z.toFixed(1)}`;
+    if (hudTargetHw) hudTargetHw.innerText = hwTag || '';
+
+    // Auto dismiss setelah 8 detik
+    if (targetDismissTimer) clearTimeout(targetDismissTimer);
+    targetDismissTimer = setTimeout(() => {
+        dismissTargetPill();
+    }, 8000);
+
+    // 4. Catat di ticker log SCADA
+    if (coords) {
+        logTicker(`<span class="text-cyan-400 font-bold">[FOKUS 3D]</span> Kamera beralih ke: <strong>${label}</strong> (${hwTag || ''}) &bull; Koordinat X: ${coords.x.toFixed(1)}, Z: ${coords.z.toFixed(1)}`);
+    }
 }
 
 // Lighting Day / Sunset / Night Toggle
@@ -1568,6 +3939,571 @@ function animate(time) {
     requestAnimationFrame(animate);
     TWEEN.update();
     controls.update();
+
+    // Dynamic 3D Azimuth Compass Rose Heading & Dial Rotation
+    if (controls) {
+        const rad = controls.getAzimuthalAngle();
+        let deg = Math.round(rad * (180 / Math.PI));
+        if (deg < 0) deg += 360;
+
+        const dial = document.getElementById('compassDial');
+        if (dial) {
+            dial.style.transform = `rotate(${-deg}deg)`;
+        }
+        const headingEl = document.getElementById('compassHeading');
+        if (headingEl) {
+            let dir = 'N';
+            if (deg >= 22.5 && deg < 67.5) dir = 'NE';
+            else if (deg >= 67.5 && deg < 112.5) dir = 'E';
+            else if (deg >= 112.5 && deg < 157.5) dir = 'SE';
+            else if (deg >= 157.5 && deg < 202.5) dir = 'S';
+            else if (deg >= 202.5 && deg < 247.5) dir = 'SW';
+            else if (deg >= 247.5 && deg < 292.5) dir = 'W';
+            else if (deg >= 292.5 && deg < 337.5) dir = 'NW';
+            headingEl.innerText = `${deg}° ${dir}`;
+        }
+    }
+
+    // 3D Target Marker Hologram Animation
+    if (targetMarkerGroup && targetMarkerGroup.visible) {
+        const t = (time || performance.now()) * 0.003;
+        const pin = targetMarkerGroup.getObjectByName("beaconPin");
+        if (pin) {
+            pin.rotation.y = t * 1.5;
+            pin.position.y = 17 + Math.sin(t * 2.5) * 0.9;
+        }
+        const beam = targetMarkerGroup.getObjectByName("beaconBeam");
+        if (beam) {
+            beam.rotation.y = -t;
+        }
+        const outerRing = targetMarkerGroup.getObjectByName("beaconOuterRing");
+        if (outerRing) {
+            outerRing.rotation.z = t * 0.8;
+        }
+        const innerRing = targetMarkerGroup.getObjectByName("beaconInnerRing");
+        if (innerRing) {
+            innerRing.rotation.z = -t * 1.2;
+        }
+    }
+
     renderer.render(scene, camera);
+}
+
+// =========================================================================
+// SENSOR EMULATION & HARDWARE TELEMETRY HANDLERS (11 SENSORS)
+// =========================================================================
+let twistlockState = true; // true = LOCKED, false = UNLOCKED
+
+function testSensorAction(type) {
+    const apiEndpoint = `api/simulator_action.php?action=test_${type}`;
+    
+    fetch(apiEndpoint)
+        .then(res => res.json())
+        .then(data => {
+            if (!data.success) {
+                showToast('Gagal Simulasi Sensor', data.message || 'Terjadi kesalahan sistem', 'error');
+                return;
+            }
+
+            // HW-01 ANPR
+            if (type === 'hw01_anpr' || type === 'anpr') {
+                focusLocation('gate', 'Kamera ANPR Lane 1 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-01 ANPR');
+                const anprEl = document.getElementById('sensorAnprVal');
+                if (anprEl) anprEl.innerText = `${data.plate} (${data.confidence})`;
+                logTicker(`[HW-01 ANPR] Kamera memindai plat truk ${data.plate} di Gate Lane 1 -> Auto-Billing: Rp 50.000 (Pas Gerbang)`);
+                showToast('HW-01 ANPR Berhasil', `Plat ${data.plate} terdeteksi (${data.confidence})`, 'success');
+            }
+            // HW-02 OCR
+            else if (type === 'hw02_ocr' || type === 'ocr') {
+                focusLocation('gate', 'Portal Optik OCR ISO 6346 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-02 OCR');
+                const ocrEl = document.getElementById('sensorOcrVal');
+                if (ocrEl) ocrEl.innerText = `${data.container_number} (${data.iso_code.split(' ')[0]})`;
+                logTicker(`[HW-02 OCR] Portal membaca kontainer ${data.container_number} | ISO ${data.iso_code} | Check Digit: VALID -> Demurrage Timer Dimulai`);
+                showToast('HW-02 OCR Berhasil', `Kontainer ${data.container_number} ISO 6346 Valid`, 'success');
+            }
+            // HW-03 VGM
+            else if (type === 'hw03_vgm' || type === 'vgm') {
+                focusLocation('vgm', 'Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: -49, y: 0, z: 52 }, 'HW-03 TIMBANGAN');
+                const vgmEl = document.getElementById('sensorVgmVal');
+                if (vgmEl) vgmEl.innerText = `Net ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg (PASS)`;
+                logTicker(`[HW-03 Timbangan 80T] Bruto ${Number(data.vgm.gross_weight).toLocaleString('id-ID')} kg, Tara ${Number(data.vgm.tare_weight).toLocaleString('id-ID')} kg, Net ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg -> Sertifikat #${data.vgm.certificate_no} (Billing Rp 120.000)`);
+                showToast('HW-03 Timbangan 80T (VGM)', `Net: ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg (Sertifikat SOLAS Terbit)`, 'success');
+            }
+            // HW-04 RFID
+            else if (type === 'hw04_rfid' || type === 'rfid') {
+                focusLocation('gate', 'Antena UHF RFID Hopeland 20m (Gate Lane 1)', { x: -45, y: 0, z: 52 }, 'HW-04 RFID');
+                const rfidEl = document.getElementById('sensorRfidVal');
+                if (rfidEl) rfidEl.innerText = `${data.rfid_tag.slice(0, 12)}... (AUTH)`;
+                logTicker(`[HW-04 UHF RFID] Hopeland 20m mendeteksi tag armada ${data.rfid_tag} (${data.driver}) -> ${data.e_wallet_status}`);
+                showToast('HW-04 UHF RFID Terbaca', `${data.driver} | e-Wallet Terverifikasi`, 'success');
+            }
+            // HW-05 VMS
+            else if (type === 'hw05_vms' || type === 'vms') {
+                focusLocation('gate', 'VMS LED Variable Message Sign (Gate Display)', { x: -45, y: 0, z: 52 }, 'HW-05 VMS');
+                const vmsEl = document.getElementById('sensorVmsVal');
+                if (vmsEl) vmsEl.innerText = data.display_text;
+                logTicker(`[HW-05 VMS Display] LED Gate menampilkan instruksi: "${data.display_text}" -> ${data.tat_impact}`);
+                showToast('HW-05 VMS Display Aktif', data.display_text, 'info');
+            }
+            // HW-06 Edge AI PC
+            else if (type === 'hw06_edge' || type === 'edge') {
+                focusLocation('gate', 'Advantech Edge AI PC & Palang Otomatis (12ms)', { x: -45, y: 0, z: 52 }, 'HW-06 EDGE PC');
+                const edgeEl = document.getElementById('sensorEdgeVal');
+                if (edgeEl) edgeEl.innerText = `OPEN (${data.latency} / 1.2s)`;
+                logTicker(`[HW-06 Edge PC] Advantech ARK-3532 memproses interlock gerbang dalam ${data.latency}. Relay GPIO membuka palang pintu.`);
+                showToast('HW-06 Edge AI PC Interlock', `Palang Pintu Terbuka (Latency ${data.latency})`, 'success');
+            }
+            // HW-07 RTK GNSS
+            else if (type === 'hw07_rtk' || type === 'rtk') {
+                focusLocation('yard', 'CHCNAV RTK DGPS (Reach Stacker RS-02 / Blok B)', { x: 8, y: 0, z: 2 }, 'HW-07 RTK GNSS');
+                const rtkEl = document.getElementById('sensorRtkVal');
+                const slotEl = document.getElementById('sensorSlotVal');
+                if (rtkEl) rtkEl.innerText = `FIX (${data.accuracy}, ${data.satellites.split(' ')[0]} Sat)`;
+                if (slotEl) slotEl.innerText = data.slot_3d;
+                logTicker(`[HW-07 RTK DGPS] CHCNAV CGI-610 mengunci koordinat akurasi ${data.accuracy} (${data.satellites}) -> Slot 3D: ${data.slot_3d}`);
+                showToast('HW-07 RTK GNSS Terkunci', `Akurasi ${data.accuracy} | Slot 3D: ${data.slot_3d}`, 'success');
+            }
+            // HW-08 Spreader Twistlock & Load Cell
+            else if (type === 'hw08_twistlock' || type === 'twistlock') {
+                focusLocation('yard', 'Bromma Spreader Twistlock & Load Cell (RS-02)', { x: 8, y: 0, z: 2 }, 'HW-08 SPREADER');
+                const twistEl = document.getElementById('sensorTwistlockVal');
+                const loadEl = document.getElementById('sensorLoadVal');
+                if (twistEl) twistEl.innerText = data.twistlock_state;
+                if (loadEl) loadEl.innerText = data.load_tonnage;
+                logTicker(`[HW-08 Bromma Spreader] Twistlock: ${data.twistlock_state} | Load Cell: ${data.load_tonnage} -> Auto-Billing: Rp 250.000 (Lo-Lo Lift-Off)`);
+                showToast('HW-08 Spreader & Load Cell', `${data.twistlock_state} | Beban: ${data.load_tonnage}`, 'success');
+            }
+            // HW-09 Reefer Socket Modbus
+            else if (type === 'hw09_reefer' || type === 'reefer') {
+                focusLocation('reefer', 'Smart Reefer Socket Marechal 380V (Rack R-02)', { x: 64, y: 0, z: 44 }, 'HW-09 REEFER');
+                const tempEl = document.getElementById('sensorReeferTempVal');
+                const voltEl = document.getElementById('sensorVoltVal');
+                const kwEl = document.getElementById('sensorKwVal');
+                if (tempEl) {
+                    tempEl.className = 'font-bold text-cyan-400';
+                    tempEl.innerText = `${data.reefer.temperature} (Optimal)`;
+                }
+                if (voltEl) voltEl.innerText = `${data.reefer.voltage} (50 Hz)`;
+                if (kwEl) kwEl.innerText = `${data.reefer.power} (${data.reefer.current})`;
+                logTicker(`[HW-09 Smart Socket] Marechal Modbus RTU: Rack R-02 Plug #14 telemetri ${data.reefer.temperature}, ${data.reefer.power} -> Billing Rp 35.000/jam`);
+                showToast('HW-09 Smart Reefer Socket', `Suhu ${data.reefer.temperature} | Daya ${data.reefer.power}`, 'success');
+            }
+            // HW-10 Rail Axle Counter
+            else if (type === 'hw10_axle' || type === 'axle') {
+                focusLocation('rail', 'Frauscher Axle Counter SIL 4 (Jalur Rel Siding)', { x: 0, y: 0, z: -46 }, 'HW-10 AXLE COUNTER');
+                const axleEl = document.getElementById('sensorAxleVal');
+                if (axleEl) axleEl.innerText = `${data.axle.axle_count} As Roda (${data.axle.train.split(' ')[0]} ${data.axle.train.split(' ')[1]})`;
+                logTicker(`[HW-10 Frauscher Axle Counter] RSR123 mendeteksi 126 gandar KA 2518 (1 Lokomotif + 30 Gerbong PPCW utuh). Sertifikasi SIL 4 verified.`);
+                showToast('HW-10 Axle Counter SIL 4', `126 Gandar KA 2518 Terverifikasi Utuh`, 'success');
+            }
+            // HW-11 Smart E-Seal CEISA 4.0
+            else if (type === 'hw11_eseal' || type === 'eseal') {
+                focusLocation('rail', 'Jointech JT701 Smart E-Seal & CEISA 4.0 Bea Cukai', { x: 0, y: 0, z: -46 }, 'HW-11 SMART E-SEAL');
+                const sealEl = document.getElementById('sensorSealVal');
+                const sppbEl = document.getElementById('sensorSppbVal');
+                if (sealEl) sealEl.innerText = `${data.eseal.wire_status} (#${data.eseal.seal_id})`;
+                if (sppbEl) sppbEl.innerText = `${data.eseal.channel}`;
+                logTicker(`[HW-11 Smart E-Seal] Jointech JT701 GPS/GSM: Kawat segel utuh (INTACT). Bea Cukai CEISA 4.0 menerbitkan ${data.eseal.sppb_number}`);
+                showToast('HW-11 Smart E-Seal & SPPB', `Segel #${data.eseal.seal_id} INTACT -> SPPB Terbit`, 'success');
+            }
+            // Kombinasi ANPR + OCR
+            else if (type === 'anpr_ocr') {
+                focusLocation('gate', 'Portal Gabungan ANPR & OCR ISO 6346 (Gate Lane 1)', { x: -45, y: 0, z: 52 }, 'HW-01 & HW-02');
+                const anprEl = document.getElementById('sensorAnprVal');
+                const ocrEl = document.getElementById('sensorOcrVal');
+                if (anprEl) anprEl.innerText = `${data.anpr.plate} (${data.anpr.confidence})`;
+                if (ocrEl) ocrEl.innerText = `${data.ocr.container_number} (${data.ocr.check_digit})`;
+                logTicker(`[HW-01 & HW-02] ANPR & Portal OCR memindai truk ${data.anpr.plate} membawa ${data.ocr.container_number} -> Auto-Billing: Rp 50.000`);
+                showToast('Pindai Plat & OCR Berhasil', `Truk ${data.anpr.plate} | Kontainer ${data.ocr.container_number}`, 'success');
+            }
+        })
+        .catch(err => {
+            console.error('Sensor action error:', err);
+            showToast('Error Sensor', 'Gagal menghubungi service telemetri', 'error');
+        });
+}
+
+function toggleTwistlockSim() {
+    focusLocation('yard', 'Bromma Spreader Twistlock & Load Cell (RS-02 Blok B)', { x: 8, y: 0, z: 2 }, 'HW-08 SPREADER');
+    twistlockState = !twistlockState;
+    const twistEl = document.getElementById('sensorTwistlockVal');
+    const loadEl = document.getElementById('sensorLoadVal');
+    
+    if (twistlockState) {
+        if (twistEl) {
+            twistEl.innerText = 'LOCKED (Mengunci)';
+            twistEl.className = 'font-bold text-blue-700';
+        }
+        if (loadEl) loadEl.innerText = '28.45 Ton';
+        logTicker('[HW-08] Bromma Spreader: Twistlock LOCKED (Mengunci 4 pin) & Load Cell aktif: 28.45 Ton (Ready to Hoist)');
+        showToast('Spreader Twistlock LOCKED', '4 Pin mengunci sempurna di corner casting box. Siap angkat.', 'info');
+    } else {
+        if (twistEl) {
+            twistEl.innerText = 'UNLOCKED (Membuka)';
+            twistEl.className = 'font-bold text-amber-600';
+        }
+        if (loadEl) loadEl.innerText = '0.00 Ton';
+        logTicker('[HW-08] Bromma Spreader: Twistlock UNLOCKED (Membuka pin) & Load Cell: 0.00 Ton (Box dilepas)');
+        showToast('Spreader Twistlock UNLOCKED', 'Pin terbuka bebas. Kontainer telah landing di slot target.', 'info');
+    }
+}
+
+function simulateReeferAlarm() {
+    focusLocation('reefer', 'ALARM SUHU KRITIS: Rack R-02 Plug #14 Overheat (+4.8°C)', { x: 64, y: 0, z: 44 }, 'HW-09 ALARM');
+    const tempEl = document.getElementById('sensorReeferTempVal');
+    if (tempEl) {
+        tempEl.className = 'font-bold text-rose-600 animate-pulse';
+        tempEl.innerText = '+4.8°C (ALARM OVERHEAT!)';
+    }
+    
+    logTicker('<span class="text-rose-400 font-bold">[ALERT HW-09]</span> Peringatan Kritis! Suhu Rack R-02 Plug #14 melonjak ke +4.8°C (Batas aman: -18°C)! SCADA mengirim notifikasi ke teknisi cold chain.');
+    showToast('ALARM SUHU REEFER!', 'Suhu melonjak ke +4.8°C! Kompresor reefer memerlukan inspeksi darurat.', 'warn');
+    
+    // Kembalikan ke normal setelah 6 detik
+    setTimeout(() => {
+        if (tempEl) {
+            tempEl.className = 'font-bold text-cyan-700';
+            tempEl.innerText = '-20.2°C (Optimal)';
+        }
+        logTicker('[HW-09] Sistem pendingin cadangan aktif otomatis. Suhu kembali normal ke -20.2°C.');
+    }, 6000);
+}
+
+// =========================================================================
+// TAB SWITCHER CONTROLLER
+// =========================================================================
+function switchSimTab(tabId) {
+    const tabs = ['truck', 'train', 'scada', 'scanner', 'catalog'];
+    tabs.forEach(t => {
+        const contentEl = document.getElementById(`tabContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        const btnEl = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
+        if (contentEl) {
+            if (t === tabId) {
+                contentEl.classList.remove('hidden');
+            } else {
+                contentEl.classList.add('hidden');
+            }
+        }
+        if (btnEl) {
+            if (t === tabId) {
+                btnEl.className = 'sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition flex items-center gap-1.5';
+            } else {
+                btnEl.className = 'sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5';
+            }
+        }
+    });
+}
+
+// =========================================================================
+// 1. ALUR OTOMATIS TRUK KONTAINER (ROAD-TO-YARD 6-TAHAP)
+// =========================================================================
+let isTruckDemoRunning = false;
+function runAutoTruckDemo() {
+    if (isTruckDemoRunning || isTrainDemoRunning) {
+        showToast('Simulasi Sedang Berjalan', 'Harap tunggu hingga alur saat ini selesai', 'warn');
+        return;
+    }
+    isTruckDemoRunning = true;
+    switchSimTab('truck');
+
+    const btn = document.getElementById('btnAutoTruck');
+    if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Alur Truk Berjalan...</span>';
+        btn.classList.add('opacity-80');
+    }
+
+    showToast('Alur Truk Dimulai', 'Mengaktifkan simulasi otomatis Road-to-Yard 6-Tahap...', 'info');
+
+    // Tahap 1: Gerbang Masuk & ANPR + RFID (0.5s)
+    setTimeout(() => {
+        setCameraView('gate');
+        testTruckStep(1);
+    }, 500);
+
+    // Tahap 2: Portal OCR Box ISO 6346 (3.0s)
+    setTimeout(() => {
+        testTruckStep(2);
+    }, 3000);
+
+    // Tahap 3: Timbangan 80T VGM SOLAS (5.5s)
+    setTimeout(() => {
+        testTruckStep(3);
+    }, 5500);
+
+    // Tahap 4: Edge PC Interlock & VMS LED (8.0s)
+    setTimeout(() => {
+        testTruckStep(4);
+    }, 8000);
+
+    // Tahap 5: Yard Stacking RS & RTK GNSS (11.0s)
+    setTimeout(() => {
+        setCameraView('yard');
+        triggerGateIn();
+        testTruckStep(5);
+    }, 11000);
+
+    // Tahap 6: Reefer Plugging (14.0s)
+    setTimeout(() => {
+        testTruckStep(6);
+    }, 14000);
+
+    // Selesai & Ringkasan Finansial (17.0s)
+    setTimeout(() => {
+        setCameraView('overview');
+        showToast('Alur Truk Selesai!', 'Siklus Truk Road-to-Yard tuntas. Total ERP Billing: Rp 420.000.', 'success');
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-truck-moving text-xs"></i><span>1. Alur Otomatis Truk (6 Tahap)</span>';
+            btn.classList.remove('opacity-80');
+        }
+        isTruckDemoRunning = false;
+    }, 17000);
+}
+
+function testTruckStep(step) {
+    if (step === 1) {
+        focusLocation('gate', 'Tahap 1: Gerbang Inbound & Pindai Plat ANPR/RFID', { x: -45, y: 0, z: 52 }, 'HW-01 & HW-04');
+        testSensorAction('hw01_anpr');
+        setTimeout(() => testSensorAction('hw04_rfid'), 800);
+    } else if (step === 2) {
+        focusLocation('gate', 'Tahap 2: Portal OCR Box ISO 6346 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-02 OCR');
+        testSensorAction('hw02_ocr');
+    } else if (step === 3) {
+        focusLocation('vgm', 'Tahap 3: Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: -49, y: 0, z: 52 }, 'HW-03 VGM');
+        testSensorAction('hw03_vgm');
+    } else if (step === 4) {
+        focusLocation('gate', 'Tahap 4: Edge AI PC Interlock & Panduan VMS LED', { x: -45, y: 0, z: 52 }, 'HW-05 & HW-06');
+        testSensorAction('hw06_edge');
+        setTimeout(() => testSensorAction('hw05_vms'), 800);
+    } else if (step === 5) {
+        focusLocation('yard', 'Tahap 5: Yard Stacking RS-02 & Telemetri RTK GNSS', { x: 8, y: 0, z: 2 }, 'HW-07 & HW-08');
+        testSensorAction('hw07_rtk');
+        setTimeout(() => {
+            testSensorAction('hw08_twistlock');
+            toggleTwistlockSim();
+        }, 800);
+    } else if (step === 6) {
+        focusLocation('reefer', 'Tahap 6: Colok Daya Smart Reefer Socket 380V (Rack R-02)', { x: 64, y: 0, z: 44 }, 'HW-09 REEFER');
+        testSensorAction('hw09_reefer');
+    }
+}
+
+// =========================================================================
+// 2. ALUR OTOMATIS KERETA API LOGISTIK (RAIL-TO-YARD 6-TAHAP)
+// =========================================================================
+let isTrainDemoRunning = false;
+function runAutoTrainDemo() {
+    if (isTruckDemoRunning || isTrainDemoRunning) {
+        showToast('Simulasi Sedang Berjalan', 'Harap tunggu hingga alur saat ini selesai', 'warn');
+        return;
+    }
+    isTrainDemoRunning = true;
+    switchSimTab('train');
+
+    const btn = document.getElementById('btnAutoTrain');
+    if (btn) {
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin text-xs"></i><span>Alur KA Berjalan...</span>';
+        btn.classList.add('opacity-80');
+    }
+
+    showToast('Alur Kereta Api Dimulai', 'Mengaktifkan simulasi intermodal Rail-to-Yard 6-Tahap...', 'info');
+
+    // Tahap 1: Rel Siding & Cacah Gandar SIL 4 (0.5s)
+    setTimeout(() => {
+        setCameraView('rail');
+        testTrainStep(1);
+    }, 500);
+
+    // Tahap 2: Pindai Smart E-Seal Nirkabel (3.0s)
+    setTimeout(() => {
+        testTrainStep(2);
+    }, 3000);
+
+    // Tahap 3: Bea Cukai CEISA 4.0 & SPPB Jalur Hijau (5.5s)
+    setTimeout(() => {
+        testTrainStep(3);
+    }, 5500);
+
+    // Tahap 4: RTG Crane Spreader Hoist (8.0s)
+    setTimeout(() => {
+        testTrainStep(4);
+    }, 8000);
+
+    // Tahap 5: RTK Positioning & Bongkar Box ke Yard (11.0s)
+    setTimeout(() => {
+        triggerRailDischarge();
+        testTrainStep(5);
+    }, 11000);
+
+    // Tahap 6: Manifest Rail & Penagihan Freight (14.0s)
+    setTimeout(() => {
+        testTrainStep(6);
+    }, 14000);
+
+    // Selesai & Ringkasan Finansial (17.0s)
+    setTimeout(() => {
+        setCameraView('overview');
+        showToast('Alur KA Intermodal Selesai!', 'Siklus Alih Muat KA tuntas. Freight Rp 1.850.000 + Bongkar Rp 350.000 terverifikasi.', 'success');
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-train-subway text-xs"></i><span>2. Alur Otomatis KA (6 Tahap)</span>';
+            btn.classList.remove('opacity-80');
+        }
+        isTrainDemoRunning = false;
+    }, 17000);
+}
+
+function testTrainStep(step) {
+    if (step === 1) {
+        focusLocation('rail', 'Tahap 1: Rel Siding KA & Frauscher Axle Counter SIL 4', { x: 0, y: 0, z: -46 }, 'HW-10 AXLE');
+        testSensorAction('hw10_axle');
+    } else if (step === 2) {
+        focusLocation('rail', 'Tahap 2: Pindai Nirkabel Smart E-Seal Jointech JT701', { x: 0, y: 0, z: -46 }, 'HW-11 E-SEAL');
+        testSensorAction('hw11_eseal');
+    } else if (step === 3) {
+        focusLocation('rail', 'Tahap 3: Klirens Pabean CEISA 4.0 Bea Cukai Jalur Hijau', { x: 0, y: 0, z: -46 }, 'CEISA 4.0');
+        logTicker('[CEISA 4.0 Bea Cukai] Gateway pabean menerbitkan SPPB Jalur Hijau (#SPPB-86434/KPU.01/2026). Jaminan pabean dirilis.');
+        showToast('CEISA 4.0 Bea Cukai', 'SPPB Jalur Hijau Terbit & Jaminan Pabean Dirilis', 'success');
+    } else if (step === 4) {
+        focusLocation('rail', 'Tahap 4: RTG Crane Spreader Twistlock & Hoisting', { x: 0, y: 0, z: -46 }, 'RTG-01 & HW-08');
+        testSensorAction('hw08_twistlock');
+        toggleTwistlockSim();
+    } else if (step === 5) {
+        focusLocation('yard', 'Tahap 5: Penempatan Slot Yard Blok A Presisi RTK', { x: -16, y: 0, z: 6 }, 'HW-07 RTK');
+        testSensorAction('hw07_rtk');
+    } else if (step === 6) {
+        focusLocation('rail', 'Tahap 6: Penerbitan Rail Manifest & Tagihan Freight', { x: 0, y: 0, z: -46 }, 'RAIL FREIGHT');
+        logTicker('[RAIL MANIFEST] KA-LOG-JKT-SMG 48 TEU tervalidasi. Freight KA: Rp 1.850.000/TEU. Reduksi jejak karbon ESG: 78%.');
+        showToast('Rail Freight Terkonfirmasi', 'Biaya Rel Rp 1.850.000/TEU & Audit ESG Tercatat', 'success');
+    }
+}
+
+// Backward Compatibility
+function runAutoInboundDemo() {
+    runAutoTruckDemo();
+}
+
+// =========================================================================
+// 3. UJI SCANNER OPTIK & VERIFIKASI MUTU AIDC (GS1 / SSCC-18 / ISO)
+// =========================================================================
+function testScannerSample(type) {
+    const statusEl = document.getElementById('scanDecoderStatus');
+    const typeEl = document.getElementById('decType');
+    const payloadEl = document.getElementById('decPayload');
+    const ownerEl = document.getElementById('decOwner');
+    const serialEl = document.getElementById('decSerial');
+    const checkEl = document.getElementById('decCheck');
+    const ymsEl = document.getElementById('decYms');
+
+    if (type === 'dry') {
+        focusLocation('yard', 'Peti Kemas Dry Blok B (MSKU9182374)', { x: 8, y: 0, z: 2 }, 'AIDC ISO-6346');
+        if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>DECODED OK';
+        if (typeEl) typeEl.innerText = 'ISO 6346 Peti Kemas (Dry 40ft High Cube)';
+        if (payloadEl) payloadEl.innerText = 'MSKU9182374';
+        if (ownerEl) ownerEl.innerText = 'MSKU (Maersk A/S)';
+        if (serialEl) serialEl.innerText = '918237';
+        if (checkEl) checkEl.innerHTML = '<span class="text-emerald-400 font-bold">4 (VALID - Modulo 11 Match)</span>';
+        if (ymsEl) ymsEl.innerText = 'Tersinkron di Blok B-08-03-02';
+        logTicker('[AIDC SCAN] Uji Sukses ISO 6346: MSKU9182374 (Check Digit 4 Valid).');
+        showToast('Uji Scanner ISO 6346', 'MSKU9182374 Check Digit Valid', 'success');
+    } else if (type === 'reefer') {
+        focusLocation('reefer', 'Peti Kemas Reefer Rack R-02 (TEMU4819203)', { x: 64, y: 0, z: 44 }, 'AIDC REEFER');
+        if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>DECODED OK';
+        if (typeEl) typeEl.innerText = 'ISO 6346 Peti Kemas (Reefer 40ft Cold Chain)';
+        if (payloadEl) payloadEl.innerText = 'TEMU4819203';
+        if (ownerEl) ownerEl.innerText = 'TEMU (Textainer Group)';
+        if (serialEl) serialEl.innerText = '481920';
+        if (checkEl) checkEl.innerHTML = '<span class="text-emerald-400 font-bold">3 (VALID - Modulo 11 Match)</span>';
+        if (ymsEl) ymsEl.innerText = 'Tersinkron di Blok REEFER Rack R-02 Plug #14';
+        logTicker('[AIDC SCAN] Uji Sukses Reefer ISO 6346: TEMU4819203 (Check Digit 3 Valid).');
+        showToast('Uji Scanner Reefer', 'TEMU4819203 Check Digit Valid', 'success');
+    } else if (type === 'sscc') {
+        focusLocation('cfs', 'CFS Logistics Hub / Cross-Dock (SSCC-18 Pallet)', { x: -88, y: 0, z: 14 }, 'GS1-128 SSCC');
+        if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-purple-400 mr-1"></i>GS1-128 DECODED';
+        if (typeEl) typeEl.innerText = 'GS1-128 SSCC-18 (Serial Shipping Container Code)';
+        if (payloadEl) payloadEl.innerText = '(00) 38991234500000018';
+        if (ownerEl) ownerEl.innerText = 'AI (00) - Standar Pallet & Muatan GS1 Internasional';
+        if (serialEl) serialEl.innerText = '3899123450000001';
+        if (checkEl) checkEl.innerHTML = '<span class="text-emerald-400 font-bold">8 (VALID - GS1 Modulo 10 Match)</span>';
+        if (ymsEl) ymsEl.innerText = 'Pallet Logistik CFS Warehouse CIDP';
+        logTicker('[AIDC SCAN] Uji Sukses GS1 SSCC-18: (00)38991234500000018.');
+        showToast('Uji Scanner SSCC-18', 'Standar GS1-128 Tervalidasi', 'success');
+    } else if (type === 'customs') {
+        focusLocation('customs', 'Pos Pabean & Bea Cukai KPPBC CEISA 4.0', { x: 92, y: 0, z: 18 }, 'CEISA 4.0');
+        if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>CEISA QR VERIFIED';
+        if (typeEl) typeEl.innerText = 'QR Code Kepabeanan CEISA 4.0 Bea Cukai';
+        if (payloadEl) payloadEl.innerText = 'SPPB-86434/KPU.01/2026';
+        if (ownerEl) ownerEl.innerText = 'Kantor Pelayanan Utama Bea Cukai Tanjung Priok / Cikarang';
+        if (serialEl) serialEl.innerText = 'KPU.01-86434';
+        if (checkEl) checkEl.innerHTML = '<span class="text-emerald-400 font-bold">DIGITAL SIGNATURE VALID (Jalur Hijau)</span>';
+        if (ymsEl) ymsEl.innerText = 'Status Pabean: SPPB Cleared (Siap Keluar Gerbang)';
+        logTicker('[AIDC SCAN] Uji Sukses QR CEISA 4.0: SPPB-86434/KPU.01/2026 Jalur Hijau.');
+        showToast('QR Pabean Terverifikasi', 'SPPB-86434 Digital Signature Valid', 'success');
+    }
+}
+
+function validateCustomBoxNumber() {
+    const input = document.getElementById('customBoxInput');
+    if (!input || !input.value.trim()) {
+        showToast('Input Kosong', 'Masukkan nomor kontainer ISO 6346 (misal: TCLU8827415)', 'warn');
+        return;
+    }
+    const val = input.value.trim().toUpperCase();
+    if (val.length !== 11) {
+        showToast('Format Salah', 'Nomor kontainer harus tepat 11 karakter (4 huruf + 7 angka)', 'warn');
+        return;
+    }
+
+    // Hitung Check Digit ISO 6346 Modulo 11
+    const charValues = {
+        'A': 10, 'B': 12, 'C': 13, 'D': 14, 'E': 15, 'F': 16, 'G': 17, 'H': 18, 'I': 19, 'J': 20,
+        'K': 21, 'L': 23, 'M': 24, 'N': 25, 'O': 26, 'P': 27, 'Q': 28, 'R': 29, 'S': 30, 'T': 31,
+        'U': 32, 'V': 34, 'W': 35, 'X': 36, 'Y': 37, 'Z': 38
+    };
+
+    let sum = 0;
+    for (let i = 0; i < 10; i++) {
+        const ch = val[i];
+        let numVal = 0;
+        if (charValues[ch] !== undefined) {
+            numVal = charValues[ch];
+        } else if (!isNaN(parseInt(ch))) {
+            numVal = parseInt(ch);
+        } else {
+            showToast('Karakter Tidak Valid', `Karakter '${ch}' bukan huruf atau angka ISO standar`, 'error');
+            return;
+        }
+        sum += numVal * Math.pow(2, i);
+    }
+
+    let calculatedCheck = sum % 11;
+    if (calculatedCheck === 10) calculatedCheck = 0;
+    const actualCheck = parseInt(val[10]);
+
+    const statusEl = document.getElementById('scanDecoderStatus');
+    const typeEl = document.getElementById('decType');
+    const payloadEl = document.getElementById('decPayload');
+    const ownerEl = document.getElementById('decOwner');
+    const serialEl = document.getElementById('decSerial');
+    const checkEl = document.getElementById('decCheck');
+    const ymsEl = document.getElementById('decYms');
+
+    if (typeEl) typeEl.innerText = 'ISO 6346 Peti Kemas (Input Kustom)';
+    if (payloadEl) payloadEl.innerText = val;
+    if (ownerEl) ownerEl.innerText = val.slice(0, 4) + ' (Owner Code)';
+    if (serialEl) serialEl.innerText = val.slice(4, 10);
+
+    if (calculatedCheck === actualCheck) {
+        focusLocation('yard', 'Verifikasi Peti Kemas: ' + val, { x: 8, y: 0, z: 2 }, 'ISO-6346 VALID');
+        if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-circle-check text-emerald-400 mr-1"></i>CHECK DIGIT VALID';
+        if (checkEl) checkEl.innerHTML = `<span class="text-emerald-400 font-bold">${actualCheck} (VALID - Modulo 11 Match)</span>`;
+        if (ymsEl) ymsEl.innerText = 'Lolos Validasi AIDC - Siap Dialokasikan ke Yard';
+        logTicker(`[ISO 6346 VALID] Nomor ${val} tervalidasi dengan Check Digit ${actualCheck}.`);
+        showToast('Check Digit VALID!', `Kontainer ${val} memenuhi standar ISO 6346`, 'success');
+    } else {
+        if (statusEl) statusEl.innerHTML = '<i class="fa-solid fa-triangle-exclamation text-rose-400 mr-1"></i>CHECK DIGIT MISMATCH';
+        if (checkEl) checkEl.innerHTML = `<span class="text-rose-400 font-bold">${actualCheck} (INVALID - Seharusnya ${calculatedCheck})</span>`;
+        if (ymsEl) ymsEl.innerText = 'Gagal Validasi - Potensi Kesalahan Ketik Nomor';
+        logTicker(`[ISO 6346 PERINGATAN] Nomor ${val} memiliki check digit ${actualCheck}, seharusnya ${calculatedCheck}!`);
+        showToast('Check Digit INVALID!', `Nomor ${val} salah ketik (Seharusnya ${calculatedCheck})`, 'warn');
+    }
 }
 </script>

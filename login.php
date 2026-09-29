@@ -1040,41 +1040,30 @@ if (isset($_POST['btn_login'])) {
     </footer>
 
     <!-- =================================================================== -->
-    <!-- 6. MODAL MASUK DEMONSTRASI YMS (SESUAI EYD & TABEL LOGIN) -->
+    <!-- 6. MODAL MASUK DEMONSTRASI YMS (CLEAN & MINIMALIST) -->
     <!-- =================================================================== -->
     <div id="loginModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs <?= empty($error_message) ? 'hidden' : ''; ?> flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-lg overflow-hidden animate-fadeIn">
+        <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-fadeIn font-sans">
             
             <!-- Kepala Modal -->
-            <div class="bg-cdp-navy px-6 py-4 text-white flex items-center justify-between">
-                <div class="flex items-center space-x-2.5">
-                    <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-8 h-8 object-contain bg-white rounded-md p-0.5 shadow-xs">
+            <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] px-6 py-4 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 p-1">
+                        <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/32?text=C'">
+                    </div>
                     <div>
-                        <h3 class="font-bold text-sm">Masuk Demonstrasi YMS</h3>
-                        <p class="text-[10px] text-blue-200">Conclusion Supply Chain Consultant</p>
+                        <h3 class="font-bold text-sm leading-tight">Masuk ke Sistem</h3>
+                        <p class="text-[10.5px] text-blue-200">CIDP Yard Management System</p>
                     </div>
                 </div>
-                <button type="button" onclick="closeLoginModal()" class="text-slate-300 hover:text-white text-lg">
-                    <i class="fa-solid fa-xmark"></i>
+                <button type="button" onclick="closeLoginModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-colors" title="Tutup Modal">
+                    <i class="fa-solid fa-xmark text-sm"></i>
                 </button>
             </div>
 
-            <!-- Badan Modal Form (Satu Pintu / Single-Door Simulation Access) -->
+            <!-- Badan Modal Form -->
             <div class="p-6 space-y-4">
                 
-                <!-- Info Banner Satu Pintu -->
-                <div class="bg-blue-50/80 border border-blue-200 rounded-xl p-3.5 flex items-start space-x-3">
-                    <div class="w-8 h-8 rounded-lg bg-[#0170b9] text-white flex items-center justify-center flex-shrink-0 text-sm mt-0.5 shadow-sm">
-                        <i class="fa-solid fa-key"></i>
-                    </div>
-                    <div>
-                        <h4 class="text-xs font-bold text-[#002f5e] uppercase tracking-wide">Akses Demonstrasi Satu Pintu</h4>
-                        <p class="text-[11px] text-slate-600 leading-relaxed mt-0.5">
-                            Konsol simulasi disiapkan dengan <strong>satu pintu akses penuh (All-in-One Consultant Access)</strong> agar evaluator dapat langsung menguji seluruh 8 modul operasional (Gate, Yard, Denah 3D, Intermodal KA-Truk, Reefer IoT, Faktur ERP, dan Scanner GS1) tanpa batasan peran.
-                        </p>
-                    </div>
-                </div>
-
                 <!-- Pesan Kesalahan jika login tidak valid -->
                 <?php if (!empty($error_message)): ?>
                     <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start space-x-2">
@@ -1083,48 +1072,51 @@ if (isset($_POST['btn_login'])) {
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" action="login.php" id="formLoginModal" class="space-y-3.5">
+                <form method="POST" action="login.php" id="formLoginModal" class="space-y-4">
                     <div>
-                        <label for="modalEmail" class="block text-xs font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                            <span>Alamat Pos-el (Email)</span>
-                            <span class="text-[10px] text-[#0170b9] font-semibold lowercase">akun konsultan utama</span>
+                        <label for="modalEmail" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Email
                         </label>
-                        <input type="email" id="modalEmail" name="email" value="admin@cidp.ac.id" required 
-                               placeholder="admin@cidp.ac.id"
-                               class="w-full px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cdp-blue outline-none bg-slate-50">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none text-xs">
+                                <i class="fa-regular fa-envelope"></i>
+                            </span>
+                            <input type="email" id="modalEmail" name="email" value="admin@cidp.ac.id" required 
+                                   placeholder="admin@cidp.ac.id"
+                                   class="w-full pl-9 pr-3.5 py-2.5 text-xs text-gray-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50/60 font-mono transition">
+                        </div>
                     </div>
 
                     <div>
-                        <label for="modalPassword" class="block text-xs font-bold text-slate-700 uppercase mb-1 flex justify-between">
-                            <span>Kata Sandi (Password)</span>
-                            <span class="text-[10px] text-emerald-600 font-semibold font-mono">admin123</span>
+                        <label for="modalPassword" class="block text-xs font-semibold text-gray-700 mb-1.5">
+                            Kata Sandi
                         </label>
-                        <input type="password" id="modalPassword" name="password" value="admin123" required 
-                               placeholder="Masukkan kata sandi"
-                               class="w-full px-3.5 py-2.5 text-xs font-mono font-bold text-slate-800 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cdp-blue outline-none bg-slate-50">
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-gray-400 pointer-events-none text-xs">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="modalPassword" name="password" value="admin123" required 
+                                   placeholder="••••••••"
+                                   class="w-full pl-9 pr-10 py-2.5 text-xs text-gray-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50/60 font-mono transition">
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 text-xs focus:outline-none" title="Lihat/Sembunyikan Kata Sandi">
+                                <i class="fa-regular fa-eye" id="togglePasswordIcon"></i>
+                            </button>
+                        </div>
                     </div>
 
-                    <div class="pt-1 space-y-2">
-                        <!-- Tombol Utama: Masuk Konsol -->
+                    <div class="pt-2">
                         <button type="submit" name="btn_login" 
-                                class="w-full py-2.5 px-4 rounded-lg bg-cdp-navy hover:bg-cdp-blue text-white text-xs font-bold shadow-sm transition flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                            <span>Masuk ke Konsol Demonstrasi (Akses Penuh)</span>
-                        </button>
-
-                        <!-- Tombol 1-Klik Cepat -->
-                        <button type="button" onclick="quickSingleDoorLogin()"
-                                class="w-full py-2 px-4 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-xs transition flex items-center justify-center space-x-2">
-                            <i class="fa-solid fa-bolt text-yellow-300"></i>
-                            <span>Masuk Cepat Langsung (1-Klik Tanpa Ketik)</span>
+                                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] hover:opacity-95 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center space-x-2">
+                            <span>Masuk ke Dashboard</span>
+                            <i class="fa-solid fa-arrow-right text-[11px]"></i>
                         </button>
                     </div>
                 </form>
 
-                <div class="pt-3 border-t border-slate-200 text-center">
-                    <span class="text-[11px] text-slate-400 font-medium">
-                        <i class="fa-solid fa-shield-halved text-emerald-600 mr-1"></i>Hak Akses Superadmin / Lead System Architect otomatis aktif.
-                    </span>
+                <div class="pt-2 text-center border-t border-gray-100">
+                    <p class="text-[11px] text-gray-400">
+                        Akun Demo: <span class="font-mono text-gray-700 font-semibold">admin@cidp.ac.id</span> &bull; <span class="font-mono text-gray-700 font-semibold">admin123</span>
+                    </p>
                 </div>
 
             </div>
@@ -1230,8 +1222,17 @@ if (isset($_POST['btn_login'])) {
             }
         }
 
-        function fillDemoCredentials() {
-            setCredentials('admin@cidp.ac.id', 'admin123');
+        function togglePasswordVisibility() {
+            const pwdInput = document.getElementById('modalPassword');
+            const pwdIcon = document.getElementById('togglePasswordIcon');
+            if (!pwdInput) return;
+            if (pwdInput.type === 'password') {
+                pwdInput.type = 'text';
+                if (pwdIcon) pwdIcon.className = 'fa-regular fa-eye-slash';
+            } else {
+                pwdInput.type = 'password';
+                if (pwdIcon) pwdIcon.className = 'fa-regular fa-eye';
+            }
         }
 
         // Menutup modal apabila tombol Escape ditekan

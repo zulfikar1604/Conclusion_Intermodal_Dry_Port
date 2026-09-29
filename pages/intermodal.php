@@ -100,6 +100,43 @@ $wagons = [
 ];
 ?>
 
+<!-- Open Source Leaflet.js GIS Engine (Lokal & Offline Ready) -->
+<link rel="stylesheet" href="assets/leaflet.css" />
+<script src="assets/leaflet.js"></script>
+
+<style>
+/* Leaflet GIS Custom Styles for Intermodal Corridor */
+#corridorGisMap {
+    background-color: #f8fafc;
+    background-image: 
+        linear-gradient(to right, rgba(203, 213, 225, 0.35) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(203, 213, 225, 0.35) 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+.train-radar-pulse {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 9999px;
+    background-color: rgba(245, 158, 11, 0.45);
+    animation: trainPulseAnim 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes trainPulseAnim {
+    0% { transform: scale(0.8); opacity: 1; }
+    100% { transform: scale(2.8); opacity: 0; }
+}
+.leaflet-popup-content-wrapper {
+    border-radius: 14px !important;
+    padding: 4px !important;
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15) !important;
+    font-family: 'Plus Jakarta Sans', sans-serif !important;
+    border: 1px solid #e2e8f0;
+}
+.leaflet-popup-tip {
+    background: white !important;
+}
+</style>
+
 <div class="space-y-6">
     <!-- Top Header Banner & PIC Badge -->
     <div class="bg-gradient-to-r from-[#002f5e] via-[#014d80] to-[#0170b9] rounded-2xl p-6 text-white shadow-sm flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
@@ -211,6 +248,163 @@ $wagons = [
             </span>
         </div>
         <?php endforeach; ?>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- REAL-TIME GIS INTERMODAL CORRIDOR TRACKER (TANJUNG PRIOK <-> CIDP 35 HA) -->
+    <!-- ======================================================================= -->
+    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-gray-100 pb-4">
+            <div>
+                <div class="flex items-center space-x-2.5 flex-wrap gap-y-1">
+                    <h2 class="text-base sm:text-lg font-bold text-gray-900 flex items-center">
+                        <i class="fa-solid fa-map-location-dot text-[#0170b9] mr-2"></i>
+                        Pelacak Spasial Koridor Rel KA Pelabuhan (Tanjung Priok &harr; CIDP 35 Ha)
+                    </h2>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center shadow-xs">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
+                        Live GIS Telemetri
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200 font-mono">
+                        Daop 1 Jakarta • 54,8 KM
+                    </span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 font-mono">
+                        Leaflet.js + OpenStreetMap
+                    </span>
+                </div>
+                <p class="text-xs text-gray-500 mt-1">
+                    Pemantauan geospasial waktu-nyata rangkaian KA Logistik 2518 melintasi koridor rel khusus pelabuhan Tanjung Priok (Pasoso) menuju Hub CIDP Cikarang, dibandingkan rute truk via Tol Jakarta-Cikampek.
+                </p>
+            </div>
+
+            <!-- Toolbar Kontrol GIS & Animasi -->
+            <div class="flex items-center space-x-2 flex-wrap gap-y-2">
+                <button type="button" onclick="toggleTrainAnimation()" id="btnPlayTrain" class="px-3.5 py-2 bg-[#002f5e] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 shadow-xs">
+                    <i class="fa-solid fa-play text-[10px]" id="playTrainIcon"></i>
+                    <span id="playTrainText">Simulasikan Perjalanan KA</span>
+                </button>
+                <button type="button" onclick="resetTrainPosition()" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition-all flex items-center space-x-1" title="Reset Posisi KA ke Priok">
+                    <i class="fa-solid fa-rotate-left text-[11px]"></i>
+                    <span>Reset</span>
+                </button>
+                <div class="h-6 w-px bg-gray-200 mx-1 hidden sm:block"></div>
+                <!-- Layer Toggles -->
+                <div class="flex items-center space-x-2 bg-slate-50 border border-slate-200/80 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold text-gray-700">
+                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                        <input type="checkbox" id="chkShowRail" checked onchange="toggleMapLayer('rail')" class="rounded text-blue-600 focus:ring-0">
+                        <span class="text-blue-800">Jalur Rel KA</span>
+                    </label>
+                    <span class="text-gray-300">|</span>
+                    <label class="flex items-center space-x-1.5 cursor-pointer">
+                        <input type="checkbox" id="chkShowRoad" checked onchange="toggleMapLayer('road')" class="rounded text-amber-600 focus:ring-0">
+                        <span class="text-amber-800">Tol Cikampek</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Container Peta Leaflet & HUD Overlay Telemetri -->
+        <div class="relative w-full rounded-2xl overflow-hidden border border-gray-200 shadow-inner bg-slate-100" style="height: 480px;">
+            <!-- Map Viewport Div -->
+            <div id="corridorGisMap" class="w-full h-full z-0"></div>
+
+            <!-- Floating Telemetri HUD (Pojok Kiri Atas Peta) -->
+            <div class="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-md rounded-xl p-3.5 border border-gray-200/80 shadow-lg text-xs space-y-2 max-w-xs pointer-events-auto">
+                <div class="flex items-center justify-between border-b border-gray-100 pb-2">
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                        <strong class="font-bold text-gray-800">Telemetri GPS KA 2518</strong>
+                    </div>
+                    <span id="hudTrainSpeed" class="font-mono text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">
+                        65 km/jam
+                    </span>
+                </div>
+                <div class="space-y-1 font-mono text-[11px]">
+                    <div class="flex justify-between text-gray-500">
+                        <span>Lokasi Terkini:</span>
+                        <strong id="hudTrainLoc" class="text-gray-900">Stasiun Bekasi (KM 26.5)</strong>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <span>Jarak Tempuh:</span>
+                        <span id="hudTrainProgress" class="font-bold text-blue-600">26.5 / 54.8 km (48%)</span>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <span>Estimasi Tiba (ETA):</span>
+                        <strong id="hudTrainEta" class="text-gray-900">42 Menit Lagi</strong>
+                    </div>
+                    <div class="flex justify-between text-gray-500">
+                        <span>Emisi CO₂ Terhemat:</span>
+                        <strong class="text-emerald-600">-1.84 Ton CO₂</strong>
+                    </div>
+                </div>
+                <!-- Progress Bar -->
+                <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div id="hudProgressBar" class="h-full bg-gradient-to-r from-blue-500 to-emerald-500 transition-all duration-300" style="width: 48%;"></div>
+                </div>
+            </div>
+
+            <!-- Floating Quick Navigation Buttons (Pojok Kanan Atas Peta) -->
+            <div class="absolute top-3 right-3 z-[1000] flex flex-col gap-1.5 pointer-events-auto">
+                <button onclick="flyToLocation('all')" class="px-2.5 py-1.5 bg-white/95 backdrop-blur-md hover:bg-white text-gray-700 border border-gray-200 rounded-lg text-xs font-semibold shadow-md transition flex items-center space-x-1" title="Tampilkan Seluruh Koridor">
+                    <i class="fa-solid fa-expand text-[10px] text-blue-600"></i>
+                    <span class="hidden sm:inline">Koridor Penuh</span>
+                </button>
+                <button onclick="flyToLocation('priok')" class="px-2.5 py-1.5 bg-white/95 backdrop-blur-md hover:bg-white text-gray-700 border border-gray-200 rounded-lg text-xs font-semibold shadow-md transition flex items-center space-x-1" title="Fokus ke Pelabuhan Tanjung Priok">
+                    <i class="fa-solid fa-anchor text-[10px] text-blue-600"></i>
+                    <span class="hidden sm:inline">Tj. Priok (JICT)</span>
+                </button>
+                <button onclick="flyToLocation('cidp')" class="px-2.5 py-1.5 bg-white/95 backdrop-blur-md hover:bg-white text-gray-700 border border-gray-200 rounded-lg text-xs font-semibold shadow-md transition flex items-center space-x-1" title="Fokus ke CIDP Hub 35 Ha">
+                    <i class="fa-solid fa-warehouse text-[10px] text-blue-600"></i>
+                    <span class="hidden sm:inline">CIDP Hub (35 Ha)</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Kajian Konsultan: Matriks Perbandingan Moda (Rail vs Road Corridor) -->
+        <div class="bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 rounded-xl p-4 border border-blue-100 text-xs">
+            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <h4 class="font-bold text-gray-900 flex items-center">
+                    <i class="fa-solid fa-chart-simple text-blue-600 mr-2"></i>
+                    Analisis Kelayakan Alih Moda (Modal Shift Matrix): KA Barang vs Truk Jalan Raya
+                </h4>
+                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider font-mono">Kajian Supply Chain Consultant CIDP</span>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-700">
+                <div class="bg-white p-3 rounded-lg border border-gray-200/80 shadow-2xs space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-semibold text-[11px]">Kepastian Waktu Tempuh</span>
+                        <i class="fa-solid fa-clock text-blue-600"></i>
+                    </div>
+                    <div class="text-base font-bold text-gray-900">110 Menit <span class="text-xs font-normal text-emerald-600 font-semibold">(vs 4-6 Jam Truk)</span></div>
+                    <p class="text-[10.5px] text-gray-500 leading-relaxed">
+                        KA memiliki jalur rel khusus bebas hambatan kemacetan Tol Jakarta-Cikampek & Cikunir.
+                    </p>
+                </div>
+
+                <div class="bg-white p-3 rounded-lg border border-gray-200/80 shadow-2xs space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-semibold text-[11px]">Kapasitas Muat Sekali Jalan</span>
+                        <i class="fa-solid fa-boxes-stacked text-indigo-600"></i>
+                    </div>
+                    <div class="text-base font-bold text-gray-900">60 TEU / Rangkaian <span class="text-xs font-normal text-indigo-600 font-semibold">(Setara 60 Truk)</span></div>
+                    <p class="text-[10.5px] text-gray-500 leading-relaxed">
+                        1 lokomotif CC 206 menggantikan 30-60 unit truk trailer di jalan raya, mengurangi beban jalan Pantura.
+                    </p>
+                </div>
+
+                <div class="bg-white p-3 rounded-lg border border-gray-200/80 shadow-2xs space-y-1">
+                    <div class="flex items-center justify-between">
+                        <span class="text-gray-500 font-semibold text-[11px]">Reduksi Emisi Karbon (Green ICD)</span>
+                        <i class="fa-solid fa-leaf text-emerald-600"></i>
+                    </div>
+                    <div class="text-base font-bold text-emerald-700">-76.4% Emisi CO₂ <span class="text-xs font-normal text-gray-500">/ Ton-KM</span></div>
+                    <p class="text-[10.5px] text-gray-500 leading-relaxed">
+                        Memenuhi standar global Green Logistics & ESG pelayaran internasional (Maersk, CMA CGM, ONE).
+                    </p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ======================================================================= -->
@@ -724,4 +918,453 @@ function downloadBaplieFile() {
 function openBaplieModal() {
     window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
 }
+
+// =======================================================================
+// GIS CORRIDOR TRACKER LOGIC (LEAFLET.JS) — DAOP 1 JAKARTA & CIDP HUB
+// =======================================================================
+let corridorMap = null;
+let railLayerGroup = null;
+let roadLayerGroup = null;
+let trainMarker = null;
+let trainAnimInterval = null;
+let isTrainPlaying = false;
+let currentTrainStep = 0;
+let interpolatedSteps = [];
+
+// Waypoints Geospasial Lintas Rel KA Barang Daop 1 (Tj. Priok - CIDP Cikarang Hub 35 Ha)
+const railCorridorPoints = [
+    { lat: -6.1042, lng: 106.8856, name: "Pelabuhan Tanjung Priok (JICT)", km: 0.0, speed: 30, desc: "Quay Crane & Dermaga Petikemas Ekspor-Impor Internasional" },
+    { lat: -6.1158, lng: 106.8887, name: "Stasiun Pasoso (Freight Terminal)", km: 1.5, speed: 35, desc: "Marshalling Yard Petikemas Daop 1 & Gate Rel Pelabuhan" },
+    { lat: -6.1105, lng: 106.8809, name: "Stasiun Tanjung Priuk", km: 2.8, speed: 40, desc: "Emplasemen Utama KA Daop 1" },
+    { lat: -6.1328, lng: 106.8523, name: "Ancol - Kampung Bandan", km: 7.2, speed: 50, desc: "Lintas Lingkar Rel Daop 1" },
+    { lat: -6.1620, lng: 106.8450, name: "Kemayoran", km: 9.8, speed: 55, desc: "Koridor Lintas Tengah" },
+    { lat: -6.1751, lng: 106.8451, name: "Stasiun Pasar Senen", km: 12.0, speed: 50, desc: "Lintas Utama Timur Daop 1" },
+    { lat: -6.2151, lng: 106.8704, name: "Stasiun Jatinegara (KM 11.8)", km: 17.5, speed: 60, desc: "Percabangan Strategis Jalur Pantura & Lintas Selatan" },
+    { lat: -6.2135, lng: 106.8998, name: "Stasiun Klender", km: 21.0, speed: 70, desc: "Double-Double Track (DDT) Paket B" },
+    { lat: -6.2198, lng: 106.9532, name: "Stasiun Cakung", km: 27.2, speed: 75, desc: "Batas Wilayah Administrasi DKI Jakarta - Jawa Barat" },
+    { lat: -6.2241, lng: 106.9793, name: "Stasiun Kranji", km: 30.5, speed: 75, desc: "Koridor Laju Aglomerasi Kota Bekasi" },
+    { lat: -6.2361, lng: 107.0002, name: "Stasiun Bekasi (KM 33.0)", km: 33.0, speed: 70, desc: "Simpul Transit & Stasiun Sentral Kota Bekasi" },
+    { lat: -6.2608, lng: 107.0601, name: "Stasiun Tambun", km: 40.2, speed: 75, desc: "Lintas Kecepatan Tinggi KA Logistik" },
+    { lat: -6.2642, lng: 107.0988, name: "Stasiun Cibitung", km: 45.0, speed: 70, desc: "Koridor Kawasan Industri Logistik MM2100" },
+    { lat: -6.2553, lng: 107.1472, name: "Stasiun Cikarang", km: 50.4, speed: 60, desc: "Stasiun Hub Industri Terbesar Kabupaten Bekasi" },
+    { lat: -6.2818, lng: 107.1729, name: "Stasiun Lemahabang (Spur Junction)", km: 53.6, speed: 40, desc: "Percabangan Jalur Rel Khusus (Spur Line) Menuju CIDP" },
+    { lat: -6.2731, lng: 107.1652, name: "CIDP Hub Rail Siding Track-01", km: 54.8, speed: 20, desc: "Terminal Intermodal 35 Ha, Sensor Frauscher RSR180, & Bea Cukai Terpadu" }
+];
+
+// Rute Tol Jakarta - Cikampek (Perbandingan Koridor Truk Jalan Raya yang Rawan Macet)
+const roadCorridorCoords = [
+    [-6.1042, 106.8856], // Tanjung Priok
+    [-6.1265, 106.8912], // Tol Pelabuhan / Plumpang
+    [-6.1820, 106.8760], // Tol Ir. Wiyoto Wiyono
+    [-6.2415, 106.8722], // Cawang Interchange
+    [-6.2450, 106.9050], // Halim Perdanakusuma
+    [-6.2512, 106.9421], // Simpang Susun Cikunir (Titik Macet Kronis)
+    [-6.2482, 106.9891], // GT Bekasi Barat
+    [-6.2570, 107.0420], // GT Bekasi Timur
+    [-6.2680, 107.0930], // GT Tambun
+    [-6.2890, 107.1250], // GT Cibitung
+    [-6.3101, 107.1352], // GT Cikarang Barat (KM 28)
+    [-6.2950, 107.1550], // Akses Kawasan Industri Jababeka
+    [-6.2731, 107.1652]  // CIDP Dry Port Hub
+];
+
+// Generate Interpolated Sub-steps untuk Animasi Halus
+function generateInterpolatedPath() {
+    interpolatedSteps = [];
+    const stepsPerSegment = 16;
+    for (let i = 0; i < railCorridorPoints.length - 1; i++) {
+        const p1 = railCorridorPoints[i];
+        const p2 = railCorridorPoints[i + 1];
+        for (let j = 0; j < stepsPerSegment; j++) {
+            const frac = j / stepsPerSegment;
+            const lat = p1.lat + (p2.lat - p1.lat) * frac;
+            const lng = p1.lng + (p2.lng - p1.lng) * frac;
+            const km = p1.km + (p2.km - p1.km) * frac;
+            const speed = Math.round(p1.speed + (p2.speed - p1.speed) * frac);
+            interpolatedSteps.push({
+                lat: lat,
+                lng: lng,
+                km: km,
+                speed: speed,
+                name: frac < 0.5 ? p1.name : p2.name,
+                desc: p2.desc
+            });
+        }
+    }
+    const lastP = railCorridorPoints[railCorridorPoints.length - 1];
+    interpolatedSteps.push({
+        lat: lastP.lat,
+        lng: lastP.lng,
+        km: lastP.km,
+        speed: lastP.speed,
+        name: lastP.name,
+        desc: lastP.desc
+    });
+}
+
+// Inisialisasi Peta GIS Intermodal Leaflet
+function initCorridorGisMap() {
+    const mapContainer = document.getElementById('corridorGisMap');
+    if (!mapContainer || corridorMap) return;
+
+    generateInterpolatedPath();
+
+    // Inisialisasi Peta Leaflet
+    corridorMap = L.map('corridorGisMap', {
+        zoomControl: false,
+        attributionControl: false
+    }).setView([-6.20, 107.03], 11);
+
+    // Zoom control di pojok kanan bawah
+    L.control.zoom({ position: 'bottomright' }).addTo(corridorMap);
+
+    // OpenStreetMap Tile Layer
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 18,
+        subdomains: ['a', 'b', 'c']
+    }).addTo(corridorMap);
+
+    railLayerGroup = L.layerGroup().addTo(corridorMap);
+    roadLayerGroup = L.layerGroup().addTo(corridorMap);
+
+    // Custom Icon: Pelabuhan Tanjung Priok
+    const priokIcon = L.divIcon({
+        className: 'custom-gis-pin',
+        html: `
+            <div class="relative flex items-center justify-center pointer-events-auto">
+                <span class="absolute w-8 h-8 rounded-full bg-blue-500/30 animate-ping"></span>
+                <div class="w-8 h-8 rounded-full bg-[#004b87] border-2 border-white shadow-lg flex items-center justify-center text-white text-xs font-bold">
+                    <i class="fa-solid fa-anchor"></i>
+                </div>
+                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 px-2 py-0.5 rounded shadow text-[10px] font-bold text-[#004b87] border border-blue-100">
+                    Tj. Priok (JICT)
+                </div>
+            </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16]
+    });
+
+    // Custom Icon: CIDP Hub 35 Ha
+    const cidpIcon = L.divIcon({
+        className: 'custom-gis-pin',
+        html: `
+            <div class="relative flex items-center justify-center pointer-events-auto">
+                <span class="absolute w-10 h-10 rounded-full bg-emerald-500/40 animate-ping"></span>
+                <div class="w-9 h-9 rounded-full bg-emerald-600 border-2 border-white shadow-xl flex items-center justify-center text-white text-sm font-bold">
+                    <i class="fa-solid fa-warehouse"></i>
+                </div>
+                <div class="absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap bg-emerald-900 text-white px-2 py-0.5 rounded shadow text-[10px] font-bold border border-emerald-400">
+                    CIDP Hub 35 Ha
+                </div>
+            </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+
+    // Function pembuat icon stasiun antara
+    function createStationIcon(label, code) {
+        return L.divIcon({
+            className: 'custom-gis-pin',
+            html: `
+                <div class="relative flex items-center justify-center pointer-events-auto">
+                    <div class="w-6 h-6 rounded-full bg-white border-2 border-[#0170b9] shadow flex items-center justify-center text-[#0170b9] text-[9px] font-bold">
+                        ${code}
+                    </div>
+                    <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/90 px-1.5 py-0.2 rounded shadow-2xs text-[9px] font-semibold text-gray-700 border border-gray-200">
+                        ${label}
+                    </div>
+                </div>
+            `,
+            iconSize: [24, 24],
+            iconAnchor: [12, 12]
+        });
+    }
+
+    // Custom Icon: Bottleneck Simpang Cikunir
+    const cikunirIcon = L.divIcon({
+        className: 'custom-gis-pin',
+        html: `
+            <div class="relative flex items-center justify-center pointer-events-auto">
+                <span class="absolute w-7 h-7 rounded-full bg-amber-500/30 animate-pulse"></span>
+                <div class="w-7 h-7 rounded-full bg-amber-500 border-2 border-white shadow flex items-center justify-center text-white text-xs font-bold">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded shadow text-[9px] font-bold border border-amber-300">
+                    Macet Cikunir (Delay 3 Jam)
+                </div>
+            </div>
+        `,
+        iconSize: [28, 28],
+        iconAnchor: [14, 14]
+    });
+
+    // Custom Icon: Lokomotif Bergerak KA 2518 (CC 206)
+    const trainIcon = L.divIcon({
+        className: 'custom-gis-pin',
+        html: `
+            <div class="relative flex items-center justify-center pointer-events-auto">
+                <div class="train-radar-pulse"></div>
+                <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 border-2 border-white shadow-xl flex items-center justify-center text-white text-sm z-10">
+                    <i class="fa-solid fa-train"></i>
+                </div>
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-900/90 text-amber-300 px-2 py-0.5 rounded-full shadow text-[10px] font-mono font-bold border border-amber-500/50 z-20 flex items-center space-x-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>KA 2518 (CC 206)</span>
+                </div>
+            </div>
+        `,
+        iconSize: [36, 36],
+        iconAnchor: [18, 18]
+    });
+
+    // Layer 1: Rel KA Daop 1 (Double Polyline: Rel Fisik + Bantalan)
+    const railCoords = railCorridorPoints.map(p => [p.lat, p.lng]);
+    L.polyline(railCoords, {
+        color: '#002f5e',
+        weight: 6,
+        opacity: 0.85
+    }).addTo(railLayerGroup);
+
+    L.polyline(railCoords, {
+        color: '#38bdf8',
+        weight: 3.5,
+        opacity: 0.95,
+        dashArray: '8, 8'
+    }).addTo(railLayerGroup);
+
+    // Layer 2: Tol Jakarta - Cikampek
+    L.polyline(roadCorridorCoords, {
+        color: '#f59e0b',
+        weight: 4,
+        opacity: 0.75,
+        dashArray: '6, 6'
+    }).addTo(roadLayerGroup);
+
+    // Tambah Marker ke Layer Rel
+    // Marker Priok
+    const pPriok = railCorridorPoints[0];
+    L.marker([pPriok.lat, pPriok.lng], { icon: priokIcon })
+        .bindPopup(`
+            <div class="p-1 space-y-1 text-xs">
+                <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[10px]">ORIGIN PORT TERMINAL</span>
+                <h4 class="font-bold text-gray-900 text-sm mt-1">${pPriok.name}</h4>
+                <p class="text-gray-600">${pPriok.desc}</p>
+                <div class="text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+                    Kapasitas: <b>7,2 Juta TEU/thn</b> &bull; Gate Rel: <b>Stasiun Pasoso</b>
+                </div>
+            </div>
+        `)
+        .addTo(railLayerGroup);
+
+    // Marker CIDP Hub
+    const pCidp = railCorridorPoints[railCorridorPoints.length - 1];
+    L.marker([pCidp.lat, pCidp.lng], { icon: cidpIcon })
+        .bindPopup(`
+            <div class="p-1 space-y-1 text-xs">
+                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">DESTINATION HUB (35 HA)</span>
+                <h4 class="font-bold text-gray-900 text-sm mt-1">${pCidp.name}</h4>
+                <p class="text-gray-600">${pCidp.desc}</p>
+                <div class="text-[11px] text-gray-500 pt-1 border-t border-gray-100">
+                    Siding Track: <b>2 &times; 450m UIC 54</b> &bull; Sensor: <b>Frauscher Axle Counter RSR180</b>
+                </div>
+            </div>
+        `)
+        .addTo(railLayerGroup);
+
+    // Marker Stasiun Transit Antara
+    const stations = [
+        { idx: 1, code: "PSO", label: "Pasoso" },
+        { idx: 6, code: "JNG", label: "Jatinegara" },
+        { idx: 10, code: "BKS", label: "Bekasi" },
+        { idx: 14, code: "LBH", label: "Lemahabang" }
+    ];
+    stations.forEach(st => {
+        const pt = railCorridorPoints[st.idx];
+        L.marker([pt.lat, pt.lng], { icon: createStationIcon(st.label, st.code) })
+            .bindPopup(`
+                <div class="p-1 space-y-1 text-xs">
+                    <span class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono font-bold text-[10px]">STASIUN DAOP 1</span>
+                    <h4 class="font-bold text-gray-900 mt-1">${pt.name}</h4>
+                    <p class="text-gray-600 text-[11px]">${pt.desc}</p>
+                    <div class="text-[10px] text-blue-600 font-mono">KM ${pt.km.toFixed(1)} dari Priok</div>
+                </div>
+            `)
+            .addTo(railLayerGroup);
+    });
+
+    // Marker Bottleneck Tol Cikunir pada Road Layer
+    L.marker([-6.2512, 106.9421], { icon: cikunirIcon })
+        .bindPopup(`
+            <div class="p-1 space-y-1 text-xs">
+                <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold text-[10px]">ROAD BOTTLENECK</span>
+                <h4 class="font-bold text-gray-900 text-sm mt-1">Simpang Susun Cikunir (Tol Jkt-Cikampek)</h4>
+                <p class="text-gray-600">Titik kemacetan kronis harian antrean truk kontainer menuju Pelabuhan. Rata-rata delay 2,5 - 4 jam.</p>
+                <div class="text-[11px] text-emerald-700 font-bold pt-1 border-t border-gray-100">
+                    Solusi Intermodal: Kereta api barang memangkas dwell time dan bebas macet jalan raya.
+                </div>
+            </div>
+        `)
+        .addTo(roadLayerGroup);
+
+    // Initial Position KA 2518 Marker
+    const startPt = interpolatedSteps[0];
+    trainMarker = L.marker([startPt.lat, startPt.lng], { icon: trainIcon })
+        .bindPopup(`
+            <div class="p-1 space-y-1 text-xs font-sans">
+                <div class="flex items-center space-x-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span class="font-mono font-bold text-gray-900">KA 2518 (CIDP Express Freight)</span>
+                </div>
+                <div class="text-[11px] text-gray-600">
+                    Lokomotif CC 206 13 42 &bull; 30 Gerbong Datar PPCW &bull; 60 TEU
+                </div>
+            </div>
+        `)
+        .addTo(corridorMap);
+
+    // Set initial Telemetri HUD
+    updateTelemetryHUD(startPt);
+
+    // Auto-fit bounds
+    setTimeout(() => {
+        corridorMap.invalidateSize();
+        corridorMap.fitBounds([
+            [-6.1042, 106.8523],
+            [-6.2818, 107.1729]
+        ], { padding: [30, 30] });
+    }, 300);
+}
+
+// Update Telemetri HUD pada Peta
+function updateTelemetryHUD(step) {
+    const elSpeed = document.getElementById('hudTrainSpeed');
+    const elLoc = document.getElementById('hudTrainLoc');
+    const elProgress = document.getElementById('hudTrainProgress');
+    const elEta = document.getElementById('hudTrainEta');
+    const elBar = document.getElementById('hudProgressBar');
+
+    if (elSpeed) elSpeed.textContent = `${step.speed} km/jam`;
+    if (elLoc) elLoc.textContent = step.name;
+
+    const pct = Math.min(100, Math.round((step.km / 54.8) * 100));
+    if (elProgress) elProgress.textContent = `${step.km.toFixed(1)} / 54.8 km (${pct}%)`;
+    if (elBar) elBar.style.width = `${pct}%`;
+
+    const remainingKm = Math.max(0, 54.8 - step.km);
+    const etaMin = Math.round((remainingKm / 54.8) * 110);
+    if (elEta) {
+        if (etaMin === 0) {
+            elEta.textContent = "Tiba di Siding CIDP Track-01";
+            elEta.className = "text-emerald-600 font-bold";
+        } else {
+            elEta.textContent = `${etaMin} Menit Lagi`;
+            elEta.className = "text-gray-900";
+        }
+    }
+}
+
+// Kontrol Play / Pause Simulasi Perjalanan KA
+function toggleTrainAnimation() {
+    if (!isTrainPlaying) {
+        startTrainAnimation();
+    } else {
+        pauseTrainAnimation();
+    }
+}
+
+function startTrainAnimation() {
+    if (!trainMarker || interpolatedSteps.length === 0) return;
+    if (currentTrainStep >= interpolatedSteps.length - 1) {
+        currentTrainStep = 0;
+    }
+    isTrainPlaying = true;
+    const btnText = document.getElementById('playTrainText');
+    const btnIcon = document.getElementById('playTrainIcon');
+    if (btnText) btnText.textContent = "Jeda Perjalanan KA";
+    if (btnIcon) btnIcon.className = "fa-solid fa-pause text-[10px]";
+
+    trainAnimInterval = setInterval(() => {
+        if (currentTrainStep < interpolatedSteps.length - 1) {
+            currentTrainStep++;
+            const step = interpolatedSteps[currentTrainStep];
+            trainMarker.setLatLng([step.lat, step.lng]);
+            updateTelemetryHUD(step);
+        } else {
+            pauseTrainAnimation();
+            const btnText = document.getElementById('playTrainText');
+            if (btnText) btnText.textContent = "Simulasikan Ulang";
+            alert("Rangkaian KA 2518 (CC 206) telah tiba di Intermodal Rail Siding Track-01 CIDP Hub 35 Ha!\n\nSensor Axle Counter Frauscher mendeteksi 126 as roda sesuai manifest BAPLIE.\nSiap untuk proses pembongkaran 48 TEU menggunakan Reach Stacker / RMGC.");
+        }
+    }, 90);
+}
+
+function pauseTrainAnimation() {
+    isTrainPlaying = false;
+    if (trainAnimInterval) clearInterval(trainAnimInterval);
+    const btnText = document.getElementById('playTrainText');
+    const btnIcon = document.getElementById('playTrainIcon');
+    if (btnText && currentTrainStep < interpolatedSteps.length - 1) btnText.textContent = "Lanjutkan Perjalanan KA";
+    if (btnIcon) btnIcon.className = "fa-solid fa-play text-[10px]";
+}
+
+function resetTrainPosition() {
+    pauseTrainAnimation();
+    currentTrainStep = 0;
+    if (interpolatedSteps.length > 0 && trainMarker) {
+        const step0 = interpolatedSteps[0];
+        trainMarker.setLatLng([step0.lat, step0.lng]);
+        updateTelemetryHUD(step0);
+    }
+    const btnText = document.getElementById('playTrainText');
+    if (btnText) btnText.textContent = "Simulasikan Perjalanan KA";
+    flyToLocation('priok');
+}
+
+// Navigasi Kamera GIS (Pojok Kanan Atas)
+function flyToLocation(target) {
+    if (!corridorMap) return;
+    if (target === 'all') {
+        corridorMap.flyToBounds([
+            [-6.1042, 106.8523],
+            [-6.2818, 107.1729]
+        ], { padding: [40, 40], duration: 1.2 });
+    } else if (target === 'priok') {
+        corridorMap.flyTo([-6.1100, 106.8856], 14, { duration: 1.2 });
+    } else if (target === 'cidp') {
+        corridorMap.flyTo([-6.2731, 107.1652], 14, { duration: 1.2 });
+    }
+}
+
+// Toggle Layer Rel KA & Jalan Tol
+function toggleMapLayer(layerType) {
+    if (!corridorMap) return;
+    if (layerType === 'rail') {
+        const chk = document.getElementById('chkShowRail');
+        if (chk && chk.checked) {
+            if (!corridorMap.hasLayer(railLayerGroup)) corridorMap.addLayer(railLayerGroup);
+        } else {
+            if (corridorMap.hasLayer(railLayerGroup)) corridorMap.removeLayer(railLayerGroup);
+        }
+    } else if (layerType === 'road') {
+        const chk = document.getElementById('chkShowRoad');
+        if (chk && chk.checked) {
+            if (!corridorMap.hasLayer(roadLayerGroup)) corridorMap.addLayer(roadLayerGroup);
+        } else {
+            if (corridorMap.hasLayer(roadLayerGroup)) corridorMap.removeLayer(roadLayerGroup);
+        }
+    }
+}
+
+// Trigger inisialisasi peta saat viewport siap
+window.addEventListener('load', () => {
+    initCorridorGisMap();
+});
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    setTimeout(initCorridorGisMap, 200);
+}
+window.addEventListener('resize', () => {
+    if (corridorMap) corridorMap.invalidateSize();
+});
 </script>

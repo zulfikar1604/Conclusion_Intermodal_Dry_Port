@@ -415,6 +415,356 @@ try {
             ]);
             break;
 
+        // ---------------------------------------------------------------------
+        // 6. HW-01: KAMERA ANPR GERBANG (Hikvision DS-TCG406-E)
+        // ---------------------------------------------------------------------
+        case 'test_hw01_anpr':
+        case 'test_anpr':
+            $plates = ['B 9481 UEK', 'B 7712 SCK', 'D 9921 XY', 'L 8182 PO', 'B 3341 JKT', 'B 9204 TKL'];
+            $randPlate = $plates[array_rand($plates)];
+            $accuracy = rand(991, 999) / 10;
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('ANPR_CAPTURE', 'HW-01-ANPR', 'ANPR Auto Trigger', 50000, ?)");
+            $stmt->execute(["[HW-01 ANPR] Kamera mendeteksi truk {$randPlate} (Akurasi {$accuracy}%). Pas Masuk Truk diterbitkan."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-01',
+                'name' => 'Kamera ANPR Gerbang',
+                'message' => "HW-01 ANPR membaca plat {$randPlate} (Tingkat Keyakinan {$accuracy}%)",
+                'plate' => $randPlate,
+                'confidence' => $accuracy . '%',
+                'lane' => 'Inbound Lane 1',
+                'billing' => [
+                    'charge_name' => 'Pas Masuk Truk (Gate Pass)',
+                    'amount' => 50000
+                ]
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 6B. HW-02: PORTAL OCR KONTAINER ISO 6346 (Hikvision iDS-TCV300-A6I)
+        // ---------------------------------------------------------------------
+        case 'test_hw02_ocr':
+        case 'test_ocr':
+            $boxPrefixes = ['MSKU', 'TCLU', 'TEMU', 'CSQU', 'FCIU', 'HLXU', 'CMAU'];
+            $randBox = $boxPrefixes[array_rand($boxPrefixes)] . rand(1000000, 9999999);
+            $accuracy = rand(989, 998) / 10;
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('OCR_CAPTURE', ?, 'HW-02-OCR', 'Portal OCR System', 0, ?)");
+            $stmt->execute([$randBox, "[HW-02 OCR] Portal OCR memindai kontainer {$randBox} (ISO 42G1). Check Digit Valid."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-02',
+                'name' => 'Portal OCR Peti Kemas',
+                'message' => "HW-02 Portal OCR memindai {$randBox} (Valid ISO 6346)",
+                'container_number' => $randBox,
+                'iso_code' => '42G1 (40ft High Cube Dry)',
+                'check_digit' => 'VALID (0-Error)',
+                'confidence' => $accuracy . '%',
+                'demurrage' => 'Free Time 5 Hari Dimulai'
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 6C. HW-04: LONG-RANGE UHF RFID READER (Hopeland 20m ISO 18000-6C)
+        // ---------------------------------------------------------------------
+        case 'test_hw04_rfid':
+        case 'test_rfid':
+            $rfidTags = ['E280117000000001', 'E280117000000002', 'E280117000000003', 'E280117000000004'];
+            $drivers = ['Sholehudin (PT Samudera Logistik Prima)', 'Hendra Kusuma (PT Lintas Benua Cepat)', 'Bambang Irawan (PT Trans Harapan Logistik)'];
+            $randRfid = $rfidTags[array_rand($rfidTags)];
+            $randDriver = $drivers[array_rand($drivers)];
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('RFID_AUTH', 'HW-04-RFID', 'Hopeland Reader', 0, ?)");
+            $stmt->execute(["[HW-04 RFID] UHF RFID 20m mendeteksi tag armada {$randRfid} ({$randDriver}). Saldo e-Wallet diverifikasi."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-04',
+                'name' => 'Long-Range UHF RFID Reader',
+                'message' => "HW-04 RFID membaca tag armada {$randRfid}",
+                'rfid_tag' => $randRfid,
+                'driver' => $randDriver,
+                'e_wallet_status' => 'AUTO-DEBIT APPROVED (Saldo Cukup)',
+                'signal_rssi' => '-54 dBm (Sangat Kuat)'
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 6D. HW-05: VARIABLE MESSAGE SIGN (VMS) GATE DISPLAY (Chipshow Outdoor LED)
+        // ---------------------------------------------------------------------
+        case 'test_hw05_vms':
+        case 'test_vms':
+            $destBlocks = ['BLOK A - BAY 04', 'BLOK B - BAY 08', 'BLOK C - BAY 11', 'REEFER R-02 #14'];
+            $dest = $destBlocks[array_rand($destBlocks)];
+            $ledMsg = "LANE 1: TRUK MENUJU {$dest}";
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('VMS_DIRECTIVE', 'HW-05-VMS', 'Traffic Control AI', 0, ?)");
+            $stmt->execute(["[HW-05 VMS] LED Display mengarahkan supir: '{$ledMsg}'. Estimasi TAT terpangkas 60%."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-05',
+                'name' => 'Variable Message Sign (VMS) Gate',
+                'message' => "HW-05 VMS menampilkan rute: {$ledMsg}",
+                'display_text' => $ledMsg,
+                'target_block' => $dest,
+                'tat_impact' => 'Pangkas Turnaround Time (TAT) 45 mnt -> 18 mnt (-60%)'
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 6E. HW-06: INDUSTRIAL FANLESS EDGE AI PC (Advantech ARK-3532)
+        // ---------------------------------------------------------------------
+        case 'test_hw06_edge':
+        case 'test_edge':
+            $latency = rand(112, 148) / 10;
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('EDGE_INTERLOCK', 'HW-06-EDGE', 'Advantech ARK-3532', 0, ?)");
+            $stmt->execute(["[HW-06 Edge PC] Edge AI memproses verifikasi dalam {$latency}ms. Relay GPIO mengirim pulsa 1.2 detik membuka palang."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-06',
+                'name' => 'Industrial Fanless Edge AI PC',
+                'message' => "HW-06 Edge PC ARK-3532 memproses interlock dalam {$latency} ms. Palang Terbuka!",
+                'device_model' => 'Advantech ARK-3532 Fanless (IP40)',
+                'latency' => $latency . ' ms',
+                'relay_status' => 'PULSE ACTIVE (1.2s OPEN)',
+                'barrier_state' => 'BARRIER OPENED'
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 6F. HW-07: DGPS / RTK GNSS RECEIVER (CHCNAV CGI-610 <2cm)
+        // ---------------------------------------------------------------------
+        case 'test_hw07_rtk':
+        case 'test_rtk':
+            $satCount = rand(16, 20);
+            $accuracyCm = rand(12, 18) / 10;
+            $slots = ['B-08-03-02', 'B-06-02-01', 'A-04-01-03', 'C-10-02-02', 'R-02-01-01'];
+            $randSlot = $slots[array_rand($slots)];
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('RTK_FIX', 'HW-07-RTK', 'CHCNAV CGI-610', 0, ?)");
+            $stmt->execute(["[HW-07 RTK] DGPS mengunci koordinat akurasi {$accuracyCm} cm ({$satCount} Satelit). Posisi Slot: {$randSlot}."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-07',
+                'name' => 'DGPS / RTK GNSS Receiver',
+                'message' => "HW-07 RTK GNSS mengunci slot {$randSlot} (Akurasi {$accuracyCm} cm, {$satCount} Sat)",
+                'status' => 'FIX',
+                'accuracy' => "< {$accuracyCm} cm",
+                'satellites' => "{$satCount} Satellites (GPS + BeiDou)",
+                'slot_3d' => $randSlot,
+                'risk_elimination' => 'Eliminasi 100% Salah Letak Box (Misplacement Zero)'
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 6G. HW-08: SPREADER TWISTLOCK & LOAD CELL SENSOR KIT (Bromma)
+        // ---------------------------------------------------------------------
+        case 'test_hw08_twistlock':
+        case 'test_twistlock':
+            $tonnage = rand(245, 305) / 10;
+            $billable = 250000;
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('SPREADER_LOCK', 'HW-08-BROMMA', 'Bromma Twistlock Kit', 250000, ?)");
+            $stmt->execute(["[HW-08 Twistlock] 4 Pin mengunci sempurna di corner casting. Load cell mencatat {$tonnage} Ton. Jasa Lo-Lo diterbitkan."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-08',
+                'name' => 'Spreader Twistlock & Load Cell Sensor Kit',
+                'message' => "HW-08 Spreader Twistlock LOCKED & Load Cell: {$tonnage} Ton (Siap Angkat)",
+                'twistlock_state' => 'LOCKED (4/4 Pin Terkunci)',
+                'load_tonnage' => "{$tonnage} Ton",
+                'hoist_interlock' => 'PERMITTED (Aman Diangkat)',
+                'billing' => [
+                    'charge_name' => 'Jasa Lo-Lo Lift-Off Stevedoring',
+                    'amount' => $billable
+                ]
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 6H. TEST ANPR & OCR SENSOR KOMBINASI (Backward Compatibility)
+        // ---------------------------------------------------------------------
+        case 'test_anpr_ocr':
+            $plates = ['B 9481 UEK', 'B 7712 SCK', 'D 9921 XY', 'L 8182 PO', 'B 3341 JKT', 'B 9204 TKL'];
+            $boxPrefixes = ['MSKU', 'TCLU', 'TEMU', 'CSQU', 'FCIU', 'HLXU', 'CMAU'];
+            
+            $randPlate = $plates[array_rand($plates)];
+            $randBox = $boxPrefixes[array_rand($boxPrefixes)] . rand(1000000, 9999999);
+            $accuracy = rand(988, 999) / 10;
+
+            // Catat log
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('GATE_SCAN', ?, 'GATE-OCR-01', 'Sistem Otomasi Gerbang', 50000, ?)");
+            $stmt->execute([$randBox, "ANPR: {$randPlate} (Akurasi {$accuracy}%) & Portal OCR: {$randBox} (Valid ISO 6346)"]);
+            
+            echo json_encode([
+                'success' => true,
+                'message' => "ANPR mendeteksi {$randPlate} ({$accuracy}%) dan OCR membaca {$randBox}",
+                'anpr' => [
+                    'hardware' => 'Hikvision DS-TCG406-E',
+                    'plate' => $randPlate,
+                    'confidence' => $accuracy . '%',
+                    'status' => 'REGISTERED'
+                ],
+                'ocr' => [
+                    'hardware' => 'Hikvision iDS-TCV300-A6I',
+                    'container_number' => $randBox,
+                    'iso_code' => '42G1 (40ft High Cube)',
+                    'check_digit' => 'VALID'
+                ],
+                'billing' => [
+                    'charge_name' => 'Pas Masuk Truk (Gate Pass)',
+                    'amount' => 50000
+                ]
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 7. TEST VGM WEIGHBRIDGE: Simulasi penimbangan truk 80 Ton
+        // ---------------------------------------------------------------------
+        case 'test_hw03_vgm':
+        case 'test_vgm':
+            $gross = rand(29500, 34500);
+            $tare = rand(10500, 11500);
+            $net_vgm = $gross - $tare;
+            $cert_num = 'VGM-CIDP-' . date('Ymd') . '-' . rand(1000, 9999);
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('VGM_WEIGH', 'VGM-CERTIFIED', 'SCALE-80T-01', 'Operator Timbangan VGM', 120000, ?)");
+            $stmt->execute(["Penimbangan Jembatan Timbang 80T: Gross {$gross}kg, Tare {$tare}kg, Net VGM {$net_vgm}kg. Sertifikat #{$cert_num} diterbitkan."]);
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Penimbangan Jembatan Timbang 80T selesai! Net VGM: " . number_format($net_vgm, 0, ',', '.') . " kg (SOLAS PASSED)",
+                'vgm' => [
+                    'hardware' => 'Fangda Electronic Truck Scale 80 Ton',
+                    'certificate_no' => $cert_num,
+                    'gross_weight' => $gross,
+                    'tare_weight' => $tare,
+                    'net_vgm' => $net_vgm,
+                    'solas_status' => 'COMPLIANT'
+                ],
+                'billing' => [
+                    'charge_name' => 'Biaya Jasa Sertifikasi VGM SOLAS',
+                    'amount' => 120000
+                ]
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 8. TEST REEFER SOCKET: Simulasi Modbus RTU Telemetri Daya & Suhu
+        // ---------------------------------------------------------------------
+        case 'test_hw09_reefer':
+        case 'test_reefer':
+            $temps = [-20.4, -20.2, -19.8, -20.1, -19.5];
+            $current_temp = $temps[array_rand($temps)];
+            $volts = rand(385, 392) + (rand(1, 9) / 10);
+            $amps = rand(26, 31) + (rand(1, 9) / 10);
+            $power_kw = round(($volts * $amps * 1.732 * 0.85) / 1000, 2);
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('REEFER_CHECK', 'TEMU4819203', 'RACK-R02-P14', 'SCADA Reefer Monitor', 35000, ?)");
+            $stmt->execute(["Smart Socket R-02 #14: Tegangan {$volts}V, Arus {$amps}A, Daya {$power_kw}kW, Suhu {$current_temp}°C (OPTIMAL)."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-09',
+                'name' => 'Smart Reefer Socket Modbus RTU',
+                'message' => "Sensor Smart Socket Marechal: Suhu {$current_temp}°C, Daya {$power_kw} kW (Optimal)",
+                'reefer' => [
+                    'hardware' => 'Marechal Smart Receptacle 380V/32A',
+                    'rack_plug' => 'Reefer Rack R-02 Plug #14',
+                    'temperature' => $current_temp . '°C',
+                    'voltage' => $volts . ' V',
+                    'current' => $amps . ' A',
+                    'power' => $power_kw . ' kW',
+                    'status' => 'COLD_CHAIN_NORMAL'
+                ],
+                'billing' => [
+                    'charge_name' => 'Reefer Electricity & Monitoring Fee (1 Jam)',
+                    'amount' => 35000
+                ]
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 9. TEST AXLE COUNTER: Simulasi sensor gandar KA logistik
+        // ---------------------------------------------------------------------
+        case 'test_hw10_axle':
+        case 'test_axle':
+            $total_axles = 126; // 1 Lokomotif 6 as + 30 Gerbong 120 as
+            $train_id = 'KA 2518 (Tj. Priok - Cikarang)';
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('RAIL_AXLE_CHECK', 'KA-2518-WAGONS', 'AXLE-RSR123', 'Petugas Siding Intermodal', 0, ?)");
+            $stmt->execute(["Sensor Frauscher RSR123 mendeteksi 126 gandar utuh pada Siding Track 1. KA 2518 siap alih muat."]);
+
+            echo json_encode([
+                'success' => true,
+                'hw_id' => 'HW-10',
+                'name' => 'Frauscher Wheel Sensor / Axle Counter',
+                'message' => "Frauscher Axle Counter memverifikasi 126 as roda! Rangkaian KA 2518 utuh & aman.",
+                'axle' => [
+                    'hardware' => 'Frauscher RSR123 Wheel Sensor',
+                    'train' => $train_id,
+                    'axle_count' => $total_axles,
+                    'locomotive' => 'CC 206 13 42 (6 As Roda)',
+                    'wagons' => '30 Gerbong PPCW (120 As Roda)',
+                    'integrity' => 'VERIFIED (100% COMPLETE)',
+                    'safety_level' => 'SIL 4'
+                ],
+                'billing' => [
+                    'charge_name' => 'Intermodal Rail Manifest Verified',
+                    'amount' => 0
+                ]
+            ]);
+            break;
+
+        // ---------------------------------------------------------------------
+        // 10. TEST E-SEAL: Simulasi verifikasi Smart E-Seal pabean CEISA 4.0
+        // ---------------------------------------------------------------------
+        case 'test_hw11_eseal':
+        case 'test_eseal':
+            $seal_num = 'JT701-' . rand(100000, 999999);
+            $sppb_num = 'SPPB-' . rand(10000, 99999) . '/KPU.01/2026';
+
+            $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
+                                   VALUES ('CUSTOMS_CLEARANCE', 'E-SEAL-VERIFIED', 'SEAL-JT701', 'Bea Cukai KPU Priok/Cikarang', 0, ?)");
+            $stmt->execute(["Jointech JT701 GPS Smart E-Seal #{$seal_num} diverifikasi via RFID nirkabel. Kawat utuh (INTACT). SPPB #{$sppb_num} terbit otomatis."]);
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Smart E-Seal terverifikasi INTACT! SPPB Bea Cukai Jalur Hijau terbit otomatis.",
+                'eseal' => [
+                    'hardware' => 'Jointech JT701 GPS/GSM Smart Lock',
+                    'seal_id' => $seal_num,
+                    'wire_status' => 'INTACT (NO TAMPER)',
+                    'battery' => '96%',
+                    'sppb_number' => $sppb_num,
+                    'channel' => 'JALUR HIJAU (AUTOMATIC CLEARANCE)'
+                ],
+                'billing' => [
+                    'charge_name' => 'Customs Bond Released (Jaminan Pabean Bebas)',
+                    'amount' => 0
+                ]
+            ]);
+            break;
+
         default:
             echo json_encode([
                 'success' => false,
