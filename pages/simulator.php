@@ -52,99 +52,162 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
     </div>
 
-    <!-- 3D Canvas Viewport & Floating HUD System -->
-    <div class="relative bg-gray-950 rounded-xl overflow-hidden shadow-xs border border-gray-800" style="height: 600px;" id="simulatorViewportContainer">
+    <!-- 4 Quick KPI Micro-Cards (Clean & Compact, Positioned at Top like Denah) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+        <div class="bg-white rounded-xl p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Box di Yard</p>
+                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none" id="statInYard">19 <span class="text-xs font-normal text-gray-400">box</span></h4>
+                <p class="text-[10px] text-emerald-600 font-medium mt-1 truncate"><i class="fa-solid fa-check-double mr-1"></i>Sync MySQL</p>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-blue-50 text-cdp-blue flex items-center justify-center text-sm shrink-0 ml-2">
+                <i class="fa-solid fa-cubes-stacked"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Utilisasi Yard</p>
+                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none" id="statYardUtil">23.8%</h4>
+                <div class="w-20 bg-gray-100 rounded-full h-1 mt-1.5">
+                    <div class="bg-blue-600 h-1 rounded-full" id="statYardBar" style="width: 23.8%"></div>
+                </div>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm shrink-0 ml-2">
+                <i class="fa-solid fa-chart-pie"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Armada SCADA</p>
+                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none">4 <span class="text-xs font-normal text-gray-400">unit</span></h4>
+                <p class="text-[10px] text-gray-500 mt-1 truncate">3 RS + 1 RTG Crane</p>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm shrink-0 ml-2">
+                <i class="fa-solid fa-dolly"></i>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
+            <div class="min-w-0">
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Kondisi Angin</p>
+                <h4 class="text-xl font-bold text-emerald-600 mt-0.5 leading-none">6.4 <span class="text-xs font-normal text-gray-400">m/s</span></h4>
+                <p class="text-[10px] text-emerald-600 font-medium mt-1 truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Batas Aman &lt; 20 m/s</p>
+            </div>
+            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shrink-0 ml-2">
+                <i class="fa-solid fa-wind"></i>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar Pengendali Navigasi 3D & Sudut Pandang CAD (Pola Bersih Seperti Denah) -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 border border-gray-100 shadow-sm space-y-3.5">
+        
+        <!-- Row 1: Camera Angle Presets (CAD & Operasional) -->
+        <div class="border-b border-gray-100 pb-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
+                <span class="text-xs font-bold text-gray-700 uppercase tracking-wider flex items-center">
+                    <i class="fa-solid fa-compass-drafting text-[#0170b9] mr-2"></i>
+                    Sudut Pandang Kamera (CAD &amp; Operasional)
+                </span>
+                <span class="text-[11px] text-gray-400 hidden sm:inline">Pilih sudut kamera untuk inspeksi atau gunakan zoom dock di kanvas 3D</span>
+            </div>
+            <div class="flex flex-wrap items-center gap-1.5" id="cameraPresetsToolbar">
+                <!-- CAD / Mode Khusus -->
+                <button onclick="setCameraView('plan')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5" id="btnCamPlan" title="Denah 2D Top-Down Sipil (Sama persis dengan denah.php)">
+                    <i class="fa-solid fa-map text-cyan-600 text-xs"></i><span>Denah 2D CAD</span>
+                </button>
+                <button onclick="setCameraView('iso')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5" id="btnCamIso" title="Sudut Isometrik Axonometric 45° BIM">
+                    <i class="fa-solid fa-cube text-purple-600 text-xs"></i><span>Isometrik 45°</span>
+                </button>
+                <button onclick="setCameraView('overview')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-bold bg-[#002f5e] text-white hover:bg-blue-800 transition flex items-center gap-1.5 shadow-xs" id="btnCamOverview" title="Drone 3D Bebas 35 Hektar">
+                    <i class="fa-solid fa-satellite text-xs"></i><span>Drone 35 Ha</span>
+                </button>
+                <div class="h-5 w-px bg-gray-200 mx-1 hidden sm:block"></div>
+                <!-- Zona Lapangan -->
+                <button onclick="setCameraView('office')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamOffice" title="Kantor Utama PT MTI &amp; Datacenter NOC (Zona 6 &amp; 7 Utara)">
+                    <i class="fa-solid fa-building text-blue-700 text-xs"></i><span>Kantor Utama</span>
+                </button>
+                <button onclick="setCameraView('gate')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamGate">
+                    <i class="fa-solid fa-archway text-blue-600 text-xs"></i><span>Gate &amp; VGM</span>
+                </button>
+                <button onclick="setCameraView('yard')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamYard">
+                    <i class="fa-solid fa-boxes-stacked text-amber-600 text-xs"></i><span>Yard 15 Ha</span>
+                </button>
+                <button onclick="setCameraView('reefer')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamReefer">
+                    <i class="fa-solid fa-snowflake text-cyan-500 text-xs"></i><span>Reefer</span>
+                </button>
+                <button onclick="setCameraView('rail')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamRail">
+                    <i class="fa-solid fa-train text-rose-600 text-xs"></i><span>Rail Siding</span>
+                </button>
+                <button onclick="setCameraView('cfs')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamCfs">
+                    <i class="fa-solid fa-warehouse text-emerald-600 text-xs"></i><span>CFS &amp; M&amp;R</span>
+                </button>
+                <button onclick="setCameraView('customs')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamCustoms">
+                    <i class="fa-solid fa-stamp text-indigo-600 text-xs"></i><span>Bea Cukai</span>
+                </button>
+                <button onclick="setCameraView('cockpit')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200 transition flex items-center gap-1.5" id="btnCamCockpit">
+                    <i class="fa-solid fa-vr-cardboard text-violet-600 text-xs"></i><span>Kabin RS</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Row 2: Lighting & Technical CAD Layers & Responsive Height -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <!-- Pencahayaan Waktu -->
+            <div class="flex items-center space-x-2">
+                <span class="text-xs font-bold text-gray-500 flex items-center"><i class="fa-solid fa-sun mr-1.5 text-amber-500"></i>Pencahayaan:</span>
+                <div class="inline-flex rounded-xl p-0.5 bg-gray-100 border border-gray-200">
+                    <button onclick="setLightingMode('day')" class="light-btn px-2.5 py-1 text-xs rounded-lg font-bold bg-white text-amber-700 shadow-2xs transition" id="btnLightDay" title="Mode Siang Terang">
+                        <i class="fa-solid fa-sun mr-1 text-amber-500"></i>Siang
+                    </button>
+                    <button onclick="setLightingMode('sunset')" class="light-btn px-2.5 py-1 text-xs rounded-lg font-medium text-gray-600 hover:text-gray-900 transition" id="btnLightSunset" title="Mode Senja Emas">
+                        <i class="fa-solid fa-cloud-sun mr-1 text-orange-400"></i>Senja
+                    </button>
+                    <button onclick="setLightingMode('night')" class="light-btn px-2.5 py-1 text-xs rounded-lg font-medium text-gray-600 hover:text-gray-900 transition" id="btnLightNight" title="Mode Malam &amp; Lampu Sorot Tower">
+                        <i class="fa-solid fa-moon mr-1 text-indigo-500"></i>Malam
+                    </button>
+                </div>
+            </div>
+
+            <!-- Layer CAD & Ukuran Layar Dinamis -->
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold text-gray-500 flex items-center"><i class="fa-solid fa-layer-group mr-1.5 text-blue-500"></i>Utilitas:</span>
+                <button onclick="toggleTechnicalDimensions()" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition flex items-center gap-1" id="btnToggleDimensions" title="Garis Ukur Dimensi CAD 3D">
+                    <i class="fa-solid fa-ruler-combined text-xs"></i><span>Garis Dimensi</span>
+                </button>
+                <button onclick="toggleCADTitleBlock()" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition flex items-center gap-1" id="btnToggleTitleBlock" title="Etiket Gambar Teknik Sipil">
+                    <i class="fa-solid fa-id-card-clip text-xs"></i><span>Etiket CAD</span>
+                </button>
+                <div class="h-4 w-px bg-gray-200 mx-0.5 hidden sm:block"></div>
+                <button onclick="toggleDynamicViewportHeight()" id="btnToggleHeight" class="px-2.5 py-1 text-xs rounded-xl font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5" title="Perbesar Tinggi Layar 3D (Dynamic Viewport)">
+                    <i class="fa-solid fa-up-down-left-right text-xs text-slate-500"></i>
+                    <span id="btnHeightText">Layar Tinggi</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Canvas Viewport & Floating HUD System (Dinamis & Bebas Tabrakan) -->
+    <div class="relative bg-gray-950 rounded-2xl overflow-hidden shadow-md border border-gray-800 h-[560px] sm:h-[620px] lg:h-[680px] xl:h-[740px] transition-all duration-300" id="simulatorViewportContainer">
         
         <!-- WebGL Canvas Container -->
         <div id="webglCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
 
-        <!-- Floating HUD: Top Camera Controls & Environment Toggle -->
-        <div class="absolute top-3.5 left-3.5 right-3.5 flex flex-wrap items-center justify-between gap-2 pointer-events-none z-10">
-            
-            <!-- Camera Preset Selector (Engineering CAD & Operational Presets) -->
-            <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 flex items-center space-x-1 shadow-xl text-white overflow-x-auto max-w-full">
-                <span class="text-[11px] text-gray-400 font-semibold px-2 flex items-center shrink-0">
-                    <i class="fa-solid fa-compass-drafting mr-1.5 text-blue-400 text-xs"></i>CAD &amp; 3D:
-                </span>
-                <button onclick="setCameraView('plan')" class="cam-btn px-2 py-1 text-xs rounded-lg font-bold bg-slate-800 text-cyan-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamPlan" title="Denah 2D Top-Down Sipil (Sama dengan denah.php)">
-                    <i class="fa-solid fa-map text-[11px]"></i><span>Denah 2D CAD</span>
-                </button>
-                <button onclick="setCameraView('iso')" class="cam-btn px-2 py-1 text-xs rounded-lg font-bold bg-slate-800 text-purple-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamIso" title="Sudut Isometrik Axonometric 45° BIM">
-                    <i class="fa-solid fa-cube text-[11px]"></i><span>Isometrik 45°</span>
-                </button>
-                <button onclick="setCameraView('overview')" class="cam-btn px-2 py-1 text-xs rounded-lg font-bold bg-blue-600 text-white hover:bg-blue-500 transition flex items-center gap-1 shrink-0" id="btnCamOverview" title="Drone 3D Bebas 35 Hektar">
-                    <i class="fa-solid fa-satellite text-[11px]"></i><span>Drone 35 Ha</span>
-                </button>
-                <div class="h-4 w-px bg-slate-700 mx-0.5 shrink-0"></div>
-                <button onclick="setCameraView('gate')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamGate">
-                    <i class="fa-solid fa-archway text-[11px]"></i><span>Gate &amp; VGM</span>
-                </button>
-                <button onclick="setCameraView('yard')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamYard">
-                    <i class="fa-solid fa-boxes-stacked text-[11px]"></i><span>Yard 15 Ha</span>
-                </button>
-                <button onclick="setCameraView('reefer')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamReefer">
-                    <i class="fa-solid fa-snowflake text-[11px]"></i><span>Reefer</span>
-                </button>
-                <button onclick="setCameraView('rail')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamRail">
-                    <i class="fa-solid fa-train text-[11px]"></i><span>Rail Siding</span>
-                </button>
-                <button onclick="setCameraView('cfs')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamCfs">
-                    <i class="fa-solid fa-warehouse text-[11px]"></i><span>CFS &amp; M&amp;R</span>
-                </button>
-                <button onclick="setCameraView('customs')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamCustoms">
-                    <i class="fa-solid fa-stamp text-[11px]"></i><span>Bea Cukai</span>
-                </button>
-                <button onclick="setCameraView('cockpit')" class="cam-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:bg-slate-700 transition flex items-center gap-1 shrink-0" id="btnCamCockpit">
-                    <i class="fa-solid fa-vr-cardboard text-[11px]"></i><span>Kabin RS</span>
-                </button>
-            </div>
-
-            <!-- Lighting, Technical Overlays & Fullscreen -->
-            <div class="pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 flex items-center space-x-1 shadow-xl text-white">
-                <button onclick="toggleTechnicalDimensions()" class="tech-btn px-2 py-1 text-xs rounded-lg font-medium bg-blue-500/20 text-blue-300 border border-blue-400/30 flex items-center gap-1" id="btnToggleDimensions" title="Garis Ukur Dimensi CAD 3D">
-                    <i class="fa-solid fa-ruler-combined text-[11px]"></i><span class="hidden md:inline">Dimensi</span>
-                </button>
-                <button onclick="toggleCADTitleBlock()" class="tech-btn px-2 py-1 text-xs rounded-lg font-medium bg-slate-800 text-gray-300 hover:text-white flex items-center gap-1" id="btnToggleTitleBlock" title="Etiket Gambar Teknik Sipil">
-                    <i class="fa-solid fa-id-card-clip text-[11px]"></i><span class="hidden md:inline">Etiket CAD</span>
-                </button>
-                <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
-                <button onclick="setLightingMode('day')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium bg-amber-500/20 text-amber-300 border border-amber-400/30 flex items-center gap-1" id="btnLightDay" title="Mode Siang">
-                    <i class="fa-solid fa-sun text-[11px]"></i><span>Siang</span>
-                </button>
-                <button onclick="setLightingMode('sunset')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium text-gray-400 hover:text-white flex items-center gap-1" id="btnLightSunset" title="Mode Senja">
-                    <i class="fa-solid fa-cloud-sun text-[11px]"></i><span>Senja</span>
-                </button>
-                <button onclick="setLightingMode('night')" class="light-btn px-2 py-1 text-xs rounded-lg font-medium text-gray-400 hover:text-white flex items-center gap-1" id="btnLightNight" title="Mode Malam">
-                    <i class="fa-solid fa-moon text-[11px]"></i><span>Malam</span>
-                </button>
-                <div class="h-4 w-px bg-slate-700 mx-0.5"></div>
-                <button onclick="toggleFullscreen()" class="p-1 px-2 text-gray-300 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Layar Penuh">
-                    <i class="fa-solid fa-expand text-xs"></i>
-                </button>
-            </div>
+        <!-- Floating Badge: Top Left Live Status & Proyeksi Aktif -->
+        <div class="absolute top-3.5 left-3.5 pointer-events-auto flex items-center space-x-2 z-10">
+            <span class="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 text-white text-[11px] font-mono px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-bold text-cyan-300" id="cadProjectionLabel">PERSPEKTIF DRONE 3D</span>
+            </span>
         </div>
 
-        <!-- Floating HUD: CAD Engineering Title Block (Etiket Gambar Teknik) -->
-        <div id="cadTitleBlock" class="absolute top-16 left-3.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 shadow-2xl text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-10 transition-all duration-300">
-            <div class="flex items-center justify-between pb-1 border-b border-slate-700 font-bold text-white">
-                <span class="text-blue-400 flex items-center gap-1"><i class="fa-solid fa-compass-drafting"></i>CIDP 35 HA TWIN</span>
-                <span class="text-[8.5px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1 py-0.2 rounded">AS-BUILT DWG</span>
-            </div>
-            <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9.5px]">
-                <div><span class="text-slate-500">DWG NO:</span> <span class="text-white font-bold">CIDP-35HA-2026</span></div>
-                <div><span class="text-slate-500">SKALA:</span> <span class="text-amber-400 font-bold">1:2.000</span></div>
-                <div><span class="text-slate-500">PROYEKSI:</span> <span id="cadProjectionLabel" class="text-emerald-400 font-bold">PERSPEKTIF 3D</span></div>
-                <div><span class="text-slate-500">DATUM:</span> <span class="text-white font-bold">EL +0.00 M</span></div>
-                <div class="col-span-2 truncate"><span class="text-slate-500">KOORDINAT:</span> UTM 48S (107°08'E 06°18'S)</div>
-                <div class="col-span-2 truncate"><span class="text-slate-500">KONSULTAN:</span> Conclusion Supply Chain</div>
-            </div>
-        </div>
-
-        <!-- Floating HUD: Dynamic 3D Azimuth Compass Rose -->
-        <div id="cadCompassRose" class="absolute top-16 right-3.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-2xl text-center hidden md:flex flex-col items-center justify-center z-10 transition-all duration-300">
-            <div class="relative w-12 h-12 flex items-center justify-center">
-                <div id="compassDial" class="w-10 h-10 rounded-full border border-slate-600/80 flex items-center justify-center transition-transform duration-75">
-                    <div class="w-1 h-8 bg-gradient-to-b from-rose-500 to-slate-400 rounded-full"></div>
+        <!-- Floating HUD: Top Left Dynamic 3D Azimuth Compass Rose (Di bawah badge status) -->
+        <div id="cadCompassRose" class="absolute top-14 left-3.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-2xl text-center hidden md:flex flex-col items-center justify-center z-10 transition-all duration-300">
+            <div class="relative w-11 h-11 flex items-center justify-center">
+                <div id="compassDial" class="w-9 h-9 rounded-full border border-slate-600/80 flex items-center justify-center transition-transform duration-75">
+                    <div class="w-1 h-7 bg-gradient-to-b from-rose-500 to-slate-400 rounded-full"></div>
                 </div>
                 <span class="absolute top-0 text-[8px] font-bold font-mono text-rose-400">N</span>
                 <span class="absolute bottom-0 text-[8px] font-bold font-mono text-slate-400">S</span>
@@ -154,8 +217,51 @@ if (session_status() === PHP_SESSION_NONE) {
             <span id="compassHeading" class="text-[9px] font-mono font-bold text-slate-300 mt-0.5">360° N</span>
         </div>
 
-        <!-- Floating HUD: Real-time 3D Navigation Target Indicator -->
-        <div id="hudTargetPill" class="absolute top-14 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 hidden z-20">
+        <!-- Floating HUD: Top Right Dedicated Zoom & Screen Dock (Fitur Zoom Mirip Denah) -->
+        <div class="absolute top-3.5 right-3.5 pointer-events-auto flex items-center bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 shadow-2xl z-10 text-white divide-x divide-slate-700/80">
+            <!-- Zoom In -->
+            <button onclick="simZoom(1)" class="w-8 h-8 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Perbesar Tampilan / Zoom In (+)">
+                <i class="fa-solid fa-plus text-xs"></i>
+            </button>
+            <!-- Zoom Level Percentage Display -->
+            <div class="px-2.5 h-8 flex items-center justify-center font-mono font-bold text-xs text-amber-300 min-w-[54px] select-none" id="simZoomLevelDisplay" title="Tingkat Zoom Kamera">
+                100%
+            </div>
+            <!-- Zoom Out -->
+            <button onclick="simZoom(-1)" class="w-8 h-8 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Perkecil Tampilan / Zoom Out (-)">
+                <i class="fa-solid fa-minus text-xs"></i>
+            </button>
+            <!-- Reset View -->
+            <button onclick="resetSimCameraView()" class="w-8 h-8 flex items-center justify-center text-slate-200 hover:text-cyan-300 hover:bg-slate-800 rounded-lg transition" title="Reset Pandangan Standar (↺)">
+                <i class="fa-solid fa-rotate-left text-xs"></i>
+            </button>
+            <!-- Fullscreen Toggle -->
+            <button onclick="toggleFullscreen()" class="w-8 h-8 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Layar Penuh (F11)">
+                <i class="fa-solid fa-expand text-xs"></i>
+            </button>
+        </div>
+
+        <!-- Floating HUD: CAD Engineering Title Block (Etiket Gambar Teknik Sipil) -->
+        <div id="cadTitleBlock" class="absolute top-14 right-3.5 pointer-events-auto bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 shadow-2xl text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-10 transition-all duration-300">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-700 font-bold text-white">
+                <span class="text-blue-400 flex items-center gap-1"><i class="fa-solid fa-compass-drafting"></i>CIDP 35 HA TWIN</span>
+                <div class="flex items-center gap-1.5">
+                    <span class="text-[8.5px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1 py-0.2 rounded">AS-BUILT</span>
+                    <button onclick="toggleCADTitleBlock()" class="text-slate-400 hover:text-white text-xs px-1" title="Tutup Etiket"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9.5px]">
+                <div><span class="text-slate-500">DWG NO:</span> <span class="text-white font-bold">CIDP-35HA-2026</span></div>
+                <div><span class="text-slate-500">SKALA:</span> <span class="text-amber-400 font-bold">1:2.000</span></div>
+                <div><span class="text-slate-500">PROYEKSI:</span> <span id="cadProjectionLabelDetail" class="text-emerald-400 font-bold">PERSPEKTIF 3D</span></div>
+                <div><span class="text-slate-500">DATUM:</span> <span class="text-white font-bold">EL +0.00 M</span></div>
+                <div class="col-span-2 truncate"><span class="text-slate-500">KOORDINAT:</span> UTM 48S (107°08'E 06°18'S)</div>
+                <div class="col-span-2 truncate"><span class="text-slate-500">KONSULTAN:</span> Conclusion Supply Chain</div>
+            </div>
+        </div>
+
+        <!-- Floating HUD: Real-time 3D Navigation Target Indicator (Centered at Top) -->
+        <div id="hudTargetPill" class="absolute top-3.5 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 hidden z-20">
             <div class="bg-slate-900/95 backdrop-blur-md border border-cyan-500/70 text-white px-3.5 py-1.5 rounded-full shadow-2xl flex items-center space-x-2 text-xs font-mono">
                 <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
                 <span class="text-cyan-300 font-bold uppercase text-[10px] shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i>Arah 3D:</span>
@@ -168,17 +274,22 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <!-- Floating HUD: Bottom Left - Compact SCADA Feed Ticker -->
+        <!-- Floating HUD: Bottom Left - Collapsible SCADA Feed Ticker -->
         <div class="absolute bottom-3.5 left-3.5 pointer-events-auto max-w-xs sm:max-w-sm w-full z-10">
             <div class="bg-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-xl p-2.5 shadow-xl text-white">
-                <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-[10px]">
+                <div class="flex items-center justify-between pb-1.5 mb-1 border-b border-slate-800 text-[10px]">
                     <div class="flex items-center space-x-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                         <span class="font-bold uppercase tracking-wider text-slate-300">SCADA Telemetry Feed</span>
                     </div>
-                    <span class="text-slate-400 font-mono" id="liveClock">--:--:-- WIB</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-400 font-mono text-[9.5px]" id="liveClock">--:--:-- WIB</span>
+                        <button onclick="toggleScadaFeed()" class="text-slate-400 hover:text-white text-xs px-1" title="Sembunyikan/Tampilkan Feed">
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="scadaFeedChevron"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="space-y-1 max-h-20 overflow-y-auto text-[10.5px] font-mono leading-tight" id="simLogTicker">
+                <div class="space-y-1 max-h-20 overflow-y-auto text-[10.5px] font-mono leading-tight transition-all duration-200" id="simLogTicker">
                     <div class="text-emerald-400 flex items-start">
                         <span class="text-slate-500 mr-1.5">[SYS]</span>
                         <span>Terminal Engine aktif. 19 box disinkronkan dari MySQL.</span>
@@ -196,26 +307,26 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
 
         <!-- Floating HUD: Bottom Center - Sleek Action Dock -->
-        <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center space-x-1.5 bg-slate-900/90 backdrop-blur-lg border border-slate-700/70 p-1.5 rounded-xl shadow-xl z-10">
-            <button onclick="triggerGateIn()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5">
+        <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center space-x-1.5 bg-slate-900/90 backdrop-blur-lg border border-slate-700/70 p-1.5 rounded-xl shadow-xl z-20 max-w-[95vw] overflow-x-auto">
+            <button onclick="triggerGateIn()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0">
                 <i class="fa-solid fa-truck text-xs"></i>
                 <span>Gate-In Truk &amp; VGM</span>
             </button>
-            <button onclick="openMoveModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5">
+            <button onclick="openMoveModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0">
                 <i class="fa-solid fa-arrows-up-down-left-right text-xs"></i>
                 <span>Relokasi Box (RS)</span>
             </button>
-            <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5">
+            <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0">
                 <i class="fa-solid fa-train text-xs"></i>
                 <span>Bongkar KA (RTG)</span>
             </button>
-            <button onclick="refreshStateFromDB()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition" title="Sinkronkan MySQL">
+            <button onclick="refreshStateFromDB()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition shrink-0" title="Sinkronkan MySQL">
                 <i class="fa-solid fa-rotate text-xs"></i>
             </button>
         </div>
 
         <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector -->
-        <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-10" id="inspectorCard">
+        <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-20" id="inspectorCard">
             <div class="bg-slate-900/95 backdrop-blur-lg border border-blue-500/50 rounded-xl p-3.5 shadow-2xl text-white relative overflow-hidden">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
                 <div class="flex items-center justify-between mb-2.5">
@@ -284,57 +395,6 @@ if (session_status() === PHP_SESSION_NONE) {
                     <div class="font-bold text-xs text-white" id="toastTitle">Aksi Berhasil Dieksekusi</div>
                     <div class="text-[11px] text-slate-300" id="toastMsg">Kontainer berhasil dipindahkan.</div>
                 </div>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- 4 Quick KPI Micro-Cards (Clean & Compact) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
-        
-        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
-            <div class="min-w-0">
-                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Box di Yard</p>
-                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none" id="statInYard">19 <span class="text-xs font-normal text-gray-400">box</span></h4>
-                <p class="text-[10px] text-emerald-600 font-medium mt-1 truncate"><i class="fa-solid fa-check-double mr-1"></i>Sync MySQL</p>
-            </div>
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-cdp-blue flex items-center justify-center text-sm shrink-0 ml-2">
-                <i class="fa-solid fa-cubes-stacked"></i>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
-            <div class="min-w-0">
-                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Utilisasi Yard</p>
-                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none" id="statYardUtil">23.8%</h4>
-                <div class="w-20 bg-gray-100 rounded-full h-1 mt-1.5">
-                    <div class="bg-blue-600 h-1 rounded-full" id="statYardBar" style="width: 23.8%"></div>
-                </div>
-            </div>
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-sm shrink-0 ml-2">
-                <i class="fa-solid fa-chart-pie"></i>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
-            <div class="min-w-0">
-                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Armada SCADA</p>
-                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none">4 <span class="text-xs font-normal text-gray-400">unit</span></h4>
-                <p class="text-[10px] text-gray-500 mt-1 truncate">3 RS + 1 RTG Crane</p>
-            </div>
-            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm shrink-0 ml-2">
-                <i class="fa-solid fa-dolly"></i>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-lg p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
-            <div class="min-w-0">
-                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Kondisi Angin</p>
-                <h4 class="text-xl font-bold text-emerald-600 mt-0.5 leading-none">6.4 <span class="text-xs font-normal text-gray-400">m/s</span></h4>
-                <p class="text-[10px] text-emerald-600 font-medium mt-1 truncate"><i class="fa-solid fa-shield-halved mr-1"></i>Batas Aman &lt; 20 m/s</p>
-            </div>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm shrink-0 ml-2">
-                <i class="fa-solid fa-wind"></i>
             </div>
         </div>
 
@@ -1867,9 +1927,9 @@ function initThreeScene() {
     scene.background = new THREE.Color(0xdcecf8);
     scene.fog = new THREE.FogExp2(0xdcecf8, 0.005);
 
-    // Camera
+    // Camera (Menghadap ke Utara / North ke arah Kantor & Gate dari koridor Rel Selatan)
     camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-    camera.position.set(0, 75, 110);
+    camera.position.set(0, 90, -125);
 
     // Renderer
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -1886,7 +1946,20 @@ function initThreeScene() {
     controls.maxPolarAngle = Math.PI / 2 - 0.05; // Do not go below ground
     controls.minDistance = 15;
     controls.maxDistance = 220;
-    controls.target.set(10, 0, 5);
+    controls.target.set(0, 0, 15);
+
+    // Zoom Indicator on OrbitControls Changes
+    controls.addEventListener('change', updateSimZoomDisplay);
+    updateSimZoomDisplay();
+
+    // Viewport Dynamic ResizeObserver
+    if (window.ResizeObserver) {
+        const vpContainer = document.getElementById('simulatorViewportContainer');
+        if (vpContainer) {
+            const ro = new ResizeObserver(() => onWindowResize());
+            ro.observe(vpContainer);
+        }
+    }
 
     // Setup Lighting
     setupLighting();
@@ -3620,84 +3693,97 @@ function refreshStateFromDB() {
 // =============================================================================
 function setCameraView(preset) {
     document.querySelectorAll('.cam-btn').forEach(btn => {
-        btn.classList.remove('bg-blue-600', 'text-white');
-        btn.classList.add('bg-slate-800', 'text-gray-300');
+        btn.classList.remove('bg-[#002f5e]', 'bg-blue-600', 'text-white', 'shadow-xs', 'border-[#002f5e]');
+        btn.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
     });
 
-    const cadProjectionLabel = document.getElementById('cadProjectionLabel');
+    const activateBtn = (id) => {
+        const b = document.getElementById(id);
+        if (b) {
+            b.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
+            b.classList.add('bg-[#002f5e]', 'text-white', 'border-[#002f5e]', 'shadow-xs');
+        }
+    };
+
+    const setProjectionText = (txt) => {
+        const p1 = document.getElementById('cadProjectionLabel');
+        const p2 = document.getElementById('cadProjectionLabelDetail');
+        if (p1) p1.innerText = txt;
+        if (p2) p2.innerText = txt;
+    };
 
     let targetPos, targetLook;
 
     switch(preset) {
         case 'plan':
-            targetPos = { x: 0, y: 175, z: 0.1 };
+            // Denah 2D Top-Down CAD: Kamera melihat lurus ke bawah, menatap dari Selatan ke Utara sehingga Kantor Utama & Gate berada di ATAS (Utara), Rel Siding di BAWAH (Selatan) persis seperti denah.php
+            targetPos = { x: 0, y: 180, z: -0.01 };
             targetLook = { x: 0, y: 0, z: 0 };
-            const bPlan = document.getElementById('btnCamPlan');
-            if (bPlan) { bPlan.classList.add('bg-blue-600', 'text-white'); bPlan.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'ORTOGRAFIK 2D (TOP-DOWN)';
+            activateBtn('btnCamPlan');
+            setProjectionText('ORTOGRAFIK 2D (CAD PLAN - UTARA DI ATAS)');
             break;
         case 'iso':
-            targetPos = { x: 110, y: 95, z: 110 };
-            targetLook = { x: 0, y: 0, z: 0 };
-            const bIso = document.getElementById('btnCamIso');
-            if (bIso) { bIso.classList.add('bg-blue-600', 'text-white'); bIso.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'AKSONOMETRI ISOMETRIK 45°';
+            // Sudut Isometrik 45° dari arah Barat Daya menatap Timur Laut
+            targetPos = { x: -105, y: 90, z: -115 };
+            targetLook = { x: 0, y: 0, z: 10 };
+            activateBtn('btnCamIso');
+            setProjectionText('AKSONOMETRI ISOMETRIK 45° BIM');
             break;
         case 'overview':
-            targetPos = { x: 0, y: 85, z: 120 };
-            targetLook = { x: 0, y: 0, z: 0 };
-            const bOver = document.getElementById('btnCamOverview');
-            if (bOver) { bOver.classList.add('bg-blue-600', 'text-white'); bOver.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'PERSPEKTIF DRONE 3D';
+            // Drone 35 Ha: Kamera menyorot ke Utara dari sisi Selatan koridor rel KA
+            targetPos = { x: 0, y: 90, z: -125 };
+            targetLook = { x: 0, y: 0, z: 15 };
+            activateBtn('btnCamOverview');
+            setProjectionText('PERSPEKTIF DRONE 3D (MENYOROT UTARA)');
+            break;
+        case 'office':
+            // Fokus ke Kantor Utama PT MTI & Datacenter NOC di Zona 6 & 7 (Utara)
+            targetPos = { x: -20, y: 22, z: 22 };
+            targetLook = { x: -20, y: 4, z: 54 };
+            activateBtn('btnCamOffice');
+            setProjectionText('DETAIL ZONA 6 (KANTOR UTAMA MTI & NOC UTARA)');
             break;
         case 'gate':
-            targetPos = { x: -45, y: 22, z: 82 };
-            targetLook = { x: -45, y: 2, z: 52 };
-            const bGate = document.getElementById('btnCamGate');
-            if (bGate) { bGate.classList.add('bg-blue-600', 'text-white'); bGate.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 1 (GATE COMPLEX)';
+            targetPos = { x: -45, y: 24, z: 22 };
+            targetLook = { x: -45, y: 2, z: 54 };
+            activateBtn('btnCamGate');
+            setProjectionText('DETAIL ZONA 1 (GATE COMPLEX UTARA)');
             break;
         case 'vgm':
-            targetPos = { x: -49, y: 16, z: 72 };
+            targetPos = { x: -49, y: 16, z: 28 };
             targetLook = { x: -49, y: 1.5, z: 52 };
-            const bVgm = document.getElementById('btnCamGate');
-            if (bVgm) { bVgm.classList.add('bg-blue-600', 'text-white'); bVgm.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL WEIGHBRIDGE VGM (80T)';
+            activateBtn('btnCamGate');
+            setProjectionText('DETAIL WEIGHBRIDGE VGM (80T)');
             break;
         case 'yard':
-            targetPos = { x: 20, y: 40, z: 40 };
+            targetPos = { x: 0, y: 45, z: -55 };
             targetLook = { x: 0, y: 2, z: -10 };
-            const bYard = document.getElementById('btnCamYard');
-            if (bYard) { bYard.classList.add('bg-blue-600', 'text-white'); bYard.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 2 (STACKING YARD 15 HA)';
+            activateBtn('btnCamYard');
+            setProjectionText('DETAIL ZONA 2 (STACKING YARD 15 HA)');
             break;
         case 'reefer':
-            targetPos = { x: 64, y: 24, z: 70 };
+            targetPos = { x: 64, y: 26, z: 16 };
             targetLook = { x: 64, y: 3, z: 44 };
-            const bReefer = document.getElementById('btnCamReefer');
-            if (bReefer) { bReefer.classList.add('bg-blue-600', 'text-white'); bReefer.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 3 (REEFER COLD CHAIN)';
+            activateBtn('btnCamReefer');
+            setProjectionText('DETAIL ZONA 3 (REEFER COLD CHAIN TIMUR LAUT)');
             break;
         case 'cfs':
-            targetPos = { x: -88, y: 30, z: 35 };
+            targetPos = { x: -55, y: 28, z: -3 };
             targetLook = { x: -88, y: 3, z: -3 };
-            const bCfs = document.getElementById('btnCamCfs');
-            if (bCfs) { bCfs.classList.add('bg-blue-600', 'text-white'); bCfs.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL CFS & M&R WORKSHOP';
+            activateBtn('btnCamCfs');
+            setProjectionText('DETAIL CFS & M&R WORKSHOP (BARAT)');
             break;
         case 'customs':
-            targetPos = { x: 92, y: 28, z: 35 };
+            targetPos = { x: 60, y: 28, z: 0 };
             targetLook = { x: 92, y: 3, z: 0 };
-            const bCust = document.getElementById('btnCamCustoms');
-            if (bCust) { bCust.classList.add('bg-blue-600', 'text-white'); bCust.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 5 (BEA CUKAI & X-RAY)';
+            activateBtn('btnCamCustoms');
+            setProjectionText('DETAIL ZONA 5 (BEA CUKAI & X-RAY TIMUR)');
             break;
         case 'rail':
-            targetPos = { x: 0, y: 28, z: -18 };
+            targetPos = { x: 0, y: 28, z: -85 };
             targetLook = { x: 0, y: 3, z: -48 };
-            const bRail = document.getElementById('btnCamRail');
-            if (bRail) { bRail.classList.add('bg-blue-600', 'text-white'); bRail.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'DETAIL ZONA 4 (RAIL SIDING 400M)';
+            activateBtn('btnCamRail');
+            setProjectionText('DETAIL ZONA 4 (RAIL SIDING 400M SELATAN)');
             break;
         case 'cockpit':
             const rs = equipmentMeshes['RS-02'];
@@ -3705,24 +3791,116 @@ function setCameraView(preset) {
             const rsZ = rs ? rs.position.z : 2;
             targetPos = { x: rsX - 1.2, y: 4.5, z: rsZ };
             targetLook = { x: rsX + 30, y: 4, z: rsZ };
-            const bCock = document.getElementById('btnCamCockpit');
-            if (bCock) { bCock.classList.add('bg-blue-600', 'text-white'); bCock.classList.remove('bg-slate-800'); }
-            if (cadProjectionLabel) cadProjectionLabel.innerText = 'FIRST-PERSON CABIN RS-02';
+            activateBtn('btnCamCockpit');
+            setProjectionText('FIRST-PERSON CABIN RS-02');
             break;
         default:
-            targetPos = { x: 0, y: 85, z: 120 };
-            targetLook = { x: 0, y: 0, z: 0 };
+            targetPos = { x: 0, y: 90, z: -125 };
+            targetLook = { x: 0, y: 0, z: 15 };
+            activateBtn('btnCamOverview');
+            setProjectionText('PERSPEKTIF DRONE 3D');
     }
 
     new TWEEN.Tween(camera.position)
         .to(targetPos, 1000)
         .easing(TWEEN.Easing.Cubic.Out)
+        .onUpdate(updateSimZoomDisplay)
+        .onComplete(updateSimZoomDisplay)
         .start();
 
     new TWEEN.Tween(controls.target)
         .to(targetLook, 1000)
         .easing(TWEEN.Easing.Cubic.Out)
         .start();
+}
+
+// =============================================================================
+// ZOOM ENGINE & DISPLAY SYSTEM (DEDICATED CONTROLS LIKE DENAH.PHP)
+// =============================================================================
+const BASE_ZOOM_DIST = 135;
+
+function updateSimZoomDisplay() {
+    if (!camera || !controls) return;
+    const dist = camera.position.distanceTo(controls.target);
+    const pct = Math.round((BASE_ZOOM_DIST / Math.max(5, dist)) * 100);
+    const zoomEl = document.getElementById('simZoomLevelDisplay');
+    if (zoomEl) {
+        zoomEl.innerText = Math.min(999, Math.max(15, pct)) + '%';
+    }
+}
+
+function simZoom(direction) {
+    if (!camera || !controls) return;
+    const factor = direction > 0 ? 0.72 : 1.38;
+    const currentDist = camera.position.distanceTo(controls.target);
+    const newDist = Math.max(controls.minDistance, Math.min(controls.maxDistance, currentDist * factor));
+
+    const dir = new THREE.Vector3().subVectors(camera.position, controls.target).normalize();
+    const targetPos = new THREE.Vector3().copy(controls.target).add(dir.multiplyScalar(newDist));
+
+    new TWEEN.Tween(camera.position)
+        .to({ x: targetPos.x, y: targetPos.y, z: targetPos.z }, 350)
+        .easing(TWEEN.Easing.Cubic.Out)
+        .onUpdate(updateSimZoomDisplay)
+        .onComplete(updateSimZoomDisplay)
+        .start();
+}
+
+function resetSimCameraView() {
+    setCameraView('overview');
+    showToast('Reset Tampilan', 'Sudut kamera dan zoom dikembalikan ke pandangan drone standar 35 Ha.', 'info');
+}
+
+// =============================================================================
+// DYNAMIC VIEWPORT HEIGHT & SCADA FEED TOGGLES
+// =============================================================================
+let isViewportExpanded = false;
+function toggleDynamicViewportHeight() {
+    isViewportExpanded = !isViewportExpanded;
+    const container = document.getElementById('simulatorViewportContainer');
+    const textEl = document.getElementById('btnHeightText');
+    const btnEl = document.getElementById('btnToggleHeight');
+
+    if (!container) return;
+
+    if (isViewportExpanded) {
+        container.classList.remove('h-[560px]', 'sm:h-[620px]', 'lg:h-[680px]', 'xl:h-[740px]');
+        container.classList.add('h-[calc(100vh-140px)]', 'min-h-[680px]');
+        if (textEl) textEl.innerText = 'Layar Normal';
+        if (btnEl) {
+            btnEl.classList.add('bg-[#002f5e]', 'text-white', 'border-[#002f5e]');
+            btnEl.classList.remove('bg-slate-100', 'text-slate-700', 'border-slate-200');
+        }
+        showToast('Mode Layar Dinamis', 'Layar 3D diperluas ke tinggi maksimal viewport kerja.', 'info');
+    } else {
+        container.classList.remove('h-[calc(100vh-140px)]', 'min-h-[680px]');
+        container.classList.add('h-[560px]', 'sm:h-[620px]', 'lg:h-[680px]', 'xl:h-[740px]');
+        if (textEl) textEl.innerText = 'Layar Tinggi';
+        if (btnEl) {
+            btnEl.classList.remove('bg-[#002f5e]', 'text-white', 'border-[#002f5e]');
+            btnEl.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
+        }
+        showToast('Mode Layar Dinamis', 'Layar 3D dikembalikan ke rasio standar.', 'info');
+    }
+
+    setTimeout(() => {
+        onWindowResize();
+    }, 150);
+}
+
+let isScadaCollapsed = false;
+function toggleScadaFeed() {
+    isScadaCollapsed = !isScadaCollapsed;
+    const ticker = document.getElementById('simLogTicker');
+    const chevron = document.getElementById('scadaFeedChevron');
+    if (!ticker) return;
+    if (isScadaCollapsed) {
+        ticker.classList.add('hidden');
+        if (chevron) chevron.className = 'fa-solid fa-chevron-up text-[10px]';
+    } else {
+        ticker.classList.remove('hidden');
+        if (chevron) chevron.className = 'fa-solid fa-chevron-down text-[10px]';
+    }
 }
 
 function toggleTechnicalDimensions() {
@@ -3733,11 +3911,11 @@ function toggleTechnicalDimensions() {
     const btn = document.getElementById('btnToggleDimensions');
     if (btn) {
         if (showTechnicalDimensions) {
-            btn.classList.add('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
-            btn.classList.remove('bg-slate-800', 'text-gray-300');
+            btn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200', 'font-bold');
+            btn.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
         } else {
-            btn.classList.remove('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
-            btn.classList.add('bg-slate-800', 'text-gray-300');
+            btn.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200', 'font-bold');
+            btn.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
         }
     }
     showToast('Overlay CAD', showTechnicalDimensions ? 'Garis Ukur Dimensi CAD 3D Ditampilkan' : 'Garis Ukur Dimensi CAD 3D Disembunyikan', 'info');
@@ -3756,11 +3934,11 @@ function toggleCADTitleBlock() {
     }
     if (btn) {
         if (showCADTitleBlock) {
-            btn.classList.add('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
-            btn.classList.remove('bg-slate-800', 'text-gray-300');
+            btn.classList.add('bg-blue-50', 'text-blue-700', 'border-blue-200', 'font-bold');
+            btn.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
         } else {
-            btn.classList.remove('bg-blue-500/20', 'text-blue-300', 'border', 'border-blue-400/30');
-            btn.classList.add('bg-slate-800', 'text-gray-300');
+            btn.classList.remove('bg-blue-50', 'text-blue-700', 'border-blue-200', 'font-bold');
+            btn.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
         }
     }
 }
@@ -3821,9 +3999,17 @@ function focusLocation(preset, label, coords, hwTag) {
 function setLightingMode(mode) {
     currentLighting = mode;
     document.querySelectorAll('.light-btn').forEach(btn => {
-        btn.classList.remove('bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-400/30');
-        btn.classList.add('text-gray-400');
+        btn.classList.remove('bg-white', 'text-amber-700', 'shadow-2xs', 'font-bold');
+        btn.classList.add('text-gray-600', 'font-medium');
     });
+
+    const activateLightBtn = (id) => {
+        const b = document.getElementById(id);
+        if (b) {
+            b.classList.remove('text-gray-600', 'font-medium');
+            b.classList.add('bg-white', 'text-amber-700', 'shadow-2xs', 'font-bold');
+        }
+    };
 
     if (mode === 'day') {
         scene.background = new THREE.Color(0xdcecf8);
@@ -3833,7 +4019,7 @@ function setLightingMode(mode) {
         sunLight.intensity = 0.9;
         sunLight.color.setHex(0xfff8ee);
         floodlightLights.forEach(l => l.intensity = 0);
-        document.getElementById('btnLightDay').classList.add('bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-400/30');
+        activateLightBtn('btnLightDay');
     } else if (mode === 'sunset') {
         scene.background = new THREE.Color(0xfdba74);
         scene.fog.color = new THREE.Color(0xfdba74);
@@ -3842,7 +4028,7 @@ function setLightingMode(mode) {
         sunLight.intensity = 0.7;
         sunLight.color.setHex(0xea580c);
         floodlightLights.forEach(l => l.intensity = 0.5);
-        document.getElementById('btnLightSunset').classList.add('bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-400/30');
+        activateLightBtn('btnLightSunset');
     } else if (mode === 'night') {
         scene.background = new THREE.Color(0x020617);
         scene.fog.color = new THREE.Color(0x020617);
@@ -3850,7 +4036,7 @@ function setLightingMode(mode) {
         ambientLight.intensity = 0.2;
         sunLight.intensity = 0.1;
         floodlightLights.forEach(l => l.intensity = 2.2); // Floodlight ON!
-        document.getElementById('btnLightNight').classList.add('bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-400/30');
+        activateLightBtn('btnLightNight');
     }
 }
 
@@ -3863,6 +4049,10 @@ function toggleFullscreen() {
         document.exitFullscreen();
     }
 }
+
+document.addEventListener('fullscreenchange', () => {
+    setTimeout(onWindowResize, 100);
+});
 
 // Toast Notifications
 function showToast(title, msg, type = 'success') {
@@ -3940,11 +4130,17 @@ function animate(time) {
     TWEEN.update();
     controls.update();
 
-    // Dynamic 3D Azimuth Compass Rose Heading & Dial Rotation
-    if (controls) {
-        const rad = controls.getAzimuthalAngle();
-        let deg = Math.round(rad * (180 / Math.PI));
+    // Dynamic 3D Azimuth Compass Rose Heading & Dial Rotation (North = +Z Kantor Utama / Gate)
+    if (controls && camera) {
+        const lookDir = new THREE.Vector3().subVectors(controls.target, camera.position);
+        lookDir.y = 0;
+        lookDir.normalize();
+
+        // Sudut arah kamera dari Utara (+Z Kantor MTI) searah jarum jam:
+        let headingRad = Math.atan2(lookDir.x, lookDir.z);
+        let deg = Math.round(headingRad * (180 / Math.PI));
         if (deg < 0) deg += 360;
+        if (deg === 360) deg = 0;
 
         const dial = document.getElementById('compassDial');
         if (dial) {

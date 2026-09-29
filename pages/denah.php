@@ -541,19 +541,6 @@ foreach ($zones_data as $z) {
     <rect width="1200" height="760" fill="url(#gridFine)" />
     <rect width="1200" height="760" fill="url(#gridMajor)" />
 
-    <!-- Title Block -->
-    <g transform="translate(940, 640)" fill="#333" font-family="monospace" font-size="10">
-        <rect width="240" height="100" fill="#fff" stroke="#333" stroke-width="1.5" />
-        <line x1="0" y1="20" x2="240" y2="20" stroke="#333" stroke-width="1" />
-        <line x1="0" y1="40" x2="240" y2="40" stroke="#333" stroke-width="1" />
-        <line x1="0" y1="60" x2="240" y2="60" stroke="#333" stroke-width="1" />
-        <line x1="0" y1="80" x2="240" y2="80" stroke="#333" stroke-width="1" />
-        <text x="10" y="14" font-weight="bold">PROJECT: CIDP — DRY PORT</text>
-        <text x="10" y="34">DRAWING: SITE MASTER PLAN 35 HA</text>
-        <text x="10" y="54">SCALE: 1 : 2.000</text>
-        <text x="10" y="74">DATE: SEPTEMBER 2026</text>
-        <text x="10" y="94">DRAWN BY: CONCLUSION CONSULTANT</text>
-    </g>
 
     <!-- Compass Rose -->
     <g transform="translate(1130, 70)">
@@ -593,9 +580,9 @@ foreach ($zones_data as $z) {
     <!-- ======================================================= -->
     <g id="svgLayer1" class="transition-opacity duration-300">
         <!-- Roads -->
-        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="url(#asphaltFill)" stroke-width="50" stroke-linecap="square" />
-        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="#666" stroke-width="1" />
-        <path d="M 20 160 L 360 160 L 360 600 L 1140 600" fill="none" stroke="#fcd34d" stroke-width="1.5" stroke-dasharray="10 10" />
+        <path d="M 20 160 L 360 160 L 360 600 L 915 600" fill="none" stroke="url(#asphaltFill)" stroke-width="50" stroke-linecap="square" />
+        <path d="M 20 160 L 360 160 L 360 600 L 915 600" fill="none" stroke="#666" stroke-width="1" />
+        <path d="M 20 160 L 360 160 L 360 600 L 915 600" fill="none" stroke="#fcd34d" stroke-width="1.5" stroke-dasharray="10 10" />
 
         <!-- Road Arrows -->
         <polygon points="150,155 160,160 150,165" fill="#fff" />
@@ -610,17 +597,19 @@ foreach ($zones_data as $z) {
         <path d="M 360 130 L 20 130" fill="none" stroke="#666" stroke-width="1" />
         <polygon points="200,135 190,130 200,125" fill="#fff" />
 
-        <!-- Railway Tracks -->
+        <!-- Railway Tracks (20m - 905m) -->
         <g stroke="#333" stroke-width="1">
-            <line x1="20" y1="670" x2="1140" y2="670" stroke-width="1.5" />
-            <line x1="20" y1="680" x2="1140" y2="680" stroke-width="1.5" />
-            <line x1="20" y1="695" x2="1140" y2="695" stroke-width="1.5" />
-            <line x1="20" y1="705" x2="1140" y2="705" stroke-width="1.5" />
+            <line x1="20" y1="670" x2="905" y2="670" stroke-width="1.5" />
+            <line x1="20" y1="680" x2="905" y2="680" stroke-width="1.5" />
+            <line x1="20" y1="695" x2="905" y2="695" stroke-width="1.5" />
+            <line x1="20" y1="705" x2="905" y2="705" stroke-width="1.5" />
             <!-- Sleepers -->
-            <!-- We can use a pattern for sleepers to be efficient -->
-            <rect x="20" y="667" width="1120" height="42" fill="url(#hatchConcrete)" opacity="0.3" />
+            <rect x="20" y="667" width="885" height="42" fill="url(#hatchConcrete)" opacity="0.3" />
+            <!-- Rail Buffer Stop (Penahan Ujung Sepur Badug) -->
+            <rect x="903" y="666" width="6" height="43" fill="#dc2626" stroke="#991b1b" stroke-width="1" rx="1" />
+            <line x1="906" y1="667" x2="906" y2="708" stroke="#fef08a" stroke-width="2" stroke-dasharray="3 3" />
         </g>
-        <text x="1000" y="660" fill="#333" font-family="monospace" font-size="9">← 400m RAIL SIDING →</text>
+        <text x="560" y="640" text-anchor="middle" fill="#78350f" font-family="monospace" font-size="9" font-weight="bold" letter-spacing="0.5">← 400M INTERMODAL RAIL SIDING (DOUBLE TRACK) →</text>
 
         <!-- ZONA 1: GATE -->
         <g id="zone_gate" class="zone-element cursor-pointer" onclick="showZoneDetails('gate')">
@@ -775,13 +764,13 @@ foreach ($zones_data as $z) {
 
         <!-- ZONA 4: RAIL -->
         <g id="zone_rail" class="zone-element cursor-pointer" onclick="showZoneDetails('rail')">
-            <rect x="35" y="615" width="1135" height="110" rx="0" fill="#fffbeb" fill-opacity="0.4" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 2" />
+            <rect x="35" y="615" width="875" height="110" rx="0" fill="#fffbeb" fill-opacity="0.4" stroke="#d97706" stroke-width="1.5" stroke-dasharray="4 2" />
             <text x="45" y="630" fill="#b45309" font-size="10" font-family="monospace" font-weight="bold">ZONA 4: INTERMODAL RAIL SIDING</text>
 
             <rect id="fac_f_rail_office" x="45" y="640" width="150" height="70" rx="0" fill="#f8fafc" stroke="#333" stroke-width="2" onclick="showFacilityDetails('f_rail_office', event)" />
             <text x="50" y="660" fill="#333" font-size="8.5" font-family="monospace" font-weight="bold">RAIL OFFICE</text>
 
-            <rect id="fac_f_loading_ramp" x="210" y="645" width="945" height="20" rx="0" fill="url(#hatchConcrete)" stroke="#333" stroke-width="1" onclick="showFacilityDetails('f_loading_ramp', event)" />
+            <rect id="fac_f_loading_ramp" x="210" y="645" width="695" height="20" rx="0" fill="url(#hatchConcrete)" stroke="#333" stroke-width="1" onclick="showFacilityDetails('f_loading_ramp', event)" />
         </g>
     </g>
 
@@ -846,6 +835,88 @@ foreach ($zones_data as $z) {
                 <title><?= $hw['id'] ?>. <?= htmlspecialchars($hw['nama']) ?> (<?= $is_live ? 'LIVE SIMULASI' : 'BLUEPRINT FISIK' ?>)</title>
             </g>
         <?php endforeach; ?>
+    </g>
+
+    <!-- ================================================================= -->
+    <!-- ENGINEERING TITLE BLOCK (KOP GAMBAR TEKNIK AUTOCAD / ISO 7200)     -->
+    <!-- Top-level overlay with opaque solid fill, zero-collision design   -->
+    <!-- ================================================================= -->
+    <g id="cadTitleBlockMap" transform="translate(926, 608)" class="select-none pointer-events-none">
+        <!-- Main Panel Container -->
+        <rect x="0" y="0" width="246" height="124" rx="2" fill="#ffffff" stroke="#0f172a" stroke-width="1.5" />
+        
+        <!-- Header Banner: Corporate Navy -->
+        <rect x="0" y="0" width="246" height="26" fill="#002f5e" rx="2" />
+        <rect x="0" y="23" width="246" height="3" fill="#002f5e" /> <!-- Square bottom corners of header -->
+        
+        <!-- Icon / Emblem -->
+        <g transform="translate(7, 5)">
+            <rect width="16" height="16" rx="2" fill="#0284c7" />
+            <path d="M 8 3 L 8 13 M 4 6 L 12 6 M 4 10 L 12 10" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />
+        </g>
+        
+        <!-- Header Text -->
+        <text x="28" y="12" fill="#ffffff" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif" font-size="7.5" font-weight="bold" letter-spacing="0.4">CONCLUSION INTERMODAL DRY PORT</text>
+        <text x="28" y="21" fill="#38bdf8" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif" font-size="5.5" font-weight="600" letter-spacing="0.3">MASTER PLAN SITE LAYOUT 35 HA — ENGINEERING DWG</text>
+        
+        <!-- Grid Dividers -->
+        <line x1="0" y1="26" x2="246" y2="26" stroke="#0f172a" stroke-width="1" />
+        <line x1="0" y1="51" x2="246" y2="51" stroke="#cbd5e1" stroke-width="0.75" />
+        <line x1="0" y1="76" x2="246" y2="76" stroke="#cbd5e1" stroke-width="0.75" />
+        <line x1="0" y1="101" x2="246" y2="101" stroke="#0f172a" stroke-width="1" />
+        <line x1="123" y1="26" x2="123" y2="101" stroke="#cbd5e1" stroke-width="0.75" />
+        
+        <!-- ROW 1 (y: 26 to 51) -->
+        <!-- Col 1: Document Number -->
+        <text x="7" y="35" fill="#64748b" font-family="monospace" font-size="5" font-weight="bold">NO. DOKUMEN / DWG NO.</text>
+        <text x="7" y="46" fill="#0f172a" font-family="monospace" font-size="7.5" font-weight="bold" letter-spacing="0.5">CIDP-ENG-CIV-001</text>
+        
+        <!-- Col 2: Scale & Projection -->
+        <text x="130" y="35" fill="#64748b" font-family="monospace" font-size="5" font-weight="bold">SKALA &amp; PROYEKSI</text>
+        <text x="130" y="46" fill="#0f172a" font-family="monospace" font-size="7" font-weight="bold">1:2.000 / WGS 84 (UTM)</text>
+        
+        <!-- ROW 2 (y: 51 to 76) -->
+        <!-- Col 1: Status & Date -->
+        <text x="7" y="60" fill="#64748b" font-family="monospace" font-size="5" font-weight="bold">TANGGAL &amp; STATUS REVISI</text>
+        <text x="7" y="70" fill="#0f172a" font-family="monospace" font-size="6.5" font-weight="bold">29 SEP 2026</text>
+        <rect x="68" y="61" width="48" height="11" rx="2" fill="#dcfce7" stroke="#86efac" stroke-width="0.5" />
+        <text x="92" y="69" fill="#166534" font-family="monospace" font-size="5.5" font-weight="bold" text-anchor="middle">AS-BUILT</text>
+        
+        <!-- Col 2: Rev & Sheet -->
+        <text x="130" y="60" fill="#64748b" font-family="monospace" font-size="5" font-weight="bold">REVISI / LEMBAR GAMBAR</text>
+        <text x="130" y="70" fill="#0f172a" font-family="monospace" font-size="6.5" font-weight="bold">REV.04 / SHEET 1 OF 1</text>
+        
+        <!-- ROW 3 (y: 76 to 101) -->
+        <!-- Col 1: Consultant -->
+        <text x="7" y="85" fill="#64748b" font-family="monospace" font-size="5" font-weight="bold">PERANCANG / KONSULTAN</text>
+        <text x="7" y="95" fill="#0284c7" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif" font-size="6.5" font-weight="bold">CONCLUSION CONSULTANT</text>
+        
+        <!-- Col 2: Engineers -->
+        <text x="130" y="85" fill="#64748b" font-family="monospace" font-size="5" font-weight="bold">ENGINEER IN CHARGE</text>
+        <text x="130" y="95" fill="#1e293b" font-family="'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif" font-size="6" font-weight="600">J. Gamaliel &amp; A. Muchtarrom</text>
+        
+        <!-- ROW 4 / FOOTER STRIP (y: 101 to 124) -->
+        <rect x="0" y="101" width="246" height="23" fill="#f8fafc" rx="2" />
+        <rect x="0" y="101" width="246" height="2" fill="#f8fafc" /> <!-- Square top corners of footer -->
+        
+        <!-- Badges / Tags -->
+        <g transform="translate(6, 107)">
+            <!-- Tag 1 -->
+            <rect x="0" y="0" width="52" height="12" rx="2" fill="#e0f2fe" stroke="#bae6fd" stroke-width="0.5" />
+            <text x="26" y="8.5" fill="#0369a1" font-family="monospace" font-size="5" font-weight="bold" text-anchor="middle">35 HA YARD</text>
+            
+            <!-- Tag 2 -->
+            <rect x="56" y="0" width="54" height="12" rx="2" fill="#ede9fe" stroke="#ddd6fe" stroke-width="0.5" />
+            <text x="83" y="8.5" fill="#5b21b6" font-family="monospace" font-size="5" font-weight="bold" text-anchor="middle">7 ZONA AKTIF</text>
+            
+            <!-- Tag 3 -->
+            <rect x="114" y="0" width="60" height="12" rx="2" fill="#d1fae5" stroke="#a7f3d0" stroke-width="0.5" />
+            <text x="144" y="8.5" fill="#047857" font-family="monospace" font-size="5" font-weight="bold" text-anchor="middle">26 HW SENSORS</text>
+            
+            <!-- Tag 4 -->
+            <rect x="178" y="0" width="56" height="12" rx="2" fill="#fef3c7" stroke="#fde68a" stroke-width="0.5" />
+            <text x="206" y="8.5" fill="#b45309" font-family="monospace" font-size="5" font-weight="bold" text-anchor="middle">4 CAD LAYERS</text>
+        </g>
     </g>
 
 </svg>
