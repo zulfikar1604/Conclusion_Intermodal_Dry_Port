@@ -9,6 +9,29 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     exit;
 }
 
+require_once __DIR__ . '/connection.php';
+$db_stats = [
+    'containers_in_yard' => 0,
+    'total_gate_trucks' => 0,
+    'loaded_wagons' => 0,
+    'total_wagons' => 0
+];
+try {
+    $c_stmt = $pdo->query("SELECT COUNT(*) FROM containers WHERE status = 'in_yard'");
+    $db_stats['containers_in_yard'] = (int)$c_stmt->fetchColumn();
+
+    $t_stmt = $pdo->query("SELECT COUNT(*) FROM trucks WHERE status != 'gate_out'");
+    $db_stats['total_gate_trucks'] = (int)$t_stmt->fetchColumn();
+
+    $w_stmt = $pdo->query("SELECT SUM(loaded_wagons), SUM(total_wagons) FROM trains");
+    $row = $w_stmt->fetch(PDO::FETCH_NUM);
+    if ($row) {
+        $db_stats['loaded_wagons'] = (int)$row[0];
+        $db_stats['total_wagons'] = (int)$row[1];
+    }
+} catch (Exception $e) {}
+
+
 $iduser = $_SESSION['iduser'] ?? 1;
 $nama   = (!empty($_SESSION['nama']) && $_SESSION['nama'] !== 'Guest') ? $_SESSION['nama'] : 'Zulfikar Jafarudin Fatah';
 $email  = $_SESSION['email'] ?? 'admin@cidp.ac.id';
@@ -162,6 +185,13 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
             animation: fadeInScale 0.16s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
     </style>
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+    <!-- jsPDF for PDF Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.4/jspdf.plugin.autotable.min.js"></script>
+    <!-- CIDP Export Utilities -->
+    <script src="assets/js/export-utils.js"></script>
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
@@ -534,7 +564,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-[9.5px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Yard Stack</p>
-                                <h3 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5 leading-none">126 <span class="text-[10px] font-normal text-gray-400">/ 200</span></h3>
+                                <h3 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5 leading-none"><?= $db_stats['containers_in_yard'] ?> <span class="text-[10px] font-normal text-gray-400">/ 200</span></h3>
                             </div>
                             <div class="w-6 h-6 rounded-md bg-blue-50 text-blue-600 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-boxes-stacked"></i>
@@ -567,7 +597,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                                 <div class="bg-indigo-600 h-1 rounded-full" style="width: 72%"></div>
                             </div>
                             <div class="flex justify-between items-center text-[9px] text-gray-500">
-                                <span class="text-indigo-600 font-semibold">14 Truk</span>
+                                <span class="text-indigo-600 font-semibold"><?= $db_stats['total_gate_trucks'] ?> Truk</span>
                                 <span class="text-emerald-600 font-bold">On-Time 98%</span>
                             </div>
                         </div>
@@ -578,7 +608,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         <div class="flex justify-between items-start">
                             <div>
                                 <p class="text-[9.5px] sm:text-[10px] font-bold text-gray-400 uppercase tracking-wider">Siding KA</p>
-                                <h3 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5 leading-none">24/30 <span class="text-[10px] font-normal text-gray-400">Wg</span></h3>
+                                <h3 class="text-lg sm:text-xl font-extrabold text-gray-900 mt-0.5 leading-none"><?= $db_stats['loaded_wagons'] ?>/<?= $db_stats['total_wagons'] ?> <span class="text-[10px] font-normal text-gray-400">Wg</span></h3>
                             </div>
                             <div class="w-6 h-6 rounded-md bg-purple-50 text-purple-600 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                                 <i class="fa-solid fa-train"></i>
@@ -780,21 +810,19 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         <div class="h-32 sm:h-36 relative w-full flex-1 flex items-center justify-center">
                             <canvas id="containerTypeChart"></canvas>
                         </div>
-                        <!-- Customs Pipeline Channel Segment Bar -->
+                        <!-- Customs Pipeline Channel Segment Bar (PMK 190/PMK.04/2022) -->
                         <div class="mt-2 pt-1.5 border-t border-gray-100 space-y-1">
                             <div class="flex justify-between text-[10px]">
-                                <span class="font-semibold text-gray-600">Pipeline Kanal Pabean:</span>
-                                <span class="font-bold text-emerald-700">SPPB Auto: 98.6%</span>
+                                <span class="font-semibold text-gray-600">Pipeline Kanal Pabean (PMK 190/2022):</span>
+                                <span class="font-bold text-emerald-700">SPPB Auto: 92%</span>
                             </div>
                             <div class="w-full bg-gray-100 rounded-full h-2 flex overflow-hidden">
-                                <div class="bg-emerald-500 h-2" style="width: 84%" title="Jalur Hijau (84%)"></div>
-                                <div class="bg-amber-400 h-2" style="width: 11%" title="Jalur Kuning (11%)"></div>
-                                <div class="bg-rose-500 h-2" style="width: 5%" title="Jalur Merah (5%)"></div>
+                                <div class="bg-emerald-500 h-2" style="width: 92%" title="Jalur Hijau (92%) - Auto SPPB Rilis"></div>
+                                <div class="bg-rose-500 h-2" style="width: 8%" title="Jalur Merah (8%) - Wajib Behandle & X-Ray"></div>
                             </div>
                             <div class="flex justify-between items-center text-[9px] text-gray-500 pt-0.5">
-                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Hijau: 84%</span>
-                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>Kuning: 11%</span>
-                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Merah: 5%</span>
+                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Hijau (SPPB Rilis): 92%</span>
+                                <span class="flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>Merah (Fisik/Behandle): 8%</span>
                             </div>
                         </div>
                     </div>

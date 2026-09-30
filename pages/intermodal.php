@@ -6,17 +6,24 @@
 // PIC : Juan Gamaliel & Afriansayah Ayubi (Data Integration & Software ERP Specialist)
 // Standar: Frauscher Axle Counter RSR180 + UN/EDIFACT BAPLIE D.95B Standard SMDG
 // =============================================================================
+require_once __DIR__ . '/../connection.php';
+
+$db_train = null;
+try {
+    $stmtT = $pdo->query("SELECT * FROM trains ORDER BY id ASC LIMIT 1");
+    $db_train = $stmtT->fetch(PDO::FETCH_ASSOC);
+} catch (Exception $e) {}
 
 $train_info = [
-    'train_id'      => 'KA 2518 (CIDP Express Freight)',
-    'route'         => 'CIDP Dry Port Hub (Cikarang) <——> Tanjung Priok Port (JICT / TPK Koja)',
+    'train_id'      => $db_train ? $db_train['train_code'] . ' (CIDP Express Freight)' : 'KA 2518 (CIDP Express Freight)',
+    'route'         => ($db_train && !empty($db_train['origin'])) ? ($db_train['origin'] . ' <——> ' . $db_train['destination']) : 'CIDP Dry Port Hub (Cikarang) <——> Tanjung Priok Port (JICT / TPK Koja)',
     'locomotive'    => 'CC 206 13 42 (GE CM20EMP - 2.250 HP)',
-    'wagons_total'  => 30,
-    'teu_capacity'  => 60,
-    'teu_loaded'    => 48,
-    'load_factor'   => '80.0%',
+    'wagons_total'  => $db_train ? (int)$db_train['total_wagons'] : 30,
+    'teu_capacity'  => $db_train ? ((int)$db_train['total_wagons'] * 2) : 60,
+    'teu_loaded'    => $db_train ? (int)$db_train['loaded_wagons'] : 0,
+    'load_factor'   => ($db_train && $db_train['total_wagons'] > 0 && $db_train['loaded_wagons'] > 0) ? round(($db_train['loaded_wagons'] / ($db_train['total_wagons'] * 2)) * 100, 1) . '%' : '0.0%',
     'est_departure' => '18:45 WIB',
-    'status'        => 'TRANSSHIPMENT IN PROGRESS (BONGKAR-MUAT)',
+    'status'        => $db_train ? strtoupper($db_train['status']) : 'SCHEDULED',
     'operator'      => 'PT Kereta Api Logistik (KAI Logistik)'
 ];
 
@@ -230,6 +237,23 @@ $wagons = [
             </div>
             <p class="text-[11px] text-gray-400 mt-2">Batas waktu keberangkatan: <?= $train_info['est_departure'] ?></p>
         </div>
+    </div>
+
+    <!-- Banner Navigasi ke Panel Simulasi 3D -->
+    <div class="bg-gradient-to-r from-[#002f5e] to-indigo-900 rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-amber-400 text-lg">
+                <i class="fa-solid fa-gamepad"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-bold">Simulasi Intermodal Kereta Api &amp; Alih Muat (Transshipment)</h3>
+                <p class="text-xs text-blue-200">Seluruh simulasi pergerakan kereta, bongkar-muat RMGC crane, dan pergerakan gerbong dijalankan terpadu di Simulator 3D.</p>
+            </div>
+        </div>
+        <a href="dashboard.php?page=simulator" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-gray-950 text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shrink-0 shadow-sm">
+            <i class="fa-solid fa-cubes"></i>
+            <span>Buka Panel Simulasi 3D</span>
+        </a>
     </div>
 
     <!-- Siding Track Status Bar -->
@@ -607,14 +631,14 @@ $wagons = [
                     </div>
                 </div>
 
-                <!-- Simulation Trigger Controls -->
+                <!-- Diagnostic Hardware Self-Test Controls -->
                 <div class="space-y-2">
                     <button type="button" onclick="triggerAxlePassSimulation()" id="btn-axle-sim" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 shadow-xs">
-                        <i class="fa-solid fa-play"></i>
-                        <span>Simulasikan Gerbong Melintas (Frauscher Pulse Count)</span>
+                        <i class="fa-solid fa-microchip"></i>
+                        <span>Uji Diagnostik Sinyal Sensor Roda (Hardware Self-Test)</span>
                     </button>
                     <p class="text-[11px] text-gray-400 text-center">
-                        Memvalidasi bahwa jumlah roda masuk persis sama dengan manifest trainlist KAI Logistik (Zero Discrepancy Rule).
+                        Memvalidasi respons pulsa magnetik sensor RSR123 &amp; pencacah roda trainlist KAI Logistik (Zero Discrepancy Rule). Untuk simulasi alih muat dan pergerakan KA, jalankan di <a href="dashboard.php?page=simulator" class="text-indigo-600 font-bold underline">Panel Simulasi 3D</a>.
                     </p>
                 </div>
             </div>
@@ -1367,4 +1391,5 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 window.addEventListener('resize', () => {
     if (corridorMap) corridorMap.invalidateSize();
 });
+
 </script>

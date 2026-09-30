@@ -16,70 +16,9 @@ try {
     $equipment_list = [];
 }
 
-// Fallback jika belum di-seed
+// Pastikan array kosong jika belum ada data di database
 if (empty($equipment_list)) {
-    $equipment_list = [
-        [
-            'equipment_id' => 'RS-01',
-            'equipment_type' => 'REACH_STACKER',
-            'brand_model' => 'Kalmar DRG450-65S5',
-            'operator_name' => 'Budi Santoso',
-            'operator_id' => 'OPR-001',
-            'status' => 'idle',
-            'gps_x' => 150.00,
-            'gps_y' => 200.00,
-            'current_container' => null,
-            'last_block' => 'A',
-            'fuel_percent' => 85,
-            'hours_today' => 3.5,
-            'last_updated' => date('Y-m-d H:i:s')
-        ],
-        [
-            'equipment_id' => 'RS-02',
-            'equipment_type' => 'REACH_STACKER',
-            'brand_model' => 'Kalmar DRG450-65S5',
-            'operator_name' => 'Agus Setiawan',
-            'operator_id' => 'OPR-002',
-            'status' => 'operating',
-            'gps_x' => 350.00,
-            'gps_y' => 300.00,
-            'current_container' => 'MSKU9182374',
-            'last_block' => 'B',
-            'fuel_percent' => 70,
-            'hours_today' => 4.2,
-            'last_updated' => date('Y-m-d H:i:s')
-        ],
-        [
-            'equipment_id' => 'RS-03',
-            'equipment_type' => 'REACH_STACKER',
-            'brand_model' => 'Kalmar DRG450-65S5',
-            'operator_name' => 'Rudi Hermawan',
-            'operator_id' => 'OPR-003',
-            'status' => 'idle',
-            'gps_x' => 500.00,
-            'gps_y' => 150.00,
-            'current_container' => null,
-            'last_block' => 'REEFER',
-            'fuel_percent' => 90,
-            'hours_today' => 2.1,
-            'last_updated' => date('Y-m-d H:i:s')
-        ],
-        [
-            'equipment_id' => 'RTG-01',
-            'equipment_type' => 'RTG_CRANE',
-            'brand_model' => 'Konecranes RTG Electric',
-            'operator_name' => 'Joko Susilo',
-            'operator_id' => 'OPR-004',
-            'status' => 'operating',
-            'gps_x' => 100.00,
-            'gps_y' => 450.00,
-            'current_container' => 'TCLU8827415',
-            'last_block' => 'RAIL',
-            'fuel_percent' => 100,
-            'hours_today' => 5.0,
-            'last_updated' => date('Y-m-d H:i:s')
-        ]
-    ];
+    $equipment_list = [];
 }
 
 // Ambil riwayat kejadian pemindahan yard (yard_events)
@@ -92,80 +31,7 @@ try {
 }
 
 if (empty($recent_events)) {
-    $recent_events = [
-        [
-            'id' => 5,
-            'event_type' => 'RELOCATION',
-            'container_number' => 'MSKU9182374',
-            'equipment_id' => 'RS-02',
-            'from_block' => 'A',
-            'from_bay' => '01',
-            'from_row' => '01',
-            'from_tier' => '01',
-            'to_block' => 'B',
-            'to_bay' => '08',
-            'to_row' => '03',
-            'to_tier' => '02',
-            'operator_name' => 'Agus Setiawan',
-            'notes' => 'Shifting kontainer 40ft untuk persiapan loading truk B 1234 XY',
-            'billable_amount' => 150000.00,
-            'created_at' => date('Y-m-d H:i:s', time() - 1200)
-        ],
-        [
-            'id' => 4,
-            'event_type' => 'RAIL_LOAD',
-            'container_number' => 'TCLU8827415',
-            'equipment_id' => 'RTG-01',
-            'from_block' => 'B',
-            'from_bay' => '04',
-            'from_row' => '02',
-            'from_tier' => '01',
-            'to_block' => 'RAIL',
-            'to_bay' => 'W08',
-            'to_row' => 'R1',
-            'to_tier' => 'T1',
-            'operator_name' => 'Joko Susilo',
-            'notes' => 'Pemuatan ke Gerbong Datar KA Logistik KA-LOG-SMG',
-            'billable_amount' => 250000.00,
-            'created_at' => date('Y-m-d H:i:s', time() - 3600)
-        ],
-        [
-            'id' => 3,
-            'event_type' => 'LIFT_OFF',
-            'container_number' => 'CSQU7777777',
-            'equipment_id' => 'RS-03',
-            'from_block' => 'GATE',
-            'from_bay' => null,
-            'from_row' => null,
-            'from_tier' => null,
-            'to_block' => 'REEFER',
-            'to_bay' => '02',
-            'to_row' => '01',
-            'to_tier' => '01',
-            'operator_name' => 'Rudi Hermawan',
-            'notes' => 'Bongkar kontainer reefer dari truk B 7777 AB langsung ke colokan reefer plug',
-            'billable_amount' => 200000.00,
-            'created_at' => date('Y-m-d H:i:s', time() - 7200)
-        ],
-        [
-            'id' => 2,
-            'event_type' => 'LIFT_OFF',
-            'container_number' => 'TEMU8888888',
-            'equipment_id' => 'RS-01',
-            'from_block' => 'GATE',
-            'from_bay' => null,
-            'from_row' => null,
-            'from_tier' => null,
-            'to_block' => 'A',
-            'to_bay' => '01',
-            'to_row' => '02',
-            'to_tier' => '01',
-            'operator_name' => 'Budi Santoso',
-            'notes' => 'Bongkar kontainer 40ft dari armada L 8888 KL',
-            'billable_amount' => 180000.00,
-            'created_at' => date('Y-m-d H:i:s', time() - 14400)
-        ]
-    ];
+    $recent_events = [];
 }
 
 $total_units = count($equipment_list);

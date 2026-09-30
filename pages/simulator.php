@@ -203,6 +203,30 @@ if (session_status() === PHP_SESSION_NONE) {
             </span>
         </div>
 
+        <!-- Floating HUD: Top Center - Live Operational Workflow Status -->
+        <div id="opFlowHUD" class="absolute top-3.5 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 pointer-events-none z-30 max-w-lg w-[90vw]">
+            <div class="bg-slate-900/95 backdrop-blur-xl border border-cyan-500/60 rounded-2xl p-2.5 shadow-2xl text-white">
+                <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-xs">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                        <span id="opFlowTitle" class="font-bold tracking-wide uppercase text-cyan-300 font-mono text-[11px]">SIKLUS OPERASIONAL BERJALAN</span>
+                    </div>
+                    <span id="opFlowStepBadge" class="px-2 py-0.5 rounded-full text-[9.5px] font-mono font-bold bg-blue-600/40 text-blue-300 border border-blue-400/30">TAHAP 1/4</span>
+                </div>
+                <!-- 4 Step Flow Indicator -->
+                <div class="grid grid-cols-4 gap-1 text-center text-[9.5px] font-semibold mb-1.5">
+                    <div id="flowStep1" class="py-1 px-0.5 rounded-lg bg-blue-900/80 text-blue-200 border border-blue-500/50">1. Gate-In &amp; VGM</div>
+                    <div id="flowStep2" class="py-1 px-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700/50">2. Sirkulasi Yard</div>
+                    <div id="flowStep3" class="py-1 px-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700/50">3. Angkat RS</div>
+                    <div id="flowStep4" class="py-1 px-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700/50">4. Gate-Out</div>
+                </div>
+                <div class="flex items-center justify-between text-[10.5px] text-slate-300 bg-slate-950/80 px-2 py-1 rounded-xl border border-slate-800 font-mono">
+                    <span id="opFlowDetailText" class="truncate">Truk melintasi jembatan timbang 80T &amp; verifikasi sensor...</span>
+                    <span id="opFlowSpeedText" class="text-amber-400 font-bold ml-2 shrink-0">1.25x</span>
+                </div>
+            </div>
+        </div>
+
         <!-- Floating HUD: Top Left Dynamic 3D Azimuth Compass Rose (Di bawah badge status) -->
         <div id="cadCompassRose" class="absolute top-14 left-3.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-2xl text-center hidden md:flex flex-col items-center justify-center z-10 transition-all duration-300">
             <div class="relative w-11 h-11 flex items-center justify-center">
@@ -274,8 +298,8 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <!-- Floating HUD: Bottom Left - Collapsible SCADA Feed Ticker -->
-        <div class="absolute bottom-3.5 left-3.5 pointer-events-auto max-w-xs sm:max-w-sm w-full z-10">
+        <!-- Floating HUD: Bottom Left - Collapsible SCADA Feed Ticker (Elevated to bottom-16 so it never collides with Action Dock) -->
+        <div class="absolute bottom-16 left-3.5 pointer-events-auto max-w-xs sm:max-w-sm w-full z-20">
             <div class="bg-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-xl p-2.5 shadow-xl text-white">
                 <div class="flex items-center justify-between pb-1.5 mb-1 border-b border-slate-800 text-[10px]">
                     <div class="flex items-center space-x-1.5">
@@ -306,27 +330,45 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <!-- Floating HUD: Bottom Center - Sleek Action Dock -->
-        <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center space-x-1.5 bg-slate-900/90 backdrop-blur-lg border border-slate-700/70 p-1.5 rounded-xl shadow-xl z-20 max-w-[95vw] overflow-x-auto">
-            <button onclick="triggerGateIn()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0">
-                <i class="fa-solid fa-truck text-xs"></i>
-                <span>Gate-In Truk &amp; VGM</span>
+        <!-- Floating HUD: Bottom Center - Enhanced Operational Action Dock (Centered at bottom-3.5) -->
+        <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center space-x-1.5 bg-slate-900/95 backdrop-blur-lg border border-slate-700/80 p-1.5 rounded-xl shadow-2xl z-30 max-w-[95vw] overflow-x-auto">
+            <!-- 1. Drop-Off: Alur Penuh (Masuk ➔ Bongkar RS ➔ Keluar) -->
+            <button onclick="triggerGateIn('drop_off')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Alur Penuh: Truk Masuk Gerbang ➔ Timbang VGM ➔ Melaju ke Yard ➔ Lift-Off RS-01 ➔ Gate-Out Keluar">
+                <i class="fa-solid fa-arrow-down-to-bracket text-xs text-blue-200"></i>
+                <span>Truk Drop-Off</span>
             </button>
-            <button onclick="openMoveModal()" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0">
-                <i class="fa-solid fa-arrows-up-down-left-right text-xs"></i>
-                <span>Relokasi Box (RS)</span>
+            <!-- 2. Pick-Up: Alur Penuh (Masuk Kosong ➔ Muat RS ➔ Keluar) -->
+            <button onclick="triggerGateIn('pick_up')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Alur Penuh: Truk Masuk Kosong ➔ Verifikasi DO ➔ Melaju ke Yard ➔ Lift-On RS-02 ➔ Gate-Out Keluar">
+                <i class="fa-solid fa-arrow-up-from-bracket text-xs text-amber-200"></i>
+                <span>Truk Pick-Up</span>
             </button>
-            <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0">
-                <i class="fa-solid fa-train text-xs"></i>
-                <span>Bongkar KA (RTG)</span>
+            <!-- 3. Gate-Out Saja -->
+            <button onclick="triggerGateOut()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Truk Keluar Gerbang (Gate-Out Selesai)">
+                <i class="fa-solid fa-door-closed text-xs text-purple-200"></i>
+                <span>Gate-Out</span>
             </button>
-            <button onclick="refreshStateFromDB()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition shrink-0" title="Sinkronkan MySQL">
+            <!-- 4. Relokasi Box (RS) -->
+            <button onclick="openMoveModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Pemindahan Box Antar-Blok oleh Reach Stacker">
+                <i class="fa-solid fa-arrows-up-down-left-right text-xs text-amber-400"></i>
+                <span>Relokasi RS</span>
+            </button>
+            <!-- 5. Alih Muat KA (RTG) -->
+            <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi RTG Mengangkat Box dari Rangkaian Kereta ke Yard">
+                <i class="fa-solid fa-train text-xs text-indigo-200"></i>
+                <span>Alih Muat KA</span>
+            </button>
+            <!-- 6. Pengatur Kecepatan (Speed 1x / 1.75x / 2.5x) -->
+            <button onclick="toggleSimSpeed()" id="btnSimSpeed" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 font-bold text-xs rounded-lg transition shrink-0 cursor-pointer border border-amber-500/30" title="Atur Kecepatan Simulasi Alur Gerakan">
+                <i class="fa-solid fa-gauge-high mr-1"></i><span id="speedBtnText">1.25x</span>
+            </button>
+            <!-- 7. Refresh Sync DB -->
+            <button onclick="refreshStateFromDB()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition shrink-0 cursor-pointer" title="Sinkronkan MySQL">
                 <i class="fa-solid fa-rotate text-xs"></i>
             </button>
         </div>
 
-        <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector -->
-        <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-20" id="inspectorCard">
+        <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector (Elevated to bottom-16 so it never collides with Action Dock) -->
+        <div class="absolute bottom-16 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-30" id="inspectorCard">
             <div class="bg-slate-900/95 backdrop-blur-lg border border-blue-500/50 rounded-xl p-3.5 shadow-2xl text-white relative overflow-hidden">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
                 <div class="flex items-center justify-between mb-2.5">
@@ -1407,25 +1449,26 @@ if (session_status() === PHP_SESSION_NONE) {
                     <div>
                         <span class="block text-[10px] text-gray-500 font-semibold mb-1">Blok</span>
                         <select id="moveToBlock" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-xs font-bold text-gray-800">
-                            <option value="A">Blok A</option>
-                            <option value="B" selected>Blok B</option>
-                            <option value="C">Blok C</option>
+                            <option value="A">Blok A (Export)</option>
+                            <option value="B" selected>Blok B (Import)</option>
+                            <option value="C">Blok C (Domestik)</option>
+                            <option value="D">Blok D (Buffer)</option>
                             <option value="REEFER">Reefer</option>
-                            <option value="DG">DG Yard</option>
-                            <option value="EMPTY">Empty</option>
+                            <option value="DG">DG Hazmat</option>
+                            <option value="EMPTY">Empty Depot</option>
                         </select>
                     </div>
                     <div>
-                        <span class="block text-[10px] text-gray-500 font-semibold mb-1">Bay (01-20)</span>
-                        <input type="text" id="moveToBay" value="06" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-xs font-bold text-gray-800 font-mono text-center">
+                        <span class="block text-[10px] text-gray-500 font-semibold mb-1">Bay (01-05)</span>
+                        <input type="text" id="moveToBay" value="02" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-xs font-bold text-gray-800 font-mono text-center">
                     </div>
                     <div>
-                        <span class="block text-[10px] text-gray-500 font-semibold mb-1">Row (01-06)</span>
-                        <input type="text" id="moveToRow" value="02" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-xs font-bold text-gray-800 font-mono text-center">
+                        <span class="block text-[10px] text-gray-500 font-semibold mb-1">Row (01-07)</span>
+                        <input type="text" id="moveToRow" value="03" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-xs font-bold text-gray-800 font-mono text-center">
                     </div>
                     <div>
                         <span class="block text-[10px] text-gray-500 font-semibold mb-1">Tier (01-04)</span>
-                        <input type="text" id="moveToTier" value="01" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-xs font-bold text-gray-800 font-mono text-center">
+                        <input type="text" id="moveToTier" value="02" class="w-full bg-white border border-gray-200 rounded-lg px-2 py-2 text-xs font-bold text-gray-800 font-mono text-center">
                     </div>
                 </div>
             </div>
@@ -1577,7 +1620,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             </p>
                             <div class="p-2 bg-slate-50 rounded-lg text-[10.5px] space-y-1 font-mono">
                                 <div><strong class="text-blue-700">Hardware:</strong> HW-11 (Jointech E-Seal GPS)</div>
-                                <div><strong class="text-indigo-700">Software:</strong> Jalur Hijau/Kuning/Merah, SPPB Auto</div>
+                                <div><strong class="text-indigo-700">Software:</strong> Jalur Hijau/Merah (PMK 190/2022), SPPB Auto</div>
                                 <div><strong class="text-emerald-700">Finansial:</strong> Pelepasan Jaminan Pabean (Customs Bond)</div>
                             </div>
                         </div>
@@ -1857,13 +1900,16 @@ let scene, camera, renderer, controls;
 let containerMeshes = {};       // Mapping container_id / number -> Three.js Mesh
 let equipmentMeshes = {};       // Mapping equipment_id -> Three.js Mesh
 let truckMesh = null;
+let truckBoxMesh = null;        // Container on truck trailer chassis
 let trainMesh = null;
 let boomBarrierMesh = null;
+let outboundBarrierMesh = null; // Outbound boom barrier
 let floodlightLights = [];
 
 let currentLighting = 'day';
 let isAnimating = false;
 let selectedContainerData = null;
+let simSpeedMultiplier = 1.25;  // Default 1.25x (smooth & operational)
 
 // Database state
 let simState = {
@@ -1873,15 +1919,15 @@ let simState = {
     trains: []
 };
 
-// Layout coordinates mapping for terminal blocks (1:1 with denah.php 35 Ha Master Plan)
+// Layout coordinates mapping for terminal blocks (1:1 Civil Port Scale - Expansive Yard 35 Hektar)
 const BLOCK_COORDS = {
-    'A':      { x: -28, z: 2,   label: 'BLOK A (LADEN EXPORT)' },
-    'B':      { x: 8,   z: 2,   label: 'BLOK B (LADEN IMPORT)' },
-    'C':      { x: -28, z: -22, label: 'BLOK C (DOMESTIC CARGO)' },
-    'D':      { x: 8,   z: -22, label: 'BLOK D (BUFFER YARD)' },
-    'DG':     { x: 44,  z: -12, label: 'BLOK E (HAZMAT / DG BUNDED)' },
-    'REEFER': { x: 50,  z: 32,  label: 'REEFER ZONE (300 PLUGS)' },
-    'EMPTY':  { x: -64, z: -12, label: 'EMPTY DEPOT (2.500 TEU)' }
+    'A':      { x: -44, z: 16,  width: 72, depth: 24, label: 'BLOK A (LADEN EXPORT - 4 TIERS)' },
+    'B':      { x: 44,  z: 16,  width: 72, depth: 24, label: 'BLOK B (LADEN IMPORT - 4 TIERS)' },
+    'C':      { x: -44, z: -26, width: 72, depth: 24, label: 'BLOK C (DOMESTIC CARGO - 4 TIERS)' },
+    'D':      { x: 44,  z: -26, width: 72, depth: 24, label: 'BLOK D (BUFFER YARD - 4 TIERS)' },
+    'DG':     { x: 104, z: -26, width: 32, depth: 24, label: 'BLOK E (HAZMAT DG BUNDED 1.4M)' },
+    'REEFER': { x: 104, z: 16,  width: 32, depth: 24, label: 'REEFER ZONE (300 POWER PLUGS)' },
+    'EMPTY':  { x: -106, z: -5,  width: 32, depth: 56, label: 'EMPTY DEPOT (2.500 TEU - 5 TIERS)' }
 };
 
 // Technical CAD overlay states
@@ -1925,11 +1971,11 @@ function initThreeScene() {
     // Scene
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xdcecf8);
-    scene.fog = new THREE.FogExp2(0xdcecf8, 0.005);
+    scene.fog = new THREE.FogExp2(0xdcecf8, 0.0035);
 
     // Camera (Menghadap ke Utara / North ke arah Kantor & Gate dari koridor Rel Selatan)
-    camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-    camera.position.set(0, 90, -125);
+    camera = new THREE.PerspectiveCamera(45, width / height, 1, 1200);
+    camera.position.set(0, 110, -155);
 
     // Renderer
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -1945,8 +1991,8 @@ function initThreeScene() {
     controls.dampingFactor = 0.05;
     controls.maxPolarAngle = Math.PI / 2 - 0.05; // Do not go below ground
     controls.minDistance = 15;
-    controls.maxDistance = 220;
-    controls.target.set(0, 0, 15);
+    controls.maxDistance = 380;
+    controls.target.set(0, 0, 5);
 
     // Zoom Indicator on OrbitControls Changes
     controls.addEventListener('change', updateSimZoomDisplay);
@@ -2040,14 +2086,17 @@ function buildTerminalEnvironment() {
 
     // 13. Create Holographic 3D Target Marker Beacon & Ground Ring
     createTargetMarker();
+
+    // 14. Generate Baseline Yard Container Stacks (Multi-tier realistic port scale)
+    generateBaselineYardContainers();
 }
 
-// 1. Civil Concrete Ground Pavements & Arterial Road Network (35 Ha)
+// 1. Civil Concrete Ground Pavements & Arterial Road Network (Expansive 35 Ha Dry Port Master Plan)
 function buildCivilPavementsAndRoadNetwork() {
-    // Base 35 Hektar Ground Floor
-    const groundGeo = new THREE.PlaneGeometry(240, 180);
+    // Base 35 Hektar Ground Floor (Expanded Scale)
+    const groundGeo = new THREE.PlaneGeometry(380, 260);
     const groundMat = new THREE.MeshStandardMaterial({
-        color: 0x1e293b, // Dark asphalt
+        color: 0x1e293b, // Dark industrial asphalt
         roughness: 0.88,
         metalness: 0.1
     });
@@ -2057,25 +2106,27 @@ function buildCivilPavementsAndRoadNetwork() {
     ground.receiveShadow = true;
     scene.add(ground);
 
-    // Fine Engineering Grid Dilatations (Expansion joints)
-    const grid = new THREE.GridHelper(240, 48, 0x475569, 0x334155);
+    // Fine Engineering Grid Dilatations (Expansion joints across 35 Ha)
+    const grid = new THREE.GridHelper(380, 76, 0x475569, 0x334155);
     grid.position.y = 0.02;
     scene.add(grid);
 
-    // Concrete Apron Platforms for Each Zone
+    // Concrete Apron Platforms for Each Zone (Scale-Accurate Heavy Port Slabs)
     const aprons = [
-        // Container Stacking Yard Apron (15 Ha)
-        { w: 154, d: 60, x: 6, z: -10, color: 0x334155 },
-        // CFS & Warehousing Apron
-        { w: 34, d: 68, x: -88, z: -3, color: 0x3b4758 },
-        // Customs & Behandle Apron
-        { w: 32, d: 68, x: 92, z: -3, color: 0x3b4758 },
-        // Administration & Public Facilities Apron
-        { w: 70, d: 34, x: 4, z: 46, color: 0x475569 },
-        // Gate Complex & Truck Queuing Apron
-        { w: 54, d: 34, x: -62, z: 46, color: 0x334155 },
-        // Reefer Cold Chain Apron
-        { w: 38, d: 34, x: 64, z: 46, color: 0x0f172a }
+        // Expansive Container Stacking Yard Apron (Core 15 Ha Terminal Blocks)
+        { w: 260, d: 120, x: 0, z: -5, color: 0x334155 },
+        // CFS Warehouse & Logistics Yard Apron (West)
+        { w: 38, d: 74, x: -106, z: 46, color: 0x3b4758 },
+        // Customs KPPBC, X-Ray & Behandle Inspection Apron (East)
+        { w: 38, d: 74, x: 104, z: 46, color: 0x3b4758 },
+        // Administration HQ, Datacenter NOC & Amenities Apron (North Central)
+        { w: 82, d: 38, x: 0, z: 52, color: 0x475569 },
+        // Gate Complex & Truck Queuing Approach Apron (North West)
+        { w: 58, d: 38, x: -62, z: 52, color: 0x334155 },
+        // Reefer Cold Chain Specialized Apron
+        { w: 38, d: 36, x: 104, z: 16, color: 0x0f172a },
+        // Rail Siding Intermodal Loading Apron (South Perimeter)
+        { w: 280, d: 24, x: 0, z: -52, color: 0x273549 }
     ];
 
     aprons.forEach(ap => {
@@ -2089,22 +2140,28 @@ function buildCivilPavementsAndRoadNetwork() {
 
     // Yellow Dashed Haul Road Center Markings
     const roadMarkings = [
-        // North Cross Road (Connecting Gate to Admin, Reefer, Customs)
-        { sx: -105, ex: 105, z: 28, orient: 'h' },
+        // North Cross Road (Connecting Gate to Admin, Transfer Lanes, Customs)
+        { sx: -130, ex: 130, z: 28, orient: 'h' },
         // Central Yard Spine Road (Between Blok A/B and Blok C/D)
-        { sx: -60, ex: 74, z: -10, orient: 'h' },
+        { sx: -84, ex: 84, z: -5, orient: 'h' },
         // South Haul Road (Alongside Rail Siding Loading Ramp)
-        { sx: -105, ex: 105, z: -35, orient: 'h' },
-        // Gate Inbound Corridor
-        { sz: 62, ez: 30, x: -45, orient: 'v' },
-        // East Corridor (Connecting Reefer to Customs)
-        { sz: 28, ez: -35, x: 74, orient: 'v' }
+        { sx: -130, ex: 130, z: -39, orient: 'h' },
+        // Gate Inbound Corridor (Lane 1)
+        { sz: 75, ez: 28, x: -49, orient: 'v' },
+        // Gate Outbound Corridor (Lane 2)
+        { sz: 75, ez: 28, x: -41, orient: 'v' },
+        // Central Transfer Boulevard (Between Blok A and Blok B - 16m Wide)
+        { sz: 28, ez: -39, x: 0, orient: 'v' },
+        // East Corridor (Connecting Reefer & DG to Customs)
+        { sz: 28, ez: -39, x: 84, orient: 'v' },
+        // West Corridor (Connecting Empty Depot to CFS)
+        { sz: 28, ez: -39, x: -84, orient: 'v' }
     ];
 
     roadMarkings.forEach(rm => {
         if (rm.orient === 'h') {
             for (let rx = rm.sx; rx <= rm.ex; rx += 6) {
-                const dashGeo = new THREE.BoxGeometry(3.5, 0.02, 0.3);
+                const dashGeo = new THREE.BoxGeometry(3.5, 0.02, 0.35);
                 const dashMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
                 const dash = new THREE.Mesh(dashGeo, dashMat);
                 dash.position.set(rx, 0.13, rm.z);
@@ -2112,7 +2169,7 @@ function buildCivilPavementsAndRoadNetwork() {
             }
         } else {
             for (let rz = rm.sz; rz >= rm.ez; rz -= 6) {
-                const dashGeo = new THREE.BoxGeometry(0.3, 0.02, 3.5);
+                const dashGeo = new THREE.BoxGeometry(0.35, 0.02, 3.5);
                 const dashMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
                 const dash = new THREE.Mesh(dashGeo, dashMat);
                 dash.position.set(rm.x, 0.13, rz);
@@ -2124,10 +2181,11 @@ function buildCivilPavementsAndRoadNetwork() {
 
 // 2. Create Block Stacking Zone Area (Blok A-E, Reefer, Empty Depot)
 function createBlockZone(blockKey, centerX, centerZ, labelText) {
-    const blockWidth = (blockKey === 'EMPTY' || blockKey === 'DG') ? 28 : 32;
-    const blockDepth = (blockKey === 'EMPTY' || blockKey === 'DG') ? 22 : 20;
+    const bData = BLOCK_COORDS[blockKey] || { width: 72, depth: 24 };
+    const blockWidth = bData.width || 72;
+    const blockDepth = bData.depth || 24;
 
-    // Concrete Slab
+    // Heavy-Duty Reinforced Concrete Slab
     let slabColor = 0x1e293b;
     if (blockKey === 'REEFER') slabColor = 0x0f172a;
     if (blockKey === 'DG') slabColor = 0x450a0a;
@@ -2138,7 +2196,7 @@ function createBlockZone(blockKey, centerX, centerZ, labelText) {
         roughness: 0.7
     });
     const slab = new THREE.Mesh(slabGeo, slabMat);
-    slab.position.set(centerX + blockWidth/2, 0.1, centerZ + blockDepth/2);
+    slab.position.set(centerX, 0.1, centerZ);
     slab.receiveShadow = true;
     scene.add(slab);
 
@@ -2146,20 +2204,148 @@ function createBlockZone(blockKey, centerX, centerZ, labelText) {
     const edgeGeo = new THREE.BoxGeometry(blockWidth + 0.6, 0.05, blockDepth + 0.6);
     const edgeMat = new THREE.MeshBasicMaterial({ color: blockKey === 'DG' ? 0xef4444 : 0xf59e0b });
     const edge = new THREE.Mesh(edgeGeo, edgeMat);
-    edge.position.set(centerX + blockWidth/2, 0.21, centerZ + blockDepth/2);
+    edge.position.set(centerX, 0.21, centerZ);
     scene.add(edge);
 
-    // If Hazmat DG: build 1.2m reinforced concrete bund wall around it!
+    // Painted Yellow Slot Ground Markings & Bay/Row Identifiers
+    createSlotGroundMarkings(blockKey, centerX, centerZ, blockWidth, blockDepth);
+
+    // Visual Stacking Tier Gauge Indicator Posts (Corner Rulers with T1-T4 Marks)
+    buildStackingTierIndicatorPost(centerX - blockWidth/2 - 0.8, centerZ - blockDepth/2, blockKey);
+    buildStackingTierIndicatorPost(centerX + blockWidth/2 + 0.8, centerZ - blockDepth/2, blockKey);
+
+    // If Hazmat DG: build 1.4m reinforced concrete bund wall around it!
     if (blockKey === 'DG') {
-        buildHazmatBundWall(centerX + blockWidth/2, centerZ + blockDepth/2, blockWidth, blockDepth);
+        buildHazmatBundWall(centerX, centerZ, blockWidth, blockDepth);
     }
 
     // Block Label Billboard Sprite
-    createBlockLabelSprite(labelText, centerX + blockWidth/2, 6.0, centerZ - 2);
+    createBlockLabelSprite(labelText, centerX, 8.5, centerZ - blockDepth/2 - 3.0);
 
     // Reefer Power Racks Structure
     if (blockKey === 'REEFER') {
         createReeferPowerRacks(centerX, centerZ, blockWidth, blockDepth);
+    }
+}
+
+// Visual Stacking Tier Gauge Indicator Post (Shows Height for T1, T2, T3, T4 Stacks)
+function buildStackingTierIndicatorPost(px, pz, blockKey) {
+    const postGroup = new THREE.Group();
+    
+    // Steel Mast Column (12m high)
+    const mastGeo = new THREE.CylinderGeometry(0.12, 0.15, 12.0, 8);
+    const mastMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
+    const mast = new THREE.Mesh(mastGeo, mastMat);
+    mast.position.y = 6.0;
+    postGroup.add(mast);
+
+    // Color-Coded Tier Rings & Badges (T1=1.5m, T2=4.1m, T3=6.7m, T4=9.3m)
+    const tiers = [
+        { label: 'T1', y: 1.5, color: 0x10b981 }, // Green (Ground)
+        { label: 'T2', y: 4.1, color: 0x0284c7 }, // Blue
+        { label: 'T3', y: 6.7, color: 0xf59e0b }, // Amber
+        { label: 'T4', y: 9.3, color: 0xef4444 }  // Red (Max Safe Port Stack)
+    ];
+
+    tiers.forEach(t => {
+        // Horizontal Ring
+        const ringGeo = new THREE.TorusGeometry(0.35, 0.05, 8, 16);
+        const ringMat = new THREE.MeshBasicMaterial({ color: t.color });
+        const ring = new THREE.Mesh(ringGeo, ringMat);
+        ring.rotation.x = Math.PI / 2;
+        ring.position.y = t.y;
+        postGroup.add(ring);
+
+        // Small Tier Signboard Sprite
+        const canvas = document.createElement('canvas');
+        canvas.width = 128;
+        canvas.height = 64;
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, 128, 64);
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(2, 2, 124, 60);
+        ctx.font = 'bold 36px monospace';
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(t.label, 64, 32);
+
+        const tex = new THREE.CanvasTexture(canvas);
+        const spriteMat = new THREE.SpriteMaterial({ map: tex });
+        const sprite = new THREE.Sprite(spriteMat);
+        sprite.position.set(0.65, t.y, 0);
+        sprite.scale.set(1.4, 0.7, 1);
+        postGroup.add(sprite);
+    });
+
+    postGroup.position.set(px, 0.2, pz);
+    scene.add(postGroup);
+}
+
+// Painted Yellow L-Corner Ground Markings & Bay/Row Markings for Yard Slots
+function createSlotGroundMarkings(blockKey, cx, cz, bw, bd) {
+    const isMainBlock = (blockKey === 'A' || blockKey === 'B' || blockKey === 'C' || blockKey === 'D');
+    const bays = isMainBlock ? 5 : (blockKey === 'EMPTY' ? 2 : 2);
+    const rows = (blockKey === 'EMPTY') ? 16 : 7;
+
+    const markMat = new THREE.MeshBasicMaterial({ color: blockKey === 'DG' ? 0xef4444 : 0xfbbf24 });
+
+    for (let b = 1; b <= bays; b++) {
+        let sx = cx;
+        if (isMainBlock) {
+            sx = (cx - 27.0) + (b - 1) * 13.5;
+        } else {
+            sx = (cx - 6.75) + (b - 1) * 13.5;
+        }
+
+        // Painted Bay ID Mark on the front of each bay (e.g. BAY 01, BAY 03, etc.)
+        if (b <= bays) {
+            const bayCanvas = document.createElement('canvas');
+            bayCanvas.width = 128;
+            bayCanvas.height = 64;
+            const bctx = bayCanvas.getContext('2d');
+            bctx.font = 'bold 38px monospace';
+            bctx.fillStyle = blockKey === 'DG' ? '#ef4444' : '#f59e0b';
+            bctx.textAlign = 'center';
+            bctx.textBaseline = 'middle';
+            bctx.fillText(`B${String(b*2-1).padStart(2, '0')}`, 64, 32);
+
+            const bTex = new THREE.CanvasTexture(bayCanvas);
+            const bSprMat = new THREE.SpriteMaterial({ map: bTex, transparent: true });
+            const bSpr = new THREE.Sprite(bSprMat);
+            bSpr.position.set(sx, 0.25, cz + bd/2 - 1.2);
+            bSpr.scale.set(2.4, 1.2, 1);
+            scene.add(bSpr);
+        }
+
+        for (let r = 1; r <= rows; r++) {
+            const sz = (cz - ((rows - 1) * 3.0) / 2) + (r - 1) * 3.0;
+
+            // Draw 4 corner marks for 40ft container footprint (12.0m x 2.44m)
+            const cL = 12.0, cW = 2.44;
+            const offsets = [
+                { x: sx - cL/2, z: sz - cW/2, dx: 0.9, dz: 0.9 },
+                { x: sx + cL/2, z: sz - cW/2, dx: -0.9, dz: 0.9 },
+                { x: sx - cL/2, z: sz + cW/2, dx: 0.9, dz: -0.9 },
+                { x: sx + cL/2, z: sz + cW/2, dx: -0.9, dz: -0.9 }
+            ];
+
+            offsets.forEach(co => {
+                // Horizontal leg of L
+                const hGeo = new THREE.BoxGeometry(0.9, 0.02, 0.15);
+                const hMesh = new THREE.Mesh(hGeo, markMat);
+                hMesh.position.set(co.x + co.dx/2, 0.22, co.z);
+                scene.add(hMesh);
+
+                // Vertical leg of L
+                const vGeo = new THREE.BoxGeometry(0.15, 0.02, 0.9);
+                const vMesh = new THREE.Mesh(vGeo, markMat);
+                vMesh.position.set(co.x, 0.22, co.z + co.dz/2);
+                scene.add(vMesh);
+            });
+        }
     }
 }
 
@@ -2229,15 +2415,15 @@ function createReeferPowerRacks(bx, bz, bw, bd) {
     const rackGeo = new THREE.BoxGeometry(bw - 2, 3.5, 0.4);
     const rackMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.6, roughness: 0.3 });
     const rack = new THREE.Mesh(rackGeo, rackMat);
-    rack.position.set(bx + bw/2, 1.8, bz + bd/2);
+    rack.position.set(bx, 1.8, bz + bd/2 - 0.4);
     scene.add(rack);
 
     // Blue LED sockets
-    for (let i = -10; i <= 10; i += 2.5) {
+    for (let i = -bw/2 + 2; i <= bw/2 - 2; i += 2.5) {
         const ledGeo = new THREE.SphereGeometry(0.18, 8, 8);
         const ledMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
         const led = new THREE.Mesh(ledGeo, ledMat);
-        led.position.set(bx + bw/2 + i, 2.5, bz + bd/2 + 0.25);
+        led.position.set(bx + i, 2.5, bz + bd/2 - 0.15);
         scene.add(led);
     }
 }
@@ -2333,6 +2519,7 @@ function buildFreightTrain(zPos) {
     trainMesh.add(cab);
 
     // 4 Flatcars with Containers
+    window.trainContainerBoxes = [];
     const containerColors = [0x0090c0, 0x007a3d, 0xd49b00, 0x0b2341];
     for (let i = 0; i < 4; i++) {
         const posX = -36 + (i * 18);
@@ -2352,6 +2539,7 @@ function buildFreightTrain(zPos) {
         cBox.position.set(posX, 3.0, 0);
         cBox.castShadow = true;
         trainMesh.add(cBox);
+        window.trainContainerBoxes.push(cBox);
     }
 
     trainMesh.position.set(0, 0, zPos);
@@ -2361,65 +2549,93 @@ function buildFreightTrain(zPos) {
 // 4. Gate Complex (Gate-In, Weighbridge 80T, OCR, ANPR, Barrier, Security, Rest Area)
 function buildGateComplex() {
     const gateZ = 52;
-    const gateX = -45;
+    const laneInX = -49;   // Lane 1 Inbound
+    const laneOutX = -41;  // Lane 2 Outbound
+    const gateCenterX = (laneInX + laneOutX) / 2; // -45
 
-    // Inbound Gate Gantry Arch
-    const gantryMat = new THREE.MeshStandardMaterial({ color: 0x004b87, metalness: 0.5, roughness: 0.4 });
+    // Inbound & Outbound Gate Portal Gantry (Steel Overhead Structure)
+    const gantryMat = new THREE.MeshStandardMaterial({ color: 0x004b87, metalness: 0.6, roughness: 0.3 });
     
-    // Inbound Pillars
-    const p1 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.5, 1.2), gantryMat);
-    p1.position.set(gateX - 9, 3.75, gateZ);
-    scene.add(p1);
+    // Gantry Columns (Span across both Lane 1 & Lane 2)
+    const colGeo = new THREE.BoxGeometry(1.2, 8.0, 1.2);
+    const colLeft = new THREE.Mesh(colGeo, gantryMat);
+    colLeft.position.set(laneInX - 4.5, 4.0, gateZ);
+    scene.add(colLeft);
 
-    const p2 = new THREE.Mesh(new THREE.BoxGeometry(1.2, 7.5, 1.2), gantryMat);
-    p2.position.set(gateX + 9, 3.75, gateZ);
-    scene.add(p2);
+    const colMid = new THREE.Mesh(colGeo, gantryMat);
+    colMid.position.set(gateCenterX, 4.0, gateZ);
+    scene.add(colMid);
 
-    // Crossbeam
-    const beam = new THREE.Mesh(new THREE.BoxGeometry(19.2, 1.6, 1.6), gantryMat);
-    beam.position.set(gateX, 8.0, gateZ);
+    const colRight = new THREE.Mesh(colGeo, gantryMat);
+    colRight.position.set(laneOutX + 4.5, 4.0, gateZ);
+    scene.add(colRight);
+
+    // Overhead Portal Crossbeam
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(20.0, 1.6, 1.6), gantryMat);
+    beam.position.set(gateCenterX, 8.0, gateZ);
     scene.add(beam);
 
     // Signboard on Gantry
-    createBlockLabelSprite('MAIN GATE & JEMBATAN TIMBANG VGM (80T)', gateX, 10.0, gateZ);
+    createBlockLabelSprite('MAIN GATE & JEMBATAN TIMBANG SOLAS 80T (LANE 1 IN • LANE 2 OUT)', gateCenterX, 10.2, gateZ);
 
-    // Weighbridge Pit & Steel Scale Platform (Lane 1)
-    const scaleGeo = new THREE.BoxGeometry(16, 0.15, 4.5);
-    const scaleMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.7, roughness: 0.3 });
+    // Weighbridge Pit & Real-World 18m SOLAS Steel Scale Platform (Lane 1, Inbound)
+    // Real-world scale: Length 18.0m (along traffic Z), Width 3.8m (across lane X)
+    const scaleGeo = new THREE.BoxGeometry(3.8, 0.15, 18.0);
+    const scaleMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.25 });
     const scale = new THREE.Mesh(scaleGeo, scaleMat);
-    scale.position.set(gateX - 4, 0.08, gateZ);
+    scale.position.set(laneInX, 0.08, gateZ);
     scale.receiveShadow = true;
     scene.add(scale);
 
-    // Digital Weighbridge Indicator Display Gantry
-    const ledDispGeo = new THREE.BoxGeometry(2.5, 1.2, 0.4);
+    // Weighbridge Yellow/Black Hazard Safety Curbs (Left & Right)
+    const curbGeo = new THREE.BoxGeometry(0.3, 0.35, 18.0);
+    const curbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
+    const curbL = new THREE.Mesh(curbGeo, curbMat);
+    curbL.position.set(laneInX - 2.0, 0.18, gateZ);
+    scene.add(curbL);
+
+    const curbR = new THREE.Mesh(curbGeo, curbMat);
+    curbR.position.set(laneInX + 2.0, 0.18, gateZ);
+    scene.add(curbR);
+
+    // Digital Weighbridge Indicator Display on Gantry (Lane 1)
+    const ledDispGeo = new THREE.BoxGeometry(2.8, 1.2, 0.4);
     const ledDispMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
     const ledDisp = new THREE.Mesh(ledDispGeo, ledDispMat);
-    ledDisp.position.set(gateX - 4, 4.5, gateZ - 3);
+    ledDisp.position.set(laneInX, 6.2, gateZ);
     scene.add(ledDisp);
 
-    // Boom Barrier Pole (Animated Palang Pintu)
-    const barrierBaseGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.4, 16);
+    // Inbound Boom Barrier Pole (Lane 1, Animated Palang Pintu Otomatis)
+    const barrierBaseGeo = new THREE.CylinderGeometry(0.35, 0.4, 1.4, 16);
     const barrierBaseMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
-    const bBase = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
-    bBase.position.set(gateX - 8, 0.7, gateZ + 3);
-    scene.add(bBase);
+    const bBaseIn = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
+    bBaseIn.position.set(laneInX - 2.2, 0.7, 43);
+    scene.add(bBaseIn);
 
-    const poleGeo = new THREE.CylinderGeometry(0.1, 0.1, 7, 8);
+    const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, 4.4, 12);
     const poleMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     boomBarrierMesh = new THREE.Mesh(poleGeo, poleMat);
     boomBarrierMesh.rotation.z = Math.PI / 2;
-    boomBarrierMesh.position.set(gateX - 4.5, 1.2, gateZ + 3);
+    boomBarrierMesh.position.set(laneInX, 1.2, 43);
     scene.add(boomBarrierMesh);
 
-    // Outbound Gate Canopy (Lane 3 & 4)
-    const outCanopyGeo = new THREE.BoxGeometry(16, 0.4, 6);
-    const outCanopyMat = new THREE.MeshStandardMaterial({ color: 0x334155 });
-    const outCanopy = new THREE.Mesh(outCanopyGeo, outCanopyMat);
-    outCanopy.position.set(gateX, 5.5, 38);
-    scene.add(outCanopy);
+    // Outbound Boom Barrier Pole (Lane 2, Animated Palang Pintu Keluar)
+    const bBaseOut = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
+    bBaseOut.position.set(laneOutX + 2.2, 0.7, 43);
+    scene.add(bBaseOut);
 
-    createBlockLabelSprite('OUTBOUND GATE (E-PASS & BARRIER)', gateX, 7.5, 38);
+    outboundBarrierMesh = new THREE.Mesh(poleGeo, poleMat);
+    outboundBarrierMesh.rotation.z = Math.PI / 2;
+    outboundBarrierMesh.position.set(laneOutX, 1.2, 43);
+    scene.add(outboundBarrierMesh);
+
+    // Outbound Lane Display
+    const outDispMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
+    const outDisp = new THREE.Mesh(ledDispGeo, outDispMat);
+    outDisp.position.set(laneOutX, 6.2, gateZ);
+    scene.add(outDisp);
+
+    createBlockLabelSprite('OUTBOUND GATE (CHECKOUT & E-SEAL)', laneOutX, 7.5, 43);
 
     // Security Post 24 Jam (fac_f_security_gate)
     const secGeo = new THREE.BoxGeometry(8, 4.5, 8);
@@ -3010,17 +3226,17 @@ function buildFloodlightTowers() {
 
 // 11. Spawn Heavy Equipment (3 Reach Stackers + 1 RTG Crane)
 function spawnEquipmentModels() {
-    // RS-01 (Empty Depot & Blok A Area)
-    equipmentMeshes['RS-01'] = createReachStackerModel('RS-01', -35, 0, 14);
+    // RS-01 (Blok A Transfer Corridor - Primary Drop-Off Handler)
+    equipmentMeshes['RS-01'] = createReachStackerModel('RS-01', -54, 0, 28);
     
-    // RS-02 (Central Spine Corridor between Blok A and Blok B - Primary Active)
-    equipmentMeshes['RS-02'] = createReachStackerModel('RS-02', 0, 0, 2);
+    // RS-02 (Blok B Transfer Corridor - Primary Pick-Up Handler)
+    equipmentMeshes['RS-02'] = createReachStackerModel('RS-02', 34, 0, 28);
 
-    // RS-03 (Reefer & DG Area)
-    equipmentMeshes['RS-03'] = createReachStackerModel('RS-03', 44, 0, 14);
+    // RS-03 (Reefer & DG Area Transfer Corridor)
+    equipmentMeshes['RS-03'] = createReachStackerModel('RS-03', 104, 0, 28);
 
     // RTG-01 (Rail Siding Crane spanning across track and buffer)
-    equipmentMeshes['RTG-01'] = createRTGCraneModel('RTG-01', 0, 0, -46);
+    equipmentMeshes['RTG-01'] = createRTGCraneModel('RTG-01', 0, 0, -52);
 }
 
 // Procedural 3D Reach Stacker Model (Kalmar DRG450)
@@ -3028,59 +3244,89 @@ function createReachStackerModel(name, x, y, z) {
     const rs = new THREE.Group();
     rs.name = name;
 
-    // 1. Chassis Body (Kalmar Red / Navy)
-    const chassisGeo = new THREE.BoxGeometry(8, 2.2, 4);
+    // 1. Chassis Body (Kalmar Industrial Red & Dark Grey)
+    const chassisGeo = new THREE.BoxGeometry(8.2, 2.2, 3.8);
     const chassisMat = new THREE.MeshStandardMaterial({ color: 0xd9232a, roughness: 0.4 });
     const chassis = new THREE.Mesh(chassisGeo, chassisMat);
     chassis.position.set(0, 1.8, 0);
     chassis.castShadow = true;
     rs.add(chassis);
 
-    // 2. Heavy Rubber Wheels
-    const wheelGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.9, 16);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
-    const wheelOffsets = [
-        { x: -2.8, z: 2.2 }, { x: 2.8, z: 2.2 },
-        { x: -2.8, z: -2.2 }, { x: 2.8, z: -2.2 }
-    ];
-    wheelOffsets.forEach(wo => {
-        const wheel = new THREE.Mesh(wheelGeo, wheelMat);
-        wheel.rotation.x = Math.PI / 2;
-        wheel.position.set(wo.x, 1.2, wo.z);
-        wheel.castShadow = true;
-        rs.add(wheel);
+    // Front Drive Axle (Huge Dual Heavy-Duty Tyres, Radius 0.8m)
+    const fWheelGeo = new THREE.CylinderGeometry(0.8, 0.8, 0.65, 24);
+    const wMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+    [-1.9, 1.9].forEach(wz => {
+        const fw = new THREE.Mesh(fWheelGeo, wMat);
+        fw.rotation.x = Math.PI / 2;
+        fw.position.set(2.8, 0.8, wz);
+        fw.castShadow = true;
+        rs.add(fw);
     });
 
-    // 3. Cabin (Glass Canopy)
-    const cabGeo = new THREE.BoxGeometry(2.5, 2.0, 2.2);
-    const cabMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.75 });
-    const cab = new THREE.Mesh(cabGeo, cabMat);
-    cab.position.set(-1.2, 3.8, 0);
-    rs.add(cab);
+    // Rear Steer Axle (Single Tyres, Radius 0.65m)
+    const rWheelGeo = new THREE.CylinderGeometry(0.65, 0.65, 0.5, 24);
+    [-1.7, 1.7].forEach(wz => {
+        const rw = new THREE.Mesh(rWheelGeo, wMat);
+        rw.rotation.x = Math.PI / 2;
+        rw.position.set(-2.8, 0.65, wz);
+        rw.castShadow = true;
+        rs.add(rw);
+    });
 
-    // 4. Rear Counterweight
-    const cwGeo = new THREE.BoxGeometry(2.4, 2.6, 3.8);
+    // Rear Heavy Ballast Counterweight
+    const cwGeo = new THREE.BoxGeometry(2.2, 2.5, 3.6);
     const cwMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.5 });
     const cw = new THREE.Mesh(cwGeo, cwMat);
-    cw.position.set(-3.2, 2.4, 0);
+    cw.position.set(-3.1, 2.3, 0);
     rs.add(cw);
 
-    // 5. Telescopic Boom Arm & Hydraulic Piston
-    const boomGeo = new THREE.BoxGeometry(9, 1.0, 1.2);
+    // Operator Glass Cabin (Elevated Vision Canopy)
+    const cabGeo = new THREE.BoxGeometry(2.2, 2.0, 2.0);
+    const cabMat = new THREE.MeshStandardMaterial({ color: 0x38bdf8, roughness: 0.1, transparent: true, opacity: 0.75 });
+    const cab = new THREE.Mesh(cabGeo, cabMat);
+    cab.position.set(-1.0, 3.8, 0);
+    rs.add(cab);
+
+    // Hydraulic Lift Cylinders (Underneath Boom)
+    const cylGeo = new THREE.CylinderGeometry(0.18, 0.18, 4.5, 12);
+    const cylMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 });
+    [-0.7, 0.7].forEach(cz => {
+        const cyl = new THREE.Mesh(cylGeo, cylMat);
+        cyl.position.set(0.8, 3.2, cz);
+        cyl.rotation.z = -Math.PI / 6;
+        rs.add(cyl);
+    });
+
+    // Main Telescopic Boom
+    const boomGeo = new THREE.BoxGeometry(9.5, 1.2, 1.2);
     const boomMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 });
     const boom = new THREE.Mesh(boomGeo, boomMat);
+    boom.name = "rsBoom";
     boom.position.set(2.8, 5.2, 0);
     boom.rotation.z = Math.PI / 10;
     boom.castShadow = true;
     rs.add(boom);
 
-    // 6. Spreader Bar with Twistlocks
-    const spreaderGeo = new THREE.BoxGeometry(6.5, 0.6, 2.4);
+    // Real-World 40FT Bromma / Elme Telescopic Spreader Bar (Length 12.0m, Width 2.44m)
+    const spreaderGeo = new THREE.BoxGeometry(12.0, 0.6, 2.44);
     const spreaderMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
     const spreader = new THREE.Mesh(spreaderGeo, spreaderMat);
-    spreader.position.set(6.8, 5.8, 0);
+    spreader.name = "rsSpreader";
+    spreader.position.set(7.5, 6.0, 0);
     spreader.castShadow = true;
     rs.add(spreader);
+
+    // 4 Corner Guide Flippers (Yellow triangular alignment guides on corners)
+    const flipperGeo = new THREE.BoxGeometry(0.3, 0.8, 0.3);
+    const flipperMat = new THREE.MeshBasicMaterial({ color: 0xeab308 });
+    [
+        { x: -5.9, z: -1.2 }, { x: 5.9, z: -1.2 },
+        { x: -5.9, z: 1.2 },  { x: 5.9, z: 1.2 }
+    ].forEach(fp => {
+        const f = new THREE.Mesh(flipperGeo, flipperMat);
+        f.position.set(fp.x, -0.4, fp.z);
+        spreader.add(f);
+    });
 
     rs.position.set(x, y, z);
     scene.add(rs);
@@ -3129,12 +3375,14 @@ function createRTGCraneModel(name, x, y, z) {
     const trolleyGeo = new THREE.BoxGeometry(4, 1.2, 15);
     const trolleyMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
     const trolley = new THREE.Mesh(trolleyGeo, trolleyMat);
+    trolley.name = "rtgTrolley";
     trolley.position.set(0, 18.5, 0);
     rtg.add(trolley);
 
     // Spreader Suspended
     const rtgSpreaderGeo = new THREE.BoxGeometry(6.5, 0.6, 2.5);
     const rtgSpreader = new THREE.Mesh(rtgSpreaderGeo, trolleyMat);
+    rtgSpreader.name = "rtgSpreader";
     rtgSpreader.position.set(0, 12, 0);
     rtgSpreader.castShadow = true;
     rtg.add(rtgSpreader);
@@ -3144,54 +3392,138 @@ function createRTGCraneModel(name, x, y, z) {
     return rtg;
 }
 
-// 12. Procedural 3D Truck Prime Mover
+// 12. Procedural 3D Truck Prime Mover (Realistic Scale-Accurate 40FT Semi-Trailer)
 function spawnTruckModel() {
     truckMesh = new THREE.Group();
+    truckMesh.name = "PrimeMoverContainerTruck";
 
-    // Cabin
-    const cabGeo = new THREE.BoxGeometry(3.5, 3.2, 2.8);
-    const cabMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.4 });
+    // --- A. Prime Mover Cabin (Head Truck: Length 3.2m, Width 2.45m, Height 2.8m) ---
+    const cabGeo = new THREE.BoxGeometry(3.2, 2.6, 2.45);
+    const cabMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35, metalness: 0.15 });
     const cab = new THREE.Mesh(cabGeo, cabMat);
-    cab.position.set(6, 2.2, 0);
+    cab.position.set(6.2, 2.25, 0);
     cab.castShadow = true;
     truckMesh.add(cab);
 
-    // Windshield
-    const wsGeo = new THREE.BoxGeometry(0.8, 1.4, 2.7);
-    const wsMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1 });
+    // Aerodynamic Roof Air Deflector
+    const roofGeo = new THREE.BoxGeometry(2.0, 0.55, 2.4);
+    const roof = new THREE.Mesh(roofGeo, cabMat);
+    roof.position.set(6.0, 3.8, 0);
+    truckMesh.add(roof);
+
+    // Front Chrome Radiator Grille
+    const grilleGeo = new THREE.BoxGeometry(0.3, 1.4, 2.1);
+    const grilleMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.7 });
+    const grille = new THREE.Mesh(grilleGeo, grilleMat);
+    grille.position.set(7.8, 1.7, 0);
+    truckMesh.add(grille);
+
+    // Windshield (Dark Tinted Glass)
+    const wsGeo = new THREE.BoxGeometry(0.3, 1.1, 2.3);
+    const wsMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, transparent: true, opacity: 0.85 });
     const ws = new THREE.Mesh(wsGeo, wsMat);
-    ws.position.set(7.5, 2.6, 0);
+    ws.position.set(7.7, 2.8, 0);
     truckMesh.add(ws);
 
-    // Trailer Chassis
-    const trailerGeo = new THREE.BoxGeometry(13, 0.8, 2.8);
-    const trailerMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6 });
+    // Dual Front Headlights
+    const headGeo = new THREE.BoxGeometry(0.2, 0.25, 0.45);
+    const headMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+    [-0.85, 0.85].forEach(hz => {
+        const hl = new THREE.Mesh(headGeo, headMat);
+        hl.position.set(7.85, 1.25, hz);
+        truckMesh.add(hl);
+    });
+
+    // Dual Vertical Chrome Exhaust Stacks
+    const exGeo = new THREE.CylinderGeometry(0.1, 0.1, 2.8, 12);
+    const exMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.1 });
+    [-1.0, 1.0].forEach(ez => {
+        const ex = new THREE.Mesh(exGeo, exMat);
+        ex.position.set(4.5, 3.0, ez);
+        truckMesh.add(ex);
+    });
+
+    // Fuel Tanks (Aluminum Cylinders under chassis)
+    const tankGeo = new THREE.CylinderGeometry(0.38, 0.38, 1.8, 16);
+    const tankMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.7 });
+    [-1.15, 1.15].forEach(tz => {
+        const tank = new THREE.Mesh(tankGeo, tankMat);
+        tank.rotation.z = Math.PI / 2;
+        tank.position.set(4.8, 0.85, tz);
+        truckMesh.add(tank);
+    });
+
+    // --- B. 40FT Skeletal Semi-Trailer Chassis (Length 12.5m, Width 2.45m, Height 0.35m) ---
+    const trailerGeo = new THREE.BoxGeometry(12.5, 0.35, 2.45);
+    const trailerMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.6, roughness: 0.4 });
     const trailer = new THREE.Mesh(trailerGeo, trailerMat);
-    trailer.position.set(-1.5, 1.2, 0);
+    trailer.position.set(-1.0, 1.25, 0);
     trailer.castShadow = true;
     truckMesh.add(trailer);
 
-    // Wheels
-    const wGeo = new THREE.CylinderGeometry(0.9, 0.9, 0.7, 16);
-    const wMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
-    [-6.5, -4.5, 4.5, 6.8].forEach(wx => {
-        [-1.5, 1.5].forEach(wz => {
+    // Fifth-Wheel Coupler Turntable (Connecting Tractor & Trailer)
+    const fifthGeo = new THREE.CylinderGeometry(0.48, 0.48, 0.15, 16);
+    const fifthMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8 });
+    const fifth = new THREE.Mesh(fifthGeo, fifthMat);
+    fifth.position.set(3.6, 1.15, 0);
+    truckMesh.add(fifth);
+
+    // 4 Corner Twistlock Bolster Castings on Trailer Deck
+    const bolsterGeo = new THREE.BoxGeometry(0.35, 0.25, 0.35);
+    const bolsterMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3 });
+    [
+        { x: -6.9, z: -1.15 }, { x: 4.9, z: -1.15 },
+        { x: -6.9, z: 1.15 },  { x: 4.9, z: 1.15 }
+    ].forEach(bp => {
+        const b = new THREE.Mesh(bolsterGeo, bolsterMat);
+        b.position.set(bp.x, 1.45, bp.z);
+        truckMesh.add(b);
+    });
+
+    // Rear Underrun Protection Bumper & Red Tail Lights
+    const bumpGeo = new THREE.BoxGeometry(0.2, 0.28, 2.4);
+    const bumpMat = new THREE.MeshStandardMaterial({ color: 0xdc2626 });
+    const bumper = new THREE.Mesh(bumpGeo, bumpMat);
+    bumper.position.set(-7.3, 0.75, 0);
+    truckMesh.add(bumper);
+
+    // --- C. Real-World Wheels (Radius 0.52m, Tyre Width 0.35m) ---
+    const wGeo = new THREE.CylinderGeometry(0.52, 0.52, 0.35, 20);
+    const wMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.85 });
+    const rimGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.36, 16);
+    const rimMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8 });
+
+    // Axles:
+    // Tractor Steer: X = 7.0 | Tractor Tandem Drive: X = 4.2, 2.9
+    // Trailer Tri-Axle Bogie: X = -4.2, -5.5, -6.8
+    const wheelXPositions = [7.0, 4.2, 2.9, -4.2, -5.5, -6.8];
+    wheelXPositions.forEach(wx => {
+        [-1.15, 1.15].forEach(wz => {
             const wheel = new THREE.Mesh(wGeo, wMat);
             wheel.rotation.x = Math.PI / 2;
-            wheel.position.set(wx, 0.9, wz);
+            wheel.position.set(wx, 0.52, wz);
+            wheel.castShadow = true;
+
+            const rim = new THREE.Mesh(rimGeo, rimMat);
+            wheel.add(rim);
+
             truckMesh.add(wheel);
         });
     });
 
-    // Container on Truck
-    const cGeo = new THREE.BoxGeometry(11.8, 2.7, 2.6);
-    const cMat = new THREE.MeshStandardMaterial({ color: 0xd49b00, roughness: 0.5 });
-    const box = new THREE.Mesh(cGeo, cMat);
-    box.position.set(-1.5, 2.9, 0);
+    // --- D. 40FT ISO 6346 Container (Length 12.0m, Width 2.44m, Height 2.6m) ---
+    // Sits precisely on trailer deck at Y = 1.35 + 1.30 = 2.65m
+    const boxGeo = new THREE.BoxGeometry(12.0, 2.6, 2.44);
+    const boxMat = new THREE.MeshStandardMaterial({ color: 0xd49b00, roughness: 0.45, metalness: 0.15 });
+    const box = new THREE.Mesh(boxGeo, boxMat);
+    box.position.set(-1.0, 2.65, 0);
     box.castShadow = true;
     truckMesh.add(box);
+    truckBoxMesh = box; // Assign to global truckBoxMesh
 
-    truckMesh.position.set(-49, 0, 52); // Parked at Gate-In weighbridge scale
+    // Standby Highway Position (Lane 1 Approach)
+    truckMesh.position.set(-49, 0, 75);
+    truckMesh.rotation.y = Math.PI / 2; // Facing north toward Gate-In
     scene.add(truckMesh);
 }
 
@@ -3265,36 +3597,202 @@ function fetchSimulationState() {
         });
 }
 
-// Render Containers onto 3D Yard Blocks
-function renderContainersFromState(containers) {
-    // Clear existing container meshes
-    for (const [key, mesh] of Object.entries(containerMeshes)) {
-        scene.remove(mesh);
+// =============================================================================
+// CONTAINER SLOT COORDINATE ENGINE & PROCEDURAL BASELINE GENERATOR
+// =============================================================================
+
+// Helper: Calculate Exact 3D World Position for Yard Slots (5 Bays, 7 Rows, 4-5 Tiers Port Standard)
+function getSlotWorldPosition(blockKey, bay, row, tier, is20ft = false) {
+    const bCoord = BLOCK_COORDS[blockKey] || BLOCK_COORDS['A'];
+    const bayNum  = parseInt(bay, 10) || 1;
+    const rowNum  = parseInt(row, 10) || 1;
+    const tierNum = parseInt(tier, 10) || 1;
+    const cHeight = 2.60;
+
+    let posX = bCoord.x;
+    const isMainBlock = (blockKey === 'A' || blockKey === 'B' || blockKey === 'C' || blockKey === 'D');
+
+    if (isMainBlock) {
+        // 5 bays of 40ft (spacing 13.5m), or 10 bays of 20ft (spacing 6.75m)
+        if (is20ft) {
+            posX = (bCoord.x - 30.375) + ((bayNum - 1) % 10) * 6.75;
+        } else {
+            posX = (bCoord.x - 27.0) + ((bayNum - 1) % 5) * 13.5;
+        }
+    } else if (blockKey === 'EMPTY') {
+        posX = (bCoord.x - 6.75) + ((bayNum - 1) % 2) * 13.5;
+    } else {
+        // REEFER or DG (2 bays)
+        posX = (bCoord.x - 6.75) + ((bayNum - 1) % 2) * 13.5;
     }
-    containerMeshes = {};
+
+    // Rows along Z (pitch 3.0m)
+    const maxR = (blockKey === 'EMPTY') ? 16 : 7;
+    const posZ = (bCoord.z - ((maxR - 1) * 3.0) / 2) + ((rowNum - 1) % maxR) * 3.0;
+
+    // Tiers along Y: Ground slab at 0.20m, container height 2.60m
+    const posY = 0.20 + (cHeight / 2) + ((tierNum - 1) * cHeight);
+
+    return { x: posX, y: posY, z: posZ };
+}
+
+// Generate Realistic Multi-Tier Stacking Yard Baseline (Populates the Expansive 35 Ha Port)
+function generateBaselineYardContainers() {
+    const baselineList = [
+        // --- BLOK A (LADEN EXPORT) - Multi-Tier Stacks ---
+        // Bay 1
+        { block: 'A', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU2091823', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28400 },
+        { block: 'A', bay: 1, row: 1, tier: 2, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU7718291', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27100 },
+        { block: 'A', bay: 1, row: 1, tier: 3, color: SHIPPING_COLORS['ONE'],       num: 'ONEU9928104', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26500 },
+        { block: 'A', bay: 1, row: 1, tier: 4, color: SHIPPING_COLORS['MSC'],       num: 'MSCU1102938', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29300 },
+        { block: 'A', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU8821940', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 29000 },
+        { block: 'A', bay: 1, row: 2, tier: 2, color: SHIPPING_COLORS['MSC'],       num: 'MSCU6629104', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 28800 },
+        { block: 'A', bay: 1, row: 3, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU5519284', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25400 },
+        { block: 'A', bay: 1, row: 4, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU3381920', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 27600 },
+        { block: 'A', bay: 1, row: 4, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU1129384', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28100 },
+        { block: 'A', bay: 1, row: 5, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU4419201', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 26800 },
+        { block: 'A', bay: 1, row: 6, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU3301928', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 27900 },
+        { block: 'A', bay: 1, row: 7, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU7729103', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 28400 },
+
+        // Bay 2 (Leaves Row 2, Tier 1 open for dynamic gate-in drop-off!)
+        { block: 'A', bay: 2, row: 1, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU1029384', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 27200 },
+        { block: 'A', bay: 2, row: 1, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU2291029', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28100 },
+        { block: 'A', bay: 2, row: 3, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU8829102', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28600 },
+        { block: 'A', bay: 2, row: 3, tier: 2, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU9920183', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 26900 },
+        { block: 'A', bay: 2, row: 3, tier: 3, color: SHIPPING_COLORS['MSC'],       num: 'MSCU5519203', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 28700 },
+        { block: 'A', bay: 2, row: 4, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU4410294', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29100 },
+        { block: 'A', bay: 2, row: 5, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU7719203', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25800 },
+        { block: 'A', bay: 2, row: 6, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU9920194', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 27300 },
+        { block: 'A', bay: 2, row: 7, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU2219483', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 28000 },
+
+        // Bay 3
+        { block: 'A', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU5510293', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28900 },
+        { block: 'A', bay: 3, row: 2, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU3329102', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 27500 },
+        { block: 'A', bay: 3, row: 2, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU6619284', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28300 },
+        { block: 'A', bay: 3, row: 3, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU7718293', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26400 },
+        { block: 'A', bay: 3, row: 4, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU2210493', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25600 },
+        { block: 'A', bay: 3, row: 5, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU9918294', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27800 },
+        { block: 'A', bay: 3, row: 6, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU4410293', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 28100 },
+
+        // Bay 4 & 5
+        { block: 'A', bay: 4, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU8810291', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28500 },
+        { block: 'A', bay: 4, row: 1, tier: 2, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU7719284', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28700 },
+        { block: 'A', bay: 4, row: 3, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU6619283', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26800 },
+        { block: 'A', bay: 5, row: 2, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU5519284', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29100 },
+
+        // --- BLOK B (LADEN IMPORT) ---
+        // Bay 1
+        { block: 'B', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU9918294', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29400 },
+        { block: 'B', bay: 1, row: 1, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU4419203', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28200 },
+        { block: 'B', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU7718294', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28700 },
+        { block: 'B', bay: 1, row: 3, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU3319284', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26700 },
+        { block: 'B', bay: 1, row: 4, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU6619283', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27500 },
+        { block: 'B', bay: 1, row: 5, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU8819204', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25900 },
+        { block: 'B', bay: 1, row: 6, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU1120493', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 27800 },
+        { block: 'B', bay: 1, row: 7, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU2219485', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29000 },
+
+        // Bay 2 (Target Pick-Up Container at Row 2, Tier 1)
+        { block: 'B', bay: 2, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU5519283', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28500 },
+        { block: 'B', bay: 2, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'MSKU4952240', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28800 },
+        { block: 'B', bay: 2, row: 3, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU3319204', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27400 },
+        { block: 'B', bay: 2, row: 4, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU8819284', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26800 },
+        { block: 'B', bay: 2, row: 5, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU7719283', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29200 },
+        { block: 'B', bay: 2, row: 6, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU4419203', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25700 },
+
+        // Bay 3
+        { block: 'B', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU2219483', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26500 },
+        { block: 'B', bay: 3, row: 1, tier: 2, color: SHIPPING_COLORS['MSC'],       num: 'MSCU8819204', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29100 },
+        { block: 'B', bay: 3, row: 2, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU7719284', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28400 },
+        { block: 'B', bay: 3, row: 3, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU4419204', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28600 },
+        { block: 'B', bay: 3, row: 4, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU5519283', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27900 },
+        { block: 'B', bay: 3, row: 5, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU6619284', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 28000 },
+
+        // Bay 4 & 5
+        { block: 'B', bay: 4, row: 2, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU3310492', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28300 },
+        { block: 'B', bay: 4, row: 2, tier: 2, color: SHIPPING_COLORS['ONE'],       num: 'ONEU5510294', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26600 },
+        { block: 'B', bay: 5, row: 3, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU2219401', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28800 },
+
+        // --- BLOK C (DOMESTIC CARGO) ---
+        { block: 'C', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU1029381', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25100 },
+        { block: 'C', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU2039481', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 26200 },
+        { block: 'C', bay: 2, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU3049581', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 24900 },
+        { block: 'C', bay: 2, row: 3, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU4059681', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 25800 },
+        { block: 'C', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU5069781', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25300 },
+        { block: 'C', bay: 3, row: 2, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU6079881', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 26000 },
+        { block: 'C', bay: 4, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU7089981', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25400 },
+
+        // --- BLOK D (BUFFER YARD) ---
+        { block: 'D', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU9018273', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28200 },
+        { block: 'D', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU8027162', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 27800 },
+        { block: 'D', bay: 2, row: 2, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU9920194', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27900 },
+        { block: 'D', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU7036251', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26900 },
+
+        // --- REEFER ZONE (Cold Chain Pure White) ---
+        { block: 'REEFER', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'EITU9823102', owner: 'Maersk Reefer Cool',   type: '40FT RF', cargo: 'reefer', weight: 29500 },
+        { block: 'REEFER', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'MSKU4410297', owner: 'Carrier Transicold',   type: '40FT RF', cargo: 'reefer', weight: 29800 },
+        { block: 'REEFER', bay: 1, row: 3, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'TRLU5510294', owner: 'Thermo King Cold',    type: '40FT RF', cargo: 'reefer', weight: 29200 },
+        { block: 'REEFER', bay: 1, row: 4, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'EITU7729104', owner: 'Daikin Reefer Tech',   type: '40FT RF', cargo: 'reefer', weight: 29600 },
+
+        // --- HAZMAT DG (Red & Hazard Striped) ---
+        { block: 'DG', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['dg'], num: 'DGAU1102938', owner: 'Bollore Hazmat Logistics', type: '20FT DG', cargo: 'dg', weight: 22000 },
+        { block: 'DG', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['dg'], num: 'DGAU2203948', owner: 'KWE Chemical Freight',      type: '20FT DG', cargo: 'dg', weight: 21500 },
+
+        // --- EMPTY DEPOT (Stacked up to 5 Tiers High) ---
+        { block: 'EMPTY', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['empty'], num: 'MTYU1000001', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
+        { block: 'EMPTY', bay: 1, row: 1, tier: 2, color: SHIPPING_COLORS['empty'], num: 'MTYU1000002', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
+        { block: 'EMPTY', bay: 1, row: 1, tier: 3, color: SHIPPING_COLORS['empty'], num: 'MTYU1000003', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
+        { block: 'EMPTY', bay: 1, row: 1, tier: 4, color: SHIPPING_COLORS['empty'], num: 'MTYU1000004', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
+        { block: 'EMPTY', bay: 1, row: 1, tier: 5, color: SHIPPING_COLORS['empty'], num: 'MTYU1000005', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
+        { block: 'EMPTY', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['empty'], num: 'MTYU1000006', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
+        { block: 'EMPTY', bay: 1, row: 2, tier: 2, color: SHIPPING_COLORS['empty'], num: 'MTYU1000007', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
+        { block: 'EMPTY', bay: 1, row: 2, tier: 3, color: SHIPPING_COLORS['empty'], num: 'MTYU1000008', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 }
+    ];
+
+    baselineList.forEach(c => {
+        const is20ft = (c.type && c.type.includes('20'));
+        const pos = getSlotWorldPosition(c.block, c.bay, c.row, c.tier, is20ft);
+        const cLength = is20ft ? 6.0 : 12.0;
+        const mesh = createContainerMesh(cLength, 2.60, 2.44, c.color, c.num, c.cargo);
+        mesh.position.set(pos.x, pos.y, pos.z);
+        mesh.userData = {
+            container_number: c.num,
+            size_type: c.type,
+            cargo_type: c.cargo,
+            block: c.block,
+            bay: String(c.bay).padStart(2, '0'),
+            row: String(c.row).padStart(2, '0'),
+            tier: String(c.tier).padStart(2, '0'),
+            gross_weight_kg: c.weight,
+            owner_company: c.owner,
+            rfid_tag: 'RFID-CTR-' + c.num.slice(-3),
+            customs_status: 'SPPB_CLEARED',
+            status: 'in_yard'
+        };
+        scene.add(mesh);
+        containerMeshes[c.num] = mesh;
+    });
+}
+
+// Render Containers onto 3D Yard Blocks (Synchronized with MySQL)
+function renderContainersFromState(containers) {
+    if (!containers || !Array.isArray(containers) || isAnimating) return;
 
     containers.forEach(c => {
-        if (c.status !== 'in_yard') return;
+        if (c.status !== 'in_yard') {
+            if (containerMeshes[c.container_number]) {
+                scene.remove(containerMeshes[c.container_number]);
+                delete containerMeshes[c.container_number];
+            }
+            return;
+        }
 
         const bCoord = BLOCK_COORDS[c.block];
         if (!bCoord) return;
 
-        const bayNum  = parseInt(c.bay, 10) || 1;
-        const rowNum  = parseInt(c.row, 10) || 1;
-        const tierNum = parseInt(c.tier, 10) || 1;
+        const is20ft = (c.size_type && c.size_type.includes('20')) || (c.iso_code && c.iso_code.startsWith('2'));
+        const cLength = is20ft ? 6.0 : 12.0;
+        const pos = getSlotWorldPosition(c.block, c.bay, c.row, c.tier, is20ft);
 
-        // Container 3D Dimensions
-        const cLength = 5.8;
-        const cWidth  = 2.4;
-        const cHeight = 2.4;
-
-        // Calculate 3D World Position
-        // X spreads by Bay (01-05), Z spreads by Row (01-04), Y stacks by Tier (01-04)
-        const posX = bCoord.x + 3.0 + ((bayNum - 1) % 5) * 6.2;
-        const posZ = bCoord.z + 2.5 + ((rowNum - 1) % 3) * 3.2;
-        const posY = (cHeight / 2) + ((tierNum - 1) * cHeight);
-
-        // Pick color based on cargo or company
         let colorHex = SHIPPING_COLORS['Maersk'];
         if (c.cargo_type === 'reefer') colorHex = SHIPPING_COLORS['reefer'];
         else if (c.cargo_type === 'dg') colorHex = SHIPPING_COLORS['dg'];
@@ -3303,21 +3801,29 @@ function renderContainersFromState(containers) {
         else if (c.owner_company && c.owner_company.includes('CMA')) colorHex = SHIPPING_COLORS['CMA CGM'];
         else if (c.owner_company && c.owner_company.includes('Meratus')) colorHex = SHIPPING_COLORS['Meratus'];
         else if (c.owner_company && c.owner_company.includes('Samudera')) colorHex = SHIPPING_COLORS['Samudera'];
+        else if (c.owner_company && c.owner_company.includes('MSC')) colorHex = SHIPPING_COLORS['MSC'];
+        else if (c.owner_company && c.owner_company.includes('ONE')) colorHex = SHIPPING_COLORS['ONE'];
 
-        // Create 3D Container Mesh
-        const mesh = createContainerMesh(cLength, cHeight, cWidth, colorHex, c.container_number);
-        mesh.position.set(posX, posY, posZ);
-        mesh.userData = c; // Attach full DB data for raycasting inspection!
-
-        scene.add(mesh);
-        containerMeshes[c.container_number] = mesh;
+        // If mesh already exists, update position & userData; else create
+        let mesh = containerMeshes[c.container_number];
+        if (mesh) {
+            mesh.position.set(pos.x, pos.y, pos.z);
+            mesh.userData = c;
+        } else {
+            mesh = createContainerMesh(cLength, 2.60, 2.44, colorHex, c.container_number, c.cargo_type);
+            mesh.position.set(pos.x, pos.y, pos.z);
+            mesh.userData = c;
+            scene.add(mesh);
+            containerMeshes[c.container_number] = mesh;
+        }
     });
 }
 
-// Procedural 3D Container Mesh with Corrugated Texture Simulation
-function createContainerMesh(l, h, w, colorHex, boxNumber) {
+// Procedural 3D Container Mesh with Authentic Industrial Stacking Details
+function createContainerMesh(l, h, w, colorHex, boxNumber, cargoType = 'dry') {
     const group = new THREE.Group();
 
+    // 1. Main Structural Box (Weathered Corten Steel)
     const boxGeo = new THREE.BoxGeometry(l, h, w);
     const boxMat = new THREE.MeshStandardMaterial({
         color: colorHex,
@@ -3329,19 +3835,188 @@ function createContainerMesh(l, h, w, colorHex, boxNumber) {
     mainBox.receiveShadow = true;
     group.add(mainBox);
 
-    // Edge corner castings
-    const edgeGeo = new THREE.BoxGeometry(l + 0.05, h + 0.05, w + 0.05);
-    const edgeMat = new THREE.MeshBasicMaterial({ color: 0x0f172a, wireframe: true });
-    const wire = new THREE.Mesh(edgeGeo, edgeMat);
-    group.add(wire);
+    // 2. 8 ISO 1161 Steel Corner Castings (Top and Bottom Corners)
+    const cornerMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.8 });
+    const cornerHoleMat = new THREE.MeshBasicMaterial({ color: 0x020617 });
+    const cornerGeo = new THREE.BoxGeometry(0.32, 0.32, 0.32);
+    const holeGeo = new THREE.BoxGeometry(0.12, 0.04, 0.18);
 
-    // Top Corrugated Grooves (Fine details)
-    const ribGeo = new THREE.BoxGeometry(0.15, 0.08, w - 0.2);
-    const ribMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.6 });
-    for (let rx = -l/2 + 0.4; rx <= l/2 - 0.4; rx += 0.5) {
-        const rib = new THREE.Mesh(ribGeo, ribMat);
-        rib.position.set(rx, h/2 + 0.04, 0);
-        group.add(rib);
+    const cornerX = [ -l/2 + 0.16, l/2 - 0.16 ];
+    const cornerY = [ -h/2 + 0.16, h/2 - 0.16 ];
+    const cornerZ = [ -w/2 + 0.16, w/2 - 0.16 ];
+
+    cornerX.forEach(cx => {
+        cornerY.forEach(cy => {
+            cornerZ.forEach(cz => {
+                const cornerMesh = new THREE.Mesh(cornerGeo, cornerMat);
+                cornerMesh.position.set(cx, cy, cz);
+                group.add(cornerMesh);
+
+                // Aperture cutout / twistlock pocket on casting face
+                const hole = new THREE.Mesh(holeGeo, cornerHoleMat);
+                hole.position.set(cx, cy + (cy > 0 ? 0.15 : -0.15), cz);
+                group.add(hole);
+            });
+        });
+    });
+
+    // 3. Stacking Interlock Cones (Twistlock Guides on 4 Top Corners)
+    const twistlockGeo = new THREE.CylinderGeometry(0.04, 0.08, 0.16, 8);
+    const twistlockMat = new THREE.MeshBasicMaterial({ color: 0xeab308 }); // Safety Yellow
+    cornerX.forEach(cx => {
+        cornerZ.forEach(cz => {
+            const tl = new THREE.Mesh(twistlockGeo, twistlockMat);
+            tl.position.set(cx, h/2 + 0.08, cz);
+            group.add(tl);
+        });
+    });
+
+    // 4. Side Corrugation Vertical Ribs (Authentic light/shadow ripples)
+    const vRibGeo = new THREE.BoxGeometry(0.12, h - 0.36, 0.04);
+    const vRibMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.5 });
+    for (let rx = -l/2 + 0.4; rx <= l/2 - 0.4; rx += 0.55) {
+        [-w/2 - 0.02, w/2 + 0.02].forEach(rz => {
+            const vRib = new THREE.Mesh(vRibGeo, vRibMat);
+            vRib.position.set(rx, 0, rz);
+            group.add(vRib);
+        });
+    }
+
+    // 5. Roof Transverse Corrugations
+    const rRibGeo = new THREE.BoxGeometry(0.15, 0.06, w - 0.35);
+    for (let rx = -l/2 + 0.4; rx <= l/2 - 0.4; rx += 0.55) {
+        const rRib = new THREE.Mesh(rRibGeo, vRibMat);
+        rRib.position.set(rx, h/2 + 0.03, 0);
+        group.add(rRib);
+    }
+
+    // 6. Rear End Cargo Doors (+X Face) with Locking Rods & Customs Seal
+    const doorFrameGeo = new THREE.BoxGeometry(0.06, h - 0.1, w - 0.1);
+    const doorFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
+    const doorFrame = new THREE.Mesh(doorFrameGeo, doorFrameMat);
+    doorFrame.position.set(l/2 + 0.02, 0, 0);
+    group.add(doorFrame);
+
+    // Center vertical split line
+    const splitGeo = new THREE.BoxGeometry(0.08, h - 0.2, 0.04);
+    const splitMesh = new THREE.Mesh(splitGeo, cornerHoleMat);
+    splitMesh.position.set(l/2 + 0.03, 0, 0);
+    group.add(splitMesh);
+
+    // 4 Galvanized Vertical Locking Bars (2 per door)
+    const rodGeo = new THREE.CylinderGeometry(0.03, 0.03, h - 0.35, 8);
+    const rodMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
+    [-0.7, -0.25, 0.25, 0.7].forEach(rz => {
+        const rod = new THREE.Mesh(rodGeo, rodMat);
+        rod.position.set(l/2 + 0.05, 0, rz);
+        group.add(rod);
+
+        // Cam Keepers (top and bottom brackets)
+        [-h/2 + 0.25, h/2 - 0.25].forEach(ry => {
+            const camGeo = new THREE.BoxGeometry(0.08, 0.12, 0.1);
+            const camMesh = new THREE.Mesh(camGeo, cornerMat);
+            camMesh.position.set(l/2 + 0.05, ry, rz);
+            group.add(camMesh);
+        });
+    });
+
+    // Horizontal Door Locking Handles & Customs Bullet Seal
+    const handleGeo = new THREE.BoxGeometry(0.06, 0.04, 0.25);
+    const handleMesh = new THREE.Mesh(handleGeo, rodMat);
+    handleMesh.position.set(l/2 + 0.07, -0.15, 0.25);
+    group.add(handleMesh);
+
+    const sealGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.1, 8);
+    const sealMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 }); // Cyan e-Seal
+    const sealMesh = new THREE.Mesh(sealGeo, sealMat);
+    sealMesh.position.set(l/2 + 0.09, -0.15, 0.20);
+    group.add(sealMesh);
+
+    // 7. Stencil Markings Canvas Decal (Box Number, ISO Code, Stacking Info)
+    const decalCanvas = document.createElement('canvas');
+    decalCanvas.width = 512;
+    decalCanvas.height = 128;
+    const dctx = decalCanvas.getContext('2d');
+    dctx.clearRect(0, 0, 512, 128);
+    dctx.font = 'bold 36px monospace';
+    dctx.fillStyle = '#ffffff';
+    dctx.fillText(boxNumber || 'MSKU1029384', 20, 45);
+    dctx.font = 'bold 22px monospace';
+    dctx.fillStyle = '#cbd5e1';
+    dctx.fillText('45G1  HIGH CUBE  9\'6"', 20, 80);
+    dctx.font = '16px monospace';
+    dctx.fillStyle = '#94a3b8';
+    dctx.fillText('MAX 32.500 KG | TARE 3.850 KG', 20, 110);
+
+    const decalTex = new THREE.CanvasTexture(decalCanvas);
+    const decalMat = new THREE.MeshBasicMaterial({ map: decalTex, transparent: true });
+    const decalGeo = new THREE.PlaneGeometry(3.6, 0.9);
+    
+    // Front side decal
+    const decalMeshF = new THREE.Mesh(decalGeo, decalMat);
+    decalMeshF.position.set(l/2 - 2.5, 0.35, w/2 + 0.03);
+    group.add(decalMeshF);
+
+    // Rear door decal
+    const doorDecalCanvas = document.createElement('canvas');
+    doorDecalCanvas.width = 256;
+    doorDecalCanvas.height = 128;
+    const ddctx = doorDecalCanvas.getContext('2d');
+    ddctx.font = 'bold 26px monospace';
+    ddctx.fillStyle = '#ffffff';
+    ddctx.fillText(boxNumber || 'MSKU1029384', 10, 35);
+    ddctx.font = '18px monospace';
+    ddctx.fillStyle = '#f59e0b';
+    ddctx.fillText('WARNING 9\'6" HIGH', 10, 70);
+    ddctx.font = '14px monospace';
+    ddctx.fillStyle = '#94a3b8';
+    ddctx.fillText('CSC SAFETY APPROVED', 10, 100);
+
+    const doorTex = new THREE.CanvasTexture(doorDecalCanvas);
+    const doorDecalMat = new THREE.MeshBasicMaterial({ map: doorTex, transparent: true });
+    const doorDecalGeo = new THREE.PlaneGeometry(1.0, 0.5);
+    const doorDecalMesh = new THREE.Mesh(doorDecalGeo, doorDecalMat);
+    doorDecalMesh.rotation.y = Math.PI / 2;
+    doorDecalMesh.position.set(l/2 + 0.06, 0.45, -0.45);
+    group.add(doorDecalMesh);
+
+    // 8. High Cube Zebra Warning Stripes on Top Front/Rear Corners (IMO Requirement)
+    const zebraGeo = new THREE.BoxGeometry(0.4, 0.12, 0.02);
+    const zebraCanvas = document.createElement('canvas');
+    zebraCanvas.width = 128;
+    zebraCanvas.height = 32;
+    const zctx = zebraCanvas.getContext('2d');
+    zctx.fillStyle = '#eab308';
+    zctx.fillRect(0, 0, 128, 32);
+    zctx.fillStyle = '#000000';
+    for (let zx = 0; zx < 128; zx += 20) {
+        zctx.beginPath();
+        zctx.moveTo(zx, 0);
+        zctx.lineTo(zx + 10, 0);
+        zctx.lineTo(zx, 32);
+        zctx.lineTo(zx - 10, 32);
+        zctx.fill();
+    }
+    const zebraTex = new THREE.CanvasTexture(zebraCanvas);
+    const zebraMat = new THREE.MeshBasicMaterial({ map: zebraTex });
+    [-l/2 + 0.4, l/2 - 0.4].forEach(zx => {
+        const zm = new THREE.Mesh(zebraGeo, zebraMat);
+        zm.position.set(zx, h/2 - 0.08, w/2 + 0.025);
+        group.add(zm);
+    });
+
+    // 9. Reefer Machinery Unit (if reefer cargo)
+    if (cargoType === 'reefer' || colorHex === SHIPPING_COLORS['reefer']) {
+        const reeferUnitGeo = new THREE.BoxGeometry(0.3, h - 0.6, w - 0.5);
+        const reeferUnitMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
+        const reeferUnit = new THREE.Mesh(reeferUnitGeo, reeferUnitMat);
+        reeferUnit.position.set(-l/2 - 0.08, 0, 0);
+        group.add(reeferUnit);
+
+        // Green Running LED Light
+        const rLed = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0x22c55e }));
+        rLed.position.set(-l/2 - 0.24, 0.4, 0.5);
+        group.add(rLed);
     }
 
     return group;
@@ -3397,13 +4072,10 @@ function inspectContainer(data) {
     card.classList.remove('hidden');
 
     // 3D Focus & Target Beacon onto inspected container
-    const bCoord = (typeof BLOCK_COORDS !== 'undefined' && BLOCK_COORDS[data.block]) ? BLOCK_COORDS[data.block] : { x: 18, z: 0 };
-    const bayNum = parseInt(data.bay, 10) || 1;
-    const rowNum = parseInt(data.row, 10) || 1;
-    const posX = bCoord.x + 3.0 + ((bayNum - 1) % 5) * 6.2;
-    const posZ = bCoord.z + 2.5 + ((rowNum - 1) % 3) * 3.2;
+    const is20ft = (data.size_type && data.size_type.includes('20'));
+    const pos = getSlotWorldPosition(data.block, data.bay, data.row, data.tier, is20ft);
     const camPreset = data.cargo_type === 'reefer' ? 'reefer' : 'yard';
-    focusLocation(camPreset, `Peti Kemas ${data.container_number} (${data.block}-${data.bay}-${data.row}-${data.tier})`, { x: posX, y: 0, z: posZ }, (data.cargo_type || 'DRY').toUpperCase());
+    focusLocation(camPreset, `Peti Kemas ${data.container_number} (${data.block}-${data.bay}-${data.row}-${data.tier})`, { x: pos.x, y: 0, z: pos.z }, (data.cargo_type || 'DRY').toUpperCase());
 
     logTicker(`[INSPECTOR] Kontainer ${data.container_number} dipilih di slot ${data.block}-${data.bay}-${data.row}-${data.tier}.`);
 }
@@ -3416,7 +4088,33 @@ function closeInspector() {
 function prefillAndOpenMove() {
     if (!selectedContainerData) return;
     openMoveModal();
-    document.getElementById('moveContainerSelect').value = selectedContainerData.id;
+    const sel = document.getElementById('moveContainerSelect');
+    const boxNum = selectedContainerData.container_number;
+    
+    // Ensure the container is available in dropdown options
+    let found = false;
+    for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].dataset.boxNum === boxNum || sel.options[i].value == selectedContainerData.id || sel.options[i].textContent.includes(boxNum)) {
+            sel.selectedIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if (!found) {
+        const opt = document.createElement('option');
+        opt.value = selectedContainerData.id || boxNum;
+        opt.dataset.boxNum = boxNum;
+        opt.textContent = `📦 ${boxNum} — ${selectedContainerData.owner_company || 'Laden'} (Saat ini di ${selectedContainerData.block}-${selectedContainerData.bay}-${selectedContainerData.row}-${selectedContainerData.tier})`;
+        sel.prepend(opt);
+        sel.selectedIndex = 0;
+    }
+    
+    // Suggest sensible target block/slot
+    const curBlock = selectedContainerData.block || 'A';
+    document.getElementById('moveToBlock').value = (curBlock === 'A') ? 'B' : 'A';
+    document.getElementById('moveToBay').value = selectedContainerData.bay || '02';
+    document.getElementById('moveToRow').value = selectedContainerData.row || '03';
+    document.getElementById('moveToTier').value = (parseInt(selectedContainerData.tier, 10) < 4) ? String(parseInt(selectedContainerData.tier, 10) + 1).padStart(2, '0') : '01';
 }
 
 // =============================================================================
@@ -3432,15 +4130,39 @@ function closeMoveModal() {
 
 function populateMoveSelect(containers) {
     const sel = document.getElementById('moveContainerSelect');
+    if (!sel) return;
+    const currentVal = sel.value;
     sel.innerHTML = '';
-    containers.forEach(c => {
-        if (c.status === 'in_yard') {
+    
+    // 1. Add containers from MySQL
+    const addedBoxNums = new Set();
+    if (containers && Array.isArray(containers)) {
+        containers.forEach(c => {
+            if (c.status === 'in_yard') {
+                const opt = document.createElement('option');
+                opt.value = c.id;
+                opt.dataset.boxNum = c.container_number;
+                opt.textContent = `📦 ${c.container_number} — ${c.owner_company} (${c.block}-${c.bay}-${c.row}-${c.tier})`;
+                sel.appendChild(opt);
+                addedBoxNums.add(c.container_number);
+            }
+        });
+    }
+
+    // 2. Also add active 3D containers from containerMeshes that might not be in DB yet
+    for (const [bNum, m] of Object.entries(containerMeshes)) {
+        if (!addedBoxNums.has(bNum) && m.userData && m.userData.block) {
+            const u = m.userData;
             const opt = document.createElement('option');
-            opt.value = c.id;
-            opt.textContent = `📦 ${c.container_number} — ${c.owner_company} (Saat ini di ${c.block}-${c.bay}-${c.row}-${c.tier})`;
+            opt.value = u.id || bNum;
+            opt.dataset.boxNum = bNum;
+            opt.textContent = `📦 ${bNum} — ${u.owner_company || 'Port Yard'} (${u.block}-${u.bay}-${u.row}-${u.tier})`;
             sel.appendChild(opt);
+            addedBoxNums.add(bNum);
         }
-    });
+    }
+
+    if (currentVal) sel.value = currentVal;
 }
 
 function handleMoveSubmit(e) {
@@ -3450,12 +4172,22 @@ function handleMoveSubmit(e) {
         return;
     }
 
-    const containerId = document.getElementById('moveContainerSelect').value;
+    const sel = document.getElementById('moveContainerSelect');
+    const selectedOpt = sel.options[sel.selectedIndex];
+    const containerId = sel.value;
+    const boxNumber = selectedOpt ? (selectedOpt.dataset.boxNum || selectedOpt.textContent.split(' ')[1]) : '';
     const equipmentId = document.getElementById('moveEquipmentSelect').value;
     const toBlock     = document.getElementById('moveToBlock').value;
     const toBay       = document.getElementById('moveToBay').value;
     const toRow       = document.getElementById('moveToRow').value;
     const toTier      = document.getElementById('moveToTier').value;
+
+    const tMesh = containerMeshes[boxNumber];
+    const fromBlock = (tMesh && tMesh.userData) ? (tMesh.userData.block || 'A') : 'A';
+    const fromBay   = (tMesh && tMesh.userData) ? (tMesh.userData.bay || '01') : '01';
+    const fromRow   = (tMesh && tMesh.userData) ? (tMesh.userData.row || '01') : '01';
+    const fromTier  = (tMesh && tMesh.userData) ? (tMesh.userData.tier || '01') : '01';
+    const ownerComp = (tMesh && tMesh.userData && tMesh.userData.owner_company) ? tMesh.userData.owner_company : 'Ocean Carrier';
 
     const btn = document.getElementById('btnSubmitMove');
     btn.disabled = true;
@@ -3468,7 +4200,13 @@ function handleMoveSubmit(e) {
         body: JSON.stringify({
             action: 'move_container',
             container_id: containerId,
+            container_number: boxNumber,
             equipment_id: equipmentId,
+            from_block: fromBlock,
+            from_bay: fromBay,
+            from_row: fromRow,
+            from_tier: fromTier,
+            owner_company: ownerComp,
             to_block: toBlock,
             to_bay: toBay,
             to_row: toRow,
@@ -3486,7 +4224,7 @@ function handleMoveSubmit(e) {
             showToast('Relokasi Berhasil', data.message, 'success');
             logTicker(`[LIFT-OFF] ${data.equipment.equipment_id} mengangkat ${data.container.container_number} -> ${data.container.to}`);
             
-            // Trigger 3D Reach Stacker Animation!
+            // Trigger 3D Reach Stacker Animation with physical attachment!
             animateReachStackerMove(data.container.container_number, data.container.from, data.container.to, equipmentId);
         } else {
             showToast('Slot Penuh / Gagal', data.message, 'error');
@@ -3499,17 +4237,20 @@ function handleMoveSubmit(e) {
     });
 }
 
-// Reach Stacker Moving & Stacking Animation
+// Reach Stacker Moving & Stacking Animation with REAL-WORLD Physical Attachment
 function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
-    const targetMesh = containerMeshes[boxNumber];
-    const rsMesh = equipmentMeshes[equipmentId] || equipmentMeshes['RS-02'];
-    if (!targetMesh || !rsMesh) {
-        fetchSimulationState();
-        return;
+    let targetMesh = containerMeshes[boxNumber];
+    if (!targetMesh) {
+        // Fallback search across meshes
+        for (const [k, m] of Object.entries(containerMeshes)) {
+            if (m.userData && (m.userData.container_number === boxNumber || m.userData.id == boxNumber)) {
+                targetMesh = m;
+                boxNumber = k;
+                break;
+            }
+        }
     }
-
-    isAnimating = true;
-
+    
     // Parse target coordinates
     const toParts = toSlot.split('-');
     const toBlock = toParts[0];
@@ -3517,43 +4258,766 @@ function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
     const toRow = parseInt(toParts[2], 10) || 1;
     const toTier = parseInt(toParts[3], 10) || 1;
 
-    const bCoord = BLOCK_COORDS[toBlock];
-    const targetX = bCoord.x + 3.0 + ((toBay - 1) % 5) * 6.2;
-    const targetZ = bCoord.z + 2.5 + ((toRow - 1) % 3) * 3.2;
-    const targetY = 1.2 + ((toTier - 1) * 2.4);
+    // Parse from coordinates
+    const fromParts = fromSlot.split('-');
+    const fromBlock = fromParts[0] || (targetMesh && targetMesh.userData ? targetMesh.userData.block : 'A');
+    const fromBay = parseInt(fromParts[1], 10) || (targetMesh && targetMesh.userData ? parseInt(targetMesh.userData.bay, 10) : 1);
+    const fromRow = parseInt(fromParts[2], 10) || (targetMesh && targetMesh.userData ? parseInt(targetMesh.userData.row, 10) : 1);
+    const fromTier = parseInt(fromParts[3], 10) || (targetMesh && targetMesh.userData ? parseInt(targetMesh.userData.tier, 10) : 1);
 
-    // Step 1: RS moves to source container
-    focusLocation('yard', `Relokasi: ${equipmentId} Menjemput ${boxNumber}`, { x: targetMesh.position.x, y: 0, z: targetMesh.position.z }, equipmentId);
+    const is20ft = targetMesh && targetMesh.userData && targetMesh.userData.size_type && targetMesh.userData.size_type.includes('20');
+    
+    // If targetMesh still somehow not created, spawn it at fromSlot!
+    if (!targetMesh) {
+        const fromPos = getSlotWorldPosition(fromBlock, fromBay, fromRow, fromTier, is20ft);
+        targetMesh = createContainerMesh(is20ft ? 6.0 : 12.0, 2.60, 2.44, SHIPPING_COLORS['Maersk'], boxNumber);
+        targetMesh.position.set(fromPos.x, fromPos.y, fromPos.z);
+        targetMesh.userData = { container_number: boxNumber, block: fromBlock, bay: String(fromBay).padStart(2,'0'), row: String(fromRow).padStart(2,'0'), tier: String(fromTier).padStart(2,'0'), status: 'in_yard' };
+        scene.add(targetMesh);
+        containerMeshes[boxNumber] = targetMesh;
+    }
 
+    const rsMesh = equipmentMeshes[equipmentId] || equipmentMeshes['RS-02'] || equipmentMeshes['RS-01'];
+    if (!rsMesh) {
+        fetchSimulationState();
+        return;
+    }
+
+    isAnimating = true;
+    const targetPos = getSlotWorldPosition(toBlock, toBay, toRow, toTier, is20ft);
+    const targetX = targetPos.x;
+    const targetY = targetPos.y;
+    const targetZ = targetPos.z;
+
+    const boom = rsMesh.getObjectByName('rsBoom');
+    const spreader = rsMesh.getObjectByName('rsSpreader');
+
+    showOpFlowHUD(3, `RELOKASI: ${equipmentId} MEMINDAHKAN ${boxNumber}`, `Menjemput kontainer di ${fromSlot} dan menumpuk di ${toSlot} (Tier ${toTier})...`);
+    focusLocation('yard', `Relokasi: ${equipmentId} Menjemput ${boxNumber} (${fromSlot})`, { x: targetMesh.position.x, y: 0, z: targetMesh.position.z }, equipmentId);
+    logTicker(`[RELOKASI] ${equipmentId} bergerak mendekati slot ${fromSlot} untuk mengangkut kontainer ${boxNumber}...`);
+
+    // Source world coordinates
+    const srcX = targetMesh.position.x;
+    const srcY = targetMesh.position.y;
+    const srcZ = targetMesh.position.z;
+
+    // Step 1: RS approaches container and aligns spreader over the top
+    // Reach Stacker faces +X (rotation Y = 0) with spreader at offset +7.5m along X
+    rsMesh.rotation.set(0, 0, 0);
     new TWEEN.Tween(rsMesh.position)
-        .to({ x: targetMesh.position.x + 8, z: targetMesh.position.z }, 1200)
+        .to({ x: srcX - 7.5, z: srcZ }, dur(1200))
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .onComplete(() => {
+            // Step 2: Spreader tilts and lowers down onto container
+            if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 18 }, dur(400)).start();
+            
+            setTimeout(() => {
+                playSimSound('twistlock');
+                logTicker(`[TWISTLOCK ENGAGED] 4 Corner casting ${boxNumber} terkunci sempurna ke spreader ${equipmentId}.`);
+
+                // Step 3: ATTACH CONTAINER TO REACH STACKER!
+                // Using Three.js attach: preserves world transform while parenting to rsMesh!
+                rsMesh.attach(targetMesh);
+
+                // Step 4: Lift container up in local RS space to clear stacks (Tier 4+ safety height)
+                if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 6 }, dur(600)).start();
+                new TWEEN.Tween(targetMesh.position)
+                    .to({ y: targetMesh.position.y + 6.0 }, dur(700))
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .onComplete(() => {
+                        logTicker(`[LIFT-OFF] Kontainer ${boxNumber} diangkat ke ketinggian bebas rintangan (Tier 4+ Clearance).`);
+                        focusLocation('yard', `Relokasi: Membawa ${boxNumber} ke ${toSlot}`, { x: targetX, y: 0, z: targetZ }, `TARGET ${toBlock}`);
+
+                        // Step 5: RS travels with container attached along terminal haul road
+                        // Intermediate waypoints:
+                        // Waypoint 1: Back out to transfer road (Z = 28 or Z = -5)
+                        const haulZ = (srcZ > 0 && targetZ > 0) ? 28 : ((srcZ < 0 && targetZ < 0) ? -39 : -5);
+                        
+                        new TWEEN.Tween(rsMesh.position)
+                            .to({ x: srcX - 10, z: haulZ }, dur(900))
+                            .easing(TWEEN.Easing.Quadratic.InOut)
+                            .onComplete(() => {
+                                // Waypoint 2: Drive along haul road to destination X
+                                new TWEEN.Tween(rsMesh.position)
+                                    .to({ x: targetX - 7.5, z: haulZ }, dur(1400))
+                                    .easing(TWEEN.Easing.Quadratic.InOut)
+                                    .onComplete(() => {
+                                        // Waypoint 3: Turn into destination bay aisle at (targetX - 7.5, targetZ)
+                                        new TWEEN.Tween(rsMesh.position)
+                                            .to({ x: targetX - 7.5, z: targetZ }, dur(900))
+                                            .easing(TWEEN.Easing.Quadratic.InOut)
+                                            .onComplete(() => {
+                                                logTicker(`[STACKING] ${equipmentId} menempatkan ${boxNumber} di ${toSlot} (Tier ${toTier})...`);
+
+                                                // Step 6: Lower spreader and container smoothly to target tier elevation
+                                                if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 16 }, dur(500)).start();
+                                                
+                                                new TWEEN.Tween(targetMesh.position)
+                                                    .to({ y: targetY }, dur(800))
+                                                    .easing(TWEEN.Easing.Quadratic.InOut)
+                                                    .onComplete(() => {
+                                                        playSimSound('thud');
+                                                        playSimSound('twistlock');
+
+                                                        // Step 7: DETACH CONTAINER & LOCK PERMANENTLY AT TARGET WORLD POSITION
+                                                        scene.attach(targetMesh);
+                                                        targetMesh.position.set(targetX, targetY, targetZ);
+                                                        targetMesh.rotation.set(0, 0, 0);
+
+                                                        // Update metadata
+                                                        targetMesh.userData.block = toBlock;
+                                                        targetMesh.userData.bay = String(toBay).padStart(2, '0');
+                                                        targetMesh.userData.row = String(toRow).padStart(2, '0');
+                                                        targetMesh.userData.tier = String(toTier).padStart(2, '0');
+                                                        containerMeshes[boxNumber] = targetMesh;
+
+                                                        logTicker(`[STACKED SUKSES] Kontainer ${boxNumber} resmi ditumpuk fisik di ${toBlock}-${toBay}-${toRow}-${toTier}.`);
+                                                        showToast('Relokasi Berhasil', `Kontainer ${boxNumber} sukses ditumpuk di ${toBlock}-${toBay}-${toRow}-${toTier} (Tier ${toTier})!`, 'success');
+
+                                                        // Step 8: RS disengages and returns to standby
+                                                        if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 10 }, dur(400)).start();
+                                                        new TWEEN.Tween(rsMesh.position)
+                                                            .to({ x: targetX - 12, z: targetZ }, dur(800))
+                                                            .easing(TWEEN.Easing.Quadratic.InOut)
+                                                            .onComplete(() => {
+                                                                isAnimating = false;
+                                                                fetchSimulationState();
+                                                                setTimeout(() => hideOpFlowHUD(), 3000);
+                                                            })
+                                                            .start();
+                                                    })
+                                                    .start();
+                                            })
+                                            .start();
+                                    })
+                                    .start();
+                            })
+                            .start();
+                    })
+                    .start();
+            }, dur(600));
+        })
+        .start();
+}
+
+// =============================================================================
+// SPEED CONTROLLER & OPERATIONAL HUD HELPERS
+// =============================================================================
+// =============================================================================
+// WEB AUDIO API REALISTIC PORT MECHANICAL SOUND SYNTHESIZER
+// =============================================================================
+let simAudioCtx = null;
+function getSimAudioContext() {
+    if (!simAudioCtx) {
+        const AudioClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioClass) simAudioCtx = new AudioClass();
+    }
+    if (simAudioCtx && simAudioCtx.state === 'suspended') {
+        simAudioCtx.resume();
+    }
+    return simAudioCtx;
+}
+
+function playSimSound(type) {
+    try {
+        const ctx = getSimAudioContext();
+        if (!ctx) return;
+
+        if (type === 'brake') {
+            // Pneumatic Air Brake Release Hiss ("Psssshhhh")
+            const bufferSize = Math.floor(ctx.sampleRate * 0.55);
+            const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < bufferSize; i++) {
+                data[i] = Math.random() * 2 - 1;
+            }
+            const noise = ctx.createBufferSource();
+            noise.buffer = buffer;
+
+            const filter = ctx.createBiquadFilter();
+            filter.type = 'bandpass';
+            filter.frequency.setValueAtTime(1600, ctx.currentTime);
+            filter.Q.setValueAtTime(1.8, ctx.currentTime);
+
+            const gain = ctx.createGain();
+            gain.gain.setValueAtTime(0.16, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.5);
+
+            noise.connect(filter);
+            filter.connect(gain);
+            gain.connect(ctx.destination);
+            noise.start();
+        } else if (type === 'twistlock') {
+            // Heavy Metallic Clank / Twistlock Latch Lock
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(140, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.18);
+
+            gain.gain.setValueAtTime(0.35, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.22);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.22);
+
+            // Metal click overtone
+            const osc2 = ctx.createOscillator();
+            const gain2 = ctx.createGain();
+            osc2.type = 'square';
+            osc2.frequency.setValueAtTime(900, ctx.currentTime);
+            osc2.frequency.exponentialRampToValueAtTime(250, ctx.currentTime + 0.08);
+
+            gain2.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.09);
+
+            osc2.connect(gain2);
+            gain2.connect(ctx.destination);
+            osc2.start();
+            osc2.stop(ctx.currentTime + 0.09);
+        } else if (type === 'beep') {
+            // Terminal Scanner RFID/OCR Confirmation Beep
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(1300, ctx.currentTime);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.12);
+        } else if (type === 'thud') {
+            // Container Stacking Solid Landing Impact
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(75, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(28, ctx.currentTime + 0.22);
+
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.25);
+        } else if (type === 'barrier') {
+            // Electric Barrier Motor Buzz
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(160, ctx.currentTime);
+
+            gain.gain.setValueAtTime(0.06, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
+
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.4);
+        }
+    } catch (e) {
+        // Audio might be waiting for user interaction, safely bypass
+    }
+}
+
+// =============================================================================
+// SPEED CONTROLLER & OPERATIONAL HUD HELPERS
+// =============================================================================
+function dur(ms) {
+    return Math.round(ms / (simSpeedMultiplier || 1.25));
+}
+
+function toggleSimSpeed() {
+    if (simSpeedMultiplier < 1.1) {
+        simSpeedMultiplier = 1.75;
+    } else if (simSpeedMultiplier < 2.0) {
+        simSpeedMultiplier = 2.5;
+    } else {
+        simSpeedMultiplier = 1.0;
+    }
+    const txt = simSpeedMultiplier.toFixed(2).replace('.00', '') + 'x';
+    const btn = document.getElementById('speedBtnText');
+    if (btn) btn.innerText = txt;
+    const hudSpd = document.getElementById('opFlowSpeedText');
+    if (hudSpd) hudSpd.innerText = txt;
+    showToast('Kecepatan Simulasi', `Kecepatan diatur ke ${txt}`, 'info');
+}
+
+function showOpFlowHUD(step, title, detail) {
+    const hud = document.getElementById('opFlowHUD');
+    if (!hud) return;
+    hud.classList.remove('opacity-0', 'pointer-events-none');
+    hud.classList.add('opacity-100');
+
+    const titleEl = document.getElementById('opFlowTitle');
+    const badgeEl = document.getElementById('opFlowStepBadge');
+    const detailEl = document.getElementById('opFlowDetailText');
+
+    if (titleEl) titleEl.innerText = title;
+    if (badgeEl) badgeEl.innerText = `TAHAP ${step}/4`;
+    if (detailEl) detailEl.innerText = detail;
+
+    for (let s = 1; s <= 4; s++) {
+        const stepEl = document.getElementById(`flowStep${s}`);
+        if (!stepEl) continue;
+        if (s === step) {
+            stepEl.className = 'py-1 px-0.5 rounded-lg bg-blue-600 text-white font-bold border border-blue-400 shadow-sm animate-pulse';
+        } else if (s < step) {
+            stepEl.className = 'py-1 px-0.5 rounded-lg bg-emerald-900/80 text-emerald-200 border border-emerald-500/50 font-semibold';
+        } else {
+            stepEl.className = 'py-1 px-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700/50 font-semibold';
+        }
+    }
+}
+
+function hideOpFlowHUD() {
+    const hud = document.getElementById('opFlowHUD');
+    if (!hud) return;
+    hud.classList.remove('opacity-100');
+    hud.classList.add('opacity-0', 'pointer-events-none');
+}
+
+// =============================================================================
+// ALUR OPERASIONAL NYATA TRUK (REAL-WORLD CONTINUOUS 4-STAGE FLOW)
+// 1. Gate-In & Timbangan 80T -> 2. Sirkulasi Yard -> 3. Angkat RS -> 4. Gate-Out
+// =============================================================================
+function triggerGateIn(type = 'drop_off') {
+    if (!truckMesh || isAnimating) return;
+    isAnimating = true;
+
+    const isPickup = (type === 'pick_up');
+    const misiText = isPickup ? 'PICK-UP (AMBIL BARANG)' : 'DROP-OFF (ANTAR BARANG)';
+
+    // Persiapan model visual armada (Drop-off membawa box 40ft, Pick-up masuk sasis kosong)
+    if (truckBoxMesh) {
+        truckBoxMesh.visible = !isPickup;
+    }
+
+    // Posisi awal di jalan raya pendekatan (Highway Approach Lane 1: X = -49, Z = 75)
+    truckMesh.position.set(-49, 0, 75);
+    truckMesh.rotation.set(0, Math.PI / 2, 0); // Menghadap Utara (-Z) ke arah Gate-In
+
+    // Stage 1 HUD & Kamera
+    showOpFlowHUD(1, '1. GATE-IN & JEMBATAN TIMBANG SOLAS 80T', isPickup 
+        ? 'Truk sasis kosong tiba di gerbang, pemindaian e-Pass supir & verifikasi bobot tara...'
+        : 'Truk kontainer tiba di gerbang, identifikasi OCR ISO 6346 & timbangan 80T...');
+    focusLocation('vgm', `Gate Inbound & Jembatan Timbang 80T [${misiText}]`, { x: -45, y: 0, z: 52 }, `GATE-IN • ${misiText}`);
+    logTicker(`[ANPR & RFID] Mendeteksi armada mendekati Inbound Gate Lane 1 (${misiText})...`);
+
+    // 1A. Truk melaju dari jalan raya ke atas platform jembatan timbang 18m (Z = 75 -> 52)
+    new TWEEN.Tween(truckMesh.position)
+        .to({ z: 52 }, dur(1600))
         .easing(TWEEN.Easing.Quadratic.Out)
         .onComplete(() => {
-            // Step 2: Lift Container Up
-            new TWEEN.Tween(targetMesh.position)
-                .to({ y: targetMesh.position.y + 7 }, 800)
-                .easing(TWEEN.Easing.Quadratic.Out)
-                .onComplete(() => {
-                    // Step 3: RS & Container travel together to destination
-                    focusLocation('yard', `Relokasi: Menumpuk ${boxNumber} ke ${toSlot}`, { x: targetX, y: 0, z: targetZ }, `TARGET ${toBlock}`);
+            playSimSound('brake'); // Suara rem angin psssh
+            logTicker(`[WEIGHBRIDGE 80T] Truk berhenti di atas timbangan SOLAS bersertifikasi...`);
 
-                    new TWEEN.Tween(rsMesh.position)
-                        .to({ x: targetX + 8, z: targetZ }, 1800)
-                        .easing(TWEEN.Easing.Quadratic.InOut)
+            // Panggil API Gate-In & Simpan ke MySQL
+            fetch(`api/simulator_action.php?action=gate_in&type=${type}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        playSimSound('beep'); // Beep konfirmasi penimbangan
+                        const trk = data.truck;
+                        trk.allocated_slot = data.allocated_slot;
+                        trk.target_container = data.target_container;
+                        const desc = isPickup 
+                            ? `${trk.license_plate}: Sasis Kosong (Tare ${trk.tare_weight.toLocaleString()} kg). Izin Pick-Up Kontainer Valid!`
+                            : `${trk.license_plate} (${trk.company}): Gross ${trk.gross_weight.toLocaleString()} kg, VGM Net ${trk.vgm_net.toLocaleString()} kg - SOLAS PASS!`;
+                        showToast(`Gate-In ${misiText} Sukses`, desc, 'success');
+                        logTicker(`[GATE-IN SUKSES] Plat ${trk.license_plate}: Gross ${trk.gross_weight}kg, Status: ${trk.vgm_status}.`);
+
+                        // 1B. Angkat Palang Pintu Gerbang Masuk (Boom Barrier Inbound)
+                        if (boomBarrierMesh) {
+                            playSimSound('barrier');
+                            new TWEEN.Tween(boomBarrierMesh.rotation)
+                                .to({ x: -Math.PI / 2.5 }, dur(600))
+                                .easing(TWEEN.Easing.Quadratic.Out)
+                                .start();
+                        }
+
+                        // 1C. Truk melaju melintasi palang masuk (Z = 52 -> 43 -> 28) ke jalan sirkulasi internal
+                        new TWEEN.Tween(truckMesh.position)
+                            .to({ z: 28 }, dur(1500))
+                            .easing(TWEEN.Easing.Quadratic.InOut)
+                            .onComplete(() => {
+                                // Tutup kembali palang pintu masuk
+                                if (boomBarrierMesh) {
+                                    new TWEEN.Tween(boomBarrierMesh.rotation)
+                                        .to({ x: 0 }, dur(500))
+                                        .easing(TWEEN.Easing.Quadratic.In)
+                                        .start();
+                                }
+
+                                // Lanjut ke Tahap 2: Sirkulasi Yard
+                                runStage2_DriveToYard(type, trk);
+                            })
+                            .start();
+                    } else {
+                        showToast('Gate-In Gagal', data.message || 'Terjadi kesalahan sistem', 'error');
+                        isAnimating = false;
+                        hideOpFlowHUD();
+                    }
+                })
+                .catch(err => {
+                    console.error('Error gate_in API:', err);
+                    isAnimating = false;
+                    hideOpFlowHUD();
+                });
+        })
+        .start();
+}
+
+function runStage2_DriveToYard(type, truckData) {
+    const isPickup = (type === 'pick_up');
+    const misiText = isPickup ? 'PICK-UP' : 'DROP-OFF';
+
+    showOpFlowHUD(2, '2. SIRKULASI TERMINAL ROAD KE YARD', isPickup
+        ? 'Truk sasis kosong melaju ke transfer lane Blok B (Laden Import) untuk alur pemuatan barang...'
+        : 'Truk kontainer melaju di jalan sirkulasi menuju transfer bay Blok A (Laden Export)...');
+
+    // Arahkan kamera ke blok yard tujuan
+    if (isPickup) {
+        focusLocation('yard', 'Truk Menuju Yard Penumpukan Blok B (Import)', { x: 44, y: 0, z: 28 }, 'YARD BLOK B');
+    } else {
+        focusLocation('yard', 'Truk Menuju Yard Penumpukan Blok A (Export)', { x: -44, y: 0, z: 28 }, 'YARD BLOK A');
+    }
+    logTicker(`[SIRKULASI YARD] Truk ${truckData.license_plate} melaju di jalan sirkulasi internal menuju transfer lane ${isPickup ? 'Blok B' : 'Blok A'}...`);
+
+    // 2A. Truk berputar ke arah Timur (rotasi Y: Math.PI / 2 -> 0)
+    new TWEEN.Tween(truckMesh.rotation)
+        .to({ y: 0 }, dur(500))
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .onComplete(() => {
+            // 2B. Truk melaju di jalan sirkulasi Z = 28 menuju posisi X transfer bay blok
+            const targetX = isPickup ? 44 : -44;
+            new TWEEN.Tween(truckMesh.position)
+                .to({ x: targetX, z: 28 }, dur(isPickup ? 2400 : 1800))
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .onComplete(() => {
+                    playSimSound('brake');
+                    runStage3_ReachStackerOperation(type, truckData);
+                })
+                .start();
+        })
+        .start();
+}
+
+function runStage3_ReachStackerOperation(type, truckData) {
+    const isPickup = (type === 'pick_up');
+    const rsId = isPickup ? 'RS-02' : 'RS-01';
+    const rs = equipmentMeshes[rsId] || equipmentMeshes['RS-01'];
+
+    showOpFlowHUD(3, isPickup ? '3. ANGKAT RS-02 (LIFT-ON MUATAN)' : '3. ANGKAT RS-01 (LIFT-OFF MUATAN)', isPickup
+        ? 'Reach Stacker RS-02 mengambil peti kemas dari slot Blok B dan menurunkannya ke sasis trailer...'
+        : 'Reach Stacker RS-01 mengunci twistlock, mengangkat box dari sasis trailer, dan menumpuk di Blok A...');
+
+    logTicker(`[${rsId}] Reach Stacker bergerak mendekati armada ${truckData.license_plate} untuk eksekusi ${isPickup ? 'Lift-On' : 'Lift-Off'}...`);
+
+    if (!rs) {
+        if (isPickup) {
+            if (truckBoxMesh) truckBoxMesh.visible = true;
+        } else {
+            if (truckBoxMesh) truckBoxMesh.visible = false;
+        }
+        setTimeout(() => runStage4_DriveToGateOut(type, truckData), dur(1500));
+        return;
+    }
+
+    const boom = rs.getObjectByName('rsBoom');
+
+    if (!isPickup) {
+        // =====================================================================
+        // DROP-OFF (LIFT-OFF FROM TRUCK & PHYSICALLY STACK ONTO BLOK A)
+        // =====================================================================
+        // Truk berada di X = -44, Z = 28. RS-01 standby di X = -54, Z = 28.
+        // Step 1: RS maju merapat ke truk (X: -54 -> -51.5)
+        new TWEEN.Tween(rs.position)
+            .to({ x: -51.5 }, dur(900))
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onComplete(() => {
+                playSimSound('twistlock');
+                logTicker(`[TWISTLOCK SENSOR] Pin twistlock spreader Bromma mengunci 4 corner casting kontainer.`);
+                
+                // Turunkan boom sedikit ke arah trailer
+                if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 18 }, dur(400)).start();
+
+                setTimeout(() => {
+                    // Angkat kontainer dari sasis truk secara fisik!
+                    const cBoxNum = truckData.container_number || ('MSKU' + Math.floor(1000000 + Math.random() * 9000000));
+                    const newMesh = createContainerMesh(12.0, 2.60, 2.44, SHIPPING_COLORS['Maersk'], cBoxNum);
+                    newMesh.position.set(-44, 2.45, 28);
+                    scene.add(newMesh);
+
+                    // Sasis trailer kini KOSONG
+                    if (truckBoxMesh) truckBoxMesh.visible = false;
+                    playSimSound('thud');
+
+                    // Kunci kontainer secara fisik ke Reach Stacker!
+                    rs.attach(newMesh);
+
+                    logTicker(`[LIFT-OFF] Kontainer ${cBoxNum} diangkat dari sasis truk ${truckData.license_plate} oleh RS-01.`);
+
+                    // Angkat boom dan kontainer ke ketinggian aman rintangan
+                    if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 7 }, dur(600)).start();
+                    new TWEEN.Tween(newMesh.position)
+                        .to({ y: newMesh.position.y + 4.5 }, dur(600))
+                        .easing(TWEEN.Easing.Quadratic.Out)
                         .start();
 
-                    new TWEEN.Tween(targetMesh.position)
-                        .to({ x: targetX, z: targetZ, y: targetY + 5 }, 1800)
+                    // Step 2: RS bergerak membawa box yang tergantung ke dalam lorong Blok A
+                    const targetBay = (truckData.allocated_slot && truckData.allocated_slot.bay) ? truckData.allocated_slot.bay : '02';
+                    const targetRow = (truckData.allocated_slot && truckData.allocated_slot.row) ? truckData.allocated_slot.row : '02';
+                    const targetTier = (truckData.allocated_slot && truckData.allocated_slot.tier) ? truckData.allocated_slot.tier : '01';
+                    const targetSlotPos = getSlotWorldPosition('A', targetBay, targetRow, targetTier, false);
+
+                    new TWEEN.Tween(rs.position)
+                        .to({ x: targetSlotPos.x - 7.5, z: targetSlotPos.z }, dur(1400))
                         .easing(TWEEN.Easing.Quadratic.InOut)
                         .onComplete(() => {
-                            // Step 4: Lower and Stack onto slot
-                            new TWEEN.Tween(targetMesh.position)
-                                .to({ y: targetY }, 800)
-                                .easing(TWEEN.Easing.Bounce.Out)
+                            // Step 3: Turunkan boom dan kontainer perlahan ke elevasi target tier Blok A
+                            if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 16 }, dur(500)).start();
+
+                            new TWEEN.Tween(newMesh.position)
+                                .to({ y: targetSlotPos.y }, dur(600))
+                                .easing(TWEEN.Easing.Quadratic.InOut)
                                 .onComplete(() => {
-                                    isAnimating = false;
-                                    logTicker(`[STACKED] ${boxNumber} telah ditumpuk sempurna di Tier ${toTier}.`);
-                                    fetchSimulationState(); // refresh DB state
+                                    playSimSound('thud');
+                                    playSimSound('twistlock');
+
+                                    // Lepas dari RS dan kunci permanen di koordinat dunia Yard Blok A!
+                                    scene.attach(newMesh);
+                                    newMesh.position.set(targetSlotPos.x, targetSlotPos.y, targetSlotPos.z);
+                                    newMesh.rotation.set(0, 0, 0);
+
+                                    newMesh.userData = {
+                                        container_number: cBoxNum,
+                                        size_type: '40FT HIGH CUBE',
+                                        cargo_type: 'dry',
+                                        block: 'A',
+                                        bay: String(targetBay).padStart(2, '0'),
+                                        row: String(targetRow).padStart(2, '0'),
+                                        tier: String(targetTier).padStart(2, '0'),
+                                        gross_weight_kg: truckData.gross_weight || 28500,
+                                        owner_company: truckData.company || 'PT Lintas Samudera',
+                                        rfid_tag: 'RFID-CTR-' + cBoxNum.slice(-3),
+                                        customs_status: 'SPPB_CLEARED',
+                                        status: 'in_yard'
+                                    };
+                                    containerMeshes[cBoxNum] = newMesh;
+
+                                    logTicker(`[FISIK YARD] Peti kemas ${cBoxNum} resmi ditumpuk fisik di Blok A-${targetBay}-${targetRow}-${targetTier}.`);
+                                    showToast('Lift-Off Sukses', `Kontainer ${cBoxNum} fisik ditumpuk di Blok A-${targetBay}-${targetRow}-${targetTier}`, 'success');
+
+                                    // Angkat boom kembali & kembalikan RS ke posisi standby
+                                    if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 10 }, dur(400)).start();
+
+                                    new TWEEN.Tween(rs.position)
+                                        .to({ x: -54, z: 28 }, dur(1000))
+                                        .easing(TWEEN.Easing.Quadratic.InOut)
+                                        .onComplete(() => {
+                                            runStage4_DriveToGateOut(type, truckData);
+                                        })
+                                        .start();
+                                })
+                                .start();
+                        })
+                        .start();
+                }, dur(800));
+            })
+            .start();
+    } else {
+        // =====================================================================
+        // PICK-UP (PHYSICALLY LIFT OFF FROM BLOK B STACK & LOAD ONTO TRUCK)
+        // =====================================================================
+        // Truk sasis kosong standby di X = 44, Z = 28. RS-02 standby di X = 34, Z = 28.
+        let targetBoxNum = (truckData.target_container && truckData.target_container.container_number)
+            ? truckData.target_container.container_number
+            : 'MSKU4952240';
+        
+        let targetMesh = containerMeshes[targetBoxNum];
+        let pickupBay = 2, pickupRow = 2, pickupTier = 1;
+
+        if (targetMesh && targetMesh.userData) {
+            pickupBay = parseInt(targetMesh.userData.bay, 10) || 2;
+            pickupRow = parseInt(targetMesh.userData.row, 10) || 2;
+            pickupTier = parseInt(targetMesh.userData.tier, 10) || 1;
+        } else {
+            // Cari kontainer apa saja di Blok B
+            for (const [num, m] of Object.entries(containerMeshes)) {
+                if (m.userData && m.userData.block === 'B') {
+                    targetMesh = m;
+                    targetBoxNum = num;
+                    pickupBay = parseInt(m.userData.bay, 10) || 2;
+                    pickupRow = parseInt(m.userData.row, 10) || 2;
+                    pickupTier = parseInt(m.userData.tier, 10) || 1;
+                    break;
+                }
+            }
+        }
+
+        const slotPos = getSlotWorldPosition('B', pickupBay, pickupRow, pickupTier, false);
+
+        if (!targetMesh) {
+            targetMesh = createContainerMesh(12.0, 2.60, 2.44, SHIPPING_COLORS['CMA CGM'], targetBoxNum);
+            targetMesh.position.set(slotPos.x, slotPos.y, slotPos.z);
+            targetMesh.userData = { container_number: targetBoxNum, block: 'B', bay: String(pickupBay).padStart(2,'0'), row: String(pickupRow).padStart(2,'0'), tier: String(pickupTier).padStart(2,'0'), status: 'in_yard' };
+            scene.add(targetMesh);
+            containerMeshes[targetBoxNum] = targetMesh;
+        }
+
+        // Step 1: RS-02 bergerak ke slot kontainer di Blok B
+        new TWEEN.Tween(rs.position)
+            .to({ x: slotPos.x - 7.5, z: slotPos.z }, dur(1100))
+            .easing(TWEEN.Easing.Quadratic.InOut)
+            .onComplete(() => {
+                if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 18 }, dur(400)).start();
+
+                setTimeout(() => {
+                    playSimSound('twistlock');
+                    logTicker(`[LIFT-ON PICKUP] RS-02 mengunci peti kemas ${targetBoxNum} di Blok B...`);
+
+                    // Kunci kontainer secara fisik ke RS-02!
+                    rs.attach(targetMesh);
+
+                    // Angkat kontainer ke ketinggian aman
+                    if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 7 }, dur(600)).start();
+                    new TWEEN.Tween(targetMesh.position)
+                        .to({ y: targetMesh.position.y + 5.0 }, dur(600))
+                        .easing(TWEEN.Easing.Quadratic.Out)
+                        .start();
+
+                    // Step 2: RS-02 bergerak membawa kontainer menuju truk di transfer bay (X: 36.5, Z: 28)
+                    new TWEEN.Tween(rs.position)
+                        .to({ x: 36.5, z: 28 }, dur(1400))
+                        .easing(TWEEN.Easing.Quadratic.InOut)
+                        .onComplete(() => {
+                            // Step 3: Turunkan spreader dan kontainer ke atas sasis trailer
+                            if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 16 }, dur(500)).start();
+
+                            new TWEEN.Tween(targetMesh.position)
+                                .to({ y: 2.45 }, dur(600))
+                                .easing(TWEEN.Easing.Quadratic.InOut)
+                                .onComplete(() => {
+                                    playSimSound('thud');
+                                    playSimSound('twistlock');
+
+                                    // Lepas dari lapangan dan pasang di sasis truk trailer!
+                                    scene.remove(targetMesh);
+                                    delete containerMeshes[targetBoxNum];
+
+                                    // Truk kini bermuatan fisik!
+                                    if (truckBoxMesh) truckBoxMesh.visible = true;
+                                    logTicker(`[LIFT-ON SUKSES] Peti kemas ${targetBoxNum} terpasang di sasis truk ${truckData.license_plate}.`);
+                                    showToast('Lift-On Sukses', `Peti kemas ${targetBoxNum} berhasil dimuat ke armada ${truckData.license_plate}`, 'success');
+
+                                    if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 10 }, dur(400)).start();
+
+                                    new TWEEN.Tween(rs.position)
+                                        .to({ x: 34, z: 28 }, dur(900))
+                                        .easing(TWEEN.Easing.Quadratic.InOut)
+                                        .onComplete(() => {
+                                            runStage4_DriveToGateOut(type, truckData);
+                                        })
+                                        .start();
+                                })
+                                .start();
+                        })
+                        .start();
+                }, dur(700));
+            })
+            .start();
+    }
+}
+
+function runStage4_DriveToGateOut(type, truckData) {
+    const isPickup = (type === 'pick_up');
+    const misiText = isPickup ? 'PICK-UP' : 'DROP-OFF';
+
+    showOpFlowHUD(4, '4. GATE-OUT & PENYELESAIAN MISI', isPickup
+        ? 'Truk bermuatan kontainer impor menuju Outbound Gate, validasi e-Seal & berangkat ke jalan tol...'
+        : 'Truk sasis kosong menuju Outbound Gate setelah menyelesaikan proses penurunan kontainer...');
+
+    focusLocation('vgm', 'Gerbang Keluar (Outbound Gate & Pemeriksaan Akhir)', { x: -41, y: 0, z: 43 }, 'OUTBOUND GATE');
+    logTicker(`[GATE-OUT] Truk ${truckData.license_plate} bergerak dari yard penumpukan menuju Outbound Gate Lane 2...`);
+
+    // 4A. Truk berputar menghadap Barat (rotasi Y: 0 -> Math.PI)
+    new TWEEN.Tween(truckMesh.rotation)
+        .to({ y: Math.PI }, dur(500))
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .onComplete(() => {
+            // 4B. Truk melaju di jalan sirkulasi ke koridor gerbang keluar Lane 2 (X: targetX -> -41)
+            new TWEEN.Tween(truckMesh.position)
+                .to({ x: -41, z: 28 }, dur(1800))
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .onComplete(() => {
+                    // 4C. Truk berputar ke arah Selatan / Gerbang Keluar (rotasi Y: Math.PI -> -Math.PI / 2)
+                    new TWEEN.Tween(truckMesh.rotation)
+                        .to({ y: -Math.PI / 2 }, dur(500))
+                        .easing(TWEEN.Easing.Quadratic.InOut)
+                        .onComplete(() => {
+                            // 4D. Truk melaju ke posisi pos palang keluar (Z: 28 -> 43)
+                            new TWEEN.Tween(truckMesh.position)
+                                .to({ z: 43 }, dur(1200))
+                                .easing(TWEEN.Easing.Quadratic.Out)
+                                .onComplete(() => {
+                                    playSimSound('brake');
+                                    logTicker(`[OUTBOUND GATE] Memindai e-Pass keluar & verifikasi surat jalan elektronik...`);
+
+                                    // Eksekusi API Gate-Out & sinkronisasi MySQL
+                                    fetch('api/simulator_action.php?action=gate_out')
+                                        .then(res => res.json())
+                                        .then(outData => {
+                                            playSimSound('beep');
+                                            // 4E. Angkat Palang Gerbang Keluar (Lane 2)
+                                            if (outboundBarrierMesh) {
+                                                playSimSound('barrier');
+                                                new TWEEN.Tween(outboundBarrierMesh.rotation)
+                                                    .to({ x: -Math.PI / 2.5 }, dur(600))
+                                                    .easing(TWEEN.Easing.Quadratic.Out)
+                                                    .start();
+                                            }
+
+                                            // 4F. Truk melaju melintasi gerbang keluar menuju jalan raya (Z: 43 -> 85)
+                                            new TWEEN.Tween(truckMesh.position)
+                                                .to({ z: 85 }, dur(2000))
+                                                .easing(TWEEN.Easing.Quadratic.In)
+                                                .onComplete(() => {
+                                                    // Tutup kembali palang gerbang keluar
+                                                    if (outboundBarrierMesh) {
+                                                        new TWEEN.Tween(outboundBarrierMesh.rotation)
+                                                            .to({ x: 0 }, dur(500))
+                                                            .easing(TWEEN.Easing.Quadratic.In)
+                                                            .start();
+                                                    }
+
+                                                    showToast(`Misi ${misiText} 100% Selesai!`, `Alur operasional lapangan tuntas dan tersinkronisasi di MySQL.`, 'success');
+                                                    logTicker(`[OPERASIONAL SUKSES] Truk ${truckData.license_plate} resmi Gate-Out. Status armada diselesaikan di database.`);
+
+                                                    // Kembalikan posisi standby truk di highway untuk demo berikutnya (Lane 1 Approach: X = -49, Z = 75)
+                                                    truckMesh.position.set(-49, 0, 75);
+                                                    truckMesh.rotation.set(0, Math.PI / 2, 0);
+                                                    if (truckBoxMesh) truckBoxMesh.visible = true;
+
+                                                    isAnimating = false;
+                                                    fetchSimulationState();
+
+                                                    setTimeout(() => {
+                                                        hideOpFlowHUD();
+                                                    }, 3000);
+                                                })
+                                                .start();
+                                        })
+                                        .catch(err => {
+                                            console.error('Error gate_out API:', err);
+                                            isAnimating = false;
+                                            hideOpFlowHUD();
+                                        });
                                 })
                                 .start();
                         })
@@ -3565,104 +5029,224 @@ function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
 }
 
 // =============================================================================
-// AKSI 2: SIMULASI GATE-IN TRUK & PENIMBANGAN JEMBATAN TIMBANG VGM SOLAS
+// AKSI 2B: SIMULASI GATE-OUT TRUK MANDIRI (JIKA TRUK SUDAH DI DALAM YARD)
 // =============================================================================
-function triggerGateIn() {
+function triggerGateOut() {
     if (!truckMesh || isAnimating) return;
     isAnimating = true;
 
-    // Arahkan 3D Viewport ke Gate & Timbangan
-    focusLocation('vgm', 'Gate Inbound & Jembatan Timbang 80T (VGM)', { x: -45, y: 0, z: 52 }, 'GATE-IN & VGM');
+    showOpFlowHUD(4, '4. GATE-OUT ARMADA MANDIRI', 'Truk di dalam terminal menuju Outbound Gate untuk proses checkout...');
+    focusLocation('vgm', 'Gate Outbound: Pemeriksaan Akhir & Barrier Keluar', { x: -41, y: 0, z: 43 }, 'GATE-OUT TERMINAL');
+    logTicker(`[GATE-OUT] Truk menyelesaikan operasional dan menuju gerbang keluar Lane 2...`);
 
-    logTicker(`[ANPR CAMERA] Mendeteksi truk mendekati Gate Lane 1...`);
+    // Posisikan truk di jalur keluar menuju barrier Lane 2 (X = -41)
+    truckMesh.position.set(-41, 0, 28);
+    truckMesh.rotation.set(0, -Math.PI / 2, 0);
 
-    // Reset truck position at highway approach
-    truckMesh.position.set(-49, 0, 72);
-
-    // Step 1: Drive onto Weighbridge scale
     new TWEEN.Tween(truckMesh.position)
-        .to({ z: 52 }, 1500)
-        .easing(TWEEN.Easing.Quadratic.Out)
+        .to({ z: 43 }, dur(1200))
+        .easing(TWEEN.Easing.Quadratic.InOut)
         .onComplete(() => {
-            // Weighbridge flash effect
-            logTicker(`[WEIGHBRIDGE] Menimbang muatan kargo 80T...`);
-            
-            fetch('api/simulator_action.php?action=gate_in')
+            playSimSound('brake');
+            fetch('api/simulator_action.php?action=gate_out')
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
+                        playSimSound('beep');
                         const trk = data.truck;
-                        showToast('Gate-In & Timbang VGM Berhasil', `${trk.license_plate} (${trk.company}): Gross ${trk.gross_weight.toLocaleString()} kg, VGM Net ${trk.vgm_net.toLocaleString()} kg - SOLAS PASS!`, 'success');
-                        logTicker(`[VGM SOLAS] Plat ${trk.license_plate}: Gross ${trk.gross_weight}kg, VGM Net ${trk.vgm_net}kg. Status: ${trk.vgm_status}.`);
+                        showToast('Gate-Out Selesai', data.message, 'success');
+                        logTicker(`[GATE-OUT] Truk ${trk.license_plate} sukses Gate-Out. Meninggalkan area pelabuhan kering.`);
 
-                        // Step 2: Open Boom Barrier (Rotate up)
-                        if (boomBarrierMesh) {
-                            new TWEEN.Tween(boomBarrierMesh.rotation)
-                                .to({ x: -Math.PI / 2.5 }, 600)
+                        if (outboundBarrierMesh) {
+                            playSimSound('barrier');
+                            new TWEEN.Tween(outboundBarrierMesh.rotation)
+                                .to({ x: -Math.PI / 2.5 }, dur(600))
                                 .easing(TWEEN.Easing.Quadratic.Out)
-                                .onComplete(() => {
-                                    // Step 3: Truck enters yard road towards Blok B
-                                    focusLocation('yard', 'Truk Kontainer Menuju Yard Penumpukan Blok B', { x: 8, y: 0, z: 2 }, 'ROAD TO YARD');
-
-                                    new TWEEN.Tween(truckMesh.position)
-                                        .to({ z: 25 }, 1500)
-                                        .easing(TWEEN.Easing.Quadratic.In)
-                                        .onComplete(() => {
-                                            // Close barrier
-                                            new TWEEN.Tween(boomBarrierMesh.rotation)
-                                                .to({ x: 0 }, 600)
-                                                .start();
-                                            isAnimating = false;
-                                            fetchSimulationState();
-                                        })
-                                        .start();
-                                })
                                 .start();
-                        } else {
-                            isAnimating = false;
-                            fetchSimulationState();
                         }
+
+                        new TWEEN.Tween(truckMesh.position)
+                            .to({ z: 85 }, dur(2000))
+                            .easing(TWEEN.Easing.Quadratic.In)
+                            .onComplete(() => {
+                                if (outboundBarrierMesh) {
+                                    new TWEEN.Tween(outboundBarrierMesh.rotation)
+                                        .to({ x: 0 }, dur(500))
+                                        .start();
+                                }
+                                truckMesh.position.set(-49, 0, 75);
+                                truckMesh.rotation.set(0, Math.PI / 2, 0);
+                                if (truckBoxMesh) truckBoxMesh.visible = true;
+
+                                isAnimating = false;
+                                fetchSimulationState();
+                                setTimeout(() => hideOpFlowHUD(), 2500);
+                            })
+                            .start();
+                    } else {
+                        showToast('Info Gate-Out', data.message || 'Tidak ada armada truk yang siap keluar.', 'info');
+                        isAnimating = false;
+                        hideOpFlowHUD();
                     }
+                })
+                .catch(e => {
+                    console.error(e);
+                    isAnimating = false;
+                    hideOpFlowHUD();
                 });
         })
         .start();
 }
 
 // =============================================================================
-// AKSI 3: SIMULASI BONGKAR MUAT KA LOGISTIK OLEH RTG CRANE
+// AKSI 3: SIMULASI BONGKAR MUAT KA LOGISTIK OLEH RTG CRANE (MULTI-STAGE)
 // =============================================================================
 function triggerRailDischarge() {
     const rtg = equipmentMeshes['RTG-01'];
     if (!rtg || isAnimating) return;
 
     isAnimating = true;
-    focusLocation('rail', 'Alih Muat Kereta Api Logistik (RTG-01 Crane)', { x: 0, y: 0, z: -46 }, 'RTG-01 & RAIL');
+    focusLocation('rail', 'Alih Muat Kereta Api Logistik (RTG-01 Crane)', { x: -18, y: 0, z: -46 }, 'RTG-01 & RAIL');
     logTicker(`[RTG-01] Memulai alih muat kontainer dari Rangkaian Kereta Api...`);
 
-    fetch('api/simulator_action.php?action=rail_discharge')
-        .then(res => res.json())
-        .then(data => {
-            if (data.success) {
-                showToast('Alih Muat KA Berhasil', data.message, 'success');
-                logTicker(`[RAIL STEVEDORING] Kontainer ${data.container.container_number} dipindahkan dari kereta ke Blok A.`);
-                
-                // Animate RTG Trolley
-                new TWEEN.Tween(rtg.position)
-                    .to({ x: rtg.position.x + 8 }, 1200)
+    const trolley = rtg.getObjectByName('rtgTrolley');
+    const spreader = rtg.getObjectByName('rtgSpreader');
+
+    // 1. RTG Gantry bergeser ke gerbong 1 (X = -18)
+    new TWEEN.Tween(rtg.position)
+        .to({ x: -18 }, dur(1400))
+        .easing(TWEEN.Easing.Quadratic.InOut)
+        .onComplete(() => {
+            logTicker(`[RTG-01] Menurunkan spreader teleskopik ke arah gerbong datar KA di X: -18...`);
+            
+            // 2. Turunkan spreader ke kontainer gerbong KA (Y: 12 -> 3.2)
+            if (spreader) {
+                new TWEEN.Tween(spreader.position)
+                    .to({ y: 3.2 }, dur(1000))
                     .easing(TWEEN.Easing.Quadratic.InOut)
                     .onComplete(() => {
-                        new TWEEN.Tween(rtg.position)
-                            .to({ x: rtg.position.x - 8 }, 1200)
-                            .easing(TWEEN.Easing.Quadratic.InOut)
-                            .onComplete(() => {
-                                isAnimating = false;
-                                fetchSimulationState();
-                            })
-                            .start();
+                        playSimSound('twistlock');
+                        logTicker(`[RTG-01 TWISTLOCK] Spreader mengunci 4 sudut peti kemas KA.`);
+                        
+                        setTimeout(() => {
+                            // --- SECARA FISIK DIANGKAT DARI GERBONG KA (GERBONG MENJADI KOSONG) ---
+                            if (window.trainContainerBoxes && window.trainContainerBoxes[1]) {
+                                window.trainContainerBoxes[1].visible = false;
+                                logTicker(`[FISIK KA] Gerbong datar #2 kini KOSONG (kontainer diangkat oleh RTG-01).`);
+                            }
+
+                            // Buat mesh kontainer yang tergantung langsung di bawah Spreader RTG!
+                            const carriedRailBox = createContainerMesh(12.0, 2.60, 2.44, SHIPPING_COLORS['Evergreen'], 'KAIU8821940');
+                            carriedRailBox.position.set(0, -1.6, 0);
+                            spreader.add(carriedRailBox);
+
+                            // 3. Angkat kontainer ke atas (Y: 3.2 -> 13)
+                            new TWEEN.Tween(spreader.position)
+                                .to({ y: 13 }, dur(1000))
+                                .easing(TWEEN.Easing.Quadratic.InOut)
+                                .onComplete(() => {
+                                    logTicker(`[RTG-01 TROLLEY] Trolley melintasi gantry membawa peti kemas menuju buffer yard...`);
+                                    
+                                    // 4. Trolley & Spreader bergeser melintang ke arah buffer yard (Z: 0 -> 8)
+                                    if (trolley) {
+                                        new TWEEN.Tween(trolley.position)
+                                            .to({ z: 8 }, dur(1200))
+                                            .easing(TWEEN.Easing.Quadratic.InOut)
+                                            .start();
+                                    }
+                                    new TWEEN.Tween(spreader.position)
+                                        .to({ z: 8 }, dur(1200))
+                                        .easing(TWEEN.Easing.Quadratic.InOut)
+                                        .onComplete(() => {
+                                            // 5. Turunkan kontainer ke slot buffer yard (Y: 13 -> 1.5)
+                                            new TWEEN.Tween(spreader.position)
+                                                .to({ y: 1.5 }, dur(1000))
+                                                .easing(TWEEN.Easing.Quadratic.InOut)
+                                                .onComplete(() => {
+                                                    playSimSound('thud');
+                                                    playSimSound('twistlock');
+
+                                                    // Panggil API Rail Discharge & update MySQL
+                                                    fetch('api/simulator_action.php?action=rail_discharge')
+                                                        .then(res => res.json())
+                                                        .then(data => {
+                                                            if (data.success) {
+                                                                showToast('Alih Muat KA Berhasil', data.message, 'success');
+                                                                const cNum = data.container.container_number;
+                                                                const toBlk = data.container.block || 'D';
+                                                                const toBay = data.container.bay || '02';
+                                                                const toRow = data.container.row || '01';
+                                                                const toTier = data.container.tier || '01';
+
+                                                                // --- SECARA FISIK DITAMBAHKAN KE LAPANGAN BUFFER YARD ---
+                                                                const bPos = getSlotWorldPosition(toBlk, toBay, toRow, toTier, false);
+                                                                
+                                                                // Lepas dari spreader RTG dan tempatkan di koordinat slot dunia!
+                                                                spreader.remove(carriedRailBox);
+                                                                carriedRailBox.position.set(bPos.x, bPos.y, bPos.z);
+                                                                carriedRailBox.rotation.set(0, 0, 0);
+                                                                scene.add(carriedRailBox);
+
+                                                                carriedRailBox.userData = {
+                                                                    container_number: cNum,
+                                                                    size_type: '40FT HIGH CUBE',
+                                                                    cargo_type: 'dry',
+                                                                    block: toBlk,
+                                                                    bay: String(toBay).padStart(2, '0'),
+                                                                    row: String(toRow).padStart(2, '0'),
+                                                                    tier: String(toTier).padStart(2, '0'),
+                                                                    owner_company: 'PT Kereta Api Logistik',
+                                                                    gross_weight_kg: 26400,
+                                                                    rfid_tag: 'RFID-CTR-' + cNum.slice(-3),
+                                                                    customs_status: 'SPPB_CLEARED',
+                                                                    status: 'in_yard'
+                                                                };
+                                                                containerMeshes[cNum] = carriedRailBox;
+
+                                                                logTicker(`[FISIK BUFFER] Peti kemas ${cNum} resmi ditempatkan fisik di ${toBlk}-${toBay}-${toRow}-${toTier}.`);
+
+                                                                // 6. Angkat spreader kembali & pulihkan posisi RTG
+                                                                new TWEEN.Tween(spreader.position)
+                                                                    .to({ y: 12 }, dur(800))
+                                                                    .easing(TWEEN.Easing.Quadratic.InOut)
+                                                                    .onComplete(() => {
+                                                                        if (trolley) {
+                                                                            new TWEEN.Tween(trolley.position).to({ z: 0 }, dur(900)).start();
+                                                                        }
+                                                                        new TWEEN.Tween(spreader.position).to({ z: 0 }, dur(900)).start();
+
+                                                                        new TWEEN.Tween(rtg.position)
+                                                                            .to({ x: 0 }, dur(1000))
+                                                                            .easing(TWEEN.Easing.Quadratic.InOut)
+                                                                            .onComplete(() => {
+                                                                                isAnimating = false;
+                                                                                fetchSimulationState();
+                                                                            })
+                                                                            .start();
+                                                                    })
+                                                                    .start();
+                                                            } else {
+                                                                isAnimating = false;
+                                                            }
+                                                        })
+                                                        .catch(err => {
+                                                            console.error(err);
+                                                            isAnimating = false;
+                                                        });
+                                                })
+                                                .start();
+                                        })
+                                        .start();
+                                })
+                                .start();
+                        }, dur(800));
                     })
                     .start();
+            } else {
+                isAnimating = false;
             }
-        });
+        })
+        .start();
 }
 
 // =============================================================================
@@ -3954,6 +5538,12 @@ function dismissTargetPill() {
 
 let targetDismissTimer = null;
 function focusLocation(preset, label, coords, hwTag) {
+    // 0. Auto scroll ke panel viewport 3D simulator agar user langsung melihat aksi lapangan
+    const viewport = document.getElementById('simulatorViewportContainer');
+    if (viewport) {
+        viewport.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     // 1. Ubah sudut kamera secara dinamis
     setCameraView(preset);
 
@@ -4395,7 +5985,7 @@ function switchSimTab(tabId) {
 // =========================================================================
 let isTruckDemoRunning = false;
 function runAutoTruckDemo() {
-    if (isTruckDemoRunning || isTrainDemoRunning) {
+    if (isTruckDemoRunning || isTrainDemoRunning || isAnimating) {
         showToast('Simulasi Sedang Berjalan', 'Harap tunggu hingga alur saat ini selesai', 'warn');
         return;
     }
@@ -4408,77 +5998,197 @@ function runAutoTruckDemo() {
         btn.classList.add('opacity-80');
     }
 
-    showToast('Alur Truk Dimulai', 'Mengaktifkan simulasi otomatis Road-to-Yard 6-Tahap...', 'info');
+    showToast('Alur Truk Dimulai', 'Mengaktifkan simulasi fisik terpadu (Gate -> Yard -> RS -> Gate-Out)...', 'info');
 
-    // Tahap 1: Gerbang Masuk & ANPR + RFID (0.5s)
-    setTimeout(() => {
-        setCameraView('gate');
-        testTruckStep(1);
-    }, 500);
+    // Eksekusi simulasi fisik 3D penuh
+    triggerGateIn('drop_off');
 
-    // Tahap 2: Portal OCR Box ISO 6346 (3.0s)
-    setTimeout(() => {
-        testTruckStep(2);
-    }, 3000);
+    // Telemetri sensor selaras waktu
+    setTimeout(() => testTruckStep(1), dur(800));
+    setTimeout(() => testTruckStep(2), dur(2200));
+    setTimeout(() => testTruckStep(3), dur(3800));
+    setTimeout(() => testTruckStep(4), dur(5500));
+    setTimeout(() => testTruckStep(5), dur(8500));
+    setTimeout(() => testTruckStep(6), dur(12500));
 
-    // Tahap 3: Timbangan 80T VGM SOLAS (5.5s)
+    // Selesai & Ringkasan Finansial
     setTimeout(() => {
-        testTruckStep(3);
-    }, 5500);
-
-    // Tahap 4: Edge PC Interlock & VMS LED (8.0s)
-    setTimeout(() => {
-        testTruckStep(4);
-    }, 8000);
-
-    // Tahap 5: Yard Stacking RS & RTK GNSS (11.0s)
-    setTimeout(() => {
-        setCameraView('yard');
-        triggerGateIn();
-        testTruckStep(5);
-    }, 11000);
-
-    // Tahap 6: Reefer Plugging (14.0s)
-    setTimeout(() => {
-        testTruckStep(6);
-    }, 14000);
-
-    // Selesai & Ringkasan Finansial (17.0s)
-    setTimeout(() => {
-        setCameraView('overview');
         showToast('Alur Truk Selesai!', 'Siklus Truk Road-to-Yard tuntas. Total ERP Billing: Rp 420.000.', 'success');
         if (btn) {
             btn.innerHTML = '<i class="fa-solid fa-truck-moving text-xs"></i><span>1. Alur Otomatis Truk (6 Tahap)</span>';
             btn.classList.remove('opacity-80');
         }
         isTruckDemoRunning = false;
-    }, 17000);
+    }, dur(16000));
 }
 
 function testTruckStep(step) {
+    // 0. Auto-scroll langsung ke panel viewport 3D simulator
+    const viewport = document.getElementById('simulatorViewportContainer');
+    if (viewport) {
+        viewport.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     if (step === 1) {
-        focusLocation('gate', 'Tahap 1: Gerbang Inbound & Pindai Plat ANPR/RFID', { x: -45, y: 0, z: 52 }, 'HW-01 & HW-04');
-        testSensorAction('hw01_anpr');
-        setTimeout(() => testSensorAction('hw04_rfid'), 800);
+        // TAHAP 1: Gerbang Inbound & Pindai Plat ANPR / RFID
+        showOpFlowHUD(1, '1. GERBANG INBOUND (ANPR & RFID)', 'Truk armada mendekati gerbang Lane 1. Loop aspal mendeteksi kendaraan, kamera ANPR membaca plat B 9481 UEK, dan antena RFID memverifikasi e-Pass supir...');
+        focusLocation('gate', 'Tahap 1: Gerbang Inbound & Pindai Plat ANPR/RFID', { x: -49, y: 0, z: 52 }, 'HW-01 & HW-04');
+        
+        if (truckMesh) {
+            truckMesh.position.set(-49, 0, 70);
+            truckMesh.rotation.set(0, -Math.PI / 2, 0);
+            if (truckBoxMesh) truckBoxMesh.visible = true;
+
+            new TWEEN.Tween(truckMesh.position)
+                .to({ z: 52 }, dur(1000))
+                .easing(TWEEN.Easing.Quadratic.Out)
+                .onComplete(() => {
+                    playSimSound('brake');
+                    testSensorAction('hw01_anpr');
+                    setTimeout(() => testSensorAction('hw04_rfid'), 800);
+                })
+                .start();
+        } else {
+            testSensorAction('hw01_anpr');
+            setTimeout(() => testSensorAction('hw04_rfid'), 800);
+        }
+
     } else if (step === 2) {
-        focusLocation('gate', 'Tahap 2: Portal OCR Box ISO 6346 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-02 OCR');
-        testSensorAction('hw02_ocr');
+        // TAHAP 2: Portal Optik OCR Box ISO 6346
+        showOpFlowHUD(1, '2. PORTAL OPTIK OCR BOX ISO 6346', 'Truk melaju perlahan melewati gantry portal OCR. 4 kamera multi-sudut membaca nomor seri kontainer ISO 6346 & tipe ukuran High Cube 45G1...');
+        focusLocation('gate', 'Tahap 2: Portal OCR Box ISO 6346 (Gate Inbound)', { x: -49, y: 0, z: 46 }, 'HW-02 OCR');
+
+        if (truckMesh) {
+            if (truckMesh.position.z > 60 || truckMesh.position.z < 35) {
+                truckMesh.position.set(-49, 0, 52);
+            }
+            truckMesh.rotation.set(0, -Math.PI / 2, 0);
+            if (truckBoxMesh) truckBoxMesh.visible = true;
+
+            new TWEEN.Tween(truckMesh.position)
+                .to({ z: 46 }, dur(900))
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .onComplete(() => {
+                    testSensorAction('hw02_ocr');
+                })
+                .start();
+        } else {
+            testSensorAction('hw02_ocr');
+        }
+
     } else if (step === 3) {
-        focusLocation('vgm', 'Tahap 3: Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: -49, y: 0, z: 52 }, 'HW-03 VGM');
-        testSensorAction('hw03_vgm');
+        // TAHAP 3: Jembatan Timbang 80 Ton SOLAS VGM
+        showOpFlowHUD(1, '3. TIMBANGAN JEMBATAN 80T (SOLAS VGM)', 'Truk berhenti tepat di platform timbangan baja 80T. Sensor strain gauge menimbang Bruto 32.500 kg, Tara 4.100 kg, dan menerbitkan sertifikat Net VGM 28.400 kg...');
+        focusLocation('vgm', 'Tahap 3: Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: -49, y: 0, z: 38 }, 'HW-03 VGM');
+
+        if (truckMesh) {
+            if (truckMesh.position.z > 55 || truckMesh.position.z < 30) {
+                truckMesh.position.set(-49, 0, 46);
+            }
+            truckMesh.rotation.set(0, -Math.PI / 2, 0);
+            if (truckBoxMesh) truckBoxMesh.visible = true;
+
+            new TWEEN.Tween(truckMesh.position)
+                .to({ z: 38 }, dur(900))
+                .easing(TWEEN.Easing.Quadratic.InOut)
+                .onComplete(() => {
+                    playSimSound('brake');
+                    testSensorAction('hw03_vgm');
+                })
+                .start();
+        } else {
+            testSensorAction('hw03_vgm');
+        }
+
     } else if (step === 4) {
-        focusLocation('gate', 'Tahap 4: Edge AI PC Interlock & Panduan VMS LED', { x: -45, y: 0, z: 52 }, 'HW-05 & HW-06');
-        testSensorAction('hw06_edge');
-        setTimeout(() => testSensorAction('hw05_vms'), 800);
+        // TAHAP 4: Buka Palang Otomatis & Panduan Rute VMS LED
+        showOpFlowHUD(2, '4. INTERLOCK PALANG & PANDUAN VMS', 'Edge AI PC memvalidasi izin masuk dalam latensi 12ms. Palang gerbang otomatis terbuka, display VMS LED menyala memandu armada menuju Blok A...');
+        focusLocation('gate', 'Tahap 4: Edge AI PC Interlock & Panduan VMS LED', { x: -49, y: 0, z: 30 }, 'HW-05 & HW-06');
+
+        if (truckMesh) {
+            truckMesh.position.set(-49, 0, 38);
+            truckMesh.rotation.set(0, -Math.PI / 2, 0);
+            if (truckBoxMesh) truckBoxMesh.visible = true;
+
+            // 4A. Angkat palang pintu gerbang masuk
+            if (boomBarrierMesh) {
+                playSimSound('barrier');
+                new TWEEN.Tween(boomBarrierMesh.rotation)
+                    .to({ x: -Math.PI / 2.5 }, dur(500))
+                    .easing(TWEEN.Easing.Quadratic.Out)
+                    .start();
+            }
+
+            // 4B. Truk melaju melewati palang ke jalan terminal
+            setTimeout(() => {
+                new TWEEN.Tween(truckMesh.position)
+                    .to({ z: 28 }, dur(1100))
+                    .easing(TWEEN.Easing.Quadratic.InOut)
+                    .onComplete(() => {
+                        // Tutup kembali palang gerbang
+                        if (boomBarrierMesh) {
+                            new TWEEN.Tween(boomBarrierMesh.rotation)
+                                .to({ x: 0 }, dur(500))
+                                .easing(TWEEN.Easing.Quadratic.In)
+                                .start();
+                        }
+                        testSensorAction('hw06_edge');
+                        setTimeout(() => testSensorAction('hw05_vms'), 700);
+                    })
+                    .start();
+            }, dur(500));
+        } else {
+            testSensorAction('hw06_edge');
+            setTimeout(() => testSensorAction('hw05_vms'), 700);
+        }
+
     } else if (step === 5) {
-        focusLocation('yard', 'Tahap 5: Yard Stacking RS-02 & Telemetri RTK GNSS', { x: 8, y: 0, z: 2 }, 'HW-07 & HW-08');
+        // TAHAP 5: Bongkar Box oleh Reach Stacker (Lift-Off ke Blok A)
+        showOpFlowHUD(3, '5. BONGKAR BOX OLEH REACH STACKER', 'Reach Stacker RS-01 merapat ke truk di jalur transfer, mengunci 4 corner casting dengan spreader Bromma, mengangkat box dari trailer, dan menumpuk di Blok A...');
+        focusLocation('yard', 'Tahap 5: Yard Stacking RS-01 & Telemetri RTK GNSS', { x: -44, y: 0, z: 28 }, 'HW-07 & HW-08');
+
+        // Posisikan truk di transfer bay Blok A (X = -44, Z = 28)
+        if (truckMesh) {
+            truckMesh.position.set(-44, 0, 28);
+            truckMesh.rotation.set(0, Math.PI, 0);
+            if (truckBoxMesh) truckBoxMesh.visible = true;
+        }
+
         testSensorAction('hw07_rtk');
         setTimeout(() => {
             testSensorAction('hw08_twistlock');
             toggleTwistlockSim();
+
+            const rs = equipmentMeshes['RS-01'] || equipmentMeshes['RS-02'];
+            if (rs) {
+                const boom = rs.getObjectByName('rsBoom');
+                new TWEEN.Tween(rs.position)
+                    .to({ x: -51.5 }, dur(800))
+                    .easing(TWEEN.Easing.Quadratic.InOut)
+                    .onComplete(() => {
+                        playSimSound('twistlock');
+                        if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 18 }, dur(400)).start();
+                        setTimeout(() => {
+                            if (truckBoxMesh) truckBoxMesh.visible = false;
+                            playSimSound('thud');
+                            if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 7 }, dur(500)).start();
+                            new TWEEN.Tween(rs.position)
+                                .to({ x: -54, z: 28 }, dur(900))
+                                .easing(TWEEN.Easing.Quadratic.InOut)
+                                .onComplete(() => {
+                                    if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 10 }, dur(400)).start();
+                                })
+                                .start();
+                        }, dur(700));
+                    })
+                    .start();
+            }
         }, 800);
+
     } else if (step === 6) {
-        focusLocation('reefer', 'Tahap 6: Colok Daya Smart Reefer Socket 380V (Rack R-02)', { x: 64, y: 0, z: 44 }, 'HW-09 REEFER');
+        // TAHAP 6: Colok Daya Smart Reefer Socket 380V
+        showOpFlowHUD(3, '6. COLOK DAYA & MONITORING SUHU REEFER', 'Peti kemas berpendingin ditempatkan di rak Reefer Terminal. Kabel daya industri 380V dicolokkan ke soket Marechal, sensor Modbus membaca suhu -20.2°C dan daya 18.2 kW secara live...');
+        focusLocation('reefer', 'Tahap 6: Colok Daya Smart Reefer Socket 380V (Reefer Zone)', { x: 104, y: 0, z: 16 }, 'HW-09 REEFER');
         testSensorAction('hw09_reefer');
     }
 }
@@ -4488,7 +6198,7 @@ function testTruckStep(step) {
 // =========================================================================
 let isTrainDemoRunning = false;
 function runAutoTrainDemo() {
-    if (isTruckDemoRunning || isTrainDemoRunning) {
+    if (isTruckDemoRunning || isTrainDemoRunning || isAnimating) {
         showToast('Simulasi Sedang Berjalan', 'Harap tunggu hingga alur saat ini selesai', 'warn');
         return;
     }
@@ -4507,35 +6217,31 @@ function runAutoTrainDemo() {
     setTimeout(() => {
         setCameraView('rail');
         testTrainStep(1);
-    }, 500);
+    }, dur(500));
 
-    // Tahap 2: Pindai Smart E-Seal Nirkabel (3.0s)
+    // Tahap 2: Pindai Smart E-Seal Nirkabel (2.0s)
     setTimeout(() => {
         testTrainStep(2);
-    }, 3000);
+    }, dur(2000));
 
-    // Tahap 3: Bea Cukai CEISA 4.0 & SPPB Jalur Hijau (5.5s)
+    // Tahap 3: Bea Cukai CEISA 4.0 & SPPB Jalur Hijau (3.5s)
     setTimeout(() => {
         testTrainStep(3);
-    }, 5500);
+    }, dur(3500));
 
-    // Tahap 4: RTG Crane Spreader Hoist (8.0s)
+    // Tahap 4 & 5: RTG Crane Spreader Hoist & Alih Muat Fisik ke Yard
     setTimeout(() => {
         testTrainStep(4);
-    }, 8000);
-
-    // Tahap 5: RTK Positioning & Bongkar Box ke Yard (11.0s)
-    setTimeout(() => {
         triggerRailDischarge();
-        testTrainStep(5);
-    }, 11000);
+        setTimeout(() => testTrainStep(5), dur(3000));
+    }, dur(5000));
 
-    // Tahap 6: Manifest Rail & Penagihan Freight (14.0s)
+    // Tahap 6: Manifest Rail & Penagihan Freight
     setTimeout(() => {
         testTrainStep(6);
-    }, 14000);
+    }, dur(10500));
 
-    // Selesai & Ringkasan Finansial (17.0s)
+    // Selesai & Ringkasan Finansial
     setTimeout(() => {
         setCameraView('overview');
         showToast('Alur KA Intermodal Selesai!', 'Siklus Alih Muat KA tuntas. Freight Rp 1.850.000 + Bongkar Rp 350.000 terverifikasi.', 'success');
@@ -4544,28 +6250,66 @@ function runAutoTrainDemo() {
             btn.classList.remove('opacity-80');
         }
         isTrainDemoRunning = false;
-    }, 17000);
+    }, dur(13500));
 }
 
 function testTrainStep(step) {
+    // 0. Auto-scroll langsung ke panel viewport 3D simulator
+    const viewport = document.getElementById('simulatorViewportContainer');
+    if (viewport) {
+        viewport.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     if (step === 1) {
-        focusLocation('rail', 'Tahap 1: Rel Siding KA & Frauscher Axle Counter SIL 4', { x: 0, y: 0, z: -46 }, 'HW-10 AXLE');
+        showOpFlowHUD(1, '1. REL SIDING KA & AXLE COUNTER SIL 4', 'Rangkaian Kereta Api Logistik melintas di atas rel siding. Sensor Frauscher SIL 4 mencacah gandar roda secara akurat untuk verifikasi integritas rangkaian...');
+        focusLocation('rail', 'Tahap 1: Rel Siding KA & Frauscher Axle Counter SIL 4', { x: -18, y: 0, z: -46 }, 'HW-10 AXLE');
         testSensorAction('hw10_axle');
+
     } else if (step === 2) {
-        focusLocation('rail', 'Tahap 2: Pindai Nirkabel Smart E-Seal Jointech JT701', { x: 0, y: 0, z: -46 }, 'HW-11 E-SEAL');
+        showOpFlowHUD(2, '2. PINDAI NIRKABEL SMART E-SEAL', 'Reader nirkabel memverifikasi status segel elektronik Jointech JT701 pada peti kemas gerbong datar KA: STATUS SECURE / TAMPER-PROOF (0 Deteksi Putus)...');
+        focusLocation('rail', 'Tahap 2: Pindai Nirkabel Smart E-Seal Jointech JT701', { x: -18, y: 0, z: -46 }, 'HW-11 E-SEAL');
         testSensorAction('hw11_eseal');
+
     } else if (step === 3) {
-        focusLocation('rail', 'Tahap 3: Klirens Pabean CEISA 4.0 Bea Cukai Jalur Hijau', { x: 0, y: 0, z: -46 }, 'CEISA 4.0');
+        showOpFlowHUD(2, '3. KLIRENS PABEAN CEISA 4.0 BEA CUKAI', 'Gateway pabean Ditjen Bea Cukai menerbitkan SPPB Jalur Hijau (#SPPB-86434/KPU.01/2026). Jaminan pabean dirilis otomatis dan kontainer siap dibongkar...');
+        focusLocation('rail', 'Tahap 3: Klirens Pabean CEISA 4.0 Bea Cukai Jalur Hijau', { x: -18, y: 0, z: -46 }, 'CEISA 4.0');
         logTicker('[CEISA 4.0 Bea Cukai] Gateway pabean menerbitkan SPPB Jalur Hijau (#SPPB-86434/KPU.01/2026). Jaminan pabean dirilis.');
         showToast('CEISA 4.0 Bea Cukai', 'SPPB Jalur Hijau Terbit & Jaminan Pabean Dirilis', 'success');
+
     } else if (step === 4) {
-        focusLocation('rail', 'Tahap 4: RTG Crane Spreader Twistlock & Hoisting', { x: 0, y: 0, z: -46 }, 'RTG-01 & HW-08');
+        showOpFlowHUD(3, '4. RTG CRANE SPREADER HOISTING', 'RTG Crane (RTG-01) menggerakkan spreader teleskopik tepat di atas peti kemas gerbong KA, mengunci 4 pin twistlock, dan mengangkat box ke ketinggian gantry...');
+        focusLocation('rail', 'Tahap 4: RTG Crane Spreader Twistlock & Hoisting', { x: -18, y: 0, z: -46 }, 'RTG-01 & HW-08');
         testSensorAction('hw08_twistlock');
         toggleTwistlockSim();
+
+        const rtg = equipmentMeshes['RTG-01'];
+        if (rtg) {
+            const spreader = rtg.getObjectByName('rtgSpreader');
+            if (spreader) {
+                new TWEEN.Tween(spreader.position)
+                    .to({ y: 3.2 }, dur(800))
+                    .easing(TWEEN.Easing.Quadratic.InOut)
+                    .onComplete(() => {
+                        playSimSound('twistlock');
+                        setTimeout(() => {
+                            new TWEEN.Tween(spreader.position)
+                                .to({ y: 12 }, dur(800))
+                                .easing(TWEEN.Easing.Quadratic.InOut)
+                                .start();
+                        }, dur(600));
+                    })
+                    .start();
+            }
+        }
+
     } else if (step === 5) {
-        focusLocation('yard', 'Tahap 5: Penempatan Slot Yard Blok A Presisi RTK', { x: -16, y: 0, z: 6 }, 'HW-07 RTK');
+        showOpFlowHUD(3, '5. BONGKAR BOX KE BUFFER YARD BLOK D', 'RTG Crane memindahkan peti kemas melintasi trolley gantry dan menempatkannya secara presisi di Buffer Yard Blok D...');
+        focusLocation('yard', 'Tahap 5: Penempatan Slot Yard Buffer Presisi RTK', { x: 44, y: 0, z: -26 }, 'HW-07 RTK');
         testSensorAction('hw07_rtk');
+        triggerRailDischarge();
+
     } else if (step === 6) {
+        showOpFlowHUD(4, '6. PENERBITAN RAIL MANIFEST & ESG FREIGHT', 'Manifest perjalanan KA-LOG-JKT-SMG tervalidasi. Freight KA Rp 1.850.000/TEU diterbitkan ke modul Billing, reduksi jejak karbon ESG tercatat 78%...');
         focusLocation('rail', 'Tahap 6: Penerbitan Rail Manifest & Tagihan Freight', { x: 0, y: 0, z: -46 }, 'RAIL FREIGHT');
         logTicker('[RAIL MANIFEST] KA-LOG-JKT-SMG 48 TEU tervalidasi. Freight KA: Rp 1.850.000/TEU. Reduksi jejak karbon ESG: 78%.');
         showToast('Rail Freight Terkonfirmasi', 'Biaya Rel Rp 1.850.000/TEU & Audit ESG Tercatat', 'success');

@@ -6,6 +6,31 @@
 // PIC: Armansyah Muchtarrom (Hardware & Infrastructure Specialist)
 // =============================================================================
 
+require_once __DIR__ . '/../connection.php';
+
+// Ambil data truk dari database untuk telemetri gerbang
+$gate_trucks = [];
+$total_inbound_today = 0;
+$total_outbound_today = 0;
+$total_at_gate = 0;
+$latest_truck = null;
+
+try {
+    $stmt = $pdo->query("SELECT * FROM trucks ORDER BY COALESCE(gate_out_time, gate_in_time, created_at) DESC LIMIT 20");
+    $gate_trucks = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    foreach ($gate_trucks as $gt) {
+        if ($gt['status'] === 'at_gate' || $gt['status'] === 'queuing') $total_at_gate++;
+        if (!empty($gt['gate_in_time'])) $total_inbound_today++;
+        if (!empty($gt['gate_out_time'])) $total_outbound_today++;
+    }
+    if (!empty($gate_trucks)) {
+        $latest_truck = $gate_trucks[0];
+    }
+} catch (Exception $e) {
+    $gate_trucks = [];
+}
+
 $gate_info = [
     'pic'    => 'Armansyah Muchtarrom',
     'role'   => 'Hardware & Infrastructure Specialist',
@@ -519,11 +544,32 @@ foreach ($hardware_list as $item) {
         </div>
     </div>
 
+    <!-- Toolbar Aksi Cepat & Registrasi Pra-Gate -->
+    <div class="bg-white rounded-xl p-3 border border-gray-100 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-xs font-bold text-gray-700">Status Gerbang Lapangan: <span class="text-emerald-600">Aktif &amp; Terhubung Sensor Telemetri</span></span>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+            <button onclick="showGatePassModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-plus"></i>
+                <span>Registrasi Pra-Gate (Gate Pass)</span>
+            </button>
+            <a href="dashboard.php?page=simulator" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-cube text-xs"></i>
+                <span>Buka Panel Simulasi 3D</span>
+            </a>
+            <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak Rekap Gate
+            </button>
+        </div>
+    </div>
+
     <!-- Tab Navigation -->
     <div class="bg-white rounded-xl p-1.5 border border-gray-100 shadow-xs flex flex-wrap gap-1">
         <button onclick="switchGateTab('tab-simulasi')" id="btn-tab-simulasi" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-bold transition-all text-[#0170b9] bg-blue-50/80 shadow-xs flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-microchip"></i>
-            <span>Simulasi Alur Gate & Sensor</span>
+            <i class="fa-solid fa-tower-broadcast"></i>
+            <span>Monitoring Arus Gerbang &amp; Telemetri</span>
         </button>
         <button onclick="switchGateTab('tab-ocr-iso')" id="btn-tab-ocr-iso" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-camera-retro"></i>
@@ -536,6 +582,10 @@ foreach ($hardware_list as $item) {
         <button onclick="switchGateTab('tab-telemetri')" id="btn-tab-telemetri" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-tower-broadcast"></i>
             <span>Telemetri IoT Lapangan</span>
+        </button>
+        <button onclick="switchGateTab('tab-dcsa')" id="btn-tab-dcsa" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+            <i class="fa-solid fa-satellite-dish"></i>
+            <span>DCSA Event Log</span>
         </button>
     </div>
 
@@ -597,187 +647,201 @@ foreach ($hardware_list as $item) {
             </div>
         </div>
 
-        <!-- Panel Interaktif Simulator Gate In -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Kontrol Simulasi -->
-            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col justify-between">
+        <!-- Banner Navigasi ke Panel Simulasi Terpusat -->
+        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-[#002f5e] rounded-2xl p-5 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-4 border border-blue-900/40">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center text-xl shrink-0">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
                 <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-sm font-bold text-gray-900 flex items-center">
-                            <i class="fa-solid fa-sliders text-[#0170b9] mr-2"></i>
-                            Pilih Skenario Truk Gate-In
-                        </h3>
-                        <span class="text-[11px] text-gray-400">Simulation Mode</span>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30">Panel Simulasi Terpusat</span>
+                        <span class="text-xs text-slate-400">Arsitektur Operasional Terintegrasi</span>
                     </div>
-
-                    <p class="text-xs text-gray-500 mb-4">
-                        Pilih armada truk kontainer untuk menguji respons pembacaan kamera ANPR, OCR kontainer, timbangan VGM, dan pemicu barrier gate:
+                    <h3 class="text-sm sm:text-base font-bold text-white mt-1">Seluruh Simulasi Fisik Gerbang &amp; Armada Terpusat di Panel Simulasi 3D</h3>
+                    <p class="text-xs text-slate-300 mt-0.5 max-w-2xl leading-relaxed">
+                        Sesuai standar Yard Management System, simulasi operasional (Gate-In Drop-Off, Gate-In Pick-Up, Penimbangan VGM SOLAS, dan Gate-Out) dijalankan terpadu di <strong>Simulator 3D Virtual Terminal</strong>. Halaman ini berfungsi murni untuk pemantauan telemetri sensor, audit transaksi data, dan pra-registrasi Gate Pass.
                     </p>
-
-                    <div class="space-y-2.5 mb-6">
-                        <label class="block p-3 border border-gray-200 rounded-xl hover:border-blue-300 transition-colors cursor-pointer bg-blue-50/40" onclick="selectScenario(1)">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-xs text-gray-900">Truk 1: Lolos Normal (40ft High Cube)</span>
-                                <input type="radio" name="scenario" value="1" checked class="text-[#0170b9] focus:ring-blue-500">
-                            </div>
-                            <div class="text-[11px] text-gray-500 mt-1 flex flex-wrap gap-x-3">
-                                <span><i class="fa-solid fa-truck text-gray-400"></i> B 9812 UIK</span>
-                                <span><i class="fa-solid fa-box text-gray-400"></i> TCKU 829104-2</span>
-                                <span><i class="fa-solid fa-weight-scale text-gray-400"></i> 32.450 kg</span>
-                            </div>
-                        </label>
-
-                        <label class="block p-3 border border-gray-200 rounded-xl hover:border-blue-300 transition-colors cursor-pointer" onclick="selectScenario(2)">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-xs text-gray-900">Truk 2: Reefer Cold Chain (20ft)</span>
-                                <input type="radio" name="scenario" value="2" class="text-[#0170b9] focus:ring-blue-500">
-                            </div>
-                            <div class="text-[11px] text-gray-500 mt-1 flex flex-wrap gap-x-3">
-                                <span><i class="fa-solid fa-truck text-gray-400"></i> B 9144 PXT</span>
-                                <span><i class="fa-solid fa-snowflake text-blue-400"></i> MSKU 441029-7</span>
-                                <span><i class="fa-solid fa-weight-scale text-gray-400"></i> 24.120 kg</span>
-                            </div>
-                        </label>
-
-                        <label class="block p-3 border border-gray-200 rounded-xl hover:border-amber-300 transition-colors cursor-pointer" onclick="selectScenario(3)">
-                            <div class="flex items-center justify-between">
-                                <span class="font-bold text-xs text-gray-900">Truk 3: Overweight Alert (>34.000 kg)</span>
-                                <input type="radio" name="scenario" value="3" class="text-[#0170b9] focus:ring-blue-500">
-                            </div>
-                            <div class="text-[11px] text-gray-500 mt-1 flex flex-wrap gap-x-3">
-                                <span><i class="fa-solid fa-truck text-gray-400"></i> B 9033 BAA</span>
-                                <span><i class="fa-solid fa-box text-gray-400"></i> CMAU 992183-5</span>
-                                <span class="text-rose-600 font-bold"><i class="fa-solid fa-triangle-exclamation text-rose-500"></i> 37.200 kg</span>
-                            </div>
-                        </label>
-                    </div>
                 </div>
-
-                <button id="btn-run-sim" onclick="runGateSimulation()" class="w-full py-3 bg-[#0170b9] hover:bg-[#004b87] text-white font-bold text-xs sm:text-sm rounded-xl transition-all shadow-md flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-play"></i>
-                    <span>Jalankan Simulasi Sensor Gate In</span>
-                </button>
             </div>
+            <a href="dashboard.php?page=simulator" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-bold text-xs rounded-xl shadow-md transition flex items-center space-x-2 shrink-0">
+                <i class="fa-solid fa-play"></i>
+                <span>Buka Panel Simulasi 3D</span>
+            </a>
+        </div>
 
-            <!-- Tampilan Hasil Sensor Live -->
-            <div class="lg:col-span-2 bg-slate-900 rounded-2xl p-6 text-white shadow-md flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute -right-10 -bottom-10 opacity-5 pointer-events-none text-9xl">
-                    <i class="fa-solid fa-microchip"></i>
-                </div>
-
+        <!-- Live Gate Lanes Telemetry Feeds -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- Lane 1: Inbound Heavy (OCR + Weighbridge 80t) -->
+            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-md border border-slate-800 flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between border-b border-slate-800 pb-4 mb-5">
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
                         <div class="flex items-center space-x-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span class="text-xs font-mono font-bold tracking-wider text-emerald-400 uppercase">Live Lane 1 Sensor Feed</span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-emerald-400 uppercase">Lane 1 (Inbound Heavy)</span>
                         </div>
-                        <span id="sim-status-badge" class="px-2.5 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[11px] font-mono">
-                            STANDBY
-                        </span>
+                        <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[10px] font-mono">ONLINE</span>
                     </div>
 
-                    <!-- Sensor Live Feed Grid -->
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-                        <!-- ANPR Box -->
-                        <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60">
-                            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
-                                <span><i class="fa-solid fa-camera text-blue-400 mr-1.5"></i> ANPR Camera Feed</span>
-                                <span id="anpr-status" class="text-[10px] text-slate-400">READY</span>
-                            </div>
-                            <div class="mt-2 text-center py-2 bg-slate-950 rounded-lg border border-slate-800">
-                                <span class="text-[10px] text-slate-500 uppercase block">License Plate</span>
-                                <span id="anpr-plate" class="text-lg font-mono font-bold tracking-widest text-amber-400">-- ---- ---</span>
-                            </div>
+                    <div class="space-y-3">
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-camera text-blue-400 mr-1"></i> Kamera ANPR</span>
+                                <span class="text-[9px] text-emerald-400 font-mono">LIVE FEED</span>
+                            </span>
+                            <span class="text-base font-mono font-bold tracking-wider text-amber-300 block mt-1">
+                                <?= !empty($latest_truck['license_plate']) ? htmlspecialchars($latest_truck['license_plate']) : 'B 9182 TE' ?>
+                            </span>
                         </div>
 
-                        <!-- OCR Kontainer Box -->
-                        <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60">
-                            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
-                                <span><i class="fa-solid fa-expand text-indigo-400 mr-1.5"></i> Container OCR Portal</span>
-                                <span id="ocr-status" class="text-[10px] text-slate-400">READY</span>
-                            </div>
-                            <div class="mt-2 text-center py-2 bg-slate-950 rounded-lg border border-slate-800">
-                                <span class="text-[10px] text-slate-500 uppercase block">ISO 6346 Container ID</span>
-                                <span id="ocr-container" class="text-lg font-mono font-bold tracking-wider text-cyan-400">---- ------- -</span>
-                            </div>
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-expand text-indigo-400 mr-1"></i> OCR Container Gantry</span>
+                                <span class="text-[9px] text-emerald-400 font-mono">ISO 6346</span>
+                            </span>
+                            <span class="text-base font-mono font-bold tracking-wider text-cyan-300 block mt-1">
+                                <?= !empty($latest_truck['container_number']) ? htmlspecialchars($latest_truck['container_number']) : 'MSKU 782910-4' ?>
+                            </span>
                         </div>
 
-                        <!-- Weighbridge Box -->
-                        <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60">
-                            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
-                                <span><i class="fa-solid fa-scale-balanced text-emerald-400 mr-1.5"></i> Weighbridge 80t</span>
-                                <span id="vgm-status" class="text-[10px] text-slate-400">READY</span>
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-scale-balanced text-emerald-400 mr-1"></i> Jembatan Timbang 80T</span>
+                                <span class="text-[9px] text-emerald-400 font-mono font-bold">VGM SOLAS</span>
+                            </span>
+                            <div class="flex items-center justify-between mt-1">
+                                <span class="text-sm font-mono font-bold text-white">32.450 kg</span>
+                                <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold rounded">VERIFIED</span>
                             </div>
-                            <div class="mt-2 flex items-center justify-between px-3 py-2 bg-slate-950 rounded-lg border border-slate-800">
-                                <div>
-                                    <span class="text-[10px] text-slate-500 uppercase block">Gross Weight</span>
-                                    <span id="vgm-weight" class="text-base font-mono font-bold text-white">0 kg</span>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-[10px] text-slate-500 uppercase block">VGM SOLAS</span>
-                                    <span id="vgm-solas" class="text-xs font-mono font-bold text-slate-400">--</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Barrier Gate & LED Box -->
-                        <div class="bg-slate-800/80 rounded-xl p-4 border border-slate-700/60">
-                            <div class="flex items-center justify-between text-xs text-slate-400 mb-1">
-                                <span><i class="fa-solid fa-traffic-light text-amber-400 mr-1.5"></i> Barrier & LED Gate</span>
-                                <span id="barrier-status" class="text-[10px] text-rose-400 font-bold">CLOSED</span>
-                            </div>
-                            <div class="mt-2 py-2 px-3 bg-slate-950 rounded-lg border border-slate-800 text-center">
-                                <span class="text-[10px] text-slate-500 uppercase block">LED Instruction Display</span>
-                                <span id="led-text" class="text-xs font-mono font-bold text-emerald-400 animate-pulse">MENUNGGU KENDARAAN</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Progress Bar Simulasi -->
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between text-[11px] text-slate-400 mb-1">
-                            <span id="progress-step-text">Status: Siap menjalankan simulasi sensor...</span>
-                            <span id="progress-percent" class="font-mono">0%</span>
-                        </div>
-                        <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-                            <div id="sim-progress-bar" class="h-full bg-gradient-to-r from-blue-500 to-emerald-400 w-0 transition-all duration-300"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Digital Gate Pass Preview (Muncul saat selesai) -->
-                <div id="gate-pass-preview" class="hidden bg-emerald-950/60 border border-emerald-500/40 rounded-xl p-3.5 mt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fadeIn">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-9 h-9 rounded-lg bg-emerald-500 text-slate-950 flex items-center justify-center font-bold text-base">
-                            <i class="fa-solid fa-qrcode"></i>
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Barrier Gate:</span>
+                    <span class="text-emerald-400 font-mono font-bold flex items-center"><i class="fa-solid fa-check-circle mr-1"></i> NORMAL STANDBY</span>
+                </div>
+            </div>
+
+            <!-- Lane 2: Inbound Fast-Track / Empty & Reefer -->
+            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-md border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-cyan-400 uppercase">Lane 2 (Fast-Track / Reefer)</span>
                         </div>
-                        <div>
-                            <span class="text-[10px] uppercase font-bold text-emerald-300 block">E-Gate Pass Diterbitkan:</span>
-                            <span id="gate-pass-no" class="font-mono font-bold text-xs text-white">GP-20260922-0041</span>
-                            <span id="gate-pass-loc" class="text-[11px] text-emerald-200 block">Tujuan: Yard Block B - Bay 04</span>
+                        <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[10px] font-mono">STANDBY</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-tower-broadcast text-cyan-400 mr-1"></i> RFID UHF Reader</span>
+                                <span class="text-[9px] text-cyan-400 font-mono">20 METERS</span>
+                            </span>
+                            <span class="text-sm font-mono font-bold text-white block mt-1">
+                                TAG-CIDP-882104
+                            </span>
+                        </div>
+
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-lock text-amber-400 mr-1"></i> e-Seal Bea Cukai (CEISA 4.0)</span>
+                                <span class="text-[9px] text-emerald-400 font-mono">SECURE</span>
+                            </span>
+                            <span class="text-sm font-mono font-bold text-emerald-300 block mt-1">
+                                JT701-098231 • Lolos Inspeksi
+                            </span>
+                        </div>
+
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-snowflake text-blue-400 mr-1"></i> Monitoring Reefer Plug</span>
+                                <span class="text-[9px] text-blue-400 font-mono">-20.5°C</span>
+                            </span>
+                            <span class="text-xs font-mono text-slate-300 block mt-1">
+                                PTI Pass • Jalur Prioritas C-01
+                            </span>
                         </div>
                     </div>
-                    <div class="flex items-center space-x-2">
-                        <button onclick="printGatePass()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-colors shadow-xs">
-                            <i class="fa-solid fa-print mr-1"></i> Cetak Pass
-                        </button>
-                        <button onclick="openEdifactModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white rounded-lg text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-xs">
-                            <i class="fa-solid fa-file-code"></i>
-                            <span>Dokumen EDIFACT CODECO</span>
-                        </button>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Barrier Gate:</span>
+                    <span class="text-slate-400 font-mono">CLOSED (AUTO DETECT)</span>
+                </div>
+            </div>
+
+            <!-- Lane 3: Outbound Gate-Out -->
+            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-md border border-slate-800 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                        <div class="flex items-center space-x-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+                            <span class="text-xs font-mono font-bold tracking-wider text-purple-400 uppercase">Lane 3 (Outbound Gate-Out)</span>
+                        </div>
+                        <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[10px] font-mono">ONLINE</span>
                     </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-barcode text-purple-400 mr-1"></i> Scanner Slip Keluar</span>
+                                <span class="text-[9px] text-purple-400 font-mono">QR CODE</span>
+                            </span>
+                            <span class="text-sm font-mono font-bold text-white block mt-1">
+                                Verifikasi Surat Jalan &amp; Billing
+                            </span>
+                        </div>
+
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-file-invoice text-emerald-400 mr-1"></i> Odoo ERP Status</span>
+                                <span class="text-[9px] text-emerald-400 font-mono">SYNCED</span>
+                            </span>
+                            <span class="text-xs font-mono text-emerald-300 block mt-1">
+                                Invoicing &amp; Lift-On/Off Selesai
+                            </span>
+                        </div>
+
+                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
+                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-road text-amber-400 mr-1"></i> Akses Tol Otomatis</span>
+                                <span class="text-[9px] text-slate-400 font-mono">KM 34 CIKARANG</span>
+                            </span>
+                            <span class="text-xs text-slate-300 block mt-1">
+                                Menuju Tol Jakarta - Cikampek
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
+                    <span class="text-slate-400">Barrier Gate:</span>
+                    <span class="text-emerald-400 font-mono font-bold flex items-center"><i class="fa-solid fa-check-circle mr-1"></i> NORMAL STANDBY</span>
                 </div>
             </div>
         </div>
 
-        <!-- Log Aktivitas Gate Terkini -->
-        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-sm font-bold text-gray-900 flex items-center">
-                    <i class="fa-solid fa-clock-rotate-left text-[#0170b9] mr-2"></i>
-                    Log Transaksi Gerbang Terkini (Real-time Gate Activity)
-                </h3>
-                <span class="text-xs text-gray-400">Diperbarui otomatis via Edge AI</span>
+        <!-- Log Aktivitas Transaksi Gerbang Real-Time (Live dari MySQL) -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4">
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900 flex items-center">
+                        <i class="fa-solid fa-clock-rotate-left text-[#0170b9] mr-2"></i>
+                        Log Transaksi Gerbang Real-Time (Live dari Database MySQL)
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Memantau riwayat armada yang masuk, antri, dan keluar terminal melalui otomasi gerbang.</p>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-200">
+                        <i class="fa-solid fa-database mr-1"></i> <?= count($gate_trucks) ?> Riwayat Terdata
+                    </span>
+                    <button onclick="location.reload()" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition" title="Segarkan Data">
+                        <i class="fa-solid fa-rotate-right text-xs"></i>
+                    </button>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -787,44 +851,75 @@ foreach ($hardware_list as $item) {
                             <th class="py-3 px-3.5">Waktu</th>
                             <th class="py-3 px-3.5">Lane</th>
                             <th class="py-3 px-3.5">Plat Nomor (ANPR)</th>
-                            <th class="py-3 px-3.5">No Kontainer (OCR)</th>
-                            <th class="py-3 px-3.5">Berat VGM</th>
-                            <th class="py-3 px-3.5">VGM SOLAS</th>
-                            <th class="py-3 px-3.5">Tujuan Yard</th>
-                            <th class="py-3 px-3.5">Status Gate</th>
+                            <th class="py-3 px-3.5">Pengemudi / Transporter</th>
+                            <th class="py-3 px-3.5">Misi Operasional</th>
+                            <th class="py-3 px-3.5">Kontainer / DO</th>
+                            <th class="py-3 px-3.5">Status Gerbang</th>
+                            <th class="py-3 px-3.5 text-center">Dokumen</th>
                         </tr>
                     </thead>
                     <tbody id="gate-log-tbody" class="divide-y divide-gray-100 text-gray-700">
-                        <tr class="hover:bg-slate-50/60 transition-colors">
-                            <td class="py-3 px-3.5 font-mono text-gray-500">23:38:12</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] font-bold">Lane 1 (In)</span></td>
-                            <td class="py-3 px-3.5 font-mono font-bold text-gray-900">B 9381 UIX</td>
-                            <td class="py-3 px-3.5 font-mono text-gray-900">TEMU 671209-1</td>
-                            <td class="py-3 px-3.5 font-mono">29.100 kg</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded font-bold text-[10px]">VERIFIED</span></td>
-                            <td class="py-3 px-3.5 font-semibold text-gray-700">Block A - Bay 02</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">GATE-IN COMPLETE</span></td>
+                        <?php if (empty($gate_trucks)): ?>
+                        <tr>
+                            <td colspan="8" class="text-center py-8 text-gray-400">
+                                <i class="fa-solid fa-door-open text-3xl mb-2 text-gray-300 block"></i>
+                                Belum ada data gerbang. Silakan registrasi pra-gate atau jalankan simulasi di Panel Simulasi 3D.
+                            </td>
                         </tr>
-                        <tr class="hover:bg-slate-50/60 transition-colors">
-                            <td class="py-3 px-3.5 font-mono text-gray-500">23:32:45</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[11px] font-bold">Lane 2 (e-Seal)</span></td>
-                            <td class="py-3 px-3.5 font-mono font-bold text-gray-900">B 9044 BZX</td>
-                            <td class="py-3 px-3.5 font-mono text-gray-900">SUDU 519280-4</td>
-                            <td class="py-3 px-3.5 font-mono">22.400 kg</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded font-bold text-[10px]">VERIFIED</span></td>
-                            <td class="py-3 px-3.5 font-semibold text-gray-700">Block C - Bay 06</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">GATE-IN COMPLETE</span></td>
+                        <?php else: ?>
+                        <?php foreach ($gate_trucks as $idx => $t): 
+                            $time = !empty($t['gate_out_time']) ? $t['gate_out_time'] : (!empty($t['gate_in_time']) ? $t['gate_in_time'] : $t['created_at']);
+                            $isOut = !empty($t['gate_out_time']) || $t['status'] === 'gate_out';
+                            $isIn = $t['status'] === 'in_yard' || $t['status'] === 'loading';
+                            $isQueue = $t['status'] === 'queuing';
+                            $lane = $isOut ? 'Lane 3 (Out)' : (($idx % 2 == 0) ? 'Lane 1 (In Heavy)' : 'Lane 2 (e-Seal)');
+                            $laneClass = $isOut ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700';
+                            $jobBadge = ($t['job_type'] === 'pick_up') 
+                                ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i>Pick-Up</span>' 
+                                : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i>Drop-Off</span>';
+                        ?>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3 px-3.5 font-mono text-gray-500 whitespace-nowrap"><?= date('H:i:s d/m', strtotime($time)) ?></td>
+                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $laneClass ?>"><?= $lane ?></span></td>
+                            <td class="py-3 px-3.5 font-mono font-bold text-gray-900"><?= htmlspecialchars($t['license_plate']) ?></td>
+                            <td class="py-3 px-3.5">
+                                <div class="font-bold text-gray-800"><?= htmlspecialchars($t['driver_name'] ?? 'Pengemudi CIDP') ?></div>
+                                <div class="text-[11px] text-gray-400"><?= htmlspecialchars($t['company'] ?? 'PT Logistik Nasional') ?></div>
+                            </td>
+                            <td class="py-3 px-3.5"><?= $jobBadge ?></td>
+                            <td class="py-3 px-3.5 font-mono">
+                                <?php if (!empty($t['container_number'])): ?>
+                                    <span class="font-bold text-indigo-700"><?= htmlspecialchars($t['container_number']) ?></span>
+                                <?php elseif (!empty($t['do_number'])): ?>
+                                    <span class="text-amber-700 font-semibold"><?= htmlspecialchars($t['do_number']) ?></span>
+                                <?php else: ?>
+                                    <span class="text-gray-400 italic">Chassis Kosong</span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-3 px-3.5">
+                                <?php if ($isOut): ?>
+                                    <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded-full text-[10px] font-bold flex items-center w-fit"><i class="fa-solid fa-check mr-1 text-slate-500"></i>SELESAI GATE-OUT</span>
+                                <?php elseif ($isIn): ?>
+                                    <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold flex items-center w-fit"><i class="fa-solid fa-circle-dot mr-1 text-emerald-500"></i>DI TERMINAL YARD</span>
+                                <?php elseif ($isQueue): ?>
+                                    <span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded-full text-[10px] font-bold flex items-center w-fit"><i class="fa-solid fa-hourglass-half mr-1 text-amber-500"></i>ANTRIAN PRA-GATE</span>
+                                <?php else: ?>
+                                    <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px] font-bold flex items-center w-fit"><?= strtoupper(htmlspecialchars($t['status'])) ?></span>
+                                <?php endif; ?>
+                            </td>
+                            <td class="py-3 px-3.5 text-center">
+                                <div class="flex items-center justify-center space-x-1">
+                                    <button onclick="viewGatePassDetail('<?= htmlspecialchars($t['license_plate']) ?>', '<?= htmlspecialchars($t['container_number'] ?? $t['do_number'] ?? '-') ?>', '<?= htmlspecialchars($t['driver_name'] ?? '') ?>')" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded text-[11px] transition" title="Lihat E-Gate Pass">
+                                        <i class="fa-solid fa-qrcode mr-1"></i> Pass
+                                    </button>
+                                    <button onclick="openEdifactModal()" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded text-[11px] transition" title="Lihat EDI CODECO">
+                                        <i class="fa-solid fa-file-code"></i>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
-                        <tr class="hover:bg-slate-50/60 transition-colors">
-                            <td class="py-3 px-3.5 font-mono text-gray-500">23:25:19</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-[11px] font-bold">Lane 3 (Out)</span></td>
-                            <td class="py-3 px-3.5 font-mono font-bold text-gray-900">B 9912 KLA</td>
-                            <td class="py-3 px-3.5 font-mono text-gray-900">MSKU 918237-4</td>
-                            <td class="py-3 px-3.5 font-mono">25.400 kg</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded font-bold text-[10px]">EXIT PASS</span></td>
-                            <td class="py-3 px-3.5 font-semibold text-gray-700">Exit ke Tol Japek</td>
-                            <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded-full text-[10px] font-bold">GATE-OUT COMPLETE</span></td>
-                        </tr>
+                        <?php endforeach; ?>
+                        <?php endif; ?>
                     </tbody>
                 </table>
             </div>
@@ -979,8 +1074,8 @@ foreach ($hardware_list as $item) {
                 <!-- Fast Actions -->
                 <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
                     <button type="button" onclick="transferOcrToGateLane()" class="w-full py-2.5 px-4 bg-[#002f5e] hover:bg-[#0170b9] text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 shadow-xs">
-                        <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                        <span>Kirim Kontainer ke Inbound Gate Lane 1</span>
+                        <i class="fa-solid fa-id-card"></i>
+                        <span>Gunakan Kontainer untuk Registrasi Pra-Gate</span>
                     </button>
                     <button type="button" onclick="openEdifactModalCurrent()" class="w-full py-2.5 px-4 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-2">
                         <i class="fa-solid fa-file-invoice"></i>
@@ -1392,6 +1487,247 @@ foreach ($hardware_list as $item) {
             </div>
         </div>
     </div>
+
+    <!-- ======================================================================= -->
+    <!-- TAB 5: DCSA EVENT LOG -->
+    <!-- ======================================================================= -->
+    <div id="tab-dcsa" class="tab-content hidden space-y-6">
+        <!-- Header Info DCSA -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-2 flex items-center">
+                <i class="fa-solid fa-satellite-dish text-[#0170b9] mr-2"></i>
+                DCSA Track & Trace API Standard
+            </h2>
+            <p class="text-xs text-gray-500">
+                Digital Container Shipping Association (konsorsium Maersk, MSC, CMA CGM, Hapag-Lloyd, dll). CIDP menggunakan standar struktur event API v2.2 untuk pelaporan aktivitas kontainer (EQUIPMENT), pergerakan moda transportasi (TRANSPORT), dan status pengiriman (SHIPMENT).
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Event Log Table -->
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-gray-100 shadow-sm flex flex-col h-[600px] overflow-hidden">
+                <div class="p-4 border-b border-gray-100 flex items-center justify-between bg-gray-50/50">
+                    <h3 class="text-sm font-bold text-gray-800">Event Log Stream</h3>
+                    <div class="flex space-x-2">
+                        <button onclick="exportGateExcel()" class="px-2 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition flex items-center shadow-xs">
+                            <i class="fa-solid fa-file-excel mr-1"></i> Excel
+                        </button>
+                        <button onclick="exportGatePDF()" class="px-2 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded text-xs font-bold transition flex items-center shadow-xs">
+                            <i class="fa-solid fa-file-pdf mr-1"></i> PDF
+                        </button>
+                        <select class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-blue-400">
+                            <option value="">Semua Event</option>
+                            <option value="EQUIPMENT">EQUIPMENT</option>
+                            <option value="TRANSPORT">TRANSPORT</option>
+                            <option value="SHIPMENT">SHIPMENT</option>
+                        </select>
+                        <select class="text-xs border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-blue-400">
+                            <option value="">Semua Status</option>
+                            <option value="ACT">ACT (Actual)</option>
+                            <option value="PLN">PLN (Planned)</option>
+                            <option value="EST">EST (Estimated)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-auto p-4">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-[10px] text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                                <th class="pb-2 font-semibold">Timestamp</th>
+                                <th class="pb-2 font-semibold">Event Type / ID</th>
+                                <th class="pb-2 font-semibold">Classifier</th>
+                                <th class="pb-2 font-semibold">Equipment / Call</th>
+                                <th class="pb-2 font-semibold">Location</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs divide-y divide-gray-50">
+                            <!-- Sample Data 1: GATE_IN -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-29T08:15:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: GATE_IN</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-001</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">MSKU7829104</td>
+                                <td class="py-2.5 text-gray-600">IDCKG (CIDP)</td>
+                            </tr>
+                            <!-- Sample Data 2: DROP_OFF -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-29T08:25:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: DROP_OFF</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-002</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">MSKU7829104</td>
+                                <td class="py-2.5 text-gray-600">IDCKG (Yard A-01)</td>
+                            </tr>
+                            <!-- Sample Data 3: LOAD -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-29T11:30:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: LOAD</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-003</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">TGHU9021845</td>
+                                <td class="py-2.5 text-gray-600">IDCKG (Rail Siding)</td>
+                            </tr>
+                            <!-- Sample Data 4: DEPA -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-29T12:00:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold">TRANSPORT: DEPA</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-004</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">KA2518 (Train)</td>
+                                <td class="py-2.5 text-gray-600">IDCKG (CIDP)</td>
+                            </tr>
+                            <!-- Sample Data 5: ARRI Planned -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-29T18:00:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold">TRANSPORT: ARRI</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-005</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded text-[10px] font-bold">PLN</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">KA2518 (Train)</td>
+                                <td class="py-2.5 text-gray-600">IDTPP (Priok)</td>
+                            </tr>
+                            <!-- Sample Data 6: RECE -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-28T09:00:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold">SHIPMENT: RECE</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-006</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">BK-20260901</td>
+                                <td class="py-2.5 text-gray-600">IDCKG</td>
+                            </tr>
+                            <!-- Sample Data 7: CONF -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-28T10:15:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold">SHIPMENT: CONF</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-007</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">BK-20260901</td>
+                                <td class="py-2.5 text-gray-600">IDCKG</td>
+                            </tr>
+                            <!-- Sample Data 8: STUFF -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-28T14:30:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: STUFF</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-008</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">EITU9823102</td>
+                                <td class="py-2.5 text-gray-600">IDCKG (CFS)</td>
+                            </tr>
+                            <!-- Sample Data 9: GATE_OUT -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-30T09:00:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: GATE_OUT</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-009</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded text-[10px] font-bold">PLN</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">EITU9823102</td>
+                                <td class="py-2.5 text-gray-600">IDCKG (Gate Out)</td>
+                            </tr>
+                            <!-- Sample Data 10: DISCHARGE Estimated -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-10-01T15:00:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: DISCHARGE</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-010</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-rose-50 text-rose-700 border border-rose-100 rounded text-[10px] font-bold">EST</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">EITU9823102</td>
+                                <td class="py-2.5 text-gray-600">IDTPP (Priok)</td>
+                            </tr>
+                            <!-- Sample Data 11: ISSU -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-30T10:00:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold">SHIPMENT: ISSU</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-011</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-amber-50 text-amber-700 border border-amber-100 rounded text-[10px] font-bold">PLN</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">BL-9912034</td>
+                                <td class="py-2.5 text-gray-600">IDCKG</td>
+                            </tr>
+                            <!-- Sample Data 12: STRIP -->
+                            <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 font-mono text-gray-500">2026-09-27T11:00:00+07:00</td>
+                                <td class="py-2.5">
+                                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: STRIP</span>
+                                    <div class="text-[10px] text-gray-400 font-mono mt-1">EVT-CIDP-012</div>
+                                </td>
+                                <td class="py-2.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded text-[10px] font-bold">ACT</span></td>
+                                <td class="py-2.5 font-mono font-bold text-gray-800">MSKU7829104</td>
+                                <td class="py-2.5 text-gray-600">IDCKG (CFS)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- API Payload Preview & Controls -->
+            <div class="space-y-6">
+                <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-md">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
+                        <h3 class="text-xs font-bold text-slate-200 flex items-center">
+                            <i class="fa-solid fa-code text-blue-400 mr-2"></i>
+                            DCSA API Payload Preview
+                        </h3>
+                        <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">JSON</span>
+                    </div>
+                    <pre class="text-[10px] font-mono text-emerald-400 bg-slate-950 p-3 rounded-lg overflow-x-auto border border-slate-800">{
+  "eventID": "EVT-CIDP-001",
+  "eventType": "EQUIPMENT",
+  "eventDateTime": "2026-09-29T08:15:00+07:00",
+  "eventClassifierCode": "ACT",
+  "equipmentEventTypeCode": "GATE_IN",
+  "equipmentReference": "MSKU7829104",
+  "transportCallID": "TC-CIDP-KA2518",
+  "facilityCode": "IDCKG",
+  "facilityCodeListProvider": "SMDG"
+}</pre>
+                    <button class="w-full mt-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-lg transition-colors border border-slate-700 flex items-center justify-center">
+                        <i class="fa-regular fa-copy mr-1.5"></i> Salin JSON Payload
+                    </button>
+                </div>
+
+                <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
+                    <h3 class="text-xs font-bold text-gray-800 mb-3 border-b border-gray-100 pb-2">Simulator DCSA Event</h3>
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-semibold mb-1">Event Type</label>
+                            <select class="w-full text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:border-blue-400">
+                                <option>EQUIPMENT_EVENT</option>
+                                <option>TRANSPORT_EVENT</option>
+                                <option>SHIPMENT_EVENT</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 font-semibold mb-1">Equipment Reference</label>
+                            <input type="text" value="MSKU7829104" class="w-full text-xs font-mono border border-gray-200 rounded-lg px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:border-blue-400">
+                        </div>
+                        <button class="w-full py-2 bg-[#0170b9] hover:bg-[#004b87] text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 mt-2">
+                            <i class="fa-solid fa-paper-plane"></i>
+                            <span>Generate DCSA Event</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- ======================================================================= -->
@@ -1480,6 +1816,110 @@ foreach ($hardware_list as $item) {
     </div>
 </div>
 
+<!-- ======================================================================= -->
+<!-- MODAL: REGISTRASI PRA-GATE (GATE PASS BOOKING) -->
+<!-- ======================================================================= -->
+<div id="gatePassModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
+    <div class="bg-white rounded-2xl max-w-xl w-full border border-gray-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+        <!-- Header -->
+        <div class="bg-[#002f5e] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-lg">
+                    <i class="fa-solid fa-id-card"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-bold tracking-tight">Registrasi Pra-Gate (Gate Pass Booking)</h3>
+                    <p class="text-xs text-blue-200">Pendaftaran armada truk &amp; dokumen sebelum melewati gerbang</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeGatePassModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Form Body -->
+        <form id="formGatePass" onsubmit="submitGatePass(event)" class="p-6 overflow-y-auto space-y-4">
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5">Tugas / Misi Truk di Dry Port</label>
+                <div class="grid grid-cols-2 gap-3">
+                    <label class="flex items-center p-3 border border-blue-200 bg-blue-50/50 rounded-xl cursor-pointer hover:bg-blue-50 transition">
+                        <input type="radio" name="gp_job_type" value="drop_off" checked onchange="toggleGatePassFields()" class="text-[#0170b9] focus:ring-blue-500 mr-2.5">
+                        <div>
+                            <span class="block text-xs font-bold text-gray-900">Drop-Off (Antar Barang)</span>
+                            <span class="block text-[11px] text-gray-500">Bawa kontainer masuk terminal</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center p-3 border border-amber-200 bg-amber-50/50 rounded-xl cursor-pointer hover:bg-amber-50 transition">
+                        <input type="radio" name="gp_job_type" value="pick_up" onchange="toggleGatePassFields()" class="text-amber-600 focus:ring-amber-500 mr-2.5">
+                        <div>
+                            <span class="block text-xs font-bold text-gray-900">Pick-Up (Ambil Barang)</span>
+                            <span class="block text-[11px] text-gray-500">Truk kosong ambil kontainer</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nomor Polisi (Plat Truk) *</label>
+                    <input type="text" id="gp_license_plate" required placeholder="misal: B 9481 UIX" class="w-full text-xs font-mono font-bold uppercase border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Pengemudi *</label>
+                    <input type="text" id="gp_driver_name" required placeholder="misal: Budi Santoso" class="w-full text-xs border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Perusahaan Ekspedisi / Transporter *</label>
+                    <input type="text" id="gp_company" required placeholder="misal: PT Samudera Raya Logistik" class="w-full text-xs border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">RFID / e-Tag Truk (Opsional)</label>
+                    <input type="text" id="gp_rfid_tag" placeholder="misal: RFID-99214" class="w-full text-xs font-mono border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+                </div>
+            </div>
+
+            <div id="gp_dropoff_section" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
+                <span class="text-[11px] font-bold text-blue-700 uppercase tracking-wider block"><i class="fa-solid fa-box mr-1"></i> Data Muatan Bawaan (Drop-Off)</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-600 mb-1">Nomor Kontainer ISO 6346</label>
+                        <input type="text" id="gp_container_number" placeholder="misal: MSKU9182374" class="w-full text-xs font-mono uppercase border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-blue-500 bg-white">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-gray-600 mb-1">Estimasi Gross SOLAS VGM (kg)</label>
+                        <input type="number" id="gp_weight" placeholder="misal: 28450" class="w-full text-xs font-mono border border-gray-200 rounded-lg p-2 focus:outline-none focus:border-blue-500 bg-white">
+                    </div>
+                </div>
+            </div>
+
+            <div id="gp_pickup_section" class="hidden bg-amber-50/60 p-3.5 rounded-xl border border-amber-200 space-y-3">
+                <span class="text-[11px] font-bold text-amber-800 uppercase tracking-wider block"><i class="fa-solid fa-file-invoice mr-1"></i> Dokumen Pengambilan (Pick-Up)</span>
+                <div>
+                    <label class="block text-[11px] font-semibold text-gray-600 mb-1">Nomor DO (Delivery Order) / SPPB Bea Cukai</label>
+                    <input type="text" id="gp_do_number" placeholder="misal: DO-2026/CIDP/0889" class="w-full text-xs font-mono uppercase border border-amber-200 rounded-lg p-2 focus:outline-none focus:border-amber-500 bg-white">
+                </div>
+            </div>
+
+            <!-- Catatan Integrasi Simulasi -->
+            <div class="p-3 bg-blue-50/70 border border-blue-200/60 rounded-xl text-[11px] text-blue-800 flex items-start space-x-2">
+                <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 shrink-0"></i>
+                <span>Setelah registrasi disimpan, armada otomatis terdaftar dengan status <strong>Antrian Pra-Gate</strong>. Anda dapat menguji proses gate-in fisik armada di <strong>Panel Simulasi 3D</strong>.</span>
+            </div>
+
+            <div class="pt-2 flex items-center justify-end space-x-2 border-t border-gray-100">
+                <button type="button" onclick="closeGatePassModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs transition">Batal</button>
+                <button type="submit" id="btnSubmitGP" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-xs shadow-xs transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Simpan &amp; Terbitkan Gate Pass</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <!-- JavaScript Interaktif Modul Gate -->
 <script>
 // Tab Switching Logic
@@ -1500,182 +1940,93 @@ function switchGateTab(tabId) {
     }
 }
 
-// Simulasi Gate Skenario Data
-const scenarios = {
-    1: {
-        plate: "B 9812 UIK",
-        container: "TCKU 829104-2",
-        weight: "32.450 kg",
-        vgm: "VERIFIED PASS",
-        solasClass: "text-emerald-400",
-        led: "SILAHKAN MASUK - BLOK B04",
-        gatePass: "GP-20260922-0042",
-        yardLoc: "Block B - Bay 04 - Row 02 (Dry 40HC)",
-        isPass: true
-    },
-    2: {
-        plate: "B 9144 PXT",
-        container: "MSKU 441029-7",
-        weight: "24.120 kg",
-        vgm: "VERIFIED PASS",
-        solasClass: "text-emerald-400",
-        led: "SILAHKAN KE REEFER YARD R02",
-        gatePass: "GP-20260922-0043",
-        yardLoc: "Reefer Yard - Block R02 - Plug 14 (Reefer 20ft)",
-        isPass: true
-    },
-    3: {
-        plate: "B 9033 BAA",
-        container: "CMAU 992183-5",
-        weight: "37.200 kg",
-        vgm: "OVERWEIGHT ALERT (>34t)",
-        solasClass: "text-rose-400 font-bold",
-        led: "OVERLOAD! LAPOR KE OPERATOR GATE",
-        gatePass: "REJECT-OVERWEIGHT",
-        yardLoc: "Area Pemeriksaan / Behandle Bea Cukai",
-        isPass: false
+// Modal Registrasi Pra-Gate
+function showGatePassModal() {
+    const modal = document.getElementById('gatePassModal');
+    if (modal) modal.classList.remove('hidden');
+}
+
+function closeGatePassModal() {
+    const modal = document.getElementById('gatePassModal');
+    if (modal) modal.classList.add('hidden');
+}
+
+function toggleGatePassFields() {
+    const isPickup = document.querySelector('input[name="gp_job_type"]:checked')?.value === 'pick_up';
+    const dropoffSec = document.getElementById('gp_dropoff_section');
+    const pickupSec = document.getElementById('gp_pickup_section');
+    if (dropoffSec && pickupSec) {
+        if (isPickup) {
+            dropoffSec.classList.add('hidden');
+            pickupSec.classList.remove('hidden');
+        } else {
+            dropoffSec.classList.remove('hidden');
+            pickupSec.classList.add('hidden');
+        }
     }
-};
-
-let currentScenarioId = 1;
-
-function selectScenario(id) {
-    currentScenarioId = id;
 }
 
-function runGateSimulation() {
-    const btn = document.getElementById('btn-run-sim');
-    const badge = document.getElementById('sim-status-badge');
-    const progressBar = document.getElementById('sim-progress-bar');
-    const stepText = document.getElementById('progress-step-text');
-    const percentText = document.getElementById('progress-percent');
-    
-    const anprPlate = document.getElementById('anpr-plate');
-    const anprStatus = document.getElementById('anpr-status');
-    const ocrContainer = document.getElementById('ocr-container');
-    const ocrStatus = document.getElementById('ocr-status');
-    const vgmWeight = document.getElementById('vgm-weight');
-    const vgmSolas = document.getElementById('vgm-solas');
-    const vgmStatus = document.getElementById('vgm-status');
-    const barrierStatus = document.getElementById('barrier-status');
-    const ledText = document.getElementById('led-text');
-    const gatePassPreview = document.getElementById('gate-pass-preview');
+function submitGatePass(e) {
+    e.preventDefault();
+    const btn = document.getElementById('btnSubmitGP');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...';
+    }
 
-    const sc = scenarios[currentScenarioId];
+    const jobType = document.querySelector('input[name="gp_job_type"]:checked')?.value || 'drop_off';
+    const plate = document.getElementById('gp_license_plate').value.trim();
+    const driver = document.getElementById('gp_driver_name').value.trim();
+    const company = document.getElementById('gp_company').value.trim();
+    const rfid = document.getElementById('gp_rfid_tag').value.trim();
+    const container = document.getElementById('gp_container_number').value.trim();
+    const doNumber = document.getElementById('gp_do_number').value.trim();
 
-    // Reset State
-    btn.disabled = true;
-    btn.classList.add('opacity-50', 'cursor-not-allowed');
-    gatePassPreview.classList.add('hidden');
-    badge.textContent = "PROCESSING SENSORS...";
-    badge.className = "px-2.5 py-0.5 bg-amber-900/60 text-amber-300 rounded-full text-[11px] font-mono animate-pulse";
-    
-    barrierStatus.textContent = "CLOSED";
-    barrierStatus.className = "text-[10px] text-rose-400 font-bold";
+    const payload = {
+        license_plate: plate,
+        driver_name: driver,
+        company: company,
+        job_type: jobType,
+        rfid_tag: rfid,
+        container_number: (jobType === 'drop_off') ? container : '',
+        do_number: (jobType === 'pick_up') ? doNumber : ''
+    };
 
-    // Step 1: ANPR Trigger
-    stepText.textContent = "Tahap 1/5: Truk melintasi loop detector, kamera ANPR mengambil gambar plat...";
-    percentText.textContent = "20%";
-    progressBar.style.width = "20%";
-    anprStatus.textContent = "SCANNING...";
-    anprStatus.className = "text-[10px] text-amber-400";
-
-    setTimeout(() => {
-        anprPlate.textContent = sc.plate;
-        anprStatus.textContent = "MATCHED";
-        anprStatus.className = "text-[10px] text-emerald-400 font-bold";
-
-        // Step 2: OCR Trigger
-        stepText.textContent = "Tahap 2/5: Kamera OCR mengekstraksi nomor kontainer ISO 6346...";
-        percentText.textContent = "40%";
-        progressBar.style.width = "40%";
-        ocrStatus.textContent = "RECOGNIZING...";
-        ocrStatus.className = "text-[10px] text-amber-400";
-
-        setTimeout(() => {
-            ocrContainer.textContent = sc.container;
-            ocrStatus.textContent = "CONFIRMED";
-            ocrStatus.className = "text-[10px] text-emerald-400 font-bold";
-
-            // Step 3: Weighbridge Trigger
-            stepText.textContent = "Tahap 3/5: Jembatan timbang 80t membaca bobot & validasi SOLAS VGM...";
-            percentText.textContent = "60%";
-            progressBar.style.width = "60%";
-            vgmStatus.textContent = "WEIGHING...";
-            vgmStatus.className = "text-[10px] text-amber-400";
-
-            setTimeout(() => {
-                vgmWeight.textContent = sc.weight;
-                vgmSolas.textContent = sc.vgm;
-                vgmSolas.className = "text-xs font-mono " + sc.solasClass;
-                vgmStatus.textContent = sc.isPass ? "VERIFIED" : "ALERT";
-                vgmStatus.className = sc.isPass ? "text-[10px] text-emerald-400 font-bold" : "text-[10px] text-rose-400 font-bold";
-
-                // Step 4: Edge AI PC Decision
-                stepText.textContent = "Tahap 4/5: Industrial Edge AI PC memvalidasi surat jalan dan manifest EDI...";
-                percentText.textContent = "80%";
-                progressBar.style.width = "80%";
-
-                setTimeout(() => {
-                    // Step 5: Barrier & LED
-                    percentText.textContent = "100%";
-                    progressBar.style.width = "100%";
-                    ledText.textContent = sc.led;
-
-                    if (sc.isPass) {
-                        barrierStatus.textContent = "OPEN (PALANG TERBUKA)";
-                        barrierStatus.className = "text-[10px] text-emerald-400 font-bold animate-bounce";
-                        badge.textContent = "SUCCESS - ACCESS GRANTED";
-                        badge.className = "px-2.5 py-0.5 bg-emerald-900/80 text-emerald-300 rounded-full text-[11px] font-mono";
-                        stepText.textContent = "Selesai: Palang terbuka otomatis. Silakan masuk ke area yard.";
-
-                        // Tampilkan Gate Pass
-                        document.getElementById('gate-pass-no').textContent = sc.gatePass;
-                        document.getElementById('gate-pass-loc').textContent = "Tujuan: " + sc.yardLoc;
-                        gatePassPreview.classList.remove('hidden');
-
-                        // Tambah log ke tabel
-                        prependGateLog(sc);
-                    } else {
-                        barrierStatus.textContent = "LOCKED (PALANG TETAP TERTUTUP)";
-                        barrierStatus.className = "text-[10px] text-rose-500 font-bold";
-                        badge.textContent = "REJECTED - OVERWEIGHT";
-                        badge.className = "px-2.5 py-0.5 bg-rose-900/80 text-rose-300 rounded-full text-[11px] font-mono";
-                        stepText.textContent = "Peringatan: Berat kontainer melebihi ambang batas SOLAS. Palang ditahan tertutup!";
-                    }
-
-                    btn.disabled = false;
-                    btn.classList.remove('opacity-50', 'cursor-not-allowed');
-                }, 700);
-            }, 700);
-        }, 700);
-    }, 700);
+    fetch('api/crud.php?action=add_truck', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Simpan & Terbitkan Gate Pass';
+        }
+        if (data.status) {
+            closeGatePassModal();
+            alert('Sukses! Gate Pass armada ' + plate + ' berhasil diterbitkan.\nStatus: Antrian Pra-Gate. Anda dapat menjalankan simulasi gerbang di Panel Simulasi 3D.');
+            location.reload();
+        } else {
+            alert('Gagal mendaftarkan armada: ' + (data.message || 'Terjadi kesalahan sistem'));
+        }
+    })
+    .catch(err => {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fa-solid fa-check"></i> Simpan & Terbitkan Gate Pass';
+        }
+        alert('Gagal menghubungi server: ' + err.message);
+    });
 }
 
-function prependGateLog(sc) {
-    const tbody = document.getElementById('gate-log-tbody');
-    const now = new Date();
-    const timeStr = String(now.getHours()).padStart(2, '0') + ':' + 
-                    String(now.getMinutes()).padStart(2, '0') + ':' + 
-                    String(now.getSeconds()).padStart(2, '0');
-
-    const newRow = document.createElement('tr');
-    newRow.className = "hover:bg-slate-50/60 transition-colors bg-blue-50/30 animate-fadeIn";
-    newRow.innerHTML = `
-        <td class="py-3 px-3.5 font-mono text-gray-500">${timeStr}</td>
-        <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[11px] font-bold">Lane 1 (In)</span></td>
-        <td class="py-3 px-3.5 font-mono font-bold text-gray-900">${sc.plate}</td>
-        <td class="py-3 px-3.5 font-mono text-gray-900">${sc.container}</td>
-        <td class="py-3 px-3.5 font-mono">${sc.weight}</td>
-        <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded font-bold text-[10px]">VERIFIED</span></td>
-        <td class="py-3 px-3.5 font-semibold text-gray-700">${sc.yardLoc.split('(')[0]}</td>
-        <td class="py-3 px-3.5"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full text-[10px] font-bold">SIMULATION PASS</span></td>
-    `;
-    tbody.insertBefore(newRow, tbody.firstChild);
-}
-
-function printGatePass() {
-    alert("Mencetak E-Gate Pass resmi CIDP...\nNomor Pass: " + document.getElementById('gate-pass-no').textContent + "\n" + document.getElementById('gate-pass-loc').textContent);
+function viewGatePassDetail(plate, contOrDo, driver) {
+    alert("=== E-GATE PASS RESMI CIDP ===\n" +
+          "Plat Truk: " + plate + "\n" +
+          "Pengemudi: " + (driver || 'Driver CIDP') + "\n" +
+          "Muatan / DO: " + contOrDo + "\n" +
+          "Status: Terverifikasi Digital Gate System\n" +
+          "Sertifikasi: VGM SOLAS Compliant (Fangda 80T)");
 }
 
 // Filter Kategori Hardware BOM
@@ -2009,26 +2360,13 @@ function transferOcrToGateLane() {
     const preset = ocrPresetsData[activePresetKey] || ocrPresetsData['MSKU'];
     const currentCode = document.getElementById('iso-input-container').value;
 
-    // Update Skenario 1 dengan data OCR terkini
-    scenarios[1].container = currentCode.length === 11 
-        ? currentCode.substring(0, 4) + ' ' + currentCode.substring(4, 10) + '-' + currentCode[10] 
-        : currentCode;
-    scenarios[1].plate = preset.plate;
-    scenarios[1].weight = preset.weight;
-    scenarios[1].yardLoc = preset.yardLoc;
-
-    // Pindah ke tab simulasi dan jalankan
-    switchGateTab('tab-simulasi');
-    
-    // Pilih skenario 1
-    const radio1 = document.querySelector('input[name="sim-scenario"][value="1"]');
-    if (radio1) radio1.checked = true;
-    selectScenario(1);
-
-    // Otomatis picu simulasi gate inbound
-    setTimeout(() => {
-        runGateSimulation();
-    }, 300);
+    showGatePassModal();
+    const contInput = document.getElementById('gp_container_number');
+    if (contInput) contInput.value = currentCode;
+    const plateInput = document.getElementById('gp_license_plate');
+    if (plateInput && preset.plate) plateInput.value = preset.plate;
+    const weightInput = document.getElementById('gp_weight');
+    if (weightInput && preset.weight) weightInput.value = parseInt(preset.weight.replace(/[^0-9]/g, '')) || 24000;
 }
 
 // ===========================================================================
@@ -2115,4 +2453,34 @@ function downloadEdifactFile() {
 document.addEventListener('DOMContentLoaded', () => {
     recalculateISO('MSKU9821450');
 });
+
+function getGateExportData() {
+    const headers = ['Timestamp', 'Event Type / ID', 'Classifier', 'Equipment / Call', 'Location'];
+    const rows = [];
+    const tableRows = document.querySelectorAll('#tab-dcsa table tbody tr');
+    
+    tableRows.forEach(row => {
+        const cols = row.querySelectorAll('td');
+        if (cols.length === 5) {
+            rows.push([
+                cols[0].innerText.trim(),
+                cols[1].innerText.replace(/\n/g, ' - ').trim(),
+                cols[2].innerText.trim(),
+                cols[3].innerText.trim(),
+                cols[4].innerText.trim()
+            ]);
+        }
+    });
+    return { headers, rows };
+}
+
+function exportGateExcel() {
+    const { headers, rows } = getGateExportData();
+    CIDPExport.toExcel(headers, rows, 'DCSA Event Log', 'Laporan_Gate_DCSA');
+}
+
+function exportGatePDF() {
+    const { headers, rows } = getGateExportData();
+    CIDPExport.toPDF('Laporan DCSA Event Log', headers, rows, 'Laporan_Gate_DCSA');
+}
 </script>

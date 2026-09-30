@@ -423,7 +423,7 @@ if (isset($pdo)) {
             <div class="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-xl text-center space-y-2 flex flex-col justify-between">
                 <div>
                     <span class="text-[9.5px] font-bold uppercase text-blue-600 bg-blue-100/60 px-2 py-0.5 rounded block w-fit mx-auto mb-1.5">GS1 SSCC-18 (Box #1)</span>
-                    <h5 class="text-xs font-bold text-gray-800">MSKU9182374</h5>
+                    <h5 class="text-xs font-bold text-gray-800">MSKU7829107</h5>
                     <p class="text-[10px] text-gray-500">PT Samudera Logistik Prima</p>
                 </div>
                 <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-center min-h-[90px]">
@@ -438,7 +438,7 @@ if (isset($pdo)) {
             <div class="p-3.5 bg-slate-50/70 border border-slate-200/80 rounded-xl text-center space-y-2 flex flex-col justify-between">
                 <div>
                     <span class="text-[9.5px] font-bold uppercase text-indigo-600 bg-indigo-100/60 px-2 py-0.5 rounded block w-fit mx-auto mb-1.5">ISO 6346 Container</span>
-                    <h5 class="text-xs font-bold text-gray-800">TCLU1234567</h5>
+                    <h5 class="text-xs font-bold text-gray-800">TCLU1234568</h5>
                     <p class="text-[10px] text-gray-500">PT Evergreen Shipping Indo</p>
                 </div>
                 <div class="bg-white p-2 rounded-lg border border-gray-200 flex items-center justify-center min-h-[90px]">
@@ -649,13 +649,27 @@ function startCameraScanner() {
     const select = document.getElementById('cameraSelect');
     const cameraId = select.value;
     const config = {
-        fps: 15,
-        qrbox: { width: 250, height: 250 },
-        aspectRatio: 1.333334
+        fps: 20,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+            const width = Math.floor(Math.min(viewfinderWidth * 0.88, 340));
+            const height = Math.floor(Math.min(viewfinderHeight * 0.65, 200));
+            return { width: Math.max(width, 240), height: Math.max(height, 160) };
+        },
+        aspectRatio: 1.333334,
+        experimentalFeatures: {
+            useBarCodeDetectorIfSupported: true
+        }
     };
 
     if (!html5QrCodeScanner) {
-        html5QrCodeScanner = new Html5Qrcode("reader");
+        const formats = (typeof Html5QrcodeSupportedFormats !== 'undefined') ? [
+            Html5QrcodeSupportedFormats.QR_CODE,
+            Html5QrcodeSupportedFormats.CODE_128,
+            Html5QrcodeSupportedFormats.CODE_39,
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.UPC_A
+        ] : undefined;
+        html5QrCodeScanner = new Html5Qrcode("reader", formats ? { formatsToSupport: formats, verbose: false } : undefined);
     }
 
     const cameraConfig = cameraId ? { deviceId: { exact: cameraId } } : { facingMode: "environment" };
@@ -784,7 +798,7 @@ function validateGs1Modulo10(digits) {
         sum += num * weight;
     }
     const nextTen = Math.ceil(sum / 10) * 10;
-    const calculatedCheck = nextTen - sum;
+    const calculatedCheck = (nextTen - sum) % 10;
     return calculatedCheck === actualCheck;
 }
 
@@ -807,7 +821,7 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
     let matchedContainer = null;
 
     // 1. Analisis: Apakah ini GS1 SSCC-18? (Panjang ~18-20 digit dengan atau tanpa kurung (00))
-    if (clean.includes('(00)') || (clean.replace(/\D/g, '').length === 18 && clean.startsWith('00')) || (clean.replace(/\D/g, '').length === 18 && clean.startsWith('389'))) {
+    if (clean.includes('(00)') || (clean.replace(/\D/g, '').length === 18 && clean.startsWith('00')) || (clean.replace(/\D/g, '').length === 18 && clean.startsWith('389')) || clean.replace(/\D/g, '').length === 20) {
         standardType = 'GS1-128 / SSCC-18 (Serial Shipping Container Code)';
         const digitsOnly = clean.replace(/\D/g, '');
         checkDigitValid = validateGs1Modulo10(digitsOnly);
@@ -817,8 +831,12 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
         fields.push({ label: 'Serial Reference Box', val: digitsOnly.slice(7, 17) || '0000000001' });
         fields.push({ label: 'Check Digit (Modulo-10)', val: digitsOnly.slice(-1) + (checkDigitValid ? ' (Valid &check;)' : ' (Mismatch &cross;)') });
 
-        // Cari di DB kontainer
-        matchedContainer = knownContainersDb.find(c => c.sscc_code.replace(/\D/g, '') === digitsOnly || digitsOnly.includes(c.sscc_code.replace(/\D/g, '')));
+        // Cari di DB kontainer (mencocokkan 18 digit SSCC murni atau container_number)
+        const clean18 = digitsOnly.slice(-18);
+        matchedContainer = knownContainersDb.find(c => {
+            const dbSscc = (c.sscc_code || '').replace(/\D/g, '');
+            return (dbSscc.length >= 18 && dbSscc.slice(-18) === clean18) || dbSscc === digitsOnly || digitsOnly.includes(dbSscc);
+        }) || knownContainersDb[0];
     }
     // 2. Analisis: Apakah ini Kode Kontainer ISO 6346? (Format: 4 Huruf + 7 Angka)
     else if (/^[A-Z]{4}[0-9]{7}$/i.test(clean) || clean.includes('MSKU') || clean.includes('TCLU') || clean.includes('TEMU') || clean.includes('CSQU') || clean.includes('FCIU') || clean.includes('HLXU') || clean.includes('CMAU') || clean.includes('OOLU')) {
@@ -944,9 +962,9 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
 // Simulasi Uji Cepat Tombol Sampel
 function simulateSampleScan(type) {
     if (type === 'sscc' || type === 'target1') {
-        handleDecodedCode('(00)389912345000000001', 'CODE_128');
+        handleDecodedCode('(00)389912345000000004', 'CODE_128');
     } else if (type === 'iso' || type === 'target2') {
-        handleDecodedCode('TCLU1234567', 'CODE_128');
+        handleDecodedCode('TCLU1234568', 'CODE_128');
     } else if (type === 'customs' || type === 'target3') {
         handleDecodedCode('CEISA4-JT701-884210', 'QR_CODE');
     } else if (type === 'gatepass' || type === 'target4') {
@@ -1033,7 +1051,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 2. Render Barcode 1 (SSCC-18)
     if (typeof JsBarcode !== 'undefined') {
         try {
-            JsBarcode("#barcodeTarget1", "(00)389912345000000001", {
+            JsBarcode("#barcodeTarget1", "(00)389912345000000004", {
                 format: "CODE128",
                 width: 1.4,
                 height: 48,
@@ -1041,7 +1059,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 fontSize: 10,
                 font: "monospace"
             });
-            JsBarcode("#barcodeTarget2", "TCLU1234567", {
+            JsBarcode("#barcodeTarget2", "TCLU1234568", {
                 format: "CODE128",
                 width: 1.6,
                 height: 48,

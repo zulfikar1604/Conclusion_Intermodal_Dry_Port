@@ -434,7 +434,7 @@ if (isset($_POST['btn_login'])) {
                             </li>
                             <li class="flex items-center space-x-2.5">
                                 <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Area jalur hijau, kuning, dan jalur merah pemeriksaan fisik</span>
+                                <span>Area jalur hijau dan jalur merah pemeriksaan fisik (PMK 190/2022)</span>
                             </li>
                             <li class="flex items-center space-x-2.5">
                                 <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>

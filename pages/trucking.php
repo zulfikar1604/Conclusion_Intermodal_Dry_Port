@@ -23,104 +23,13 @@ try {
 
 // Fallback dataset jika tabel kosong
 if (empty($trucks)) {
-    $trucks = [
-        [
-            'id' => 1,
-            'license_plate' => 'B 9182 TE',
-            'rfid_tag' => 'RFID-TRK-001',
-            'driver_name' => 'Soleh Marzuki',
-            'company' => 'PT Trans Logistik Prima',
-            'container_number' => 'MSKU9182374',
-            'status' => 'loading',
-            'gate_in_time' => '2026-09-21 13:45:00',
-            'gate_out_time' => null
-        ],
-        [
-            'id' => 2,
-            'license_plate' => 'B 1234 XY',
-            'rfid_tag' => 'RFID-TRK-002',
-            'driver_name' => 'Hendra Gunawan',
-            'company' => 'PT Cepat Aman Sejahtera',
-            'container_number' => 'TCLU1234567',
-            'status' => 'in_yard',
-            'gate_in_time' => '2026-09-21 14:05:00',
-            'gate_out_time' => null
-        ],
-        [
-            'id' => 3,
-            'license_plate' => 'D 5555 ZZ',
-            'rfid_tag' => 'RFID-TRK-003',
-            'driver_name' => 'Maman Sulaeman',
-            'company' => 'CV Jaya Abadi Transport',
-            'container_number' => null,
-            'status' => 'at_gate',
-            'gate_in_time' => '2026-09-21 14:22:00',
-            'gate_out_time' => null
-        ],
-        [
-            'id' => 4,
-            'license_plate' => 'B 7777 AB',
-            'rfid_tag' => 'RFID-TRK-004',
-            'driver_name' => 'Tono Hartono',
-            'company' => 'PT Puninar Logistics',
-            'container_number' => 'CSQU7777777',
-            'status' => 'queuing',
-            'gate_in_time' => null,
-            'gate_out_time' => null
-        ],
-        [
-            'id' => 5,
-            'license_plate' => 'L 8888 KL',
-            'rfid_tag' => 'RFID-TRK-005',
-            'driver_name' => 'Yanto Prasetyo',
-            'company' => 'PT Siba Surya',
-            'container_number' => 'TEMU8888888',
-            'status' => 'gate_out',
-            'gate_in_time' => '2026-09-21 12:15:00',
-            'gate_out_time' => '2026-09-21 12:38:00'
-        ]
-    ];
+    $trucks = [];
 }
 
 // Tambah armada realistis untuk memperkaya traffic demo jika kurang dari 8 unit
-if (count($trucks) < 8) {
-    $extra_trucks = [
-        [
-            'id' => 6,
-            'license_plate' => 'B 9481 FZ',
-            'rfid_tag' => 'RFID-TRK-006',
-            'driver_name' => 'Bambang Irawan',
-            'company' => 'PT Samudera Freight',
-            'container_number' => 'FCIU5555555',
-            'status' => 'loading',
-            'gate_in_time' => '2026-09-21 13:58:00',
-            'gate_out_time' => null
-        ],
-        [
-            'id' => 7,
-            'license_plate' => 'B 9021 UJ',
-            'rfid_tag' => 'RFID-TRK-007',
-            'driver_name' => 'Dedi Iskandar',
-            'company' => 'PT Dunex Express',
-            'container_number' => null,
-            'status' => 'in_yard',
-            'gate_in_time' => '2026-09-21 14:10:00',
-            'gate_out_time' => null
-        ],
-        [
-            'id' => 8,
-            'license_plate' => 'B 8820 KXA',
-            'rfid_tag' => 'RFID-TRK-008',
-            'driver_name' => 'Wahyudi Santoso',
-            'company' => 'PT Pos Logistik',
-            'container_number' => 'TEMU4819203',
-            'status' => 'gate_out',
-            'gate_in_time' => '2026-09-21 11:30:00',
-            'gate_out_time' => '2026-09-21 11:51:00'
-        ]
-    ];
-    $trucks = array_merge($trucks, $extra_trucks);
-}
+// if (count($trucks) < 8) {
+//     $extra_trucks = [ ... ];
+// }
 
 // Data Gerbang, Posisi Lapangan & Alat Berat
 $lanes = [
@@ -201,6 +110,18 @@ $total_trucks = count($trucks);
             </p>
         </div>
         <div class="flex items-center space-x-2 flex-shrink-0">
+            <button onclick="showAddTruckModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-plus"></i>
+                <span>Registrasi Truk Masuk</span>
+            </button>
+            <button onclick="exportTruckingExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Export Excel</span>
+            </button>
+            <button onclick="exportTruckingPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Export PDF</span>
+            </button>
             <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
                 <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak Rekap
             </button>
@@ -303,6 +224,7 @@ $total_trucks = count($trucks);
                     <tr class="bg-gray-50/80 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
                         <th class="py-3.5 px-4 font-semibold">Armada / Plat Truk</th>
                         <th class="py-3.5 px-4 font-semibold">Pengemudi</th>
+                        <th class="py-3.5 px-4 font-semibold">Tugas / Misi</th>
                         <th class="py-3.5 px-4 font-semibold">Gerbang Masuk</th>
                         <th class="py-3.5 px-4 font-semibold">Muatan Kontainer</th>
                         <th class="py-3.5 px-4 font-semibold">Status Operasional</th>
@@ -377,6 +299,19 @@ $total_trucks = count($trucks);
                                 </div>
                             </td>
 
+                            <!-- Tugas / Misi (Drop-Off / Pick-Up) -->
+                            <td class="py-4 px-4 whitespace-nowrap">
+                                <?php if (($t['job_type'] ?? 'drop_off') === 'pick_up'): ?>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                        <i class="fa-solid fa-arrow-up-from-bracket mr-1 text-[10px] text-amber-600"></i>Pick-Up (Ambil)
+                                    </span>
+                                <?php else: ?>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
+                                        <i class="fa-solid fa-arrow-down-to-bracket mr-1 text-[10px] text-blue-600"></i>Drop-Off (Antar)
+                                    </span>
+                                <?php endif; ?>
+                            </td>
+
                             <!-- Gerbang Masuk -->
                             <td class="py-4 px-4 whitespace-nowrap">
                                 <div class="text-xs text-gray-700 flex items-center">
@@ -404,7 +339,7 @@ $total_trucks = count($trucks);
 
                             <!-- Tombol Aksi Detail & Milestone -->
                             <td class="py-4 px-4 text-right whitespace-nowrap">
-                                <button class="px-3 py-1.5 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1.5">
+                                <button onclick="showGatePassModal(<?= $json_pass ?>)" class="px-3 py-1.5 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1.5">
                                     <span>Detail & Milestone</span>
                                     <i class="fa-solid fa-chevron-right text-[10px]"></i>
                                 </button>
@@ -659,4 +594,155 @@ window.addEventListener('click', function(e) {
         closeGatePassModal();
     }
 });
+
+function getTruckingExportData() {
+    const headers = ['Nopol', 'Nama Supir', 'Perusahaan', 'No. Kontainer', 'Lokasi Saat Ini', 'Status', 'Gate In', 'Gate Out', 'Turnaround Time (TAT)'];
+    const rows = [];
+    const tableRows = document.querySelectorAll('#truckTable tbody tr.truck-row');
+    
+    tableRows.forEach(row => {
+        if (row.style.display !== 'none') {
+            const onclickStr = row.getAttribute('onclick') || '';
+            const match = onclickStr.match(/showGatePassModal\((.*?)\)/);
+            if (match && match[1]) {
+                try {
+                    const data = JSON.parse(match[1]);
+                    rows.push([
+                        data.license_plate,
+                        data.driver_name,
+                        data.company,
+                        data.container_number,
+                        data.current_location,
+                        data.status_text,
+                        data.gate_in_time,
+                        data.gate_out_time,
+                        data.tat_text
+                    ]);
+                } catch (e) {
+                    console.error("Error parsing row data", e);
+                }
+            }
+        }
+    });
+    return { headers, rows };
+}
+
+function exportTruckingExcel() {
+    const { headers, rows } = getTruckingExportData();
+    CIDPExport.toExcel(headers, rows, 'Data Trucking', 'Laporan_Trucking_CIDP');
+}
+
+function exportTruckingPDF() {
+    const { headers, rows } = getTruckingExportData();
+    CIDPExport.toPDF('Laporan Manajemen Trucking & Gate', headers, rows, 'Laporan_Trucking_CIDP');
+}
+
+function showAddTruckModal() {
+    document.getElementById('addTruckModal').classList.remove('hidden');
+}
+function closeAddTruckModal() {
+    document.getElementById('addTruckModal').classList.add('hidden');
+}
+
+function submitAddTruck(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    fetch('api/crud.php?action=add_truck', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            alert('Truk berhasil diregistrasi!');
+            location.reload();
+        } else {
+            alert('Gagal: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Terjadi kesalahan.');
+    });
+}
 </script>
+
+<!-- Add Truck Modal -->
+<div id="addTruckModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn border border-gray-100">
+        <div class="bg-gradient-to-r from-[#002f5e] to-indigo-800 text-white p-4 flex items-center justify-between">
+            <h3 class="font-bold text-lg">Registrasi Truk Masuk</h3>
+            <button onclick="closeAddTruckModal()" class="text-white hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="submitAddTruck(event)" class="p-5 space-y-3.5">
+            <!-- Pilihan Tugas / Misi -->
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1.5">Jenis Tugas / Misi Operasional:</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center p-2.5 border border-blue-200 rounded-xl bg-blue-50/50 cursor-pointer hover:bg-blue-50 transition">
+                        <input type="radio" name="job_type" value="drop_off" checked onchange="toggleJobType(this.value)" class="text-blue-600 focus:ring-blue-500 mr-2">
+                        <div>
+                            <span class="text-xs font-bold text-blue-900 block">📥 Drop-Off</span>
+                            <span class="text-[10px] text-blue-700">Antar kontainer ke yard</span>
+                        </div>
+                    </label>
+                    <label class="flex items-center p-2.5 border border-amber-200 rounded-xl bg-amber-50/50 cursor-pointer hover:bg-amber-50 transition">
+                        <input type="radio" name="job_type" value="pick_up" onchange="toggleJobType(this.value)" class="text-amber-600 focus:ring-amber-500 mr-2">
+                        <div>
+                            <span class="text-xs font-bold text-amber-900 block">📤 Pick-Up</span>
+                            <span class="text-[10px] text-amber-700">Ambil kontainer dari yard</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Plat Nomor Truk</label>
+                    <input type="text" name="license_plate" required placeholder="mis: B 9182 TE" class="w-full border border-gray-200 p-2 rounded-lg text-xs font-mono font-bold focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Nama Pengemudi</label>
+                    <input type="text" name="driver_name" required placeholder="mis: Soleh Marzuki" class="w-full border border-gray-200 p-2 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Perusahaan Ekspedisi / Transporter</label>
+                <input type="text" name="company" required placeholder="mis: PT Trans Logistik Prima" class="w-full border border-gray-200 p-2 rounded-lg text-xs focus:ring-2 focus:ring-indigo-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label id="lblContainer" class="block text-xs font-bold text-gray-700 mb-1">Nomor Kontainer</label>
+                    <input type="text" name="container_number" id="inpContainer" placeholder="mis: MSKU7829104" class="w-full border border-gray-200 p-2 rounded-lg text-xs font-mono uppercase focus:ring-2 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-700 mb-1">No. DO / SPPB Bea Cukai</label>
+                    <input type="text" name="do_number" placeholder="mis: DO-2026-09-001" class="w-full border border-gray-200 p-2 rounded-lg text-xs font-mono focus:ring-2 focus:ring-indigo-500">
+                </div>
+            </div>
+
+            <div class="pt-3 flex justify-end space-x-2 border-t border-gray-100">
+                <button type="button" onclick="closeAddTruckModal()" class="px-4 py-2 border border-gray-200 hover:bg-gray-50 rounded-lg text-xs font-bold text-gray-700 transition">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-bold transition shadow-xs">Simpan Registrasi</button>
+            </div>
+        </form>
+
+        <script>
+        function toggleJobType(val) {
+            const lbl = document.getElementById('lblContainer');
+            const inp = document.getElementById('inpContainer');
+            if (val === 'pick_up') {
+                lbl.innerHTML = 'Kontainer Tujuan <span class="text-[10px] text-amber-600">(Yang Diambil)</span>';
+                inp.placeholder = 'mis: TGHU9021845';
+            } else {
+                lbl.innerHTML = 'Nomor Kontainer <span class="text-[10px] text-blue-600">(Yang Diantar)</span>';
+                inp.placeholder = 'mis: MSKU7829104';
+            }
+        }
+        </script>
+    </div>
+</div>

@@ -10,7 +10,7 @@ header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
     http_response_code(200);
     exit;
 }
@@ -20,7 +20,7 @@ require_once __DIR__ . '/../connection.php';
 // Ambil input JSON atau GET/POST parameter
 $input_raw = file_get_contents('php://input');
 $input = json_decode($input_raw, true) ?? [];
-$action = $_GET['action'] ?? $input['action'] ?? $_POST['action'] ?? '';
+$action = $_GET['action'] ?? $input['action'] ?? $_POST['action'] ?? $_REQUEST['action'] ?? '';
 
 try {
     switch ($action) {
@@ -104,14 +104,14 @@ try {
         // 2. MOVE CONTAINER: Relokasi kontainer oleh Reach Stacker
         // ---------------------------------------------------------------------
         case 'move_container':
-            $container_id = (int)($input['container_id'] ?? $_POST['container_id'] ?? 0);
-            $container_number = trim($input['container_number'] ?? $_POST['container_number'] ?? '');
-            $equipment_id = trim($input['equipment_id'] ?? $_POST['equipment_id'] ?? 'RS-02');
+            $container_id = (int)($input['container_id'] ?? $_REQUEST['container_id'] ?? 0);
+            $container_number = trim($input['container_number'] ?? $_REQUEST['container_number'] ?? '');
+            $equipment_id = trim($input['equipment_id'] ?? $_REQUEST['equipment_id'] ?? 'RS-02');
             
-            $to_block = strtoupper(trim($input['to_block'] ?? $_POST['to_block'] ?? 'B'));
-            $to_bay   = str_pad(trim($input['to_bay'] ?? $_POST['to_bay'] ?? '01'), 2, '0', STR_PAD_LEFT);
-            $to_row   = str_pad(trim($input['to_row'] ?? $_POST['to_row'] ?? '01'), 2, '0', STR_PAD_LEFT);
-            $to_tier  = str_pad(trim($input['to_tier'] ?? $_POST['to_tier'] ?? '01'), 2, '0', STR_PAD_LEFT);
+            $to_block = strtoupper(trim($input['to_block'] ?? $_REQUEST['to_block'] ?? 'B'));
+            $to_bay   = str_pad(trim($input['to_bay'] ?? $_REQUEST['to_bay'] ?? '01'), 2, '0', STR_PAD_LEFT);
+            $to_row   = str_pad(trim($input['to_row'] ?? $_REQUEST['to_row'] ?? '01'), 2, '0', STR_PAD_LEFT);
+            $to_tier  = str_pad(trim($input['to_tier'] ?? $_REQUEST['to_tier'] ?? '01'), 2, '0', STR_PAD_LEFT);
 
             // Validasi keberadaan kontainer
             if ($container_id > 0) {
@@ -122,6 +122,24 @@ try {
                 $stmtFind->execute([$container_number]);
             }
             $targetContainer = $stmtFind->fetch();
+
+            if (!$targetContainer) {
+                if (!empty($container_number)) {
+                    $from_block = strtoupper(trim($input['from_block'] ?? $_REQUEST['from_block'] ?? 'A'));
+                    $from_bay   = str_pad(trim($input['from_bay'] ?? $_REQUEST['from_bay'] ?? '01'), 2, '0', STR_PAD_LEFT);
+                    $from_row   = str_pad(trim($input['from_row'] ?? $_REQUEST['from_row'] ?? '01'), 2, '0', STR_PAD_LEFT);
+                    $from_tier  = str_pad(trim($input['from_tier'] ?? $_REQUEST['from_tier'] ?? '01'), 2, '0', STR_PAD_LEFT);
+                    $owner_comp = trim($input['owner_company'] ?? $_REQUEST['owner_company'] ?? 'Ocean Carrier');
+                    $cargo_t    = trim($input['cargo_type'] ?? $_REQUEST['cargo_type'] ?? 'dry');
+                    $stmtIns = $pdo->prepare("INSERT INTO containers 
+                        (container_number, iso_code, size_type, cargo_type, owner_company, gross_weight_kg, block, bay, row, tier, status)
+                        VALUES (?, '45G1', '40FT HIGH CUBE', ?, ?, 28500, ?, ?, ?, ?, 'in_yard')");
+                    $stmtIns->execute([$container_number, $cargo_t, $owner_comp, $from_block, $from_bay, $from_row, $from_tier]);
+                    $stmtFind = $pdo->prepare("SELECT * FROM containers WHERE container_number = ?");
+                    $stmtFind->execute([$container_number]);
+                    $targetContainer = $stmtFind->fetch();
+                }
+            }
 
             if (!$targetContainer) {
                 echo json_encode(['success' => false, 'message' => 'Kontainer tidak ditemukan dalam sistem.']);
@@ -217,65 +235,210 @@ try {
         // ---------------------------------------------------------------------
         // 3. GATE-IN TRUCK & TIMBANGAN VGM SOLAS
         // ---------------------------------------------------------------------
+        // ---------------------------------------------------------------------
+        // 3. GATE-IN TRUCK (DROP-OFF & PICK-UP) & TIMBANGAN VGM SOLAS
+        // ---------------------------------------------------------------------
         case 'gate_in':
-            $plates = ['B 9481 UEK', 'B 7712 SCK', 'D 9921 XY', 'L 8182 PO', 'B 3341 JKT'];
-            $drivers = ['Sholehudin', 'Hendra Kusuma', 'Bambang Irawan', 'Rahmat Hidayat', 'Yanto Subagyo'];
-            $companies = ['PT Samudera Logistik Prima', 'PT Lintas Benua Cepat', 'PT Trans Harapan Logistik'];
-            
-            $randPlate = $plates[array_rand($plates)];
-            $randDriver = $drivers[array_rand($drivers)];
-            $randCompany = $companies[array_rand($companies)];
-            
-            // Hitung bobot jembatan timbang acak realistis
-            $gross = rand(28500, 32500);
-            $tare  = rand(11000, 12500);
-            $net_vgm = $gross - $tare;
+            $req_type = $_GET['type'] ?? 'drop_off'; // drop_off atau pick_up
+
+            // Prioritaskan mengambil truk antrian dari database jika ada yang sesuai
+            $stmtQ = $pdo->prepare("SELECT * FROM trucks WHERE status = 'queuing' AND job_type = ? ORDER BY id ASC LIMIT 1");
+            $stmtQ->execute([$req_type]);
+            $queuingTrk = $stmtQ->fetch(PDO::FETCH_ASSOC);
+
+            if (!$queuingTrk) {
+                // Ambil sembarang antrian jika tipe spesifik tidak ada
+                $stmtQ2 = $pdo->query("SELECT * FROM trucks WHERE status = 'queuing' ORDER BY id ASC LIMIT 1");
+                $queuingTrk = $stmtQ2->fetch(PDO::FETCH_ASSOC);
+            }
+
+            if ($queuingTrk) {
+                $randPlate = $queuingTrk['license_plate'];
+                $randDriver = $queuingTrk['driver_name'];
+                $randCompany = $queuingTrk['company'];
+                $jobType = $queuingTrk['job_type'] ?? $req_type;
+                $containerNo = $queuingTrk['container_number'];
+                $truck_id = $queuingTrk['id'];
+            } else {
+                $plates = ['B 9481 UEK', 'B 7712 SCK', 'D 9921 XY', 'L 8182 PO', 'B 3341 JKT'];
+                $drivers = ['Sholehudin', 'Hendra Kusuma', 'Bambang Irawan', 'Rahmat Hidayat', 'Yanto Subagyo'];
+                $companies = ['PT Samudera Logistik Prima', 'PT Lintas Benua Cepat', 'PT Trans Harapan Logistik'];
+                
+                $randPlate = $plates[array_rand($plates)];
+                $randDriver = $drivers[array_rand($drivers)];
+                $randCompany = $companies[array_rand($companies)];
+                $jobType = $req_type;
+                $containerNo = ($jobType === 'drop_off') ? 'MSKU' . rand(1000000, 9999999) : null;
+                $truck_id = null;
+            }
+
+            $is_pickup = ($jobType === 'pick_up');
+
+            if ($is_pickup) {
+                // Truk Pick-Up: Masuk dengan sasis kosong untuk mengambil kargo di dry port
+                $tare = rand(10500, 11800);
+                $gross = $tare; // Truk kosong
+                $net_vgm = 0;
+                $vgm_status = 'EMPTY CHASSIS (TARE RECORDED) - PICK-UP PERMITTED';
+            } else {
+                // Truk Drop-Off: Masuk membawa kontainer penuh (Laden)
+                $gross = rand(28500, 32500);
+                $tare  = rand(11000, 12500);
+                $net_vgm = $gross - $tare;
+                $vgm_status = 'SOLAS VERIFIED (PASS)';
+            }
 
             $pdo->beginTransaction();
 
-            // Cek apakah truk sudah ada di DB
-            $stmtTrk = $pdo->prepare("SELECT id FROM trucks WHERE license_plate = ? LIMIT 1");
-            $stmtTrk->execute([$randPlate]);
-            $existTrk = $stmtTrk->fetch();
-
-            if ($existTrk) {
+            if ($truck_id) {
                 $upd = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW() WHERE id = ?");
-                $upd->execute([$existTrk['id']]);
-                $truck_id = $existTrk['id'];
+                $upd->execute([$truck_id]);
             } else {
-                $ins = $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, status, gate_in_time) 
-                                      VALUES (?, ?, ?, ?, 'in_yard', NOW())");
+                $ins = $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, job_type, container_number, status, gate_in_time) 
+                                      VALUES (?, ?, ?, ?, ?, ?, 'in_yard', NOW())");
                 $rfid = 'RFID-TRK-' . rand(100, 999);
-                $ins->execute([$randPlate, $rfid, $randDriver, $randCompany]);
+                $ins->execute([$randPlate, $rfid, $randDriver, $randCompany, $jobType, $containerNo]);
                 $truck_id = $pdo->lastInsertId();
             }
 
+            $allocated_slot = null;
+            $target_pickup_container = null;
+
+            if ($is_pickup) {
+                // Pick-Up: Ambil kontainer impor dari Blok B yang statusnya in_yard
+                $stmtPick = $pdo->prepare("SELECT * FROM containers WHERE block = 'B' AND status = 'in_yard' ORDER BY tier DESC, bay ASC, row ASC LIMIT 1");
+                $stmtPick->execute();
+                $target_pickup_container = $stmtPick->fetch(PDO::FETCH_ASSOC);
+
+                if ($target_pickup_container) {
+                    $containerNo = $target_pickup_container['container_number'];
+                    $updTrk = $pdo->prepare("UPDATE trucks SET container_number = ? WHERE id = ?");
+                    $updTrk->execute([$containerNo, $truck_id]);
+                } else {
+                    // Fallback jika blok B kosong
+                    $containerNo = 'MSKU' . rand(2000000, 8999999);
+                }
+            } else {
+                // Drop-Off: Alokasikan slot kosong di Blok A (Laden Export)
+                $stmtOcc = $pdo->query("SELECT bay, row, tier FROM containers WHERE block = 'A' AND status = 'in_yard'")->fetchAll(PDO::FETCH_ASSOC);
+                $occupied = [];
+                foreach ($stmtOcc as $o) {
+                    $occupied[$o['bay'].'-'.$o['row'].'-'.$o['tier']] = true;
+                }
+
+                $target_bay = '02';
+                $target_row = '02';
+                $target_tier = '01';
+
+                for ($b = 1; $b <= 4; $b++) {
+                    $sb = str_pad($b, 2, '0', STR_PAD_LEFT);
+                    for ($r = 1; $r <= 8; $r++) {
+                        $sr = str_pad($r, 2, '0', STR_PAD_LEFT);
+                        for ($t = 1; $t <= 4; $t++) {
+                            $st = str_pad($t, 2, '0', STR_PAD_LEFT);
+                            if (!isset($occupied["{$sb}-{$sr}-{$st}"])) {
+                                $target_bay = $sb;
+                                $target_row = $sr;
+                                $target_tier = $st;
+                                break 3;
+                            }
+                        }
+                    }
+                }
+
+                $allocated_slot = [
+                    'block' => 'A',
+                    'bay' => $target_bay,
+                    'row' => $target_row,
+                    'tier' => $target_tier
+                ];
+
+                // Jika Drop-Off dan ada kontainer, daftarkan kontainer di database pada slot Blok A
+                if ($containerNo) {
+                    $stmtC = $pdo->prepare("SELECT id FROM containers WHERE container_number = ? LIMIT 1");
+                    $stmtC->execute([$containerNo]);
+                    $existingC = $stmtC->fetch(PDO::FETCH_ASSOC);
+
+                    if (!$existingC) {
+                        $rfidC = 'RFID-CTR-' . rand(100, 999);
+                        $sscc = '0038991234' . str_pad(rand(10000000, 99999999), 8, '0', STR_PAD_LEFT);
+                        $seal = 'SEAL-ID-DJBC-' . date('Ymd') . '-' . rand(100, 999);
+                        $insCtr = $pdo->prepare("INSERT INTO containers 
+                            (container_number, iso_code, size_type, cargo_type, rfid_tag, sscc_code, gross_weight_kg, owner_company, seal_number, customs_status, block, bay, row, tier, gate_in_time, status) 
+                            VALUES (?, '45G1', '40FT HIGH CUBE', 'dry', ?, ?, ?, ?, ?, 'SPPB_CLEARED', 'A', ?, ?, ?, NOW(), 'in_yard')");
+                        $insCtr->execute([$containerNo, $rfidC, $sscc, $gross, $randCompany, $seal, $target_bay, $target_row, $target_tier]);
+                    } else {
+                        $updCtr = $pdo->prepare("UPDATE containers SET block = 'A', bay = ?, row = ?, tier = ?, status = 'in_yard', gate_in_time = NOW() WHERE id = ?");
+                        $updCtr->execute([$target_bay, $target_row, $target_tier, $existingC['id']]);
+                    }
+                }
+            }
+
             // Catat event Gate-In & Biaya Jasa Timbang VGM
+            $misiText = $is_pickup ? 'PICK-UP (Ambil Barang)' : 'DROP-OFF (Antar Barang)';
             $stmtLog = $pdo->prepare("INSERT INTO yard_events 
                 (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
-                VALUES ('GATE_IN', 'INBOUND-TRUCK', 'GATE-01', 'Petugas Gerbang Timbangan', 50000, ?)");
-            $stmtLog->execute(["Truk {$randPlate} ({$randDriver}) Gate-In. Timbang VGM SOLAS: Gross {$gross}kg, Tare {$tare}kg, Net {$net_vgm}kg (PASS)."]);
+                VALUES ('GATE_IN', ?, 'GATE-01', 'Petugas Gerbang Timbangan', 50000, ?)");
+            $stmtLog->execute([$containerNo ?? 'TRUK-KOSONG', "Truk {$randPlate} ({$randDriver}) Gate-In [{$misiText}]. Timbang: Gross {$gross}kg, Tare {$tare}kg. Status: {$vgm_status}."]);
             $event_id = $pdo->lastInsertId();
 
             $pdo->commit();
 
             echo json_encode([
                 'success' => true,
-                'message' => "Truk {$randPlate} berhasil Gate-In melalui Gate 1!",
+                'message' => "Truk {$randPlate} berhasil Gate-In melalui Gate 1 ({$misiText})!",
                 'truck' => [
                     'id' => $truck_id,
                     'license_plate' => $randPlate,
                     'driver_name' => $randDriver,
                     'company' => $randCompany,
+                    'job_type' => $jobType,
+                    'container_number' => $containerNo,
                     'gross_weight' => $gross,
                     'tare_weight' => $tare,
                     'vgm_net' => $net_vgm,
-                    'vgm_status' => 'SOLAS VERIFIED (PASS)'
+                    'vgm_status' => $vgm_status
                 ],
+                'allocated_slot' => $allocated_slot,
+                'target_container' => $target_pickup_container,
                 'billing' => [
                     'charge_name' => 'Jasa Jembatan Timbang VGM SOLAS',
                     'amount' => 50000
                 ]
+            ]);
+            break;
+
+        case 'gate_out':
+            $stmtY = $pdo->query("SELECT * FROM trucks WHERE status IN ('in_yard', 'loading') ORDER BY id ASC LIMIT 1");
+            $trk = $stmtY->fetch(PDO::FETCH_ASSOC);
+            if (!$trk) {
+                echo json_encode(['success' => false, 'message' => 'Tidak ada armada truk di dalam yard yang siap Gate-Out.']);
+                break;
+            }
+
+            $is_pickup = ($trk['job_type'] === 'pick_up');
+            $pdo->beginTransaction();
+
+            $upd = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE id = ?");
+            $upd->execute([$trk['id']]);
+
+            if ($is_pickup && !empty($trk['container_number'])) {
+                $updC = $pdo->prepare("UPDATE containers SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ?");
+                $updC->execute([$trk['container_number']]);
+            }
+
+            $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes) VALUES ('GATE_OUT', ?, ?)");
+            $actNotes = $is_pickup 
+                ? "Truk {$trk['license_plate']} GATE-OUT membawa kontainer {$trk['container_number']} keluar dari dry port (Pick-Up Selesai)."
+                : "Truk {$trk['license_plate']} GATE-OUT sasis kosong setelah menurunkan kontainer di yard (Drop-Off Selesai).";
+            $stmtLog->execute([$trk['container_number'], $actNotes]);
+
+            $pdo->commit();
+
+            echo json_encode([
+                'success' => true,
+                'message' => "Truk {$trk['license_plate']} berhasil Gate-Out (" . ($is_pickup ? "Membawa Kontainer Keluar" : "Sasis Kosong") . ")!",
+                'truck' => $trk
             ]);
             break;
 

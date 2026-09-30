@@ -23,103 +23,7 @@ try {
 
 // Fallback dataset realistis jika database kosong
 if (empty($containers)) {
-    $containers = [
-        [
-            'id' => 1,
-            'container_number' => 'MSKU9182374',
-            'iso_code' => '42G1',
-            'size_type' => '40FT HIGH CUBE',
-            'cargo_type' => 'dry',
-            'rfid_tag' => 'E280117000000001',
-            'sscc_code' => '(00)389912345000000001',
-            'gross_weight_kg' => 25400.00,
-            'owner_company' => 'PT Samudera Logistik Prima',
-            'seal_number' => 'SN-JKT-102938',
-            'customs_status' => 'SPPB_CLEARED',
-            'block' => 'A',
-            'bay' => '01',
-            'row' => '01',
-            'tier' => '01',
-            'gate_in_time' => '2026-09-19 08:30:00',
-            'status' => 'in_yard'
-        ],
-        [
-            'id' => 2,
-            'container_number' => 'TCLU1234567',
-            'iso_code' => '22G1',
-            'size_type' => '20FT STANDARD',
-            'cargo_type' => 'dry',
-            'rfid_tag' => 'E280117000000002',
-            'sscc_code' => '(00)389912345000000002',
-            'gross_weight_kg' => 14500.00,
-            'owner_company' => 'PT Evergreen Shipping',
-            'seal_number' => 'SN-JKT-102939',
-            'customs_status' => 'SPPB_CLEARED',
-            'block' => 'A',
-            'bay' => '01',
-            'row' => '01',
-            'tier' => '02',
-            'gate_in_time' => '2026-09-19 09:15:00',
-            'status' => 'in_yard'
-        ],
-        [
-            'id' => 3,
-            'container_number' => 'TEMU8888888',
-            'iso_code' => '42G1',
-            'size_type' => '40FT HIGH CUBE',
-            'cargo_type' => 'dry',
-            'rfid_tag' => 'E280117000000003',
-            'sscc_code' => '(00)389912345000000003',
-            'gross_weight_kg' => 28000.00,
-            'owner_company' => 'Maersk Indonesia',
-            'seal_number' => 'SN-JKT-102940',
-            'customs_status' => 'SPPB_CLEARED',
-            'block' => 'A',
-            'bay' => '01',
-            'row' => '02',
-            'tier' => '01',
-            'gate_in_time' => '2026-09-18 14:00:00',
-            'status' => 'in_yard'
-        ],
-        [
-            'id' => 4,
-            'container_number' => 'CSQU7777777',
-            'iso_code' => '42R1',
-            'size_type' => '40FT REEFER HC',
-            'cargo_type' => 'reefer',
-            'rfid_tag' => 'E280117000000004',
-            'sscc_code' => '(00)389912345000000004',
-            'gross_weight_kg' => 27200.00,
-            'owner_company' => 'PT Cold Chain Nusantara',
-            'seal_number' => 'SN-JKT-102941',
-            'customs_status' => 'SPPB_CLEARED',
-            'block' => 'REEFER',
-            'bay' => '01',
-            'row' => '01',
-            'tier' => '01',
-            'gate_in_time' => '2026-09-20 11:20:00',
-            'status' => 'in_yard'
-        ],
-        [
-            'id' => 5,
-            'container_number' => 'FCIU5555555',
-            'iso_code' => '22G1',
-            'size_type' => '20FT STANDARD DG',
-            'cargo_type' => 'dg',
-            'rfid_tag' => 'E280117000000005',
-            'sscc_code' => '(00)389912345000000005',
-            'gross_weight_kg' => 18900.00,
-            'owner_company' => 'PT Kimia Farma Trading',
-            'seal_number' => 'SN-JKT-102942',
-            'customs_status' => 'INSPECTION_REQUIRED',
-            'block' => 'DG',
-            'bay' => '01',
-            'row' => '01',
-            'tier' => '01',
-            'gate_in_time' => '2026-09-21 07:45:00',
-            'status' => 'in_yard'
-        ]
-    ];
+    $containers = [];
 }
 
 // Data rute dan atribut pendukung
@@ -196,9 +100,21 @@ $total_containers = count($containers);
             </p>
         </div>
         <div class="flex items-center space-x-2 flex-shrink-0">
+            <button onclick="showAddContainerModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-plus"></i>
+                <span>Tambah Kontainer</span>
+            </button>
             <a href="dashboard.php?page=simulator" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
                 <i class="fa-solid fa-cubes mr-1.5"></i> Simulasi 3D
             </a>
+            <button onclick="exportKontainerExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-file-excel"></i>
+                <span>Export Excel</span>
+            </button>
+            <button onclick="exportKontainerPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-file-pdf"></i>
+                <span>Export PDF</span>
+            </button>
             <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
                 <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak
             </button>
@@ -581,6 +497,88 @@ $total_containers = count($containers);
                 </div>
             </div>
 
+            <!-- ======================================================================= -->
+            <!-- NEW SECTION: DCSA EVENT TIMELINE (TRACK & TRACE API)                    -->
+            <!-- ======================================================================= -->
+            <div class="border-t border-gray-100 pt-6 mt-2">
+                <div class="flex items-center justify-between mb-4">
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-gray-800 flex items-center">
+                        <i class="fa-solid fa-satellite-dish mr-2 text-[#0170b9]"></i>DCSA Track & Trace Event Timeline
+                    </h4>
+                    <span class="px-2 py-0.5 text-[9px] font-bold bg-slate-100 text-slate-500 rounded border border-slate-200">API v2.2</span>
+                </div>
+                
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-inner overflow-x-auto">
+                    <div class="min-w-[600px]">
+                        <!-- DCSA Timeline Node Container -->
+                        <div class="relative flex items-center justify-between before:absolute before:inset-0 before:top-1/2 before:-translate-y-1/2 before:h-0.5 before:bg-slate-200 before:w-full z-0">
+                            
+                            <!-- Event 1: DEPA SGSIN -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-indigo-100 border-2 border-indigo-500 text-indigo-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-ship"></i></div>
+                                <span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded text-[9px] font-bold mb-1">DEPA</span>
+                                <span class="text-[9px] font-mono text-gray-500">SGSIN</span>
+                            </div>
+
+                            <!-- Event 2: ARRI IDTPP -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-indigo-100 border-2 border-indigo-500 text-indigo-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-anchor"></i></div>
+                                <span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded text-[9px] font-bold mb-1">ARRI</span>
+                                <span class="text-[9px] font-mono text-gray-500">IDTPP</span>
+                            </div>
+
+                            <!-- Event 3: DISCHARGE IDTPP -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-blue-100 border-2 border-blue-500 text-blue-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-crane"></i></div>
+                                <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold mb-1">DISCHARGE</span>
+                                <span class="text-[9px] font-mono text-gray-500">IDTPP</span>
+                            </div>
+
+                            <!-- Event 4: LOAD onto KA2518 -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-blue-100 border-2 border-blue-500 text-blue-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-train"></i></div>
+                                <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold mb-1">LOAD</span>
+                                <span class="text-[9px] font-mono text-gray-500">KA 2518</span>
+                            </div>
+
+                            <!-- Event 5: DEPA IDTPP -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-indigo-100 border-2 border-indigo-500 text-indigo-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-train-tram"></i></div>
+                                <span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded text-[9px] font-bold mb-1">DEPA</span>
+                                <span class="text-[9px] font-mono text-gray-500">IDTPP</span>
+                            </div>
+
+                            <!-- Event 6: ARRI IDCKG -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-indigo-100 border-2 border-indigo-500 text-indigo-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-map-pin"></i></div>
+                                <span class="px-1.5 py-0.5 bg-indigo-50 text-indigo-700 border border-indigo-200 rounded text-[9px] font-bold mb-1">ARRI</span>
+                                <span class="text-[9px] font-mono text-gray-500">IDCKG</span>
+                            </div>
+
+                            <!-- Event 7: GATE_IN CIDP -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-blue-100 border-2 border-blue-500 text-blue-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-door-open"></i></div>
+                                <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold mb-1">GATE_IN</span>
+                                <span class="text-[9px] font-mono text-gray-500">CIDP</span>
+                            </div>
+
+                            <!-- Event 8: DROP_OFF Yard Block A-01 -->
+                            <div class="relative z-10 flex flex-col items-center w-24">
+                                <div class="w-7 h-7 bg-blue-100 border-2 border-blue-500 text-blue-600 rounded-full flex items-center justify-center text-[10px] mb-2 shadow-sm font-bold"><i class="fa-solid fa-boxes-stacked"></i></div>
+                                <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold mb-1">DROP_OFF</span>
+                                <span class="text-[9px] font-mono text-gray-500">Yard A-01</span>
+                            </div>
+                            
+                        </div>
+                        <div class="mt-4 flex justify-center space-x-6 text-[9px]">
+                            <div class="flex items-center"><span class="w-2.5 h-2.5 rounded bg-blue-500 mr-1.5"></span><span class="text-gray-500">EQUIPMENT Event</span></div>
+                            <div class="flex items-center"><span class="w-2.5 h-2.5 rounded bg-indigo-500 mr-1.5"></span><span class="text-gray-500">TRANSPORT Event</span></div>
+                            <div class="flex items-center"><span class="w-2.5 h-2.5 rounded bg-emerald-500 mr-1.5"></span><span class="text-gray-500">SHIPMENT Event</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
 
         <!-- Modal Footer -->
@@ -672,4 +670,119 @@ window.addEventListener('click', function(e) {
         closeJourneyModal();
     }
 });
+
+function getKontainerExportData() {
+    const headers = ['Nomor Kontainer', 'Tipe Kargo', 'Pemilik', 'Posisi Yard', 'Gate In', 'Dwell Time', 'Asal', 'Tujuan', 'Status Bea Cukai'];
+    const rows = [];
+    const tableRows = document.querySelectorAll('#containerTable tbody tr.container-row');
+    
+    tableRows.forEach(row => {
+        if (row.style.display !== 'none') {
+            // We can extract data from the onclick JSON payload
+            const onclickStr = row.getAttribute('onclick') || '';
+            const match = onclickStr.match(/showJourneyModal\((.*?)\)/);
+            if (match && match[1]) {
+                try {
+                    const data = JSON.parse(match[1]);
+                    rows.push([
+                        data.container_number,
+                        data.cargo_type,
+                        data.owner_company,
+                        `Blok ${data.block} / B${data.bay}-R${data.row}-T${data.tier}`,
+                        data.gate_in_time,
+                        data.dwell_time,
+                        data.origin,
+                        data.destination,
+                        data.customs_status
+                    ]);
+                } catch (e) {
+                    console.error("Error parsing row data", e);
+                }
+            }
+        }
+    });
+    return { headers, rows };
+}
+
+function exportKontainerExcel() {
+    const { headers, rows } = getKontainerExportData();
+    CIDPExport.toExcel(headers, rows, 'Data Kontainer', 'Laporan_Kontainer_CIDP');
+}
+
+function exportKontainerPDF() {
+    const { headers, rows } = getKontainerExportData();
+    CIDPExport.toPDF('Laporan Posisi & Pelacakan Kontainer', headers, rows, 'Laporan_Kontainer_CIDP');
+}
+
+function showAddContainerModal() {
+    document.getElementById('addContainerModal').classList.remove('hidden');
+}
+function closeAddContainerModal() {
+    document.getElementById('addContainerModal').classList.add('hidden');
+}
+
+function submitAddContainer(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    fetch('api/crud.php?action=add_container', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if(data.success) {
+            alert('Kontainer berhasil ditambahkan!');
+            location.reload();
+        } else {
+            alert('Gagal: ' + data.message);
+        }
+    })
+    .catch(err => {
+        console.error(err);
+        alert('Terjadi kesalahan.');
+    });
+}
 </script>
+
+<!-- Add Container Modal -->
+<div id="addContainerModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-fadeIn border border-gray-100">
+        <div class="bg-gradient-to-r from-[#002f5e] to-[#0170b9] text-white p-4 flex items-center justify-between">
+            <h3 class="font-bold text-lg">Tambah Kontainer Baru</h3>
+            <button onclick="closeAddContainerModal()" class="text-white hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        <form onsubmit="submitAddContainer(event)" class="p-4 space-y-4">
+            <div><label class="block text-xs font-bold mb-1">Nomor Kontainer</label><input type="text" name="container_number" required placeholder="MSKU1234567" class="w-full border p-2 rounded text-xs"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold mb-1">Ukuran / Tipe</label><select name="size_type" class="w-full border p-2 rounded text-xs">
+                    <option value="20FT STANDARD">20FT STANDARD</option>
+                    <option value="40FT STANDARD">40FT STANDARD</option>
+                    <option value="40FT HIGH CUBE">40FT HIGH CUBE</option>
+                    <option value="20FT REEFER">20FT REEFER</option>
+                    <option value="40FT REEFER HC">40FT REEFER HC</option>
+                </select></div>
+                <div><label class="block text-xs font-bold mb-1">Tipe Kargo</label><select name="cargo_type" class="w-full border p-2 rounded text-xs">
+                    <option value="dry">Dry</option><option value="reefer">Reefer</option><option value="dg">DG</option><option value="empty">Empty</option>
+                </select></div>
+            </div>
+            <div><label class="block text-xs font-bold mb-1">Pemilik / Perusahaan</label><input type="text" name="owner_company" class="w-full border p-2 rounded text-xs"></div>
+            <div class="grid grid-cols-2 gap-4">
+                <div><label class="block text-xs font-bold mb-1">Berat (kg)</label><input type="number" name="gross_weight_kg" class="w-full border p-2 rounded text-xs"></div>
+                <div><label class="block text-xs font-bold mb-1">No Segel</label><input type="text" name="seal_number" class="w-full border p-2 rounded text-xs"></div>
+            </div>
+            <div class="grid grid-cols-4 gap-2">
+                <div><label class="block text-xs font-bold mb-1">Blok</label><select name="block" class="w-full border p-2 rounded text-xs"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>REEFER</option><option>DG</option></select></div>
+                <div><label class="block text-xs font-bold mb-1">Bay</label><input type="number" name="bay" class="w-full border p-2 rounded text-xs" value="1"></div>
+                <div><label class="block text-xs font-bold mb-1">Row</label><input type="number" name="row" class="w-full border p-2 rounded text-xs" value="1"></div>
+                <div><label class="block text-xs font-bold mb-1">Tier</label><input type="number" name="tier" class="w-full border p-2 rounded text-xs" value="1"></div>
+            </div>
+            <div class="pt-4 flex justify-end space-x-2">
+                <button type="button" onclick="closeAddContainerModal()" class="px-4 py-2 border rounded text-xs font-bold">Batal</button>
+                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Simpan</button>
+            </div>
+        </form>
+    </div>
+</div>
+
