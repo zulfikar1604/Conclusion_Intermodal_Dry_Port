@@ -1506,23 +1506,43 @@ function showHardwareDetails(id, event) {
         if (blueprintNotice) blueprintNotice.classList.add('hidden');
 
         const moduleMapping = {
-            'gate': { url: 'dashboard.php?page=gate', label: 'Buka Simulasi di Modul Gate' },
-            'yard': { url: 'dashboard.php?page=yard', label: 'Buka Modul Yard & Stacking' },
-            'reefer': { url: 'dashboard.php?page=reefer', label: 'Buka Modul Reefer Cold Chain' },
-            'intermodal': { url: 'dashboard.php?page=intermodal', label: 'Buka Modul Intermodal Rail' },
-            'customs': { url: 'dashboard.php?page=customs', label: 'Buka Modul Kepabeanan & Bea Cukai' },
-            'alat': { url: 'dashboard.php?page=alat', label: 'Buka Lokasi Alat Berat GPS' },
-            'scanner': { url: 'dashboard.php?page=scanner', label: 'Buka Scanner SSCC/GS1' },
-            'settings': { url: 'dashboard.php?page=settings', label: 'Buka Pengaturan Datacenter' }
+            'gate': { url: 'dashboard.php?page=gate', label: '⚡ Uji & Monitor Sensor di Modul Gate' },
+            'yard': { url: 'dashboard.php?page=yard', label: '⚡ Monitor & Trigger di Modul Yard' },
+            'reefer': { url: 'dashboard.php?page=reefer', label: '⚡ Uji Sensor Telemetri & Thermal Reefer' },
+            'cfs': { url: 'dashboard.php?page=cfs', label: '⚡ Uji Sensor Dock & Timbangan CFS' },
+            'intermodal': { url: 'dashboard.php?page=intermodal', label: '⚡ Monitor Axle Counter & RFID Rail' },
+            'customs': { url: 'dashboard.php?page=customs', label: '⚡ Uji E-Seal & Scanner X-Ray CEISA' },
+            'alat': { url: 'dashboard.php?page=alat', label: '⚡ Monitor Telemetri GPS & VMT Alat' },
+            'scanner': { url: 'dashboard.php?page=cfs', label: '⚡ Uji Barcode/HHT Scanner di Gudang CFS' },
+            'kontainer': { url: 'dashboard.php?page=kontainer', label: '⚡ Buka Siklus Kontainer di Modul Peti Kemas' },
+            'trucking': { url: 'dashboard.php?page=trucking', label: '⚡ Monitor GPS Truk & Armada' },
+            'settings': { url: 'dashboard.php?page=settings', label: '⚡ Konfigurasi Datacenter & Gateway' }
         };
 
-        const targetMod = moduleMapping[hw.modul] || { url: 'dashboard.php?page=gate', label: 'Buka Modul Terkait' };
+        const targetMod = moduleMapping[hw.modul] || { url: 'dashboard.php?page=gate', label: '⚡ Uji Sensor di Modul Terkait' };
         actionBtn.href = targetMod.url;
         actionText.textContent = targetMod.label;
     } else {
-        // BLUEPRINT FISIK: TIDAK ADA TOMBOL SIMULASI!
-        actionWrapper.classList.add('hidden');
+        // BLUEPRINT FISIK: Sediakan tautan operasional ke modul terkait
+        actionWrapper.classList.remove('hidden');
         if (blueprintNotice) blueprintNotice.classList.remove('hidden');
+        
+        const bpMapping = {
+            'gate': { url: 'dashboard.php?page=gate', label: '⚡ Monitor Zona di Modul Gate' },
+            'yard': { url: 'dashboard.php?page=yard', label: '⚡ Monitor Zona di Modul Yard' },
+            'reefer': { url: 'dashboard.php?page=reefer', label: '⚡ Monitor Zona di Modul Reefer' },
+            'cfs': { url: 'dashboard.php?page=cfs', label: '⚡ Buka Denah & Sensor CFS' },
+            'intermodal': { url: 'dashboard.php?page=intermodal', label: '⚡ Buka Jalur Siding KA di Intermodal' },
+            'customs': { url: 'dashboard.php?page=customs', label: '⚡ Monitor Jalur Merah di Bea Cukai' },
+            'alat': { url: 'dashboard.php?page=alat', label: '⚡ Monitor Alat di Modul Fleet' },
+            'scanner': { url: 'dashboard.php?page=cfs', label: '⚡ Uji Scanner di Modul CFS' },
+            'kontainer': { url: 'dashboard.php?page=kontainer', label: '⚡ Buka Modul Kontainer' },
+            'trucking': { url: 'dashboard.php?page=trucking', label: '⚡ Buka Modul Trucking' },
+            'settings': { url: 'dashboard.php?page=settings', label: '⚡ Buka Konfigurasi Server' }
+        };
+        const bpTarget = bpMapping[hw.modul] || { url: 'dashboard.php?page=gate', label: '⚡ Buka Modul Terkait' };
+        actionBtn.href = bpTarget.url;
+        actionText.textContent = bpTarget.label;
     }
 }
 
@@ -1563,19 +1583,45 @@ function showFacilityDetails(facId, event) {
     const blueprintNotice = document.getElementById('inspBlueprintNotice');
     if (blueprintNotice) blueprintNotice.classList.add('hidden');
 
-    // Tombol Aksi Langsung ke Hardware Terkait
+    // Tombol Aksi Langsung ke Modul atau Hardware Terkait
     const actionWrapper = document.getElementById('inspActionWrapper');
     const actionBtn = document.getElementById('inspActionBtn');
     const actionText = document.getElementById('inspActionText');
 
-    if (fac.hw_id) {
+    actionBtn.onclick = null; // Reset click handler
+
+    // Pemetaan khusus fasilitas langsung ke modul operasional & trigger sensor
+    const facilityDirectMap = {
+        'f_cfs': { url: 'dashboard.php?page=cfs', label: '⚡ Buka Denah CFS & Konsol Pemicu Sensor' },
+        'f_gate_in': { url: 'dashboard.php?page=gate', label: '⚡ Buka Modul Gate & Pemicu ANPR Inbound' },
+        'f_gate_out': { url: 'dashboard.php?page=gate', label: '⚡ Buka Modul Gate & Palang Outbound' },
+        'f_weighbridge': { url: 'dashboard.php?page=gate', label: '⚡ Buka Modul Gate & Pemicu Weighbridge VGM' },
+        'f_reefer_control': { url: 'dashboard.php?page=reefer', label: '⚡ Buka Modul Reefer & Telemetri Suhu' },
+        'f_reefer_racks': { url: 'dashboard.php?page=reefer', label: '⚡ Buka Matriks 300 Steker Reefer 380V' },
+        'f_genset_shelter': { url: 'dashboard.php?page=reefer', label: '⚡ Uji ATS Genset 1.500 kVA di Modul Reefer' },
+        'f_loading_ramp': { url: 'dashboard.php?page=intermodal', label: '⚡ Buka Modul Intermodal Rail Siding' },
+        'f_rail_office': { url: 'dashboard.php?page=intermodal', label: '⚡ Monitor Jadwal Langsiran KA' },
+        'f_behandle_xray': { url: 'dashboard.php?page=customs', label: '⚡ Buka Scanner X-Ray di Modul Bea Cukai' },
+        'f_kppbc': { url: 'dashboard.php?page=customs', label: '⚡ Buka Integrasi Kepabeanan CEISA 4.0' },
+        'f_quarantine': { url: 'dashboard.php?page=customs', label: '⚡ Buka Ruang Karantina Bea Cukai' },
+        'f_stacking_yard': { url: 'dashboard.php?page=yard', label: '⚡ Buka Denah Stacking Blok A-E' },
+        'f_empty_depot': { url: 'dashboard.php?page=yard', label: '⚡ Buka Empty Container Depot' },
+        'f_workshop_mr': { url: 'dashboard.php?page=alat', label: '⚡ Buka Bengkel M&R & Telemetri Alat' },
+        'f_datacenter': { url: 'dashboard.php?page=settings', label: '⚡ Buka Datacenter & Jaringan Core' }
+    };
+
+    if (facilityDirectMap[facId]) {
+        actionWrapper.classList.remove('hidden');
+        actionBtn.href = facilityDirectMap[facId].url;
+        actionText.textContent = facilityDirectMap[facId].label;
+    } else if (fac.hw_id) {
         actionWrapper.classList.remove('hidden');
         actionBtn.href = "javascript:void(0)";
         actionBtn.onclick = function(e) {
             if (e) e.preventDefault();
             showHardwareDetails(fac.hw_id, e);
         };
-        actionText.textContent = "Periksa " + (fac.hw_nama || "Hardware #" + fac.hw_id);
+        actionText.textContent = "🔍 Periksa " + (fac.hw_nama || "Hardware #" + fac.hw_id);
     } else {
         actionWrapper.classList.add('hidden');
     }
@@ -1804,10 +1850,44 @@ mapSvgWrapper.addEventListener('touchend', () => {
     initialDistance = null;
 });
 
-// Initialize
+// Initialize & URL Deep-Linking Handler
 setTimeout(() => {
-    // If fitToScreen on load is desired:
-    // fitToScreen();
-}, 100);
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const hwId = urlParams.get('hw_id');
+        const facId = urlParams.get('fac_id');
+        const block = urlParams.get('highlight_block');
+        const zone = urlParams.get('zone');
+
+        if (hwId) {
+            const idInt = parseInt(hwId);
+            if (!isNaN(idInt)) showHardwareDetails(idInt, null);
+        } else if (facId) {
+            showFacilityDetails(facId, null);
+        } else if (block) {
+            const b = block.toUpperCase();
+            if (b === 'R' || b === 'REEFER') {
+                filterZone('reefer');
+                showFacilityDetails('f_reefer_racks', null);
+            } else if (b === 'RAIL') {
+                filterZone('rail');
+                showFacilityDetails('f_loading_ramp', null);
+            } else if (b === 'GATE') {
+                filterZone('gate');
+                showFacilityDetails('f_gate_in', null);
+            } else if (b === 'CFS') {
+                filterZone('cfs_yard');
+                showFacilityDetails('f_cfs', null);
+            } else {
+                filterZone('cfs_yard');
+                showFacilityDetails('f_stacking_yard', null);
+            }
+        } else if (zone) {
+            filterZone(zone);
+        }
+    } catch(err) {
+        console.warn('URL deep-linking error:', err);
+    }
+}, 300);
 
 </script>

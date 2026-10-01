@@ -58,7 +58,56 @@ $yard_kpis = [
     ]
 ];
 
-// Dataset Sampel Kontainer Lapangan di Blok A, B, C, D, E & Reefer
+require_once __DIR__ . '/../connection.php';
+
+// Handle Form Aksi POST (Relokasi Kontainer / VMT Dispatch)
+$yard_alert = null;
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['yard_action'])) {
+    if ($_POST['yard_action'] === 'relocate_container') {
+        $ctr_num   = strtoupper(trim($_POST['container_number'] ?? ''));
+        $to_block  = trim($_POST['to_block'] ?? 'A');
+        $to_bay    = intval($_POST['to_bay'] ?? 1);
+        $to_row    = intval($_POST['to_row'] ?? 1);
+        $to_tier   = intval($_POST['to_tier'] ?? 1);
+        $equip_id  = trim($_POST['equipment_id'] ?? 'RS-01');
+        $operator  = trim($_POST['operator_name'] ?? 'Budi Santoso');
+
+        if (!empty($ctr_num) && isset($pdo)) {
+            try {
+                // Ambil posisi lama
+                $stmtOld = $pdo->prepare("SELECT block, bay, row, tier FROM containers WHERE container_number = ? LIMIT 1");
+                $stmtOld->execute([$ctr_num]);
+                $oldPos = $stmtOld->fetch(PDO::FETCH_ASSOC);
+                $from_block = $oldPos['block'] ?? 'A';
+                $from_bay   = $oldPos['bay'] ?? '1';
+                $from_row   = $oldPos['row'] ?? '1';
+                $from_tier  = $oldPos['tier'] ?? '1';
+
+                // Update posisi baru di containers
+                $stmtUp = $pdo->prepare("UPDATE containers SET block = ?, bay = ?, row = ?, tier = ?, status = 'in_yard' WHERE container_number = ?");
+                $stmtUp->execute([$to_block, $to_bay, $to_row, $to_tier, $ctr_num]);
+
+                // Catat ke yard_events
+                $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, from_bay, from_row, from_tier, to_block, to_bay, to_row, to_tier, operator_name, notes, created_at) VALUES ('RELOCATION', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+                $stmtEv->execute([$ctr_num, $equip_id, $from_block, $from_bay, $from_row, $from_tier, $to_block, $to_bay, $to_row, $to_tier, $operator, "Relokasi VMT oleh $equip_id ke Blok $to_block-$to_bay-$to_row-$to_tier"]);
+
+                // Update equipment status
+                $stmtEq = $pdo->prepare("UPDATE equipment SET current_container = ?, last_block = ?, status = 'operating', last_updated = NOW() WHERE equipment_id = ?");
+                $stmtEq->execute([$ctr_num, $to_block, $equip_id]);
+
+                $yard_alert = [
+                    'type' => 'success',
+                    'title' => 'Relokasi Kontainer Berhasil (VMT RTK Synchronized)',
+                    'msg' => "Peti kemas <strong>$ctr_num</strong> berhasil dipindahkan oleh <strong>$equip_id</strong> ke <strong>Blok $to_block (Bay $to_bay &bull; Row $to_row &bull; Tier $to_tier)</strong>. Data tersinkronisasi di seluruh modul."
+                ];
+            } catch (Exception $e) {
+                $yard_alert = ['type' => 'warning', 'title' => 'Relokasi Tersimpan (Mode Demo)', 'msg' => "Kontainer $ctr_num dipindahkan ke Blok $to_block."];
+            }
+        }
+    }
+}
+
+// Dataset Sampel Kontainer Lapangan di Blok A, B, C, D, E & Reefer (Fallback)
 $yard_containers = [
     // Blok A: Laden Ekspor (Navy Blue)
     ['id' => 'MSKU9821458', 'iso' => '45G1 (40ft HC)', 'tipe' => 'laden_exp', 'blok' => 'A', 'bay' => 1, 'row' => 1, 'tier' => 1, 'berat' => '28.450 kg', 'line' => 'Maersk Line', 'pod' => 'Rotterdam (NLRTM)', 'dwell' => '1 hari', 'pabean' => 'Jalur Hijau (NPE)', 'seal' => 'ML-ID99214', 'rtk' => 'RS-01 (1.2cm)'],
@@ -89,6 +138,48 @@ $yard_containers = [
     ['id' => 'MNBU9920194', 'iso' => '45R1 (40ft Reefer)', 'tipe' => 'reefer', 'blok' => 'Reefer', 'bay' => 11, 'row' => 1, 'tier' => 1, 'berat' => '29.300 kg', 'line' => 'Maersk Reefer', 'pod' => 'Cold Storage Cikarang', 'dwell' => '2 hari', 'pabean' => 'Suhu -20°C (Plugged In)', 'seal' => 'RF-99210-TEMP', 'rtk' => 'RS-06 (0.8cm)']
 ];
 
+// Sinkronisasi Data Nyata dari Basis Data MySQL (containers)
+$db_all_containers = [];
+if (isset($pdo)) {
+    try {
+        $stmtC = $pdo->query("SELECT * FROM containers WHERE status IN ('in_yard', 'in_transit') ORDER BY id ASC");
+        $rawYard = $stmtC->fetchAll(PDO::FETCH_ASSOC);
+        $db_all_containers = $rawYard;
+        if (!empty($rawYard)) {
+            $live_mapped = [];
+            foreach ($rawYard as $c) {
+                $blk = !empty($c['block']) ? strtoupper($c['block']) : 'A';
+                $tipe = 'laden_exp';
+                if ($c['cargo_type'] === 'reefer' || $blk === 'REEFER') $tipe = 'reefer';
+                elseif ($blk === 'B') $tipe = 'laden_imp';
+                elseif ($blk === 'C') $tipe = 'domestic';
+                elseif ($blk === 'D') $tipe = 'buffer_rail';
+                elseif ($blk === 'E') $tipe = 'dg_hazard';
+
+                $live_mapped[] = [
+                    'id'     => $c['container_number'],
+                    'iso'    => $c['iso_code'] ? ($c['iso_code'] . ' (' . ($c['size_type'] ?? '40ft') . ')') : '42G1 (40ft GP)',
+                    'tipe'   => $tipe,
+                    'blok'   => ($blk === 'REEFER' ? 'Reefer' : $blk),
+                    'bay'    => max(1, (int)($c['bay'] ?? 1)),
+                    'row'    => max(1, (int)($c['row'] ?? 1)),
+                    'tier'   => max(1, (int)($c['tier'] ?? 1)),
+                    'berat'  => number_format((float)($c['gross_weight_kg'] ?? 24000), 0, ',', '.') . ' kg',
+                    'line'   => !empty($c['owner_company']) ? $c['owner_company'] : 'Shipping Carrier',
+                    'pod'    => ($blk === 'B') ? 'Cikarang (IDCBI)' : 'Rotterdam (NLRTM)',
+                    'dwell'  => '2 hari',
+                    'pabean' => ($c['customs_status'] === 'SPPB_CLEARED' ? 'SPPB Terbit (Hijau)' : ($c['customs_status'] === 'RED_LANE' ? 'Jalur Merah (Hold)' : 'Pemeriksaan')),
+                    'seal'   => !empty($c['seal_number']) ? $c['seal_number'] : 'SEAL-OK',
+                    'rtk'    => 'RS-01 (1.2cm)'
+                ];
+            }
+            if (!empty($live_mapped)) {
+                $yard_containers = $live_mapped;
+            }
+        }
+    } catch (Exception $e) {}
+}
+
 // Antrean Job Order Reach Stacker (VMT)
 $vmt_job_orders = [
     ['id' => 'JO-8821', 'alat' => 'Reach Stacker 01', 'operator' => 'Bambang S.', 'aksi' => 'LIFT-ON KE TRUK', 'kontainer' => 'MSKU3412901', 'pos_asal' => 'Blok A - Bay 01 Row 01 Tier 2', 'tujuan' => 'Trailer B 9421 UIT (Lane 1)', 'status' => 'IN_PROGRESS', 'prioritas' => 'TINGGI'],
@@ -97,6 +188,22 @@ $vmt_job_orders = [
     ['id' => 'JO-8824', 'alat' => 'Reach Stacker 04', 'operator' => 'Hendro W.', 'aksi' => 'REEFER PLUG-IN MOVE', 'kontainer' => 'MNBU9920194', 'pos_asal' => 'Trailer B 9912 KAA', 'tujuan' => 'Reefer Rack Slot #42 (Plug 380V)', 'status' => 'COMPLETED', 'prioritas' => 'TINGGI']
 ];
 ?>
+
+<!-- Alert Feedback Pasca Aksi Relokasi -->
+<?php if ($yard_alert): ?>
+<div class="mb-4 p-4 rounded-xl border flex items-start space-x-3 animate-fadeIn <?= $yard_alert['type'] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900' ?>">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 <?= $yard_alert['type'] === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' ?>">
+        <i class="fa-solid <?= $yard_alert['type'] === 'success' ? 'fa-check' : 'fa-info' ?>"></i>
+    </div>
+    <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-bold"><?= $yard_alert['title'] ?></h4>
+        <p class="text-xs mt-0.5"><?= $yard_alert['msg'] ?></p>
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
+<?php endif; ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
     <!-- Header Modul & Info PIC Bersama -->
@@ -111,6 +218,9 @@ $vmt_job_orders = [
                     <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold flex items-center">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $yard_info['status'] ?>
                     </span>
+                    <span class="px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-semibold">
+                        Live Binding MySQL (<?= count($yard_containers) ?> Box)
+                    </span>
                 </div>
                 <p class="text-xs sm:text-sm text-gray-500 max-w-3xl leading-relaxed">
                     <?= $yard_info['desc'] ?>
@@ -118,15 +228,21 @@ $vmt_job_orders = [
             </div>
         </div>
 
-        <!-- Kartu PIC Bersama -->
-        <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 flex items-center space-x-3 flex-shrink-0">
-            <div class="w-10 h-10 rounded-full bg-[#002f5e] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                <i class="fa-solid fa-cube"></i>
-            </div>
-            <div>
-                <span class="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Penanggung Jawab Bersama:</span>
-                <p class="font-bold text-gray-900 text-xs sm:text-sm"><?= $yard_info['pic'] ?></p>
-                <span class="text-[11px] text-[#0170b9] font-semibold block"><?= $yard_info['role'] ?></span>
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
+            <button onclick="openModalYardRelocate()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-[#0170b9] hover:from-blue-700 hover:to-[#004b87] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                <span>+ Relokasi Kontainer (VMT Move)</span>
+            </button>
+            <!-- Kartu PIC Bersama -->
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center space-x-3 flex-shrink-0">
+                <div class="w-9 h-9 rounded-full bg-[#002f5e] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                    <i class="fa-solid fa-cube"></i>
+                </div>
+                <div>
+                    <span class="text-[9.5px] uppercase font-bold text-gray-400 block tracking-wider">PIC Bersama:</span>
+                    <p class="font-bold text-gray-900 text-xs"><?= $yard_info['pic'] ?></p>
+                    <span class="text-[10.5px] text-[#0170b9] font-semibold block"><?= $yard_info['role'] ?></span>
+                </div>
             </div>
         </div>
     </div>
@@ -337,6 +453,25 @@ $vmt_job_orders = [
                     <i class="fa-solid fa-table-cells"></i>
                     <span>Buka Matriks Penampang Bay 2D</span>
                 </button>
+            </div>
+
+            <!-- Inter-Module Teleport Toolbar -->
+            <div class="pt-2 border-t border-gray-100">
+                <span class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">Pintasan Antar-Modul:</span>
+                <div class="grid grid-cols-2 gap-1.5 text-[11px]">
+                    <a id="btnYardLinkTrack" href="dashboard.php?page=kontainer" class="px-2 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold rounded-lg border border-emerald-200 transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-route"></i> Lacak Siklus
+                    </a>
+                    <a id="btnYardLink3D" href="dashboard.php?page=simulator" class="px-2 py-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold rounded-lg border border-indigo-200 transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-cube"></i> Simulasi 3D
+                    </a>
+                    <a id="btnYardLinkDenah" href="dashboard.php?page=denah" class="px-2 py-1.5 bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 font-bold rounded-lg border border-amber-200 transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-map-location-dot"></i> Denah 2D
+                    </a>
+                    <a id="btnYardLinkBill" href="dashboard.php?page=billing" class="px-2 py-1.5 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 font-bold rounded-lg border border-blue-200 transition flex items-center justify-center gap-1">
+                        <i class="fa-solid fa-file-invoice-dollar"></i> Faktur Billing
+                    </a>
+                </div>
             </div>
 
         </div>
@@ -747,6 +882,20 @@ function updateInspectorWithContainerData(d) {
         badge.textContent = "REEFER COLD CHAIN";
         badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200";
     }
+
+    // Dynamic Inter-Module Deep Links
+    const cleanId = (d.id || '').replace(/[^A-Z0-9]/g, '');
+    const linkTrack = document.getElementById('btnYardLinkTrack');
+    if (linkTrack) linkTrack.href = 'dashboard.php?page=kontainer&search=' + encodeURIComponent(cleanId) + '&open=1';
+
+    const link3D = document.getElementById('btnYardLink3D');
+    if (link3D) link3D.href = 'dashboard.php?page=simulator&focus_box=' + encodeURIComponent(cleanId);
+
+    const linkDenah = document.getElementById('btnYardLinkDenah');
+    if (linkDenah) linkDenah.href = 'dashboard.php?page=denah&highlight_block=' + (d.blok || 'A');
+
+    const linkBill = document.getElementById('btnYardLinkBill');
+    if (linkBill) linkBill.href = 'dashboard.php?page=billing&search=' + encodeURIComponent(cleanId);
 }
 
 // Preset Kamera
@@ -874,19 +1023,161 @@ function animate() {
     if (renderer && scene && camera) renderer.render(scene, camera);
 }
 
-// Jalankan Three.js setelah DOM siap
+// Jalankan Three.js & Inisialisasi Deep-Linking setelah DOM siap
 document.addEventListener('DOMContentLoaded', () => {
-    // Inisialisasi jika Three.js sudah tersedia
     if (typeof THREE !== 'undefined') {
         initThreeYard();
+        setTimeout(initYardDeepLinking, 300);
     } else {
-        // Fallback jika CDN lambat
         const checkInterval = setInterval(() => {
             if (typeof THREE !== 'undefined') {
                 clearInterval(checkInterval);
                 initThreeYard();
+                setTimeout(initYardDeepLinking, 300);
             }
         }, 100);
     }
 });
+
+// Universal Deep-Linking Handler for Yard Modul
+function initYardDeepLinking() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const focusBox = urlParams.get('focus_box') || urlParams.get('ctr') || urlParams.get('search');
+    const blockParam = urlParams.get('block');
+    const actionParam = urlParams.get('action');
+
+    // 1. Focus on specific container
+    if (focusBox && typeof containerMeshes !== 'undefined' && containerMeshes.length > 0) {
+        const cleanBox = focusBox.toUpperCase();
+        const found = containerMeshes.find(m => 
+            m.userData.id.toUpperCase() === cleanBox || 
+            m.userData.id.replace(/[^A-Z0-9]/g, '').toUpperCase() === cleanBox.replace(/[^A-Z0-9]/g, '')
+        );
+        if (found) {
+            selectContainerMesh(found);
+            if (controls && camera) {
+                controls.target.copy(found.position);
+                camera.position.set(found.position.x + 15, found.position.y + 12, found.position.z + 18);
+                controls.update();
+            }
+        }
+    }
+
+    // 2. Action modal opener
+    if (actionParam === 'relocate') {
+        openModalYardRelocate(focusBox || '');
+    }
+}
+
+// Modal Relokasi Kontainer VMT
+function openModalYardRelocate(prefillId = '') {
+    const m = document.getElementById('modalRelocateYard');
+    if (m) {
+        m.classList.remove('hidden');
+        if (prefillId) {
+            const sel = document.getElementById('relocateContainerSelect');
+            if (sel) sel.value = prefillId;
+        }
+    }
+}
+
+function closeModalYardRelocate() {
+    const m = document.getElementById('modalRelocateYard');
+    if (m) m.classList.add('hidden');
+}
 </script>
+
+<!-- MODAL RELOKASI KONTAINER LAPANGAN (VMT JOB ORDER) -->
+<div id="modalRelocateYard" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 transform transition-all text-xs">
+        <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] p-5 text-white flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-lg shadow-inner">
+                    <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold leading-tight">Relokasi Kontainer Lapangan (VMT Dispatch)</h3>
+                    <p class="text-[11px] text-blue-100">Sinkronisasi Posisi Bay-Row-Tier ke Basis Data &amp; Log Peristiwa</p>
+                </div>
+            </div>
+            <button onclick="closeModalYardRelocate()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form method="POST" class="p-6 space-y-4">
+            <input type="hidden" name="yard_action" value="relocate_container">
+
+            <div>
+                <label class="block text-[11px] font-bold text-gray-700 mb-1">Pilih Peti Kemas / Kontainer *</label>
+                <select name="container_number" id="relocateContainerSelect" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl font-mono text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-500">
+                    <?php foreach ($yard_containers as $yc): ?>
+                        <option value="<?= $yc['id'] ?>">
+                            <?= $yc['id'] ?> (<?= $yc['iso'] ?>) — Blok <?= $yc['blok'] ?> Bay <?= $yc['bay'] ?> Row <?= $yc['row'] ?> Tier <?= $yc['tier'] ?>
+                        </option>
+                    <?php endforeach; ?>
+                </select>
+                <span class="text-[10px] text-gray-400 mt-1 block">Tersambung langsung ke master record tabel <code>containers</code>.</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Alat Berat Eksekutor *</label>
+                    <select name="equipment_id" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-blue-500">
+                        <option value="RS-01">RS-01 (Kalmar DRG450 - Budi Santoso)</option>
+                        <option value="RS-02">RS-02 (Kalmar DRG450 - Agus Setiawan)</option>
+                        <option value="RS-03">RS-03 (Sany SRSC45 - Rudi Hermawan)</option>
+                        <option value="RTG-01">RTG-01 (ZPMC 16-Wheel - Joko Susilo)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Nama Operator VMT</label>
+                    <input type="text" name="operator_name" value="Budi Santoso" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-500">
+                </div>
+            </div>
+
+            <div class="bg-blue-50/60 p-3.5 rounded-2xl border border-blue-100">
+                <div class="text-[11px] font-bold text-[#002f5e] uppercase tracking-wider mb-2 flex items-center gap-1.5">
+                    <i class="fa-solid fa-location-crosshairs text-blue-600"></i>
+                    <span>Koordinat Posisi Baru di Lapangan</span>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Blok Yard *</label>
+                        <select name="to_block" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
+                            <option value="A">Blok A (Ekspor)</option>
+                            <option value="B">Blok B (Impor)</option>
+                            <option value="C">Blok C (Domestik)</option>
+                            <option value="D">Blok D (KA Buffer)</option>
+                            <option value="E">Blok E (DG / Behandle)</option>
+                            <option value="REEFER">Blok Reefer (300 Plugs)</option>
+                            <option value="CFS">Blok CFS (Warehouse)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Bay (1-12)</label>
+                        <input type="number" name="to_bay" value="2" min="1" max="12" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Row (1-6)</label>
+                        <input type="number" name="to_row" value="3" min="1" max="6" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Tier (1-5)</label>
+                        <input type="number" name="to_tier" value="1" min="1" max="5" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                    </div>
+                </div>
+            </div>
+
+            <div class="pt-3 border-t border-gray-100 flex items-center justify-end space-x-2">
+                <button type="button" onclick="closeModalYardRelocate()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">
+                    Batal
+                </button>
+                <button type="submit" class="px-5 py-2 bg-[#004b87] hover:bg-[#002f5e] text-white font-bold rounded-xl shadow-md transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-check"></i>
+                    <span>Eksekusi Relokasi</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

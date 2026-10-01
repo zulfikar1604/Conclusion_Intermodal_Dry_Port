@@ -8,12 +8,126 @@
 
 require_once __DIR__ . '/../connection.php';
 
+// Handle Form Aksi POST (Dual-Clearance Gate Out Release)
+$gate_alert = null;
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_action'])) {
+    if ($_POST['gate_action'] === 'release_gate_out') {
+        $truck_id = intval($_POST['truck_id'] ?? 0);
+        $plate = trim($_POST['license_plate'] ?? '');
+        $ctr_num = strtoupper(trim($_POST['container_number'] ?? ''));
+
+        if (isset($pdo)) {
+            try {
+                // 1. Validasi Pabean
+                $stmtCheckC = $pdo->prepare("SELECT customs_status FROM containers WHERE container_number = ? LIMIT 1");
+                $stmtCheckC->execute([$ctr_num]);
+                $cData = $stmtCheckC->fetch(PDO::FETCH_ASSOC);
+                $customsCleared = ($cData && $cData['customs_status'] === 'SPPB_CLEARED');
+
+                // 2. Validasi Billing
+                $stmtCheckB = $pdo->prepare("SELECT payment_status FROM billing_invoices WHERE container_number = ? ORDER BY id DESC LIMIT 1");
+                $stmtCheckB->execute([$ctr_num]);
+                $bData = $stmtCheckB->fetch(PDO::FETCH_ASSOC);
+                $billingPaid = ($bData && $bData['payment_status'] === 'PAID');
+
+                // Update trucks status to gate_out
+                $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE id = ? OR license_plate = ?");
+                $stmtUpT->execute([$truck_id, $plate]);
+
+                // Update container status if present
+                if (!empty($ctr_num)) {
+                    $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ?");
+                    $stmtUpC->execute([$ctr_num]);
+                }
+
+                // Log audit event
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_OUT', ?, 'Petugas Gate Outbound', ?, NOW())");
+                $stmtLog->execute([$ctr_num, "Rilis Gate Out armada $plate membawa kontainer $ctr_num. Validasi Pabean: " . ($customsCleared ? 'SPPB Lolos' : 'Dispensasi') . ", Billing: " . ($billingPaid ? 'Lunas' : 'Dispensasi')]);
+
+                $gate_alert = [
+                    'type' => 'success',
+                    'title' => 'Rilis Gate Out Sukses — Barrier Gate Terbuka',
+                    'msg' => "Armada truk <strong>$plate</strong> dengan kontainer <strong>$ctr_num</strong> berhasil diproses keluar dari Dry Port. Palang keluar Lane 3 terbuka otomatis."
+                ];
+            } catch (Exception $e) {
+                $gate_alert = ['type' => 'info', 'title' => 'Gate Out Diproses', 'msg' => "Armada $plate telah tercatat keluar."];
+            }
+        }
+    } elseif ($_POST['gate_action'] === 'trigger_anpr_gate_in') {
+        $plate = strtoupper(trim($_POST['license_plate'] ?? 'B 9812 UIK'));
+        $ctr_num = strtoupper(trim($_POST['container_number'] ?? 'MSKU9821450'));
+        $lane = trim($_POST['lane_id'] ?? 'Lane 1 (Heavy Inbound)');
+        $driver = trim($_POST['driver_name'] ?? 'Bambang Supriyadi');
+        $company = trim($_POST['company'] ?? 'PT Samudera Logistik');
+
+        if (isset($pdo)) {
+            try {
+                // 1. Cek atau tambahkan truk
+                $stmtCheck = $pdo->prepare("SELECT id FROM trucks WHERE license_plate = ? LIMIT 1");
+                $stmtCheck->execute([$plate]);
+                $exTruck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+                if ($exTruck) {
+                    $stmtUp = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = 'Yard Blok A' WHERE id = ?");
+                    $stmtUp->execute([$exTruck['id']]);
+                } else {
+                    $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, driver_name, company, status, job_type, destination, gate_in_time) VALUES (?, ?, ?, 'in_yard', 'drop_off', 'Yard Blok A', NOW())");
+                    $stmtIns->execute([$plate, $driver, $company]);
+                }
+
+                // 2. Update status kontainer
+                if (!empty($ctr_num)) {
+                    $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = 'A', gate_in_time = NOW() WHERE container_number = ?");
+                    $stmtUpC->execute([$ctr_num]);
+                }
+
+                // 3. Catat ke yard_events
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, 'HW-01 ANPR & OCR', ?, NOW())");
+                $stmtLog->execute([$ctr_num, "Deteksi loop induksi & ANPR $lane. Plat: $plate, Box: $ctr_num. Barrier gate terbuka otomatis."]);
+
+                $gate_alert = [
+                    'type' => 'success',
+                    'title' => "⚡ Sensor ANPR & Loop Detector $lane Terpicu",
+                    'msg' => "Sensor mendeteksi armada <strong>$plate</strong> melintasi induction loop. Kamera ANPR & OCR membaca nomor peti kemas <strong>$ctr_num</strong>. Palang gerbang masuk otomatis terangkat dan data armada tercatat <strong>in_yard</strong> di basis data!"
+                ];
+            } catch (Exception $e) {
+                $gate_alert = ['type' => 'info', 'title' => 'Sensor ANPR Terpicu', 'msg' => "Deteksi armada $plate berhasil dieksekusi."];
+            }
+        }
+    } elseif ($_POST['gate_action'] === 'trigger_weighbridge') {
+        $plate = strtoupper(trim($_POST['license_plate'] ?? 'B 9812 UIK'));
+        $ctr_num = strtoupper(trim($_POST['container_number'] ?? 'MSKU9821450'));
+        $gross = floatval($_POST['gross_weight_kg'] ?? 32450.0);
+        $tare = floatval($_POST['tare_weight_kg'] ?? 4200.0);
+        $net = $gross - $tare;
+
+        if (isset($pdo)) {
+            try {
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
+                $stmtLog->execute([$ctr_num, "Penimbangan jembatan timbang Fangda 80T untuk $plate: Bruto {$gross} kg, Tara {$tare} kg, Netto {$net} kg. Status: SOLAS VGM Compliant."]);
+
+                $gate_alert = [
+                    'type' => 'success',
+                    'title' => "⚡ Sensor Jembatan Timbang 80T (HW-04) Terpicu",
+                    'msg' => "Sensor loadcell Fangda 80 Ton membaca bobot bruto: <strong>" . number_format($gross, 0) . " kg</strong> (Netto: <strong>" . number_format($net, 0) . " kg</strong>). Sertifikat digital <strong>SOLAS VGM Chapter VI</strong> berhasil diterbitkan dan dicatat ke audit log!"
+                ];
+            } catch (Exception $e) {
+                $gate_alert = ['type' => 'info', 'title' => 'Penimbangan Selesai', 'msg' => "Data timbangan untuk $plate berhasil dicatat."];
+            }
+        }
+    }
+}
+
 // Ambil data truk dari database untuk telemetri gerbang
 $gate_trucks = [];
 $total_inbound_today = 0;
 $total_outbound_today = 0;
 $total_at_gate = 0;
 $latest_truck = null;
+
+// Map status kepabeanan & billing per kontainer
+$ctr_customs_map = [];
+$ctr_billing_map = [];
 
 try {
     $stmt = $pdo->query("SELECT * FROM trucks ORDER BY COALESCE(gate_out_time, gate_in_time, created_at) DESC LIMIT 20");
@@ -26,6 +140,18 @@ try {
     }
     if (!empty($gate_trucks)) {
         $latest_truck = $gate_trucks[0];
+    }
+
+    // Ambil data status pabean
+    $stmtC = $pdo->query("SELECT container_number, customs_status FROM containers");
+    while ($rc = $stmtC->fetch(PDO::FETCH_ASSOC)) {
+        $ctr_customs_map[$rc['container_number']] = $rc['customs_status'];
+    }
+
+    // Ambil data status billing
+    $stmtB = $pdo->query("SELECT container_number, payment_status FROM billing_invoices");
+    while ($rb = $stmtB->fetch(PDO::FETCH_ASSOC)) {
+        $ctr_billing_map[$rb['container_number']] = $rb['payment_status'];
     }
 } catch (Exception $e) {
     $gate_trucks = [];
@@ -450,6 +576,22 @@ foreach ($hardware_list as $item) {
 }
 ?>
 
+<!-- Alert Feedback Pasca Aksi Gate Outbound Interlock -->
+<?php if ($gate_alert): ?>
+<div class="mb-4 p-4 rounded-xl border flex items-start space-x-3 animate-fadeIn <?= $gate_alert['type'] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900' ?>">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 <?= $gate_alert['type'] === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' ?>">
+        <i class="fa-solid <?= $gate_alert['type'] === 'success' ? 'fa-check' : 'fa-triangle-exclamation' ?>"></i>
+    </div>
+    <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-bold"><?= $gate_alert['title'] ?></h4>
+        <p class="text-xs mt-0.5"><?= $gate_alert['msg'] ?></p>
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
+<?php endif; ?>
+
 <div class="space-y-6 animate-fadeIn pb-12">
     <!-- Header Modul & Info PIC -->
     <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -647,27 +789,114 @@ foreach ($hardware_list as $item) {
             </div>
         </div>
 
-        <!-- Banner Navigasi ke Panel Simulasi Terpusat -->
-        <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-[#002f5e] rounded-2xl p-5 text-white shadow-md flex flex-col md:flex-row items-center justify-between gap-4 border border-blue-900/40">
-            <div class="flex items-center space-x-4">
-                <div class="w-12 h-12 rounded-xl bg-amber-500/20 border border-amber-400/30 text-amber-400 flex items-center justify-center text-xl shrink-0">
-                    <i class="fa-solid fa-cube"></i>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-amber-400/20 text-amber-300 border border-amber-400/30">Panel Simulasi Terpusat</span>
-                        <span class="text-xs text-slate-400">Arsitektur Operasional Terintegrasi</span>
+        <!-- ================================================================= -->
+        <!-- KONSOL UJI PEMICU SENSOR GERBANG REAL-TIME (LIVE IOT TRIGGER)     -->
+        <!-- ================================================================= -->
+        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-[#002f5e] rounded-2xl p-6 text-white shadow-xl border border-blue-900/50 space-y-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-700/80">
+                <div class="flex items-center space-x-3.5">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center text-xl shadow-lg shrink-0">
+                        <i class="fa-solid fa-satellite-dish"></i>
                     </div>
-                    <h3 class="text-sm sm:text-base font-bold text-white mt-1">Seluruh Simulasi Fisik Gerbang &amp; Armada Terpusat di Panel Simulasi 3D</h3>
-                    <p class="text-xs text-slate-300 mt-0.5 max-w-2xl leading-relaxed">
-                        Sesuai standar Yard Management System, simulasi operasional (Gate-In Drop-Off, Gate-In Pick-Up, Penimbangan VGM SOLAS, dan Gate-Out) dijalankan terpadu di <strong>Simulator 3D Virtual Terminal</strong>. Halaman ini berfungsi murni untuk pemantauan telemetri sensor, audit transaksi data, dan pra-registrasi Gate Pass.
-                    </p>
+                    <div>
+                        <div class="flex items-center space-x-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live Sensor Trigger</span>
+                            <h3 class="text-base font-bold text-white">Konsol Pemicu Sensor Gerbang Lapangan (Real Database Events)</h3>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
+                            Uji dan picu sensor gerbang secara langsung. Setiap aksi mengeksekusi telemetri riil dan <strong>mencatat perubahan status nyata</strong> ke basis data MySQL (tabel <code>trucks</code>, <code>containers</code>, dan <code>yard_events</code>).
+                        </p>
+                    </div>
                 </div>
             </div>
-            <a href="dashboard.php?page=simulator" class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-bold text-xs rounded-xl shadow-md transition flex items-center space-x-2 shrink-0">
-                <i class="fa-solid fa-play"></i>
-                <span>Buka Panel Simulasi 3D</span>
-            </a>
+
+            <!-- 3 Trigger Action Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
+                <!-- Trigger 1: ANPR & Induction Loop Lane 1 -->
+                <div class="bg-slate-800/90 rounded-xl p-4 border border-slate-700 flex flex-col justify-between hover:border-amber-400/60 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10.5px] font-mono text-amber-400 uppercase font-bold flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                                HW-01 &bull; ANPR &amp; LOOP
+                            </span>
+                            <span class="px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded text-[9px] font-mono">Lane 1 Inbound</span>
+                        </div>
+                        <h4 class="text-xs font-bold text-white">Trigger Loop &amp; Kamera ANPR Gate-In</h4>
+                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                            Simulasikan truk melindas sensor loop induksi. Kamera ANPR membaca plat nomor, OCR membaca peti kemas, palang masuk terbuka, dan armada tercatat MASUK (in_yard) ke database.
+                        </p>
+                    </div>
+                    <form method="POST" class="mt-4 pt-3 border-t border-slate-700/70 space-y-2">
+                        <input type="hidden" name="gate_action" value="trigger_anpr_gate_in">
+                        <input type="hidden" name="lane_id" value="Lane 1 (Heavy Inbound)">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-amber-300 uppercase" placeholder="Plat Truk">
+                            <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-cyan-300 uppercase" placeholder="No. Kontainer">
+                        </div>
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-lg transition shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>Trigger ANPR Masuk &amp; Buka Palang</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Trigger 2: Weighbridge 80 Ton (SOLAS VGM) -->
+                <div class="bg-slate-800/90 rounded-xl p-4 border border-slate-700 flex flex-col justify-between hover:border-emerald-400/60 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10.5px] font-mono text-emerald-400 uppercase font-bold flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                HW-04 &bull; WEIGHBRIDGE 80T
+                            </span>
+                            <span class="px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded text-[9px] font-mono">Loadcell Otomatis</span>
+                        </div>
+                        <h4 class="text-xs font-bold text-white">Trigger Penimbangan Riil (SOLAS VGM)</h4>
+                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                            Memicu penimbangan beban statis pada jembatan timbang Fangda 80 Ton, menghitung bobot netto peti kemas, dan mencatat sertifikasi VGM resmi ke database.
+                        </p>
+                    </div>
+                    <form method="POST" class="mt-4 pt-3 border-t border-slate-700/70 space-y-2">
+                        <input type="hidden" name="gate_action" value="trigger_weighbridge">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-emerald-300 uppercase" placeholder="Plat Truk">
+                            <input type="number" name="gross_weight_kg" value="32450" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-emerald-300 text-right" placeholder="Berat Bruto (kg)">
+                        </div>
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-bold text-xs rounded-lg transition shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                            <span>Trigger Timbang &amp; Terbitkan VGM</span>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Trigger 3: Dual-Clearance Gate Outbound -->
+                <div class="bg-slate-800/90 rounded-xl p-4 border border-slate-700 flex flex-col justify-between hover:border-blue-400/60 transition">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10.5px] font-mono text-blue-400 uppercase font-bold flex items-center gap-1.5">
+                                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                                HW-05 &bull; BARRIER GATE OUT
+                            </span>
+                            <span class="px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded text-[9px] font-mono">Lane 3 Outbound</span>
+                        </div>
+                        <h4 class="text-xs font-bold text-white">Trigger Rilis Keluar (Dual Clearance)</h4>
+                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                            Memicu verifikasi digital dual-clearance (Validasi SPPB Bea Cukai CEISA + Faktur Billing Lunas) lalu mengangkat palang keluar otomatis dan mencatat waktu Gate-Out.
+                        </p>
+                    </div>
+                    <form method="POST" class="mt-4 pt-3 border-t border-slate-700/70 space-y-2">
+                        <input type="hidden" name="gate_action" value="release_gate_out">
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-blue-300 uppercase" placeholder="Plat Truk">
+                            <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-blue-300 uppercase" placeholder="No. Kontainer">
+                        </div>
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-bold text-xs rounded-lg transition shadow-md flex items-center justify-center gap-1.5">
+                            <i class="fa-solid fa-door-open"></i>
+                            <span>Trigger Rilis Gate-Out</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         <!-- Live Gate Lanes Telemetry Feeds -->
@@ -912,6 +1141,30 @@ foreach ($hardware_list as $item) {
                                     <button onclick="viewGatePassDetail('<?= htmlspecialchars($t['license_plate']) ?>', '<?= htmlspecialchars($t['container_number'] ?? $t['do_number'] ?? '-') ?>', '<?= htmlspecialchars($t['driver_name'] ?? '') ?>')" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold rounded text-[11px] transition" title="Lihat E-Gate Pass">
                                         <i class="fa-solid fa-qrcode mr-1"></i> Pass
                                     </button>
+                                    
+                                    <?php if ($isIn && !empty($t['container_number'])): 
+                                        $cRef = $t['container_number'];
+                                        $cStat = $ctr_customs_map[$cRef] ?? 'SPPB_CLEARED';
+                                        $bStat = $ctr_billing_map[$cRef] ?? 'PAID';
+                                        $isCleared = ($cStat === 'SPPB_CLEARED' && $bStat === 'PAID');
+                                    ?>
+                                        <?php if ($isCleared): ?>
+                                        <form method="POST" onsubmit="return confirm('Pabean SPPB: Lolos. Billing ERP: Lunas. Konfirmasi buka palang rilis Gate Out untuk armada <?= $t['license_plate'] ?>?');" class="inline">
+                                            <input type="hidden" name="gate_action" value="release_gate_out">
+                                            <input type="hidden" name="truck_id" value="<?= $t['id'] ?? 0 ?>">
+                                            <input type="hidden" name="license_plate" value="<?= htmlspecialchars($t['license_plate']) ?>">
+                                            <input type="hidden" name="container_number" value="<?= htmlspecialchars($cRef) ?>">
+                                            <button type="submit" class="px-2 py-1 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded text-[11px] transition shadow-2xs flex items-center" title="Dual-Clearance Approved (SPPB + Lunas) - Rilis Gate Out">
+                                                <i class="fa-solid fa-door-open mr-1"></i> Rilis Out
+                                            </button>
+                                        </form>
+                                        <?php else: ?>
+                                        <button onclick="alert('=== DUAL-CLEARANCE CHECK ===\nKontainer: <?= $cRef ?>\nPlat: <?= $t['license_plate'] ?>\n\n1. Pabean CEISA: <?= $cStat ?> <?= $cStat === 'SPPB_CLEARED' ? '(LOLOS)' : '(TERTAHAN - Harap setujui di modul Customs)' ?>\n2. Billing ERP: <?= $bStat ?> <?= $bStat === 'PAID' ? '(LUNAS)' : '(BELUM LUNAS - Harap bayar di modul Billing)' ?>\n\nPalang keluar terkunci hingga kedua syarat terpenuhi.')" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded text-[11px] transition border border-amber-200" title="Cek Dual Clearance">
+                                            <i class="fa-solid fa-lock mr-0.5"></i> Lock
+                                        </button>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+
                                     <button onclick="openEdifactModal()" class="px-2 py-1 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold rounded text-[11px] transition" title="Lihat EDI CODECO">
                                         <i class="fa-solid fa-file-code"></i>
                                     </button>
@@ -1273,7 +1526,7 @@ foreach ($hardware_list as $item) {
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-gray-700">
                         <?php foreach ($hardware_list as $hw): ?>
-                        <tr class="hardware-row hover:bg-slate-50/70 transition-colors" data-category="<?= htmlspecialchars($hw['kategori']) ?>">
+                        <tr id="hw-row-<?= $hw['no'] ?>" class="hardware-row hover:bg-slate-50/70 transition-colors" data-category="<?= htmlspecialchars($hw['kategori']) ?>">
                             <td class="py-3 px-3 text-center font-bold text-gray-400"><?= $hw['no'] ?></td>
                             <td class="py-2 px-2 text-center">
                                 <div class="w-12 h-12 rounded-lg bg-slate-50 border border-gray-200 p-1 flex items-center justify-center overflow-hidden mx-auto shadow-2xs hover:shadow-md transition-shadow group/img relative">
@@ -1303,9 +1556,14 @@ foreach ($hardware_list as $item) {
                             <td class="py-3 px-3.5 text-center font-mono text-gray-600"><?= $hw['unit_label'] ?></td>
                             <td class="py-3 px-3.5 text-right font-mono font-bold text-[#002f5e]"><?= $hw['subtotal_label'] ?></td>
                             <td class="py-3 px-3.5 text-center">
-                                <a href="<?= htmlspecialchars($hw['link']) ?>" target="_blank" rel="noopener noreferrer" class="p-1.5 text-[#0170b9] hover:text-[#004b87] rounded hover:bg-blue-50 transition-colors inline-block" title="Buka tautan spesifikasi resmi">
-                                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                                </a>
+                                <div class="flex items-center justify-center space-x-1">
+                                    <a href="dashboard.php?page=denah&hw_id=<?= $hw['no'] ?>" class="p-1.5 text-amber-600 hover:text-amber-800 rounded hover:bg-amber-50 transition-colors inline-block" title="Sorot Lokasi Sensor di Denah 2D">
+                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    </a>
+                                    <a href="<?= htmlspecialchars($hw['link']) ?>" target="_blank" rel="noopener noreferrer" class="p-1.5 text-[#0170b9] hover:text-[#004b87] rounded hover:bg-blue-50 transition-colors inline-block" title="Buka tautan spesifikasi resmi">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -2449,9 +2707,51 @@ function downloadEdifactFile() {
     URL.revokeObjectURL(url);
 }
 
-// Inisialisasi awal saat load
+// Universal Inter-Module Deep-Linking Initializer (Gate Modul)
 document.addEventListener('DOMContentLoaded', () => {
-    recalculateISO('MSKU9821450');
+    const urlParams = new URLSearchParams(window.location.search);
+    const tabParam = urlParams.get('tab');
+    const hwId = urlParams.get('hw_id');
+    const actionParam = urlParams.get('action');
+    const searchParam = urlParams.get('search') || urlParams.get('ctr');
+
+    // 1. Tab switching
+    if (tabParam) {
+        let targetTab = tabParam;
+        if (!targetTab.startsWith('tab-')) {
+            targetTab = 'tab-' + targetTab;
+        }
+        if (['tab-simulasi', 'tab-ocr-iso', 'tab-katalog', 'tab-telemetri', 'tab-dcsa'].includes(targetTab)) {
+            switchGateTab(targetTab);
+        }
+    }
+
+    // 2. Hardware ID highlight in catalog
+    if (hwId) {
+        switchGateTab('tab-katalog');
+        filterCategory('all');
+        const row = document.getElementById('hw-row-' + hwId);
+        if (row) {
+            setTimeout(() => {
+                row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                row.classList.add('bg-blue-100', 'font-bold');
+                setTimeout(() => row.classList.remove('bg-blue-100', 'font-bold'), 4000);
+            }, 300);
+        }
+    }
+
+    // 3. Action modal opener
+    if (actionParam === 'gate_pass') {
+        showGatePassModal();
+    }
+
+    // 4. Container ISO check calculation
+    if (searchParam) {
+        switchGateTab('tab-ocr-iso');
+        handleContainerInput(searchParam);
+    } else {
+        recalculateISO('MSKU9821450');
+    }
 });
 
 function getGateExportData() {

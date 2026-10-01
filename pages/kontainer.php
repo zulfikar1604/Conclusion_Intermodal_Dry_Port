@@ -329,12 +329,33 @@ $total_containers = count($containers);
                                 </div>
                             </td>
 
-                            <!-- Tombol Aksi Detail & Milestone -->
+                            <!-- Tombol Aksi Detail & Aksi Pintas Lintas Modul -->
                             <td class="py-4 px-4 text-right whitespace-nowrap">
-                                <button class="px-3 py-1.5 bg-slate-100 hover:bg-[#0170b9] text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1.5">
-                                    <span>Detail & Milestone</span>
-                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                                </button>
+                                <div class="inline-flex items-center space-x-1.5" onclick="event.stopPropagation()">
+                                    <!-- Detail Modal Button -->
+                                    <button onclick='showJourneyModal(<?= $json_detail ?>)' class="px-2.5 py-1.5 bg-slate-100 hover:bg-[#0170b9] text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1" title="Buka Detail Milestone">
+                                        <i class="fa-solid fa-timeline text-[10px]"></i>
+                                        <span>Milestone</span>
+                                    </button>
+                                    <!-- Denah 2D -->
+                                    <a href="dashboard.php?page=denah&highlight_block=<?= urlencode($c['block']) ?>" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-[#0170b9] text-[#0170b9] hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Sorot di Denah 2D (Blok <?= $c['block'] ?>)">
+                                        <i class="fa-solid fa-map-location-dot text-[11px]"></i>
+                                    </a>
+                                    <!-- 3D Simulator -->
+                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($c['container_number']) ?>" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-gray-950 flex items-center justify-center text-xs transition shadow-2xs" title="Lihat di Simulasi 3D">
+                                        <i class="fa-solid fa-cube text-[11px]"></i>
+                                    </a>
+                                    <!-- Billing -->
+                                    <a href="dashboard.php?page=billing&search=<?= urlencode($c['container_number']) ?>" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Periksa Faktur Billing">
+                                        <i class="fa-solid fa-file-invoice-dollar text-[11px]"></i>
+                                    </a>
+                                    <?php if ($c['cargo_type'] === 'reefer'): ?>
+                                    <!-- Reefer -->
+                                    <a href="dashboard.php?page=reefer&search=<?= urlencode($c['container_number']) ?>" class="w-7 h-7 rounded-lg bg-cyan-50 hover:bg-cyan-600 text-cyan-700 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Monitoring Reefer Cold Chain">
+                                        <i class="fa-solid fa-snowflake text-[11px]"></i>
+                                    </a>
+                                    <?php endif; ?>
+                                </div>
                             </td>
 
                         </tr>
@@ -581,6 +602,30 @@ $total_containers = count($containers);
 
         </div>
 
+        <!-- Aksi Pintas Lintas Modul (Inter-Module Shortcuts) -->
+        <div class="bg-blue-50/70 border-t border-b border-blue-100 px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <span class="font-bold text-[#002f5e] flex items-center">
+                <i class="fa-solid fa-compass mr-1.5 text-[#0170b9]"></i>Aksi Pintas Lintas Modul:
+            </span>
+            <div class="flex items-center space-x-2 flex-wrap gap-y-1.5" id="journeyActionShortcuts">
+                <a id="btnLinkDenah" href="#" class="px-3 py-1.5 bg-white hover:bg-[#002f5e] text-gray-700 hover:text-white border border-gray-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-map-location-dot mr-1.5 text-blue-500"></i>Denah 2D 35 Ha
+                </a>
+                <a id="btnLink3D" href="#" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold rounded-lg transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-cube mr-1.5"></i>Simulasi 3D
+                </a>
+                <a id="btnLinkBilling" href="#" class="px-3 py-1.5 bg-white hover:bg-emerald-600 text-gray-700 hover:text-white border border-gray-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-file-invoice-dollar mr-1.5 text-emerald-600"></i>Faktur Billing
+                </a>
+                <a id="btnLinkYard" href="#" class="px-3 py-1.5 bg-white hover:bg-purple-600 text-gray-700 hover:text-white border border-gray-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-grip mr-1.5 text-purple-600"></i>Matriks Yard
+                </a>
+                <a id="btnLinkReefer" href="#" class="px-3 py-1.5 bg-cyan-50 hover:bg-cyan-600 text-cyan-800 hover:text-white border border-cyan-200 rounded-lg font-semibold transition flex items-center shadow-2xs hidden">
+                    <i class="fa-solid fa-snowflake mr-1.5 text-cyan-600"></i>Reefer Cold Chain
+                </a>
+            </div>
+        </div>
+
         <!-- Modal Footer -->
         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex items-center justify-between">
             <div class="text-xs text-gray-500">
@@ -657,12 +702,81 @@ function showJourneyModal(data) {
     document.getElementById('m_destination').innerText = data.destination;
     document.getElementById('m_gate_time').innerText = data.gate_in_time || '2026-09-19 08:30 WIB';
 
+    // Konfigurasi Link Aksi Pintas Lintas Modul
+    const btnDenah = document.getElementById('btnLinkDenah');
+    if (btnDenah) btnDenah.href = `dashboard.php?page=denah&highlight_block=${encodeURIComponent(data.block)}`;
+
+    const btn3D = document.getElementById('btnLink3D');
+    if (btn3D) btn3D.href = `dashboard.php?page=simulator&focus_box=${encodeURIComponent(data.container_number)}`;
+
+    const btnBill = document.getElementById('btnLinkBilling');
+    if (btnBill) btnBill.href = `dashboard.php?page=billing&search=${encodeURIComponent(data.container_number)}`;
+
+    const btnYard = document.getElementById('btnLinkYard');
+    if (btnYard) btnYard.href = `dashboard.php?page=yard&find=${encodeURIComponent(data.container_number)}`;
+
+    const reeferBtn = document.getElementById('btnLinkReefer');
+    if (reeferBtn) {
+        if (data.cargo_type === 'REEFER' || data.block === 'R') {
+            reeferBtn.classList.remove('hidden');
+            reeferBtn.href = `dashboard.php?page=reefer&search=${encodeURIComponent(data.container_number)}`;
+        } else {
+            reeferBtn.classList.add('hidden');
+        }
+    }
+
     document.getElementById('journeyModal').classList.remove('hidden');
 }
 
 function closeJourneyModal() {
     document.getElementById('journeyModal').classList.add('hidden');
 }
+
+// URL Deep-Linking Initializer for Container Tracking
+setTimeout(() => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search') || urlParams.get('q');
+        const blockParam = urlParams.get('block');
+        const typeParam = urlParams.get('type');
+        const autoOpen = urlParams.get('open') === '1';
+
+        if (searchParam) {
+            const input = document.getElementById('searchInput');
+            if (input) {
+                input.value = searchParam;
+                filterContainers();
+            }
+        }
+        if (blockParam) {
+            const bSelect = document.getElementById('filterBlock');
+            if (bSelect) {
+                bSelect.value = blockParam.toUpperCase();
+                filterContainers();
+            }
+        }
+        if (typeParam) {
+            const tSelect = document.getElementById('filterType');
+            if (tSelect) {
+                tSelect.value = typeParam.toLowerCase();
+                filterContainers();
+            }
+        }
+
+        // If autoOpen is set or searchParam exact match:
+        if (searchParam && autoOpen) {
+            const rows = document.querySelectorAll('#containerTable tbody tr.container-row');
+            for (let r of rows) {
+                if ((r.getAttribute('data-container') || '').toUpperCase() === searchParam.toUpperCase()) {
+                    r.click();
+                    break;
+                }
+            }
+        }
+    } catch(err) {
+        console.warn('Container deep-linking error:', err);
+    }
+}, 200);
 
 window.addEventListener('click', function(e) {
     const modal = document.getElementById('journeyModal');

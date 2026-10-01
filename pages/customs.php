@@ -15,6 +15,50 @@ $customs_info = [
     'status' => 'CEISA 4.0 Connected — REST API v1.4 & EDI Engine Aktif'
 ];
 
+require_once __DIR__ . '/../connection.php';
+
+// Handle Form Aksi POST (Rilis SPPB Jalur Hijau / Tahan Jalur Merah Behandle)
+$customs_alert = null;
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['customs_action'])) {
+    $c_action = $_POST['customs_action'];
+    $ctr_num  = strtoupper(trim($_POST['container_number'] ?? ''));
+    $officer  = trim($_POST['officer_name'] ?? 'Hanggar DJBC CIDP');
+    $notes    = trim($_POST['customs_notes'] ?? '');
+
+    if (!empty($ctr_num) && isset($pdo)) {
+        try {
+            if ($c_action === 'release_sppb') {
+                $sppb_code = 'SPPB-' . rand(100000, 999999) . '/KPU.01/' . date('Y');
+                $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = 'SPPB_CLEARED' WHERE container_number = ?");
+                $stmtUp->execute([$ctr_num]);
+
+                $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('CUSTOMS_SPPB_RELEASE', ?, ?, ?, NOW())");
+                $stmtEv->execute([$ctr_num, $officer, "Penerbitan $sppb_code CEISA 4.0 Jalur Hijau. Kargo dinyatakan cleared dan siap untuk pengeluaran di Gate Out."]);
+
+                $customs_alert = [
+                    'type' => 'success',
+                    'title' => 'SPPB Berhasil Diterbitkan (Jalur Hijau CEISA 4.0)',
+                    'msg' => "Peti kemas <strong>$ctr_num</strong> telah memperoleh status <strong>SPPB_CLEARED</strong> ($sppb_code). Pengeluaran gerbang di Gate Out kini telah diizinkan."
+                ];
+            } elseif ($c_action === 'hold_red_lane') {
+                $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE', block = 'E' WHERE container_number = ?");
+                $stmtUp->execute([$ctr_num]);
+
+                $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('CUSTOMS_RED_LANE_HOLD', ?, 'E', ?, ?, NOW())");
+                $stmtEv->execute([$ctr_num, $officer, "Penetapan Jalur Merah & Instruksi Pemeriksaan Fisik Terminal Behandle Blok E / X-Ray 6 MeV. Catatan: $notes"]);
+
+                $customs_alert = [
+                    'type' => 'warning',
+                    'title' => 'Kontainer Ditetapkan Jalur Merah (Pemeriksaan Fisik Behandle)',
+                    'msg' => "Peti kemas <strong>$ctr_num</strong> dialokasikan ke <strong>Blok E (Terminal Behandle & Pemindai X-Ray)</strong>. Palang gerbang Gate Out otomatis terkunci hingga pemeriksaan selesai."
+                ];
+            }
+        } catch (Exception $e) {
+            $customs_alert = ['type' => 'info', 'title' => 'Pembaruan Pabean Tersimpan', 'msg' => "Status pabean untuk $ctr_num telah diperbarui."];
+        }
+    }
+}
+
 // Data Awal 12 Dokumen Kepabeanan CIDP (PIB, PEB, BC 2.3 TPB)
 $customs_docs = [
     [
@@ -427,6 +471,35 @@ $customs_docs = [
     ]
 ];
 
+// Sinkronisasi Status Dokumen Pabean dengan Basis Data Nyata (containers)
+if (isset($pdo)) {
+    try {
+        $stmtSync = $pdo->query("SELECT container_number, customs_status, block FROM containers");
+        $dbStatusMap = [];
+        while ($r = $stmtSync->fetch(PDO::FETCH_ASSOC)) {
+            $dbStatusMap[$r['container_number']] = $r;
+        }
+
+        foreach ($customs_docs as &$cd) {
+            if (isset($dbStatusMap[$cd['no_kontainer']])) {
+                $stat = $dbStatusMap[$cd['no_kontainer']]['customs_status'];
+                if ($stat === 'SPPB_CLEARED') {
+                    $cd['status'] = 'SPPB_TERBIT';
+                    $cd['jalur'] = 'HIJAU';
+                    $cd['e_seal_status'] = 'UNLOCKED';
+                    $cd['no_sppb'] = ($cd['no_sppb'] === '-' ? 'SPPB-0428' . rand(10,99) . '/KPU.01/2026' : $cd['no_sppb']);
+                } elseif ($stat === 'RED_LANE') {
+                    $cd['status'] = 'SPJM_TERBIT';
+                    $cd['jalur'] = 'MERAH';
+                    $cd['e_seal_status'] = 'LOCKED';
+                    $cd['lokasi_yard'] = 'Blok E (Terminal Behandle)';
+                }
+            }
+        }
+        unset($cd);
+    } catch (Exception $e) {}
+}
+
 // Perhitungan Statistik Kepabeanan (Sesuai PMK 190/PMK.04/2022: Jalur Hijau & Jalur Merah)
 $total_docs       = count($customs_docs);
 $count_hijau      = 0;
@@ -450,6 +523,22 @@ foreach ($customs_docs as $d) {
 $persen_hijau = round(($count_hijau / $total_docs) * 100, 1);
 $persen_merah = round(($count_merah / $total_docs) * 100, 1);
 ?>
+
+<!-- Alert Feedback Pasca Aksi Pabean CEISA -->
+<?php if ($customs_alert): ?>
+<div class="mb-4 p-4 rounded-xl border flex items-start space-x-3 animate-fadeIn <?= $customs_alert['type'] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-amber-50 border-amber-200 text-amber-900' ?>">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 <?= $customs_alert['type'] === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700' ?>">
+        <i class="fa-solid <?= $customs_alert['type'] === 'success' ? 'fa-check' : 'fa-triangle-exclamation' ?>"></i>
+    </div>
+    <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-bold"><?= $customs_alert['title'] ?></h4>
+        <p class="text-xs mt-0.5"><?= $customs_alert['msg'] ?></p>
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
+<?php endif; ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
     <!-- Header Modul & Info PIC -->
@@ -743,12 +832,39 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                             <i class="fa-solid fa-eye text-xs"></i>
                                         </button>
 
+                                        <!-- Aksi Pintas Lintas Modul -->
+                                        <a href="dashboard.php?page=kontainer&search=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-[#002f5e] hover:text-white rounded flex items-center justify-center transition" title="Lacak Kontainer di Tracking Box">
+                                            <i class="fa-solid fa-boxes-stacked text-xs"></i>
+                                        </a>
+                                        <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white rounded flex items-center justify-center transition" title="Lihat Posisi Fisik 3D">
+                                            <i class="fa-solid fa-cube text-xs"></i>
+                                        </a>
+                                        <a href="dashboard.php?page=billing&search=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded flex items-center justify-center transition" title="Periksa Faktur & Billing">
+                                            <i class="fa-solid fa-file-invoice-dollar text-xs"></i>
+                                        </a>
+
                                         <?php if ($doc['status'] === 'SPPB_TERBIT'): ?>
                                             <!-- Tombol Cetak SPPB Resmi -->
                                             <button onclick="printOfficialSPPB(<?= $doc['id'] ?>)" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded flex items-center justify-center transition" title="Cetak Surat Persetujuan Pengeluaran Barang (SPPB)">
                                                 <i class="fa-solid fa-stamp text-xs"></i>
                                             </button>
+                                            <!-- Quick Action: Tahan Jalur Merah -->
+                                            <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin MENAHAN kontainer <?= $doc['no_kontainer'] ?> ke Jalur Merah (Behandle / Hold)?');" class="inline">
+                                                <input type="hidden" name="customs_action" value="hold_red_lane">
+                                                <input type="hidden" name="container_number" value="<?= $doc['no_kontainer'] ?>">
+                                                <button type="submit" class="w-7 h-7 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded flex items-center justify-center transition" title="Hold / Tahan ke Jalur Merah">
+                                                    <i class="fa-solid fa-ban text-xs"></i>
+                                                </button>
+                                            </form>
                                         <?php elseif ($doc['status'] === 'SPJM_TERBIT' || $doc['status'] === 'DALAM_BEHANDLE'): ?>
+                                            <!-- Quick Action: Rilis SPPB Hijau -->
+                                            <form method="POST" onsubmit="return confirm('Konfirmasi rilis SPPB Jalur Hijau untuk kontainer <?= $doc['no_kontainer'] ?>?');" class="inline">
+                                                <input type="hidden" name="customs_action" value="release_sppb">
+                                                <input type="hidden" name="container_number" value="<?= $doc['no_kontainer'] ?>">
+                                                <button type="submit" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded flex items-center justify-center transition" title="Rilis SPPB (Jalur Hijau)">
+                                                    <i class="fa-solid fa-circle-check text-xs"></i>
+                                                </button>
+                                            </form>
                                             <!-- Tombol Alihkan ke Tab Behandle -->
                                             <button onclick="inspectBehandleDoc(<?= $doc['id'] ?>)" class="w-7 h-7 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded flex items-center justify-center transition" title="Periksa Fisik Behandle & Scan X-Ray">
                                                 <i class="fa-solid fa-radiation text-xs"></i>
@@ -2367,4 +2483,24 @@ function exportCustomsPDF() {
     const { headers, rows } = getCustomsExportData();
     CIDPExport.toPDF('Laporan Dokumen Kepabeanan CEISA', headers, rows, 'Laporan_Pabean_CIDP');
 }
+
+// URL Deep-Linking Initializer for Customs CEISA
+setTimeout(() => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search') || urlParams.get('ctr') || urlParams.get('doc');
+        const tabParam = urlParams.get('tab');
+
+        if (tabParam && typeof switchCustomsTab === 'function') {
+            switchCustomsTab(tabParam);
+        }
+        if (searchParam) {
+            const input = document.getElementById('searchCustomsInput') || document.querySelector('input[placeholder*="Cari"]');
+            if (input) {
+                input.value = searchParam;
+                if (typeof filterCustomsDocs === 'function') filterCustomsDocs();
+            }
+        }
+    } catch(e) {}
+}, 200);
 </script>

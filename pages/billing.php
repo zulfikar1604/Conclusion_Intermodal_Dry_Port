@@ -6,18 +6,53 @@
 // PIC : Afriansayah Ayubi (Software & ERP Process Specialist)
 // =============================================================================
 
-// Data Sample Invoices
+require_once __DIR__ . '/../connection.php';
+
+function formatRupiah($angka){
+    return "Rp " . number_format($angka,0,',','.');
+}
+
+// Handle Form Aksi POST (Pembayaran Faktur / Penerbitan Tagihan)
+$billing_alert = null;
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['billing_action'])) {
+    $b_action = $_POST['billing_action'];
+    $inv_num  = trim($_POST['invoice_number'] ?? '');
+    $method   = trim($_POST['payment_method'] ?? 'Virtual Account Mandiri');
+
+    if ($b_action === 'pay_invoice' && !empty($inv_num) && isset($pdo)) {
+        try {
+            $stmtUp = $pdo->prepare("UPDATE billing_invoices SET payment_status = 'PAID', paid_at = NOW(), payment_method = ? WHERE invoice_number = ?");
+            $stmtUp->execute([$method, $inv_num]);
+
+            // Ambil nomor kontainer terkait
+            $stmtCtr = $pdo->prepare("SELECT container_number, total_amount FROM billing_invoices WHERE invoice_number = ? LIMIT 1");
+            $stmtCtr->execute([$inv_num]);
+            $invData = $stmtCtr->fetch(PDO::FETCH_ASSOC);
+            $ctrRef = $invData['container_number'] ?? '-';
+            $totVal = (float)($invData['total_amount'] ?? 0);
+
+            // Catat ke yard_events
+            $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, billable_amount, operator_name, notes, created_at) VALUES ('BILLING_PAID', ?, ?, 'Kasir Keuangan ERP', ?, NOW())");
+            $stmtEv->execute([$ctrRef, $totVal, "Pelunasan faktur $inv_num sebesar " . formatRupiah($totVal) . " via $method. Syarat komersial pengeluaran gerbang telah terpenuhi."]);
+
+            $billing_alert = [
+                'type' => 'success',
+                'title' => 'Pembayaran Faktur Dikonfirmasi (LUNAS / PAID)',
+                'msg' => "Faktur <strong>$inv_num</strong> untuk kontainer <strong>$ctrRef</strong> telah lunas. Gate Out kini diizinkan merilis armada pengangkut."
+            ];
+        } catch (Exception $e) {
+            $billing_alert = ['type' => 'info', 'title' => 'Status Faktur Diperbarui', 'msg' => "Faktur $inv_num telah ditandai lunas."];
+        }
+    }
+}
+
+// Data Fallback Sample Invoices
 $invoices = [
-    ['no' => 'INV/2026/00001', 'tgl' => '2026-09-01', 'pelanggan' => 'PT Samudera Pratama Mandiri', 'layanan' => 'Jasa Penumpukan (Storage)', 'nilai' => 15000000, 'status' => 'Lunas'],
-    ['no' => 'INV/2026/00002', 'tgl' => '2026-09-03', 'pelanggan' => 'PT Unilever Indonesia Tbk', 'layanan' => 'Lift-On/Lift-Off', 'nilai' => 8500000, 'status' => 'Lunas'],
-    ['no' => 'INV/2026/00003', 'tgl' => '2026-09-05', 'pelanggan' => 'PT Astra Honda Motor', 'layanan' => 'Stripping/Stuffing', 'nilai' => 22000000, 'status' => 'Menunggu'],
-    ['no' => 'INV/2026/00004', 'tgl' => '2026-09-08', 'pelanggan' => 'PT Global Chemindo Pratama', 'layanan' => 'Customs Clearance', 'nilai' => 12500000, 'status' => 'Menunggu'],
-    ['no' => 'INV/2026/00005', 'tgl' => '2026-09-10', 'pelanggan' => 'PT Krakatau Posco', 'layanan' => 'Reefer Monitoring', 'nilai' => 5400000, 'status' => 'Overdue'],
-    ['no' => 'INV/2026/00006', 'tgl' => '2026-09-12', 'pelanggan' => 'PT Schneider Electric', 'layanan' => 'Gate Pass', 'nilai' => 3200000, 'status' => 'Lunas'],
-    ['no' => 'INV/2026/00007', 'tgl' => '2026-09-15', 'pelanggan' => 'PT Samudera Pratama Mandiri', 'layanan' => 'Jasa Penumpukan (Storage)', 'nilai' => 18000000, 'status' => 'Menunggu'],
-    ['no' => 'INV/2026/00008', 'tgl' => '2026-09-18', 'pelanggan' => 'PT Unilever Indonesia Tbk', 'layanan' => 'Lift-On/Lift-Off', 'nilai' => 9200000, 'status' => 'Lunas'],
-    ['no' => 'INV/2026/00009', 'tgl' => '2026-09-20', 'pelanggan' => 'PT Astra Honda Motor', 'layanan' => 'Stripping/Stuffing', 'nilai' => 25000000, 'status' => 'Overdue'],
-    ['no' => 'INV/2026/00010', 'tgl' => '2026-09-22', 'pelanggan' => 'PT Global Chemindo Pratama', 'layanan' => 'Customs Clearance', 'nilai' => 14000000, 'status' => 'Menunggu']
+    ['no' => 'INV/2026/00001', 'tgl' => '2026-09-01', 'pelanggan' => 'PT Samudera Pratama Mandiri', 'layanan' => 'Jasa Penumpukan (Storage)', 'nilai' => 15000000, 'status' => 'Lunas', 'ctr' => 'MSKU7829107'],
+    ['no' => 'INV/2026/00002', 'tgl' => '2026-09-03', 'pelanggan' => 'PT Unilever Indonesia Tbk', 'layanan' => 'Lift-On/Lift-Off', 'nilai' => 8500000, 'status' => 'Lunas', 'ctr' => 'TGHU9021845'],
+    ['no' => 'INV/2026/00003', 'tgl' => '2026-09-05', 'pelanggan' => 'PT Astra Honda Motor', 'layanan' => 'Stripping/Stuffing', 'nilai' => 22000000, 'status' => 'Menunggu', 'ctr' => 'MSKU8821940'],
+    ['no' => 'INV/2026/00004', 'tgl' => '2026-09-08', 'pelanggan' => 'PT Global Chemindo Pratama', 'layanan' => 'Customs Clearance', 'nilai' => 12500000, 'status' => 'Menunggu', 'ctr' => 'CMAU7718290'],
+    ['no' => 'INV/2026/00005', 'tgl' => '2026-09-10', 'pelanggan' => 'PT Krakatau Posco', 'layanan' => 'Reefer Monitoring', 'nilai' => 5400000, 'status' => 'Overdue', 'ctr' => 'EITU9823102']
 ];
 
 $kpi_cards = [
@@ -27,8 +62,57 @@ $kpi_cards = [
     ['title' => 'Jatuh Tempo / Overdue', 'value' => 'Rp 275.500.000', 'desc' => '9.7%', 'color' => 'red', 'icon' => 'fa-triangle-exclamation', 'bg' => 'bg-red-50', 'text' => 'text-red-600'],
 ];
 
-function formatRupiah($angka){
-    return "Rp " . number_format($angka,0,',','.');
+// Tarik Data Nyata Faktur dari Basis Data MySQL (billing_invoices)
+if (isset($pdo)) {
+    try {
+        $stmtInv = $pdo->query("SELECT * FROM billing_invoices ORDER BY id DESC");
+        $dbInvs = $stmtInv->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($dbInvs)) {
+            $live_invoices = [];
+            $kpi_total = 0;
+            $kpi_paid = 0;
+            $kpi_pending = 0;
+            $kpi_overdue = 0;
+
+            foreach ($dbInvs as $row) {
+                $amt = (float)$row['total_amount'];
+                $kpi_total += $amt;
+                if ($row['payment_status'] === 'PAID') $kpi_paid += $amt;
+                elseif ($row['payment_status'] === 'PENDING') $kpi_pending += $amt;
+                elseif ($row['payment_status'] === 'OVERDUE') $kpi_overdue += $amt;
+
+                $statIndo = 'Menunggu';
+                if ($row['payment_status'] === 'PAID') $statIndo = 'Lunas';
+                elseif ($row['payment_status'] === 'OVERDUE') $statIndo = 'Overdue';
+
+                $live_invoices[] = [
+                    'id'        => $row['id'],
+                    'no'        => $row['invoice_number'],
+                    'tgl'       => date('Y-m-d', strtotime($row['created_at'])),
+                    'pelanggan' => $row['customer_name'],
+                    'layanan'   => $row['service_type'],
+                    'nilai'     => $amt,
+                    'status'    => $statIndo,
+                    'ctr'       => $row['container_number'],
+                    'paid_at'   => $row['paid_at']
+                ];
+            }
+
+            if (!empty($live_invoices)) {
+                $invoices = $live_invoices;
+                $pctPaid = $kpi_total > 0 ? round(($kpi_paid / $kpi_total) * 100, 1) : 0;
+                $pctPending = $kpi_total > 0 ? round(($kpi_pending / $kpi_total) * 100, 1) : 0;
+                $pctOverdue = $kpi_total > 0 ? round(($kpi_overdue / $kpi_total) * 100, 1) : 0;
+
+                $kpi_cards = [
+                    ['title' => 'Total Tagihan Operasional', 'value' => formatRupiah($kpi_total), 'desc' => count($invoices) . ' Faktur Terdaftar', 'color' => 'blue', 'icon' => 'fa-file-invoice-dollar', 'bg' => 'bg-blue-50', 'text' => 'text-blue-600'],
+                    ['title' => 'Sudah Terbayar / Lunas', 'value' => formatRupiah($kpi_paid), 'desc' => $pctPaid . '% Rasio Lunas', 'color' => 'green', 'icon' => 'fa-check-double', 'bg' => 'bg-green-50', 'text' => 'text-green-600'],
+                    ['title' => 'Menunggu Pembayaran', 'value' => formatRupiah($kpi_pending), 'desc' => $pctPending . '% Belum Lunas', 'color' => 'amber', 'icon' => 'fa-clock', 'bg' => 'bg-amber-50', 'text' => 'text-amber-600'],
+                    ['title' => 'Jatuh Tempo / Overdue', 'value' => formatRupiah($kpi_overdue), 'desc' => $pctOverdue . '% Melebihi Tempo', 'color' => 'red', 'icon' => 'fa-triangle-exclamation', 'bg' => 'bg-red-50', 'text' => 'text-red-600'],
+                ];
+            }
+        }
+    } catch (Exception $e) {}
 }
 
 $status_colors = [
@@ -45,6 +129,21 @@ $billing_info = [
     'status' => 'ERP Odoo Connected'
 ];
 ?>
+<!-- Alert Feedback Pasca Aksi Billing -->
+<?php if ($billing_alert): ?>
+<div class="mb-4 p-4 rounded-xl border flex items-start space-x-3 animate-fadeIn <?= $billing_alert['type'] === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-900' : 'bg-blue-50 border-blue-200 text-blue-900' ?>">
+    <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 <?= $billing_alert['type'] === 'success' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700' ?>">
+        <i class="fa-solid <?= $billing_alert['type'] === 'success' ? 'fa-check' : 'fa-info' ?>"></i>
+    </div>
+    <div class="flex-1 min-w-0">
+        <h4 class="text-sm font-bold"><?= $billing_alert['title'] ?></h4>
+        <p class="text-xs mt-0.5"><?= $billing_alert['msg'] ?></p>
+    </div>
+    <button onclick="this.parentElement.remove()" class="text-gray-400 hover:text-gray-600">
+        <i class="fa-solid fa-xmark"></i>
+    </button>
+</div>
+<?php endif; ?>
 
 <div class="animate-fadeIn">
     <!-- Header Modul -->
@@ -111,14 +210,14 @@ $billing_info = [
                 <h3 class="text-lg font-bold text-[#002f5e]">Monitoring Faktur Operasional</h3>
                 <div class="flex space-x-2">
                     <div class="relative">
-                        <input type="text" placeholder="Cari invoice/pelanggan..." class="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-[#0170b9] focus:border-[#0170b9] w-full sm:w-64">
+                        <input type="text" id="searchInvoiceInput" onkeyup="filterInvoices()" placeholder="Cari invoice/kontainer/pelanggan..." class="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-[#0170b9] focus:border-[#0170b9] w-full sm:w-72">
                         <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"></i>
                     </div>
-                    <select class="border border-gray-200 rounded-lg text-sm px-3 py-2 bg-white focus:ring-[#0170b9]">
+                    <select id="filterInvoiceStatus" onchange="filterInvoices()" class="border border-gray-200 rounded-lg text-sm px-3 py-2 bg-white focus:ring-[#0170b9]">
                         <option value="">Semua Status</option>
-                        <option value="Lunas">Lunas</option>
-                        <option value="Menunggu">Menunggu</option>
-                        <option value="Overdue">Overdue</option>
+                        <option value="lunas">Lunas</option>
+                        <option value="menunggu">Menunggu</option>
+                        <option value="overdue">Overdue</option>
                     </select>
                 </div>
             </div>
@@ -126,19 +225,27 @@ $billing_info = [
                 <table class="w-full text-left border-collapse">
                     <thead>
                         <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
-                            <th class="p-4 font-semibold">No. Invoice</th>
+                            <th class="p-4 font-semibold">No. Invoice &amp; Kontainer</th>
                             <th class="p-4 font-semibold">Tanggal</th>
                             <th class="p-4 font-semibold">Pelanggan</th>
                             <th class="p-4 font-semibold">Jenis Layanan</th>
                             <th class="p-4 font-semibold text-right">Nilai (IDR)</th>
                             <th class="p-4 font-semibold text-center">Status</th>
-                            <th class="p-4 font-semibold text-center">Aksi</th>
+                            <th class="p-4 font-semibold text-center">Aksi Pintas</th>
                         </tr>
                     </thead>
                     <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
                         <?php foreach($invoices as $inv): ?>
-                        <tr class="hover:bg-slate-50/50 transition-colors">
-                            <td class="p-4 font-semibold text-[#0170b9]"><?= $inv['no'] ?></td>
+                        <tr class="invoice-row hover:bg-slate-50/50 transition-colors" data-no="<?= strtolower($inv['no']) ?>" data-pelanggan="<?= strtolower($inv['pelanggan']) ?>" data-ctr="<?= strtolower($inv['ctr'] ?? '') ?>" data-status="<?= strtolower($inv['status']) ?>">
+                            <td class="p-4">
+                                <span class="font-semibold text-[#0170b9] block"><?= $inv['no'] ?></span>
+                                <?php if (!empty($inv['ctr'])): ?>
+                                    <span class="text-[11px] font-mono text-gray-500 flex items-center gap-1 mt-0.5">
+                                        <i class="fa-solid fa-cube text-[9px] text-[#0170b9]"></i>
+                                        <strong><?= htmlspecialchars($inv['ctr']) ?></strong>
+                                    </span>
+                                <?php endif; ?>
+                            </td>
                             <td class="p-4"><?= date('d M Y', strtotime($inv['tgl'])) ?></td>
                             <td class="p-4 font-medium"><?= $inv['pelanggan'] ?></td>
                             <td class="p-4 text-gray-500"><?= $inv['layanan'] ?></td>
@@ -149,9 +256,32 @@ $billing_info = [
                                 </span>
                             </td>
                             <td class="p-4 text-center">
-                                <button onclick="openInvoiceModal('<?= $inv['no'] ?>', '<?= $inv['pelanggan'] ?>', <?= $inv['nilai'] ?>, '<?= $inv['status'] ?>')" class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] hover:bg-[#0170b9] hover:text-white transition-colors flex items-center justify-center mx-auto shadow-sm">
-                                    <i class="fa-solid fa-eye"></i>
-                                </button>
+                                <div class="flex items-center justify-center space-x-1.5">
+                                    <button onclick="openInvoiceModal('<?= $inv['no'] ?>', '<?= htmlspecialchars(addslashes($inv['pelanggan'])) ?>', <?= $inv['nilai'] ?>, '<?= $inv['status'] ?>')" class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] hover:bg-[#0170b9] hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Lihat Rincian Faktur ERP">
+                                        <i class="fa-solid fa-eye text-xs"></i>
+                                    </button>
+                                    <?php if (!empty($inv['ctr'])): ?>
+                                    <a href="dashboard.php?page=kontainer&search=<?= urlencode($inv['ctr']) ?>" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 hover:bg-[#002f5e] hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Lacak Kontainer di Tracking Box">
+                                        <i class="fa-solid fa-boxes-stacked text-xs"></i>
+                                    </a>
+                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($inv['ctr']) ?>" class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Lihat di Simulasi 3D">
+                                        <i class="fa-solid fa-cube text-xs"></i>
+                                    </a>
+                                    <?php endif; ?>
+                                    <?php if ($inv['status'] !== 'Lunas'): ?>
+                                    <form method="POST" onsubmit="return confirm('Konfirmasi pelunasan faktur <?= $inv['no'] ?>? Status komersial untuk Gate Out akan otomatis disetujui.');" class="inline">
+                                        <input type="hidden" name="billing_action" value="pay_invoice">
+                                        <input type="hidden" name="invoice_number" value="<?= $inv['no'] ?>">
+                                        <button type="submit" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Konfirmasi Bayar (Set LUNAS)">
+                                            <i class="fa-solid fa-check text-xs"></i>
+                                        </button>
+                                    </form>
+                                    <?php else: ?>
+                                    <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs" title="Faktur Telah Lunas">
+                                        <i class="fa-solid fa-badge-check"></i>
+                                    </span>
+                                    <?php endif; ?>
+                                </div>
                             </td>
                         </tr>
                         <?php endforeach; ?>
@@ -910,4 +1040,38 @@ $billing_info = [
             btnText.innerHTML = 'Sinkronisasi Data Invoice';
         }
     }
+
+    // Filter Realtime Tabel Faktur YMS
+    function filterInvoices() {
+        const q = (document.getElementById('searchInvoiceInput')?.value || '').toLowerCase().trim();
+        const st = (document.getElementById('filterInvoiceStatus')?.value || '').toLowerCase().trim();
+        const rows = document.querySelectorAll('.invoice-row');
+        
+        rows.forEach(r => {
+            const no = (r.getAttribute('data-no') || '').toLowerCase();
+            const pel = (r.getAttribute('data-pelanggan') || '').toLowerCase();
+            const ctr = (r.getAttribute('data-ctr') || '').toLowerCase();
+            const s = (r.getAttribute('data-status') || '').toLowerCase();
+
+            const matchQ = !q || no.includes(q) || pel.includes(q) || ctr.includes(q);
+            const matchS = !st || s.includes(st);
+
+            r.style.display = (matchQ && matchS) ? '' : 'none';
+        });
+    }
+
+    // URL Deep-Linking Initializer
+    setTimeout(() => {
+        try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const searchParam = urlParams.get('search') || urlParams.get('inv') || urlParams.get('ctr');
+            if (searchParam) {
+                const input = document.getElementById('searchInvoiceInput');
+                if (input) {
+                    input.value = searchParam;
+                    filterInvoices();
+                }
+            }
+        } catch(e) {}
+    }, 200);
 </script>

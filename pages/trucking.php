@@ -337,12 +337,28 @@ $total_trucks = count($trucks);
                                 <?= $badge_status ?>
                             </td>
 
-                            <!-- Tombol Aksi Detail & Milestone -->
+                            <!-- Tombol Aksi Detail & Aksi Pintas Lintas Modul -->
                             <td class="py-4 px-4 text-right whitespace-nowrap">
-                                <button onclick="showGatePassModal(<?= $json_pass ?>)" class="px-3 py-1.5 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1.5">
-                                    <span>Detail & Milestone</span>
-                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
-                                </button>
+                                <div class="inline-flex items-center space-x-1.5" onclick="event.stopPropagation()">
+                                    <button onclick="showGatePassModal(<?= $json_pass ?>)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1" title="Lihat Detail Tiket Armada">
+                                        <i class="fa-solid fa-file-lines text-[10px]"></i>
+                                        <span>Milestone</span>
+                                    </button>
+                                    <?php if (!empty($t['container_number'])): ?>
+                                    <a href="dashboard.php?page=kontainer&search=<?= urlencode($t['container_number']) ?>" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-[#002f5e] text-[#0170b9] hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Lacak Kontainer <?= $t['container_number'] ?>">
+                                        <i class="fa-solid fa-boxes-stacked text-[11px]"></i>
+                                    </a>
+                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($t['container_number']) ?>" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-gray-950 flex items-center justify-center text-xs transition shadow-2xs" title="Lihat di Simulasi 3D">
+                                        <i class="fa-solid fa-cube text-[11px]"></i>
+                                    </a>
+                                    <a href="dashboard.php?page=billing&search=<?= urlencode($t['container_number']) ?>" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Cek Faktur Billing">
+                                        <i class="fa-solid fa-file-invoice-dollar text-[11px]"></i>
+                                    </a>
+                                    <?php endif; ?>
+                                    <a href="dashboard.php?page=denah&fac_id=f_gate_in" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Lihat Gerbang di Denah">
+                                        <i class="fa-solid fa-map-location-dot text-[11px]"></i>
+                                    </a>
+                                </div>
                             </td>
 
                         </tr>
@@ -507,6 +523,27 @@ $total_trucks = count($trucks);
 
         </div>
 
+        <!-- Aksi Pintas Lintas Modul -->
+        <div class="bg-indigo-50/70 border-t border-b border-indigo-100 px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <span class="font-bold text-[#002f5e] flex items-center">
+                <i class="fa-solid fa-compass mr-1.5 text-indigo-600"></i>Aksi Pintas Lintas Modul:
+            </span>
+            <div class="flex items-center space-x-2 flex-wrap gap-y-1" id="truckModalShortcuts">
+                <a id="btnTrkCont" href="#" class="px-3 py-1 bg-white hover:bg-[#002f5e] text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs hidden">
+                    <i class="fa-solid fa-boxes-stacked mr-1 text-[#0170b9]"></i>Lacak Kontainer
+                </a>
+                <a id="btnTrk3D" href="#" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold rounded-lg transition flex items-center shadow-2xs hidden">
+                    <i class="fa-solid fa-cube mr-1"></i>Simulasi 3D
+                </a>
+                <a id="btnTrkBilling" href="#" class="px-3 py-1 bg-white hover:bg-emerald-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs hidden">
+                    <i class="fa-solid fa-file-invoice-dollar mr-1 text-emerald-600"></i>Faktur Billing
+                </a>
+                <a href="dashboard.php?page=denah&fac_id=f_gate_in" class="px-3 py-1 bg-white hover:bg-slate-700 text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-map-location-dot mr-1 text-blue-500"></i>Denah Gerbang
+                </a>
+            </div>
+        </div>
+
         <!-- Footer -->
         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex items-center justify-between">
             <button onclick="window.print()" class="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-xl transition flex items-center">
@@ -581,12 +618,58 @@ function showGatePassModal(data) {
     document.getElementById('p_location').innerText = data.current_location;
     document.getElementById('p_equipment').innerText = data.handling_equipment;
 
+    // Tombol Lintas Modul
+    const btnC = document.getElementById('btnTrkCont');
+    const btn3 = document.getElementById('btnTrk3D');
+    const btnB = document.getElementById('btnTrkBilling');
+    if (data.container_number && data.container_number !== '-') {
+        if (btnC) {
+            btnC.classList.remove('hidden');
+            btnC.href = `dashboard.php?page=kontainer&search=${encodeURIComponent(data.container_number)}&open=1`;
+        }
+        if (btn3) {
+            btn3.classList.remove('hidden');
+            btn3.href = `dashboard.php?page=simulator&focus_box=${encodeURIComponent(data.container_number)}`;
+        }
+        if (btnB) {
+            btnB.classList.remove('hidden');
+            btnB.href = `dashboard.php?page=billing&search=${encodeURIComponent(data.container_number)}`;
+        }
+    } else {
+        if (btnC) btnC.classList.add('hidden');
+        if (btn3) btn3.classList.add('hidden');
+        if (btnB) btnB.classList.add('hidden');
+    }
+
     document.getElementById('gatePassModal').classList.remove('hidden');
 }
 
 function closeGatePassModal() {
     document.getElementById('gatePassModal').classList.add('hidden');
 }
+
+// URL Deep-Linking Initializer for Trucking Monitor
+setTimeout(() => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const searchParam = urlParams.get('search') || urlParams.get('plate') || urlParams.get('q');
+        const statusParam = urlParams.get('status');
+        if (searchParam) {
+            const input = document.getElementById('searchTruckInput');
+            if (input) {
+                input.value = searchParam;
+                filterTrucks();
+            }
+        }
+        if (statusParam) {
+            const select = document.getElementById('filterStatus');
+            if (select) {
+                select.value = statusParam;
+                filterTrucks();
+            }
+        }
+    } catch(e) {}
+}, 200);
 
 window.addEventListener('click', function(e) {
     const modal = document.getElementById('gatePassModal');

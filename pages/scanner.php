@@ -934,6 +934,23 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
             <div><span class="text-gray-400 block">Lokasi Lapangan:</span><strong class="text-blue-700 font-mono font-bold">Blok ${matchedContainer.block}-${matchedContainer.bay}-${matchedContainer.row}-${matchedContainer.tier}</strong></div>
             <div><span class="text-gray-400 block">Pemilik Kargo:</span><span class="text-gray-800 font-medium truncate block">${matchedContainer.owner_company}</span></div>
             <div><span class="text-gray-400 block">Status Bea Cukai:</span><strong class="text-emerald-700 font-semibold">${matchedContainer.customs_status || 'SPPB_CLEARED'}</strong></div>
+            <div class="col-span-2 pt-2 mt-1 border-t border-slate-200 flex flex-wrap gap-1.5">
+                <a href="dashboard.php?page=kontainer&search=${encodeURIComponent(matchedContainer.container_number)}&open=1" class="px-2.5 py-1 bg-white hover:bg-[#002f5e] text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-boxes-stacked mr-1 text-[#0170b9]"></i>Lacak Perjalanan
+                </a>
+                <a href="dashboard.php?page=simulator&focus_box=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-gray-950 rounded-lg text-[11px] font-bold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-cube mr-1"></i>Sorot 3D Twin
+                </a>
+                <a href="dashboard.php?page=denah&highlight_block=${encodeURIComponent(matchedContainer.block)}" class="px-2.5 py-1 bg-white hover:bg-blue-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-map-location-dot mr-1 text-blue-500"></i>Denah 2D
+                </a>
+                <a href="dashboard.php?page=billing&search=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-white hover:bg-emerald-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-file-invoice-dollar mr-1 text-emerald-600"></i>Faktur Billing
+                </a>
+                <a href="dashboard.php?page=cfs&search=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-white hover:bg-indigo-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-warehouse mr-1 text-indigo-600"></i>CFS LCL
+                </a>
+            </div>
         `;
     } else {
         ymsBadge.className = "px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800";
@@ -941,6 +958,14 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
         ymsGrid.innerHTML = `
             <div class="col-span-2 text-gray-500 text-[11px]">
                 Nomor identitas ini valid secara optik tetapi belum terdaftar dalam lapangan penumpukan CIDP. Siap untuk diterbitkan dokumen Gate-In.
+            </div>
+            <div class="col-span-2 pt-2 mt-1 border-t border-slate-200 flex flex-wrap gap-1.5">
+                <a href="dashboard.php?page=gate" class="px-2.5 py-1 bg-[#0170b9] hover:bg-[#002f5e] text-white rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-door-open mr-1"></i>Proses Gate-In di Modul Gate
+                </a>
+                <a href="dashboard.php?page=customs" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-stamp mr-1 text-blue-600"></i>Cek Pabean CEISA 4.0
+                </a>
             </div>
         `;
     }
@@ -1094,6 +1119,15 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (e) {
             console.warn('QRCode rendering error:', e);
         }
+    }
+
+    // 4. Auto-decode jika ada parameter query (misal navigasi dari CFS / Pallet Inventory)
+    const urlParams = new URLSearchParams(window.location.search);
+    const queryCode = urlParams.get('query');
+    if (queryCode) {
+        setTimeout(() => {
+            handleDecodedCode(queryCode, 'AUTO_QUERY');
+        }, 500);
     }
 });
 </script>

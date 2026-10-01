@@ -6446,4 +6446,40 @@ function validateCustomBoxNumber() {
         showToast('Check Digit INVALID!', `Nomor ${val} salah ketik (Seharusnya ${calculatedCheck})`, 'warn');
     }
 }
+
+// URL Deep-Linking Initializer for Simulator 3D
+setTimeout(() => {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const viewParam = urlParams.get('view');
+        const boxParam = urlParams.get('focus_box');
+        const blockParam = urlParams.get('block');
+
+        if (boxParam) {
+            if (typeof activeContainers !== 'undefined' && Array.isArray(activeContainers)) {
+                const found = activeContainers.find(c => (c.container_number || '').toUpperCase() === boxParam.toUpperCase());
+                if (found) {
+                    const is20ft = (found.size || 40) == 20;
+                    const pos = getSlotWorldPosition(found.block, found.bay, found.row, found.tier, is20ft);
+                    const camPreset = (found.cargo_type === 'reefer' || found.block === 'R') ? 'reefer' : 'yard';
+                    focusLocation(camPreset, `Peti Kemas ${found.container_number} (${found.block}-${found.bay}-${found.row}-${found.tier})`, { x: pos.x, y: 0, z: pos.z }, (found.cargo_type || 'DRY').toUpperCase());
+                    showToast('Fokus Peti Kemas 3D', `Menyorot ${found.container_number} di Blok ${found.block}`, 'info');
+                } else {
+                    focusLocation('yard', `Pencarian Box: ${boxParam}`, { x: 0, y: 0, z: 0 }, 'PENCARIAN');
+                }
+            }
+        } else if (blockParam) {
+            const b = blockParam.toUpperCase();
+            if (b === 'R' || b === 'REEFER') setCameraView('reefer');
+            else if (b === 'RAIL') setCameraView('rail');
+            else if (b === 'GATE') setCameraView('gate');
+            else if (b === 'CFS') setCameraView('cfs');
+            else setCameraView('yard');
+        } else if (viewParam) {
+            setCameraView(viewParam);
+        }
+    } catch(err) {
+        console.warn('Simulator 3D deep-linking error:', err);
+    }
+}, 800);
 </script>
