@@ -55,7 +55,7 @@ $zones_data = [
         'color' => '#d97706',
         'facilities' => [
             ['id' => 'f_rail_office', 'nama' => 'Rail Office / Stasiun Operator', 'desc' => 'Kantor pengendali operasi langsiran dan persinyalan kereta api kontainer bekerja sama dengan KAI Logistik.', 'icon' => 'fa-train', 'hw_id' => 25, 'hw_nama' => 'Rail Trackside Axle Counter Frauscher', 'img' => 'hardware/images/converted/item_25.png'],
-            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Jalur Ganda (400m)', 'desc' => '2 jalur rel KA kontainer sepanjang 400 meter untuk alih muat langsung gerbong datar (flatcar) ke lapangan.', 'icon' => 'fa-arrows-split-up-and-left', 'hw_id' => 12, 'hw_nama' => 'Access Point Outdoor WiFi 7 Siding KA', 'img' => 'hardware/images/converted/item_12.png']
+            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Sepur Ganda (Dual Track 450m)', 'desc' => '2 sepur rel berkapasitas 2x30 gerbong (Sepur Utara: Bongkar Inbound Impor ex-Priok; Sepur Selatan: Muat Outbound Ekspor siap kapal) untuk alih muat langsung gerbong datar (flatcar PPCW) dan cross-docking.', 'icon' => 'fa-arrows-split-up-and-left', 'hw_id' => 12, 'hw_nama' => 'Access Point Outdoor WiFi 7 Siding KA', 'img' => 'hardware/images/converted/item_12.png']
         ]
     ],
     'customs' => [

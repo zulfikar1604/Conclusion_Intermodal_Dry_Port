@@ -725,9 +725,9 @@ if (session_status() === PHP_SESSION_NONE) {
                         <i class="fa-solid fa-train"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Alur Operasional Kereta Api Logistik (Rail Intermodal Siding)</h4>
+                        <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Alur Operasional Kereta Api Shuttle 2-Arah (Dual-Track Rail Siding)</h4>
                         <p class="text-[11.5px] text-gray-600 mt-0.5 leading-relaxed max-w-4xl">
-                            <strong>Mengapa alur KA berbeda total dengan truk?</strong> KA tiba langsung dari pelabuhan internasional (Tanjung Priok) membawa puluhan kontainer di bawah rezim pabean transit (bonded). Tidak melalui gerbang jalan tol dan jembatan timbang statis, melainkan diverifikasi sensor gandar rel SIL 4, Smart E-Seal pabean CEISA 4.0, dan dibongkar oleh RTG Crane.
+                            <strong>Esensi Kereta Api Shuttle Dry Port 2-Arah:</strong> Menghubungkan Stasiun Pasoso (Tanjung Priok) &harr; CIDP secara kontinyu: rangkaian <em>Inbound</em> (Bongkar Impor &amp; PLP Pabean ex-kapal laut di Sepur Utara Track-01) dan rangkaian <em>Outbound</em> (Muat Ekspor terverifikasi SOLAS VGM &amp; NPE Bea Cukai di Sepur Selatan Track-02 langsung ke kapal laut). Diverifikasi sensor gandar Frauscher SIL 4 dan E-Seal CEISA 4.0.
                         </p>
                     </div>
                 </div>
@@ -878,7 +878,7 @@ if (session_status() === PHP_SESSION_NONE) {
                             Dokumen Rail Interchange Manifest diverifikasi. Biaya pengangkutan kereta api (Rp 1.850.000/TEU) tercatat, dan reduksi emisi karbon 78% dibanding truk jalan raya tercatat.
                         </p>
                         <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Manifest KA:</span> KA-LOG-JKT-SMG &bull; 48 TEU</div>
+                            <div><span class="text-slate-400">Manifest KA:</span> KA-LOG-PRIOK-CIDP &bull; 48 TEU (Inbound) / 52 TEU (Outbound)</div>
                             <div><span class="text-slate-400">Billing Freight:</span> <strong class="text-emerald-400">Tarif KA (Rp 1.850.000 / TEU)</strong></div>
                             <div><span class="text-slate-400">Dampak Hijau:</span> <strong class="text-blue-300">Reduksi Karbon 78% (ESG)</strong></div>
                         </div>

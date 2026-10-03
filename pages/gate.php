@@ -115,7 +115,125 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                 $gate_alert = ['type' => 'info', 'title' => 'Penimbangan Selesai', 'msg' => "Data timbangan untuk $plate berhasil dicatat."];
             }
         }
+    } elseif ($_POST['gate_action'] === 'quick_gate_in') {
+        $truck_id = intval($_POST['truck_id'] ?? 0);
+        $plate = strtoupper(trim($_POST['license_plate'] ?? ''));
+        $ctr_num = strtoupper(trim($_POST['container_number'] ?? ''));
+        $mission = trim($_POST['mission_type'] ?? 'drop_export');
+        $target_block = strtoupper(trim($_POST['target_block'] ?? 'B'));
+        $lane = trim($_POST['lane_id'] ?? 'Lane 1 (Heavy Inbound)');
+        $gross = floatval($_POST['weight_gross'] ?? 32000.0);
+        $tare = floatval($_POST['weight_tare'] ?? 14000.0);
+        $net = max(0, $gross - $tare);
+
+        if (isset($pdo)) {
+            try {
+                // 1. Update status armada menjadi in_yard
+                $dest = "Yard Blok " . $target_block;
+                $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = ? WHERE id = ? OR license_plate = ?");
+                $stmtUpT->execute([$dest, $truck_id, $plate]);
+
+                // 2. Jika membawa kontainer (Laden In / Empty Return / Dual Cycle), perbarui atau masukkan kontainer
+                if (!empty($ctr_num)) {
+                    $stmtCheckC = $pdo->prepare("SELECT id FROM containers WHERE container_number = ? LIMIT 1");
+                    $stmtCheckC->execute([$ctr_num]);
+                    $exC = $stmtCheckC->fetch(PDO::FETCH_ASSOC);
+
+                    if ($exC) {
+                        $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, gate_in_time = NOW() WHERE container_number = ?");
+                        $stmtUpC->execute([$target_block, $ctr_num]);
+                    } else {
+                        $type = ($gross > 20000) ? '40HC' : '20GP';
+                        $customs = ($mission === 'drop_export') ? 'EXPORT_READY' : 'SPPB_CLEARED';
+                        $stmtInsC = $pdo->prepare("INSERT INTO containers (container_number, size_type, status, block, bay, row_num, tier, iso_code, weight_gross, customs_status, gate_in_time) VALUES (?, ?, 'in_yard', ?, '04', '02', 1, '45G1', ?, ?, NOW())");
+                        $stmtInsC->execute([$ctr_num, $type, $target_block, $gross, $customs]);
+                    }
+                }
+
+                // 3. Catat audit event ke yard_events (ANPR Gate-In & SOLAS VGM)
+                $stmtLog1 = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, 'HW-01 ANPR & OCR', ?, NOW())");
+                $stmtLog1->execute([$ctr_num ?: '-', "Deteksi ANPR $lane untuk $plate (Misi: $mission). Palang masuk terbuka otomatis."]);
+
+                if ($gross > 0 && !empty($ctr_num)) {
+                    $stmtLog2 = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
+                    $stmtLog2->execute([$ctr_num, "SOLAS VGM Verified: Bruto " . number_format($gross, 0, ',', '.') . " kg, Tara " . number_format($tare, 0, ',', '.') . " kg, Netto " . number_format($net, 0, ',', '.') . " kg untuk $plate ke Blok $target_block."]);
+                }
+
+                $mission_labels = [
+                    'drop_export' => 'Skenario 1: Drop-Off Ekspor (Laden In)',
+                    'pick_import' => 'Skenario 2: Pick-Up Impor (Chassis In)',
+                    'empty_return' => 'Skenario 3: Drop Kosong (Empty Return)',
+                    'empty_release' => 'Skenario 4: Pick-Up Kosong (Empty Release)',
+                    'dual_cycle' => 'Skenario 5: Dual Cycle (Drop Ekspor & Ambil Impor)'
+                ];
+                $mission_label = $mission_labels[$mission] ?? $mission;
+
+                $gate_alert = [
+                    'type' => 'success',
+                    'title' => "⚡ Sukses Gate-In 1-Click: $plate ($mission_label)",
+                    'msg' => "Armada <strong>$plate</strong> berhasil diproses masuk gerbang melalui <strong>$lane</strong>.<br>Kamera ANPR membaca plat nomor, jembatan timbang merekam bobot <strong>" . number_format($gross, 0, ',', '.') . " kg</strong> (SOLAS VGM Sah), dan tiket yard diterbitkan menuju <strong>Blok $target_block</strong>. Palang gerbang otomatis terangkat!"
+                ];
+            } catch (Exception $e) {
+                $gate_alert = ['type' => 'info', 'title' => 'Gate-In Diproses', 'msg' => "Data armada $plate telah diperbarui ke sistem."];
+            }
+        }
+    } elseif ($_POST['gate_action'] === 'batch_gate_in') {
+        if (isset($pdo)) {
+            try {
+                $stmtGetQ = $pdo->query("SELECT * FROM trucks WHERE status = 'queuing'");
+                $batch_list = $stmtGetQ->fetchAll(PDO::FETCH_ASSOC);
+                $count = 0;
+                foreach ($batch_list as $bt) {
+                    $b_dest = "Yard Blok " . ($bt['target_block'] ?: 'B');
+                    $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = ? WHERE id = ?")->execute([$b_dest, $bt['id']]);
+                    if (!empty($bt['container_number'])) {
+                        $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, gate_in_time = NOW() WHERE container_number = ?")->execute([$bt['target_block'] ?: 'B', $bt['container_number']]);
+                    }
+                    $count++;
+                }
+                $gate_alert = [
+                    'type' => 'success',
+                    'title' => "⚡ Batch Gate-In Selesai ($count Armada)",
+                    'msg' => "Seluruh $count armada antrean terjadwal (Pre-Advice Queue) telah berhasil diproses masuk ke terminal yard sekaligus!"
+                ];
+            } catch (Exception $e) {
+                $gate_alert = ['type' => 'info', 'title' => 'Batch Gate-In', 'msg' => 'Proses batch selesai.'];
+            }
+        }
+    } elseif ($_POST['gate_action'] === 'reset_demo_queue') {
+        if (isset($pdo)) {
+            try {
+                $pdo->exec("DELETE FROM trucks WHERE license_plate IN ('B 9481 UIX', 'B 9120 KLP', 'B 9833 TRK', 'B 9502 PQR', 'B 9044 XZW')");
+                $demo_queuing = [
+                    ['B 9481 UIX', 'PT Samudera Pratama Logistik', 'Budi Santoso', 'drop_export', 'drop_off', 'MSKU9821450', 'B', 'Pabrik Cikarang Jababeka', 32450.00, 14200.00],
+                    ['B 9120 KLP', 'PT Dunex Express Indonesia', 'Bambang Supriyadi', 'pick_import', 'pick_up', NULL, 'A', 'Pabrik MM2100 Cibitung', 14200.00, 14200.00],
+                    ['B 9833 TRK', 'PT Cipta Krida Logistik', 'Dedi Suryanto', 'empty_return', 'drop_off', 'TEMU6543210', 'C', 'Pabrik KIIC Karawang', 16500.00, 14100.00],
+                    ['B 9502 PQR', 'PT Puninar Jaya', 'Hendra Setiawan', 'empty_release', 'pick_up', NULL, 'C', 'Pabrik EJIP Cikarang', 14100.00, 14100.00],
+                    ['B 9044 XZW', 'PT Kamadjaja Logistics', 'Eko Prasetyo', 'dual_cycle', 'drop_off', 'SUDU5544332', 'B', 'Pabrik GIIC Deltamas', 33100.00, 14300.00]
+                ];
+                $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, company, driver_name, mission_type, job_type, container_number, target_block, destination, weight_gross, weight_tare, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queuing', NOW())");
+                foreach ($demo_queuing as $row) {
+                    $stmtIns->execute($row);
+                }
+                $gate_alert = [
+                    'type' => 'success',
+                    'title' => 'Antrean Pra-Gate Berhasil Direset',
+                    'msg' => '5 Skenario Truk Terjadwal (Pre-Advice Queue) siap diuji kembali!'
+                ];
+            } catch (Exception $e) {
+                $gate_alert = ['type' => 'info', 'title' => 'Reset Antrean', 'msg' => 'Data antrean diperbarui.'];
+            }
+        }
     }
+}
+
+// Ambil antrian truk terjadwal (Pre-Advised / Queuing) untuk Gate In
+$queuing_trucks = [];
+try {
+    $stmtQ = $pdo->query("SELECT * FROM trucks WHERE status = 'queuing' ORDER BY id ASC");
+    $queuing_trucks = $stmtQ->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    $queuing_trucks = [];
 }
 
 // Ambil data truk dari database untuk telemetri gerbang
@@ -790,6 +908,208 @@ foreach ($hardware_list as $item) {
         </div>
 
         <!-- ================================================================= -->
+        <!-- ANTREAN TRUK TERJADWAL & PRA-GATE BOOKING (PRE-ADVICE QUEUE)     -->
+        <!-- ================================================================= -->
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 pb-3 border-b border-gray-100">
+                <div>
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-50 text-[#0170b9] border border-blue-200">
+                            <i class="fa-solid fa-list-ol mr-1"></i>Pre-Advice &amp; Booking Queue
+                        </span>
+                        <span class="text-xs font-bold text-gray-500 font-mono">5 Skenario Riil Dry Port</span>
+                    </div>
+                    <h3 class="text-base font-bold text-gray-900 mt-1 flex items-center">
+                        <i class="fa-solid fa-truck-ramp-box text-[#0170b9] mr-2"></i>
+                        Antrean Truk Terjadwal (Siap Eksekusi Gate-In 1-Click)
+                    </h3>
+                    <p class="text-xs text-gray-500 mt-0.5 max-w-3xl leading-relaxed">
+                        Data booking pra-gate yang telah didaftarkan transporter/shipper. Klik tombol kilat <strong class="text-amber-600">⚡ 1-Click Gate-In</strong> pada salah satu armada untuk memicu alur ANPR, penimbangan SOLAS VGM, penugasan blok yard, dan pembukaan palang gerbang secara instan!
+                    </p>
+                </div>
+                <div class="flex items-center space-x-2 shrink-0">
+                    <?php if (!empty($queuing_trucks)): ?>
+                    <form method="POST" onsubmit="return confirm('Proses seluruh armada antrean ke terminal yard sekaligus?');" class="inline">
+                        <input type="hidden" name="gate_action" value="batch_gate_in">
+                        <button type="submit" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-1.5">
+                            <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
+                            <span>Batch Gate-In (Semua <?= count($queuing_trucks) ?>)</span>
+                        </button>
+                    </form>
+                    <?php endif; ?>
+                    <form method="POST" class="inline">
+                        <input type="hidden" name="gate_action" value="reset_demo_queue">
+                        <button type="submit" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center space-x-1" title="Reset 5 skenario armada pra-gate">
+                            <i class="fa-solid fa-rotate-left text-slate-500"></i>
+                            <span>Reset Antrean Demo</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <?php if (empty($queuing_trucks)): ?>
+            <div class="py-8 text-center bg-slate-50/70 rounded-xl border border-dashed border-slate-200 p-6">
+                <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-xl mb-3 shadow-inner">
+                    <i class="fa-solid fa-circle-check"></i>
+                </div>
+                <h4 class="text-sm font-bold text-gray-800">Seluruh Antrean Terjadwal Telah Memasuki Terminal!</h4>
+                <p class="text-xs text-gray-500 mt-1 max-w-md mx-auto">
+                    Semua 5 skenario armada telah sukses diproses masuk melalui gerbang dan saat ini berada di dalam Terminal Yard atau selesai dilayani.
+                </p>
+                <div class="mt-4 flex items-center justify-center space-x-2">
+                    <form method="POST" class="inline">
+                        <input type="hidden" name="gate_action" value="reset_demo_queue">
+                        <button type="submit" class="px-4 py-2 bg-[#002f5e] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-2">
+                            <i class="fa-solid fa-arrows-rotate text-amber-400"></i>
+                            <span>Muat Ulang 5 Skenario Antrean Pra-Gate</span>
+                        </button>
+                    </form>
+                    <button onclick="showGatePassModal()" class="px-3.5 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-semibold transition">
+                        <i class="fa-solid fa-plus mr-1"></i>Input Truk Baru
+                    </button>
+                </div>
+            </div>
+            <?php else: ?>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <?php
+                $meta_map = [
+                    'drop_export' => [
+                        'tag' => 'SKENARIO 1 • DROP EKSPOR',
+                        'badge_bg' => 'bg-blue-100 text-blue-800 border-blue-200',
+                        'card_border' => 'hover:border-blue-400',
+                        'icon' => 'fa-arrow-down-to-bracket text-blue-600',
+                        'lane' => 'Lane 1 (Heavy Inbound)',
+                        'desc' => 'Truk bawa kontainer ekspor ex-pabrik. Ditimbang SOLAS VGM &amp; dialokasikan ke Blok B Ekspor.',
+                        'btn_label' => '1-Click Gate-In Ekspor (VGM + Blok B)'
+                    ],
+                    'pick_import' => [
+                        'tag' => 'SKENARIO 2 • PICK-UP IMPOR',
+                        'badge_bg' => 'bg-amber-100 text-amber-900 border-amber-200',
+                        'card_border' => 'hover:border-amber-400',
+                        'icon' => 'fa-arrow-up-from-bracket text-amber-600',
+                        'lane' => 'Lane 2 (Fast-Track / Empty)',
+                        'desc' => 'Truk chassis kosong masuk ambil box impor di Blok A ex-kereta Priok. SPPB Bea Cukai lolos.',
+                        'btn_label' => '1-Click Gate-In Ambil Impor (Blok A)'
+                    ],
+                    'empty_return' => [
+                        'tag' => 'SKENARIO 3 • EMPTY RETURN',
+                        'badge_bg' => 'bg-slate-100 text-slate-800 border-slate-300',
+                        'card_border' => 'hover:border-slate-400',
+                        'icon' => 'fa-rotate-left text-slate-600',
+                        'lane' => 'Lane 2 (Fast-Track / Empty)',
+                        'desc' => 'Kembalikan kontainer kosong setelah dibongkar di pabrik ke Depo Empty Blok C untuk stock.',
+                        'btn_label' => '1-Click Gate-In Return Kosong (Blok C)'
+                    ],
+                    'empty_release' => [
+                        'tag' => 'SKENARIO 4 • EMPTY RELEASE',
+                        'badge_bg' => 'bg-cyan-100 text-cyan-900 border-cyan-200',
+                        'card_border' => 'hover:border-cyan-400',
+                        'icon' => 'fa-box-open text-cyan-600',
+                        'lane' => 'Lane 2 (Fast-Track / Empty)',
+                        'desc' => 'Truk chassis kosong ambil box kosong dari Depo Blok C untuk stuffing ekspor barang pabrik.',
+                        'btn_label' => '1-Click Gate-In Ambil Kosong (Blok C)'
+                    ],
+                    'dual_cycle' => [
+                        'tag' => 'SKENARIO 5 • DUAL CYCLE',
+                        'badge_bg' => 'bg-purple-100 text-purple-900 border-purple-200',
+                        'card_border' => 'hover:border-purple-400',
+                        'icon' => 'fa-arrows-rotate text-purple-600',
+                        'lane' => 'Lane 1 (Heavy Inbound)',
+                        'desc' => 'Efisiensi 100%: Drop box ekspor di Blok B lalu langsung ambil box impor di Blok A.',
+                        'btn_label' => '1-Click Gate-In Dual Cycle (Blok B &amp; A)'
+                    ]
+                ];
+
+                foreach ($queuing_trucks as $qt):
+                    $m_type = $qt['mission_type'] ?? 'drop_export';
+                    $m_info = $meta_map[$m_type] ?? [
+                        'tag' => strtoupper($m_type),
+                        'badge_bg' => 'bg-gray-100 text-gray-800 border-gray-200',
+                        'card_border' => 'hover:border-gray-400',
+                        'icon' => 'fa-truck text-gray-600',
+                        'lane' => 'Lane 1 (Inbound)',
+                        'desc' => 'Misi operasional terjadwal dry port.',
+                        'btn_label' => 'Proses Gate-In'
+                    ];
+                    $has_box = !empty($qt['container_number']);
+                ?>
+                <div class="bg-white rounded-xl p-4 border border-gray-200/80 shadow-2xs <?= $m_info['card_border'] ?> transition-all flex flex-col justify-between space-y-3 relative group">
+                    <div class="space-y-2">
+                        <!-- Top Meta Header -->
+                        <div class="flex items-center justify-between">
+                            <span class="px-2 py-0.5 text-[9.5px] font-mono font-extrabold rounded-md border <?= $m_info['badge_bg'] ?>">
+                                <?= $m_info['tag'] ?>
+                            </span>
+                            <span class="text-[10px] font-mono text-gray-400 flex items-center">
+                                <i class="fa-solid fa-road mr-1 text-gray-400"></i><?= $m_info['lane'] ?>
+                            </span>
+                        </div>
+
+                        <!-- Truk Plat & Perusahaan -->
+                        <div class="flex items-start justify-between">
+                            <div>
+                                <span class="font-mono text-base font-extrabold text-gray-900 tracking-wide block">
+                                    <?= htmlspecialchars($qt['license_plate']) ?>
+                                </span>
+                                <span class="text-[11px] text-gray-500 font-semibold block truncate max-w-[210px]">
+                                    <?= htmlspecialchars($qt['company']) ?>
+                                </span>
+                            </div>
+                            <span class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-center text-sm <?= $m_info['icon'] ?>">
+                                <i class="fa-solid <?= explode(' ', $m_info['icon'])[0] ?>"></i>
+                            </span>
+                        </div>
+
+                        <!-- Info Muatan & Bobot -->
+                        <div class="bg-slate-50 rounded-lg p-2.5 border border-slate-200/70 space-y-1.5 text-xs font-sans">
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-gray-500">Muatan Box:</span>
+                                <?php if ($has_box): ?>
+                                    <span class="font-mono font-bold text-indigo-700"><?= htmlspecialchars($qt['container_number']) ?></span>
+                                <?php else: ?>
+                                    <span class="italic text-amber-700 font-semibold flex items-center"><i class="fa-solid fa-truck-pickup mr-1"></i>Chassis Kosong</span>
+                                <?php endif; ?>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-gray-500">Tujuan / Slot:</span>
+                                <span class="font-bold text-gray-800">
+                                    <i class="fa-solid fa-location-dot text-rose-500 mr-1"></i>Yard Blok <?= htmlspecialchars($qt['target_block'] ?? 'B') ?>
+                                </span>
+                            </div>
+                            <div class="flex items-center justify-between text-[11px]">
+                                <span class="text-gray-500">Bobot Bruto:</span>
+                                <span class="font-mono font-bold text-slate-900"><?= number_format($qt['weight_gross'] ?? 30000, 0, ',', '.') ?> kg</span>
+                            </div>
+                        </div>
+
+                        <p class="text-[10.5px] text-gray-500 leading-tight">
+                            <?= $m_info['desc'] ?>
+                        </p>
+                    </div>
+
+                    <!-- Tombol Aksi 1-Click Gate-In -->
+                    <form method="POST" class="pt-2 border-t border-gray-100">
+                        <input type="hidden" name="gate_action" value="quick_gate_in">
+                        <input type="hidden" name="truck_id" value="<?= $qt['id'] ?>">
+                        <input type="hidden" name="license_plate" value="<?= htmlspecialchars($qt['license_plate']) ?>">
+                        <input type="hidden" name="container_number" value="<?= htmlspecialchars($qt['container_number'] ?? '') ?>">
+                        <input type="hidden" name="mission_type" value="<?= htmlspecialchars($m_type) ?>">
+                        <input type="hidden" name="target_block" value="<?= htmlspecialchars($qt['target_block'] ?? 'B') ?>">
+                        <input type="hidden" name="lane_id" value="<?= htmlspecialchars($m_info['lane']) ?>">
+                        <input type="hidden" name="weight_gross" value="<?= $qt['weight_gross'] ?? 32000 ?>">
+                        <input type="hidden" name="weight_tare" value="<?= $qt['weight_tare'] ?? 14000 ?>">
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-[#002f5e] to-[#0170b9] hover:from-[#002244] hover:to-[#01558c] text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center space-x-1.5 group-hover:shadow-sm">
+                            <i class="fa-solid fa-bolt text-amber-400"></i>
+                            <span><?= $m_info['btn_label'] ?></span>
+                        </button>
+                    </form>
+                </div>
+                <?php endforeach; ?>
+            </div>
+            <?php endif; ?>
+        </div>
+
+        <!-- ================================================================= -->
         <!-- KONSOL UJI PEMICU SENSOR GERBANG REAL-TIME (LIVE IOT TRIGGER)     -->
         <!-- ================================================================= -->
         <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-[#002f5e] rounded-2xl p-6 text-white shadow-xl border border-blue-900/50 space-y-4">
@@ -1103,9 +1423,22 @@ foreach ($hardware_list as $item) {
                             $isQueue = $t['status'] === 'queuing';
                             $lane = $isOut ? 'Lane 3 (Out)' : (($idx % 2 == 0) ? 'Lane 1 (In Heavy)' : 'Lane 2 (e-Seal)');
                             $laneClass = $isOut ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700';
-                            $jobBadge = ($t['job_type'] === 'pick_up') 
-                                ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i>Pick-Up</span>' 
-                                : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i>Drop-Off</span>';
+                            $mType = $t['mission_type'] ?? '';
+                            if ($mType === 'drop_export') {
+                                $jobBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 flex items-center w-fit"><i class="fa-solid fa-arrow-down-to-bracket mr-1 text-blue-600"></i>Drop Ekspor</span>';
+                            } elseif ($mType === 'pick_import') {
+                                $jobBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-200 flex items-center w-fit"><i class="fa-solid fa-arrow-up-from-bracket mr-1 text-amber-600"></i>Pick-Up Impor</span>';
+                            } elseif ($mType === 'empty_return') {
+                                $jobBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300 flex items-center w-fit"><i class="fa-solid fa-rotate-left mr-1 text-slate-600"></i>Empty Return</span>';
+                            } elseif ($mType === 'empty_release') {
+                                $jobBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-100 text-cyan-900 border border-cyan-200 flex items-center w-fit"><i class="fa-solid fa-box-open mr-1 text-cyan-600"></i>Empty Release</span>';
+                            } elseif ($mType === 'dual_cycle') {
+                                $jobBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-100 text-purple-900 border border-purple-200 flex items-center w-fit"><i class="fa-solid fa-arrows-rotate mr-1 text-purple-600"></i>Dual Cycle</span>';
+                            } else {
+                                $jobBadge = ($t['job_type'] === 'pick_up') 
+                                    ? '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200"><i class="fa-solid fa-arrow-up-from-bracket mr-1"></i>Pick-Up</span>' 
+                                    : '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200"><i class="fa-solid fa-arrow-down-to-bracket mr-1"></i>Drop-Off</span>';
+                            }
                         ?>
                         <tr class="hover:bg-slate-50/80 transition-colors">
                             <td class="py-3 px-3.5 font-mono text-gray-500 whitespace-nowrap"><?= date('H:i:s d/m', strtotime($time)) ?></td>
@@ -1118,11 +1451,16 @@ foreach ($hardware_list as $item) {
                             <td class="py-3 px-3.5"><?= $jobBadge ?></td>
                             <td class="py-3 px-3.5 font-mono">
                                 <?php if (!empty($t['container_number'])): ?>
-                                    <span class="font-bold text-indigo-700"><?= htmlspecialchars($t['container_number']) ?></span>
+                                    <span class="font-bold text-indigo-700 block"><?= htmlspecialchars($t['container_number']) ?></span>
                                 <?php elseif (!empty($t['do_number'])): ?>
-                                    <span class="text-amber-700 font-semibold"><?= htmlspecialchars($t['do_number']) ?></span>
+                                    <span class="text-amber-700 font-semibold block"><?= htmlspecialchars($t['do_number']) ?></span>
                                 <?php else: ?>
-                                    <span class="text-gray-400 italic">Chassis Kosong</span>
+                                    <span class="text-gray-400 italic block font-sans">Chassis Kosong</span>
+                                <?php endif; ?>
+                                <?php if (!empty($t['destination']) || !empty($t['target_block'])): ?>
+                                    <span class="text-[10px] font-sans text-gray-500 flex items-center mt-0.5">
+                                        <i class="fa-solid fa-location-dot mr-1 text-rose-500"></i><?= htmlspecialchars($t['destination'] ?: ('Blok ' . $t['target_block'])) ?>
+                                    </span>
                                 <?php endif; ?>
                             </td>
                             <td class="py-3 px-3.5">

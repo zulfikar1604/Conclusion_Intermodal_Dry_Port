@@ -67,9 +67,17 @@ foreach ($trucks as $idx => &$t) {
 
     // Data Timbangan VGM
     $has_cont = !empty($t['container_number']);
-    $tare = 12500 + ($idx * 150);
-    $net = $has_cont ? (14000 + ($idx * 2100)) : 0;
-    $gross = $tare + $net;
+    $db_gross = floatval($t['weight_gross'] ?? 0);
+    $db_tare = floatval($t['weight_tare'] ?? 0);
+    if ($db_gross > 0 && $db_tare > 0) {
+        $gross = $db_gross;
+        $tare = $db_tare;
+        $net = max(0, $gross - $tare);
+    } else {
+        $tare = 12500 + ($idx * 150);
+        $net = $has_cont ? (14000 + ($idx * 2100)) : 0;
+        $gross = $tare + $net;
+    }
 
     $t['weight_tare'] = $tare;
     $t['weight_net'] = $net;
@@ -299,9 +307,31 @@ $total_trucks = count($trucks);
                                 </div>
                             </td>
 
-                            <!-- Tugas / Misi (Drop-Off / Pick-Up) -->
+                            <!-- Tugas / Misi (5 Skenario Riil Dry Port) -->
                             <td class="py-4 px-4 whitespace-nowrap">
-                                <?php if (($t['job_type'] ?? 'drop_off') === 'pick_up'): ?>
+                                <?php
+                                $mType = $t['mission_type'] ?? '';
+                                if ($mType === 'drop_export'): ?>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
+                                        <i class="fa-solid fa-arrow-down-to-bracket mr-1 text-[10px] text-blue-600"></i>Drop Ekspor
+                                    </span>
+                                <?php elseif ($mType === 'pick_import'): ?>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
+                                        <i class="fa-solid fa-arrow-up-from-bracket mr-1 text-[10px] text-amber-600"></i>Pick-Up Impor
+                                    </span>
+                                <?php elseif ($mType === 'empty_return'): ?>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-300">
+                                        <i class="fa-solid fa-rotate-left mr-1 text-[10px] text-slate-600"></i>Empty Return
+                                    </span>
+                                <?php elseif ($mType === 'empty_release'): ?>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-cyan-100 text-cyan-900 border border-cyan-200">
+                                        <i class="fa-solid fa-box-open mr-1 text-[10px] text-cyan-600"></i>Empty Release
+                                    </span>
+                                <?php elseif ($mType === 'dual_cycle'): ?>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
+                                        <i class="fa-solid fa-arrows-rotate mr-1 text-[10px] text-purple-600"></i>Dual Cycle
+                                    </span>
+                                <?php elseif (($t['job_type'] ?? 'drop_off') === 'pick_up'): ?>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
                                         <i class="fa-solid fa-arrow-up-from-bracket mr-1 text-[10px] text-amber-600"></i>Pick-Up (Ambil)
                                     </span>
@@ -321,14 +351,19 @@ $total_trucks = count($trucks);
                                 </div>
                             </td>
 
-                            <!-- Muatan Kontainer -->
+                            <!-- Muatan Kontainer & Tujuan Yard -->
                             <td class="py-4 px-4 whitespace-nowrap">
                                 <?php if (!empty($t['container_number'])): ?>
-                                    <span class="font-mono font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 text-xs">
+                                    <span class="font-mono font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 text-xs block w-fit">
                                         <?= htmlspecialchars($t['container_number']) ?>
                                     </span>
                                 <?php else: ?>
-                                    <span class="text-gray-400 italic text-xs">Truk Kosong</span>
+                                    <span class="text-gray-400 italic text-xs block">Chassis Kosong</span>
+                                <?php endif; ?>
+                                <?php if (!empty($t['destination']) || !empty($t['target_block'])): ?>
+                                    <span class="text-[10px] text-gray-500 flex items-center mt-0.5">
+                                        <i class="fa-solid fa-location-dot mr-1 text-rose-500"></i><?= htmlspecialchars($t['destination'] ?: ('Blok ' . $t['target_block'])) ?>
+                                    </span>
                                 <?php endif; ?>
                             </td>
 
