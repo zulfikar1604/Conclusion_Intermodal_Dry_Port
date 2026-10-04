@@ -177,6 +177,18 @@ if (session_status() === PHP_SESSION_NONE) {
                 <button onclick="toggleTechnicalDimensions()" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100 transition flex items-center gap-1" id="btnToggleDimensions" title="Garis Ukur Dimensi CAD 3D">
                     <i class="fa-solid fa-ruler-combined text-xs"></i><span>Garis Dimensi</span>
                 </button>
+                <button onclick="toggleCADLayer('gridAxes')" id="cadLayerBtn-gridAxes" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition flex items-center gap-1" title="Grid Aksis AS 1-5 / A-E">
+                    <i class="fa-solid fa-border-all text-xs"></i><span>Grid As</span>
+                </button>
+                <button onclick="toggleCADLayer('drainage')" id="cadLayerBtn-drainage" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition flex items-center gap-1" title="Drainase U-Ditch">
+                    <i class="fa-solid fa-water text-xs"></i><span>Drainase</span>
+                </button>
+                <button onclick="toggleCADLayer('pavement')" id="cadLayerBtn-pavement" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition flex items-center gap-1" title="Perkerasan Beton Kaku">
+                    <i class="fa-solid fa-road text-xs"></i><span>Perkerasan</span>
+                </button>
+                <button onclick="toggleCADLayer('heavyEquipment')" id="cadLayerBtn-heavyEquipment" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition flex items-center gap-1" title="Alat Berat (RS/RTG)">
+                    <i class="fa-solid fa-truck-monster text-xs"></i><span>Alat Berat</span>
+                </button>
                 <button onclick="toggleCADTitleBlock()" class="tech-btn px-2.5 py-1 text-xs rounded-xl font-medium bg-gray-100 text-gray-700 border border-gray-200 hover:bg-gray-200 transition flex items-center gap-1" id="btnToggleTitleBlock" title="Etiket Gambar Teknik Sipil">
                     <i class="fa-solid fa-id-card-clip text-xs"></i><span>Etiket CAD</span>
                 </button>
@@ -298,77 +310,8 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
-        <!-- Floating HUD: Bottom Left - Collapsible SCADA Feed Ticker (Elevated to bottom-16 so it never collides with Action Dock) -->
-        <div class="absolute bottom-16 left-3.5 pointer-events-auto max-w-xs sm:max-w-sm w-full z-20">
-            <div class="bg-slate-900/90 backdrop-blur-md border border-slate-700/60 rounded-xl p-2.5 shadow-xl text-white">
-                <div class="flex items-center justify-between pb-1.5 mb-1 border-b border-slate-800 text-[10px]">
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span class="font-bold uppercase tracking-wider text-slate-300">SCADA Telemetry Feed</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-slate-400 font-mono text-[9.5px]" id="liveClock">--:--:-- WIB</span>
-                        <button onclick="toggleScadaFeed()" class="text-slate-400 hover:text-white text-xs px-1" title="Sembunyikan/Tampilkan Feed">
-                            <i class="fa-solid fa-chevron-down text-[10px]" id="scadaFeedChevron"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="space-y-1 max-h-20 overflow-y-auto text-[10.5px] font-mono leading-tight transition-all duration-200" id="simLogTicker">
-                    <div class="text-emerald-400 flex items-start">
-                        <span class="text-slate-500 mr-1.5">[SYS]</span>
-                        <span>Terminal Engine aktif. 19 box disinkronkan dari MySQL.</span>
-                    </div>
-                    <div class="text-blue-400 flex items-start">
-                        <span class="text-slate-500 mr-1.5">[GPS]</span>
-                        <span>RS-02 terkoneksi di Blok B (Operator: Agus Setiawan).</span>
-                    </div>
-                    <div class="text-amber-400 flex items-start">
-                        <span class="text-slate-500 mr-1.5">[GATE]</span>
-                        <span>Kamera ANPR Lane 1 &amp; 2 Siap (Jembatan 80T Siap).</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Floating HUD: Bottom Center - Enhanced Operational Action Dock (Centered at bottom-3.5) -->
-        <div class="absolute bottom-3.5 left-1/2 -translate-x-1/2 pointer-events-auto flex items-center space-x-1.5 bg-slate-900/95 backdrop-blur-lg border border-slate-700/80 p-1.5 rounded-xl shadow-2xl z-30 max-w-[95vw] overflow-x-auto">
-            <!-- 1. Drop-Off: Alur Penuh (Masuk ➔ Bongkar RS ➔ Keluar) -->
-            <button onclick="triggerGateIn('drop_off')" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Alur Penuh: Truk Masuk Gerbang ➔ Timbang VGM ➔ Melaju ke Yard ➔ Lift-Off RS-01 ➔ Gate-Out Keluar">
-                <i class="fa-solid fa-arrow-down-to-bracket text-xs text-blue-200"></i>
-                <span>Truk Drop-Off</span>
-            </button>
-            <!-- 2. Pick-Up: Alur Penuh (Masuk Kosong ➔ Muat RS ➔ Keluar) -->
-            <button onclick="triggerGateIn('pick_up')" class="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Alur Penuh: Truk Masuk Kosong ➔ Verifikasi DO ➔ Melaju ke Yard ➔ Lift-On RS-02 ➔ Gate-Out Keluar">
-                <i class="fa-solid fa-arrow-up-from-bracket text-xs text-amber-200"></i>
-                <span>Truk Pick-Up</span>
-            </button>
-            <!-- 3. Gate-Out Saja -->
-            <button onclick="triggerGateOut()" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Truk Keluar Gerbang (Gate-Out Selesai)">
-                <i class="fa-solid fa-door-closed text-xs text-purple-200"></i>
-                <span>Gate-Out</span>
-            </button>
-            <!-- 4. Relokasi Box (RS) -->
-            <button onclick="openMoveModal()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi Pemindahan Box Antar-Blok oleh Reach Stacker">
-                <i class="fa-solid fa-arrows-up-down-left-right text-xs text-amber-400"></i>
-                <span>Relokasi RS</span>
-            </button>
-            <!-- 5. Alih Muat KA (RTG) -->
-            <button onclick="triggerRailDischarge()" class="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center space-x-1.5 shrink-0 cursor-pointer" title="Simulasi RTG Mengangkat Box dari Rangkaian Kereta ke Yard">
-                <i class="fa-solid fa-train text-xs text-indigo-200"></i>
-                <span>Alih Muat KA</span>
-            </button>
-            <!-- 6. Pengatur Kecepatan (Speed 1x / 1.75x / 2.5x) -->
-            <button onclick="toggleSimSpeed()" id="btnSimSpeed" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 font-bold text-xs rounded-lg transition shrink-0 cursor-pointer border border-amber-500/30" title="Atur Kecepatan Simulasi Alur Gerakan">
-                <i class="fa-solid fa-gauge-high mr-1"></i><span id="speedBtnText">1.25x</span>
-            </button>
-            <!-- 7. Refresh Sync DB -->
-            <button onclick="refreshStateFromDB()" class="px-2.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition shrink-0 cursor-pointer" title="Sinkronkan MySQL">
-                <i class="fa-solid fa-rotate text-xs"></i>
-            </button>
-        </div>
-
-        <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector (Elevated to bottom-16 so it never collides with Action Dock) -->
-        <div class="absolute bottom-16 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-30" id="inspectorCard">
+        <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector (Only visible when a container is clicked) -->
+        <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-30" id="inspectorCard">
             <div class="bg-slate-900/95 backdrop-blur-lg border border-blue-500/50 rounded-xl p-3.5 shadow-2xl text-white relative overflow-hidden">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
                 <div class="flex items-center justify-between mb-2.5">
@@ -419,7 +362,7 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
 
                 <div class="mt-3 pt-2.5 border-t border-slate-800">
-                    <button onclick="prefillAndOpenMove()" class="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-1.5">
+                    <button onclick="prefillAndOpenMove()" class="w-full py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 font-bold text-xs rounded-lg shadow transition flex items-center justify-center space-x-1.5 cursor-pointer">
                         <i class="fa-solid fa-arrows-up-down-left-right text-[11px]"></i>
                         <span>Pindahkan Box Ini</span>
                     </button>
@@ -441,6 +384,96 @@ if (session_status() === PHP_SESSION_NONE) {
         </div>
 
     </div>
+
+    <!-- ========================================================================= -->
+    <!-- PANEL KONTROL CEPAT & TELEMETRI SCADA (DITEMPATKAN RAPI DI LUAR LAYAR 3D) -->
+    <!-- ========================================================================= -->
+    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3 sm:p-4 shadow-xl text-white">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-center">
+            
+            <!-- Kolom Kiri (7 Kolom): Tombol Aksi Cepat Operasional Lapangan -->
+            <div class="lg:col-span-7 xl:col-span-7 flex flex-col space-y-2.5">
+                <div class="flex items-center justify-between flex-wrap gap-2">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
+                        <span class="font-bold text-slate-200 uppercase tracking-wider text-xs font-mono flex items-center gap-1.5">
+                            <i class="fa-solid fa-gamepad text-cyan-400"></i>Aksi Cepat Lapangan
+                        </span>
+                    </div>
+                    <!-- Pengatur Kecepatan & Tombol Sinkronisasi Database -->
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="toggleSimSpeed()" id="btnSimSpeed" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 font-bold text-xs rounded-lg transition shrink-0 cursor-pointer border border-amber-500/30 flex items-center gap-1.5" title="Atur Kecepatan Simulasi Alur Gerakan">
+                            <i class="fa-solid fa-gauge-high text-xs"></i><span id="speedBtnText">1.25x</span>
+                        </button>
+                        <button onclick="refreshStateFromDB()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition shrink-0 cursor-pointer border border-slate-700 flex items-center gap-1.5" title="Sinkronkan MySQL">
+                            <i class="fa-solid fa-rotate text-xs"></i><span class="text-[11px] font-semibold">Sync DB</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Kelompok Tombol Aksi Cepat (Bersih, Rapi & Tanpa Scrollbar Abu-Abu) -->
+                <div class="flex flex-wrap items-center gap-2">
+                    <!-- 1. Drop-Off: Alur Penuh (Masuk ➔ Bongkar RS ➔ Keluar) -->
+                    <button onclick="triggerGateIn('drop_off')" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Alur Penuh: Truk Masuk Gerbang ➔ Timbang VGM ➔ Melaju ke Yard ➔ Lift-Off RS-01 ➔ Gate-Out Keluar">
+                        <i class="fa-solid fa-arrow-down-to-bracket text-xs text-blue-200"></i>
+                        <span>Truk Drop-Off</span>
+                    </button>
+                    <!-- 2. Pick-Up: Alur Penuh (Masuk Kosong ➔ Muat RS ➔ Keluar) -->
+                    <button onclick="triggerGateIn('pick_up')" class="px-3.5 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Alur Penuh: Truk Masuk Kosong ➔ Verifikasi DO ➔ Melaju ke Yard ➔ Lift-On RS-02 ➔ Gate-Out Keluar">
+                        <i class="fa-solid fa-arrow-up-from-bracket text-xs text-amber-200"></i>
+                        <span>Truk Pick-Up</span>
+                    </button>
+                    <!-- 3. Gate-Out Saja -->
+                    <button onclick="triggerGateOut()" class="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Truk Keluar Gerbang (Gate-Out Selesai)">
+                        <i class="fa-solid fa-door-closed text-xs text-purple-200"></i>
+                        <span>Gate-Out</span>
+                    </button>
+                    <!-- 4. Relokasi Box (RS) -->
+                    <button onclick="openMoveModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 border border-slate-700 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Pemindahan Box Antar-Blok oleh Reach Stacker">
+                        <i class="fa-solid fa-arrows-up-down-left-right text-xs text-amber-400"></i>
+                        <span>Relokasi RS</span>
+                    </button>
+                    <!-- 5. Alih Muat KA (RTG) -->
+                    <button onclick="triggerRailDischarge()" class="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi RTG Mengangkat Box dari Rangkaian Kereta ke Yard">
+                        <i class="fa-solid fa-train text-xs text-indigo-200"></i>
+                        <span>Alih Muat KA</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Kolom Kanan (5 Kolom): Live SCADA Telemetry Feed Terminal (Tertata Rapi & Modern) -->
+            <div class="lg:col-span-5 xl:col-span-5 bg-slate-950/90 rounded-xl p-3 border border-slate-800 shadow-inner">
+                <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-[10.5px]">
+                    <div class="flex items-center space-x-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                        <span class="font-bold uppercase tracking-wider text-slate-300 font-mono">SCADA Telemetry Feed</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <span class="text-slate-400 font-mono text-[9.5px]" id="liveClock">--:--:-- WIB</span>
+                        <button onclick="toggleScadaFeed()" class="text-slate-400 hover:text-white text-xs px-1 cursor-pointer" title="Sembunyikan/Tampilkan Feed">
+                            <i class="fa-solid fa-chevron-down text-[10px]" id="scadaFeedChevron"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="space-y-1 max-h-20 sm:max-h-24 overflow-y-auto text-[10.5px] font-mono leading-tight transition-all duration-200 pr-1" id="simLogTicker">
+                    <div class="text-emerald-400 flex items-start">
+                        <span class="text-slate-500 mr-1.5">[SYS]</span>
+                        <span>Terminal Engine aktif. 19 box disinkronkan dari MySQL.</span>
+                    </div>
+                    <div class="text-blue-400 flex items-start">
+                        <span class="text-slate-500 mr-1.5">[GPS]</span>
+                        <span>RS-02 terkoneksi di Blok B (Operator: Agus Setiawan).</span>
+                    </div>
+                    <div class="text-amber-400 flex items-start">
+                        <span class="text-slate-500 mr-1.5">[GATE]</span>
+                        <span>Kamera ANPR Lane 1 &amp; 2 Siap (Jembatan 80T Siap).</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
 
     <!-- ========================================================================= -->
     <!-- KONSOL SIMULASI OPERASIONAL LAPANGAN (DUAL-WORKFLOW ENGINE & SCADA HUB)   -->
@@ -1935,6 +1968,144 @@ let showTechnicalDimensions = true;
 let showCADTitleBlock = true;
 let technicalDimensionsGroup = null;
 
+// =============================================================================
+// CAD / BIM & CIVIL INFRASTRUCTURE ENGINE STATE (TAHAP 1 - 4)
+// =============================================================================
+let cadGridGroup = null;
+let pavementGroup = null;
+let drainageGroup = null;
+let animatedHazardLights = []; // Lampu strobo putar alat berat: { mesh, light, speed, phase }
+let concreteTextureCache = null;
+
+// Layer Filter Kontrol CAD/BIM
+const cadLayers = {
+    pavement: true,
+    drainage: true,
+    structures: true,
+    dimensions: true,
+    gridAxes: true,
+    heavyEquipment: true
+};
+
+// Generator Tekstur Prosedural Rigid Pavement K-450 dengan Sambungan Susut (Joints)
+// Satu tile = 1 modul pelat beton. Tanpa argumen -> repeat default seluruh tapak 35 Ha.
+// Dengan argumen (repX, repY) -> klon tekstur (berbagi canvas) untuk apron berukuran khusus.
+function getRigidPavementTexture(repX, repY) {
+    if (!concreteTextureCache) {
+        const canvas = document.createElement('canvas');
+        canvas.width = 512;
+        canvas.height = 512;
+        const ctx = canvas.getContext('2d');
+
+        // Base concrete grey
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(0, 0, 512, 512);
+
+        // Micro aggregate & wear noise (efek agregat kasar beton pelabuhan)
+        for (let i = 0; i < 4000; i++) {
+            const x = Math.random() * 512;
+            const y = Math.random() * 512;
+            const c = Math.random() > 0.5 ? 40 : 70;
+            ctx.fillStyle = `rgba(${c}, ${c + 8}, ${c + 15}, 0.15)`;
+            ctx.fillRect(x, y, 2, 2);
+        }
+
+        // Tire-wear / oil stain patches (variasi tonal agar tidak terlihat repetitif)
+        for (let i = 0; i < 6; i++) {
+            const gx = Math.random() * 512, gy = Math.random() * 512;
+            const grad = ctx.createRadialGradient(gx, gy, 2, gx, gy, 60 + Math.random() * 50);
+            grad.addColorStop(0, 'rgba(15,23,42,0.18)');
+            grad.addColorStop(1, 'rgba(15,23,42,0)');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 512, 512);
+        }
+
+        // Surface hairline cracks
+        ctx.strokeStyle = 'rgba(15,23,42,0.35)';
+        ctx.lineWidth = 0.8;
+        for (let i = 0; i < 3; i++) {
+            let cx = Math.random() * 512, cy = Math.random() * 512;
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            for (let s = 0; s < 6; s++) {
+                cx += (Math.random() - 0.5) * 50;
+                cy += (Math.random() - 0.5) * 50;
+                ctx.lineTo(cx, cy);
+            }
+            ctx.stroke();
+        }
+
+        // Grid Siar Dilatasi / Contraction Joint (Modul Pelat Beton 5x5 m)
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(0, 0, 512, 512);
+
+        // Sealant joint lines
+        ctx.strokeStyle = '#0f172a';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(2, 2, 508, 508);
+
+        // Dowel bar tick marks pada tengah sambungan (detail struktural)
+        ctx.fillStyle = 'rgba(148,163,184,0.35)';
+        for (let t = 64; t < 512; t += 128) {
+            ctx.fillRect(t, 0, 6, 3);
+            ctx.fillRect(0, t, 3, 6);
+        }
+
+        const texture = new THREE.CanvasTexture(canvas);
+        texture.wrapS = THREE.RepeatWrapping;
+        texture.wrapT = THREE.RepeatWrapping;
+        texture.repeat.set(38, 26);
+        if (renderer && renderer.capabilities) {
+            texture.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+        }
+        concreteTextureCache = texture;
+    }
+
+    if (repX === undefined || repY === undefined) return concreteTextureCache;
+
+    const clone = concreteTextureCache.clone();
+    clone.repeat.set(repX, repY);
+    clone.needsUpdate = true; // clone() tidak otomatis menandai upload ke GPU
+    return clone;
+}
+
+// Terapkan filter layer CAD/BIM (dipakai tombol/tahap selanjutnya)
+function setCadLayer(layerName, visible) {
+    if (!(layerName in cadLayers)) return;
+    cadLayers[layerName] = !!visible;
+    const map = {
+        pavement: pavementGroup,
+        drainage: drainageGroup,
+        dimensions: technicalDimensionsGroup,
+        gridAxes: cadGridGroup
+    };
+    if (map[layerName]) map[layerName].visible = cadLayers[layerName];
+    if (layerName === 'dimensions') showTechnicalDimensions = cadLayers[layerName];
+}
+
+// Registrasi lampu strobo putar alat berat (dipanggil dari builder alat/gedung)
+function registerHazardLight(mesh, light, speed, pulse) {
+    animatedHazardLights.push({ mesh: mesh, light: light || null, speed: speed || 6, phase: Math.random() * Math.PI * 2, pulse: !!pulse });
+}
+
+// Dipanggil tiap frame dari animate(time)
+function updateHazardLights(time) {
+    time = time || 0;
+    const t = time * 0.001;
+    const pulse = (Math.sin(time * 0.012) + 1) / 2; // strobo K3 ~2 Hz
+    for (let i = 0; i < animatedHazardLights.length; i++) {
+        const h = animatedHazardLights[i];
+        if (h.pulse) {
+            // Strobo amber berkedip: ubah warna material (RGB amber -> redup)
+            if (h.mesh && h.mesh.material) h.mesh.material.color.setRGB(1.0, 0.6 * pulse + 0.2, 0);
+        } else if (h.mesh) {
+            h.mesh.rotation.y = t * h.speed + h.phase;
+        }
+        if (h.light) h.light.intensity = (Math.sin(t * h.speed * 1.5 + h.phase) > 0) ? 1.6 : 0.1;
+    }
+}
+
 // Shipping Line Color Palette
 const SHIPPING_COLORS = {
     'Maersk':     0x0090c0, // Cyan Blue
@@ -2019,22 +2190,26 @@ function initThreeScene() {
 
 // Lighting Setup
 let ambientLight, sunLight;
+const LIGHT_DAY = { ambient: 0.55, sun: 1.15, sunColor: 0xfff5e6 };
 function setupLighting() {
-    ambientLight = new THREE.AmbientLight(0xffffff, 0.65);
+    ambientLight = new THREE.AmbientLight(0xffffff, LIGHT_DAY.ambient);
     scene.add(ambientLight);
 
-    sunLight = new THREE.DirectionalLight(0xfff8ee, 0.9);
-    sunLight.position.set(60, 100, 50);
+    // Directional Sun Light berdasarkan sudut zenith/azimuth lokasi proyek (Cikarang 6°18' LS: matahari tinggi)
+    sunLight = new THREE.DirectionalLight(LIGHT_DAY.sunColor, LIGHT_DAY.sun);
+    sunLight.position.set(70, 115, 65);
     sunLight.castShadow = true;
+
+    // Contact soft shadow parameters
     sunLight.shadow.mapSize.width = 2048;
     sunLight.shadow.mapSize.height = 2048;
     sunLight.shadow.camera.near = 10;
-    sunLight.shadow.camera.far = 300;
-    sunLight.shadow.camera.left = -100;
-    sunLight.shadow.camera.right = 100;
-    sunLight.shadow.camera.top = 100;
-    sunLight.shadow.camera.bottom = -100;
-    sunLight.shadow.bias = -0.0005;
+    sunLight.shadow.camera.far = 350;
+    sunLight.shadow.camera.left = -140;
+    sunLight.shadow.camera.right = 140;
+    sunLight.shadow.camera.top = 140;
+    sunLight.shadow.camera.bottom = -140;
+    sunLight.shadow.bias = -0.0003;
     scene.add(sunLight);
 }
 
@@ -2093,23 +2268,37 @@ function buildTerminalEnvironment() {
 
 // 1. Civil Concrete Ground Pavements & Arterial Road Network (Expansive 35 Ha Dry Port Master Plan)
 function buildCivilPavementsAndRoadNetwork() {
-    // Base 35 Hektar Ground Floor (Expanded Scale)
+    // Layer groups (CAD/BIM layer filter)
+    pavementGroup = new THREE.Group();
+    pavementGroup.name = "RigidPavementLayer";
+    scene.add(pavementGroup);
+    drainageGroup = new THREE.Group();
+    drainageGroup.name = "DrainageLayer";
+    scene.add(drainageGroup);
+    cadGridGroup = new THREE.Group();
+    cadGridGroup.name = "CadGridAxesLayer";
+    scene.add(cadGridGroup);
+
+    // Base 35 Hektar Ground Floor: Rigid Pavement K-450 (tile 10 unit ~ pelat 5x5 m)
     const groundGeo = new THREE.PlaneGeometry(380, 260);
     const groundMat = new THREE.MeshStandardMaterial({
-        color: 0x1e293b, // Dark industrial asphalt
-        roughness: 0.88,
-        metalness: 0.1
+        map: getRigidPavementTexture(),
+        color: 0xffffff,
+        roughness: 0.9,
+        metalness: 0.05
     });
     const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI / 2;
     ground.position.y = 0;
     ground.receiveShadow = true;
-    scene.add(ground);
+    pavementGroup.add(ground);
 
-    // Fine Engineering Grid Dilatations (Expansion joints across 35 Ha)
+    // CAD axis grid (grid sumbu 5 unit) - layer 'gridAxes'
     const grid = new THREE.GridHelper(380, 76, 0x475569, 0x334155);
-    grid.position.y = 0.02;
-    scene.add(grid);
+    grid.position.y = 0.03;
+    grid.material.transparent = true;
+    grid.material.opacity = 0.25;
+    cadGridGroup.add(grid);
 
     // Concrete Apron Platforms for Each Zone (Scale-Accurate Heavy Port Slabs)
     const aprons = [
@@ -2131,14 +2320,27 @@ function buildCivilPavementsAndRoadNetwork() {
 
     aprons.forEach(ap => {
         const apGeo = new THREE.BoxGeometry(ap.w, 0.12, ap.d);
-        const apMat = new THREE.MeshStandardMaterial({ color: ap.color, roughness: 0.75 });
+        // Tint apron: campur warna zona dengan putih agar tekstur beton tetap terbaca
+        const tint = new THREE.Color(ap.color).lerp(new THREE.Color(0xffffff), 0.6);
+        const apMat = new THREE.MeshStandardMaterial({
+            map: getRigidPavementTexture(ap.w / 10, ap.d / 10),
+            color: tint,
+            roughness: 0.75
+        });
         const mesh = new THREE.Mesh(apGeo, apMat);
         mesh.position.set(ap.x, 0.06, ap.z);
         mesh.receiveShadow = true;
-        scene.add(mesh);
+        pavementGroup.add(mesh);
     });
 
-    // Yellow Dashed Haul Road Center Markings
+    // Sistem Drainase Tepi Jalan (Precast U-Ditch dengan Steel Grating)
+    buildUDitchDrainageNetwork();
+
+    // Marka Jalan Garis Kuning Reflektif (Thermoplastic Paint) - geometri & material dipakai bersama
+    const dashMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
+    const dashGeoH = new THREE.BoxGeometry(3.5, 0.02, 0.35);
+    const dashGeoV = new THREE.BoxGeometry(0.35, 0.02, 3.5);
+
     const roadMarkings = [
         // North Cross Road (Connecting Gate to Admin, Transfer Lanes, Customs)
         { sx: -130, ex: 130, z: 28, orient: 'h' },
@@ -2161,22 +2363,54 @@ function buildCivilPavementsAndRoadNetwork() {
     roadMarkings.forEach(rm => {
         if (rm.orient === 'h') {
             for (let rx = rm.sx; rx <= rm.ex; rx += 6) {
-                const dashGeo = new THREE.BoxGeometry(3.5, 0.02, 0.35);
-                const dashMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
-                const dash = new THREE.Mesh(dashGeo, dashMat);
+                const dash = new THREE.Mesh(dashGeoH, dashMat);
                 dash.position.set(rx, 0.13, rm.z);
-                scene.add(dash);
+                pavementGroup.add(dash);
             }
         } else {
             for (let rz = rm.sz; rz >= rm.ez; rz -= 6) {
-                const dashGeo = new THREE.BoxGeometry(0.35, 0.02, 3.5);
-                const dashMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
-                const dash = new THREE.Mesh(dashGeo, dashMat);
+                const dash = new THREE.Mesh(dashGeoV, dashMat);
                 dash.position.set(rm.x, 0.13, rz);
-                scene.add(dash);
+                pavementGroup.add(dash);
             }
         }
     });
+}
+
+// Saluran Parit Drainase U-Ditch Beton Pracetak di Sepanjang Koridor Jalan
+// Diletakkan di celah antar blok (bukan di bawah tumpukan kontainer): z=31 (tepi utara Blok A/B) dan z=-6.8 (jalan tengah yard).
+function buildUDitchDrainageNetwork() {
+    if (!drainageGroup) {
+        drainageGroup = new THREE.Group();
+        scene.add(drainageGroup);
+    }
+    drainageGroup.name = "CivilDrainageUDitch";
+
+    const ditchTroughs = [
+        { x: 0, z: 31, w: 260, d: 0.8 },
+        { x: 0, z: -6.8, w: 260, d: 0.8 }
+    ];
+
+    const concMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
+    const grateMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
+    const grateGeo = new THREE.BoxGeometry(1.8, 0.04, 0.7);
+
+    ditchTroughs.forEach(dt => {
+        // Badan Parit U-Ditch (puncak sedikit di atas apron 0.12 agar terbaca)
+        const ditch = new THREE.Mesh(new THREE.BoxGeometry(dt.w, 0.3, dt.d), concMat);
+        ditch.position.set(dt.x, 0.0, dt.z);
+        ditch.receiveShadow = true;
+        drainageGroup.add(ditch);
+
+        // Penutup Kisi Besi Galvanis (Steel Grating) per 2 unit
+        for (let gx = -dt.w / 2 + 1; gx <= dt.w / 2 - 1; gx += 2) {
+            const grate = new THREE.Mesh(grateGeo, grateMat);
+            grate.position.set(dt.x + gx, 0.16, dt.z);
+            drainageGroup.add(grate);
+        }
+    });
+
+    drainageGroup.visible = cadLayers.drainage;
 }
 
 // 2. Create Block Stacking Zone Area (Blok A-E, Reefer, Empty Depot)
@@ -2381,7 +2615,7 @@ function buildHazmatBundWall(cx, cz, bw, bd) {
 }
 
 // Block Label Sprite in 3D Space
-function createBlockLabelSprite(text, x, y, z) {
+function createBlockLabelSprite(text, x, y, z, parent) {
     const canvas = document.createElement('canvas');
     canvas.width = 512;
     canvas.height = 128;
@@ -2406,7 +2640,7 @@ function createBlockLabelSprite(text, x, y, z) {
     const sprite = new THREE.Sprite(spriteMat);
     sprite.position.set(x, y, z);
     sprite.scale.set(16, 4, 1);
-    scene.add(sprite);
+    (parent || scene).add(sprite);
     return sprite;
 }
 
@@ -2433,26 +2667,57 @@ function buildRailSiding() {
     const trackZ = -48;
     const railLength = 210;
 
-    // Ballast Gravel Bed
+    // Balast Batu Pecah Bersudut (Crushed Rock Ballast Bed)
     const ballastGeo = new THREE.BoxGeometry(railLength, 0.4, 16);
-    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x3f4c5e, roughness: 0.95 });
+    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.98 });
     const ballast = new THREE.Mesh(ballastGeo, ballastMat);
     ballast.position.set(0, 0.2, trackZ);
     ballast.receiveShadow = true;
     scene.add(ballast);
 
-    // Sleepers (Bantalan Rel Beton PC)
-    const sleeperGeo = new THREE.BoxGeometry(0.4, 0.2, 13);
-    const sleeperMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 });
-    for (let x = -100; x <= 100; x += 2.5) {
-        const sleeper = new THREE.Mesh(sleeperGeo, sleeperMat);
-        sleeper.position.set(x, 0.45, trackZ);
-        scene.add(sleeper);
-    }
-
-    // Steel Rails (Rel Baja - Track 1 & Track 2)
-    const railSteelMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.2 });
+    // Rel Baja R54 (Track 1 & Track 2)
+    const railSteelMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, metalness: 0.95, roughness: 0.15 });
     const railOffsets = [-4.5, -2.5, 2.5, 4.5];
+
+    // Bantalan Beton Pratekan (Prestressed Concrete Sleepers) + Klip Pandrol Elastis
+    // Pakai InstancedMesh: ratusan bantalan/klip hanya 2 draw call.
+    const sleeperXs = [];
+    for (let x = -105; x <= 105; x += 2.0) sleeperXs.push(x);
+
+    const sleeperMesh = new THREE.InstancedMesh(
+        new THREE.BoxGeometry(0.42, 0.2, 13.2),
+        new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.8 }),
+        sleeperXs.length
+    );
+    const clipMesh = new THREE.InstancedMesh(
+        new THREE.BoxGeometry(0.12, 0.08, 0.1),
+        new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.8, roughness: 0.4 }), // Pandrol Clip
+        sleeperXs.length * railOffsets.length * 2
+    );
+    const dummy = new THREE.Object3D();
+    let clipIdx = 0;
+    sleeperXs.forEach((x, i) => {
+        dummy.position.set(x, 0.45, trackZ);
+        dummy.updateMatrix();
+        sleeperMesh.setMatrixAt(i, dummy.matrix);
+
+        // Klip pengencang di kedua sisi tiap rel
+        railOffsets.forEach(rz => {
+            [-0.14, 0.14].forEach(side => {
+                dummy.position.set(x, 0.59, trackZ + rz + side);
+                dummy.updateMatrix();
+                clipMesh.setMatrixAt(clipIdx++, dummy.matrix);
+            });
+        });
+    });
+    sleeperMesh.instanceMatrix.needsUpdate = true;
+    clipMesh.instanceMatrix.needsUpdate = true;
+    sleeperMesh.receiveShadow = true;
+    sleeperMesh.frustumCulled = false; // bounding sphere instance default berada di origin
+    clipMesh.frustumCulled = false;
+    scene.add(sleeperMesh);
+    scene.add(clipMesh);
+
     railOffsets.forEach(offsetZ => {
         const railGeo = new THREE.BoxGeometry(railLength, 0.3, 0.15);
         const rail = new THREE.Mesh(railGeo, railSteelMat);
@@ -2496,7 +2761,7 @@ function buildRailSiding() {
     buildFreightTrain(trackZ + 3.5);
 
     // Rail Siding Signboard
-    createBlockLabelSprite('RAIL SIDING KAI LOGISTIK (INTERMODAL 400M)', 0, 8.5, trackZ + 12);
+    createBlockLabelSprite('RAIL SIDING KAI LOGISTIK (R54, BANTALAN BETON PRATEKAN)', 0, 8.5, trackZ + 12);
 }
 
 // Freight Train Model (PT Kereta Api Logistik CC 206)
@@ -2884,13 +3149,79 @@ function buildCFSAndWarehouseZone() {
     cfsGroup.name = "CFSAndWarehousingZone";
 
     // 1. CFS Warehouse 4.000 m² (fac_f_cfs)
-    const cfsW = 24, cfsH = 8, cfsD = 18;
-    const cfsGeo = new THREE.BoxGeometry(cfsW, cfsH, cfsD);
-    const cfsMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 });
-    const cfs = new THREE.Mesh(cfsGeo, cfsMat);
-    cfs.position.set(-88, cfsH/2, 14);
+    const cfsW = 24, cfsH = 8.5, cfsD = 18;
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 });
+    const claddingMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+    const cfsX = -88, cfsZ = 14;
+    const roofRise = (cfsW / 2) * Math.tan(Math.PI / 16);
+
+    // Dinding Penutup Sandwich Panel (sedikit lebih kecil dari grid kolom agar kolom baja terlihat menonjol)
+    const cfs = new THREE.Mesh(new THREE.BoxGeometry(cfsW - 0.2, cfsH - 0.2, cfsD - 0.2), claddingMat);
+    cfs.position.set(cfsX, (cfsH - 0.2) / 2, cfsZ);
     cfs.castShadow = true;
     cfsGroup.add(cfs);
+
+    // Portal Frame: Kolom Baja WF + Kuda-kuda Atap (rafter miring) tiap 4.5 unit
+    const colGeo = new THREE.BoxGeometry(0.45, cfsH, 0.45);
+    const rafterGeo = new THREE.BoxGeometry(cfsW / 2 / Math.cos(Math.PI / 16) + 0.3, 0.35, 0.35);
+    for (let pz = -cfsD / 2; pz <= cfsD / 2 + 0.01; pz += 4.5) {
+        [-cfsW / 2, cfsW / 2].forEach(px => {
+            const col = new THREE.Mesh(colGeo, steelMat);
+            col.position.set(cfsX + px, cfsH / 2, cfsZ + pz);
+            col.castShadow = true;
+            cfsGroup.add(col);
+        });
+
+        // Rafter kiri naik ke bubungan, kanan turun (rotasi +/- PI/16)
+        const rafterL = new THREE.Mesh(rafterGeo, steelMat);
+        rafterL.position.set(cfsX - cfsW / 4, cfsH + roofRise / 2, cfsZ + pz);
+        rafterL.rotation.z = Math.PI / 16;
+        cfsGroup.add(rafterL);
+
+        const rafterR = new THREE.Mesh(rafterGeo, steelMat);
+        rafterR.position.set(cfsX + cfsW / 4, cfsH + roofRise / 2, cfsZ + pz);
+        rafterR.rotation.z = -Math.PI / 16;
+        cfsGroup.add(rafterR);
+    }
+
+    // Gording (purlin) memanjang sepanjang gudang di sisi atap
+    const purlinGeo = new THREE.BoxGeometry(0.2, 0.2, cfsD + 0.4);
+    [-0.9, -0.5, -0.1, 0.1, 0.5, 0.9].forEach(f => {
+        const px = f * (cfsW / 2);
+        const py = cfsH + (1 - Math.abs(f)) * roofRise + 0.25;
+        const purlin = new THREE.Mesh(purlinGeo, steelMat);
+        purlin.position.set(cfsX + px, py, cfsZ);
+        cfsGroup.add(purlin);
+    });
+
+    // Penutup atap (roof sheet) dua bidang miring
+    const roofLen = cfsW / 2 / Math.cos(Math.PI / 16) + 0.4;
+    const roofGeo = new THREE.BoxGeometry(roofLen, 0.12, cfsD + 0.4);
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.5, roughness: 0.45 });
+    const roofL = new THREE.Mesh(roofGeo, roofMat);
+    roofL.position.set(cfsX - cfsW / 4, cfsH + roofRise / 2 + 0.38, cfsZ);
+    roofL.rotation.z = Math.PI / 16;
+    roofL.castShadow = true;
+    cfsGroup.add(roofL);
+    const roofR = new THREE.Mesh(roofGeo, roofMat);
+    roofR.position.set(cfsX + cfsW / 4, cfsH + roofRise / 2 + 0.38, cfsZ);
+    roofR.rotation.z = -Math.PI / 16;
+    roofR.castShadow = true;
+    cfsGroup.add(roofR);
+
+    // Dinding gable segitiga di kedua ujung gudang (menutup ruang antara dinding dan atap)
+    const gableShape = new THREE.Shape();
+    gableShape.moveTo(-cfsW / 2 + 0.1, 0);
+    gableShape.lineTo(cfsW / 2 - 0.1, 0);
+    gableShape.lineTo(0, roofRise + 0.1);
+    gableShape.closePath();
+    const gableGeo = new THREE.ShapeGeometry(gableShape);
+    const gableMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6, side: THREE.DoubleSide });
+    [-1, 1].forEach(s => {
+        const gable = new THREE.Mesh(gableGeo, gableMat);
+        gable.position.set(cfsX, cfsH - 0.2, cfsZ + s * (cfsD / 2 - 0.1));
+        cfsGroup.add(gable);
+    });
 
     // Raised Loading Dock Platform
     const dockGeo = new THREE.BoxGeometry(3.5, 1.2, cfsD);
@@ -2915,7 +3246,7 @@ function buildCFSAndWarehouseZone() {
         cfsGroup.add(b);
     }
 
-    createBlockLabelSprite('CFS WAREHOUSE 4.000 M² (LCL)', -88, cfsH + 3.5, 14);
+    createBlockLabelSprite('CFS WAREHOUSE 4.000 M² (STEEL PORTAL FRAME)', -88, cfsH + 5.5, 14);
 
     // 2. Transit Distribution Warehouse (fac_f_warehouse)
     const trW = 24, trH = 7, trD = 13;
@@ -2938,11 +3269,19 @@ function buildCFSAndWarehouseZone() {
     cfsGroup.add(mrWorkshop);
 
     // Overhead Gantry Crane Rail extending outside M&R bay
-    const craneBeamGeo = new THREE.BoxGeometry(10, 0.8, 0.8);
-    const craneBeamMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
+    const craneBeamGeo = new THREE.BoxGeometry(12, 0.7, 0.5);
+    const craneBeamMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, metalness: 0.6, roughness: 0.35 });
     const craneBeam = new THREE.Mesh(craneBeamGeo, craneBeamMat);
-    craneBeam.position.set(-88 + mrW/2 + 3, 7.5, -20);
+    craneBeam.position.set(-88 + mrW/2 + 4, 7.8, -20);
     cfsGroup.add(craneBeam);
+
+    // Kolom penumpu runway crane di ujung luar balok
+    const runwayColMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 });
+    [-1, 1].forEach(s => {
+        const rc = new THREE.Mesh(new THREE.BoxGeometry(0.45, 7.8, 0.45), runwayColMat);
+        rc.position.set(-88 + mrW/2 + 9.8, 3.9, -20 + s * 0.9);
+        cfsGroup.add(rc);
+    });
 
     createBlockLabelSprite('M&R HEAVY EQUIPMENT WORKSHOP', -88, mrH + 2.5, -20);
 
@@ -3110,23 +3449,142 @@ function buildPerimeterAndSecurity() {
 function buildEngineeringDimensionLeaders() {
     technicalDimensionsGroup = new THREE.Group();
     technicalDimensionsGroup.name = "EngineeringDimensionLeaders";
+    scene.add(technicalDimensionsGroup);
 
-    // 1. Rail Siding Dimension Line: 400m
-    createDimensionLine(-100, 100, -60, '← 400.00 M RAIL SIDING (INTERMODAL DOUBLE TRACK) →', 0xd97706);
+    // 1. Grid Aksis As Teknik Sipil (Grid Bubbles AS 1-5 dan AS A-E) -> layer 'gridAxes'
+    buildCivilGridAxesSystem();
 
-    // 2. Container Stacking Yard Dimension Line: 150m
-    createDimensionLine(-60, 75, 20, '← 150.00 M CONTAINER STACKING YARD (15 HA) →', 0x4f46e5);
+    // 2. ISO Dimension Leaders dengan tick 45 derajat
+    createCADLeaderDimension(-100, 100, -60, 'STA 0+000 s/d 0+400 (400.00 M RAIL SIDING)', 0xd97706);
+    createCADLeaderDimension(-60, 75, 20, '150.00 M CORE STACKING YARD (15 HA)', 0x4f46e5);
 
-    // 3. CFS Logistics Dimension Line: 80m
+    // 3. Dimensi lain (CFS & jalan haul) tetap dipertahankan
     createDimensionLineZ(22, -22, -102, '← 80.00 M CFS & M&R LOGISTICS COMPLEX →', 0x0284c7);
-
-    // 4. Main Haul Road Dimension: 14m
     createDimensionLine(-52, -38, 28, '← 14.00 M TWO-WAY CONTAINER TRUCK ROAD →', 0x10b981);
 
-    // 5. Benchmark Datum Marker
-    createDatumBenchmarkMarker(-105, 0.5, 60);
+    // 4. Elevation marks (duga)
+    createCADLeaderElevation(0, 0.16, 28, 'EL +0.16 M (TOP SLAB PEKERASAN)');
+    createCADLeaderElevation(44, 10.6, 16, 'EL +10.60 M (MAX TIER 4 HOIST LIMIT)');
 
-    scene.add(technicalDimensionsGroup);
+    // 5. Benchmark Datum Geodetik
+    createDatumBenchmarkMarker(-110, 0.5, 62);
+
+    technicalDimensionsGroup.visible = cadLayers.dimensions && showTechnicalDimensions;
+}
+
+// Sistem Aksis Grid Arsitektur & Sipil (Grid Bubbles)
+// Memakai cadGridGroup yang sudah dibuat di buildCivilPavementsAndRoadNetwork() (berisi GridHelper),
+// sehingga layer 'gridAxes' mengontrol grid + as sekaligus, terpisah dari layer 'dimensions'.
+function buildCivilGridAxesSystem() {
+    if (!cadGridGroup) {
+        cadGridGroup = new THREE.Group();
+        cadGridGroup.name = "CADGridAxes";
+        scene.add(cadGridGroup);
+    }
+
+    const xAxes = [
+        { x: -106, label: 'AS 1' },
+        { x: -44,  label: 'AS 2' },
+        { x: 0,    label: 'AS 3' },
+        { x: 44,   label: 'AS 4' },
+        { x: 104,  label: 'AS 5' }
+    ];
+
+    const zAxes = [
+        { z: 52,   label: 'AS A' },
+        { z: 16,   label: 'AS B' },
+        { z: -5,   label: 'AS C' },
+        { z: -26,  label: 'AS D' },
+        { z: -52,  label: 'AS E' }
+    ];
+
+    // Material dipakai bersama (satu instance) untuk semua garis as
+    const lineMat = new THREE.LineDashedMaterial({
+        color: 0x0284c7,
+        dashSize: 3,
+        gapSize: 2
+    });
+
+    // Garis As Vertikal (sejajar sumbu Z)
+    xAxes.forEach(ax => {
+        const geom = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(ax.x, 0.3, 72),
+            new THREE.Vector3(ax.x, 0.3, -72)
+        ]);
+        const line = new THREE.Line(geom, lineMat);
+        line.computeLineDistances();
+        cadGridGroup.add(line);
+        createGridBubbleSprite(ax.label, ax.x, 1.2, 75);
+    });
+
+    // Garis As Horisontal (sejajar sumbu X)
+    zAxes.forEach(az => {
+        const geom = new THREE.BufferGeometry().setFromPoints([
+            new THREE.Vector3(-125, 0.3, az.z),
+            new THREE.Vector3(125, 0.3, az.z)
+        ]);
+        const line = new THREE.Line(geom, lineMat);
+        line.computeLineDistances();
+        cadGridGroup.add(line);
+        createGridBubbleSprite(az.label, -128, 1.2, az.z);
+    });
+
+    cadGridGroup.visible = cadLayers.gridAxes;
+}
+
+// Lingkaran As Simbol Gambar Kerja (CAD Grid Head Bubble)
+function createGridBubbleSprite(text, x, y, z) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+
+    ctx.beginPath();
+    ctx.arc(64, 64, 56, 0, Math.PI * 2);
+    ctx.fillStyle = '#0284c7';
+    ctx.fill();
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = '#ffffff';
+    ctx.stroke();
+
+    ctx.font = 'bold 36px monospace';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(text, 64, 64);
+
+    const sprite = new THREE.Sprite(new THREE.SpriteMaterial({ map: new THREE.CanvasTexture(canvas), transparent: true }));
+    sprite.position.set(x, y, z);
+    sprite.scale.set(4, 4, 1);
+    cadGridGroup.add(sprite);
+}
+
+// Garis Ukur Dimensi CAD ISO (tick 45 derajat arsitektural + extension lines)
+function createCADLeaderDimension(startX, endX, zPos, labelText, colorHex) {
+    const lineMat = new THREE.LineBasicMaterial({ color: colorHex || 0x38bdf8 });
+    const add = (pts) => technicalDimensionsGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat));
+
+    // Garis ukur utama
+    add([new THREE.Vector3(startX, 1.2, zPos), new THREE.Vector3(endX, 1.2, zPos)]);
+
+    [startX, endX].forEach(x => {
+        // Tick 45 derajat
+        add([new THREE.Vector3(x - 0.5, 0.7, zPos), new THREE.Vector3(x + 0.5, 1.7, zPos)]);
+        // Extension line tegak ke permukaan perkerasan
+        add([new THREE.Vector3(x, 0.15, zPos), new THREE.Vector3(x, 2.0, zPos)]);
+    });
+
+    createBlockLabelSprite(labelText, (startX + endX) / 2, 2.8, zPos, technicalDimensionsGroup);
+}
+
+// Simbol Ketinggian Duga (Elevation Level Mark): garis leader vertikal + label
+function createCADLeaderElevation(x, y, z, text) {
+    const lineMat = new THREE.LineBasicMaterial({ color: 0xf59e0b });
+    technicalDimensionsGroup.add(new THREE.Line(
+        new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(x, y, z), new THREE.Vector3(x, y + 2.2, z)]),
+        lineMat
+    ));
+    createBlockLabelSprite(`▼ ${text}`, x, y + 3.2, z, technicalDimensionsGroup);
 }
 
 function createDimensionLine(startX, endX, zPos, labelText, colorHex) {
@@ -3154,7 +3612,7 @@ function createDimensionLine(startX, endX, zPos, labelText, colorHex) {
     });
 
     // Label Sprite
-    createBlockLabelSprite(labelText, (startX + endX) / 2, 3.2, zPos);
+    createBlockLabelSprite(labelText, (startX + endX) / 2, 3.2, zPos, technicalDimensionsGroup);
 }
 
 function createDimensionLineZ(startZ, endZ, xPos, labelText, colorHex) {
@@ -3179,7 +3637,7 @@ function createDimensionLineZ(startZ, endZ, xPos, labelText, colorHex) {
         technicalDimensionsGroup.add(tick);
     });
 
-    createBlockLabelSprite(labelText, xPos, 3.2, (startZ + endZ) / 2);
+    createBlockLabelSprite(labelText, xPos, 3.2, (startZ + endZ) / 2, technicalDimensionsGroup);
 }
 
 function createDatumBenchmarkMarker(x, y, z) {
@@ -3189,7 +3647,46 @@ function createDatumBenchmarkMarker(x, y, z) {
     marker.position.set(x, y, z);
     technicalDimensionsGroup.add(marker);
 
-    createBlockLabelSprite('DATUM BENCHMARK: EL +0.00 M (MSL)', x, y + 2.5, z);
+    createBlockLabelSprite('DATUM BENCHMARK: EL +0.00 M (MSL)', x, y + 2.5, z, technicalDimensionsGroup);
+}
+
+// Pengendali Layer Dinamis CAD/BIM (satu pintu untuk semua layer, termasuk tombol UI)
+function toggleCADLayer(layerName) {
+    if (cadLayers[layerName] === undefined) return;
+    const next = !cadLayers[layerName];
+
+    if (layerName === 'heavyEquipment') {
+        cadLayers.heavyEquipment = next;
+        Object.values(equipmentMeshes || {}).forEach(m => { if (m) m.visible = next; });
+    } else {
+        setCadLayer(layerName, next); // pavement, drainage, dimensions, gridAxes
+    }
+
+    if (layerName === 'dimensions') {
+        // jaga sinkron dengan tombol toolbar yang sudah ada
+        const btn = document.getElementById('btnToggleDimensions');
+        if (btn) {
+            btn.classList.toggle('bg-blue-50', next);
+            btn.classList.toggle('text-blue-700', next);
+            btn.classList.toggle('border-blue-200', next);
+            btn.classList.toggle('font-bold', next);
+            btn.classList.toggle('bg-gray-100', !next);
+            btn.classList.toggle('text-gray-700', !next);
+            btn.classList.toggle('border-gray-200', !next);
+        }
+    }
+
+    const chip = document.getElementById('cadLayerBtn-' + layerName);
+    if (chip) {
+        chip.classList.toggle('bg-sky-50', next);
+        chip.classList.toggle('text-sky-700', next);
+        chip.classList.toggle('border-sky-200', next);
+        chip.classList.toggle('bg-gray-100', !next);
+        chip.classList.toggle('text-gray-500', !next);
+        chip.classList.toggle('border-gray-200', !next);
+    }
+
+    showToast('Layer CAD Diperbarui', `Layer ${layerName}: ${next ? 'Aktif' : 'Nonaktif'}`, 'info');
 }
 
 // 10. Yard Floodlight High Towers
@@ -3287,15 +3784,29 @@ function createReachStackerModel(name, x, y, z) {
     cab.position.set(-1.0, 3.8, 0);
     rs.add(cab);
 
-    // Hydraulic Lift Cylinders (Underneath Boom)
-    const cylGeo = new THREE.CylinderGeometry(0.18, 0.18, 4.5, 12);
-    const cylMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85 });
+    // Silinder Hidrolik Bertingkat: barrel (badan) + piston chrome teleskopik
+    const cylMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.95, roughness: 0.1 });
     [-0.7, 0.7].forEach(cz => {
-        const cyl = new THREE.Mesh(cylGeo, cylMat);
-        cyl.position.set(0.8, 3.2, cz);
-        cyl.rotation.z = -Math.PI / 6;
-        rs.add(cyl);
+        const barrel = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 3.5, 16), chassisMat);
+        barrel.position.set(0.4, 2.8, cz);
+        barrel.rotation.z = -Math.PI / 6;
+        rs.add(barrel);
+
+        const piston = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 3.0, 16), cylMat);
+        piston.position.set(1.4, 3.8, cz);
+        piston.rotation.z = -Math.PI / 6;
+        rs.add(piston);
     });
+
+    // Lampu Strobo Putar K3 Pelabuhan (berkedip amber, material per unit agar tidak berbagi warna)
+    const strobe = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.14, 0.14, 0.25, 12),
+        new THREE.MeshBasicMaterial({ color: 0xf59e0b })
+    );
+    strobe.position.set(-1.0, 4.95, 0);
+    strobe.name = "hazardStrobe";
+    rs.add(strobe);
+    registerHazardLight(strobe, null, 0, true);
 
     // Main Telescopic Boom
     const boomGeo = new THREE.BoxGeometry(9.5, 1.2, 1.2);
@@ -3827,13 +4338,24 @@ function createContainerMesh(l, h, w, colorHex, boxNumber, cargoType = 'dry') {
     const boxGeo = new THREE.BoxGeometry(l, h, w);
     const boxMat = new THREE.MeshStandardMaterial({
         color: colorHex,
-        roughness: 0.45,
-        metalness: 0.15
+        roughness: 0.58,
+        metalness: 0.28
     });
     const mainBox = new THREE.Mesh(boxGeo, boxMat);
     mainBox.castShadow = true;
     mainBox.receiveShadow = true;
     group.add(mainBox);
+
+    // 1b. CAD Edge Outline Wireframe (gaya model BIM Revit/Tekla) - geometri di-cache per dimensi
+    const edgeKey = l + '_' + h + '_' + w;
+    if (!createContainerMesh._edgeCache) createContainerMesh._edgeCache = {};
+    if (!createContainerMesh._edgeMat) {
+        createContainerMesh._edgeMat = new THREE.LineBasicMaterial({ color: 0x0f172a, transparent: true, opacity: 0.45 });
+    }
+    if (!createContainerMesh._edgeCache[edgeKey]) {
+        createContainerMesh._edgeCache[edgeKey] = new THREE.EdgesGeometry(boxGeo);
+    }
+    group.add(new THREE.LineSegments(createContainerMesh._edgeCache[edgeKey], createContainerMesh._edgeMat));
 
     // 2. 8 ISO 1161 Steel Corner Castings (Top and Bottom Corners)
     const cornerMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.8 });
@@ -5489,6 +6011,7 @@ function toggleScadaFeed() {
 
 function toggleTechnicalDimensions() {
     showTechnicalDimensions = !showTechnicalDimensions;
+    cadLayers.dimensions = showTechnicalDimensions;
     if (technicalDimensionsGroup) {
         technicalDimensionsGroup.visible = showTechnicalDimensions;
     }
@@ -5605,9 +6128,9 @@ function setLightingMode(mode) {
         scene.background = new THREE.Color(0xdcecf8);
         scene.fog.color = new THREE.Color(0xdcecf8);
         ambientLight.color.setHex(0xffffff);
-        ambientLight.intensity = 0.65;
-        sunLight.intensity = 0.9;
-        sunLight.color.setHex(0xfff8ee);
+        ambientLight.intensity = LIGHT_DAY.ambient;
+        sunLight.intensity = LIGHT_DAY.sun;
+        sunLight.color.setHex(LIGHT_DAY.sunColor);
         floodlightLights.forEach(l => l.intensity = 0);
         activateLightBtn('btnLightDay');
     } else if (mode === 'sunset') {
@@ -5719,6 +6242,7 @@ function animate(time) {
     requestAnimationFrame(animate);
     TWEEN.update();
     controls.update();
+    updateHazardLights(time);
 
     // Dynamic 3D Azimuth Compass Rose Heading & Dial Rotation (North = +Z Kantor Utama / Gate)
     if (controls && camera) {

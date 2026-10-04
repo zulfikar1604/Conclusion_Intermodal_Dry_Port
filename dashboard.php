@@ -130,7 +130,7 @@ $menu_clusters = [
     ],
     'System & Finance' => [
         'billing' => ['icon' => 'fa-file-invoice-dollar', 'label' => 'Billing & Invoicing'],
-        'simulator' => ['icon' => 'fa-vr-cardboard', 'label' => '3D Digital Twin'],
+        'simulator' => ['icon' => 'fa-vr-cardboard', 'label' => 'Simulation Panel'],
         'settings' => ['icon' => 'fa-gear', 'label' => 'Settings']
     ]
 ];
