@@ -5,112 +5,120 @@
 // =============================================================================
 ?>
                 <!-- Executive Cockpit Header & Real-Time Status -->
-                <div class="bg-white rounded-lg px-4 py-3.5 shadow-2xs border border-[#E4DFD3] flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 transition-all">
+                <div class="bg-white rounded-xl px-4 py-3.5 shadow-2xs border border-gray-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 transition-all">
                     <div class="flex items-center gap-3.5">
-                        <div class="w-9 h-9 rounded-md bg-ink text-brass flex items-center justify-center text-sm flex-shrink-0">
+                        <div class="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200/80 text-orange-600 flex items-center justify-center text-sm flex-shrink-0 shadow-2xs">
                             <i class="fa-solid fa-layer-group"></i>
                         </div>
                         <div>
                             <div class="flex items-center gap-2.5">
-                                <h2 class="text-sm sm:text-[15px] font-semibold text-ink tracking-[0.005em] leading-tight">
+                                <h2 class="text-sm sm:text-[15px] font-bold text-gray-900 tracking-tight leading-tight">
                                     Konsol Eksekutif &amp; Telemetri Operasional Dry Port
                                 </h2>
-                                <span class="text-[9px] font-medium tracking-[0.16em] uppercase text-[#5E7A6B] flex items-center gap-1.5">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-[#5E7A6B]"></span>
+                                <span class="text-[9px] font-bold tracking-wider uppercase bg-emerald-50 text-emerald-700 border border-emerald-200/80 px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-2xs">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                                     Live 35 Ha
                                 </span>
                             </div>
-                            <p class="text-ink/50 text-[11px] mt-0.5">Simulasi Inland Container Depot (ICD), Siding KA Daop 1, &amp; Pabean CEISA 4.0</p>
+                            <p class="text-gray-500 text-[11px] mt-0.5">Simulasi Inland Container Depot (ICD), Siding KA Daop 1, &amp; Pabean CEISA 4.0</p>
                         </div>
                     </div>
                     <!-- Micro Telemetry Badges & Real-Time Clock -->
-                    <div class="flex items-center gap-4 flex-wrap text-[10.5px] text-ink/60">
-                        <div class="flex items-center gap-1.5">
-                            <i class="fa-regular fa-calendar text-brass-deep text-[10px]"></i>
-                            <span class="font-medium"><?= $tanggal_sekarang ?></span>
-                            <span class="text-ink/20">&bull;</span>
-                            <i class="fa-solid fa-clock text-brass-deep text-[9.5px]"></i>
-                            <span id="berandaLiveClock" class="font-semibold text-ink font-mono">--:--:-- WIB</span>
+                    <div class="flex items-center gap-3 sm:gap-4 flex-wrap text-[10.5px] text-gray-600">
+                        <div class="flex items-center gap-1.5 bg-slate-50 border border-gray-200/80 rounded-lg px-2 py-1">
+                            <i class="fa-regular fa-calendar text-gray-500 text-[10px]"></i>
+                            <span class="font-medium text-gray-700"><?= $tanggal_sekarang ?></span>
+                            <span class="text-gray-300">&bull;</span>
+                            <i class="fa-solid fa-clock text-orange-500 text-[9.5px]"></i>
+                            <span id="berandaLiveClock" class="font-bold text-gray-900 font-mono">--:--:-- WIB</span>
                         </div>
-                        <div class="flex items-center gap-1.5 pl-4 border-l border-[#E4DFD3]">
-                            <i class="fa-solid fa-satellite-dish text-[9px] text-brass-deep"></i>
-                            <span class="font-medium">SCADA <span class="text-ink font-semibold">99.8%</span></span>
+                        <div class="flex items-center gap-1.5 pl-3 border-l border-gray-200">
+                            <i class="fa-solid fa-satellite-dish text-[9.5px] text-[#0170b9]"></i>
+                            <span class="font-medium text-gray-500">SCADA <span class="text-gray-900 font-bold">99.8%</span></span>
                         </div>
-                        <div class="flex items-center gap-1.5 pl-4 border-l border-[#E4DFD3]">
-                            <i class="fa-solid fa-train-subway text-[9px] text-brass-deep"></i>
-                            <span class="font-medium">Siding KA <span class="text-ink font-semibold">Ready</span></span>
+                        <div class="flex items-center gap-1.5 pl-3 border-l border-gray-200">
+                            <i class="fa-solid fa-train-subway text-[9.5px] text-orange-500"></i>
+                            <span class="font-medium text-gray-500">Siding KA <span class="text-gray-900 font-bold">Ready</span></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live IoT Sensor & Field Workbench Status Bar (Direct-Launch Shortcuts) -->
-                <div class="bg-ink rounded-lg px-4 py-3.5 shadow-sm border border-white/[0.06] text-paper">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3 pb-3 border-b border-white/[0.08]">
+                <div class="bg-white rounded-xl px-4 py-3.5 shadow-2xs border border-gray-200/80">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3 pb-3 border-b border-gray-100">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-1.5 h-1.5 rounded-full bg-[#8FA89A]"></span>
-                            <h3 class="text-[12.5px] sm:text-[13px] font-semibold tracking-[0.02em] text-paper">
+                            <span class="w-2 h-2 rounded-full bg-orange-500 animate-pulse"></span>
+                            <h3 class="text-[12.5px] sm:text-[13px] font-bold tracking-tight text-gray-900">
                                 Pusat Kendali Sensor &amp; IoT Workbench Lapangan
-                                <span class="font-normal text-paper/45 ml-1">Live Operational Sync</span>
+                                <span class="font-normal text-gray-400 ml-1 text-xs">Live Operational Sync</span>
                             </h3>
                         </div>
-                        <span class="text-[10px] text-paper/45 tracking-[0.06em] flex items-center gap-1.5">
-                            <i class="fa-solid fa-microchip text-brass/80"></i>
+                        <span class="text-[10.5px] text-orange-700 bg-orange-50 border border-orange-200/80 px-2.5 py-0.5 rounded-full font-medium flex items-center gap-1.5">
+                            <i class="fa-solid fa-microchip text-orange-500"></i>
                             <span>26 BOM Hardware Terkalibrasi &middot; Latensi &lt; 150ms</span>
                         </span>
                     </div>
                     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
                         <!-- Gateway 1: Gate ANPR -->
-                        <a href="dashboard.php?page=gate" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                        <a href="dashboard.php?page=gate" class="p-2.5 rounded-lg border border-gray-200/90 bg-slate-50/60 hover:bg-orange-50/40 hover:border-orange-300 transition-all flex items-center justify-between gap-2 group shadow-2xs">
                             <div class="flex items-center gap-2.5 min-w-0">
-                                <i class="fa-solid fa-door-open text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="w-7 h-7 rounded-md bg-blue-100/80 text-cdp-blue flex items-center justify-center text-xs group-hover:bg-orange-500 group-hover:text-white transition-colors flex-shrink-0">
+                                    <i class="fa-solid fa-door-open"></i>
+                                </div>
                                 <div class="min-w-0">
-                                    <div class="font-semibold text-paper text-[11.5px] truncate">Gate &amp; Timbangan</div>
-                                    <div class="text-[10px] text-paper/45 truncate">ANPR OCR + 80T Solas</div>
+                                    <div class="font-bold text-gray-800 text-[11.5px] group-hover:text-orange-600 transition-colors truncate">Gate &amp; Timbangan</div>
+                                    <div class="text-[10px] text-gray-400 truncate">ANPR OCR + 80T Solas</div>
                                 </div>
                             </div>
-                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-[#8FA89A] flex items-center gap-1.5 flex-shrink-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#8FA89A]"></span>Online
+                            <span class="text-[9px] font-bold tracking-wider uppercase text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-1 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
                             </span>
                         </a>
 
                         <!-- Gateway 2: CFS Rampa D1-D5 -->
-                        <a href="dashboard.php?page=cfs" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                        <a href="dashboard.php?page=cfs" class="p-2.5 rounded-lg border border-gray-200/90 bg-slate-50/60 hover:bg-orange-50/40 hover:border-orange-300 transition-all flex items-center justify-between gap-2 group shadow-2xs">
                             <div class="flex items-center gap-2.5 min-w-0">
-                                <i class="fa-solid fa-warehouse text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="w-7 h-7 rounded-md bg-amber-100/80 text-amber-700 flex items-center justify-center text-xs group-hover:bg-orange-500 group-hover:text-white transition-colors flex-shrink-0">
+                                    <i class="fa-solid fa-warehouse"></i>
+                                </div>
                                 <div class="min-w-0">
-                                    <div class="font-semibold text-paper text-[11.5px] truncate">CFS Rampa D1-D5</div>
-                                    <div class="text-[10px] text-paper/45 truncate">Pallet 3T + Gas HW-19</div>
+                                    <div class="font-bold text-gray-800 text-[11.5px] group-hover:text-orange-600 transition-colors truncate">CFS Rampa D1-D5</div>
+                                    <div class="text-[10px] text-gray-400 truncate">Pallet 3T + Gas HW-19</div>
                                 </div>
                             </div>
-                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-[#8FA89A] flex items-center gap-1.5 flex-shrink-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#8FA89A]"></span>Online
+                            <span class="text-[9px] font-bold tracking-wider uppercase text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200/60 flex items-center gap-1 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Online
                             </span>
                         </a>
 
                         <!-- Gateway 3: Reefer Terminal -->
-                        <a href="dashboard.php?page=reefer" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                        <a href="dashboard.php?page=reefer" class="p-2.5 rounded-lg border border-gray-200/90 bg-slate-50/60 hover:bg-orange-50/40 hover:border-orange-300 transition-all flex items-center justify-between gap-2 group shadow-2xs">
                             <div class="flex items-center gap-2.5 min-w-0">
-                                <i class="fa-solid fa-snowflake text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="w-7 h-7 rounded-md bg-cyan-100/80 text-cyan-700 flex items-center justify-center text-xs group-hover:bg-orange-500 group-hover:text-white transition-colors flex-shrink-0">
+                                    <i class="fa-solid fa-snowflake"></i>
+                                </div>
                                 <div class="min-w-0">
-                                    <div class="font-semibold text-paper text-[11.5px] truncate">Reefer Cold Chain</div>
-                                    <div class="text-[10px] text-paper/45 truncate">300 Plug + SHT40 LoRa</div>
+                                    <div class="font-bold text-gray-800 text-[11.5px] group-hover:text-orange-600 transition-colors truncate">Reefer Cold Chain</div>
+                                    <div class="text-[10px] text-gray-400 truncate">300 Plug + SHT40 LoRa</div>
                                 </div>
                             </div>
-                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-[#9DB0C4] flex items-center gap-1.5 flex-shrink-0">
-                                <span class="w-1.5 h-1.5 rounded-full bg-[#9DB0C4]"></span>Pulse
+                            <span class="text-[9px] font-bold tracking-wider uppercase text-cyan-700 bg-cyan-50 px-1.5 py-0.5 rounded border border-cyan-200/60 flex items-center gap-1 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span>Pulse
                             </span>
                         </a>
 
                         <!-- Gateway 4: Denah Terminal 35 Ha -->
-                        <a href="dashboard.php?page=denah" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                        <a href="dashboard.php?page=denah" class="p-2.5 rounded-lg border border-orange-200 bg-orange-50/30 hover:bg-orange-50 hover:border-orange-300 transition-all flex items-center justify-between gap-2 group shadow-2xs">
                             <div class="flex items-center gap-2.5 min-w-0">
-                                <i class="fa-solid fa-map-location-dot text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="w-7 h-7 rounded-md bg-orange-500 text-white flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
+                                    <i class="fa-solid fa-map-location-dot"></i>
+                                </div>
                                 <div class="min-w-0">
-                                    <div class="font-semibold text-paper text-[11.5px] truncate">Denah Terminal 35 Ha</div>
-                                    <div class="text-[10px] text-paper/45 truncate">26 Hardware BOM Map</div>
+                                    <div class="font-bold text-gray-900 text-[11.5px] group-hover:text-orange-600 transition-colors truncate">Denah Terminal 35 Ha</div>
+                                    <div class="text-[10px] text-gray-500 truncate">26 Hardware BOM Map</div>
                                 </div>
                             </div>
-                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-brass flex items-center gap-1.5 flex-shrink-0">
+                            <span class="text-[9px] font-bold tracking-wider uppercase text-orange-700 bg-orange-100/80 px-1.5 py-0.5 rounded border border-orange-300/80 flex items-center gap-1 flex-shrink-0">
                                 Uji Real <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
                             </span>
                         </a>

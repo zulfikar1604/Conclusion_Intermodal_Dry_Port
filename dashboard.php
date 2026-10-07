@@ -189,11 +189,13 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
                     },
                     colors: {
-                        // Palet Maritim CIDP: Selaras 100% dengan Landing Page (login.php)
+                        // Palet Maritim CIDP: Selaras 100% dengan Landing Page & Sidebar Baru
                         'cdp-navy': '#004b87',
                         'cdp-dark': '#002f5e',
                         'cdp-blue': '#0170b9',
                         'cdp-light': '#f4f8fc',
+                        'cdp-orange': '#ea580c',
+                        'cdp-orange-light': '#fff7ed',
                         'ink': '#002f5e',
                         'ink-2': '#002447',
                         'paper': '#ffffff',

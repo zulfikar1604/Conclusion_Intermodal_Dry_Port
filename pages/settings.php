@@ -150,7 +150,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     <!-- Header Modul: Pengaturan Global & Tata Kelola Sistem -->
     <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-5">
         <div class="flex items-start sm:items-center space-x-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#002f5e] via-[#004b87] to-[#0170b9] text-white flex items-center justify-center text-2xl shadow-md shadow-blue-950/20 flex-shrink-0">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-2xl shadow-md shadow-orange-950/20 flex-shrink-0">
                 <i class="fa-solid fa-sliders"></i>
             </div>
             <div>
@@ -160,7 +160,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
                         <?= $db_status ?>
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
                         YMS v2.4 Enterprise Edition
                     </span>
                 </div>
@@ -168,23 +168,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     Pusat komando tata kelola arsitektur sistem, parameter fasilitas terminal intermodal 35 Ha, manajemen hak akses pengguna (RBAC), integrasi gateway API kepabeanan CEISA 4.0 / Inaportnet / Odoo ERP, dan kalibrasi master 26 hardware IoT.
                 </p>
                 <div class="flex items-center space-x-2 text-[11px] text-gray-400 mt-1.5 font-mono">
-                    <span><i class="fa-solid fa-crown text-amber-500 mr-1"></i>Ketua Tim &amp; Lead Architect: <strong><?= htmlspecialchars($cur_nama) ?></strong> &bull; <?= $cur_role ?></span>
+                    <span><i class="fa-solid fa-crown text-orange-500 mr-1"></i>Ketua Tim &amp; Lead Architect: <strong><?= htmlspecialchars($cur_nama) ?></strong> &bull; <?= $cur_role ?></span>
                 </div>
             </div>
         </div>
 
         <!-- Tombol Aksi Cepat Header -->
         <div class="flex flex-wrap items-center gap-2 self-start md:self-auto flex-shrink-0">
-            <button onclick="exportSettingsJson()" class="px-3.5 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl shadow-2xs transition flex items-center space-x-1.5" title="Ekspor Seluruh Parameter ke Format JSON">
-                <i class="fa-solid fa-file-code text-blue-600"></i>
+            <button onclick="exportSettingsJson()" class="px-3.5 py-2 bg-white border border-gray-200 hover:bg-orange-50/60 hover:border-orange-200 text-gray-700 text-xs font-bold rounded-xl shadow-2xs transition flex items-center space-x-1.5" title="Ekspor Seluruh Parameter ke Format JSON">
+                <i class="fa-solid fa-file-code text-orange-600"></i>
                 <span>Ekspor JSON</span>
             </button>
-            <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-gradient-to-r from-[#0170b9] to-[#004b87] hover:from-[#004b87] hover:to-[#002f5e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+            <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/25 transition flex items-center space-x-1.5">
                 <i class="fa-solid fa-user-plus"></i>
                 <span>Tambah Pengguna</span>
             </button>
             <a href="dashboard.php?page=beranda" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-2xs transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-gauge-high text-amber-400"></i>
+                <i class="fa-solid fa-gauge-high text-orange-400"></i>
                 <span>Dashboard</span>
             </a>
         </div>
@@ -193,16 +193,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     <!-- 5 Kartu KPI Status Sistem & Metrik Basis Data -->
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
         <!-- KPI 1: Total Rekaman Basis Data -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-blue-300 transition group">
+        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-orange-300 transition group">
             <div class="flex items-center justify-between">
                 <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Rekaman Operasi</span>
-                <span class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
+                <span class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
                     <i class="fa-solid fa-database"></i>
                 </span>
             </div>
             <div class="mt-2 flex items-baseline space-x-1.5">
                 <span class="text-2xl font-black text-gray-900"><?= array_sum($table_counts) ?></span>
-                <span class="text-xs text-blue-600 font-bold">Baris / 9 Tabel</span>
+                <span class="text-xs text-orange-600 font-bold">Baris / 9 Tabel</span>
             </div>
             <p class="text-[10px] text-gray-500 mt-2">
                 Sync Real-Time via MySQL PDO
@@ -280,27 +280,27 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
     <!-- Tab Bar Navigasi 6 Sub-Modul Pengaturan Global -->
     <div class="bg-white rounded-xl p-1.5 border border-gray-100 shadow-xs flex flex-wrap gap-1">
-        <button onclick="switchSettingsTab('tab-terminal')" id="btn-tab-terminal" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all text-[#0170b9] bg-blue-50/90 shadow-2xs flex items-center justify-center space-x-2">
+        <button onclick="switchSettingsTab('tab-terminal')" id="btn-tab-terminal" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all text-white bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm shadow-orange-500/20 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-building-columns"></i>
             <span>Fasilitas &amp; SLA Terminal 35 Ha</span>
         </button>
-        <button onclick="switchSettingsTab('tab-users')" id="btn-tab-users" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+        <button onclick="switchSettingsTab('tab-users')" id="btn-tab-users" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-user-shield"></i>
             <span>Tata Kelola User &amp; RBAC</span>
         </button>
-        <button onclick="switchSettingsTab('tab-integration')" id="btn-tab-integration" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+        <button onclick="switchSettingsTab('tab-integration')" id="btn-tab-integration" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-network-wired"></i>
             <span>Integrasi Gateway API &amp; EDI</span>
         </button>
-        <button onclick="switchSettingsTab('tab-hardware')" id="btn-tab-hardware" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+        <button onclick="switchSettingsTab('tab-hardware')" id="btn-tab-hardware" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-microchip"></i>
             <span>Kalibrasi Hardware &amp; Sensor</span>
         </button>
-        <button onclick="switchSettingsTab('tab-database')" id="btn-tab-database" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+        <button onclick="switchSettingsTab('tab-database')" id="btn-tab-database" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-database"></i>
             <span>Basis Data &amp; Log Audit</span>
         </button>
-        <button onclick="switchSettingsTab('tab-team')" id="btn-tab-team" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
+        <button onclick="switchSettingsTab('tab-team')" id="btn-tab-team" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-users-gear"></i>
             <span>Struktur Tim &amp; Akademis ITL</span>
         </button>
@@ -495,7 +495,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 </div>
 
                 <div class="flex justify-end pt-3 border-t border-gray-100">
-                    <button type="submit" class="px-6 py-2.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5">
                         <i class="fa-solid fa-floppy-disk"></i>
                         <span>Simpan Parameter Fasilitas 35 Ha</span>
                     </button>
@@ -514,7 +514,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     <h3 class="font-bold text-base text-gray-900">Daftar Akun Pengguna &amp; Matriks Hak Akses (RBAC)</h3>
                     <p class="text-xs text-gray-500 mt-0.5">Pengelolaan otentikasi login, profil staf terminal, dan batas wewenang operasional</p>
                 </div>
-                <button onclick="openAddUserModal()" class="px-4 py-2 bg-[#0170b9] hover:bg-[#004b87] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5 self-start sm:self-auto">
+                <button onclick="openAddUserModal()" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5 self-start sm:self-auto">
                     <i class="fa-solid fa-user-plus"></i>
                     <span>Tambah Akun Baru</span>
                 </button>
@@ -823,7 +823,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 </div>
 
                 <div class="flex justify-end pt-3 border-t border-gray-100">
-                    <button type="submit" class="px-6 py-2.5 bg-[#0170b9] hover:bg-[#004b87] text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5">
                         <i class="fa-solid fa-check"></i>
                         <span>Simpan Kalibrasi Hardware</span>
                     </button>
@@ -1066,7 +1066,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 animate-fadeIn" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between pb-3.5 border-b border-gray-100">
             <div class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 rounded-xl bg-blue-100 text-blue-800 flex items-center justify-center text-base">
+                <div class="w-9 h-9 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center text-base">
                     <i class="fa-solid fa-user-plus"></i>
                 </div>
                 <div>
@@ -1084,17 +1084,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Nama Lengkap:</label>
-                <input type="text" name="user_name" required placeholder="Contoh: Rian Hidayat" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-[#0170b9]">
+                <input type="text" name="user_name" required placeholder="Contoh: Rian Hidayat" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-semibold focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
             </div>
 
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Alamat Email Dinas:</label>
-                <input type="email" name="user_email" required placeholder="contoh: rian@cidp.ac.id" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-mono focus:bg-white focus:ring-1 focus:ring-[#0170b9]">
+                <input type="email" name="user_email" required placeholder="contoh: rian@cidp.ac.id" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-mono focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
             </div>
 
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Peran Hak Akses (Role):</label>
-                <select name="user_role" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-semibold focus:bg-white focus:ring-1 focus:ring-[#0170b9]">
+                <select name="user_role" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-semibold focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                     <option value="staf">Operator Alat &amp; Staf Lapangan (staf)</option>
                     <option value="superadmin">Superadmin &bull; Akses Penuh (superadmin)</option>
                     <option value="user">Mitra Logistik / Shipper (user)</option>
@@ -1104,13 +1104,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
             <div>
                 <label class="block font-bold text-gray-700 mb-1">Kata Sandi Awal:</label>
-                <input type="password" name="user_password" value="password123" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-mono focus:bg-white focus:ring-1 focus:ring-[#0170b9]">
+                <input type="password" name="user_password" value="password123" class="w-full p-2.5 bg-slate-50 border border-gray-300 rounded-lg text-xs font-mono focus:bg-white focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none">
                 <span class="text-[10px] text-gray-400 mt-0.5 block">Kata sandi default: <code>password123</code> (Dihash BCRYPT otomatis)</span>
             </div>
 
             <div class="flex items-center justify-end space-x-2 pt-3 border-t border-gray-100">
                 <button type="button" onclick="closeAddUserModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition">Batal</button>
-                <button type="submit" class="px-5 py-2 bg-[#0170b9] hover:bg-[#004b87] text-white font-bold rounded-lg shadow-sm transition">
+                <button type="submit" class="px-5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-lg shadow-sm shadow-orange-500/20 transition">
                     <i class="fa-solid fa-check mr-1"></i> Simpan Pengguna
                 </button>
             </div>
@@ -1126,7 +1126,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 function switchSettingsTab(tabId) {
     document.querySelectorAll('.settings-tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-        btn.classList.remove('text-[#0170b9]', 'bg-blue-50/90', 'shadow-2xs');
+        btn.classList.remove('bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'text-white', 'shadow-sm', 'shadow-orange-500/20');
         btn.classList.add('text-gray-600');
     });
 
@@ -1135,7 +1135,7 @@ function switchSettingsTab(tabId) {
 
     const activeBtn = document.getElementById('btn-' + tabId);
     if (activeBtn) {
-        activeBtn.classList.add('text-[#0170b9]', 'bg-blue-50/90', 'shadow-2xs');
+        activeBtn.classList.add('bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'text-white', 'shadow-sm', 'shadow-orange-500/20');
         activeBtn.classList.remove('text-gray-600');
     }
 }

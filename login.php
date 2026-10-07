@@ -78,7 +78,9 @@ if (isset($_POST['btn_login'])) {
                             navy: '#004b87',
                             dark: '#002f5e',
                             blue: '#0170b9',
-                            light: '#f4f8fc'
+                            light: '#f4f8fc',
+                            orange: '#ea580c',
+                            'orange-light': '#fff7ed'
                         }
                     },
                     fontFamily: {
@@ -123,11 +125,11 @@ if (isset($_POST['btn_login'])) {
         }
         .dot-indicator.active {
             width: 28px;
-            background-color: #ffffff;
+            background-color: #ea580c;
         }
     </style>
 </head>
-<body class="bg-slate-50 text-slate-800 antialiased selection:bg-cdp-blue selection:text-white overflow-x-hidden min-h-screen">
+<body class="bg-slate-50 text-slate-800 antialiased selection:bg-orange-500 selection:text-white overflow-x-hidden min-h-screen">
 
     <!-- =================================================================== -->
     <!-- 1. BILAH NAVIGASI ATAS (Standar Cikarang Dry Port - Responsive & Balanced) -->
@@ -142,7 +144,7 @@ if (isset($_POST['btn_login'])) {
                     <div class="font-extrabold text-base sm:text-lg text-cdp-navy tracking-tight leading-none">
                         CONCLUSION
                     </div>
-                    <div class="text-[9px] sm:text-[10px] font-bold text-cdp-blue tracking-wider uppercase mt-0.5">
+                    <div class="text-[9px] sm:text-[10px] font-bold text-orange-600 tracking-wider uppercase mt-0.5">
                         Supply Chain Consultant
                     </div>
                 </div>
@@ -150,10 +152,10 @@ if (isset($_POST['btn_login'])) {
 
             <!-- TAUTAN MENU UTAMA (Tengah Layar / Centered) -->
             <nav class="hidden lg:flex items-center justify-center space-x-5 xl:space-x-8 text-xs font-bold text-slate-700">
-                <a href="#tentang" class="hover:text-cdp-blue transition whitespace-nowrap">Tentang Kami</a>
-                <a href="#fasilitas" class="hover:text-cdp-blue transition whitespace-nowrap">Fasilitas &amp; Solusi</a>
-                <a href="#tiga-alur" class="hover:text-cdp-blue transition whitespace-nowrap">3 Alur Operasional</a>
-                <a href="#tim" class="hover:text-cdp-blue transition whitespace-nowrap">Tim Konsultan</a>
+                <a href="#tentang" class="hover:text-orange-600 transition whitespace-nowrap">Tentang Kami</a>
+                <a href="#fasilitas" class="hover:text-orange-600 transition whitespace-nowrap">Fasilitas &amp; Solusi</a>
+                <a href="#tiga-alur" class="hover:text-orange-600 transition whitespace-nowrap">3 Alur Operasional</a>
+                <a href="#tim" class="hover:text-orange-600 transition whitespace-nowrap">Tim Konsultan</a>
             </nav>
 
             <!-- BAGIAN KANAN: PENCARIAN & TOMBOL MASUK DEMO YMS (Sisi Kanan) -->
@@ -167,7 +169,7 @@ if (isset($_POST['btn_login'])) {
 
                 <!-- Tombol Masuk Demo YMS -->
                 <button type="button" onclick="openLoginModal()" 
-                        class="bg-cdp-navy hover:bg-cdp-blue text-white px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg text-xs font-bold shadow-xs transition flex items-center space-x-2 shrink-0">
+                        class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-3.5 py-2 sm:px-4 sm:py-2 rounded-lg text-xs font-bold shadow-sm shadow-orange-500/25 transition-all flex items-center space-x-2 shrink-0">
                     <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
                     <span class="hidden sm:inline">Masuk Demo YMS</span>
                     <span class="sm:hidden">Masuk</span>
@@ -187,7 +189,7 @@ if (isset($_POST['btn_login'])) {
              style="background-image: linear-gradient(rgba(0, 47, 94, 0.78), rgba(0, 75, 135, 0.85)), url('https://images.unsplash.com/photo-1605371924599-2d0365da1ae0?auto=format&fit=crop&w=2000&q=80');">
             <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
                 <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-blue-100 border border-white/20">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
                     <span>Aplikasi Demonstrasi &bull; Prototipe Yard Management System (YMS)</span>
                 </div>
 
@@ -201,7 +203,7 @@ if (isset($_POST['btn_login'])) {
 
                 <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
+                            class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl shadow-orange-950/40 transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
                         <span>Uji Coba Demonstrasi YMS</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
@@ -228,7 +230,7 @@ if (isset($_POST['btn_login'])) {
 
                 <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
+                            class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl shadow-orange-950/40 transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
                         <span>Pelajari Solusi Antarmoda YMS</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
@@ -255,7 +257,7 @@ if (isset($_POST['btn_login'])) {
 
                 <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
+                            class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl shadow-orange-950/40 transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
                         <span>Simulasikan Penataan Lapangan</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
@@ -282,7 +284,7 @@ if (isset($_POST['btn_login'])) {
 
                 <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
-                            class="bg-white hover:bg-slate-100 text-cdp-navy font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2">
+                            class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl shadow-orange-950/40 transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
                         <span>Eksplorasi Rekonsiliasi Finansial</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
@@ -317,7 +319,7 @@ if (isset($_POST['btn_login'])) {
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
             <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-blue-50 text-cdp-blue text-xs lg:text-sm font-bold border border-blue-100 uppercase tracking-wider">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
                     <i class="fa-solid fa-compass-drafting"></i>
                     <span>Profil Konsultan &bull; Conclusion Supply Chain Consultant</span>
                 </div>
@@ -332,7 +334,7 @@ if (isset($_POST['btn_login'])) {
             <!-- 4 Nilai Unggulan Konsultansi -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8">
                 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-cdp-blue hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-blue-100 text-cdp-navy flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-cdp-navy group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-clock-rotate-left"></i>
@@ -344,7 +346,7 @@ if (isset($_POST['btn_login'])) {
                     </div>
                 </div>
 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-cdp-blue hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-cyan-500 hover:shadow-lg transition-all group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-cyan-100 text-cdp-blue flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-cdp-blue group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-train-subway"></i>
@@ -356,9 +358,9 @@ if (isset($_POST['btn_login'])) {
                     </div>
                 </div>
 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-cdp-blue hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-orange-500 hover:shadow-lg transition-all group flex flex-col justify-between">
                     <div>
-                        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-amber-600 group-hover:text-white transition shadow-2xs">
+                        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-microchip"></i>
                         </div>
                         <h3 class="font-bold text-base lg:text-lg text-slate-900 mb-2 lg:mb-3">Otomasi Telemetri IoT</h3>
@@ -368,7 +370,7 @@ if (isset($_POST['btn_login'])) {
                     </div>
                 </div>
 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-cdp-blue hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all group flex flex-col justify-between">
                     <div>
                         <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-emerald-600 group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-shield-halved"></i>
@@ -392,7 +394,7 @@ if (isset($_POST['btn_login'])) {
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
             <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-cdp-navy/10 text-cdp-navy text-xs lg:text-sm font-bold border border-cdp-navy/20 uppercase tracking-wider">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
                     <i class="fa-solid fa-warehouse"></i>
                     <span>Infrastruktur &amp; Kapabilitas Layanan</span>
                 </div>
@@ -641,7 +643,7 @@ if (isset($_POST['btn_login'])) {
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
             <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-blue-50 text-cdp-blue text-xs lg:text-sm font-bold border border-blue-100 uppercase tracking-wider">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
                     <i class="fa-solid fa-diagram-project"></i>
                     <span>Arsitektur Ekosistem YMS</span>
                 </div>
@@ -818,8 +820,8 @@ if (isset($_POST['btn_login'])) {
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
             <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-cdp-navy/10 text-cdp-navy text-xs lg:text-sm font-bold border border-cdp-navy/20 uppercase tracking-wider">
-                    <i class="fa-solid fa-graduation-cap text-amber-500"></i>
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
+                    <i class="fa-solid fa-graduation-cap text-orange-500"></i>
                     <span>Kelompok 3 &bull; Inland Container Depot &amp; Dry Port Management</span>
                 </div>
                 <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
@@ -837,14 +839,14 @@ if (isset($_POST['btn_login'])) {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8 mb-12 lg:mb-16">
                 
                 <!-- 1. Zulfikar Jafarudin Fatah -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 lg:p-8 shadow-xs hover:border-cdp-blue hover:shadow-lg transition-all space-y-4 lg:space-y-5">
+                <div class="bg-white rounded-2xl border border-slate-200 p-6 lg:p-8 shadow-xs hover:border-orange-400 hover:shadow-lg transition-all space-y-4 lg:space-y-5">
                     <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-cdp-navy text-white flex items-center justify-center font-extrabold text-lg lg:text-xl shadow-md flex-shrink-0">
+                        <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center font-extrabold text-lg lg:text-xl shadow-md flex-shrink-0">
                             ZF
                         </div>
                         <div>
                             <h3 class="font-extrabold text-base lg:text-lg text-slate-900 leading-snug">Zulfikar Jafarudin Fatah</h3>
-                            <span class="inline-block mt-0.5 text-[11px] lg:text-xs font-bold text-cdp-blue bg-blue-50 px-2.5 py-0.5 rounded-md border border-blue-100">
+                            <span class="inline-block mt-0.5 text-[11px] lg:text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-0.5 rounded-md border border-orange-200/80">
                                 Lead System Architect (Ketua Tim)
                             </span>
                         </div>
@@ -1018,7 +1020,7 @@ if (isset($_POST['btn_login'])) {
                         Gunakan akun pengujian terdaftar untuk menguji fitur penataan lapangan dan pelacakan telemetri.
                     </p>
                     <button type="button" onclick="openLoginModal()" 
-                            class="mt-2 bg-cdp-blue hover:bg-blue-600 text-white px-4 py-2 lg:px-5 lg:py-2.5 rounded-lg text-xs lg:text-sm font-bold shadow-sm transition inline-flex items-center space-x-2">
+                            class="mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 lg:px-5 lg:py-2.5 rounded-lg text-xs lg:text-sm font-bold shadow-sm shadow-orange-500/25 transition-all inline-flex items-center space-x-2">
                         <i class="fa-solid fa-arrow-right-to-bracket text-xs lg:text-sm"></i>
                         <span>Buka Modal Masuk</span>
                     </button>
@@ -1046,14 +1048,14 @@ if (isset($_POST['btn_login'])) {
         <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden animate-fadeIn font-sans">
             
             <!-- Kepala Modal -->
-            <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] px-6 py-4 text-white flex items-center justify-between">
+            <div class="bg-gradient-to-r from-[#002f5e] via-[#0170b9] to-orange-600 px-6 py-4 text-white flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-9 h-9 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 p-1">
                         <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/32?text=C'">
                     </div>
                     <div>
                         <h3 class="font-bold text-sm leading-tight">Masuk ke Sistem</h3>
-                        <p class="text-[10.5px] text-blue-200">CIDP Yard Management System</p>
+                        <p class="text-[10.5px] text-orange-200">CIDP Yard Management System</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeLoginModal()" class="w-8 h-8 rounded-lg bg-white/10 hover:bg-white/20 text-white/80 hover:text-white flex items-center justify-center transition-colors" title="Tutup Modal">
@@ -1083,7 +1085,7 @@ if (isset($_POST['btn_login'])) {
                             </span>
                             <input type="email" id="modalEmail" name="email" value="admin@cidp.ac.id" required 
                                    placeholder="admin@cidp.ac.id"
-                                   class="w-full pl-9 pr-3.5 py-2.5 text-xs text-gray-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50/60 font-mono transition">
+                                   class="w-full pl-9 pr-3.5 py-2.5 text-xs text-gray-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-gray-50/60 font-mono transition">
                         </div>
                     </div>
 
@@ -1097,7 +1099,7 @@ if (isset($_POST['btn_login'])) {
                             </span>
                             <input type="password" id="modalPassword" name="password" value="admin123" required 
                                    placeholder="••••••••"
-                                   class="w-full pl-9 pr-10 py-2.5 text-xs text-gray-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-gray-50/60 font-mono transition">
+                                   class="w-full pl-9 pr-10 py-2.5 text-xs text-gray-800 border border-gray-200 rounded-xl focus:ring-2 focus:ring-orange-500 focus:border-orange-500 outline-none bg-gray-50/60 font-mono transition">
                             <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-gray-400 hover:text-gray-600 text-xs focus:outline-none" title="Lihat/Sembunyikan Kata Sandi">
                                 <i class="fa-regular fa-eye" id="togglePasswordIcon"></i>
                             </button>
@@ -1106,7 +1108,7 @@ if (isset($_POST['btn_login'])) {
 
                     <div class="pt-2">
                         <button type="submit" name="btn_login" 
-                                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] hover:opacity-95 text-white text-xs font-bold shadow-md transition-all flex items-center justify-center space-x-2">
+                                class="w-full py-2.5 px-4 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold shadow-md shadow-orange-500/25 transition-all flex items-center justify-center space-x-2">
                             <span>Masuk ke Dashboard</span>
                             <i class="fa-solid fa-arrow-right text-[11px]"></i>
                         </button>
@@ -1115,7 +1117,7 @@ if (isset($_POST['btn_login'])) {
 
                 <div class="pt-2 text-center border-t border-gray-100">
                     <p class="text-[11px] text-gray-400">
-                        Akun Demo: <span class="font-mono text-gray-700 font-semibold">admin@cidp.ac.id</span> &bull; <span class="font-mono text-gray-700 font-semibold">admin123</span>
+                        Akun Demo: <span class="font-mono text-orange-600 font-bold">admin@cidp.ac.id</span> &bull; <span class="font-mono text-orange-600 font-bold">admin123</span>
                     </p>
                 </div>
 
