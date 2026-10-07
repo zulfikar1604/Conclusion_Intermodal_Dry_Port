@@ -32,3 +32,8 @@ if (!defined('APP_NAME')) {
 
 // Auto-load API helpers
 require_once __DIR__ . '/response.php';
+
+// Auto-load Composer Vendor Packages (Dompdf, GuzzleHTTP, Endroid QR, Dotenv)
+if (file_exists(ROOT_PATH . '/vendor/autoload.php')) {
+    require_once ROOT_PATH . '/vendor/autoload.php';
+}

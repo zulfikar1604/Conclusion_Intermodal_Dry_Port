@@ -22,3 +22,6 @@ ehthumbs_vista.db
 tmp/
 cookie*.txt
 hardware/images
+
+# Composer Vendor Directory
+vendor/
