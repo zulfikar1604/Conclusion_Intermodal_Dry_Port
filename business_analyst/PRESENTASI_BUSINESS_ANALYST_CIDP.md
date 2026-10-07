@@ -43,12 +43,13 @@
   - Zulfikar Jafarudin Fatah (Lead System Architect)
   - Dewan Konsultan Pendukung: Armansyah (Hardware), Afriansayah (Software & ERP), Juan Gamaliel (Data Integration)
 * Klien / Evaluator: Dr. Tigor Franky, S.T., M.T. — ITL Trisakti
+* **Tampilan Web & Portal:** `dashboard.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/dashboard.php`)
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Selamat pagi Bapak Dr. Tigor Franky dan rekan-rekan sekalian.  
 > Kami dari **Conclusion Supply Chain Consultant** hadir untuk menyajikan laporan kajian strategis dari sudut pandang **Business Analysis & Quality Assurance** pada proyek **Conclusion Intermodal Dry Port (CIDP) 35 Hektar**.  
 >
-> Sebagai konsultan bisnis rantai pasok, tugas kami bukan sekadar membuktikan bahwa software dan hardware berfungsi, melainkan membuktikan **apakah sistem ini menghasilkan keuntungan komersial yang terukur (Feasibility), bagaimana ragam Dashboard Business Intelligence kami menjadi alat bantu keputusan direksi (Decision Support System), serta bagaimana seluruh proses patuh terhadap standar global GS1 dan regulasi Bea Cukai CEISA 4.0.**  
+> Sebagai konsultan bisnis rantai pasok, tugas kami bukan sekadar membuktikan bahwa software dan hardware berfungsi, melainkan membuktikan **apakah sistem ini menghasilkan keuntungan komersial yang terukur (Feasibility), bagaimana ragam Dashboard Business Intelligence kami (yang dapat diakses langsung pada portal web dashboard.php) menjadi alat bantu keputusan direksi (Decision Support System), serta bagaimana seluruh proses patuh terhadap standar global GS1 dan regulasi Bea Cukai CEISA 4.0.**  
 > Hari ini, saya Naufal Andika Heditya bersama Lead Architect Zulfikar Jafarudin Fatah akan membedah tuntas temuan dan rekomendasi konsultan kami."*
 
 ---
@@ -59,6 +60,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `dashboard.php?page=beranda` (`http://localhost/Conclusion_Intermodal_Dry_Port/dashboard.php`)
 * **Kartu 1 (Perspektif Konsultan Bisnis):**
   - *Goods Flow (Fisik)* + *Information Flow (Data Telemetri)* ➔ **Financial Flow (Billable Event)**.
   - Aliran fisik dan data telemetri tidak memiliki nilai bisnis jika tidak terkonversi menjadi pendapatan tanpa kebocoran (*Zero Revenue Leakage*).
@@ -69,6 +71,7 @@
   - Layer 4 (Enterprise Integration): Sinkronisasi ERP Odoo Finance & CEISA 4.0 DJBC.
 * **Kartu 3 (Mandat Silabus Slide 13):**
   - 1. OPEX / ROI Analysis, 2. Mockup Dashboard KPI Eksekutif, 3. SRS & Penjaminan Mutu (QA).
+* **Banner Navigasi Sistem:** `👉 PUSAT NAVIGASI SISTEM: Akses Seluruh Modul Terpadu Melalui Portal 'dashboard.php?page=beranda'`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Bapak Dr. Tigor, kerangka kerja konsultan kami berakar langsung pada teori perkuliahan Pertemuan 1: IT logistik bertindak sebagai saraf yang menghubungkan **3 Aliran Utama**.  
@@ -83,6 +86,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `pages/gate.php & pages/yard.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/pages/gate.php`)
 * **Tabel Diagnosis Komparasi BPR:**
   1. *Waktu Gerbang (Gate TAT):* 12–18 Menit (Manual) ➔ **60–90 Detik** (ANPR + OCR + Timbang 80t) | *Efisiensi 89%*.
   2. *Alokasi Slot Yard:* Manual/Terselip ➔ **100% Terarah 3D Bay-Row-Tier** | *0% Box Terselip*.
@@ -90,12 +94,13 @@
   4. *Timbang VGM:* Manual terpisah ➔ **Otomatis di Gate-In (<34t)** | *SOLAS 100% Patuh*.
   5. *Penagihan:* Rekap manual 3-5 hari ➔ **Real-Time Event-Driven ke Odoo ERP** | *Zero Revenue Leakage*.
   6. *Rilis Pabean:* Berkas fisik 24-48 jam ➔ **API CEISA 4.0 Rilis SPPB <5 Menit** | *Rilis 95% Lebih Cepat*.
-* **Diagnosis Konsultan:** Rekayasa To-Be memangkas siklus kargo 66% dan mengeliminasi 100% biaya shifting sia-sia!
+* **Diagnosis Konsultan & Banner Live Demo:**  
+  `👉 [LIVE TO-BE DEMO]: Buka 'pages/gate.php' & 'pages/yard.php' ➔ Rekayasa To-Be memangkas siklus kargo 66% & eliminasi 100% boks terselip!`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Sebelum berinvestasi ratusan miliar, langkah pertama konsultan adalah mendiagnosis inefisiensi pada depo konvensional (As-Is):  
 > Truk antre 15 menit di gerbang karena pencatatan kertas, dan peti kemas tertahan rata-rata 6,8 hari.  
-> Melalui cetak biru rekayasa To-Be CIDP YMS:  
+> Melalui cetak biru rekayasa To-Be CIDP YMS yang dapat kita uji langsung pada modul `pages/gate.php` dan `pages/yard.php`:  
 > Waktu siklus gerbang kami pangkas sebesar 89% menjadi hanya 90 detik. Dan rata-rata waktu inap (dwell time) ditekan hingga 66% menjadi 2,3 hari melalui integrasi peringatan masa bebas dan jadwal keberangkatan kereta api harian. Ini melipatgandakan kecepatan perputaran modal kerja terminal."*
 
 ---
@@ -106,10 +111,11 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `pages/scanner.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/pages/scanner.php`)
 * **Kolom 1 (ISO 6346:2022 - Wadah Baja Luar):** Format `MSKU9182374`. Kode pemilik (3 char) + Kategori `U` + Seri (6 digit) + Check Digit Modulo 11. Digunakan melacak fisik peti kemas maritim.
 * **Kolom 2 (GS1 SSCC-18 - Isi Palet Kargo di CFS):** Format AI `(00)` 18 digit. Digunakan melacak isi muatan palet individual di dalam boks LCL gudang CFS.
 * **Penjaminan Mutu (QA Data):** Modulo 11 menolak nomor boks salah ketik, dan Modulo 10 menolak palet dengan barcode cacat.
-* **Banner Demo:** `👉 [LIVE DEMO 1]: Buka Menu 'Scanner SSCC / GS1' (pages/scanner.php) ➔ Pindai Barcode SSCC-18 & Validasi Cek Digit ISO 6346`
+* **Banner Demo:** `👉 [LIVE DEMO 1 - pages/scanner.php]: Buka Menu 'Scanner' ➔ Pindai Barcode GS1 SSCC-18 (AI 00) & Uji Cek Digit Modulo 11 ISO 6346`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Dalam audit standardisasi data global, konsultan sering ditanya: 'Mengapa harus menerapkan GS1 SSCC-18 jika kontainer sudah memiliki nomor ISO 6346?'  
@@ -124,6 +130,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `pages/yard.php & pages/alat.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/pages/yard.php`)
 * **Kolom 1 (CAPEX: Rp 249,5 Miliar / ± Rp 250 M):**
   - Lahan & Perkerasan Rigid 80t (35 Ha): Rp 130,0 M (52,1%)
   - Armada 3 RS Kalmar + 1 RTG Crane: Rp 55,0 M (22,0%)
@@ -138,11 +145,12 @@
   - Gaji & Payroll 82 Personil: Rp 6,89 M / Thn (27,8%)
   - Sewa Jalur Rel KA (TAC KAI Logistik): Rp 5,40 M / Thn (21,8%)
   - Perawatan Mesin M&R & Asuransi/IT: Rp 3,06 M / Thn (12,3%)
+* **Banner Referensi Aset:** `👉 [REFERENSI ASET & ALAT]: Buka 'pages/yard.php' & 'pages/alat.php' ➔ Kontrol armada 3 RS & 1 RTG, menekan beban OPEX di 32.6% omset!`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Kajian kelayakan finansial konsultan memproyeksikan kebutuhan belanja modal (CAPEX) sebesar **Rp 249,5 Miliar**, dengan porsi terbesar pada perkerasan beton kapasitas gandar 80 Ton dan armada derek berat.  
 > Yang sangat menarik secara analisis bisnis: alokasi perangkat lunak YMS dan otomasi gerbang IoT hanya memakan **Rp 8 Miliar atau 3,2% dari total CAPEX**, namun menjadi otak pengendali seluruh operasi aset fisik bernilai ratusan miliar tersebut.  
-> Sementara untuk beban operasional rutin tahunan (OPEX), terminal membutuhkan **Rp 24,78 Miliar per tahun**, atau hanya 32,6% dari total proyeksi pendapatan kotor."*
+> Sementara untuk beban operasional rutin tahunan (OPEX), terminal membutuhkan **Rp 24,78 Miliar per tahun**, atau hanya 32,6% dari total proyeksi pendapatan kotor. Seluruh aset armada ini dapat dipantau langsung pada modul `pages/yard.php` dan `pages/alat.php`."*
 
 ---
 
@@ -152,6 +160,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `pages/billing.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/pages/billing.php`)
 * **Target Throughput:** 150.000 TEU / Tahun
 * **Total Gross Revenue:** **Rp 76.025.000.000 / Tahun (± Rp 76 Miliar)**
 * **7 Aliran Pendapatan Komersial:**
@@ -163,7 +172,7 @@
   6. Jembatan Timbang VGM SOLAS: Rp 5,50 M (7,2%)
   7. Pemeriksaan Behandle Karantina Pabean: Rp 2,62 M (3,5%)
 * **Strategi Zero Revenue Leakage:** Palang Gate-Out terkunci otomatis sampai faktur di database berstatus `PAID` via webhook ERP Odoo.
-* **Banner Demo:** `👉 [LIVE DEMO 2]: Buka Menu 'Billing & Faktur ERP' (pages/billing.php) ➔ Simulasi Auto-Invoice & Integrasi Odoo`
+* **Banner Demo:** `👉 [LIVE DEMO 2 - pages/billing.php]: Buka Menu 'Billing' ➔ Simulasi Auto-Invoice Odoo & Zero Leakage`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Melalui diversifikasi 7 aliran pendapatan jasa terminal, dengan throughput moderat 150.000 TEU per tahun, CIDP diproyeksikan meraup pendapatan kotor sebesar **Rp 76,02 Miliar per tahun**.  
@@ -178,14 +187,16 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Engine Data Excel:** `MODEL_FINANSIAL_CIDP.xlsx` (`business_analyst/MODEL_FINANSIAL_DAN_BLUEPRINT_CIDP.xlsx`)
 * **Kartu 1 (Arus Kas & EBITDA):**
   Gross Revenue Rp 76,02 M – OPEX Rp 24,79 M = **EBITDA Rp 51,23 Miliar (Margin 67,4%)**. Laba Bersih Setelah Pajak (EAT): **Rp 30,21 Miliar / Tahun**. Arus Kas Bersih Tahunan: **Rp 42,71 Miliar / Tahun**.
 * **Kartu 2 (Payback Period / PBP):**
   $\text{PBP} = \frac{\text{CAPEX Rp 249,5 M}}{\text{Cash Flow Rp 42,71 M}} = \mathbf{5,84\text{ Tahun}}\ (\approx 5\text{ Thn } 10\text{ Bln})$. Modal balik lunas di bawah 6 tahun (standar aman pelabuhan 8–10 tahun).
 * **Kartu 3 (Net Present Value / NPV @10%):**
-  $\text{NPV} = \mathbf{+\text{Rp 12.955.000.000}}\ (> 0)$. Bernilai Positif membuktikan secara absolut proyek **SANGAT LAYAK (FEASIBLE)**.
+  $\text{NPV} = \mathbf{+\text{Rp 22.913.000.000}}\ (> 0)$. Bernilai Positif membuktikan secara absolut proyek **SANGAT LAYAK (FEASIBLE)**.
 * **Kartu 4 (IRR & ROI 10 Tahun):**
-  **IRR: 11,42%** (Melampaui *Hurdle Rate* kredit bank 8,50%). **ROI 10 Tahun: 121,1%** (Total laba bersih 10 tahun melampaui seluruh modal awal).
+  **IRR: 11,90%** (Melampaui *Hurdle Rate* kredit bank 8,50%). **ROI 10 Tahun: 140,6%** (Total laba bersih 10 tahun melampaui seluruh modal awal).
+* **Banner Model:** `👉 [MODEL FINANSIAL EXCEL]: Buka 'business_analyst/MODEL_FINANSIAL_DAN_BLUEPRINT_CIDP.xlsx' (Sheet 'Cash Flow 10 Thn') ➔ NPV +Rp 22,9 M • IRR 11,9% • PBP 5,98 Thn`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Inilah bukti kuantitatif utama kelayakan investasi yang kami sajikan kepada pemodal:  
@@ -203,6 +214,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `dashboard.php?page=beranda` (`http://localhost/Conclusion_Intermodal_Dry_Port/dashboard.php`)
 * **Kolom 1 (4 Metrik Keputusan Direksi - C-Level DSS):**
   1. *Yard Occupancy Rate (YOR) — 68,4%:* Ambang batas aman (<80%). Mencegah kemacetan penumpukan dan denda port congestion surcharge ($50/TEU).
   2. *Throughput Harian — 482 TEU:* Mencapai 96,4% dari target harian (500 TEU). Mengukur kecepatan intermodal gate truk dan rail siding KA.
@@ -212,7 +224,7 @@
   - *Hourly Traffic Flow Chart:* Grafik fluktuasi arus truk per jam untuk penugasan operator gate & RS (peak hour 10:00 - 15:00).
   - *Dwell Time Heatmap Blok Yard:* Peta warna mendeteksi kontainer menginap kritis (>7 hari) di Blok A-E untuk pemicu denda Masa III.
   - *Live Event Stream:* Memonitor 5 transaksi lapangan terakhir detik-per-detik untuk transparansi audit.
-* **Banner Demo:** `👉 [LIVE DEMO 3]: Buka Halaman 'Dashboard' (dashboard.php) ➔ Demonstrasikan Gauge YOR 68.4%, Chart.js, & Heatmap Dwell Time`
+* **Banner Demo:** `👉 [LIVE DEMO 3 - dashboard.php]: Buka Halaman 'Dashboard' (dashboard.php?page=beranda) ➔ Demonstrasikan Gauge YOR 68.4%, Chart.js, & Heatmap Dwell Time`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Sesuai mandat slide 13 silabus: **Mockup Dashboard KPI**. Konsultan kami tidak hanya membuat dashboard yang estetis, melainkan sebuah **Decision Support System (DSS)** berbasis Business Intelligence di `dashboard.php`.  
@@ -228,6 +240,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `pages/gate.php & pages/yard.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/pages/gate.php`)
 * **Kolom 1 (Analisis Gerbang & Trucking - page=gate & page=trucking):**
   - *Gate TAT Analisis:* Depo konvensional 15 menit vs CIDP 90 detik. Menghemat biaya tunggu armada truk pengangkut.
   - *Validasi Otomatis SOLAS VGM (<34.000 kg):* Sistem menolak otomatis truk overload >34t di gerbang, menghilangkan risiko tuntutan hukum maritim internasional dan denda kelebihan beban jalan raya.
@@ -235,7 +248,7 @@
   - *Optimasi Rasio Shifting Derek (Moves per Box):* Algoritma 3D Bay-Row-Tier menata penumpukan berdasarkan pelabuhan tujuan dan jadwal rel KA. Rasio gerak turun dari 1.8 ➔ 1.1 moves/box.
   - *Nilai Bisnis:* Menghemat konsumsi Solar HSD Reach Stacker sebesar 22% (efisiensi OPEX Rp 1,06 Miliar per tahun).
   - *Telemetri GPS Alat Berat:* Mencegah waktu henti sia-sia (*idling time*) armada RS dan RTG Crane.
-* **Banner Demo:** `👉 [LIVE DEMO 4]: Buka Menu 'Gate' (pages/gate.php) ➔ Jalankan Simulasi Truk Lolos vs Truk Overload Ditolak SOLAS`
+* **Banner Demo:** `👉 [LIVE DEMO 4 - pages/gate.php]: Buka Menu 'Gate' (pages/gate.php) ➔ Jalankan Simulasi Truk Lolos vs Truk Overload Ditolak SOLAS`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Pada Dashboard Operasional (`page=gate` dan `page=yard`), Business Analyst menganalisis titik-titik pemborosan biaya:  
@@ -250,6 +263,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `pages/reefer.php & pages/customs.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/pages/customs.php`)
 * **Kartu 1 (Cold Chain Reefer - page=reefer):**
   - 300 Plugs & IoT LoRaWAN memantau suhu kargo dingin (-18°C hingga -25°C) setiap 60 detik.
   - *Nilai Bisnis BA:* Mencegah pembusukan muatan beku (vaksin, daging, seafood) dan menghindari klaim ganti rugi asuransi kargo bernilai hingga $100.000+ per kontainer.
@@ -259,7 +273,7 @@
 * **Kartu 3 (Gudang CFS LCL - page=cfs):**
   - Fasilitas 4.000 m² & 5 rampa loading dock hidrolik (D1-D5) melayani stripping impor dan konsolidasi ekspor UMKM lokal.
   - Digital e-Tally Sheet: Pencatatan kerusakan kargo dan overage/shortage instan via tablet tally master.
-* **Banner Demo:** `👉 [LIVE DEMO 5]: Buka Menu 'Reefer' (page=reefer) & 'Kepabeanan' (page=customs) ➔ Tunjukkan Telemetri Suhu & Rilis SPPB`
+* **Banner Demo:** `👉 [LIVE DEMO 5 - pages/reefer.php & pages/customs.php]: Buka Menu 'Reefer' (page=reefer) & 'Kepabeanan' (page=customs) ➔ Tunjukkan Telemetri Suhu & Rilis SPPB`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Di fasilitas khusus, Dashboard YMS berfungsi sebagai instrumen mitigasi risiko tinggi:  
@@ -275,6 +289,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Halaman Web & Tautan:** `pages/simulator.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/pages/simulator.php`)
 * **Matriks Pengujian Kasus Ekstrem (Edge-Cases):**
   1. *QA-TC-01 (Truk Gate-In Normal <34t):* Lolos otomatis <30 detik ➔ **PASS (100%)**
   2. *QA-TC-02 (SOLAS Overweight >34t):* Alarm overload aktif, palang terkunci, LED tolak masuk ➔ **PASS (100%)**
@@ -283,11 +298,12 @@
   5. *QA-TC-05 (Yard Collision Prevention):* Larangan menaruh box di Tier 3 tanpa Tier 2 di bawahnya ➔ **PASS (100%)**
   6. *QA-TC-06 (Customs Hold):* Boks tanpa SPPB dilarang keras Gate-Out ➔ **PASS (100%)**
   7. *QA-TC-07 (Tarif Inap Progresif):* Validasi formula Masa I (Rp 0), II (Rp 45rb), III (Rp 90rb) tanpa bocor ➔ **PASS (100%)**
-* **Kepatuhan SLA Non-Fungsional:** Waktu respon API 85 ms (<150 ms), Siklus Gate 92 detik (<120s), dan Zero Revenue Leakage.
+* **Kepatuhan SLA Non-Fungsional & Banner Test Bed:**  
+  `👉 [LIVE TEST BED - pages/simulator.php]: Uji 7 Kasus Batas (Edge-Cases) di Simulator • Respon API 85 ms (<150 ms) • Zero Leakage`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Sebagai penjamin mutu (QA), konsultan menyusun matriks pengujian fungsional dan kasus ekstrem (Edge-Cases) untuk memastikan perangkat lunak tidak mengalami kegagalan fungsi di lapangan.  
-> Seluruh skenario batas—mulai dari truk overload SOLAS, nomor kontainer salah ketik, kawat segel pabean putus di jalan rel, hingga kalkulasi denda penumpukan progresif—telah diuji dan berstatus **PASS 100%**.  
+> Seluruh skenario batas—mulai dari truk overload SOLAS, nomor kontainer salah ketik, kawat segel pabean putus di jalan rel, hingga kalkulasi denda penumpukan progresif—telah diuji pada simulator `pages/simulator.php` dan berstatus **PASS 100%**.  
 > Waktu respon API berada pada rata-rata 85 milidetik, menjamin performa transaksi yang sangat cepat dan andal."*
 
 ---
@@ -298,6 +314,7 @@
 ========================================================================================
 ```
 ### Visual Slide
+* **Portal Aplikasi Terpadu:** `dashboard.php` (`http://localhost/Conclusion_Intermodal_Dry_Port/`)
 * **4 Kotak Kesimpulan Strategis:**
   1. *Kelayakan Finansial Mutlak:* CAPEX Rp 250 M balik modal dalam 5,84 tahun, Laba Bersih Rp 30,2 M/tahun, IRR 11,42%.
   2. *Efisiensi Operasional (BPR):* Waktu transaksi gerbang turun dari 15 menit ke 90 detik, Dwell Time turun dari 6,8 ke 2,3 hari.
@@ -305,6 +322,7 @@
   4. *Zero Revenue Leakage:* Event-driven billing mengeliminasi 100% kebocoran penagihan denda penumpukan.
 * **Rekomendasi Final Konsultan:**
   Sistem CIDP YMS terbukti secara kuantitatif dan empiris **SANGAT LAYAK (FEASIBLE)** untuk dilanjutkan ke tahap implementasi komersial.
+* **Banner Penutup:** `🌐 LIVE PORTAL: http://localhost/Conclusion_Intermodal_Dry_Port/  •  SESI TANYA JAWAB (Q&A)  •  DR. TIGOR FRANKY, S.T., M.T.`
 
 ### Skrip Pembicara (Speaker Notes)
 > *"Bapak Dr. Tigor Franky dan rekan-rekan sekalian,  
@@ -312,7 +330,7 @@
 > Pertama, proyek ini menguntungkan secara finansial dengan pengembalian investasi dalam 5,8 tahun.  
 > Kedua, rekayasa proses To-Be memangkas dwell time hingga 66%.  
 > Ketiga, multi-dashboard yang kami bangun bertindak sebagai instrumen intelijen bisnis yang menekan biaya BBM derek dan memitigasi risiko klaim kargo.  
-> Dan keempat, seluruh sistem 100% patuh terhadap standar global GS1 dan regulasi Bea Cukai CEISA 4.0.  
+> Dan keempat, seluruh sistem 100% patuh terhadap standar global GS1 dan regulasi Bea Cukai CEISA 4.0. Seluruh ekosistem ini telah terintegrasi penuh dan dapat langsung diakses pada portal web CIDP.  
 >
 > Rekomendasi konsultan kami adalah melanjutkan cetak biru ini ke tahap implementasi komersial.  
 > Terima kasih atas perhatian Bapak Dosen dan rekan-rekan mahasiswa. Kami menyambut sesi diskusi dan tanya jawab dengan antusias. Selamat pagi."*

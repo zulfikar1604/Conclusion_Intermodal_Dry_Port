@@ -34,24 +34,60 @@ def create_ba_presentation():
     C_RED_BG = RGBColor(254, 242, 242)  # #fef2f2
     C_RED = RGBColor(239, 68, 68)
 
-    def add_header(slide, title_text, category_text="CONCLUSION SUPPLY CHAIN CONSULTANT — STRATEGIC BUSINESS BLUEPRINT"):
-        header_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.35), Inches(11.7), Inches(1.1))
+    def add_header(slide, title_text, category_text="CONCLUSION SUPPLY CHAIN CONSULTANT — STRATEGIC BUSINESS BLUEPRINT", web_page=None, web_url=None):
+        box_width = Inches(8.2) if web_page else Inches(11.7)
+        header_box = slide.shapes.add_textbox(Inches(0.8), Inches(0.30), box_width, Inches(1.15))
         tf = header_box.text_frame
         tf.word_wrap = True
         tf.margin_left = tf.margin_top = tf.margin_right = tf.margin_bottom = 0
         
         p0 = tf.paragraphs[0]
         p0.text = category_text.upper()
-        p0.font.size = Pt(9.5)
+        p0.font.size = Pt(8.5)
         p0.font.bold = True
         p0.font.color.rgb = C_BLUE
         
         p1 = tf.add_paragraph()
         p1.text = title_text
-        p1.font.size = Pt(19)
+        p1.font.size = Pt(17) if web_page else Pt(19)
         p1.font.bold = True
         p1.font.color.rgb = C_NAVY
         p1.space_before = Pt(2)
+
+        # Web Showcase Badge on Top Right
+        if web_page:
+            badge_card = slide.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(9.1), Inches(0.28), Inches(3.4), Inches(1.02))
+            badge_card.fill.solid()
+            badge_card.fill.fore_color.rgb = C_BLUE_BG
+            badge_card.line.color.rgb = C_BLUE
+            badge_card.line.width = Pt(1)
+            btf = badge_card.text_frame
+            btf.word_wrap = True
+            btf.margin_left = Inches(0.12)
+            btf.margin_right = Inches(0.12)
+            btf.margin_top = Inches(0.08)
+            btf.margin_bottom = Inches(0.08)
+            
+            bp0 = btf.paragraphs[0]
+            bp0.text = "🌐 HALAMAN WEB / LIVE DEMO"
+            bp0.font.size = Pt(7.5)
+            bp0.font.bold = True
+            bp0.font.color.rgb = C_BLUE
+            
+            bp1 = btf.add_paragraph()
+            bp1.text = web_page
+            bp1.font.size = Pt(9.5)
+            bp1.font.bold = True
+            bp1.font.color.rgb = C_NAVY
+            bp1.space_before = Pt(1)
+            
+            if web_url:
+                bp2 = btf.add_paragraph()
+                bp2.text = web_url
+                bp2.font.size = Pt(7)
+                bp2.font.italic = True
+                bp2.font.color.rgb = C_MUTED
+                bp2.space_before = Pt(1)
 
     def add_footer(slide, current_slide):
         footer_box = slide.shapes.add_textbox(Inches(0.8), Inches(7.05), Inches(11.7), Inches(0.35))
@@ -178,30 +214,36 @@ def create_ba_presentation():
     p.space_before = Pt(6)
 
     # Footer Box
-    fbox = s1.shapes.add_textbox(Inches(1.1), Inches(6.35), Inches(11.4), Inches(0.7))
+    fbox = s1.shapes.add_textbox(Inches(1.1), Inches(6.25), Inches(11.4), Inches(0.9))
     ftf = fbox.text_frame
     ftf.word_wrap = True
     ftf.margin_left = ftf.margin_top = ftf.margin_right = ftf.margin_bottom = 0
     p = ftf.paragraphs[0]
     p.text = "Klien / Evaluator Akademik: Dr. Tigor Franky, S.T., M.T.  •  Mata Kuliah: Teknologi dan Perangkat Lunak Logistik"
-    p.font.size = Pt(10)
+    p.font.size = Pt(9.5)
     p.font.bold = True
     p.font.color.rgb = RGBColor(203, 213, 225)
     p = ftf.add_paragraph()
     p.text = "Program Studi S1 Manajemen Logistik  •  Institut Transportasi dan Logistik (ITL) Trisakti  •  Oktober 2026"
-    p.font.size = Pt(9.5)
+    p.font.size = Pt(9)
     p.font.color.rgb = RGBColor(148, 163, 184)
+    p.space_before = Pt(1)
+    p = ftf.add_paragraph()
+    p.text = "🌐 Live Web Application Portal: http://localhost/Conclusion_Intermodal_Dry_Port/dashboard.php"
+    p.font.size = Pt(9)
+    p.font.bold = True
+    p.font.color.rgb = RGBColor(56, 189, 248)
     p.space_before = Pt(2)
 
     # =========================================================================
     # SLIDE 2: KERANGKA KERJA KONSULTAN (FINANCIAL FLOW & 4-LAYER)
     # =========================================================================
     s2 = prs.slides.add_slide(blank_layout)
-    add_header(s2, "Kerangka Kerja Konsultan: Pengendalian Aliran Finansial (Financial Flow)")
+    add_header(s2, "Kerangka Kerja Konsultan: Pengendalian Aliran Finansial (Financial Flow)", web_page="dashboard.php?page=beranda", web_url="http://localhost/.../dashboard.php")
     add_footer(s2, 2)
 
     card_w = Inches(3.7)
-    card_h = Inches(5.1)
+    card_h = Inches(4.55)
 
     # Card 1: 3 Aliran Logistik
     create_card(s2, Inches(0.8), Inches(1.65), card_w, card_h)
@@ -221,9 +263,9 @@ def create_ba_presentation():
     p.space_before = Pt(2)
     p = tf.add_paragraph()
     p.text = "• Goods Flow (Fisik):\n  Gerak peti kemas di area 35 Ha (Gate ➔ Yard ➔ Rail Siding).\n\n• Information Flow (Data Telemetri):\n  Status boks, nomor ISO, bobot VGM, koordinat 3D Bay-Row-Tier, suhu reefer, & kode palet SSCC.\n\n• Financial Flow (INTI KONSULTAN):\n  Mengubah peristiwa fisik menjadi penagihan sah (billable event) secara otomatis tanpa kebocoran (Zero Revenue Leakage)."
-    p.font.size = Pt(9.5)
+    p.font.size = Pt(8.5)
     p.font.color.rgb = C_TEXT
-    p.space_before = Pt(6)
+    p.space_before = Pt(4)
 
     # Card 2: 4-Layer IT
     create_card(s2, Inches(4.8), Inches(1.65), card_w, card_h, bg_color=C_BLUE_BG, border_color=C_BLUE)
@@ -243,9 +285,9 @@ def create_ba_presentation():
     p.space_before = Pt(2)
     p = tf.add_paragraph()
     p.text = "• Layer 1 (Sensing):\n  Audit utilisasi 26 alat fisik & sensor bernilai miliaran rupiah.\n\n• Layer 2 (Network):\n  Menjamin kontinuitas data penagihan & telemetri tanpa paket hilang.\n\n• Layer 3 (Application YMS):\n  Merancang aturan tarif progresif, aturan penumpukan, dan kepatuhan pabean.\n\n• Layer 4 (Enterprise Integration):\n  Sinkronisasi data ke ERP Odoo Finansial & CEISA 4.0 Bea Cukai."
-    p.font.size = Pt(9.5)
+    p.font.size = Pt(8.5)
     p.font.color.rgb = C_TEXT
-    p.space_before = Pt(6)
+    p.space_before = Pt(4)
 
     # Card 3: Mandat BA & QA
     create_card(s2, Inches(8.8), Inches(1.65), card_w, card_h)
@@ -266,15 +308,17 @@ def create_ba_presentation():
     p.space_before = Pt(2)
     p = tf.add_paragraph()
     p.text = "1. OPEX / ROI Analysis (Kelayakan Bisnis):\n   Menghitung belanja operasional rutin, PBP, NPV, IRR, dan efisiensi biaya terminal.\n\n2. Mockup Dashboard KPI Eksekutif:\n   Visualisasi Business Intelligence penentu keputusan (Throughput, YOR, Dwell Time, Gross Daily Revenue).\n\n3. Dokumen SRS & Penjaminan Mutu (QA):\n   Standardisasi format GS1, pengujian kasus batas (Edge-Cases), dan kepatuhan regulasi."
-    p.font.size = Pt(9.5)
+    p.font.size = Pt(8.5)
     p.font.color.rgb = C_TEXT
-    p.space_before = Pt(6)
+    p.space_before = Pt(4)
+
+    add_demo_banner(s2, "PUSAT NAVIGASI SISTEM: Akses Seluruh Modul Terpadu Melalui Portal 'dashboard.php?page=beranda'", top=Inches(6.32))
 
     # =========================================================================
     # SLIDE 3: BPR AS-IS VS TO-BE
     # =========================================================================
     s3 = prs.slides.add_slide(blank_layout)
-    add_header(s3, "Rekayasa Ulang Proses Bisnis (Business Process Reengineering - BPR)")
+    add_header(s3, "Rekayasa Ulang Proses Bisnis (BPR: As-Is vs To-Be)", web_page="pages/gate.php & pages/yard.php", web_url="http://localhost/.../pages/gate.php")
     add_footer(s3, 3)
 
     rows, cols = 7, 4
@@ -319,7 +363,7 @@ def create_ba_presentation():
                 p.font.bold = True
                 p.font.color.rgb = C_EMERALD
 
-    f_bar = s3.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(6.15), Inches(11.7), Inches(0.65))
+    f_bar = s3.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(6.12), Inches(11.7), Inches(0.68))
     f_bar.fill.solid()
     f_bar.fill.fore_color.rgb = C_BLUE_BG
     f_bar.line.color.rgb = C_BLUE
@@ -327,7 +371,7 @@ def create_ba_presentation():
     tf = f_bar.text_frame
     tf.word_wrap = True
     p = tf.paragraphs[0]
-    p.text = "DIAGNOSIS KONSULTAN: Rekayasa To-Be memangkas siklus kargo sebesar 66% dan mengeliminasi 100% biaya shifting kontainer sia-sia di lapangan!"
+    p.text = "👉 [LIVE TO-BE DEMO]: Buka 'pages/gate.php' & 'pages/yard.php' ➔ Rekayasa To-Be memangkas siklus kargo 66% & eliminasi 100% boks terselip!"
     p.font.size = Pt(9)
     p.font.bold = True
     p.font.color.rgb = C_NAVY
@@ -337,7 +381,7 @@ def create_ba_presentation():
     # SLIDE 4: STANDAR MUTU GS1 SSCC-18 VS ISO 6346 [LIVE DEMO]
     # =========================================================================
     s4 = prs.slides.add_slide(blank_layout)
-    add_header(s4, "Standar Identifikasi Global: GS1 SSCC-18 vs Kontainer ISO 6346")
+    add_header(s4, "Standar Identifikasi Global: GS1 SSCC-18 vs Kontainer ISO 6346", web_page="pages/scanner.php", web_url="http://localhost/.../pages/scanner.php")
     add_footer(s4, 4)
 
     col_w = Inches(5.7)
@@ -387,13 +431,13 @@ def create_ba_presentation():
     p.font.color.rgb = C_TEXT
     p.space_before = Pt(6)
 
-    add_demo_banner(s4, "[LIVE DEMO 1]: Buka Menu 'Scanner SSCC / GS1' (pages/scanner.php) ➔ Pindai Barcode SSCC-18 & Validasi Cek Digit ISO 6346")
+    add_demo_banner(s4, "[LIVE DEMO 1 - pages/scanner.php]: Buka Menu 'Scanner' ➔ Pindai Barcode GS1 SSCC-18 (AI 00) & Uji Cek Digit Modulo 11 ISO 6346")
 
     # =========================================================================
     # SLIDE 5: CAPEX & OPEX
     # =========================================================================
     s5 = prs.slides.add_slide(blank_layout)
-    add_header(s5, "Studi Kelayakan Finansial: Struktur CAPEX Rp 250 M & OPEX Rp 24.8 M/Thn")
+    add_header(s5, "Studi Kelayakan Finansial: Struktur CAPEX Rp 250 M & OPEX Rp 24.8 M/Thn", web_page="pages/yard.php & pages/alat.php", web_url="http://localhost/.../pages/yard.php")
     add_footer(s5, 5)
 
     col_w = Inches(5.7)
@@ -450,7 +494,7 @@ def create_ba_presentation():
     s_bar.line.width = Pt(1)
     tf = s_bar.text_frame
     p = tf.paragraphs[0]
-    p.text = "RASIO EFISIENSI OPEX: Beban operasional tahunan hanya 32.6% dari total proyeksi pendapatan kotor terminal!"
+    p.text = "👉 [REFERENSI ASET & ALAT]: Buka 'pages/yard.php' & 'pages/alat.php' ➔ Kontrol armada 3 RS & 1 RTG, menekan beban OPEX di 32.6% omset!"
     p.font.size = Pt(9)
     p.font.bold = True
     p.font.color.rgb = RGBColor(180, 83, 9)
@@ -460,7 +504,7 @@ def create_ba_presentation():
     # SLIDE 6: REVENUE STREAMS & ZERO LEAKAGE [LIVE DEMO]
     # =========================================================================
     s6 = prs.slides.add_slide(blank_layout)
-    add_header(s6, "Model Pendapatan (Revenue Streams) & Strategi Zero Revenue Leakage")
+    add_header(s6, "Model Pendapatan (Revenue Streams) & Strategi Zero Revenue Leakage", web_page="pages/billing.php", web_url="http://localhost/.../pages/billing.php")
     add_footer(s6, 6)
 
     rows, cols = 8, 4
@@ -506,13 +550,13 @@ def create_ba_presentation():
                 p.font.bold = True
                 p.font.color.rgb = C_EMERALD
 
-    add_demo_banner(s6, "TOTAL GROSS REVENUE: Rp 76.025.000.000 / Thn  |  [LIVE DEMO 2]: Buka Menu 'Billing & Faktur ERP' (pages/billing.php) ➔ Simulasi Auto-Invoice Odoo", top=Inches(5.9))
+    add_demo_banner(s6, "TOTAL REVENUE: Rp 76,02 M/Thn  |  [LIVE DEMO 2 - pages/billing.php]: Buka Menu 'Billing' ➔ Simulasi Auto-Invoice Odoo & Zero Leakage", top=Inches(5.9))
 
     # =========================================================================
     # SLIDE 7: EVALUASI INVESTASI FINANSIAL
     # =========================================================================
     s7 = prs.slides.add_slide(blank_layout)
-    add_header(s7, "Evaluasi Kelayakan Investasi Finansial: PBP, NPV, IRR & ROI")
+    add_header(s7, "Evaluasi Kelayakan Investasi Finansial: PBP, NPV, IRR & ROI", web_page="MODEL_FINANSIAL_CIDP.xlsx", web_url="Model Arus Kas 10 Tahun (Excel)")
     add_footer(s7, 7)
 
     card_w = Inches(2.75)
@@ -572,6 +616,7 @@ def create_ba_presentation():
     p.font.size = Pt(9.5)
     p.font.bold = True
     p.font.color.rgb = C_BLUE
+    p.space_before = Pt(0)
     p = tf.add_paragraph()
     p.text = "+Rp 12.955.000.000"
     p.font.size = Pt(12)
@@ -613,7 +658,7 @@ def create_ba_presentation():
     e_bar.line.width = Pt(1)
     tf = e_bar.text_frame
     p = tf.paragraphs[0]
-    p.text = "KESIMPULAN STUDI FINANSIAL:  Payback Period 5.84 Tahun  •  NPV Positif +Rp 13 Miliar  •  IRR 11.42%  •  Margin EBITDA 67.4%"
+    p.text = "👉 [MODEL FINANSIAL EXCEL]: Buka 'business_analyst/MODEL_FINANSIAL_DAN_BLUEPRINT_CIDP.xlsx' (Sheet 'Cash Flow 10 Thn') ➔ NPV +Rp 22,9 M • IRR 11,9% • PBP 5,98 Thn"
     p.font.size = Pt(9)
     p.font.bold = True
     p.font.color.rgb = RGBColor(180, 83, 9)
@@ -623,7 +668,7 @@ def create_ba_presentation():
     # SLIDE 8: DASHBOARD INTELLIGENCE 1 — EXECUTIVE COMMAND CENTER
     # =========================================================================
     s8 = prs.slides.add_slide(blank_layout)
-    add_header(s8, "Dashboard Intelligence 1: Executive Command Center (dashboard.php)")
+    add_header(s8, "Dashboard Intelligence 1: Executive Command Center", web_page="dashboard.php?page=beranda", web_url="http://localhost/.../dashboard.php")
     add_footer(s8, 8)
 
     col_w = Inches(5.7)
@@ -673,13 +718,13 @@ def create_ba_presentation():
     p.font.color.rgb = C_TEXT
     p.space_before = Pt(6)
 
-    add_demo_banner(s8, "[LIVE DEMO 3]: Buka Halaman 'Dashboard' (dashboard.php) ➔ Demonstrasikan Gauge YOR 68.4%, Chart.js, & Heatmap Dwell Time")
+    add_demo_banner(s8, "[LIVE DEMO 3 - dashboard.php]: Buka Halaman 'Dashboard' ➔ Ulas Gauge YOR 68.4%, Chart.js Trafik Truk, & Heatmap Dwell Time")
 
     # =========================================================================
     # SLIDE 9: DASHBOARD INTELLIGENCE 2 — OPERASIONAL & YARD OPTIMIZATION
     # =========================================================================
     s9 = prs.slides.add_slide(blank_layout)
-    add_header(s9, "Dashboard Intelligence 2: Efisiensi Lapangan & Mitigasi Biaya Operasional")
+    add_header(s9, "Dashboard Intelligence 2: Efisiensi Lapangan & Mitigasi Biaya Operasional", web_page="pages/gate.php & pages/yard.php", web_url="http://localhost/.../pages/gate.php")
     add_footer(s9, 9)
 
     col_w = Inches(5.7)
@@ -729,13 +774,13 @@ def create_ba_presentation():
     p.font.color.rgb = C_TEXT
     p.space_before = Pt(6)
 
-    add_demo_banner(s9, "[LIVE DEMO 4]: Buka Menu 'Gate' (pages/gate.php) ➔ Jalankan Simulasi Truk Lolos vs Truk Overload Ditolak SOLAS")
+    add_demo_banner(s9, "[LIVE DEMO 4 - pages/gate.php]: Buka Menu 'Gate' ➔ Jalankan Simulasi Kamera OCR, ANPR, & Uji Tolak Truk Overload SOLAS (>34t)")
 
     # =========================================================================
     # SLIDE 10: DASHBOARD INTELLIGENCE 3 — MITIGASI RISIKO KHUSUS
     # =========================================================================
     s10 = prs.slides.add_slide(blank_layout)
-    add_header(s10, "Dashboard Intelligence 3: Mitigasi Risiko Cold Chain, Pabean & CFS")
+    add_header(s10, "Dashboard Intelligence 3: Mitigasi Risiko Cold Chain, Pabean & CFS", web_page="pages/reefer.php & pages/customs.php", web_url="http://localhost/.../pages/customs.php")
     add_footer(s10, 10)
 
     card_w = Inches(3.7)
@@ -807,13 +852,13 @@ def create_ba_presentation():
     p.font.color.rgb = C_TEXT
     p.space_before = Pt(4)
 
-    add_demo_banner(s10, "[LIVE DEMO 5]: Buka Menu 'Reefer' (page=reefer) & 'Kepabeanan' (page=customs) ➔ Tunjukkan Telemetri Suhu & Rilis SPPB")
+    add_demo_banner(s10, "[LIVE DEMO 5 - pages/reefer.php & pages/customs.php]: Buka Menu 'Reefer' (Suhu 300 Plugs) & 'Pabean' (Rilis SPPB CEISA 4.0)")
 
     # =========================================================================
     # SLIDE 11: QA MATRIX & EDGE CASES
     # =========================================================================
     s11 = prs.slides.add_slide(blank_layout)
-    add_header(s11, "Penjaminan Mutu Sistem (QA Testing Matrix) & Kepatuhan SLA")
+    add_header(s11, "Penjaminan Mutu Sistem (QA Testing Matrix) & Kepatuhan SLA", web_page="pages/simulator.php", web_url="http://localhost/.../pages/simulator.php")
     add_footer(s11, 11)
 
     # Table QA Matrix
@@ -860,14 +905,14 @@ def create_ba_presentation():
                 p.font.bold = True
                 p.font.color.rgb = C_EMERALD
 
-    sla_bar = s11.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(6.15), Inches(11.7), Inches(0.65))
+    sla_bar = s11.shapes.add_shape(MSO_SHAPE.ROUNDED_RECTANGLE, Inches(0.8), Inches(6.12), Inches(11.7), Inches(0.68))
     sla_bar.fill.solid()
     sla_bar.fill.fore_color.rgb = C_GREEN_BG
     sla_bar.line.color.rgb = C_EMERALD
     sla_bar.line.width = Pt(1)
     tf = sla_bar.text_frame
     p = tf.paragraphs[0]
-    p.text = "PENJAMINAN MUTU NON-FUNGSIONAL: Waktu Respon API 85 ms (<150 ms)  •  Siklus Gate 92s (<120s)  •  Zero Revenue Leakage (0% Bocor)"
+    p.text = "👉 [LIVE TEST BED - pages/simulator.php]: Uji 7 Kasus Batas (Edge-Cases) di Simulator  •  Respon API 85 ms (<150 ms)  •  Zero Leakage"
     p.font.size = Pt(9)
     p.font.bold = True
     p.font.color.rgb = RGBColor(6, 95, 70)
@@ -877,7 +922,7 @@ def create_ba_presentation():
     # SLIDE 12: KESIMPULAN REKOMENDASI KONSULTAN
     # =========================================================================
     s12 = prs.slides.add_slide(blank_layout)
-    add_header(s12, "Kesimpulan Eksekutif Business Analyst & Rekomendasi Konsultan")
+    add_header(s12, "Kesimpulan Eksekutif Business Analyst & Rekomendasi Konsultan", web_page="dashboard.php (Integrated Portal)", web_url="http://localhost/Conclusion_Intermodal_Dry_Port/")
     add_footer(s12, 12)
 
     card_w = Inches(2.75)
@@ -935,7 +980,7 @@ def create_ba_presentation():
     p.space_before = Pt(3)
 
     p = tf.add_paragraph()
-    p.text = "SESI TANYA JAWAB (Q&A)  •  DOSEN PENGAMPU: DR. TIGOR FRANKY, S.T., M.T.  •  TERIMA KASIH"
+    p.text = "🌐 LIVE PORTAL: http://localhost/Conclusion_Intermodal_Dry_Port/  •  SESI TANYA JAWAB (Q&A)  •  DR. TIGOR FRANKY, S.T., M.T."
     p.font.size = Pt(9.5)
     p.font.bold = True
     p.font.color.rgb = C_AMBER
