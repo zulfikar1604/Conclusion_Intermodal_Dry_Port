@@ -7,25 +7,19 @@
 // Koneksi: conclusion-intermodal-dry-port.odoo.com (Odoo Enterprise saas~19.4+e)
 // =============================================================================
 
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+require_once __DIR__ . '/../config/app.php';
+require_once __DIR__ . '/../config/connection.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
+api_init_headers();
 
-// Konfigurasi Odoo Cloud
-$odoo_host = 'https://conclusion-intermodal-dry-port.odoo.com';
-$odoo_db   = 'conclusion-intermodal-dry-port';
-$odoo_user = 'zulfikarjafarudinfatah@gmail.com';
-$odoo_pass = '@Zulfikar123';
+// Konfigurasi Odoo Cloud dari config/app.php (dapat di-override via request jika diperlukan)
+$odoo_host = defined('ODOO_DEFAULT_HOST') ? ODOO_DEFAULT_HOST : 'https://conclusion-intermodal-dry-port.odoo.com';
+$odoo_db   = defined('ODOO_DEFAULT_DB')   ? ODOO_DEFAULT_DB   : 'conclusion-intermodal-dry-port';
+$odoo_user = defined('ODOO_DEFAULT_USER') ? ODOO_DEFAULT_USER : 'zulfikarjafarudinfatah@gmail.com';
+$odoo_pass = defined('ODOO_DEFAULT_PASS') ? ODOO_DEFAULT_PASS : '@Zulfikar123';
 
-$raw_input = file_get_contents('php://input');
-$json_input = json_decode($raw_input, true) ?? [];
-$action = $_GET['action'] ?? $json_input['action'] ?? $_POST['action'] ?? 'ping';
+$json_input = get_json_input();
+$action = $json_input['action'] ?? 'ping';
 
 /**
  * HTTP POST helper (JSON-RPC)

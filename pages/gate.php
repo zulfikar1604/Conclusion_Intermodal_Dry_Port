@@ -1813,10 +1813,10 @@ foreach ($hardware_list as $item) {
                 <div>
                     <span class="text-[11px] font-bold uppercase tracking-wider text-gray-400">Dokumen Acuan Resmi</span>
                     <p class="text-xs text-gray-700 font-semibold mt-1">File Word & Markdown Tersedia di Direktori:</p>
-                    <p class="text-[11px] font-mono text-gray-500 bg-gray-50 p-1.5 rounded mt-1 border border-gray-200">hardware/KATALOG_HARDWARE_CIDP.md</p>
+                    <p class="text-[11px] font-mono text-gray-500 bg-gray-50 p-1.5 rounded mt-1 border border-gray-200">docs/hardware/KATALOG_HARDWARE_CIDP.md</p>
                 </div>
                 <div class="mt-3 flex items-center space-x-2">
-                    <a href="hardware/KATALOG_HARDWARE_CIDP.md" target="_blank" class="text-xs text-[#0170b9] hover:underline font-bold flex items-center">
+                    <a href="docs/hardware/KATALOG_HARDWARE_CIDP.md" target="_blank" class="text-xs text-[#0170b9] hover:underline font-bold flex items-center">
                         <i class="fa-solid fa-file-lines mr-1"></i> Buka Katalog MD
                     </a>
                 </div>
@@ -1868,7 +1868,7 @@ foreach ($hardware_list as $item) {
                             <td class="py-3 px-3 text-center font-bold text-gray-400"><?= $hw['no'] ?></td>
                             <td class="py-2 px-2 text-center">
                                 <div class="w-12 h-12 rounded-lg bg-slate-50 border border-gray-200 p-1 flex items-center justify-center overflow-hidden mx-auto shadow-2xs hover:shadow-md transition-shadow group/img relative">
-                                    <img src="hardware/images/converted/item_<?= $hw['no'] ?>.png" alt="<?= htmlspecialchars($hw['nama']) ?>" class="max-w-full max-h-full object-contain group-hover/img:scale-125 transition-transform" loading="lazy">
+                                    <img src="assets/img/hardware/converted/item_<?= $hw['no'] ?>.png" alt="<?= htmlspecialchars($hw['nama']) ?>" class="max-w-full max-h-full object-contain group-hover/img:scale-125 transition-transform" loading="lazy">
                                 </div>
                             </td>
                             <td class="py-3 px-3.5 font-bold text-gray-900"><?= htmlspecialchars($hw['nama']) ?></td>

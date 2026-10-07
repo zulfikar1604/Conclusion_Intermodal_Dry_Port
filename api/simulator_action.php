@@ -5,22 +5,14 @@
 // Mendukung aksi operasional Reach Stacker, Gate-In VGM, dan Alih Muat KA
 // =============================================================================
 
-header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+require_once __DIR__ . '/../config/app.php';
+require_once __DIR__ . '/../config/connection.php';
 
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'OPTIONS') {
-    http_response_code(200);
-    exit;
-}
-
-require_once __DIR__ . '/../connection.php';
+api_init_headers();
 
 // Ambil input JSON atau GET/POST parameter
-$input_raw = file_get_contents('php://input');
-$input = json_decode($input_raw, true) ?? [];
-$action = $_GET['action'] ?? $input['action'] ?? $_POST['action'] ?? $_REQUEST['action'] ?? '';
+$input = get_json_input();
+$action = $input['action'] ?? '';
 
 try {
     switch ($action) {

@@ -21,11 +21,11 @@ $zones_data = [
         'icon' => 'fa-door-open',
         'color' => '#0284c7',
         'facilities' => [
-            ['id' => 'f_gate_in', 'nama' => 'Gatehouse Inbound', 'desc' => 'Pos kontrol masuk 2 lane dilengkapi Kamera ANPR, OCR Portal, RFID Reader, dan Industrial Edge AI PC.', 'icon' => 'fa-arrow-right-to-bracket', 'hw_id' => 2, 'hw_nama' => 'Kamera OCR Kontainer Portal & ANPR', 'img' => 'hardware/images/converted/item_2.png'],
-            ['id' => 'f_gate_out', 'nama' => 'Gatehouse Outbound', 'desc' => 'Pos kontrol keluar 2 lane dengan pembacaan e-Pass dan palang barrier gate otomatis.', 'icon' => 'fa-arrow-right-from-bracket', 'hw_id' => 9, 'hw_nama' => 'Automatic Barrier Gate & ANPR', 'img' => 'hardware/images/converted/item_9.png'],
-            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station', 'desc' => 'Bangunan jembatan timbang kendaraan kapasitas 80 ton bersertifikasi SOLAS VGM.', 'icon' => 'fa-scale-balanced', 'hw_id' => 6, 'hw_nama' => 'Weighbridge / VGM Scale 80t', 'img' => 'hardware/images/converted/item_6.png'],
-            ['id' => 'f_security_gate', 'nama' => 'Security Post 24 Jam', 'desc' => 'Pos keamanan gerbang utama, verifikasi dokumen surat jalan, dan penerbitan izin masuk.', 'icon' => 'fa-shield-halved', 'hw_id' => 7, 'hw_nama' => 'Long-Range UHF RFID Reader', 'img' => 'hardware/images/converted/item_7.png'],
-            ['id' => 'f_truck_queue', 'nama' => 'Parkir Truk Antrian', 'desc' => 'Area parkir tunggu (queuing yard) berkapasitas 40 truk trailer untuk mencegah antrean di jalan arteri.', 'icon' => 'fa-truck-moving', 'hw_id' => 17, 'hw_nama' => 'GPS Tracker Truck & Fleet', 'img' => 'hardware/images/converted/item_17.png']
+            ['id' => 'f_gate_in', 'nama' => 'Gatehouse Inbound', 'desc' => 'Pos kontrol masuk 2 lane dilengkapi Kamera ANPR, OCR Portal, RFID Reader, dan Industrial Edge AI PC.', 'icon' => 'fa-arrow-right-to-bracket', 'hw_id' => 2, 'hw_nama' => 'Kamera OCR Kontainer Portal & ANPR', 'img' => 'assets/img/hardware/converted/item_2.png'],
+            ['id' => 'f_gate_out', 'nama' => 'Gatehouse Outbound', 'desc' => 'Pos kontrol keluar 2 lane dengan pembacaan e-Pass dan palang barrier gate otomatis.', 'icon' => 'fa-arrow-right-from-bracket', 'hw_id' => 9, 'hw_nama' => 'Automatic Barrier Gate & ANPR', 'img' => 'assets/img/hardware/converted/item_9.png'],
+            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station', 'desc' => 'Bangunan jembatan timbang kendaraan kapasitas 80 ton bersertifikasi SOLAS VGM.', 'icon' => 'fa-scale-balanced', 'hw_id' => 6, 'hw_nama' => 'Weighbridge / VGM Scale 80t', 'img' => 'assets/img/hardware/converted/item_6.png'],
+            ['id' => 'f_security_gate', 'nama' => 'Security Post 24 Jam', 'desc' => 'Pos keamanan gerbang utama, verifikasi dokumen surat jalan, dan penerbitan izin masuk.', 'icon' => 'fa-shield-halved', 'hw_id' => 7, 'hw_nama' => 'Long-Range UHF RFID Reader', 'img' => 'assets/img/hardware/converted/item_7.png'],
+            ['id' => 'f_truck_queue', 'nama' => 'Parkir Truk Antrian', 'desc' => 'Area parkir tunggu (queuing yard) berkapasitas 40 truk trailer untuk mencegah antrean di jalan arteri.', 'icon' => 'fa-truck-moving', 'hw_id' => 17, 'hw_nama' => 'GPS Tracker Truck & Fleet', 'img' => 'assets/img/hardware/converted/item_17.png']
         ]
     ],
     'cfs_yard' => [
@@ -33,10 +33,10 @@ $zones_data = [
         'icon' => 'fa-boxes-stacked',
         'color' => '#4f46e5',
         'facilities' => [
-            ['id' => 'f_cfs', 'nama' => 'Container Freight Station (CFS)', 'desc' => 'Gudang modern 4.000 m² untuk aktivitas bongkar muat kargo LCL (stripping-stuffing) dan konsolidasi barang.', 'icon' => 'fa-warehouse', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Gudang CFS', 'img' => 'hardware/images/converted/item_15.png'],
-            ['id' => 'f_empty_depot', 'nama' => 'Empty Container Depot', 'desc' => 'Area penyimpanan peti kemas kosong (empty boxes) 20ft/40ft dengan kapasitas 2.500 TEUs.', 'icon' => 'fa-box-open', 'hw_id' => 20, 'hw_nama' => 'Terminal VMT Alat Berat Empty Depot', 'img' => 'hardware/images/converted/item_20.png'],
-            ['id' => 'f_warehouse', 'nama' => 'Warehouse / Gudang Transit', 'desc' => 'Gudang tertutup untuk muatan bernilai tinggi, transit distribusi barang, dan cross-docking.', 'icon' => 'fa-dolly', 'hw_id' => 17, 'hw_nama' => 'GPS Asset Tracker Transit Kargo', 'img' => 'hardware/images/converted/item_17.png'],
-            ['id' => 'f_stacking_yard', 'nama' => 'Container Stacking Yard (Blok A-E)', 'desc' => 'Lapangan penumpukan utama 15 Ha: Blok A/B (Laden Ekspor-Impor), Blok C (Domestik), Blok D (Buffer), Blok E (Dangerous Goods).', 'icon' => 'fa-cubes', 'hw_id' => 21, 'hw_nama' => 'DGPS / RTK GNSS Receiver Reach Stacker', 'img' => 'hardware/images/converted/item_21.png']
+            ['id' => 'f_cfs', 'nama' => 'Container Freight Station (CFS)', 'desc' => 'Gudang modern 4.000 m² untuk aktivitas bongkar muat kargo LCL (stripping-stuffing) dan konsolidasi barang.', 'icon' => 'fa-warehouse', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Gudang CFS', 'img' => 'assets/img/hardware/converted/item_15.png'],
+            ['id' => 'f_empty_depot', 'nama' => 'Empty Container Depot', 'desc' => 'Area penyimpanan peti kemas kosong (empty boxes) 20ft/40ft dengan kapasitas 2.500 TEUs.', 'icon' => 'fa-box-open', 'hw_id' => 20, 'hw_nama' => 'Terminal VMT Alat Berat Empty Depot', 'img' => 'assets/img/hardware/converted/item_20.png'],
+            ['id' => 'f_warehouse', 'nama' => 'Warehouse / Gudang Transit', 'desc' => 'Gudang tertutup untuk muatan bernilai tinggi, transit distribusi barang, dan cross-docking.', 'icon' => 'fa-dolly', 'hw_id' => 17, 'hw_nama' => 'GPS Asset Tracker Transit Kargo', 'img' => 'assets/img/hardware/converted/item_17.png'],
+            ['id' => 'f_stacking_yard', 'nama' => 'Container Stacking Yard (Blok A-E)', 'desc' => 'Lapangan penumpukan utama 15 Ha: Blok A/B (Laden Ekspor-Impor), Blok C (Domestik), Blok D (Buffer), Blok E (Dangerous Goods).', 'icon' => 'fa-cubes', 'hw_id' => 21, 'hw_nama' => 'DGPS / RTK GNSS Receiver Reach Stacker', 'img' => 'assets/img/hardware/converted/item_21.png']
         ]
     ],
     'reefer' => [
@@ -44,9 +44,9 @@ $zones_data = [
         'icon' => 'fa-snowflake',
         'color' => '#06b6d4',
         'facilities' => [
-            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin 24/7 dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera Reefer Monitoring', 'img' => 'hardware/images/converted/item_16.png'],
-            ['id' => 'f_genset_shelter', 'nama' => 'Genset Shelter Cadangan', 'desc' => 'Gedung pembangkit daya darurat 1.500 kVA Caterpillar untuk menjamin kelangsungan listrik reefer jika PLN padam.', 'icon' => 'fa-bolt', 'hw_id' => 14, 'hw_nama' => 'UPS Online & Sistem Kelistrikan Darurat', 'img' => 'hardware/images/converted/item_14.png'],
-            ['id' => 'f_reefer_racks', 'nama' => 'Reefer Stacking Racks (300 Plugs)', 'desc' => 'Platform bertingkat dilengkapi 300 titik colokan Smart Reefer Socket 380V/32A dengan meteran digital.', 'icon' => 'fa-plug-circle-check', 'hw_id' => 23, 'hw_nama' => 'Smart Reefer Power Socket 380V/32A', 'img' => 'hardware/images/converted/item_23.png']
+            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin 24/7 dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera Reefer Monitoring', 'img' => 'assets/img/hardware/converted/item_16.png'],
+            ['id' => 'f_genset_shelter', 'nama' => 'Genset Shelter Cadangan', 'desc' => 'Gedung pembangkit daya darurat 1.500 kVA Caterpillar untuk menjamin kelangsungan listrik reefer jika PLN padam.', 'icon' => 'fa-bolt', 'hw_id' => 14, 'hw_nama' => 'UPS Online & Sistem Kelistrikan Darurat', 'img' => 'assets/img/hardware/converted/item_14.png'],
+            ['id' => 'f_reefer_racks', 'nama' => 'Reefer Stacking Racks (300 Plugs)', 'desc' => 'Platform bertingkat dilengkapi 300 titik colokan Smart Reefer Socket 380V/32A dengan meteran digital.', 'icon' => 'fa-plug-circle-check', 'hw_id' => 23, 'hw_nama' => 'Smart Reefer Power Socket 380V/32A', 'img' => 'assets/img/hardware/converted/item_23.png']
         ]
     ],
     'rail' => [
@@ -54,8 +54,8 @@ $zones_data = [
         'icon' => 'fa-train-subway',
         'color' => '#d97706',
         'facilities' => [
-            ['id' => 'f_rail_office', 'nama' => 'Rail Office / Stasiun Operator', 'desc' => 'Kantor pengendali operasi langsiran dan persinyalan kereta api kontainer bekerja sama dengan KAI Logistik.', 'icon' => 'fa-train', 'hw_id' => 25, 'hw_nama' => 'Rail Trackside Axle Counter Frauscher', 'img' => 'hardware/images/converted/item_25.png'],
-            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Sepur Ganda (Dual Track 450m)', 'desc' => '2 sepur rel berkapasitas 2x30 gerbong (Sepur Utara: Bongkar Inbound Impor ex-Priok; Sepur Selatan: Muat Outbound Ekspor siap kapal) untuk alih muat langsung gerbong datar (flatcar PPCW) dan cross-docking.', 'icon' => 'fa-arrows-split-up-and-left', 'hw_id' => 12, 'hw_nama' => 'Access Point Outdoor WiFi 7 Siding KA', 'img' => 'hardware/images/converted/item_12.png']
+            ['id' => 'f_rail_office', 'nama' => 'Rail Office / Stasiun Operator', 'desc' => 'Kantor pengendali operasi langsiran dan persinyalan kereta api kontainer bekerja sama dengan KAI Logistik.', 'icon' => 'fa-train', 'hw_id' => 25, 'hw_nama' => 'Rail Trackside Axle Counter Frauscher', 'img' => 'assets/img/hardware/converted/item_25.png'],
+            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Sepur Ganda (Dual Track 450m)', 'desc' => '2 sepur rel berkapasitas 2x30 gerbong (Sepur Utara: Bongkar Inbound Impor ex-Priok; Sepur Selatan: Muat Outbound Ekspor siap kapal) untuk alih muat langsung gerbong datar (flatcar PPCW) dan cross-docking.', 'icon' => 'fa-arrows-split-up-and-left', 'hw_id' => 12, 'hw_nama' => 'Access Point Outdoor WiFi 7 Siding KA', 'img' => 'assets/img/hardware/converted/item_12.png']
         ]
     ],
     'customs' => [
@@ -63,9 +63,9 @@ $zones_data = [
         'icon' => 'fa-stamp',
         'color' => '#dc2626',
         'facilities' => [
-            ['id' => 'f_kppbc', 'nama' => 'Kantor Bea Cukai (KPPBC)', 'desc' => 'Kantor pelayanan kepabeanan dan pabean impor/ekspor terhubung langsung dengan sistem nasional CEISA 4.0.', 'icon' => 'fa-building-columns', 'hw_id' => 26, 'hw_nama' => 'Electronic Cargo Smart Seal (E-Seal)', 'img' => 'hardware/images/converted/item_26.png'],
-            ['id' => 'f_behandle_xray', 'nama' => 'Behandle Area & Gantry X-Ray', 'desc' => 'Gedung pemindaian kontainer X-Ray energi tinggi (6 MeV) Nuctech dan kanopi pemeriksaan fisik Jalur Merah.', 'icon' => 'fa-radiation', 'hw_id' => 19, 'hw_nama' => 'Gantry Container X-Ray Scanner 6 MeV', 'img' => 'hardware/images/converted/item_19.png'],
-            ['id' => 'f_quarantine', 'nama' => 'Quarantine Inspection Room', 'desc' => 'Laboratorium dan ruang pemeriksaan Balai Karantina Hewan, Ikan, dan Tumbuhan Kementerian Pertanian.', 'icon' => 'fa-biohazard', 'hw_id' => 26, 'hw_nama' => 'Smart E-Seal & Inspeksi Pabean', 'img' => 'hardware/images/converted/item_26.png']
+            ['id' => 'f_kppbc', 'nama' => 'Kantor Bea Cukai (KPPBC)', 'desc' => 'Kantor pelayanan kepabeanan dan pabean impor/ekspor terhubung langsung dengan sistem nasional CEISA 4.0.', 'icon' => 'fa-building-columns', 'hw_id' => 26, 'hw_nama' => 'Electronic Cargo Smart Seal (E-Seal)', 'img' => 'assets/img/hardware/converted/item_26.png'],
+            ['id' => 'f_behandle_xray', 'nama' => 'Behandle Area & Gantry X-Ray', 'desc' => 'Gedung pemindaian kontainer X-Ray energi tinggi (6 MeV) Nuctech dan kanopi pemeriksaan fisik Jalur Merah.', 'icon' => 'fa-radiation', 'hw_id' => 19, 'hw_nama' => 'Gantry Container X-Ray Scanner 6 MeV', 'img' => 'assets/img/hardware/converted/item_19.png'],
+            ['id' => 'f_quarantine', 'nama' => 'Quarantine Inspection Room', 'desc' => 'Laboratorium dan ruang pemeriksaan Balai Karantina Hewan, Ikan, dan Tumbuhan Kementerian Pertanian.', 'icon' => 'fa-biohazard', 'hw_id' => 26, 'hw_nama' => 'Smart E-Seal & Inspeksi Pabean', 'img' => 'assets/img/hardware/converted/item_26.png']
         ]
     ],
     'office' => [
@@ -73,10 +73,10 @@ $zones_data = [
         'icon' => 'fa-building',
         'color' => '#7c3aed',
         'facilities' => [
-            ['id' => 'f_admin_office', 'nama' => 'Kantor Utama / Admin Building', 'desc' => 'Gedung kantor pusat pengelola terminal PT Multi Terminal Indonesia (MTI) 2 lantai.', 'icon' => 'fa-briefcase', 'hw_id' => 13, 'hw_nama' => 'Server NVR & Database YMS Core', 'img' => 'hardware/images/converted/item_13.png'],
-            ['id' => 'f_datacenter', 'nama' => 'Datacenter / Server Room (NOC)', 'desc' => 'Ruang server sentral berpendingin presisi, NVR 64-Channel, Online UPS 5000VA, dan rak switch jaringan inti.', 'icon' => 'fa-server', 'hw_id' => 11, 'hw_nama' => 'Industrial Network Switch PoE+ & Datacenter', 'img' => 'hardware/images/converted/item_11.png'],
-            ['id' => 'f_meeting_room', 'nama' => 'Ruang Meeting & Training Room', 'desc' => 'Ruang rapat operasional dan ruang simulasi/pelatihan bersertifikasi untuk operator terminal.', 'icon' => 'fa-users-gear', 'hw_id' => 10, 'hw_nama' => 'LED Information Display Ruang Operasi', 'img' => 'hardware/images/converted/item_10.png'],
-            ['id' => 'f_workshop_mr', 'nama' => 'Workshop / Bengkel M&R', 'desc' => 'Bengkel perawatan alat berat lapangan (Reach Stacker, Empty Handler, Forklift, dan perbaikan kontainer).', 'icon' => 'fa-wrench', 'hw_id' => 24, 'hw_nama' => 'Rugged Mobile PDA Tallyman & M&R', 'img' => 'hardware/images/converted/item_24.png']
+            ['id' => 'f_admin_office', 'nama' => 'Kantor Utama / Admin Building', 'desc' => 'Gedung kantor pusat pengelola terminal PT Multi Terminal Indonesia (MTI) 2 lantai.', 'icon' => 'fa-briefcase', 'hw_id' => 13, 'hw_nama' => 'Server NVR & Database YMS Core', 'img' => 'assets/img/hardware/converted/item_13.png'],
+            ['id' => 'f_datacenter', 'nama' => 'Datacenter / Server Room (NOC)', 'desc' => 'Ruang server sentral berpendingin presisi, NVR 64-Channel, Online UPS 5000VA, dan rak switch jaringan inti.', 'icon' => 'fa-server', 'hw_id' => 11, 'hw_nama' => 'Industrial Network Switch PoE+ & Datacenter', 'img' => 'assets/img/hardware/converted/item_11.png'],
+            ['id' => 'f_meeting_room', 'nama' => 'Ruang Meeting & Training Room', 'desc' => 'Ruang rapat operasional dan ruang simulasi/pelatihan bersertifikasi untuk operator terminal.', 'icon' => 'fa-users-gear', 'hw_id' => 10, 'hw_nama' => 'LED Information Display Ruang Operasi', 'img' => 'assets/img/hardware/converted/item_10.png'],
+            ['id' => 'f_workshop_mr', 'nama' => 'Workshop / Bengkel M&R', 'desc' => 'Bengkel perawatan alat berat lapangan (Reach Stacker, Empty Handler, Forklift, dan perbaikan kontainer).', 'icon' => 'fa-wrench', 'hw_id' => 24, 'hw_nama' => 'Rugged Mobile PDA Tallyman & M&R', 'img' => 'assets/img/hardware/converted/item_24.png']
         ]
     ],
     'public' => [
@@ -84,14 +84,14 @@ $zones_data = [
         'icon' => 'fa-hands-holding-child',
         'color' => '#059669',
         'facilities' => [
-            ['id' => 'f_musholla', 'nama' => 'Musholla / Masjid Al-Hidayah', 'desc' => 'Fasilitas ibadah representatif berkapasitas 150 jamaah untuk pekerja terminal, petugas pabean, dan sopir truk.', 'icon' => 'fa-mosque', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'hardware/images/converted/item_12.png'],
-            ['id' => 'f_kantin', 'nama' => 'Kantin / Warung Makan 🍛', 'desc' => 'Area pujasera bersih dan terjangkau untuk kebutuhan makan dan minum seluruh pekerja lapangan dan sopir.', 'icon' => 'fa-utensils', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'hardware/images/converted/item_12.png'],
-            ['id' => 'f_koperasi', 'nama' => 'Koperasi Karyawan 🏪', 'desc' => 'Toko ritel penyedia kebutuhan sehari-hari, minuman, makanan ringan, perlengkapan APD, dan ATK.', 'icon' => 'fa-shop', 'hw_id' => 8, 'hw_nama' => 'RFID Tag UHF ISO Karyawan', 'img' => 'hardware/images/converted/item_8.png'],
-            ['id' => 'f_klinik', 'nama' => 'Klinik P3K / Pos Kesehatan', 'desc' => 'Pos pertolongan pertama pada kecelakaan kerja (K3) dilengkapi tenaga medis jaga dan ambulans darurat.', 'icon' => 'fa-kit-medical', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Medis K3', 'img' => 'hardware/images/converted/item_15.png'],
-            ['id' => 'f_toilet', 'nama' => 'Toilet Umum Tersebar', 'desc' => 'Fasilitas sanitasi dan MCK bersih yang tersebar di 3 lokasi strategis (Gerbang, Kantor, dan Siding KA).', 'icon' => 'fa-restroom', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Area Layanan', 'img' => 'hardware/images/converted/item_12.png'],
-            ['id' => 'f_parking_staff', 'nama' => 'Parkir Karyawan & Tamu', 'desc' => 'Area parkir kendaraan roda 2 dan roda 4 khusus pegawai terminal, tamu dinas, dan mitra logistik.', 'icon' => 'fa-square-parking', 'hw_id' => 1, 'hw_nama' => 'Kamera ANPR Gerbang Karyawan', 'img' => 'hardware/images/converted/item_1.png'],
-            ['id' => 'f_damkar', 'nama' => 'Pos Damkar & Fire Station', 'desc' => 'Pos tanggap darurat kebakaran dilengkapi armada pemadam kimia, reservoir air, dan jaringan hydrant yard.', 'icon' => 'fa-fire-extinguisher', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera & Sensor Api', 'img' => 'hardware/images/converted/item_16.png'],
-            ['id' => 'f_driver_rest', 'nama' => 'Ruang Istirahat Driver (Rest Area)', 'desc' => 'Ruang istirahat ber-AC dilengkapi colokan listrik, dispenser air minum, dan kasur santai bagi sopir truk jarak jauh.', 'icon' => 'fa-couch', 'hw_id' => 8, 'hw_nama' => 'Kartu Akses RFID Tag Pengemudi', 'img' => 'hardware/images/converted/item_8.png']
+            ['id' => 'f_musholla', 'nama' => 'Musholla / Masjid Al-Hidayah', 'desc' => 'Fasilitas ibadah representatif berkapasitas 150 jamaah untuk pekerja terminal, petugas pabean, dan sopir truk.', 'icon' => 'fa-mosque', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'assets/img/hardware/converted/item_12.png'],
+            ['id' => 'f_kantin', 'nama' => 'Kantin / Warung Makan 🍛', 'desc' => 'Area pujasera bersih dan terjangkau untuk kebutuhan makan dan minum seluruh pekerja lapangan dan sopir.', 'icon' => 'fa-utensils', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'assets/img/hardware/converted/item_12.png'],
+            ['id' => 'f_koperasi', 'nama' => 'Koperasi Karyawan 🏪', 'desc' => 'Toko ritel penyedia kebutuhan sehari-hari, minuman, makanan ringan, perlengkapan APD, dan ATK.', 'icon' => 'fa-shop', 'hw_id' => 8, 'hw_nama' => 'RFID Tag UHF ISO Karyawan', 'img' => 'assets/img/hardware/converted/item_8.png'],
+            ['id' => 'f_klinik', 'nama' => 'Klinik P3K / Pos Kesehatan', 'desc' => 'Pos pertolongan pertama pada kecelakaan kerja (K3) dilengkapi tenaga medis jaga dan ambulans darurat.', 'icon' => 'fa-kit-medical', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Medis K3', 'img' => 'assets/img/hardware/converted/item_15.png'],
+            ['id' => 'f_toilet', 'nama' => 'Toilet Umum Tersebar', 'desc' => 'Fasilitas sanitasi dan MCK bersih yang tersebar di 3 lokasi strategis (Gerbang, Kantor, dan Siding KA).', 'icon' => 'fa-restroom', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Area Layanan', 'img' => 'assets/img/hardware/converted/item_12.png'],
+            ['id' => 'f_parking_staff', 'nama' => 'Parkir Karyawan & Tamu', 'desc' => 'Area parkir kendaraan roda 2 dan roda 4 khusus pegawai terminal, tamu dinas, dan mitra logistik.', 'icon' => 'fa-square-parking', 'hw_id' => 1, 'hw_nama' => 'Kamera ANPR Gerbang Karyawan', 'img' => 'assets/img/hardware/converted/item_1.png'],
+            ['id' => 'f_damkar', 'nama' => 'Pos Damkar & Fire Station', 'desc' => 'Pos tanggap darurat kebakaran dilengkapi armada pemadam kimia, reservoir air, dan jaringan hydrant yard.', 'icon' => 'fa-fire-extinguisher', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera & Sensor Api', 'img' => 'assets/img/hardware/converted/item_16.png'],
+            ['id' => 'f_driver_rest', 'nama' => 'Ruang Istirahat Driver (Rest Area)', 'desc' => 'Ruang istirahat ber-AC dilengkapi colokan listrik, dispenser air minum, dan kasur santai bagi sopir truk jarak jauh.', 'icon' => 'fa-couch', 'hw_id' => 8, 'hw_nama' => 'Kartu Akses RFID Tag Pengemudi', 'img' => 'assets/img/hardware/converted/item_8.png']
         ]
     ]
 ];
@@ -103,63 +103,63 @@ $hardware_pins = [
         'id' => 1, 'nama' => 'Kamera ANPR Gate', 'model' => 'Hikvision DS-TCG406-E', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Gatehouse Inbound & Outbound',
         'x' => 875, 'y' => 85, 'harga' => 'Rp 16.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 64.000.000',
-        'img' => 'hardware/images/converted/item_1.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_1.png', 'modul' => 'gate',
         'desc' => 'Kamera pembaca nomor plat otomatis berkecepatan tinggi, mendeteksi kedatangan truk trailer di loop masuk.'
     ],
     [
         'id' => 2, 'nama' => 'Kamera OCR Kontainer', 'model' => 'Hikvision iDS-TCV300-A6I', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Portal Inbound Lane 1 & 2',
         'x' => 875, 'y' => 110, 'harga' => 'Rp 55.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 220.000.000',
-        'img' => 'hardware/images/converted/item_2.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_2.png', 'modul' => 'gate',
         'desc' => 'Portal pemindai multi-sudut untuk mengekstraksi kode kontainer ISO 6346 (4 huruf + 7 angka) dan tipe kontainer.'
     ],
     [
         'id' => 6, 'nama' => 'Weighbridge / VGM Scale 80t', 'model' => 'Fangda Electronic Truck Scale 80 Ton', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Weighbridge Station Inbound',
         'x' => 875, 'y' => 145, 'harga' => 'Rp 267.000.000', 'unit' => '2 unit', 'subtotal' => 'Rp 534.000.000',
-        'img' => 'hardware/images/converted/item_6.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_6.png', 'modul' => 'gate',
         'desc' => 'Jembatan timbang terintegrasi load cell digital berkapasitas 80 ton untuk verifikasi berat kotor bersertifikat SOLAS VGM.'
     ],
     [
         'id' => 7, 'nama' => 'RFID Reader Long-Range', 'model' => 'UHF RFID Reader (20m)', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Tiang e-Pass Gatehouse',
         'x' => 855, 'y' => 95, 'harga' => 'Rp 3.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 12.000.000',
-        'img' => 'hardware/images/converted/item_7.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_7.png', 'modul' => 'gate',
         'desc' => 'Antena pembaca tag RFID jarak jauh hingga 20 meter untuk identifikasi kartu pengemudi dan verifikasi izin akses gerbang.'
     ],
     [
         'id' => 8, 'nama' => 'RFID Tag UHF ISO', 'model' => 'RFID UHF ID Tag ISO', 'tipe' => 'blueprint', 'layer' => 1,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Security Post & Loket Tag',
         'x' => 818, 'y' => 75, 'harga' => 'Rp 690.000 / pack', 'unit' => '50 pack', 'subtotal' => 'Rp 34.500.000',
-        'img' => 'hardware/images/converted/item_8.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_8.png', 'modul' => 'gate',
         'desc' => 'Kartu tag pintar anti-metal standar ISO 18000-6C yang dibagikan kepada mitra truk dan kartu akses pengemudi.'
     ],
     [
         'id' => 9, 'nama' => 'Automatic Barrier Gate', 'model' => 'High-Speed Barrier Gate', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Lane 1, 2, 3, 4 Gatehouses',
         'x' => 875, 'y' => 175, 'harga' => 'Rp 60.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 240.000.000',
-        'img' => 'hardware/images/converted/item_9.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_9.png', 'modul' => 'gate',
         'desc' => 'Palang otomatis kecepatan tinggi (buka 1.2 detik) yang digerakkan sinyal relay Edge PC setelah dokumen tervalidasi.'
     ],
     [
         'id' => 10, 'nama' => 'LED Information Display', 'model' => 'Outdoor P6/P8 Industrial LED', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Kanopi Gerbang Inbound/Outbound',
         'x' => 897, 'y' => 65, 'harga' => 'Rp 47.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 188.000.000',
-        'img' => 'hardware/images/converted/item_10.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_10.png', 'modul' => 'gate',
         'desc' => 'Display LED outdoor cerah yang menampilkan instruksi sopir ("SILAHKAN MASUK", "KE YARD BLOK B"), dan nomor gate pass.'
     ],
     [
         'id' => 18, 'nama' => 'Industrial Edge AI PC Gate', 'model' => 'Advantech ARK-3532 Fanless', 'tipe' => 'live', 'layer' => 2,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Kabinet Kontrol Gate Inbound/Outbound',
         'x' => 897, 'y' => 135, 'harga' => 'Rp 42.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 168.000.000',
-        'img' => 'hardware/images/converted/item_18.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_18.png', 'modul' => 'gate',
         'desc' => 'Komputer tepi tangguh tanpa kipas (-20°C s/d 60°C) yang memproses validasi transaksi gerbang lokal dan kontrol relay palang.'
     ],
     [
         'id' => 15, 'nama' => 'Barcode / QR Scanner', 'model' => 'Zebra Symbol LS2208 Handheld', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Security Post & Loket Pelayanan',
         'x' => 818, 'y' => 95, 'harga' => 'Rp 1.600.000', 'unit' => '8 unit', 'subtotal' => 'Rp 12.800.000',
-        'img' => 'hardware/images/converted/item_15.png', 'modul' => 'scanner',
+        'img' => 'assets/img/hardware/converted/item_15.png', 'modul' => 'scanner',
         'desc' => 'Pemindai laser 1D/2D untuk membaca barcode surat jalan cetak, gate pass digital di smartphone sopir, dan dokumen booking.'
     ],
 
@@ -168,42 +168,42 @@ $hardware_pins = [
         'id' => 3, 'nama' => 'CCTV Yard 4 MP', 'model' => 'Hikvision DS-2CD2046G2H-IU', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Tiang Lampu Blok A, B, C, D (32 Titik)',
         'x' => 502, 'y' => 290, 'harga' => 'Rp 3.500.000', 'unit' => '32 unit', 'subtotal' => 'Rp 112.000.000',
-        'img' => 'hardware/images/converted/item_3.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_3.png', 'modul' => 'yard',
         'desc' => 'Kamera pengawas berdefinisi tinggi IP67 weatherproof dengan night vision IR untuk memantau keselamatan penumpukan kontainer.'
     ],
     [
         'id' => 5, 'nama' => 'CCTV PTZ 360°', 'model' => 'Hikvision DS-2SE4C425MWG TandemVu', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Menara Pengawas Pusat (Tower 1 & 2)',
         'x' => 630, 'y' => 391, 'harga' => 'Rp 10.300.000', 'unit' => '8 unit', 'subtotal' => 'Rp 82.400.000',
-        'img' => 'hardware/images/converted/item_5.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_5.png', 'modul' => 'yard',
         'desc' => 'Kamera bergerak 360 derajat dengan 25x optical zoom untuk pemantauan insiden darurat dan pergerakan alat berat di yard.'
     ],
     [
         'id' => 20, 'nama' => 'Vehicle Mounted Terminal (VMT)', 'model' => 'Zebra VC8300 Rugged Terminal', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Kabin Reach Stacker 01 & 02',
         'x' => 757, 'y' => 290, 'harga' => 'Rp 74.000.000', 'unit' => '6 unit', 'subtotal' => 'Rp 444.000.000',
-        'img' => 'hardware/images/converted/item_20.png', 'modul' => 'alat',
+        'img' => 'assets/img/hardware/converted/item_20.png', 'modul' => 'alat',
         'desc' => 'Terminal komputer kabin layar sentuh tahan guncangan ekstrem (MIL-STD-810G) untuk menerima perintah kerja (Job Order) dari YMS.'
     ],
     [
         'id' => 21, 'nama' => 'DGPS / RTK GNSS Receiver', 'model' => 'CHCNAV CGI-610 Dual Antenna', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Atap Boom Reach Stacker 01 & 02',
         'x' => 450, 'y' => 290, 'harga' => 'Rp 45.000.000', 'unit' => '6 unit', 'subtotal' => 'Rp 270.000.000',
-        'img' => 'hardware/images/converted/item_21.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_21.png', 'modul' => 'yard',
         'desc' => 'Antena navigasi satelit berakurasi centimeter (<1.4 cm) untuk mendeteksi secara otomatis posisi penumpukan Bay-Row-Tier.'
     ],
     [
         'id' => 22, 'nama' => 'Spreader Twistlock & Load Cell', 'model' => 'Bromma SmartSpreader Kit', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Head Spreader Alat Angkat RS',
         'x' => 550, 'y' => 290, 'harga' => 'Rp 35.000.000', 'unit' => '6 unit', 'subtotal' => 'Rp 210.000.000',
-        'img' => 'hardware/images/converted/item_22.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_22.png', 'modul' => 'yard',
         'desc' => 'Sensor induktif penguncian twistlock dan load cell telemetri untuk auto-update status kontainer (lift-on / lift-off) ke basis data.'
     ],
     [
         'id' => 24, 'nama' => 'Rugged Mobile PDA', 'model' => 'Zebra TC57x Handheld PDA', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Petugas Tallyman & Checker Lapangan',
         'x' => 470, 'y' => 480, 'harga' => 'Rp 16.000.000', 'unit' => '10 unit', 'subtotal' => 'Rp 160.000.000',
-        'img' => 'hardware/images/converted/item_24.png', 'modul' => 'kontainer',
+        'img' => 'assets/img/hardware/converted/item_24.png', 'modul' => 'kontainer',
         'desc' => 'Perangkat genggam enterprise tahan banting (IP68) untuk inspeksi fisik kontainer rusak (EIR) dan checklist kondisi segel.'
     ],
 
@@ -212,14 +212,14 @@ $hardware_pins = [
         'id' => 16, 'nama' => 'Thermal Camera Reefer', 'model' => 'Hikvision DS-2TD2636B-13/P Thermal', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Reefer Yard', 'zona_id' => 'reefer', 'posisi' => 'Menara Pengawas Reefer Yard',
         'x' => 1112, 'y' => 245, 'harga' => 'Rp 30.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 120.000.000',
-        'img' => 'hardware/images/converted/item_16.png', 'modul' => 'reefer',
+        'img' => 'assets/img/hardware/converted/item_16.png', 'modul' => 'reefer',
         'desc' => 'Kamera pemindai suhu inframerah untuk mendeteksi dini panas abnormal pada kompresor reefer dan mencegah bahaya kebakaran.'
     ],
     [
         'id' => 23, 'nama' => 'Smart Reefer Power Socket', 'model' => 'Marechal 380V/32A DECONTACTOR', 'tipe' => 'live', 'layer' => 2,
         'zona' => 'Zona Reefer Yard', 'zona_id' => 'reefer', 'posisi' => 'Rak Penumpukan Reefer (300 Titik)',
         'x' => 977, 'y' => 295, 'harga' => 'Rp 8.500.000 / titik', 'unit' => '300 titik', 'subtotal' => 'Rp 2.550.000.000',
-        'img' => 'hardware/images/converted/item_23.png', 'modul' => 'reefer',
+        'img' => 'assets/img/hardware/converted/item_23.png', 'modul' => 'reefer',
         'desc' => 'Colokan industri 380V dengan meteran listrik Modbus dan sensor suhu kontinu untuk memantau rantai dingin dan alarm listrik trip.'
     ],
 
@@ -228,21 +228,21 @@ $hardware_pins = [
         'id' => 25, 'nama' => 'Rail Trackside Axle Counter', 'model' => 'Frauscher RSR180 Wheel Sensor', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Intermodal Rail Siding', 'zona_id' => 'rail', 'posisi' => 'Kepala Rel Ujung Barat & Timur Siding',
         'x' => 220, 'y' => 638, 'harga' => 'Rp 85.000.000', 'unit' => '4 sensor', 'subtotal' => 'Rp 340.000.000',
-        'img' => 'hardware/images/converted/item_25.png', 'modul' => 'intermodal',
+        'img' => 'assets/img/hardware/converted/item_25.png', 'modul' => 'intermodal',
         'desc' => 'Sensor induktif pada kepala rel untuk menghitung gandar roda KA, estimasi kecepatan, dan konfirmasi kedatangan gerbong otomatis.'
     ],
     [
         'id' => 12, 'nama' => 'Access Point Outdoor', 'model' => 'Ubiquiti U7 Pro Outdoor WiFi 7', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Intermodal Rail Siding', 'zona_id' => 'rail', 'posisi' => 'Tiang Lampu Yard & Rail Siding (18 Titik)',
         'x' => 522, 'y' => 600, 'harga' => 'Rp 7.200.000', 'unit' => '18 unit', 'subtotal' => 'Rp 129.600.000',
-        'img' => 'hardware/images/converted/item_12.png', 'modul' => 'intermodal',
+        'img' => 'assets/img/hardware/converted/item_12.png', 'modul' => 'intermodal',
         'desc' => 'Pemancar nirkabel generasi WiFi 7 bersertifikasi IP67 untuk transmisi data real-time ke terminal VMT alat berat dan PDA tallyman.'
     ],
     [
         'id' => 17, 'nama' => 'GPS Tracker Truck & Asset', 'model' => 'Teltonika TAT240 4G LTE', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Intermodal Rail Siding', 'zona_id' => 'rail', 'posisi' => 'Gerbong Kereta Api & Armada Mitra',
         'x' => 750, 'y' => 638, 'harga' => 'Rp 2.500.000 / unit', 'unit' => '40 unit', 'subtotal' => 'Rp 100.000.000',
-        'img' => 'hardware/images/converted/item_17.png', 'modul' => 'trucking',
+        'img' => 'assets/img/hardware/converted/item_17.png', 'modul' => 'trucking',
         'desc' => 'Modul pelacak otonom dengan baterai mandiri untuk memantau posisi rangkaian gerbong kontainer di rute Priok - Cikarang.'
     ],
 
@@ -251,21 +251,21 @@ $hardware_pins = [
         'id' => 19, 'nama' => 'Gantry Container X-Ray Scanner', 'model' => 'Nuctech MB1215DE (6 MeV)', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Behandle & Bea Cukai', 'zona_id' => 'customs', 'posisi' => 'Gedung Pemindai X-Ray Jalur Merah',
         'x' => 1112, 'y' => 330, 'harga' => 'Rp 12.500.000.000', 'unit' => '1 sistem', 'subtotal' => 'Rp 12.500.000.000',
-        'img' => 'hardware/images/converted/item_19.png', 'modul' => 'customs',
+        'img' => 'assets/img/hardware/converted/item_19.png', 'modul' => 'customs',
         'desc' => 'Pemindai radiasi sinar-X energi tinggi berdaya tembus baja >300 mm untuk pemeriksaan non-intrusif peti kemas impor Jalur Merah.'
     ],
     [
         'id' => 26, 'nama' => 'Electronic Cargo Smart Seal (E-Seal)', 'model' => 'Jointech JT701 GPS Smart E-Seal', 'tipe' => 'live', 'layer' => 3,
         'zona' => 'Zona Behandle & Bea Cukai', 'zona_id' => 'customs', 'posisi' => 'Pos Stasiun Pemeriksaan Segel Bea Cukai',
         'x' => 1112, 'y' => 495, 'harga' => 'Rp 3.200.000 / unit', 'unit' => '100 unit', 'subtotal' => 'Rp 320.000.000',
-        'img' => 'hardware/images/converted/item_26.png', 'modul' => 'customs',
+        'img' => 'assets/img/hardware/converted/item_26.png', 'modul' => 'customs',
         'desc' => 'Gembok elektronik pintar ber-GPS dan sensor anti-tamper untuk mengamankan kontainer transit pabean terintegrasi CEISA 4.0.'
     ],
     [
         'id' => 4, 'nama' => 'CCTV Yard 8 MP Perimeter', 'model' => 'Hikvision DS-2CD2T87G2H-LI 4K', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Behandle & Bea Cukai', 'zona_id' => 'customs', 'posisi' => 'Pagar Batas Perimeter Pabean (16 Titik)',
         'x' => 1112, 'y' => 410, 'harga' => 'Rp 6.500.000', 'unit' => '16 unit', 'subtotal' => 'Rp 104.000.000',
-        'img' => 'hardware/images/converted/item_4.png', 'modul' => 'customs',
+        'img' => 'assets/img/hardware/converted/item_4.png', 'modul' => 'customs',
         'desc' => 'Kamera perimeter 4K UHD dengan teknologi ColorVu malam hari untuk menjaga sterilitas kawasan pabean internasional.'
     ],
 
@@ -274,21 +274,21 @@ $hardware_pins = [
         'id' => 13, 'nama' => 'Server NVR & Database YMS', 'model' => 'Hikvision DS-9664NI-M16/R & Rack Server', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Kantor & Datacenter', 'zona_id' => 'office', 'posisi' => 'Datacenter / Server Room (NOC)',
         'x' => 437, 'y' => 95, 'harga' => 'Rp 102.000.000', 'unit' => '2 unit', 'subtotal' => 'Rp 204.000.000',
-        'img' => 'hardware/images/converted/item_13.png', 'modul' => 'settings',
+        'img' => 'assets/img/hardware/converted/item_13.png', 'modul' => 'settings',
         'desc' => 'Pusat server rekaman CCTV 64 saluran dan server komputasi basis data MySQL sistem operasi pelabuhan kering CIDP YMS.'
     ],
     [
         'id' => 14, 'nama' => 'UPS Online 5000VA Rackmount', 'model' => 'APC Smart-UPS SRT 5000VA (SRT5KRMXLI)', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Kantor & Datacenter', 'zona_id' => 'office', 'posisi' => 'Datacenter & Ruang Kontrol Gate',
         'x' => 457, 'y' => 125, 'harga' => 'Rp 81.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 324.000.000',
-        'img' => 'hardware/images/converted/item_14.png', 'modul' => 'settings',
+        'img' => 'assets/img/hardware/converted/item_14.png', 'modul' => 'settings',
         'desc' => 'Pencatu daya cadangan darurat (On-Line Double Conversion 5kVA) untuk menjaga server dan gerbang tetap beroperasi saat listrik PLN padam.'
     ],
     [
         'id' => 11, 'nama' => 'Industrial Network Switch PoE+', 'model' => 'Managed Industrial PoE+ Gigabit Switch', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Kantor & Datacenter', 'zona_id' => 'office', 'posisi' => 'Core Switch Datacenter & Distribusi Lapangan',
         'x' => 417, 'y' => 125, 'harga' => 'Rp 10.000.000', 'unit' => '12 unit', 'subtotal' => 'Rp 120.000.000',
-        'img' => 'hardware/images/converted/item_11.png', 'modul' => 'settings',
+        'img' => 'assets/img/hardware/converted/item_11.png', 'modul' => 'settings',
         'desc' => 'Switch jaringan gigabit berpelindung logam tahan suhu ekstrem untuk menghubungkan seluruh kamera, access point, dan kontroler sensor.'
     ]
 ];
@@ -1274,7 +1274,7 @@ foreach ($zones_data as $z) {
 
             <!-- Kontainer Foto Produk / Fasilitas -->
             <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-center min-h-[160px] relative overflow-hidden" id="inspImageWrapper">
-                <img id="inspImg" src="hardware/images/converted/item_1.png" alt="Hardware Image" class="max-h-36 max-w-full object-contain transition-all duration-300 drop-shadow-sm">
+                <img id="inspImg" src="assets/img/hardware/converted/item_1.png" alt="Hardware Image" class="max-h-36 max-w-full object-contain transition-all duration-300 drop-shadow-sm">
                 <div id="inspIconFallback" class="hidden text-5xl text-slate-400">
                     <i class="fa-solid fa-building" id="inspFallbackIcon"></i>
                 </div>
