@@ -28,11 +28,11 @@ function toggleDesktopSidebar() {
 
     isSidebarCollapsedDesktop = !isSidebarCollapsedDesktop;
     if (isSidebarCollapsedDesktop) {
-        sidebar.classList.replace('w-64', 'w-20');
+        sidebar.classList.replace('w-56', 'w-16');
         logoTexts.forEach(el => el.classList.add('hidden'));
         if (desktopToggleIcon) desktopToggleIcon.classList.replace('fa-bars-staggered', 'fa-bars');
     } else {
-        sidebar.classList.replace('w-20', 'w-64');
+        sidebar.classList.replace('w-16', 'w-56');
         if (desktopToggleIcon) desktopToggleIcon.classList.replace('fa-bars', 'fa-bars-staggered');
         setTimeout(() => {
             logoTexts.forEach(el => el.classList.remove('hidden'));

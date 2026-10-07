@@ -189,30 +189,30 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
                     },
                     colors: {
-                        // Palet "Executive Ink": navy matte, putih tulang, satu aksen kuningan.
-                        'cdp-navy': '#1B2D47',
-                        'cdp-dark': '#0F1B2D',
-                        'cdp-blue': '#3A5578',
-                        'cdp-light': '#F6F4EF',
-                        'ink': '#0F1B2D',
-                        'ink-2': '#16243A',
-                        'paper': '#F6F4EF',
-                        'brass': '#B8955A',
-                        'brass-deep': '#8A6B3A',
+                        // Palet Maritim CIDP: Selaras 100% dengan Landing Page (login.php)
+                        'cdp-navy': '#004b87',
+                        'cdp-dark': '#002f5e',
+                        'cdp-blue': '#0170b9',
+                        'cdp-light': '#f4f8fc',
+                        'ink': '#002f5e',
+                        'ink-2': '#002447',
+                        'paper': '#ffffff',
+                        'brass': '#0170b9',
+                        'brass-deep': '#004b87',
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; background-color: #F6F4EF; }
+        body { font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif; background-color: #f4f8fc; }
         .sidebar-transition { transition: width 0.3s ease-in-out; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #CFC9BC; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #A9A292; }
-        #sidebar nav::-webkit-scrollbar-thumb { background: rgba(246,244,239,0.14); }
-        #sidebar nav::-webkit-scrollbar-thumb:hover { background: rgba(246,244,239,0.26); }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        #sidebar nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
+        #sidebar nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
         .timeline-dot { position: absolute; left: -5px; top: 5px; width: 10px; height: 10px; border-radius: 50%; }
         @keyframes fadeInScale {
             from { opacity: 0; transform: translateY(-8px) scale(0.98); }
