@@ -1,4 +1,4 @@
-﻿# Operating System Files
+# Operating System Files
 Thumbs.db
 Thumbs.db:encryptable
 ehthumbs.db
@@ -20,3 +20,4 @@ ehthumbs_vista.db
 *.log
 *.tmp
 tmp/
+cookie*.txt

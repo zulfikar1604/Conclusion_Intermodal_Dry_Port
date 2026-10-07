@@ -30,9 +30,9 @@ if (isset($pdo)) {
 ?>
 
 <!-- Script Library Pendukung Open Source (Lokal dengan Fallback CDN) -->
-<script src="assets/html5-qrcode.min.js"></script>
-<script src="assets/JsBarcode.all.min.js"></script>
-<script src="assets/qrcode.min.js"></script>
+<script src="assets/vendor/html5-qrcode.min.js"></script>
+<script src="assets/vendor/JsBarcode.all.min.js"></script>
+<script src="assets/vendor/qrcode.min.js"></script>
 
 <div class="space-y-6 animate-fadeIn pb-12">
     <!-- Header Modul & Status Penjaminan Mutu (QA) -->

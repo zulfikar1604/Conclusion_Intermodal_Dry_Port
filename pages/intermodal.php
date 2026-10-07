@@ -314,8 +314,8 @@ $wagons = $wagons_inbound;
 ?>
 
 <!-- Open Source Leaflet.js GIS Engine (Lokal & Offline Ready) -->
-<link rel="stylesheet" href="assets/leaflet.css" />
-<script src="assets/leaflet.js"></script>
+<link rel="stylesheet" href="assets/vendor/leaflet.css" />
+<script src="assets/vendor/leaflet.js"></script>
 
 <style>
 /* Leaflet GIS Custom Styles for Intermodal Corridor */
