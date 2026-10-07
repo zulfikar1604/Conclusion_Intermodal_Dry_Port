@@ -211,8 +211,8 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        #sidebar nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); }
-        #sidebar nav::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.3); }
+        #sidebar nav::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        #sidebar nav::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
         .timeline-dot { position: absolute; left: -5px; top: 5px; width: 10px; height: 10px; border-radius: 50%; }
         @keyframes fadeInScale {
             from { opacity: 0; transform: translateY(-8px) scale(0.98); }
