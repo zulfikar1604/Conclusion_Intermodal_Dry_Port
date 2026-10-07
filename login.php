@@ -67,8 +67,8 @@ if (isset($_POST['btn_login'])) {
     <link rel="shortcut icon" type="image/png" href="assets/img/logo.png">
     <link rel="apple-touch-icon" href="assets/img/logo.png">
     
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tailwind CSS (Offline Local Vendor) -->
+    <script src="assets/vendor/tailwindcss.js"></script>
     <script>
         tailwind.config = {
             theme: {
@@ -82,7 +82,7 @@ if (isset($_POST['btn_login'])) {
                         }
                     },
                     fontFamily: {
-                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'system-ui', 'sans-serif'],
                         mono: ['JetBrains Mono', 'monospace']
                     }
                 }
@@ -90,8 +90,8 @@ if (isset($_POST['btn_login'])) {
         }
     </script>
 
-    <!-- FontAwesome 6 CDN -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- FontAwesome 6 (Offline Local Vendor) -->
+    <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 

@@ -11,10 +11,10 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 ?>
 
-<!-- Three.js, OrbitControls & Tween.js -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
+<!-- Three.js, OrbitControls & Tween.js (Offline Local Vendor) -->
+<script src="assets/vendor/three.min.js"></script>
+<script src="assets/vendor/OrbitControls.js"></script>
+<script src="assets/vendor/tween.umd.js"></script>
 
 <div class="space-y-3.5">
     
