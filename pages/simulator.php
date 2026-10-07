@@ -310,6 +310,83 @@ if (session_status() === PHP_SESSION_NONE) {
             </div>
         </div>
 
+        <!-- Floating HUD: Bottom Left - Digital Twin Intermodal Container Tracking & Yard Telemetry -->
+        <div id="shipmentTrackingCard" class="absolute bottom-3.5 left-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 z-20">
+            <div class="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3.5 shadow-2xl text-slate-800 space-y-2.5 relative">
+                <!-- Header with Status Pill and Minimizer -->
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
+                            SPPB Cleared
+                        </span>
+                        <span class="font-mono font-bold text-xs text-blue-900 tracking-wider">MSKU 9182374</span>
+                    </div>
+                    <button onclick="toggleShipmentCard()" class="text-slate-400 hover:text-slate-700 text-xs px-1" title="Sembunyikan / Buka Detail">
+                        <i id="shipmentCardChevron" class="fa-solid fa-chevron-down"></i>
+                    </button>
+                </div>
+
+                <!-- Collapsible Body Content -->
+                <div id="shipmentCardContent" class="space-y-2.5 text-xs transition-all duration-200">
+                    <!-- Route Information: Port to Dry Port -->
+                    <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-2.5 space-y-1.5">
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-400 font-semibold uppercase text-[9px]">Pelabuhan Muat (POL)</span>
+                            <span class="font-bold text-slate-800">Pelabuhan Tg. Priok (JICT)</span>
+                        </div>
+                        <div class="flex items-center justify-between text-[11px]">
+                            <span class="text-slate-400 font-semibold uppercase text-[9px]">Terminal Tujuan (POD)</span>
+                            <span class="font-bold text-blue-600">CIDP Dry Port • Blok B-05</span>
+                        </div>
+                    </div>
+
+                    <!-- 3-Step Port Logistics Intermodal Stepper -->
+                    <div class="pt-1">
+                        <div class="flex items-center justify-between text-[9px] font-medium text-slate-500 mb-1">
+                            <span class="text-emerald-600 font-bold">1. Gate-In OCR</span>
+                            <span class="text-emerald-600 font-bold">2. Timbang VGM</span>
+                            <span class="text-blue-600 font-bold">3. Lift-Off RS</span>
+                        </div>
+                        <div class="relative flex items-center justify-between">
+                            <div class="absolute left-2 right-2 top-1/2 -translate-y-1/2 h-1 bg-slate-200 -z-0"></div>
+                            <div class="absolute left-2 w-3/4 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-emerald-500 to-blue-500 -z-0"></div>
+                            <!-- Step 1 -->
+                            <div class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] font-bold z-10 shadow-sm">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <!-- Step 2 -->
+                            <div class="w-4 h-4 rounded-full bg-emerald-500 text-white flex items-center justify-center text-[8px] font-bold z-10 shadow-sm">
+                                <i class="fa-solid fa-check"></i>
+                            </div>
+                            <!-- Step 3 (Active) -->
+                            <div class="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-[8px] font-bold z-10 shadow-md ring-4 ring-blue-100">
+                                <i class="fa-solid fa-arrows-down-to-line"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ETA & Truck License Plate -->
+                    <div class="flex items-center justify-between text-[10.5px] pt-1 border-t border-slate-100 text-slate-600">
+                        <span><i class="fa-solid fa-trailer text-blue-600 mr-1"></i>Chassis: <strong>40FT Skeletal</strong></span>
+                        <span class="font-mono text-[10px] bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 text-slate-700">B 9812 UI</span>
+                    </div>
+
+                    <!-- Port Equipment Telemetry Highlights -->
+                    <div class="pt-1 border-t border-slate-100 grid grid-cols-2 gap-1 text-[9.5px] font-semibold text-slate-600">
+                        <div class="bg-blue-50 border border-blue-200 text-blue-800 rounded-lg p-1 px-1.5 flex items-center gap-1 truncate" title="Reach Stacker Blok A">
+                            <i class="fa-solid fa-truck-ramp-box text-blue-600 text-[10px]"></i>
+                            <span>RS-01: Blok A Ready</span>
+                        </div>
+                        <div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-1 px-1.5 flex items-center gap-1 truncate" title="RTG Crane di Rail Siding">
+                            <i class="fa-solid fa-bridge text-amber-600 text-[10px]"></i>
+                            <span>RTG-01: Rail Standby</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector (Only visible when a container is clicked) -->
         <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-30" id="inspectorCard">
             <div class="bg-slate-900/95 backdrop-blur-lg border border-blue-500/50 rounded-xl p-3.5 shadow-2xl text-white relative overflow-hidden">
@@ -1997,59 +2074,44 @@ function getRigidPavementTexture(repX, repY) {
         canvas.height = 512;
         const ctx = canvas.getContext('2d');
 
-        // Base concrete grey
-        ctx.fillStyle = '#334155';
+        // Base concrete clean architectural light tone (seperti referensi WareTrack Digital Twin)
+        ctx.fillStyle = '#e2e8f0';
         ctx.fillRect(0, 0, 512, 512);
 
-        // Micro aggregate & wear noise (efek agregat kasar beton pelabuhan)
-        for (let i = 0; i < 4000; i++) {
+        // Micro aggregate & wear noise (efek agregat halus bersih bermutu tinggi K-500)
+        for (let i = 0; i < 3500; i++) {
             const x = Math.random() * 512;
             const y = Math.random() * 512;
-            const c = Math.random() > 0.5 ? 40 : 70;
-            ctx.fillStyle = `rgba(${c}, ${c + 8}, ${c + 15}, 0.15)`;
+            const c = Math.random() > 0.5 ? 200 : 235;
+            ctx.fillStyle = `rgba(${c}, ${c + 4}, ${c + 10}, 0.22)`;
             ctx.fillRect(x, y, 2, 2);
         }
 
-        // Tire-wear / oil stain patches (variasi tonal agar tidak terlihat repetitif)
-        for (let i = 0; i < 6; i++) {
+        // Clean subtle tire tracks & pavement tone variations
+        for (let i = 0; i < 5; i++) {
             const gx = Math.random() * 512, gy = Math.random() * 512;
-            const grad = ctx.createRadialGradient(gx, gy, 2, gx, gy, 60 + Math.random() * 50);
-            grad.addColorStop(0, 'rgba(15,23,42,0.18)');
-            grad.addColorStop(1, 'rgba(15,23,42,0)');
+            const grad = ctx.createRadialGradient(gx, gy, 4, gx, gy, 70 + Math.random() * 50);
+            grad.addColorStop(0, 'rgba(148,163,184,0.12)');
+            grad.addColorStop(1, 'rgba(148,163,184,0)');
             ctx.fillStyle = grad;
             ctx.fillRect(0, 0, 512, 512);
         }
 
-        // Surface hairline cracks
-        ctx.strokeStyle = 'rgba(15,23,42,0.35)';
-        ctx.lineWidth = 0.8;
-        for (let i = 0; i < 3; i++) {
-            let cx = Math.random() * 512, cy = Math.random() * 512;
-            ctx.beginPath();
-            ctx.moveTo(cx, cy);
-            for (let s = 0; s < 6; s++) {
-                cx += (Math.random() - 0.5) * 50;
-                cy += (Math.random() - 0.5) * 50;
-                ctx.lineTo(cx, cy);
-            }
-            ctx.stroke();
-        }
-
-        // Grid Siar Dilatasi / Contraction Joint (Modul Pelat Beton 5x5 m)
-        ctx.strokeStyle = '#1e293b';
-        ctx.lineWidth = 4;
+        // Siar Dilatasi / Contraction Joint (Modul Pelat Beton 5x5 m - garis bersih presisi)
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 3.5;
         ctx.strokeRect(0, 0, 512, 512);
 
         // Sealant joint lines
-        ctx.strokeStyle = '#0f172a';
-        ctx.lineWidth = 1.5;
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 1.2;
         ctx.strokeRect(2, 2, 508, 508);
 
-        // Dowel bar tick marks pada tengah sambungan (detail struktural)
-        ctx.fillStyle = 'rgba(148,163,184,0.35)';
+        // Dowel bar tick marks pada tengah sambungan
+        ctx.fillStyle = 'rgba(100,116,139,0.35)';
         for (let t = 64; t < 512; t += 128) {
-            ctx.fillRect(t, 0, 6, 3);
-            ctx.fillRect(0, t, 3, 6);
+            ctx.fillRect(t, 0, 5, 2.5);
+            ctx.fillRect(0, t, 2.5, 5);
         }
 
         const texture = new THREE.CanvasTexture(canvas);
@@ -2066,7 +2128,7 @@ function getRigidPavementTexture(repX, repY) {
 
     const clone = concreteTextureCache.clone();
     clone.repeat.set(repX, repY);
-    clone.needsUpdate = true; // clone() tidak otomatis menandai upload ke GPU
+    clone.needsUpdate = true;
     return clone;
 }
 
@@ -2139,21 +2201,24 @@ function initThreeScene() {
     const width = container.clientWidth;
     const height = container.clientHeight;
 
-    // Scene
+    // Scene (Bright Clean Digital Twin Atmosphere seperti referensi WareTrack)
     scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xdcecf8);
-    scene.fog = new THREE.FogExp2(0xdcecf8, 0.0035);
+    scene.background = new THREE.Color(0xecf3f9);
+    scene.fog = new THREE.FogExp2(0xecf3f9, 0.0022);
 
     // Camera (Menghadap ke Utara / North ke arah Kantor & Gate dari koridor Rel Selatan)
     camera = new THREE.PerspectiveCamera(45, width / height, 1, 1200);
     camera.position.set(0, 110, -155);
 
-    // Renderer
+    // Renderer (ACESFilmic Tone Mapping + sRGB Color Space untuk render bersih berkualitas tinggi)
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.08;
+    renderer.outputEncoding = THREE.sRGBEncoding;
     container.appendChild(renderer.domElement);
 
     // Controls
@@ -2188,16 +2253,16 @@ function initThreeScene() {
     animate();
 }
 
-// Lighting Setup
+// Lighting Setup (Soft Hemisphere Fill + Natural Warm Sunlight)
 let ambientLight, sunLight;
-const LIGHT_DAY = { ambient: 0.55, sun: 1.15, sunColor: 0xfff5e6 };
+const LIGHT_DAY = { ambient: 0.85, sun: 1.35, sunColor: 0xfffaf0 };
 function setupLighting() {
-    ambientLight = new THREE.AmbientLight(0xffffff, LIGHT_DAY.ambient);
+    ambientLight = new THREE.HemisphereLight(0xffffff, 0xcbd5e1, LIGHT_DAY.ambient);
     scene.add(ambientLight);
 
-    // Directional Sun Light berdasarkan sudut zenith/azimuth lokasi proyek (Cikarang 6°18' LS: matahari tinggi)
+    // Directional Sun Light (Matahari alami dengan bayangan kontak halus presisi)
     sunLight = new THREE.DirectionalLight(LIGHT_DAY.sunColor, LIGHT_DAY.sun);
-    sunLight.position.set(70, 115, 65);
+    sunLight.position.set(75, 120, 60);
     sunLight.castShadow = true;
 
     // Contact soft shadow parameters
@@ -2264,6 +2329,15 @@ function buildTerminalEnvironment() {
 
     // 14. Generate Baseline Yard Container Stacks (Multi-tier realistic port scale)
     generateBaselineYardContainers();
+
+    // 15. Forklift Charging Hub & Active Electric Fleet (WareTrack Digital Twin)
+    buildForkliftHubAndChargingStation();
+
+    // 16. Truk Kontainer Sasis 40ft (CFS Stuffing / Stripping Dock Bay 03)
+    buildCFSContainerTruck();
+
+    // 17. Modern Stylized Low-Poly Trees & Green Belts
+    buildStylizedTrees();
 }
 
 // 1. Civil Concrete Ground Pavements & Arterial Road Network (Expansive 35 Ha Dry Port Master Plan)
@@ -2294,37 +2368,36 @@ function buildCivilPavementsAndRoadNetwork() {
     pavementGroup.add(ground);
 
     // CAD axis grid (grid sumbu 5 unit) - layer 'gridAxes'
-    const grid = new THREE.GridHelper(380, 76, 0x475569, 0x334155);
+    // CAD axis grid (grid sumbu 5 unit) - layer 'gridAxes'
+    const grid = new THREE.GridHelper(380, 76, 0x94a3b8, 0xcbd5e1);
     grid.position.y = 0.03;
     grid.material.transparent = true;
-    grid.material.opacity = 0.25;
+    grid.material.opacity = 0.35;
     cadGridGroup.add(grid);
 
-    // Concrete Apron Platforms for Each Zone (Scale-Accurate Heavy Port Slabs)
+    // Concrete Apron Platforms for Each Zone (Scale-Accurate Clean Architectural Slabs)
     const aprons = [
         // Expansive Container Stacking Yard Apron (Core 15 Ha Terminal Blocks)
-        { w: 260, d: 120, x: 0, z: -5, color: 0x334155 },
+        { w: 260, d: 120, x: 0, z: -5, color: 0xe2e8f0 },
         // CFS Warehouse & Logistics Yard Apron (West)
-        { w: 38, d: 74, x: -106, z: 46, color: 0x3b4758 },
+        { w: 38, d: 74, x: -106, z: 46, color: 0xedf2f7 },
         // Customs KPPBC, X-Ray & Behandle Inspection Apron (East)
-        { w: 38, d: 74, x: 104, z: 46, color: 0x3b4758 },
+        { w: 38, d: 74, x: 104, z: 46, color: 0xedf2f7 },
         // Administration HQ, Datacenter NOC & Amenities Apron (North Central)
-        { w: 82, d: 38, x: 0, z: 52, color: 0x475569 },
+        { w: 82, d: 38, x: 0, z: 52, color: 0xf1f5f9 },
         // Gate Complex & Truck Queuing Approach Apron (North West)
-        { w: 58, d: 38, x: -62, z: 52, color: 0x334155 },
+        { w: 58, d: 38, x: -62, z: 52, color: 0xe2e8f0 },
         // Reefer Cold Chain Specialized Apron
-        { w: 38, d: 36, x: 104, z: 16, color: 0x0f172a },
+        { w: 38, d: 36, x: 104, z: 16, color: 0xe0f2fe },
         // Rail Siding Intermodal Loading Apron (South Perimeter)
-        { w: 280, d: 24, x: 0, z: -52, color: 0x273549 }
+        { w: 280, d: 24, x: 0, z: -52, color: 0xdbeafe }
     ];
 
     aprons.forEach(ap => {
         const apGeo = new THREE.BoxGeometry(ap.w, 0.12, ap.d);
-        // Tint apron: campur warna zona dengan putih agar tekstur beton tetap terbaca
-        const tint = new THREE.Color(ap.color).lerp(new THREE.Color(0xffffff), 0.6);
         const apMat = new THREE.MeshStandardMaterial({
             map: getRigidPavementTexture(ap.w / 10, ap.d / 10),
-            color: tint,
+            color: ap.color,
             roughness: 0.75
         });
         const mesh = new THREE.Mesh(apGeo, apMat);
@@ -2375,6 +2448,24 @@ function buildCivilPavementsAndRoadNetwork() {
             }
         }
     });
+
+    // Marka Garis Parkir Truk di Depan Loading Dock CFS (Dock Stalls Bay 01 - 04)
+    const stallLineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    const stallLineGeo = new THREE.BoxGeometry(11, 0.02, 0.22);
+    const stopLineGeo = new THREE.BoxGeometry(0.22, 0.02, 3.6);
+
+    [7, 11.5, 16, 20.5].forEach(dz => {
+        // Garis samping stall parkir mundur truk
+        [-1.8, 1.8].forEach(offsetZ => {
+            const line = new THREE.Mesh(stallLineGeo, stallLineMat);
+            line.position.set(-68.5, 0.13, dz + offsetZ);
+            pavementGroup.add(line);
+        });
+        // Garis batas roda truk (stop line)
+        const stopLine = new THREE.Mesh(stopLineGeo, stallLineMat);
+        stopLine.position.set(-63.0, 0.13, dz);
+        pavementGroup.add(stopLine);
+    });
 }
 
 // Saluran Parit Drainase U-Ditch Beton Pracetak di Sepanjang Koridor Jalan
@@ -2419,10 +2510,10 @@ function createBlockZone(blockKey, centerX, centerZ, labelText) {
     const blockWidth = bData.width || 72;
     const blockDepth = bData.depth || 24;
 
-    // Heavy-Duty Reinforced Concrete Slab
-    let slabColor = 0x1e293b;
-    if (blockKey === 'REEFER') slabColor = 0x0f172a;
-    if (blockKey === 'DG') slabColor = 0x450a0a;
+    // Heavy-Duty Reinforced Concrete Slab (Clean Architectural Concrete)
+    let slabColor = 0xdbe4ee;
+    if (blockKey === 'REEFER') slabColor = 0xcfe2f7;
+    if (blockKey === 'DG') slabColor = 0xfce7f3;
 
     const slabGeo = new THREE.BoxGeometry(blockWidth, 0.2, blockDepth);
     const slabMat = new THREE.MeshStandardMaterial({
@@ -3148,18 +3239,25 @@ function buildCFSAndWarehouseZone() {
     const cfsGroup = new THREE.Group();
     cfsGroup.name = "CFSAndWarehousingZone";
 
-    // 1. CFS Warehouse 4.000 m² (fac_f_cfs)
+    // 1. CFS Warehouse 4.000 m² (fac_f_cfs) - Clean Modern Architectural SaaS Aesthetic
     const cfsW = 24, cfsH = 8.5, cfsD = 18;
-    const steelMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 });
-    const claddingMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6 });
+    const steelMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, metalness: 0.7, roughness: 0.3 }); // Vibrant electric royal blue frame
+    const claddingMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.55 }); // Crisp off-white sandwich panels
+    const blueTrimMat = new THREE.MeshStandardMaterial({ color: 0x1e40af, roughness: 0.4 }); // Deep blue accents
     const cfsX = -88, cfsZ = 14;
     const roofRise = (cfsW / 2) * Math.tan(Math.PI / 16);
 
-    // Dinding Penutup Sandwich Panel (sedikit lebih kecil dari grid kolom agar kolom baja terlihat menonjol)
+    // Dinding Penutup Sandwich Panel Off-White Modern
     const cfs = new THREE.Mesh(new THREE.BoxGeometry(cfsW - 0.2, cfsH - 0.2, cfsD - 0.2), claddingMat);
     cfs.position.set(cfsX, (cfsH - 0.2) / 2, cfsZ);
     cfs.castShadow = true;
     cfsGroup.add(cfs);
+
+    // Blue Architectural Accent Band at top of facade
+    const topBandGeo = new THREE.BoxGeometry(cfsW + 0.1, 0.6, cfsD + 0.1);
+    const topBand = new THREE.Mesh(topBandGeo, blueTrimMat);
+    topBand.position.set(cfsX, cfsH - 0.3, cfsZ);
+    cfsGroup.add(topBand);
 
     // Portal Frame: Kolom Baja WF + Kuda-kuda Atap (rafter miring) tiap 4.5 unit
     const colGeo = new THREE.BoxGeometry(0.45, cfsH, 0.45);
@@ -3197,7 +3295,7 @@ function buildCFSAndWarehouseZone() {
     // Penutup atap (roof sheet) dua bidang miring
     const roofLen = cfsW / 2 / Math.cos(Math.PI / 16) + 0.4;
     const roofGeo = new THREE.BoxGeometry(roofLen, 0.12, cfsD + 0.4);
-    const roofMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.5, roughness: 0.45 });
+    const roofMat = new THREE.MeshStandardMaterial({ color: 0xcfd8dc, metalness: 0.45, roughness: 0.4 });
     const roofL = new THREE.Mesh(roofGeo, roofMat);
     roofL.position.set(cfsX - cfsW / 4, cfsH + roofRise / 2 + 0.38, cfsZ);
     roofL.rotation.z = Math.PI / 16;
@@ -3209,60 +3307,114 @@ function buildCFSAndWarehouseZone() {
     roofR.castShadow = true;
     cfsGroup.add(roofR);
 
-    // Dinding gable segitiga di kedua ujung gudang (menutup ruang antara dinding dan atap)
+    // Dinding gable segitiga di kedua ujung gudang
     const gableShape = new THREE.Shape();
     gableShape.moveTo(-cfsW / 2 + 0.1, 0);
     gableShape.lineTo(cfsW / 2 - 0.1, 0);
     gableShape.lineTo(0, roofRise + 0.1);
     gableShape.closePath();
     const gableGeo = new THREE.ShapeGeometry(gableShape);
-    const gableMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.6, side: THREE.DoubleSide });
+    const gableMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.55, side: THREE.DoubleSide });
     [-1, 1].forEach(s => {
         const gable = new THREE.Mesh(gableGeo, gableMat);
         gable.position.set(cfsX, cfsH - 0.2, cfsZ + s * (cfsD / 2 - 0.1));
         cfsGroup.add(gable);
     });
 
-    // Raised Loading Dock Platform
+    // Raised Loading Dock Platform (K-400 Concrete)
     const dockGeo = new THREE.BoxGeometry(3.5, 1.2, cfsD);
-    const dockMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.8 });
+    const dockMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.75 });
     const dock = new THREE.Mesh(dockGeo, dockMat);
     dock.position.set(-88 + cfsW/2 + 1.75, 0.6, 14);
+    dock.receiveShadow = true;
     cfsGroup.add(dock);
 
-    // 4 Loading Dock Overhead Doors with Yellow Dock Bumpers
-    for (let dz = 7; dz <= 21; dz += 4.5) {
-        const dDoorGeo = new THREE.BoxGeometry(0.2, 4.0, 3.2);
-        const dDoorMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2 });
-        const dDoor = new THREE.Mesh(dDoorGeo, dDoorMat);
-        dDoor.position.set(-88 + cfsW/2 + 0.1, 3.2, dz);
-        cfsGroup.add(dDoor);
+    // 4 Modern Loading Dock Bays with Blue Portals, Bay Badges & Open Interior Staging
+    const dockBays = [
+        { dz: 7, label: 'BAY 01', open: true, hasPallets: true },
+        { dz: 11.5, label: 'BAY 02', open: true, hasPallets: true },
+        { dz: 16, label: 'BAY 03', open: true, hasPallets: false }, // Backed-up Box Truck
+        { dz: 20.5, label: 'BAY 04', open: false, hasPallets: false }
+    ];
 
-        // Dock bumper
+    dockBays.forEach(bay => {
+        // Blue portal frame border surround
+        const frameL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.2, 0.25), blueTrimMat);
+        frameL.position.set(-88 + cfsW/2 + 0.12, 3.3, bay.dz - 1.6);
+        cfsGroup.add(frameL);
+
+        const frameR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 4.2, 0.25), blueTrimMat);
+        frameR.position.set(-88 + cfsW/2 + 0.12, 3.3, bay.dz + 1.6);
+        cfsGroup.add(frameR);
+
+        const frameTop = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.35, 3.45), blueTrimMat);
+        frameTop.position.set(-88 + cfsW/2 + 0.12, 5.4, bay.dz);
+        cfsGroup.add(frameTop);
+
+        // Overhead Bay Number Signboard
+        const baySignGeo = new THREE.BoxGeometry(0.22, 0.45, 1.5);
+        const baySign = new THREE.Mesh(baySignGeo, new THREE.MeshStandardMaterial({ color: 0x1d4ed8 }));
+        baySign.position.set(-88 + cfsW/2 + 0.18, 5.8, bay.dz);
+        cfsGroup.add(baySign);
+
+        if (bay.open) {
+            // Door rolled up (compact roll cylinder at top)
+            const rollGeo = new THREE.CylinderGeometry(0.35, 0.35, 3.1, 12);
+            const rollMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.5 });
+            const roll = new THREE.Mesh(rollGeo, rollMat);
+            roll.rotation.x = Math.PI / 2;
+            roll.position.set(-88 + cfsW/2 + 0.05, 5.0, bay.dz);
+            cfsGroup.add(roll);
+
+            // Warm interior lighting glowing from inside the dock
+            const dockLight = new THREE.PointLight(0xffedd5, 1.6, 12);
+            dockLight.position.set(-88 + cfsW/2 - 2.5, 3.8, bay.dz);
+            cfsGroup.add(dockLight);
+
+            // Staged cargo pallets inside the open bay
+            if (bay.hasPallets) {
+                const palletStack = createCargoPalletStack(-88 + cfsW/2 - 2.2, 1.25, bay.dz);
+                cfsGroup.add(palletStack);
+            }
+        } else {
+            // Closed roll door
+            const dDoorGeo = new THREE.BoxGeometry(0.2, 4.0, 3.1);
+            const dDoorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3 });
+            const dDoor = new THREE.Mesh(dDoorGeo, dDoorMat);
+            dDoor.position.set(-88 + cfsW/2 + 0.05, 3.2, bay.dz);
+            cfsGroup.add(dDoor);
+        }
+
+        // Heavy-duty rubber dock bumper with yellow safety markings
         const bGeo = new THREE.BoxGeometry(0.4, 0.4, 3.2);
         const bMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
         const b = new THREE.Mesh(bGeo, bMat);
-        b.position.set(-88 + cfsW/2 + 3.5, 0.6, dz);
+        b.position.set(-88 + cfsW/2 + 3.5, 0.6, bay.dz);
         cfsGroup.add(b);
-    }
+    });
 
     createBlockLabelSprite('CFS WAREHOUSE 4.000 M² (STEEL PORTAL FRAME)', -88, cfsH + 5.5, 14);
 
     // 2. Transit Distribution Warehouse (fac_f_warehouse)
     const trW = 24, trH = 7, trD = 13;
     const trGeo = new THREE.BoxGeometry(trW, trH, trD);
-    const trMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.6 });
+    const trMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.55 });
     const trWarehouse = new THREE.Mesh(trGeo, trMat);
     trWarehouse.position.set(-88, trH/2, -3);
     trWarehouse.castShadow = true;
     cfsGroup.add(trWarehouse);
+
+    // Navy Accent Band on Transit Warehouse
+    const trBand = new THREE.Mesh(new THREE.BoxGeometry(trW + 0.1, 0.5, trD + 0.1), blueTrimMat);
+    trBand.position.set(-88, trH - 0.25, -3);
+    cfsGroup.add(trBand);
 
     createBlockLabelSprite('TRANSIT WAREHOUSE & CROSS-DOCKING', -88, trH + 2.5, -3);
 
     // 3. M&R Workshop / Bengkel Alat Berat (fac_f_workshop_mr)
     const mrW = 24, mrH = 9, mrD = 16;
     const mrGeo = new THREE.BoxGeometry(mrW, mrH, mrD);
-    const mrMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
+    const mrMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.5 });
     const mrWorkshop = new THREE.Mesh(mrGeo, mrMat);
     mrWorkshop.position.set(-88, mrH/2, -20);
     mrWorkshop.castShadow = true;
@@ -3276,7 +3428,7 @@ function buildCFSAndWarehouseZone() {
     cfsGroup.add(craneBeam);
 
     // Kolom penumpu runway crane di ujung luar balok
-    const runwayColMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, metalness: 0.8, roughness: 0.3 });
+    const runwayColMat = new THREE.MeshStandardMaterial({ color: 0x1d4ed8, metalness: 0.8, roughness: 0.3 });
     [-1, 1].forEach(s => {
         const rc = new THREE.Mesh(new THREE.BoxGeometry(0.45, 7.8, 0.45), runwayColMat);
         rc.position.set(-88 + mrW/2 + 9.8, 3.9, -20 + s * 0.9);
@@ -3286,6 +3438,617 @@ function buildCFSAndWarehouseZone() {
     createBlockLabelSprite('M&R HEAVY EQUIPMENT WORKSHOP', -88, mrH + 2.5, -20);
 
     scene.add(cfsGroup);
+}
+
+// =============================================================================
+// PROCEDURAL ASSETS: CARGO PALLETS, FORKLIFTS, EV CHARGING & DELIVERY BOX TRUCK
+// (Matches WareTrack / 3D SaaS Digital Twin Master Reference)
+// =============================================================================
+
+// Helper: Stacked Wooden Pallet with Cardboard Cargo Boxes
+function createCargoPalletStack(x, y, z) {
+    const stackGroup = new THREE.Group();
+    
+    // Wooden pallet base (warm natural timber)
+    const woodMat = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.85 });
+    const deckGeo = new THREE.BoxGeometry(1.6, 0.08, 1.3);
+    const deck = new THREE.Mesh(deckGeo, woodMat);
+    deck.position.set(0, 0.12, 0);
+    stackGroup.add(deck);
+
+    const runnerGeo = new THREE.BoxGeometry(1.6, 0.08, 0.14);
+    [-0.5, 0, 0.5].forEach(rz => {
+        const runner = new THREE.Mesh(runnerGeo, woodMat);
+        runner.position.set(0, 0.04, rz);
+        stackGroup.add(runner);
+    });
+
+    // Cardboard boxes in warm kraft packaging colors
+    const boxMat1 = new THREE.MeshStandardMaterial({ color: 0xd97706, roughness: 0.8 });
+    const boxMat2 = new THREE.MeshStandardMaterial({ color: 0xb45309, roughness: 0.8 });
+    const boxMat3 = new THREE.MeshStandardMaterial({ color: 0x92400e, roughness: 0.8 });
+    const boxMats = [boxMat1, boxMat2, boxMat3];
+
+    const bGeo = new THREE.BoxGeometry(0.7, 0.5, 0.55);
+    const boxPositions = [
+        { bx: -0.36, by: 0.42, bz: -0.28, rot: 0 },
+        { bx: 0.36, by: 0.42, bz: -0.28, rot: 0 },
+        { bx: -0.36, by: 0.42, bz: 0.28, rot: 0 },
+        { bx: 0.36, by: 0.42, bz: 0.28, rot: 0 },
+        { bx: -0.15, by: 0.85, bz: 0, rot: 0.05 },
+        { bx: 0.32, by: 0.85, bz: 0.1, rot: -0.05 }
+    ];
+
+    boxPositions.forEach((bp, idx) => {
+        const box = new THREE.Mesh(bGeo, boxMats[idx % boxMats.length]);
+        box.position.set(bp.bx, bp.by, bp.bz);
+        box.rotation.y = bp.rot;
+        box.castShadow = true;
+        stackGroup.add(box);
+    });
+
+    stackGroup.position.set(x, y, z);
+    return stackGroup;
+}
+
+// Helper: 3D Floating Speech Bubble Callout Badge ("[⚡ FL-12 Charging]")
+function createChargingCalloutBadge(text, batteryPercent) {
+    const canvas = document.createElement('canvas');
+    canvas.width = 384;
+    canvas.height = 128;
+    const ctx = canvas.getContext('2d');
+    
+    // Background card (white with subtle drop shadow)
+    ctx.fillStyle = '#ffffff';
+    ctx.shadowColor = 'rgba(0,0,0,0.22)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetY = 4;
+    
+    const x = 12, y = 8, w = 360, h = 90, r = 18;
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.lineTo(x + w - r, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+    ctx.lineTo(x + w, y + h - r);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    // Tail pointing down to the vehicle
+    ctx.lineTo(x + w / 2 + 16, y + h);
+    ctx.lineTo(x + w / 2, y + h + 22);
+    ctx.lineTo(x + w / 2 - 16, y + h);
+    ctx.lineTo(x + r, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+    ctx.lineTo(x, y + r);
+    ctx.quadraticCurveTo(x, y, x + r, y);
+    ctx.closePath();
+    ctx.fill();
+    ctx.shadowColor = 'transparent';
+
+    // Green battery badge icon
+    ctx.fillStyle = '#10b981';
+    ctx.beginPath();
+    if (ctx.roundRect) {
+        ctx.roundRect(26, 24, 48, 56, 10);
+    } else {
+        ctx.rect(26, 24, 48, 56);
+    }
+    ctx.fill();
+
+    // Lightning bolt icon
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 30px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('⚡', 50, 52);
+
+    // Vehicle Name
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 24px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(text, 88, 48);
+
+    // Battery percentage
+    ctx.fillStyle = '#10b981';
+    ctx.font = 'bold 20px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillText(`${batteryPercent}% Charging`, 88, 75);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(6.8, 2.26, 1);
+    return sprite;
+}
+
+// Procedural Industrial Forklift Model Builder
+function createForkliftModel(colorHex = 0xf59e0b, hasPallet = false) {
+    const flGroup = new THREE.Group();
+
+    const bodyMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.4, metalness: 0.2 });
+    const darkMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.6, metalness: 0.4 });
+    const blackMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.8 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0a0e17, roughness: 0.9 });
+    const forkMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.3 });
+    const lightMat = new THREE.MeshBasicMaterial({ color: 0xfef08a });
+    const amberBeaconMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+    // 1. Lower Chassis
+    const baseGeo = new THREE.BoxGeometry(2.3, 0.55, 1.35);
+    const base = new THREE.Mesh(baseGeo, bodyMat);
+    base.position.set(0, 0.48, 0);
+    base.castShadow = true;
+    flGroup.add(base);
+
+    // Rear counterweight
+    const cwGeo = new THREE.BoxGeometry(0.7, 0.7, 1.32);
+    const cw = new THREE.Mesh(cwGeo, darkMat);
+    cw.position.set(-0.85, 0.7, 0);
+    cw.castShadow = true;
+    flGroup.add(cw);
+
+    // 2. Cab Floor & Seat Console
+    const seatGeo = new THREE.BoxGeometry(0.5, 0.5, 0.45);
+    const seat = new THREE.Mesh(seatGeo, blackMat);
+    seat.position.set(-0.2, 0.9, 0);
+    flGroup.add(seat);
+
+    // Steering Column & Wheel
+    const colGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.6);
+    const col = new THREE.Mesh(colGeo, darkMat);
+    col.position.set(0.3, 0.95, 0);
+    col.rotation.z = -Math.PI / 8;
+    flGroup.add(col);
+
+    const steerGeo = new THREE.TorusGeometry(0.14, 0.025, 8, 16);
+    const steer = new THREE.Mesh(steerGeo, darkMat);
+    steer.position.set(0.38, 1.2, 0);
+    steer.rotation.x = Math.PI / 2.5;
+    flGroup.add(steer);
+
+    // 3. Overhead Guard (ROPS Cage)
+    const ropsPillarGeo = new THREE.BoxGeometry(0.06, 1.5, 0.06);
+    [
+        { x: -0.6, z: -0.55 },
+        { x: -0.6, z: 0.55 },
+        { x: 0.35, z: -0.55 },
+        { x: 0.35, z: 0.55 }
+    ].forEach(pos => {
+        const pillar = new THREE.Mesh(ropsPillarGeo, darkMat);
+        pillar.position.set(pos.x, 1.45, pos.z);
+        flGroup.add(pillar);
+    });
+
+    const roofTopGeo = new THREE.BoxGeometry(1.05, 0.05, 1.2);
+    const roofTop = new THREE.Mesh(roofTopGeo, darkMat);
+    roofTop.position.set(-0.12, 2.2, 0);
+    flGroup.add(roofTop);
+
+    // Amber Safety Strobe Beacon on top
+    const beaconGeo = new THREE.CylinderGeometry(0.07, 0.07, 0.12, 12);
+    const beacon = new THREE.Mesh(beaconGeo, amberBeaconMat);
+    beacon.position.set(-0.12, 2.28, 0);
+    flGroup.add(beacon);
+
+    // 4. Front Mast Assembly (Vertical I-beams)
+    const mastGeo = new THREE.BoxGeometry(0.08, 2.1, 0.1);
+    [-0.42, 0.42].forEach(mz => {
+        const mast = new THREE.Mesh(mastGeo, darkMat);
+        mast.position.set(1.18, 1.25, mz);
+        flGroup.add(mast);
+    });
+
+    const crossGeo = new THREE.BoxGeometry(0.06, 0.08, 0.94);
+    [0.7, 1.4, 2.1].forEach(my => {
+        const cross = new THREE.Mesh(crossGeo, darkMat);
+        cross.position.set(1.18, my, 0);
+        flGroup.add(cross);
+    });
+
+    // Carriage plate & Fork Tines
+    const carriageGeo = new THREE.BoxGeometry(0.06, 0.4, 0.8);
+    const carriage = new THREE.Mesh(carriageGeo, darkMat);
+    carriage.position.set(1.24, 0.45, 0);
+    flGroup.add(carriage);
+
+    const forkGeo = new THREE.BoxGeometry(1.25, 0.05, 0.12);
+    [-0.22, 0.22].forEach(fz => {
+        const fork = new THREE.Mesh(forkGeo, forkMat);
+        fork.position.set(1.88, 0.18, fz);
+        flGroup.add(fork);
+        const forkBackGeo = new THREE.BoxGeometry(0.05, 0.38, 0.12);
+        const forkBack = new THREE.Mesh(forkBackGeo, forkMat);
+        forkBack.position.set(1.27, 0.36, fz);
+        flGroup.add(forkBack);
+    });
+
+    // 5. Wheels
+    const fWheelGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.28, 18);
+    [-0.64, 0.64].forEach(wz => {
+        const fw = new THREE.Mesh(fWheelGeo, wheelMat);
+        fw.rotation.x = Math.PI / 2;
+        fw.position.set(0.68, 0.38, wz);
+        fw.castShadow = true;
+        flGroup.add(fw);
+    });
+
+    const rWheelGeo = new THREE.CylinderGeometry(0.30, 0.30, 0.24, 18);
+    [-0.58, 0.58].forEach(wz => {
+        const rw = new THREE.Mesh(rWheelGeo, wheelMat);
+        rw.rotation.x = Math.PI / 2;
+        rw.position.set(-0.75, 0.30, wz);
+        rw.castShadow = true;
+        flGroup.add(rw);
+    });
+
+    // Headlights
+    [-0.45, 0.45].forEach(lz => {
+        const hl = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.1, 0.1), lightMat);
+        hl.position.set(1.0, 1.4, lz);
+        flGroup.add(hl);
+    });
+
+    // Optional Pallet with Cargo Boxes on the forks
+    if (hasPallet) {
+        const pallet = createCargoPalletStack(1.95, 0.18, 0);
+        pallet.scale.set(0.85, 0.85, 0.85);
+        flGroup.add(pallet);
+    }
+
+    return flGroup;
+}
+
+// Dedicated Forklift Charging Hub & Active Electric Fleet
+function buildForkliftHubAndChargingStation() {
+    const hubGroup = new THREE.Group();
+    hubGroup.name = "ForkliftChargingHub";
+
+    // 1. Dedicated EV Charging Pad on CFS Apron (Light concrete with emerald border)
+    const padW = 16, padD = 12;
+    const padGeo = new THREE.BoxGeometry(padW, 0.14, padD);
+    const padMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.75 });
+    const pad = new THREE.Mesh(padGeo, padMat);
+    pad.position.set(-62, 0.08, 23);
+    pad.receiveShadow = true;
+    hubGroup.add(pad);
+
+    // Green safety boundary line around EV charging bay
+    const lineGeoX = new THREE.BoxGeometry(padW + 0.2, 0.02, 0.3);
+    const lineGeoZ = new THREE.BoxGeometry(0.3, 0.02, padD + 0.2);
+    const greenLineMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+    [-padD/2, padD/2].forEach(lz => {
+        const line = new THREE.Mesh(lineGeoX, greenLineMat);
+        line.position.set(-62, 0.17, 23 + lz);
+        hubGroup.add(line);
+    });
+    [-padW/2, padW/2].forEach(lx => {
+        const line = new THREE.Mesh(lineGeoZ, greenLineMat);
+        line.position.set(-62 + lx, 0.17, 23);
+        hubGroup.add(line);
+    });
+
+    // EV Parking Slot Dividing Lines (3 charging bays)
+    const slotLineGeo = new THREE.BoxGeometry(padW - 3, 0.02, 0.2);
+    const whiteLineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    [-2.2, 2.2].forEach(sz => {
+        const sLine = new THREE.Mesh(slotLineGeo, whiteLineMat);
+        sLine.position.set(-61, 0.17, 23 + sz);
+        hubGroup.add(sLine);
+    });
+
+    // 2. 3 Sleek White EV Charging Bollards / Pillars
+    const bollardGeo = new THREE.BoxGeometry(0.65, 1.8, 0.65);
+    const bollardMat = new THREE.MeshStandardMaterial({ color: 0xf8fafc, roughness: 0.3, metalness: 0.1 });
+    const screenMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+    const cableMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+
+    const bollardZCoords = [23 - 4.2, 23, 23 + 4.2];
+    bollardZCoords.forEach((bz) => {
+        const bollard = new THREE.Mesh(bollardGeo, bollardMat);
+        bollard.position.set(-68.5, 0.98, bz);
+        bollard.castShadow = true;
+        hubGroup.add(bollard);
+
+        // Green illuminated status panel
+        const screen = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.45, 0.35), screenMat);
+        screen.position.set(-68.15, 1.4, bz);
+        hubGroup.add(screen);
+
+        // Blue brand stripe on bollard
+        const stripe = new THREE.Mesh(new THREE.BoxGeometry(0.67, 0.15, 0.67), new THREE.MeshStandardMaterial({ color: 0x0284c7 }));
+        stripe.position.set(-68.5, 1.7, bz);
+        hubGroup.add(stripe);
+
+        // Charging Cable drooping to charging slot
+        const cable = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, 1.8, 8), cableMat);
+        cable.position.set(-67.5, 0.7, bz + 0.3);
+        cable.rotation.z = Math.PI / 3;
+        hubGroup.add(cable);
+    });
+
+    // 3. Parked Charging Forklift 1 (FL-12 - Yellow) at Slot 2 (Center)
+    const fl12 = createForkliftModel(0xf59e0b, false);
+    fl12.position.set(-63.5, 0.08, 23);
+    fl12.rotation.y = Math.PI; // facing east
+    hubGroup.add(fl12);
+
+    // Floating 3D Speech Bubble Badge "[⚡ FL-01 CFS 3.5T • 84% Baterai]" directly above FL-12
+    const callout = createChargingCalloutBadge('FL-01 CFS 3.5T', 84);
+    callout.position.set(-63.5, 4.6, 23);
+    hubGroup.add(callout);
+
+    // Parked Charging Forklift 2 (FL-02 CFS 5.0T - Heavy Duty Port Yellow) at Slot 3 (North)
+    const fl08 = createForkliftModel(0xf59e0b, false);
+    fl08.position.set(-63.5, 0.08, 23 + 4.2);
+    fl08.rotation.y = Math.PI;
+    hubGroup.add(fl08);
+
+    // 4. Active Forklift 3 (FL-03 CFS - Stuffing/Stripping Kargo Palet)
+    // Operating actively in front of CFS Loading Dock Bay 1
+    const fl03 = createForkliftModel(0xf59e0b, true);
+    fl03.position.set(-65.5, 0.08, 7.5);
+    fl03.rotation.y = -Math.PI / 1.15;
+    hubGroup.add(fl03);
+
+    // Billboard Label
+    createBlockLabelSprite('CFS EQUIPMENT DEPOT (FORKLIFT CFS 3.5T - 5T)', -62, 5.8, 29);
+
+    scene.add(hubGroup);
+}
+
+// =============================================================================
+// TRUK KONTAINER PELABUHAN (PRIME MOVER + SASIS TRAILER 40FT + KONTAINER ISO)
+// Parkir Mundur di Loading Dock Bay 03 CFS untuk Proses Stuffing/Stripping Kargo
+// =============================================================================
+function buildCFSContainerTruck() {
+    const truckGroup = new THREE.Group();
+    truckGroup.name = "CFSContainerTruck40FT";
+
+    // Posisi parkir mundur di CFS Loading Dock Bay 3 (z = 16.0, pintu kontainer merapat ke dock bumper di x = -74.2)
+    const dockZ = 16.0;
+    const rearDockX = -74.1; // Ujung belakang kontainer merapat ke dock
+
+    // Material Standar Pelabuhan Internasional
+    const cabMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.35, metalness: 0.2 }); // Kabin Prime Mover Biru Maritim
+    const chassisMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7, metalness: 0.5 }); // Baja Sasis Gelap
+    const containerMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, roughness: 0.45, metalness: 0.1 }); // Kontainer ISO 40FT Maersk/Ocean Blue
+    const glassMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.1, metalness: 0.8 });
+    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x0a0e17, roughness: 0.9 });
+    const chromeMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, metalness: 0.9, roughness: 0.1 });
+    const cornerMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.7, roughness: 0.3 }); // ISO Corner Castings
+    const lightMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+    const yellowMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+
+    // -------------------------------------------------------------------------
+    // 1. Sasis Skeletal Semi-Trailer 40FT (Panjang 12.5m, Lebar 2.45m)
+    // -------------------------------------------------------------------------
+    const trailerLength = 12.5;
+    const trailerCenter = rearDockX + trailerLength / 2; // -67.85
+
+    const sasisBeam = new THREE.Mesh(new THREE.BoxGeometry(trailerLength, 0.35, 2.45), chassisMat);
+    sasisBeam.position.set(trailerCenter, 1.25, dockZ);
+    sasisBeam.castShadow = true;
+    truckGroup.add(sasisBeam);
+
+    // 4 Corner Twistlock Bolsters pada Sasis
+    [-trailerLength / 2 + 0.3, trailerLength / 2 - 0.3].forEach(bx => {
+        [-1.15, 1.15].forEach(bz => {
+            const bolster = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.25, 0.35), chassisMat);
+            bolster.position.set(trailerCenter + bx, 1.45, dockZ + bz);
+            truckGroup.add(bolster);
+        });
+    });
+
+    // Roda Gandar Ganda Belakang Sasis Trailer (8 Roda / Tandem Bogie Pelabuhan)
+    [-trailerLength / 2 + 1.2, -trailerLength / 2 + 2.5].forEach(axX => {
+        [-1.0, -1.22, 1.0, 1.22].forEach(wz => {
+            const w = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.22, 20), wheelMat);
+            w.rotation.x = Math.PI / 2;
+            w.position.set(trailerCenter + axX, 0.5, dockZ + wz);
+            w.castShadow = true;
+            truckGroup.add(w);
+        });
+    });
+
+    // -------------------------------------------------------------------------
+    // 2. Kontainer ISO 40FT High Cube (12.2m x 2.6m x 2.44m)
+    // -------------------------------------------------------------------------
+    const cLen = 12.2, cH = 2.6, cW = 2.44;
+    const cCenter = rearDockX + cLen / 2; // -68.0
+
+    // Bodi Utama Kontainer
+    const containerBox = new THREE.Mesh(new THREE.BoxGeometry(cLen, cH, cW), containerMat);
+    containerBox.position.set(cCenter, 1.45 + cH / 2, dockZ);
+    containerBox.castShadow = true;
+    truckGroup.add(containerBox);
+
+    // ISO Corner Castings (8 Sudut Baja Standar ISO 1161)
+    [-cLen / 2 + 0.15, cLen / 2 - 0.15].forEach(cx => {
+        [-cW / 2 + 0.15, cW / 2 - 0.15].forEach(cz => {
+            [1.45 + 0.15, 1.45 + cH - 0.15].forEach(cy => {
+                const corner = new THREE.Mesh(new THREE.BoxGeometry(0.32, 0.32, 0.32), cornerMat);
+                corner.position.set(cCenter + cx, cy, dockZ + cz);
+                truckGroup.add(corner);
+            });
+        });
+    });
+
+    // Pintu Belakang Kontainer (Menghadap Loading Dock Bay 03) dengan Locking Rods
+    [-0.5, 0.5].forEach(rz => {
+        const rod = new THREE.Mesh(new THREE.CylinderGeometry(0.035, 0.035, cH - 0.4, 8), chromeMat);
+        rod.position.set(rearDockX + 0.05, 1.45 + cH / 2, dockZ + rz);
+        truckGroup.add(rod);
+    });
+
+    // Tulang Gelombang Dinding Kontainer (Corrugated Ribs Visual Accent)
+    for (let rx = -cLen / 2 + 0.8; rx <= cLen / 2 - 0.8; rx += 0.9) {
+        [-cW / 2 - 0.02, cW / 2 + 0.02].forEach(rz => {
+            const rib = new THREE.Mesh(new THREE.BoxGeometry(0.04, cH - 0.3, 0.06), containerMat);
+            rib.position.set(cCenter + rx, 1.45 + cH / 2, dockZ + rz);
+            truckGroup.add(rib);
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Kepala Truk / Prime Mover (Tractor Head Standar Terminal Pelabuhan)
+    // -------------------------------------------------------------------------
+    const cabX = trailerCenter + trailerLength / 2 + 1.2; // Menghadap ke Timur (+X)
+    const cabGeo = new THREE.BoxGeometry(3.2, 2.6, 2.45);
+    const cab = new THREE.Mesh(cabGeo, cabMat);
+    cab.position.set(cabX, 2.25, dockZ);
+    cab.castShadow = true;
+    truckGroup.add(cab);
+
+    // Aerodynamic Air Deflector di Atap Kabin
+    const roofDeflector = new THREE.Mesh(new THREE.BoxGeometry(2.0, 0.55, 2.4), cabMat);
+    roofDeflector.position.set(cabX - 0.2, 3.8, dockZ);
+    truckGroup.add(roofDeflector);
+
+    // Kaca Depan Windshield (Dark Tinted Glass)
+    const ws = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.1, 2.3), glassMat);
+    ws.position.set(cabX + 1.5, 2.8, dockZ);
+    truckGroup.add(ws);
+
+    // Kaca Samping
+    [-1.23, 1.23].forEach(wz => {
+        const sw = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.8, 0.05), glassMat);
+        sw.position.set(cabX + 0.3, 2.75, dockZ + wz);
+        truckGroup.add(sw);
+    });
+
+    // Gril Depan & Bemper Baja Berat
+    const grille = new THREE.Mesh(new THREE.BoxGeometry(0.3, 1.4, 2.1), chassisMat);
+    grille.position.set(cabX + 1.6, 1.7, dockZ);
+    truckGroup.add(grille);
+
+    const bumper = new THREE.Mesh(new THREE.BoxGeometry(0.35, 0.5, 2.5), chassisMat);
+    bumper.position.set(cabX + 1.65, 0.85, dockZ);
+    truckGroup.add(bumper);
+
+    // Lampu Utama Depan (Headlights)
+    [-0.85, 0.85].forEach(hz => {
+        const hl = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.25, 0.45), lightMat);
+        hl.position.set(cabX + 1.7, 1.25, dockZ + hz);
+        truckGroup.add(hl);
+    });
+
+    // Spion Ganda (Side Mirrors)
+    [-1.35, 1.35].forEach(mz => {
+        const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.15, 0.45, 0.2), chassisMat);
+        mirror.position.set(cabX + 1.1, 2.7, dockZ + mz);
+        truckGroup.add(mirror);
+    });
+
+    // Knalpot Vertikal Krom (Dual Chrome Exhaust Stacks)
+    [-1.0, 1.0].forEach(ez => {
+        const ex = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.09, 2.8, 12), chromeMat);
+        ex.position.set(cabX - 1.2, 3.0, dockZ + ez);
+        truckGroup.add(ex);
+    });
+
+    // Tangki Solar Aluminium di Bawah Sasis Kabin
+    [-1.15, 1.15].forEach(tz => {
+        const tank = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 1.8, 16), chromeMat);
+        tank.rotation.z = Math.PI / 2;
+        tank.position.set(cabX - 0.8, 0.85, dockZ + tz);
+        truckGroup.add(tank);
+    });
+
+    // Roda Gandar Depan & Gandar Penggerak Prime Mover (6 Roda)
+    // Gandar Depan (Kemudi)
+    [-1.05, 1.05].forEach(wz => {
+        const fw = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.32, 20), wheelMat);
+        fw.rotation.x = Math.PI / 2;
+        fw.position.set(cabX + 1.0, 0.5, dockZ + wz);
+        fw.castShadow = true;
+        truckGroup.add(fw);
+    });
+
+    // Gandar Belakang Prime Mover (Drive Axle Ganda)
+    [-1.0, -1.22, 1.0, 1.22].forEach(wz => {
+        const rw = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 0.22, 20), wheelMat);
+        rw.rotation.x = Math.PI / 2;
+        rw.position.set(cabX - 0.9, 0.5, dockZ + wz);
+        rw.castShadow = true;
+        truckGroup.add(rw);
+    });
+
+    scene.add(truckGroup);
+}
+
+// Modern Stylized Low-Poly Trees and Greenery Belts
+function buildStylizedTrees() {
+    const treesGroup = new THREE.Group();
+    treesGroup.name = "ModernStylizedTrees";
+
+    function createTree(x, z, scale = 1.0) {
+        const tree = new THREE.Group();
+
+        // Trunk
+        const trunkGeo = new THREE.CylinderGeometry(0.18 * scale, 0.26 * scale, 2.4 * scale, 8);
+        const trunkMat = new THREE.MeshStandardMaterial({ color: 0x78350f, roughness: 0.9 });
+        const trunk = new THREE.Mesh(trunkGeo, trunkMat);
+        trunk.position.y = 1.2 * scale;
+        trunk.castShadow = true;
+        tree.add(trunk);
+
+        // Foliage spheres (vibrant layered fresh greens)
+        const greenMat1 = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.65 });
+        const greenMat2 = new THREE.MeshStandardMaterial({ color: 0x22c55e, roughness: 0.6 });
+        const greenMat3 = new THREE.MeshStandardMaterial({ color: 0x4ade80, roughness: 0.6 });
+
+        const fol1 = new THREE.Mesh(new THREE.DodecahedronGeometry(1.35 * scale, 1), greenMat1);
+        fol1.position.set(0, 2.6 * scale, 0);
+        fol1.castShadow = true;
+        tree.add(fol1);
+
+        const fol2 = new THREE.Mesh(new THREE.DodecahedronGeometry(1.05 * scale, 1), greenMat2);
+        fol2.position.set(0.25 * scale, 3.4 * scale, 0.15 * scale);
+        fol2.castShadow = true;
+        tree.add(fol2);
+
+        const fol3 = new THREE.Mesh(new THREE.DodecahedronGeometry(0.75 * scale, 1), greenMat3);
+        fol3.position.set(-0.2 * scale, 3.9 * scale, -0.15 * scale);
+        fol3.castShadow = true;
+        tree.add(fol3);
+
+        tree.position.set(x, 0.1, z);
+        return tree;
+    }
+
+    const treePositions = [
+        // Along North Boulevard & Administration HQ Green Lawn
+        { x: -35, z: 66, s: 1.1 },
+        { x: -25, z: 68, s: 1.25 },
+        { x: -12, z: 68, s: 1.0 },
+        { x: 12,  z: 68, s: 1.15 },
+        { x: 26,  z: 68, s: 1.3 },
+        { x: 38,  z: 66, s: 1.05 },
+        // Between Gate and Admin
+        { x: -52, z: 68, s: 1.2 },
+        { x: -62, z: 68, s: 0.95 },
+        { x: -74, z: 66, s: 1.15 },
+        // Near CFS Warehouse Entrance (West Green Verge)
+        { x: -110, z: 20, s: 1.2 },
+        { x: -110, z: 8,  s: 1.0 },
+        { x: -110, z: -4, s: 1.1 },
+        { x: -110, z: -16,s: 0.95 },
+        // Near Customs Complex (East Green Verge)
+        { x: 116, z: 24,  s: 1.1 },
+        { x: 116, z: 12,  s: 1.2 },
+        { x: 116, z: 0,   s: 1.05 },
+        { x: 116, z: -12, s: 1.15 },
+        // South Perimeter Green Belt
+        { x: -90, z: -68, s: 1.2 },
+        { x: -45, z: -68, s: 1.05 },
+        { x: 0,   z: -68, s: 1.15 },
+        { x: 45,  z: -68, s: 1.0 },
+        { x: 90,  z: -68, s: 1.25 }
+    ];
+
+    treePositions.forEach(tp => {
+        treesGroup.add(createTree(tp.x, tp.z, tp.s));
+    });
+
+    scene.add(treesGroup);
 }
 
 // 7. Customs KPPBC, 6 MeV Gantry X-Ray, Red Line Behandle Canopy & Quarantine
@@ -6050,6 +6813,25 @@ function toggleCADTitleBlock() {
     }
 }
 
+function toggleShipmentCard() {
+    const content = document.getElementById('shipmentCardContent');
+    const chevron = document.getElementById('shipmentCardChevron');
+    if (!content) return;
+    if (content.classList.contains('hidden')) {
+        content.classList.remove('hidden');
+        if (chevron) {
+            chevron.classList.remove('fa-chevron-up');
+            chevron.classList.add('fa-chevron-down');
+        }
+    } else {
+        content.classList.add('hidden');
+        if (chevron) {
+            chevron.classList.remove('fa-chevron-down');
+            chevron.classList.add('fa-chevron-up');
+        }
+    }
+}
+
 function dismissTargetPill() {
     const hudTargetPill = document.getElementById('hudTargetPill');
     if (hudTargetPill) {
@@ -6125,8 +6907,8 @@ function setLightingMode(mode) {
     };
 
     if (mode === 'day') {
-        scene.background = new THREE.Color(0xdcecf8);
-        scene.fog.color = new THREE.Color(0xdcecf8);
+        scene.background = new THREE.Color(0xecf3f9);
+        scene.fog.color = new THREE.Color(0xecf3f9);
         ambientLight.color.setHex(0xffffff);
         ambientLight.intensity = LIGHT_DAY.ambient;
         sunLight.intensity = LIGHT_DAY.sun;

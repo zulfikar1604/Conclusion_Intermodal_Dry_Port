@@ -189,24 +189,33 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                         sans: ['"Plus Jakarta Sans"', 'sans-serif'],
                     },
                     colors: {
-                        'cdp-navy': '#004b87',
-                        'cdp-dark': '#002f5e',
-                        'cdp-blue': '#0170b9',
-                        'cdp-light': '#f4f8fc',
+                        // Palet "Executive Ink": navy matte, putih tulang, satu aksen kuningan.
+                        // Nama token cdp-* dipertahankan agar seluruh halaman ikut selaras tanpa ubah markup.
+                        'cdp-navy': '#1B2D47',
+                        'cdp-dark': '#0F1B2D',
+                        'cdp-blue': '#3A5578',
+                        'cdp-light': '#F6F4EF',
+                        'ink': '#0F1B2D',
+                        'ink-2': '#16243A',
+                        'paper': '#F6F4EF',
+                        'brass': '#B8955A',
+                        'brass-deep': '#8A6B3A',
                     }
                 }
             }
         }
     </script>
     <style>
-        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f4f8fc; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #F6F4EF; }
         .sidebar-transition { transition: width 0.3s ease-in-out; }
         
         /* Custom scrollbar for sidebar and feeds */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-thumb { background: #CFC9BC; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #A9A292; }
+        #sidebar nav::-webkit-scrollbar-thumb { background: rgba(246,244,239,0.14); }
+        #sidebar nav::-webkit-scrollbar-thumb:hover { background: rgba(246,244,239,0.26); }
         
         /* Activity timeline dots */
         .timeline-dot {
@@ -237,51 +246,49 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
-    <!-- Sidebar (Executive Consultant Modern Dark Theme) -->
-    <aside id="sidebar" class="bg-gradient-to-b from-[#001d3a] via-[#002f5e] to-[#001830] text-white flex-shrink-0 z-40 h-full overflow-hidden sidebar-transition w-64 fixed md:relative transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out shadow-2xl md:shadow-md flex flex-col justify-between border-r border-white/5 font-sans">
+    <!-- Sidebar (Executive Ink: navy matte, putih tulang, aksen kuningan) -->
+    <aside id="sidebar" class="bg-ink text-paper flex-shrink-0 z-40 h-full overflow-hidden sidebar-transition w-64 fixed md:relative transform -translate-x-full md:translate-x-0 transition-all duration-300 ease-in-out shadow-2xl md:shadow-none flex flex-col justify-between border-r border-white/[0.06] font-sans">
         <!-- Top: Logo Header (Height aligned with top header: h-14 / 56px) -->
-        <div class="h-14 flex items-center justify-between px-4 border-b border-white/10 bg-black/20 flex-shrink-0">
+        <div class="h-14 flex items-center justify-between px-4 border-b border-white/[0.07] flex-shrink-0">
             <div class="flex items-center overflow-hidden space-x-3">
-                <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#0170b9] to-emerald-400 p-[1.5px] shadow-sm flex-shrink-0">
-                    <div class="w-full h-full bg-[#002f5e] rounded-[10px] flex items-center justify-center p-1">
-                        <img src="assets/img/logo.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/32?text=C'">
-                    </div>
+                <div class="w-8 h-8 rounded-lg border border-brass/40 bg-white/[0.03] flex items-center justify-center p-1 flex-shrink-0">
+                    <img src="assets/img/logo.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/32?text=C'">
                 </div>
                 <div class="logo-text min-w-0">
-                    <span class="text-sm font-extrabold tracking-tight text-white block leading-tight">CIDP YMS</span>
-                    <span class="text-[9.5px] text-blue-200/80 font-mono tracking-wider block uppercase">Hub 35 Ha &bull; v2.4</span>
+                    <span class="text-[13px] font-semibold tracking-[0.04em] text-paper block leading-tight">CIDP YMS</span>
+                    <span class="text-[9px] text-paper/45 tracking-[0.18em] block uppercase mt-0.5">Hub 35 Ha &middot; v2.4</span>
                 </div>
             </div>
             <!-- Mobile Close Button -->
-            <button onclick="toggleSidebar()" class="md:hidden text-white/70 hover:text-white p-1.5 rounded-lg focus:outline-none transition-colors" title="Tutup Menu">
+            <button onclick="toggleSidebar()" class="md:hidden text-paper/60 hover:text-paper p-1.5 rounded-lg focus:outline-none transition-colors" title="Tutup Menu">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
         </div>
         
         <!-- Middle: Navigation (4 Kluster Divisi Operasional Dry Port) -->
-        <nav class="flex-1 overflow-y-auto p-3 space-y-4">
+        <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-5">
             <?php foreach ($menu_clusters as $cluster_title => $items): ?>
                 <div class="space-y-1">
-                    <div class="text-[10px] font-bold text-blue-300/50 uppercase tracking-widest px-3 mb-1.5 logo-text flex items-center justify-between">
+                    <div class="text-[9.5px] font-medium text-brass/70 uppercase tracking-[0.22em] px-3 mb-2 logo-text flex items-center justify-between">
                         <span><?= $cluster_title ?></span>
                     </div>
-                    <div class="space-y-0.5">
+                    <div class="space-y-px">
                         <?php foreach ($items as $key => $item): 
                             if (can_view($key, $role)): 
                                 $is_active = ($page === $key);
                         ?>
                             <a href="dashboard.php?page=<?= $key ?>" 
-                               class="flex items-center justify-between px-3 py-2 rounded-xl transition-all duration-200 group <?= $is_active ? 'bg-gradient-to-r from-blue-600 to-[#0170b9] text-white shadow-md shadow-blue-900/40 font-semibold ring-1 ring-white/10' : 'text-slate-300 hover:text-white hover:bg-white/[0.08] font-medium' ?>"
+                               class="relative flex items-center justify-between pl-3 pr-3 py-2 rounded-md transition-colors duration-200 group <?= $is_active ? 'bg-white/[0.07] text-paper font-semibold' : 'text-paper/60 hover:text-paper hover:bg-white/[0.04] font-medium' ?>"
                                title="<?= $item['label'] ?>">
-                                <div class="flex items-center min-w-0 space-x-2.5">
-                                    <span class="w-7 h-7 rounded-lg flex items-center justify-center text-xs flex-shrink-0 transition-all <?= $is_active ? 'bg-white/20 text-white shadow-inner' : 'bg-white/5 text-slate-400 group-hover:text-blue-300 group-hover:bg-white/10' ?>">
+                                <?php if ($is_active): ?>
+                                    <span class="absolute left-0 top-1.5 bottom-1.5 w-[2px] rounded-full bg-brass"></span>
+                                <?php endif; ?>
+                                <div class="flex items-center min-w-0 space-x-3">
+                                    <span class="w-5 flex items-center justify-center text-[13px] flex-shrink-0 transition-colors <?= $is_active ? 'text-brass' : 'text-paper/40 group-hover:text-paper/80' ?>">
                                         <i class="fa-solid <?= $item['icon'] ?>"></i>
                                     </span>
-                                    <span class="text-xs logo-text truncate tracking-tight"><?= $item['label'] ?></span>
+                                    <span class="text-[12.5px] logo-text truncate tracking-[0.01em]"><?= $item['label'] ?></span>
                                 </div>
-                                <?php if ($is_active): ?>
-                                    <span class="logo-text w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                                <?php endif; ?>
                             </a>
                         <?php 
                             endif;
@@ -292,18 +299,16 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
         </nav>
 
         <!-- Bottom: Executive Consultant Status Card -->
-        <div class="p-3 border-t border-white/10 bg-black/25 logo-text flex-shrink-0">
-            <div class="bg-white/5 border border-white/10 rounded-xl p-2.5 space-y-1.5 shadow-inner">
-                <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-mono font-bold text-blue-200 uppercase tracking-wider">SYSTEM CONSULTANT</span>
-                    <span class="flex items-center text-[9px] text-emerald-400 font-mono font-bold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1 animate-ping"></span>
-                        ONLINE
-                    </span>
-                </div>
-                <p class="text-[11px] font-bold text-white tracking-tight truncate">Conclusion Consultant</p>
-                <p class="text-[9.5px] text-slate-300/80 truncate">ITL Trisakti &bull; Dr. Tigor Franky</p>
+        <div class="px-4 py-3.5 border-t border-white/[0.07] logo-text flex-shrink-0">
+            <div class="flex items-center justify-between mb-1.5">
+                <span class="text-[9px] font-medium text-paper/40 uppercase tracking-[0.22em]">System Consultant</span>
+                <span class="flex items-center text-[9px] text-[#8FA89A] tracking-[0.14em] uppercase">
+                    <span class="w-1.5 h-1.5 rounded-full bg-[#8FA89A] mr-1.5"></span>
+                    Online
+                </span>
             </div>
+            <p class="text-[12px] font-semibold text-paper tracking-[0.01em] truncate">Conclusion Consultant</p>
+            <p class="text-[10px] text-paper/45 truncate mt-0.5">ITL Trisakti &middot; Dr. Tigor Franky</p>
         </div>
     </aside>
 
@@ -556,122 +561,113 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                 <?php if ($page === 'beranda'): ?>
                 
                 <!-- Executive Cockpit Header & Real-Time Status -->
-                <div class="bg-white rounded-xl p-3 sm:p-3.5 shadow-2xs border border-gray-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 transition-all">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-blue-50 text-cdp-blue flex items-center justify-center text-sm font-bold flex-shrink-0 border border-blue-100">
+                <div class="bg-white rounded-lg px-4 py-3.5 shadow-2xs border border-[#E4DFD3] flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 transition-all">
+                    <div class="flex items-center gap-3.5">
+                        <div class="w-9 h-9 rounded-md bg-ink text-brass flex items-center justify-center text-sm flex-shrink-0">
                             <i class="fa-solid fa-layer-group"></i>
                         </div>
                         <div>
-                            <div class="flex items-center gap-2">
-                                <h2 class="text-sm sm:text-base font-bold text-gray-900 leading-tight">
+                            <div class="flex items-center gap-2.5">
+                                <h2 class="text-sm sm:text-[15px] font-semibold text-ink tracking-[0.005em] leading-tight">
                                     Konsol Eksekutif &amp; Telemetri Operasional Dry Port
                                 </h2>
-                                <span class="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                    LIVE 35 Ha
+                                <span class="text-[9px] font-medium tracking-[0.16em] uppercase text-[#5E7A6B] flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-[#5E7A6B]"></span>
+                                    Live 35 Ha
                                 </span>
                             </div>
-                            <p class="text-gray-500 text-[11px] mt-0.5">Simulasi Inland Container Depot (ICD), Siding KA Daop 1, &amp; Pabean CEISA 4.0</p>
+                            <p class="text-ink/50 text-[11px] mt-0.5">Simulasi Inland Container Depot (ICD), Siding KA Daop 1, &amp; Pabean CEISA 4.0</p>
                         </div>
                     </div>
                     <!-- Micro Telemetry Badges & Real-Time Clock -->
-                    <div class="flex items-center gap-1.5 flex-wrap text-[10px]">
-                        <div class="bg-gray-50 border border-gray-200/80 px-2 py-1 rounded-lg text-gray-700 flex items-center gap-1.5 shadow-2xs font-mono">
-                            <i class="fa-regular fa-calendar text-cdp-blue text-[10px]"></i>
-                            <span class="font-sans font-medium text-gray-600"><?= $tanggal_sekarang ?></span>
-                            <span class="text-gray-300">&bull;</span>
-                            <i class="fa-solid fa-clock text-cdp-blue text-[9.5px]"></i>
-                            <span id="berandaLiveClock" class="font-bold text-cdp-navy">--:--:-- WIB</span>
+                    <div class="flex items-center gap-4 flex-wrap text-[10.5px] text-ink/60">
+                        <div class="flex items-center gap-1.5">
+                            <i class="fa-regular fa-calendar text-brass-deep text-[10px]"></i>
+                            <span class="font-medium"><?= $tanggal_sekarang ?></span>
+                            <span class="text-ink/20">&bull;</span>
+                            <i class="fa-solid fa-clock text-brass-deep text-[9.5px]"></i>
+                            <span id="berandaLiveClock" class="font-semibold text-ink font-mono">--:--:-- WIB</span>
                         </div>
-                        <div class="bg-blue-50/70 border border-blue-200/60 px-2 py-1 rounded-lg text-blue-700 flex items-center gap-1.5 font-semibold">
-                            <i class="fa-solid fa-satellite-dish text-[9px] text-blue-500"></i>
-                            <span>SCADA: 99.8%</span>
+                        <div class="flex items-center gap-1.5 pl-4 border-l border-[#E4DFD3]">
+                            <i class="fa-solid fa-satellite-dish text-[9px] text-brass-deep"></i>
+                            <span class="font-medium">SCADA <span class="text-ink font-semibold">99.8%</span></span>
                         </div>
-                        <div class="bg-purple-50/70 border border-purple-200/60 px-2 py-1 rounded-lg text-purple-700 flex items-center gap-1.5 font-semibold">
-                            <i class="fa-solid fa-train-subway text-[9px] text-purple-500"></i>
-                            <span>Siding KA: Ready</span>
+                        <div class="flex items-center gap-1.5 pl-4 border-l border-[#E4DFD3]">
+                            <i class="fa-solid fa-train-subway text-[9px] text-brass-deep"></i>
+                            <span class="font-medium">Siding KA <span class="text-ink font-semibold">Ready</span></span>
                         </div>
                     </div>
                 </div>
 
                 <!-- Live IoT Sensor & Field Workbench Status Bar (Direct-Launch Shortcuts) -->
-                <div class="bg-gradient-to-r from-[#002f5e] to-[#004b87] rounded-xl p-3 sm:p-3.5 shadow-sm border border-blue-900/40 text-white">
-                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2 pb-2 border-b border-white/10">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span class="w-2 h-2 rounded-full bg-emerald-400 -ml-3"></span>
-                            <h3 class="text-xs sm:text-sm font-bold tracking-wide flex items-center gap-1.5">
-                                <i class="fa-solid fa-tower-broadcast text-cyan-300"></i>
-                                <span>Pusat Kendali Sensor &amp; IoT Workbench Lapangan (Live Operational Sync)</span>
+                <div class="bg-ink rounded-lg px-4 py-3.5 shadow-sm border border-white/[0.06] text-paper">
+                    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-3 pb-3 border-b border-white/[0.08]">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-[#8FA89A]"></span>
+                            <h3 class="text-[12.5px] sm:text-[13px] font-semibold tracking-[0.02em] text-paper">
+                                Pusat Kendali Sensor &amp; IoT Workbench Lapangan
+                                <span class="font-normal text-paper/45 ml-1">Live Operational Sync</span>
                             </h3>
                         </div>
-                        <span class="text-[10px] text-blue-200/90 font-mono flex items-center gap-1.5">
-                            <i class="fa-solid fa-microchip text-cyan-300"></i>
-                            <span>26 BOM Hardware Terkalibrasi &bull; Latensi &lt; 150ms</span>
+                        <span class="text-[10px] text-paper/45 tracking-[0.06em] flex items-center gap-1.5">
+                            <i class="fa-solid fa-microchip text-brass/80"></i>
+                            <span>26 BOM Hardware Terkalibrasi &middot; Latensi &lt; 150ms</span>
                         </span>
                     </div>
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 text-[11px]">
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 text-[11px]">
                         <!-- Gateway 1: Gate ANPR -->
-                        <a href="dashboard.php?page=gate" class="bg-white/10 hover:bg-white/15 p-2 rounded-lg border border-white/10 transition flex items-center justify-between group">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-amber-500/20 text-amber-300 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-door-open"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white group-hover:text-amber-300 transition text-[11px]">Gate &amp; Timbangan</div>
-                                    <div class="text-[9.5px] text-blue-200">ANPR OCR + 80T Solas</div>
+                        <a href="dashboard.php?page=gate" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <i class="fa-solid fa-door-open text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-paper text-[11.5px] truncate">Gate &amp; Timbangan</div>
+                                    <div class="text-[10px] text-paper/45 truncate">ANPR OCR + 80T Solas</div>
                                 </div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-[#8FA89A] flex items-center gap-1.5 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#8FA89A]"></span>Online
                             </span>
                         </a>
 
                         <!-- Gateway 2: CFS Rampa D1-D5 -->
-                        <a href="dashboard.php?page=cfs" class="bg-white/10 hover:bg-white/15 p-2 rounded-lg border border-white/10 transition flex items-center justify-between group">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-indigo-500/20 text-indigo-300 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-warehouse"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white group-hover:text-indigo-300 transition text-[11px]">CFS Rampa D1-D5</div>
-                                    <div class="text-[9.5px] text-blue-200">Pallet 3T + Gas HW-19</div>
+                        <a href="dashboard.php?page=cfs" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <i class="fa-solid fa-warehouse text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-paper text-[11.5px] truncate">CFS Rampa D1-D5</div>
+                                    <div class="text-[10px] text-paper/45 truncate">Pallet 3T + Gas HW-19</div>
                                 </div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> ONLINE
+                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-[#8FA89A] flex items-center gap-1.5 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#8FA89A]"></span>Online
                             </span>
                         </a>
 
                         <!-- Gateway 3: Reefer Terminal -->
-                        <a href="dashboard.php?page=reefer" class="bg-white/10 hover:bg-white/15 p-2 rounded-lg border border-white/10 transition flex items-center justify-between group">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-cyan-500/20 text-cyan-300 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-snowflake"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white group-hover:text-cyan-300 transition text-[11px]">Reefer Cold Chain</div>
-                                    <div class="text-[9.5px] text-blue-200">300 Plug + SHT40 LoRa</div>
+                        <a href="dashboard.php?page=reefer" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <i class="fa-solid fa-snowflake text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-paper text-[11.5px] truncate">Reefer Cold Chain</div>
+                                    <div class="text-[10px] text-paper/45 truncate">300 Plug + SHT40 LoRa</div>
                                 </div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-400/30 flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></span> PULSE
+                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-[#9DB0C4] flex items-center gap-1.5 flex-shrink-0">
+                                <span class="w-1.5 h-1.5 rounded-full bg-[#9DB0C4]"></span>Pulse
                             </span>
                         </a>
 
                         <!-- Gateway 4: Denah Terminal 35 Ha -->
-                        <a href="dashboard.php?page=denah" class="bg-white/10 hover:bg-white/15 p-2 rounded-lg border border-white/10 transition flex items-center justify-between group">
-                            <div class="flex items-center gap-2">
-                                <div class="w-7 h-7 rounded-md bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xs">
-                                    <i class="fa-solid fa-map-location-dot"></i>
-                                </div>
-                                <div>
-                                    <div class="font-bold text-white group-hover:text-emerald-300 transition text-[11px]">Denah Terminal 35 Ha</div>
-                                    <div class="text-[9.5px] text-blue-200">26 Hardware BOM Map</div>
+                        <a href="dashboard.php?page=denah" class="p-2.5 rounded-md border border-white/[0.08] hover:border-brass/50 hover:bg-white/[0.03] transition-colors flex items-center justify-between gap-2 group">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                <i class="fa-solid fa-map-location-dot text-[13px] text-brass/80 w-4 text-center"></i>
+                                <div class="min-w-0">
+                                    <div class="font-semibold text-paper text-[11.5px] truncate">Denah Terminal 35 Ha</div>
+                                    <div class="text-[10px] text-paper/45 truncate">26 Hardware BOM Map</div>
                                 </div>
                             </div>
-                            <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/20 text-blue-200 border border-blue-400/30 flex items-center gap-1">
-                                <i class="fa-solid fa-up-right-from-square text-[8px]"></i> UJI REAL
+                            <span class="text-[9px] font-medium tracking-[0.14em] uppercase text-brass flex items-center gap-1.5 flex-shrink-0">
+                                Uji Real <i class="fa-solid fa-arrow-up-right-from-square text-[8px]"></i>
                             </span>
                         </a>
                     </div>
