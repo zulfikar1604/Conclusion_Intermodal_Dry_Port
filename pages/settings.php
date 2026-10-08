@@ -147,150 +147,136 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         </div>
     <?php endif; ?>
 
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+    <!-- Header Modul: Executive Compact -->
+    <div class="bg-white rounded-xl px-3.5 py-2.5 shadow-2xs border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center text-xs shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-sliders"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900 leading-tight">Pengaturan Global &amp; Tata Kelola Sistem YMS</h1>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold <?= $db_badge ?> border flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $db_status ?>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold text-slate-900 leading-tight">Pengaturan Global &amp; Tata Kelola Sistem YMS</h1>
+                    <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold <?= $db_badge ?> border flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span><?= $db_status ?>
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
                         RBAC &amp; API Gateway
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                    <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                         CEISA 4.0 &amp; ERP Sync
                     </span>
                 </div>
+                <div class="text-[9px] font-bold text-orange-600 tracking-wider uppercase mt-0.5">Konfigurasi Fasilitas • Autentikasi Pengguna • Integrasi EDI &amp; IoT</div>
             </div>
         </div>
 
         <!-- Tombol Aksi Cepat Header -->
-        <div class="flex flex-wrap items-center gap-2 self-start md:self-auto flex-shrink-0">
-            <button onclick="exportSettingsJson()" class="px-3 py-2 bg-white border border-gray-200 hover:bg-orange-50/60 text-gray-700 text-xs font-semibold rounded-xl shadow-2xs transition flex items-center space-x-1.5" title="Ekspor Seluruh Parameter ke Format JSON">
-                <i class="fa-solid fa-file-code text-orange-600"></i>
+        <div class="flex flex-wrap items-center gap-1.5 self-start md:self-auto flex-shrink-0">
+            <button onclick="exportSettingsJson()" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-orange-50/60 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1" title="Ekspor Seluruh Parameter ke Format JSON">
+                <i class="fa-solid fa-file-code text-orange-600 text-[10px]"></i>
                 <span>Ekspor JSON</span>
             </button>
-            <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-user-plus text-xs"></i>
+            <button onclick="openAddUserModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center space-x-1">
+                <i class="fa-solid fa-user-plus text-[10px]"></i>
                 <span>+ Pengguna</span>
             </button>
         </div>
     </div>
 
-    <!-- 5 Kartu KPI Status Sistem & Metrik Basis Data -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+    <!-- 5 Kartu KPI Status Sistem & Metrik Basis Data (Micro Compact Grid) -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
         <!-- KPI 1: Total Rekaman Basis Data -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-orange-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Rekaman Operasi</span>
-                <span class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-database"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-orange-300 transition flex items-center justify-between">
+            <div>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Rekaman Operasi</span>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5">
+                    <?= array_sum($table_counts) ?> <span class="text-[10px] text-orange-600 font-bold">Baris</span>
+                </h3>
+                <p class="text-[9px] text-slate-400 font-medium">9 Tabel MySQL PDO</p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900"><?= array_sum($table_counts) ?></span>
-                <span class="text-xs text-orange-600 font-bold">Baris / 9 Tabel</span>
+            <div class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-database"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-2">
-                Sync Real-Time via MySQL PDO
-            </p>
         </div>
 
         <!-- KPI 2: Total Pengguna RBAC -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-emerald-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Akses Pengguna</span>
-                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-users"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-emerald-300 transition flex items-center justify-between">
+            <div>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Akses Pengguna</span>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5">
+                    <?= count($login_users) ?> <span class="text-[10px] text-emerald-600 font-bold">Akun</span>
+                </h3>
+                <p class="text-[9px] text-slate-400 font-medium">RBAC Multi-Role</p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900"><?= count($login_users) ?></span>
-                <span class="text-xs text-emerald-600 font-bold">Akun Terdaftar</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-users"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-2">
-                RBAC Multi-Role Terverifikasi
-            </p>
         </div>
 
         <!-- KPI 3: Gateway Antar-Sistem -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-cyan-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Gateway API EDI</span>
-                <span class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-network-wired"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-cyan-300 transition flex items-center justify-between">
+            <div>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Gateway API EDI</span>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5">
+                    5/5 <span class="text-[10px] text-cyan-600 font-bold">100%</span>
+                </h3>
+                <p class="text-[9px] text-slate-400 font-medium">CEISA, Inaportnet, Odoo</p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900">5 / 5</span>
-                <span class="text-xs text-cyan-600 font-bold">Online 100%</span>
+            <div class="w-7 h-7 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-network-wired"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-2">
-                CEISA, Inaportnet, Odoo, LoRa, DCSA
-            </p>
         </div>
 
         <!-- KPI 4: Sebaran Hardware Lapangan -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-amber-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Master Hardware</span>
-                <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-microchip"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-amber-300 transition flex items-center justify-between">
+            <div>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Master Hardware</span>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5">
+                    26 <span class="text-[10px] text-amber-600 font-bold">Titik</span>
+                </h3>
+                <p class="text-[9px] text-slate-400 font-medium">11 Live + 15 Fisik</p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900">26</span>
-                <span class="text-xs text-amber-600 font-bold">Titik BOM</span>
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-microchip"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-2">
-                11 Live Telemetri + 15 Fisik
-            </p>
         </div>
 
         <!-- KPI 5: Uptime & SLA Sistem -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-purple-300 transition group col-span-2 md:col-span-1">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Ketersediaan Sistem</span>
-                <span class="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-purple-300 transition flex items-center justify-between col-span-2 md:col-span-1">
+            <div>
+                <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">Ketersediaan Sistem</span>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5">
+                    99.98% <span class="text-[10px] text-purple-600 font-bold">Uptime</span>
+                </h3>
+                <p class="text-[9px] text-slate-400 font-medium">Latensi &lt; 28ms</p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900">99.98%</span>
-                <span class="text-xs text-purple-600 font-bold">Uptime 24/7</span>
+            <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-2">
-                NOC Server Latensi &lt; 28ms
-            </p>
         </div>
     </div>
 
-    <!-- Tab Bar Navigasi 6 Sub-Modul Pengaturan Global -->
-    <div class="bg-white rounded-xl p-1.5 border border-gray-100 shadow-xs flex flex-wrap gap-1">
-        <button onclick="switchSettingsTab('tab-terminal')" id="btn-tab-terminal" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-bold transition-all text-white bg-gradient-to-r from-orange-500 to-orange-600 shadow-sm shadow-orange-500/20 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-building-columns"></i>
-            <span>Fasilitas &amp; SLA Terminal 35 Ha</span>
+    <!-- Tab Bar Navigasi 6 Sub-Modul Pengaturan Global (Pill Style) -->
+    <div class="bg-white rounded-xl p-1 border border-slate-200/80 shadow-2xs flex flex-wrap gap-1">
+        <button onclick="switchSettingsTab('tab-terminal')" id="btn-tab-terminal" class="settings-tab-btn flex-1 min-w-[130px] py-1.5 px-2.5 rounded-lg text-xs font-bold transition-all text-white bg-gradient-to-r from-orange-500 to-orange-600 shadow-xs shadow-orange-500/20 flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-building-columns text-[10px]"></i>
+            <span>Fasilitas &amp; SLA</span>
         </button>
-        <button onclick="switchSettingsTab('tab-users')" id="btn-tab-users" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-user-shield"></i>
-            <span>Tata Kelola User &amp; RBAC</span>
+        <button onclick="switchSettingsTab('tab-users')" id="btn-tab-users" class="settings-tab-btn flex-1 min-w-[130px] py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-user-shield text-[10px]"></i>
+            <span>User &amp; RBAC</span>
         </button>
-        <button onclick="switchSettingsTab('tab-integration')" id="btn-tab-integration" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-network-wired"></i>
-            <span>Integrasi Gateway API &amp; EDI</span>
+        <button onclick="switchSettingsTab('tab-integration')" id="btn-tab-integration" class="settings-tab-btn flex-1 min-w-[130px] py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-network-wired text-[10px]"></i>
+            <span>Gateway API &amp; EDI</span>
         </button>
-        <button onclick="switchSettingsTab('tab-hardware')" id="btn-tab-hardware" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-microchip"></i>
-            <span>Kalibrasi Hardware &amp; Sensor</span>
+        <button onclick="switchSettingsTab('tab-hardware')" id="btn-tab-hardware" class="settings-tab-btn flex-1 min-w-[130px] py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-microchip text-[10px]"></i>
+            <span>Hardware &amp; Sensor</span>
         </button>
-        <button onclick="switchSettingsTab('tab-database')" id="btn-tab-database" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-database"></i>
-            <span>Basis Data &amp; Log Audit</span>
+        <button onclick="switchSettingsTab('tab-database')" id="btn-tab-database" class="settings-tab-btn flex-1 min-w-[130px] py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-database text-[10px]"></i>
+            <span>Basis Data &amp; Log</span>
         </button>
     </div>
 

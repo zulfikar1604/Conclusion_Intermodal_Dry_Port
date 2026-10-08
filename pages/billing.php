@@ -146,22 +146,22 @@ $billing_info = [
 <?php endif; ?>
 
 <div class="animate-fadeIn">
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+    <!-- Header Modul: Compact Executive Style (Aligned with Sidebar) -->
+    <div class="bg-white rounded-xl px-3 py-2 shadow-2xs border border-slate-200/80 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
                 <i class="fa-solid <?= $billing_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900">Modul Billing &amp; Faktur ERP</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $billing_info['status'] ?>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold tracking-tight text-slate-900">Modul Billing &amp; Faktur ERP</h1>
+                    <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[9px] font-bold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span><?= $billing_info['status'] ?>
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold">
+                    <span class="px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded text-[9px] font-bold">
                         Otomasi Tarif PMK
                     </span>
-                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-semibold">
+                    <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold">
                         Lift-On / Lift-Off
                     </span>
                 </div>
@@ -169,53 +169,59 @@ $billing_info = [
         </div>
     </div>
 
-    <!-- KPI Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+    <!-- KPI Micro-Cards (High-Density Executive Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
         <?php foreach($kpi_cards as $kpi): ?>
-        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center">
-            <div class="w-12 h-12 rounded-full <?= $kpi['bg'] ?> <?= $kpi['text'] ?> flex items-center justify-center text-xl mr-4 flex-shrink-0">
-                <i class="fa-solid <?= $kpi['icon'] ?>"></i>
-            </div>
-            <div>
-                <p class="text-xs text-gray-500 font-semibold mb-1"><?= $kpi['title'] ?></p>
-                <h3 class="text-lg font-bold text-gray-800"><?= $kpi['value'] ?></h3>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5"><?= $kpi['title'] ?></p>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight truncate"><?= $kpi['value'] ?></h3>
                 <?php if($kpi['desc']): ?>
-                <p class="text-[10px] text-gray-400 font-medium mt-0.5"><?= $kpi['desc'] ?> dari total</p>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate"><?= $kpi['desc'] ?></p>
                 <?php endif; ?>
+            </div>
+            <div class="w-7 h-7 rounded-lg <?= $kpi['bg'] ?> <?= $kpi['text'] ?> flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid <?= $kpi['icon'] ?>"></i>
             </div>
         </div>
         <?php endforeach; ?>
     </div>
 
-    <!-- Tab Navigasi -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-100 mb-6 overflow-hidden">
-        <div class="flex border-b border-gray-200 overflow-x-auto custom-scrollbar">
-            <button class="tab-btn active px-6 py-4 text-sm font-semibold text-[#0170b9] border-b-2 border-[#0170b9] hover:bg-gray-50 whitespace-nowrap transition-colors" data-target="tab-monitor">
-                <i class="fa-solid fa-file-lines mr-2"></i>Daftar Faktur & Invoice
-            </button>
-            <button class="tab-btn px-6 py-4 text-sm font-semibold text-gray-500 border-b-2 border-transparent hover:text-[#0170b9] hover:bg-gray-50 whitespace-nowrap transition-colors" data-target="tab-kalkulator">
-                <i class="fa-solid fa-calculator mr-2"></i>Kalkulator Tarif
-            </button>
-            <button class="tab-btn px-6 py-4 text-sm font-semibold text-gray-500 border-b-2 border-transparent hover:text-[#0170b9] hover:bg-gray-50 whitespace-nowrap transition-colors" data-target="tab-odoo">
-                <i class="fa-solid fa-server mr-2"></i>Integrasi Odoo ERP
-            </button>
-            <button class="tab-btn px-6 py-4 text-sm font-semibold text-gray-500 border-b-2 border-transparent hover:text-[#0170b9] hover:bg-gray-50 whitespace-nowrap transition-colors" data-target="tab-laporan">
-                <i class="fa-solid fa-chart-pie mr-2"></i>Laporan & Aging
-            </button>
-        </div>
+    <!-- Tab Navigasi (Pill Executive Style Aligned with Sidebar) -->
+    <div class="bg-white rounded-xl p-1 border border-slate-200/80 shadow-2xs mb-2.5 flex items-center gap-1 overflow-x-auto">
+        <button class="tab-btn active px-2.5 py-1.5 rounded-lg text-[11.5px] font-bold bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-xs shadow-orange-500/20 whitespace-nowrap transition-all flex items-center space-x-1.5 cursor-pointer" data-target="tab-monitor">
+            <i class="fa-solid fa-file-lines text-[11px]"></i>
+            <span>Daftar Faktur &amp; Invoice</span>
+        </button>
+        <button class="tab-btn px-2.5 py-1.5 rounded-lg text-[11.5px] font-medium text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 whitespace-nowrap transition-all flex items-center space-x-1.5 cursor-pointer" data-target="tab-kalkulator">
+            <i class="fa-solid fa-calculator text-[11px]"></i>
+            <span>Kalkulator Tarif</span>
+        </button>
+        <button class="tab-btn px-2.5 py-1.5 rounded-lg text-[11.5px] font-medium text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 whitespace-nowrap transition-all flex items-center space-x-1.5 cursor-pointer" data-target="tab-odoo">
+            <i class="fa-solid fa-server text-[11px]"></i>
+            <span>Integrasi Odoo ERP</span>
+        </button>
+        <button class="tab-btn px-2.5 py-1.5 rounded-lg text-[11.5px] font-medium text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 whitespace-nowrap transition-all flex items-center space-x-1.5 cursor-pointer" data-target="tab-laporan">
+            <i class="fa-solid fa-chart-pie text-[11px]"></i>
+            <span>Laporan &amp; Aging</span>
+        </button>
     </div>
 
     <!-- Konten Tab 1: Monitor Invoice -->
     <div id="tab-monitor" class="tab-content block">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div class="p-5 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <h3 class="text-lg font-bold text-[#002f5e]">Monitoring Faktur Operasional</h3>
-                <div class="flex space-x-2">
+        <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 overflow-hidden">
+            <div class="px-3 py-2 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-slate-50/40">
+                <div class="flex items-center space-x-2">
+                    <span class="w-1.5 h-3.5 bg-orange-500 rounded-full"></span>
+                    <h3 class="text-[12.5px] font-extrabold text-slate-900 tracking-tight">Monitoring Faktur Operasional</h3>
+                    <span class="text-[10px] text-slate-400 font-semibold">(<?= count($invoices) ?> data)</span>
+                </div>
+                <div class="flex items-center space-x-2">
                     <div class="relative">
-                        <input type="text" id="searchInvoiceInput" onkeyup="filterInvoices()" placeholder="Cari invoice/kontainer/pelanggan..." class="pl-9 pr-4 py-2 border border-gray-200 rounded-lg text-sm focus:ring-[#0170b9] focus:border-[#0170b9] w-full sm:w-72">
-                        <i class="fa-solid fa-search absolute left-3 top-2.5 text-gray-400"></i>
+                        <input type="text" id="searchInvoiceInput" onkeyup="filterInvoices()" placeholder="Cari invoice / kontainer / pelanggan..." class="pl-7 pr-2.5 py-1 border border-slate-200 rounded-lg text-[11px] focus:ring-1 focus:ring-orange-500 focus:border-orange-500 w-full sm:w-64 bg-white text-slate-800 placeholder-slate-400">
+                        <i class="fa-solid fa-search absolute left-2.5 top-2 text-slate-400 text-[10px]"></i>
                     </div>
-                    <select id="filterInvoiceStatus" onchange="filterInvoices()" class="border border-gray-200 rounded-lg text-sm px-3 py-2 bg-white focus:ring-[#0170b9]">
+                    <select id="filterInvoiceStatus" onchange="filterInvoices()" class="border border-slate-200 rounded-lg text-[11px] px-2.5 py-1 bg-white text-slate-700 focus:ring-1 focus:ring-orange-500 focus:border-orange-500">
                         <option value="">Semua Status</option>
                         <option value="lunas">Lunas</option>
                         <option value="menunggu">Menunggu</option>
@@ -226,60 +232,60 @@ $billing_info = [
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr class="bg-slate-50 text-slate-600 text-xs uppercase tracking-wider border-b border-slate-200">
-                            <th class="p-4 font-semibold">No. Invoice &amp; Kontainer</th>
-                            <th class="p-4 font-semibold">Tanggal</th>
-                            <th class="p-4 font-semibold">Pelanggan</th>
-                            <th class="p-4 font-semibold">Jenis Layanan</th>
-                            <th class="p-4 font-semibold text-right">Nilai (IDR)</th>
-                            <th class="p-4 font-semibold text-center">Status</th>
-                            <th class="p-4 font-semibold text-center">Aksi Pintas</th>
+                        <tr class="bg-slate-50 text-slate-500 text-[9.5px] font-bold uppercase tracking-wider border-b border-slate-200/80">
+                            <th class="px-3 py-1.5">No. Invoice &amp; Kontainer</th>
+                            <th class="px-3 py-1.5">Tanggal</th>
+                            <th class="px-3 py-1.5">Pelanggan</th>
+                            <th class="px-3 py-1.5">Jenis Layanan</th>
+                            <th class="px-3 py-1.5 text-right">Nilai (IDR)</th>
+                            <th class="px-3 py-1.5 text-center">Status</th>
+                            <th class="px-3 py-1.5 text-center">Aksi Pintas</th>
                         </tr>
                     </thead>
-                    <tbody class="text-sm text-gray-700 divide-y divide-gray-100">
+                    <tbody class="text-[11.5px] text-slate-700 divide-y divide-slate-100">
                         <?php foreach($invoices as $inv): ?>
-                        <tr class="invoice-row hover:bg-slate-50/50 transition-colors" data-no="<?= strtolower($inv['no']) ?>" data-pelanggan="<?= strtolower($inv['pelanggan']) ?>" data-ctr="<?= strtolower($inv['ctr'] ?? '') ?>" data-status="<?= strtolower($inv['status']) ?>">
-                            <td class="p-4">
-                                <span class="font-semibold text-[#0170b9] block"><?= $inv['no'] ?></span>
+                        <tr class="invoice-row hover:bg-orange-50/30 transition-colors" data-no="<?= strtolower($inv['no']) ?>" data-pelanggan="<?= strtolower($inv['pelanggan']) ?>" data-ctr="<?= strtolower($inv['ctr'] ?? '') ?>" data-status="<?= strtolower($inv['status']) ?>">
+                            <td class="px-3 py-1.5">
+                                <span class="font-bold text-orange-600 hover:text-orange-700 block text-[11.5px] cursor-pointer" onclick="openInvoiceModal('<?= $inv['no'] ?>', '<?= htmlspecialchars(addslashes($inv['pelanggan'])) ?>', <?= $inv['nilai'] ?>, '<?= $inv['status'] ?>')"><?= $inv['no'] ?></span>
                                 <?php if (!empty($inv['ctr'])): ?>
-                                    <span class="text-[11px] font-mono text-gray-500 flex items-center gap-1 mt-0.5">
-                                        <i class="fa-solid fa-cube text-[9px] text-[#0170b9]"></i>
-                                        <strong><?= htmlspecialchars($inv['ctr']) ?></strong>
+                                    <span class="text-[10px] font-mono text-slate-500 flex items-center gap-1 mt-0.5">
+                                        <i class="fa-solid fa-cube text-[8.5px] text-orange-500"></i>
+                                        <strong class="text-slate-700"><?= htmlspecialchars($inv['ctr']) ?></strong>
                                     </span>
                                 <?php endif; ?>
                             </td>
-                            <td class="p-4"><?= date('d M Y', strtotime($inv['tgl'])) ?></td>
-                            <td class="p-4 font-medium"><?= $inv['pelanggan'] ?></td>
-                            <td class="p-4 text-gray-500"><?= $inv['layanan'] ?></td>
-                            <td class="p-4 text-right font-medium"><?= formatRupiah($inv['nilai']) ?></td>
-                            <td class="p-4 text-center">
-                                <span class="px-2.5 py-1 rounded-full text-[10px] font-bold border <?= $status_colors[$inv['status']] ?>">
+                            <td class="px-3 py-1.5 text-slate-600 text-[11px] whitespace-nowrap"><?= date('d M Y', strtotime($inv['tgl'])) ?></td>
+                            <td class="px-3 py-1.5 font-bold text-slate-800"><?= $inv['pelanggan'] ?></td>
+                            <td class="px-3 py-1.5 text-slate-500 text-[11px]"><?= $inv['layanan'] ?></td>
+                            <td class="px-3 py-1.5 text-right font-extrabold text-slate-900 font-mono"><?= formatRupiah($inv['nilai']) ?></td>
+                            <td class="px-3 py-1.5 text-center whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded text-[9.5px] font-bold border <?= $status_colors[$inv['status']] ?>">
                                     <?= strtoupper($inv['status']) ?>
                                 </span>
                             </td>
-                            <td class="p-4 text-center">
-                                <div class="flex items-center justify-center space-x-1.5">
-                                    <button onclick="openInvoiceModal('<?= $inv['no'] ?>', '<?= htmlspecialchars(addslashes($inv['pelanggan'])) ?>', <?= $inv['nilai'] ?>, '<?= $inv['status'] ?>')" class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] hover:bg-[#0170b9] hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Lihat Rincian Faktur ERP">
-                                        <i class="fa-solid fa-eye text-xs"></i>
+                            <td class="px-3 py-1.5 text-center whitespace-nowrap">
+                                <div class="flex items-center justify-center space-x-1">
+                                    <button onclick="openInvoiceModal('<?= $inv['no'] ?>', '<?= htmlspecialchars(addslashes($inv['pelanggan'])) ?>', <?= $inv['nilai'] ?>, '<?= $inv['status'] ?>')" class="w-6 h-6 rounded-md bg-blue-50 text-blue-600 hover:bg-[#0170b9] hover:text-white transition-colors flex items-center justify-center shadow-2xs cursor-pointer" title="Lihat Rincian Faktur ERP">
+                                        <i class="fa-solid fa-eye text-[10px]"></i>
                                     </button>
                                     <?php if (!empty($inv['ctr'])): ?>
-                                    <a href="dashboard.php?page=kontainer&search=<?= urlencode($inv['ctr']) ?>" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-700 hover:bg-[#002f5e] hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Lacak Kontainer di Tracking Box">
-                                        <i class="fa-solid fa-boxes-stacked text-xs"></i>
+                                    <a href="dashboard.php?page=kontainer&search=<?= urlencode($inv['ctr']) ?>" class="w-6 h-6 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-800 hover:text-white transition-colors flex items-center justify-center shadow-2xs" title="Lacak Kontainer di Tracking Box">
+                                        <i class="fa-solid fa-boxes-stacked text-[10px]"></i>
                                     </a>
-                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($inv['ctr']) ?>" class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Lihat di Simulasi 3D">
-                                        <i class="fa-solid fa-cube text-xs"></i>
+                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($inv['ctr']) ?>" class="w-6 h-6 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-colors flex items-center justify-center shadow-2xs" title="Lihat di Simulasi 3D">
+                                        <i class="fa-solid fa-cube text-[10px]"></i>
                                     </a>
                                     <?php endif; ?>
                                     <?php if ($inv['status'] !== 'Lunas'): ?>
                                     <form method="POST" onsubmit="return confirm('Konfirmasi pelunasan faktur <?= $inv['no'] ?>? Status komersial untuk Gate Out akan otomatis disetujui.');" class="inline">
                                         <input type="hidden" name="billing_action" value="pay_invoice">
                                         <input type="hidden" name="invoice_number" value="<?= $inv['no'] ?>">
-                                        <button type="submit" class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors flex items-center justify-center shadow-xs" title="Konfirmasi Bayar (Set LUNAS)">
-                                            <i class="fa-solid fa-check text-xs"></i>
+                                        <button type="submit" class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors flex items-center justify-center shadow-2xs cursor-pointer" title="Konfirmasi Bayar (Set LUNAS)">
+                                            <i class="fa-solid fa-check text-[10px]"></i>
                                         </button>
                                     </form>
                                     <?php else: ?>
-                                    <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs" title="Faktur Telah Lunas">
+                                    <span class="w-6 h-6 rounded-md bg-emerald-100 text-emerald-800 flex items-center justify-center text-[10px]" title="Faktur Telah Lunas">
                                         <i class="fa-solid fa-badge-check"></i>
                                     </span>
                                     <?php endif; ?>
@@ -295,15 +301,17 @@ $billing_info = [
 
     <!-- Konten Tab 2: Kalkulator Tarif -->
     <div id="tab-kalkulator" class="tab-content hidden">
-        <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-            <h3 class="text-lg font-bold text-[#002f5e] mb-6 border-b pb-4"><i class="fa-solid fa-calculator text-[#0170b9] mr-2"></i> Kalkulator Tarif Jasa Pelabuhan Kering</h3>
+        <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
+            <h3 class="text-[12.5px] font-extrabold text-slate-900 mb-3 border-b border-slate-100 pb-2 flex items-center">
+                <i class="fa-solid fa-calculator text-orange-600 mr-2 text-[11px]"></i>Kalkulator Tarif Jasa Pelabuhan Kering
+            </h3>
             
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <div class="lg:col-span-2 space-y-5">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="lg:col-span-2 space-y-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Jenis Kontainer</label>
-                            <select id="calc-tipe" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-[#0170b9] focus:border-[#0170b9]" onchange="calculateTariff()">
+                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Jenis Kontainer</label>
+                            <select id="calc-tipe" class="w-full border border-slate-200 rounded-lg p-1.5 text-[11.5px] bg-white text-slate-800 focus:ring-1 focus:ring-orange-500 focus:border-orange-500" onchange="calculateTariff()">
                                 <option value="20GP">20' General Purpose (GP)</option>
                                 <option value="40GP">40' General Purpose (GP)</option>
                                 <option value="40HC">40' High Cube (HC)</option>
@@ -312,77 +320,77 @@ $billing_info = [
                             </select>
                         </div>
                         <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-2">Masa Penumpukan (Hari)</label>
-                            <input type="number" id="calc-hari" value="5" min="1" class="w-full border border-gray-300 rounded-lg p-2.5 text-sm focus:ring-[#0170b9] focus:border-[#0170b9]" onchange="calculateTariff()" onkeyup="calculateTariff()">
+                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Masa Penumpukan (Hari)</label>
+                            <input type="number" id="calc-hari" value="5" min="1" class="w-full border border-slate-200 rounded-lg p-1.5 text-[11.5px] bg-white text-slate-800 focus:ring-1 focus:ring-orange-500 focus:border-orange-500" onchange="calculateTariff()" onkeyup="calculateTariff()">
                         </div>
                     </div>
                     
-                    <div class="space-y-3">
-                        <label class="block text-sm font-semibold text-gray-700">Layanan Tambahan</label>
+                    <div class="space-y-2">
+                        <label class="block text-[11px] font-bold text-slate-700">Layanan Tambahan</label>
                         
-                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                            <input type="checkbox" id="calc-lolo" class="w-4 h-4 text-[#0170b9] rounded focus:ring-[#0170b9]" onchange="calculateTariff()" checked>
-                            <div class="ml-3 flex-1">
-                                <span class="block text-sm font-medium text-gray-800">Jasa Bongkar Muat (Lift-On/Lift-Off)</span>
-                                <span class="block text-xs text-gray-500">Handling kontainer dari truk ke yard atau sebaliknya</span>
+                        <label class="flex items-center p-2 border border-slate-200 rounded-lg hover:bg-orange-50/30 cursor-pointer transition-colors bg-white">
+                            <input type="checkbox" id="calc-lolo" class="w-3.5 h-3.5 text-orange-600 rounded focus:ring-orange-500" onchange="calculateTariff()" checked>
+                            <div class="ml-2.5 flex-1">
+                                <span class="block text-[11.5px] font-bold text-slate-800">Jasa Bongkar Muat (Lift-On/Lift-Off)</span>
+                                <span class="block text-[9.5px] text-slate-500">Handling kontainer dari truk ke yard atau sebaliknya</span>
                             </div>
                         </label>
 
-                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                            <input type="checkbox" id="calc-strip" class="w-4 h-4 text-[#0170b9] rounded focus:ring-[#0170b9]" onchange="calculateTariff()">
-                            <div class="ml-3 flex-1">
-                                <span class="block text-sm font-medium text-gray-800">Jasa Stripping / Stuffing</span>
-                                <span class="block text-xs text-gray-500">Pemuatan atau pembongkaran kargo dari dalam kontainer</span>
+                        <label class="flex items-center p-2 border border-slate-200 rounded-lg hover:bg-orange-50/30 cursor-pointer transition-colors bg-white">
+                            <input type="checkbox" id="calc-strip" class="w-3.5 h-3.5 text-orange-600 rounded focus:ring-orange-500" onchange="calculateTariff()">
+                            <div class="ml-2.5 flex-1">
+                                <span class="block text-[11.5px] font-bold text-slate-800">Jasa Stripping / Stuffing</span>
+                                <span class="block text-[9.5px] text-slate-500">Pemuatan atau pembongkaran kargo dari dalam kontainer</span>
                             </div>
                         </label>
                         
-                        <label class="flex items-center p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
-                            <input type="checkbox" id="calc-customs" class="w-4 h-4 text-[#0170b9] rounded focus:ring-[#0170b9]" onchange="calculateTariff()">
-                            <div class="ml-3 flex-1">
-                                <span class="block text-sm font-medium text-gray-800">Customs Clearance Fee</span>
-                                <span class="block text-xs text-gray-500">Administrasi pengurusan dokumen pabean BC 2.0 / 2.3</span>
+                        <label class="flex items-center p-2 border border-slate-200 rounded-lg hover:bg-orange-50/30 cursor-pointer transition-colors bg-white">
+                            <input type="checkbox" id="calc-customs" class="w-3.5 h-3.5 text-orange-600 rounded focus:ring-orange-500" onchange="calculateTariff()">
+                            <div class="ml-2.5 flex-1">
+                                <span class="block text-[11.5px] font-bold text-slate-800">Customs Clearance Fee</span>
+                                <span class="block text-[9.5px] text-slate-500">Administrasi pengurusan dokumen pabean BC 2.0 / 2.3</span>
                             </div>
                         </label>
                     </div>
                 </div>
                 
-                <div class="bg-slate-50 rounded-xl border border-slate-200 p-5 flex flex-col justify-between">
+                <div class="bg-slate-50/70 rounded-xl border border-slate-200/80 p-3.5 flex flex-col justify-between">
                     <div>
-                        <h4 class="text-sm font-bold text-gray-800 mb-4 uppercase tracking-wider">Rincian Estimasi Biaya</h4>
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between text-gray-600">
+                        <h4 class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2.5">Rincian Estimasi Biaya</h4>
+                        <div class="space-y-2 text-[11.5px]">
+                            <div class="flex justify-between text-slate-600">
                                 <span>Penumpukan (<span id="out-hari">5</span> hari)</span>
-                                <span id="out-penumpukan" class="font-medium text-gray-800">Rp 0</span>
+                                <span id="out-penumpukan" class="font-bold text-slate-900 font-mono">Rp 0</span>
                             </div>
-                            <div class="flex justify-between text-gray-600">
+                            <div class="flex justify-between text-slate-600">
                                 <span>Lift-On / Lift-Off</span>
-                                <span id="out-lolo" class="font-medium text-gray-800">Rp 0</span>
+                                <span id="out-lolo" class="font-bold text-slate-900 font-mono">Rp 0</span>
                             </div>
-                            <div class="flex justify-between text-gray-600">
+                            <div class="flex justify-between text-slate-600">
                                 <span>Stripping / Stuffing</span>
-                                <span id="out-strip" class="font-medium text-gray-800">Rp 0</span>
+                                <span id="out-strip" class="font-bold text-slate-900 font-mono">Rp 0</span>
                             </div>
-                            <div class="flex justify-between text-gray-600">
+                            <div class="flex justify-between text-slate-600">
                                 <span>Customs Clearance</span>
-                                <span id="out-customs" class="font-medium text-gray-800">Rp 0</span>
+                                <span id="out-customs" class="font-bold text-slate-900 font-mono">Rp 0</span>
                             </div>
-                            <div class="border-t border-gray-200 pt-3 flex justify-between text-gray-800 font-semibold">
+                            <div class="border-t border-slate-200 pt-2 flex justify-between text-slate-800 font-bold">
                                 <span>Subtotal</span>
-                                <span id="out-subtotal">Rp 0</span>
+                                <span id="out-subtotal" class="font-mono">Rp 0</span>
                             </div>
-                            <div class="flex justify-between text-gray-500 text-xs">
+                            <div class="flex justify-between text-slate-500 text-[10px]">
                                 <span>PPN (11%)</span>
-                                <span id="out-ppn">Rp 0</span>
+                                <span id="out-ppn" class="font-mono">Rp 0</span>
                             </div>
                         </div>
                     </div>
-                    <div class="mt-6 pt-4 border-t-2 border-dashed border-gray-300">
-                        <div class="flex justify-between items-center mb-4">
-                            <span class="text-sm font-bold text-[#002f5e]">TOTAL BIAYA</span>
-                            <span id="out-total" class="text-xl font-bold text-[#0170b9]">Rp 0</span>
+                    <div class="mt-4 pt-3 border-t-2 border-dashed border-slate-300">
+                        <div class="flex justify-between items-center mb-3">
+                            <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">TOTAL BIAYA</span>
+                            <span id="out-total" class="text-base font-extrabold text-orange-600 font-mono">Rp 0</span>
                         </div>
-                        <button class="w-full py-2.5 bg-[#0170b9] hover:bg-[#004b87] text-white text-sm font-bold rounded-lg transition-colors shadow-sm">
-                            <i class="fa-solid fa-file-invoice mr-2"></i>Buat Draft Invoice
+                        <button class="w-full py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11.5px] font-bold rounded-lg transition-all shadow-xs cursor-pointer">
+                            <i class="fa-solid fa-file-invoice mr-1.5"></i>Buat Draft Invoice
                         </button>
                     </div>
                 </div>
@@ -392,108 +400,104 @@ $billing_info = [
 
     <!-- Konten Tab 3: Integrasi Odoo -->
     <div id="tab-odoo" class="tab-content hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div class="lg:col-span-1 space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <div class="lg:col-span-1 space-y-3">
                 <!-- Status Koneksi -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-md font-bold text-[#002f5e] flex items-center">
-                            <i class="fa-solid fa-circle-nodes text-[#0170b9] mr-2"></i>Status Koneksi Odoo
+                <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
+                    <div class="flex items-center justify-between mb-2.5">
+                        <h3 class="text-[12px] font-extrabold text-slate-900 flex items-center">
+                            <i class="fa-solid fa-circle-nodes text-orange-600 mr-2 text-[11px]"></i>Status Koneksi Odoo
                         </h3>
-                        <span id="odoo-live-pulse" class="flex h-3 w-3 relative">
+                        <span id="odoo-live-pulse" class="flex h-2.5 w-2.5 relative">
                             <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
                         </span>
                     </div>
 
-                    <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mb-4 space-y-2.5">
+                    <div class="bg-slate-50/80 rounded-lg p-2.5 border border-slate-200/70 mb-3 space-y-1.5 text-[11px]">
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 font-medium">Server Host</span>
-                            <a href="https://conclusion-intermodal-dry-port.odoo.com" target="_blank" class="text-xs font-mono text-[#0170b9] hover:underline flex items-center">
+                            <span class="text-slate-500">Server Host</span>
+                            <a href="https://conclusion-intermodal-dry-port.odoo.com" target="_blank" class="font-mono text-orange-600 hover:underline flex items-center font-bold">
                                 <span>odoo.com SaaS</span>
-                                <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[10px]"></i>
+                                <i class="fa-solid fa-arrow-up-right-from-square ml-1 text-[9px]"></i>
                             </a>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 font-medium">Subdomain</span>
-                            <span class="text-xs font-mono text-gray-800">conclusion-intermodal-dry-port</span>
+                            <span class="text-slate-500">Subdomain</span>
+                            <span class="font-mono text-slate-800 text-[10px] truncate max-w-[150px]">conclusion-intermodal-dry-port</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 font-medium">Database</span>
-                            <span class="text-xs font-mono text-gray-800">conclusion-intermodal-dry-port</span>
+                            <span class="text-slate-500">Protokol</span>
+                            <span class="font-mono text-slate-800">JSON-RPC v2.0 (HTTPS)</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 font-medium">Protokol</span>
-                            <span class="text-xs font-mono text-gray-800">JSON-RPC v2.0 (HTTPS)</span>
+                            <span class="text-slate-500">Versi Server</span>
+                            <span id="odoo-server-version" class="font-mono font-bold text-slate-800">saas~19.4+e</span>
                         </div>
                         <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 font-medium">Versi Server</span>
-                            <span id="odoo-server-version" class="text-xs font-mono font-bold text-gray-800">saas~19.4+e (Enterprise)</span>
+                            <span class="text-slate-500">Latensi Jaringan</span>
+                            <span id="odoo-latency-display" class="font-mono text-emerald-600 font-bold">~340 ms</span>
                         </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-xs text-gray-500 font-medium">Latensi Jaringan</span>
-                            <span id="odoo-latency-display" class="text-xs font-mono text-emerald-600 font-bold">~340 ms</span>
-                        </div>
-                        <div class="flex justify-between items-center pt-2 border-t border-slate-200">
-                            <span class="text-xs text-gray-500 font-medium">Status API Gateway</span>
-                            <span id="odoo-status-badge" class="px-2.5 py-1 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[11px] font-bold flex items-center">
-                                <i class="fa-solid fa-check-circle mr-1 text-emerald-600"></i>CONNECTED LIVE
+                        <div class="flex justify-between items-center pt-1.5 border-t border-slate-200/80">
+                            <span class="text-slate-500">Status API</span>
+                            <span id="odoo-status-badge" class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded text-[9.5px] font-bold flex items-center">
+                                <i class="fa-solid fa-check-circle mr-1 text-emerald-600 text-[9px]"></i>CONNECTED LIVE
                             </span>
                         </div>
                     </div>
 
                     <!-- Alert / Status Banner -->
-                    <div id="odoo-alert-box" class="p-3 mb-4 rounded-xl text-xs bg-blue-50 border border-blue-200 text-blue-800 flex items-start space-x-2">
-                        <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 flex-shrink-0"></i>
-                        <span id="odoo-alert-msg">Server Odoo SaaS cloud aktif dan siap menerima panggilan JSON-RPC dari modul CIDP.</span>
+                    <div id="odoo-alert-box" class="p-2 mb-2.5 rounded-lg text-[10.5px] bg-blue-50 border border-blue-200 text-blue-800 flex items-start space-x-1.5">
+                        <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 flex-shrink-0 text-[10px]"></i>
+                        <span id="odoo-alert-msg" class="leading-tight">Server Odoo SaaS cloud aktif dan siap menerima panggilan JSON-RPC dari modul CIDP.</span>
                     </div>
                     
-                    <button id="btn-test-odoo" onclick="checkOdooLiveConnection()" class="w-full py-2.5 border-2 border-[#0170b9] text-[#0170b9] hover:bg-blue-50 text-xs sm:text-sm font-bold rounded-xl transition-all mb-2.5 flex items-center justify-center space-x-2 shadow-xs cursor-pointer">
-                        <i class="fa-solid fa-plug text-sm"></i>
+                    <button id="btn-test-odoo" onclick="checkOdooLiveConnection()" class="w-full py-1.5 border border-orange-500 text-orange-600 hover:bg-orange-50 text-[11px] font-bold rounded-lg transition-all mb-1.5 flex items-center justify-center space-x-1.5 cursor-pointer shadow-2xs">
+                        <i class="fa-solid fa-plug text-[11px]"></i>
                         <span id="btn-test-odoo-text">Test Koneksi Ulang (Live Ping)</span>
                     </button>
-                    <button id="btn-sync-odoo" onclick="syncOdooLiveInvoices()" class="w-full py-2.5 bg-gradient-to-r from-[#002f5e] to-[#0170b9] hover:from-[#002448] hover:to-[#005a96] text-white text-xs sm:text-sm font-bold rounded-xl transition-all shadow-sm flex items-center justify-center space-x-2 cursor-pointer">
-                        <i class="fa-solid fa-rotate text-sm"></i>
+                    <button id="btn-sync-odoo" onclick="syncOdooLiveInvoices()" class="w-full py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg transition-all shadow-xs flex items-center justify-center space-x-1.5 cursor-pointer">
+                        <i class="fa-solid fa-rotate text-[11px]"></i>
                         <span id="btn-sync-odoo-text">Sinkronisasi Data Invoice</span>
                     </button>
 
-                    <div class="mt-4 pt-4 border-t border-gray-100 text-[11px] text-gray-500 flex justify-between items-center">
-                        <span>Pemeriksaan Terakhir:</span>
-                        <span id="odoo-last-checked" class="font-mono text-gray-700">Baru saja</span>
+                    <div class="mt-2.5 pt-2 border-t border-slate-100 text-[10px] text-slate-400 flex justify-between items-center">
+                        <span>Pemeriksaan:</span>
+                        <span id="odoo-last-checked" class="font-mono text-slate-600">Baru saja</span>
                     </div>
                 </div>
 
                 <!-- Info PIC ERP -->
-                <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-full bg-[#002f5e] text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-xs">
+                <div class="bg-white border border-slate-200/80 rounded-xl p-2.5 shadow-2xs flex items-center space-x-2.5">
+                    <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center font-bold text-xs flex-shrink-0 shadow-2xs">
                         <i class="fa-solid fa-user-tie"></i>
                     </div>
-                    <div>
-                        <span class="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">PIC Sistem ERP Odoo</span>
-                        <p class="font-bold text-gray-900 text-xs mt-0.5">Afriansayah Ayubi</p>
-                        <span class="text-[11px] text-[#0170b9] font-medium block">Software &amp; ERP Process Specialist</span>
+                    <div class="min-w-0">
+                        <span class="text-[8.5px] uppercase font-bold text-slate-400 block tracking-widest">PIC Modul ERP</span>
+                        <p class="font-bold text-slate-900 text-[11.5px] truncate">Afriansayah Ayubi</p>
+                        <span class="text-[9.5px] text-orange-600 font-semibold block truncate">Software &amp; ERP Process Specialist</span>
                     </div>
                 </div>
             </div>
             
-            <div class="lg:col-span-2 space-y-6">
+            <div class="lg:col-span-2 space-y-3">
                 <!-- Log JSON-RPC Live -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-md font-bold text-[#002f5e] flex items-center">
-                            <i class="fa-solid fa-code text-[#0170b9] mr-2"></i>Odoo JSON-RPC Payload Log (Live Handshake)
+                <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-[12px] font-extrabold text-slate-900 flex items-center">
+                            <i class="fa-solid fa-code text-orange-600 mr-2 text-[11px]"></i>JSON-RPC Payload Log (Live Handshake)
                         </h3>
-                        <span class="px-2 py-0.5 bg-slate-100 text-slate-600 rounded text-[10px] font-mono font-bold">Standard RPC-2.0</span>
+                        <span class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[9.5px] font-mono font-bold">Standard RPC-2.0</span>
                     </div>
                     
-                    <div class="space-y-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <div>
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">Request Payload (JSON-RPC Call)</span>
-                                <span class="text-[10px] font-mono text-gray-400">POST /jsonrpc</span>
+                                <span class="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider">Request Payload</span>
+                                <span class="text-[9px] font-mono text-slate-400">POST /jsonrpc</span>
                             </div>
-                            <div class="bg-[#1e1e1e] rounded-xl p-4 overflow-x-auto shadow-inner border border-gray-800">
-<pre id="odoo-req-payload" class="text-xs font-mono text-emerald-400 leading-relaxed">{
+                            <div class="bg-[#1e1e1e] rounded-lg p-2.5 overflow-x-auto shadow-inner border border-gray-800 max-h-32">
+<pre id="odoo-req-payload" class="text-[10px] font-mono text-emerald-400 leading-tight">{
   "jsonrpc": "2.0",
   "method": "call",
   "params": {
@@ -508,24 +512,15 @@ $billing_info = [
 
                         <div>
                             <div class="flex justify-between items-center mb-1">
-                                <span class="text-xs font-bold text-gray-600 uppercase tracking-wider">Response Payload dari Odoo Server</span>
-                                <span id="odoo-res-status" class="text-[10px] font-mono text-emerald-500 font-bold">HTTP 200 OK (Live Cloud)</span>
+                                <span class="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider">Response Payload</span>
+                                <span id="odoo-res-status" class="text-[9px] font-mono text-emerald-500 font-bold">HTTP 200 OK</span>
                             </div>
-                            <div class="bg-[#1e1e1e] rounded-xl p-4 overflow-x-auto shadow-inner border border-gray-800">
-<pre id="odoo-res-payload" class="text-xs font-mono text-sky-300 leading-relaxed">{
+                            <div class="bg-[#1e1e1e] rounded-lg p-2.5 overflow-x-auto shadow-inner border border-gray-800 max-h-32">
+<pre id="odoo-res-payload" class="text-[10px] font-mono text-sky-300 leading-tight">{
   "jsonrpc": "2.0",
   "id": 2196,
   "result": {
     "server_version": "saas~19.4+e",
-    "server_version_info": [
-      "saas~19",
-      4,
-      0,
-      "final",
-      0,
-      "e"
-    ],
-    "server_serie": "saas~19.4",
     "protocol_version": 1
   }
 }</pre>
@@ -535,46 +530,46 @@ $billing_info = [
                 </div>
 
                 <!-- Preview Invoices Hasil Sinkronisasi -->
-                <div id="odoo-synced-box" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-md font-bold text-[#002f5e] flex items-center">
-                            <i class="fa-solid fa-receipt text-[#0170b9] mr-2"></i>Invoice Terhubung dari Odoo (`account.move`)
+                <div id="odoo-synced-box" class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
+                    <div class="flex items-center justify-between mb-2">
+                        <h3 class="text-[12px] font-extrabold text-slate-900 flex items-center">
+                            <i class="fa-solid fa-receipt text-orange-600 mr-2 text-[11px]"></i>Invoice Terhubung Odoo (`account.move`)
                         </h3>
-                        <span class="text-xs text-gray-500">Live Mirroring YMS &harr; Odoo</span>
+                        <span class="text-[10px] text-slate-400 font-semibold">Live Mirroring YMS &harr; Odoo</span>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
+                        <table class="w-full text-left border-collapse text-[11px]">
                             <thead>
-                                <tr class="bg-slate-50 text-slate-600 uppercase tracking-wider border-b border-slate-200">
-                                    <th class="p-3 font-semibold">No. Invoice Odoo</th>
-                                    <th class="p-3 font-semibold">Customer / Partner</th>
-                                    <th class="p-3 font-semibold">Layanan Logistik</th>
-                                    <th class="p-3 font-semibold text-right">Nilai Total</th>
-                                    <th class="p-3 font-semibold text-center">Status Bayar</th>
+                                <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200/80 text-[9.5px] font-bold">
+                                    <th class="px-2.5 py-1.5">No. Invoice Odoo</th>
+                                    <th class="px-2.5 py-1.5">Customer / Partner</th>
+                                    <th class="px-2.5 py-1.5">Layanan Logistik</th>
+                                    <th class="px-2.5 py-1.5 text-right">Nilai Total</th>
+                                    <th class="px-2.5 py-1.5 text-center">Status Bayar</th>
                                 </tr>
                             </thead>
-                            <tbody id="odoo-synced-tbody" class="divide-y divide-gray-100 text-gray-700">
-                                <tr class="hover:bg-blue-50/40">
-                                    <td class="p-3 font-mono font-bold text-[#002f5e]">INV/2026/00001</td>
-                                    <td class="p-3 font-medium">PT Samudera Pratama Mandiri</td>
-                                    <td class="p-3 text-gray-600">Penumpukan &amp; Lo-Lo 20FT</td>
-                                    <td class="p-3 font-bold text-right text-gray-900">Rp 15.000.000</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">PAID</span></td>
+                            <tbody id="odoo-synced-tbody" class="divide-y divide-slate-100 text-slate-700">
+                                <tr class="hover:bg-orange-50/30">
+                                    <td class="px-2.5 py-1 font-mono font-bold text-orange-600">INV/2026/00001</td>
+                                    <td class="px-2.5 py-1 font-bold text-slate-800">PT Samudera Pratama Mandiri</td>
+                                    <td class="px-2.5 py-1 text-slate-500">Penumpukan &amp; Lo-Lo 20FT</td>
+                                    <td class="px-2.5 py-1 font-bold text-right text-slate-900 font-mono">Rp 15.000.000</td>
+                                    <td class="px-2.5 py-1 text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9.5px]">PAID</span></td>
                                 </tr>
-                                <tr class="hover:bg-blue-50/40">
-                                    <td class="p-3 font-mono font-bold text-[#002f5e]">INV/2026/00002</td>
-                                    <td class="p-3 font-medium">PT Unilever Indonesia Tbk</td>
-                                    <td class="p-3 text-gray-600">Reefer Power &amp; Monitoring</td>
-                                    <td class="p-3 font-bold text-right text-gray-900">Rp 8.500.000</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">PAID</span></td>
+                                <tr class="hover:bg-orange-50/30">
+                                    <td class="px-2.5 py-1 font-mono font-bold text-orange-600">INV/2026/00002</td>
+                                    <td class="px-2.5 py-1 font-bold text-slate-800">PT Unilever Indonesia Tbk</td>
+                                    <td class="px-2.5 py-1 text-slate-500">Reefer Power &amp; Monitoring</td>
+                                    <td class="px-2.5 py-1 font-bold text-right text-slate-900 font-mono">Rp 8.500.000</td>
+                                    <td class="px-2.5 py-1 text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9.5px]">PAID</span></td>
                                 </tr>
-                                <tr class="hover:bg-blue-50/40">
-                                    <td class="p-3 font-mono font-bold text-[#002f5e]">INV/2026/00003</td>
-                                    <td class="p-3 font-medium">PT Astra Honda Motor</td>
-                                    <td class="p-3 text-gray-600">Stripping CFS &amp; Gate Inbound</td>
-                                    <td class="p-3 font-bold text-right text-gray-900">Rp 22.400.000</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-[10px]">PENDING</span></td>
+                                <tr class="hover:bg-orange-50/30">
+                                    <td class="px-2.5 py-1 font-mono font-bold text-orange-600">INV/2026/00003</td>
+                                    <td class="px-2.5 py-1 font-bold text-slate-800">PT Astra Honda Motor</td>
+                                    <td class="px-2.5 py-1 text-slate-500">Stripping CFS &amp; Gate Inbound</td>
+                                    <td class="px-2.5 py-1 font-bold text-right text-slate-900 font-mono">Rp 22.400.000</td>
+                                    <td class="px-2.5 py-1 text-center"><span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-[9.5px]">PENDING</span></td>
                                 </tr>
                             </tbody>
                         </table>
@@ -586,49 +581,49 @@ $billing_info = [
 
     <!-- Konten Tab 4: Laporan & Aging -->
     <div id="tab-laporan" class="tab-content hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">
             <!-- Aging Report -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="text-md font-bold text-[#002f5e] mb-4"><i class="fa-solid fa-chart-bar text-[#0170b9] mr-2"></i>Account Receivable Aging Report</h3>
+            <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
+                <h3 class="text-[12px] font-extrabold text-slate-900 mb-2.5 flex items-center"><i class="fa-solid fa-chart-bar text-orange-600 mr-2 text-[11px]"></i>Account Receivable Aging Report</h3>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-sm">
+                    <table class="w-full text-left border-collapse text-[11px]">
                         <thead>
-                            <tr class="bg-slate-50 text-slate-600 text-[11px] uppercase tracking-wider border-b border-slate-200">
-                                <th class="p-3 font-semibold">Kategori Umur</th>
-                                <th class="p-3 font-semibold text-right">Jumlah (IDR)</th>
-                                <th class="p-3 font-semibold text-center">% Total</th>
+                            <tr class="bg-slate-50 text-slate-500 text-[9.5px] font-bold uppercase tracking-wider border-b border-slate-200/80">
+                                <th class="px-2.5 py-1.5">Kategori Umur</th>
+                                <th class="px-2.5 py-1.5 text-right">Jumlah (IDR)</th>
+                                <th class="px-2.5 py-1.5 text-center">% Total</th>
                             </tr>
                         </thead>
-                        <tbody class="text-gray-700 divide-y divide-gray-100">
+                        <tbody class="text-slate-700 divide-y divide-slate-100">
                             <tr>
-                                <td class="p-3 flex items-center"><span class="w-3 h-3 rounded-full bg-green-500 mr-2"></span>Current (Belum Jatuh Tempo)</td>
-                                <td class="p-3 text-right font-medium">Rp 648.250.000</td>
-                                <td class="p-3 text-center">70.2%</td>
+                                <td class="px-2.5 py-1 flex items-center"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>Current (Belum Jatuh Tempo)</td>
+                                <td class="px-2.5 py-1 text-right font-bold text-slate-900 font-mono">Rp 648.250.000</td>
+                                <td class="px-2.5 py-1 text-center text-slate-500">70.2%</td>
                             </tr>
                             <tr>
-                                <td class="p-3 flex items-center"><span class="w-3 h-3 rounded-full bg-yellow-400 mr-2"></span>1 - 30 Hari</td>
-                                <td class="p-3 text-right font-medium">Rp 125.000.000</td>
-                                <td class="p-3 text-center">13.5%</td>
+                                <td class="px-2.5 py-1 flex items-center"><span class="w-2 h-2 rounded-full bg-yellow-400 mr-1.5"></span>1 - 30 Hari</td>
+                                <td class="px-2.5 py-1 text-right font-bold text-slate-900 font-mono">Rp 125.000.000</td>
+                                <td class="px-2.5 py-1 text-center text-slate-500">13.5%</td>
                             </tr>
                             <tr>
-                                <td class="p-3 flex items-center"><span class="w-3 h-3 rounded-full bg-orange-500 mr-2"></span>31 - 60 Hari</td>
-                                <td class="p-3 text-right font-medium">Rp 85.500.000</td>
-                                <td class="p-3 text-center">9.2%</td>
+                                <td class="px-2.5 py-1 flex items-center"><span class="w-2 h-2 rounded-full bg-orange-500 mr-1.5"></span>31 - 60 Hari</td>
+                                <td class="px-2.5 py-1 text-right font-bold text-slate-900 font-mono">Rp 85.500.000</td>
+                                <td class="px-2.5 py-1 text-center text-slate-500">9.2%</td>
                             </tr>
                             <tr>
-                                <td class="p-3 flex items-center"><span class="w-3 h-3 rounded-full bg-red-500 mr-2"></span>61 - 90 Hari</td>
-                                <td class="p-3 text-right font-medium">Rp 45.000.000</td>
-                                <td class="p-3 text-center">4.9%</td>
+                                <td class="px-2.5 py-1 flex items-center"><span class="w-2 h-2 rounded-full bg-red-500 mr-1.5"></span>61 - 90 Hari</td>
+                                <td class="px-2.5 py-1 text-right font-bold text-slate-900 font-mono">Rp 45.000.000</td>
+                                <td class="px-2.5 py-1 text-center text-slate-500">4.9%</td>
                             </tr>
                             <tr>
-                                <td class="p-3 flex items-center"><span class="w-3 h-3 rounded-full bg-red-800 mr-2"></span>> 90 Hari</td>
-                                <td class="p-3 text-right font-medium">Rp 20.000.000</td>
-                                <td class="p-3 text-center">2.2%</td>
+                                <td class="px-2.5 py-1 flex items-center"><span class="w-2 h-2 rounded-full bg-red-800 mr-1.5"></span>> 90 Hari</td>
+                                <td class="px-2.5 py-1 text-right font-bold text-slate-900 font-mono">Rp 20.000.000</td>
+                                <td class="px-2.5 py-1 text-center text-slate-500">2.2%</td>
                             </tr>
-                            <tr class="bg-slate-50 font-bold border-t-2 border-slate-200">
-                                <td class="p-3 text-right">TOTAL PIUTANG BERJALAN</td>
-                                <td class="p-3 text-right text-[#0170b9]">Rp 923.750.000</td>
-                                <td class="p-3 text-center">100%</td>
+                            <tr class="bg-slate-50 font-bold border-t border-slate-200/80">
+                                <td class="px-2.5 py-1 text-right text-slate-700">TOTAL PIUTANG</td>
+                                <td class="px-2.5 py-1 text-right text-orange-600 font-mono font-extrabold">Rp 923.750.000</td>
+                                <td class="px-2.5 py-1 text-center text-slate-700">100%</td>
                             </tr>
                         </tbody>
                     </table>
@@ -636,65 +631,60 @@ $billing_info = [
             </div>
 
             <!-- Revenue Breakdown -->
-            <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                <h3 class="text-md font-bold text-[#002f5e] mb-4"><i class="fa-solid fa-pie-chart text-[#0170b9] mr-2"></i>Distribusi Pendapatan (Bulan Ini)</h3>
+            <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
+                <h3 class="text-[12px] font-extrabold text-slate-900 mb-2.5 flex items-center"><i class="fa-solid fa-pie-chart text-orange-600 mr-2 text-[11px]"></i>Distribusi Pendapatan (Bulan Ini)</h3>
                 
-                <div class="space-y-4">
-                    <!-- Bar 1 -->
+                <div class="space-y-2">
                     <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="font-medium text-gray-700">Jasa Penumpukan (Storage)</span>
-                            <span class="font-bold text-gray-900">45%</span>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span class="font-bold text-slate-700">Jasa Penumpukan (Storage)</span>
+                            <span class="font-extrabold text-slate-900 font-mono">45%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-[#002f5e] h-2 rounded-full" style="width: 45%"></div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-orange-500 h-1.5 rounded-full" style="width: 45%"></div>
                         </div>
                     </div>
-                    <!-- Bar 2 -->
                     <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="font-medium text-gray-700">Lift-On / Lift-Off</span>
-                            <span class="font-bold text-gray-900">25%</span>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span class="font-bold text-slate-700">Lift-On / Lift-Off</span>
+                            <span class="font-extrabold text-slate-900 font-mono">25%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-[#0170b9] h-2 rounded-full" style="width: 25%"></div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-[#0170b9] h-1.5 rounded-full" style="width: 25%"></div>
                         </div>
                     </div>
-                    <!-- Bar 3 -->
                     <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="font-medium text-gray-700">Stripping / Stuffing</span>
-                            <span class="font-bold text-gray-900">15%</span>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span class="font-bold text-slate-700">Stripping / Stuffing</span>
+                            <span class="font-extrabold text-slate-900 font-mono">15%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-[#0ea5e9] h-2 rounded-full" style="width: 15%"></div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-sky-500 h-1.5 rounded-full" style="width: 15%"></div>
                         </div>
                     </div>
-                    <!-- Bar 4 -->
                     <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="font-medium text-gray-700">Customs Clearance</span>
-                            <span class="font-bold text-gray-900">10%</span>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span class="font-bold text-slate-700">Customs Clearance</span>
+                            <span class="font-extrabold text-slate-900 font-mono">10%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-sky-400 h-2 rounded-full" style="width: 10%"></div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-emerald-500 h-1.5 rounded-full" style="width: 10%"></div>
                         </div>
                     </div>
-                    <!-- Bar 5 -->
                     <div>
-                        <div class="flex justify-between text-xs mb-1">
-                            <span class="font-medium text-gray-700">Reefer & Lainnya</span>
-                            <span class="font-bold text-gray-900">5%</span>
+                        <div class="flex justify-between text-[11px] mb-0.5">
+                            <span class="font-bold text-slate-700">Reefer &amp; Lainnya</span>
+                            <span class="font-extrabold text-slate-900 font-mono">5%</span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-cyan-200 h-2 rounded-full" style="width: 5%"></div>
+                        <div class="w-full bg-slate-100 rounded-full h-1.5 overflow-hidden">
+                            <div class="bg-teal-400 h-1.5 rounded-full" style="width: 5%"></div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg text-center border border-blue-100">
-                    <span class="block text-xs text-blue-600 font-semibold mb-1">Prediksi Akhir Bulan</span>
-                    <span class="block text-xl font-bold text-[#002f5e]">Rp 3.550.000.000 <i class="fa-solid fa-arrow-trend-up text-green-500 text-sm ml-1"></i></span>
+                <div class="mt-3 p-2 bg-orange-50/50 rounded-lg text-center border border-orange-200/60">
+                    <span class="block text-[9.5px] text-orange-700 font-bold uppercase tracking-wider mb-0.5">Prediksi Akhir Bulan</span>
+                    <span class="block text-[14px] font-extrabold text-slate-900 font-mono">Rp 3.550.000.000 <i class="fa-solid fa-arrow-trend-up text-emerald-500 text-xs ml-1"></i></span>
                 </div>
             </div>
         </div>
@@ -804,20 +794,23 @@ $billing_info = [
 </div>
 
 <script>
-    // Tab Switching Logic
+    // Tab Switching Logic (Executive Pill Buttons Aligned with Sidebar)
     const tabBtns = document.querySelectorAll('.tab-btn');
     const tabContents = document.querySelectorAll('.tab-content');
+
+    const activeTabClasses = ['active', 'bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'text-white', 'font-bold', 'shadow-xs', 'shadow-orange-500/20'];
+    const inactiveTabClasses = ['text-slate-600', 'hover:text-orange-600', 'hover:bg-orange-50/70', 'font-medium'];
 
     tabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             // Remove active state from all buttons
             tabBtns.forEach(b => {
-                b.classList.remove('active', 'text-[#0170b9]', 'border-[#0170b9]');
-                b.classList.add('text-gray-500', 'border-transparent');
+                b.classList.remove(...activeTabClasses);
+                b.classList.add(...inactiveTabClasses);
             });
             // Add active state to clicked button
-            btn.classList.add('active', 'text-[#0170b9]', 'border-[#0170b9]');
-            btn.classList.remove('text-gray-500', 'border-transparent');
+            btn.classList.add(...activeTabClasses);
+            btn.classList.remove(...inactiveTabClasses);
 
             // Hide all tabs
             tabContents.forEach(content => {
@@ -827,8 +820,11 @@ $billing_info = [
 
             // Show target tab
             const targetId = btn.getAttribute('data-target');
-            document.getElementById(targetId).classList.remove('hidden');
-            document.getElementById(targetId).classList.add('block');
+            const targetEl = document.getElementById(targetId);
+            if (targetEl) {
+                targetEl.classList.remove('hidden');
+                targetEl.classList.add('block');
+            }
 
             // Auto-check connection when opening Odoo tab
             if (targetId === 'tab-odoo') {

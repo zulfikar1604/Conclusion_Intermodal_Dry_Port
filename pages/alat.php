@@ -149,102 +149,104 @@ foreach ($equipment_list as $eq) {
 
 <div class="space-y-4">
 
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl shadow-2xs border border-gray-100">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+    <!-- Header & Subtitle (Executive Compact) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center text-xs shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-satellite-dish"></i>
             </div>
             <div>
                 <div class="flex items-center space-x-2">
-                    <h2 class="text-base font-bold text-gray-900 leading-tight">Lokasi &amp; Status Alat Berat (Reach Stacker &amp; RTG)</h2>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <h2 class="text-[13px] font-extrabold text-slate-900 leading-tight">Lokasi &amp; Status Alat Berat (Reach Stacker &amp; RTG)</h2>
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> GPS Aktif
                     </span>
                 </div>
+                <div class="text-[9px] font-bold text-orange-600 tracking-wider uppercase mt-0.5">Telemetri Lapangan • Dispatch Spreader • Utilisasi Alat</div>
             </div>
         </div>
-        <div class="flex items-center space-x-2 flex-shrink-0 flex-wrap gap-y-2">
-            <button onclick="openDispatchModal()" class="px-3 py-1.5 bg-[#0170b9] hover:bg-[#002f5e] text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-paper-plane mr-1.5"></i> + Dispatch Job Order
+        <div class="flex items-center space-x-1.5 flex-shrink-0 flex-wrap">
+            <button onclick="openDispatchModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center">
+                <i class="fa-solid fa-paper-plane mr-1 text-[10px]"></i> + Dispatch Job
             </button>
-            <a href="dashboard.php?page=simulator" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-cube mr-1.5"></i> Simulasi 3D
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Simulasi 3D
             </a>
-            <button onclick="refreshEquipment()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-rotate mr-1.5 text-gray-500" id="refreshIcon"></i> GPS
+            <button onclick="refreshEquipment()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-rotate mr-1 text-slate-500 text-[10px]" id="refreshIcon"></i> GPS
             </button>
-            <a href="dashboard.php?page=kontainer" class="px-3 py-1.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-boxes-stacked mr-1.5"></i> Kontainer <i class="fa-solid fa-arrow-right ml-1"></i>
+            <a href="dashboard.php?page=kontainer" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-orange-50 text-orange-700 text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-boxes-stacked mr-1 text-[10px]"></i> Kontainer
             </a>
         </div>
     </div>
 
-    <!-- 4 Telemetry Metric Cards (Compact Grid) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-blue-300 transition-all flex items-center justify-between">
+    <!-- 4 Telemetry Metric Cards (Micro Compact Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-orange-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Armada Aktif</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5"><?= $total_units ?> <span class="text-[10px] font-normal text-gray-400">Unit</span></h3>
-                <div class="mt-0.5 text-[10px] text-blue-600 font-medium">3 RS + 1 RTG</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Armada Aktif</p>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5"><?= $total_units ?> <span class="text-[10px] font-medium text-slate-400">Unit</span></h3>
+                <div class="text-[9px] text-blue-600 font-medium">3 RS + 1 RTG</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs">
                 <i class="fa-solid fa-dolly"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-purple-300 transition-all flex items-center justify-between">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-purple-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Status Operasional</p>
-                <div class="flex items-center space-x-1.5 mt-0.5">
-                    <span class="text-[10px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded"><?= $operating_units ?> Bekerja</span>
-                    <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded"><?= $idle_units ?> Standby</span>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Status Operasional</p>
+                <div class="flex items-center space-x-1 mt-0.5">
+                    <span class="text-[9px] font-bold text-purple-700 bg-purple-50 px-1 py-0.2 rounded"><?= $operating_units ?> Bekerja</span>
+                    <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded"><?= $idle_units ?> Standby</span>
                 </div>
-                <p class="mt-0.5 text-[10px] text-gray-400">Semua Unit Sehat</p>
+                <p class="text-[9px] text-slate-400 font-medium mt-0.5">Semua Unit Sehat</p>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-gears"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-indigo-300 transition-all flex items-center justify-between">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-indigo-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Utilisasi</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-indigo-600 mt-0.5">82.5%</h3>
-                <div class="mt-0.5 text-[10px] text-emerald-600 font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Sangat Efisien</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Rata-Rata Utilisasi</p>
+                <h3 class="text-[13.5px] font-extrabold text-indigo-600 tracking-tight leading-tight mt-0.5">82.5%</h3>
+                <div class="text-[9px] text-emerald-600 font-medium"><i class="fa-solid fa-arrow-trend-up mr-1"></i>Sangat Efisien</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-chart-line"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-emerald-300 transition-all flex items-center justify-between">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-emerald-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Produktivitas Gerakan</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">24.2 <span class="text-[10px] font-normal text-gray-400">M/Jam</span></h3>
-                <div class="mt-0.5 text-[10px] text-blue-600 font-medium">Siklus Cepat Lift-Off/On</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Produktivitas Gerakan</p>
+                <h3 class="text-[13.5px] font-extrabold text-emerald-600 tracking-tight leading-tight mt-0.5">24.2 <span class="text-[10px] font-medium text-slate-400">M/Jam</span></h3>
+                <div class="text-[9px] text-blue-600 font-medium">Siklus Lift-Off/On</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-gauge-high"></i>
             </div>
         </div>
     </div>
 
     <!-- PETA SKEMATIK POSISI ALAT BERAT DI TERMINAL (RADAR GRID) -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
-        <div class="flex items-center justify-between pb-3 mb-4 border-b border-gray-100">
+    <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/80">
+        <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/80">
             <div>
-                <h3 class="font-bold text-gray-900 text-base flex items-center">
-                    <i class="fa-solid fa-map-location-dot mr-2 text-[#0170b9]"></i>Peta Skematik Posisi Live Alat Berat Terminal
+                <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
+                    <i class="fa-solid fa-map-location-dot mr-1.5 text-orange-600"></i>Peta Skematik Posisi Live Alat Berat Terminal
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Penempatan posisi fisik alat berat pada masing-masing zona yard.</p>
+                <p class="text-[9px] text-slate-400 mt-0.5">Penempatan posisi fisik alat berat pada masing-masing zona yard.</p>
             </div>
-            <div class="flex items-center space-x-3 text-xs">
-                <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5"></span>Standby</span>
-                <span class="flex items-center text-gray-600 font-medium"><span class="w-2.5 h-2.5 rounded-full bg-purple-600 mr-1.5 animate-ping"></span>Sedang Memindahkan</span>
+            <div class="flex items-center space-x-2.5 text-[10px]">
+                <span class="flex items-center text-slate-600 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-1"></span>Standby</span>
+                <span class="flex items-center text-slate-600 font-medium"><span class="w-2 h-2 rounded-full bg-purple-600 mr-1 animate-ping"></span>Sedang Memindahkan</span>
             </div>
         </div>
 
-        <div class="bg-slate-900 rounded-2xl p-5 text-white relative overflow-hidden border border-slate-800">
+        <div class="bg-slate-900 rounded-xl p-3 text-white relative overflow-hidden border border-slate-800">
             <?php
             $rs01 = $eq_map['RS-01'] ?? ['operator_name' => 'Budi Santoso', 'status' => 'idle', 'current_container' => '', 'last_block' => 'A', 'fuel_percent' => 85];
             $rs02 = $eq_map['RS-02'] ?? ['operator_name' => 'Agus Setiawan', 'status' => 'idle', 'current_container' => '', 'last_block' => 'B', 'fuel_percent' => 87];
@@ -256,60 +258,60 @@ foreach ($equipment_list as $eq) {
             $rs03_op = ($rs03['status'] === 'operating' || $rs03['status'] === 'carrying');
             $rtg01_op = ($rtg01['status'] === 'operating' || $rtg01['status'] === 'carrying');
             ?>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-2.5">
                 
                 <!-- Blok A (RS-01) -->
-                <div class="bg-slate-800/60 border <?= $rs01_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-xl p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-blue-400">BLOK A (Dry 40ft & Shifting)</span>
-                        <span class="w-2.5 h-2.5 rounded-full <?= $rs01_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
+                <div class="bg-slate-800/60 border <?= $rs01_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-lg p-2.5">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-[11px] font-bold text-blue-400">BLOK A (Dry 40ft)</span>
+                        <span class="w-2 h-2 rounded-full <?= $rs01_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
                     </div>
-                    <div class="bg-slate-900/90 p-3 rounded-xl border <?= $rs01_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-3">
-                        <span class="font-mono font-bold <?= $rs01_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-sm px-2 py-1 rounded">RS-01</span>
+                    <div class="bg-slate-900/90 p-2 rounded-lg border <?= $rs01_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
+                        <span class="font-mono font-bold <?= $rs01_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-xs px-1.5 py-0.5 rounded">RS-01</span>
                         <div class="text-xs">
-                            <strong class="text-slate-200 block"><?= htmlspecialchars($rs01['operator_name']) ?></strong>
+                            <strong class="text-slate-200 block text-[11px]"><?= htmlspecialchars($rs01['operator_name']) ?></strong>
                             <?php if ($rs01_op && !empty($rs01['current_container'])): ?>
-                                <span class="text-purple-300 font-mono text-[10px] font-bold block">Angkut: <?= htmlspecialchars($rs01['current_container']) ?></span>
+                                <span class="text-purple-300 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs01['current_container']) ?></span>
                             <?php else: ?>
-                                <span class="text-slate-400 text-[10px]">Standby di Blok <?= htmlspecialchars($rs01['last_block'] ?? 'A') ?> (BBM <?= $rs01['fuel_percent'] ?>%)</span>
+                                <span class="text-slate-400 text-[9px]">Standby Blok <?= htmlspecialchars($rs01['last_block'] ?? 'A') ?> (BBM <?= $rs01['fuel_percent'] ?>%)</span>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Blok B (RS-02) -->
-                <div class="bg-slate-800/60 border <?= $rs02_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-xl p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-purple-400">BLOK B (Dry 20ft & Shifting)</span>
-                        <span class="w-2.5 h-2.5 rounded-full <?= $rs02_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
+                <div class="bg-slate-800/60 border <?= $rs02_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-lg p-2.5">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-[11px] font-bold text-purple-400">BLOK B (Dry 20ft)</span>
+                        <span class="w-2 h-2 rounded-full <?= $rs02_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
                     </div>
-                    <div class="bg-slate-900/90 p-3 rounded-xl border <?= $rs02_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-3">
-                        <span class="font-mono font-bold <?= $rs02_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-sm px-2 py-1 rounded">RS-02</span>
+                    <div class="bg-slate-900/90 p-2 rounded-lg border <?= $rs02_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
+                        <span class="font-mono font-bold <?= $rs02_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-xs px-1.5 py-0.5 rounded">RS-02</span>
                         <div class="text-xs">
-                            <strong class="text-slate-100 block"><?= htmlspecialchars($rs02['operator_name']) ?></strong>
+                            <strong class="text-slate-100 block text-[11px]"><?= htmlspecialchars($rs02['operator_name']) ?></strong>
                             <?php if ($rs02_op && !empty($rs02['current_container'])): ?>
-                                <span class="text-purple-300 font-mono text-[10px] font-bold block">Angkut: <?= htmlspecialchars($rs02['current_container']) ?></span>
+                                <span class="text-purple-300 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs02['current_container']) ?></span>
                             <?php else: ?>
-                                <span class="text-slate-400 text-[10px]">Standby di Blok <?= htmlspecialchars($rs02['last_block'] ?? 'B') ?> (BBM <?= $rs02['fuel_percent'] ?>%)</span>
+                                <span class="text-slate-400 text-[9px]">Standby Blok <?= htmlspecialchars($rs02['last_block'] ?? 'B') ?> (BBM <?= $rs02['fuel_percent'] ?>%)</span>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Reefer (RS-03) -->
-                <div class="bg-slate-800/60 border <?= $rs03_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-xl p-4">
-                    <div class="flex justify-between items-center mb-2">
-                        <span class="text-xs font-bold text-cyan-400">ZONA DERMAGA REEFER &amp; DG</span>
-                        <span class="w-2.5 h-2.5 rounded-full <?= $rs03_op ? 'bg-purple-500 animate-ping' : 'bg-cyan-400' ?>"></span>
+                <div class="bg-slate-800/60 border <?= $rs03_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-lg p-2.5">
+                    <div class="flex justify-between items-center mb-1.5">
+                        <span class="text-[11px] font-bold text-cyan-400">ZONA REEFER &amp; DG</span>
+                        <span class="w-2 h-2 rounded-full <?= $rs03_op ? 'bg-purple-500 animate-ping' : 'bg-cyan-400' ?>"></span>
                     </div>
-                    <div class="bg-slate-900/90 p-3 rounded-xl border <?= $rs03_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-3">
-                        <span class="font-mono font-bold <?= $rs03_op ? 'text-purple-300 bg-purple-950' : 'text-cyan-400 bg-cyan-950' ?> text-sm px-2 py-1 rounded">RS-03</span>
+                    <div class="bg-slate-900/90 p-2 rounded-lg border <?= $rs03_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
+                        <span class="font-mono font-bold <?= $rs03_op ? 'text-purple-300 bg-purple-950' : 'text-cyan-400 bg-cyan-950' ?> text-xs px-1.5 py-0.5 rounded">RS-03</span>
                         <div class="text-xs">
-                            <strong class="text-slate-200 block"><?= htmlspecialchars($rs03['operator_name']) ?></strong>
+                            <strong class="text-slate-200 block text-[11px]"><?= htmlspecialchars($rs03['operator_name']) ?></strong>
                             <?php if ($rs03_op && !empty($rs03['current_container'])): ?>
-                                <span class="text-purple-300 font-mono text-[10px] font-bold block">Angkut: <?= htmlspecialchars($rs03['current_container']) ?></span>
+                                <span class="text-purple-300 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs03['current_container']) ?></span>
                             <?php else: ?>
-                                <span class="text-slate-400 text-[10px]">Siaga Steker Reefer (BBM <?= $rs03['fuel_percent'] ?>%)</span>
+                                <span class="text-slate-400 text-[9px]">Siaga Steker Reefer (BBM <?= $rs03['fuel_percent'] ?>%)</span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -318,19 +320,19 @@ foreach ($equipment_list as $eq) {
             </div>
 
             <!-- Rail Siding (RTG-01) -->
-            <div class="bg-slate-800/80 border <?= $rtg01_op ? 'border-amber-500/50' : 'border-blue-500/30' ?> rounded-xl p-3 flex items-center justify-between">
-                <div class="flex items-center space-x-3 text-xs">
-                    <span class="font-mono font-bold text-amber-400 bg-amber-950 px-2 py-1 rounded">RTG-01</span>
+            <div class="bg-slate-800/80 border <?= $rtg01_op ? 'border-amber-500/50' : 'border-blue-500/30' ?> rounded-lg p-2.5 flex items-center justify-between">
+                <div class="flex items-center space-x-2.5 text-xs">
+                    <span class="font-mono font-bold text-amber-400 bg-amber-950 px-1.5 py-0.5 rounded text-[11px]">RTG-01</span>
                     <div>
-                        <strong class="text-slate-200"><?= htmlspecialchars($rtg01['operator_name']) ?> (Konecranes RTG Electric)</strong>
+                        <strong class="text-slate-200 text-xs"><?= htmlspecialchars($rtg01['operator_name']) ?> (RTG Electric)</strong>
                         <?php if ($rtg01_op && !empty($rtg01['current_container'])): ?>
-                            <span class="text-amber-300 block text-[10px] font-mono">Memuat KA Logistik: <strong><?= htmlspecialchars($rtg01['current_container']) ?></strong> • Daya Grid 100%</span>
+                            <span class="text-amber-300 block text-[9px] font-mono">Memuat KA: <strong><?= htmlspecialchars($rtg01['current_container']) ?></strong> • Daya Grid 100%</span>
                         <?php else: ?>
-                            <span class="text-slate-400 block text-[10px]">Jalur Rel Siding KA Logistik (Siaga di Rel Siding • Daya Grid 100%)</span>
+                            <span class="text-slate-400 block text-[9px]">Jalur Rel Siding KA Logistik (Siaga di Rel Siding • Daya Grid 100%)</span>
                         <?php endif; ?>
                     </div>
                 </div>
-                <span class="px-2.5 py-0.5 rounded text-[10px] font-bold <?= $rtg01_op ? 'bg-amber-900 text-amber-200' : 'bg-emerald-900 text-emerald-200' ?>">
+                <span class="px-2 py-0.5 rounded text-[9px] font-bold <?= $rtg01_op ? 'bg-amber-900 text-amber-200' : 'bg-emerald-900 text-emerald-200' ?>">
                     <?= $rtg01_op ? 'AKTIF MEMUAT KA' : 'STANDBY SIDING' ?>
                 </span>
             </div>
@@ -338,54 +340,54 @@ foreach ($equipment_list as $eq) {
     </div>
 
     <!-- KARTU RINGKAS TIAP UNIT ALAT BERAT (4 CARDS) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         <?php foreach ($equipment_list as $eq): ?>
             <?php
             $is_operating = ($eq['status'] === 'operating' || $eq['status'] === 'carrying');
             ?>
-            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 hover:shadow-md transition flex flex-col justify-between">
+            <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-orange-300 transition flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-100">
-                        <span class="font-mono font-bold text-gray-900 text-sm bg-slate-100 px-2.5 py-0.5 rounded-lg border border-slate-200">
+                    <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
+                        <span class="font-mono font-bold text-slate-900 text-xs bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
                             <?= htmlspecialchars($eq['equipment_id']) ?>
                         </span>
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold <?= $is_operating ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' ?>">
+                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold <?= $is_operating ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' ?>">
                             <?= $is_operating ? 'Operating' : 'Standby' ?>
                         </span>
                     </div>
-                    <div class="space-y-1.5 text-xs text-gray-600 mb-3">
-                        <div class="font-semibold text-gray-800 flex items-center justify-between">
+                    <div class="space-y-1 text-xs text-slate-600 mb-2">
+                        <div class="font-semibold text-slate-800 flex items-center justify-between text-xs">
                             <span><?= htmlspecialchars($eq['operator_name']) ?></span>
-                            <span class="text-[10px] text-gray-400 font-mono"><?= htmlspecialchars($eq['operator_id'] ?? '') ?></span>
+                            <span class="text-[9px] text-slate-400 font-mono"><?= htmlspecialchars($eq['operator_id'] ?? '') ?></span>
                         </div>
-                        <div class="text-[11px] text-gray-500">Blok Terakhir: <strong><?= htmlspecialchars($eq['last_block'] ?? '-') ?></strong></div>
+                        <div class="text-[10px] text-slate-500">Blok Terakhir: <strong><?= htmlspecialchars($eq['last_block'] ?? '-') ?></strong></div>
                         <?php if (!empty($eq['current_container'])): ?>
-                            <div class="text-purple-700 font-mono font-bold text-[11px] bg-purple-50 px-2 py-1 rounded border border-purple-100">
+                            <div class="text-purple-700 font-mono font-bold text-[10px] bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100">
                                 <i class="fa-solid fa-lock mr-1"></i><?= htmlspecialchars($eq['current_container']) ?>
                             </div>
                         <?php else: ?>
-                            <div class="text-gray-400 italic text-[11px] bg-slate-50 px-2 py-1 rounded border border-slate-100">
+                            <div class="text-slate-400 italic text-[10px] bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
                                 <i class="fa-solid fa-check mr-1 text-emerald-500"></i>Spreader Siap
                             </div>
                         <?php endif; ?>
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-gray-100 space-y-2">
-                    <div class="flex items-center justify-between text-[11px] text-gray-500">
+                <div class="pt-1.5 border-t border-slate-100 space-y-1.5">
+                    <div class="flex items-center justify-between text-[10px] text-slate-500">
                         <span>Power: <strong><?= $eq['fuel_percent'] ?>%</strong></span>
                         <span>Jam: <strong><?= $eq['hours_today'] ?>j</strong></span>
                     </div>
-                    <div class="flex items-center gap-1.5 pt-1">
-                        <button onclick="openDispatchModal('<?= htmlspecialchars($eq['equipment_id']) ?>')" class="flex-1 py-1.5 bg-slate-100 hover:bg-[#0170b9] text-slate-700 hover:text-white rounded-lg text-xs font-bold transition flex items-center justify-center space-x-1">
-                            <i class="fa-solid fa-paper-plane text-[10px]"></i>
+                    <div class="flex items-center gap-1">
+                        <button onclick="openDispatchModal('<?= htmlspecialchars($eq['equipment_id']) ?>')" class="flex-1 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white rounded text-[11px] font-bold transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-paper-plane text-[9px]"></i>
                             <span>Tugaskan</span>
                         </button>
                         <?php if ($is_operating): ?>
                         <form method="POST" class="inline" onsubmit="return confirm('Lepas twistlock spreader unit <?= $eq['equipment_id'] ?> dan ubah status ke Standby?')">
                             <input type="hidden" name="alat_action" value="release_spreader">
                             <input type="hidden" name="equipment_id" value="<?= htmlspecialchars($eq['equipment_id']) ?>">
-                            <button type="submit" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-bold transition" title="Lepas Spreader & Standby">
+                            <button type="submit" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[11px] font-bold transition" title="Lepas Spreader & Standby">
                                 <i class="fa-solid fa-lock-open"></i>
                             </button>
                         </form>
@@ -396,16 +398,16 @@ foreach ($equipment_list as $eq) {
         <?php endforeach; ?>
     </div>
 
-    <!-- CLEAN & SPACIOUS AUDIT LOG TABEL PEMINDAHAN YARD -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
-            <div>
-                <h3 class="font-bold text-gray-900 text-base flex items-center">
-                    <i class="fa-solid fa-clock-rotate-left mr-2 text-[#0170b9]"></i>Riwayat Pekerjaan Pemindahan Kontainer
+    <!-- CLEAN & COMPACT AUDIT LOG TABEL PEMINDAHAN YARD -->
+    <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 overflow-hidden">
+        <div class="px-3.5 py-2 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center space-x-2">
+                <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
+                    <i class="fa-solid fa-clock-rotate-left mr-1.5 text-orange-600"></i>Riwayat Pekerjaan Pemindahan Kontainer
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tampilan ringkas satu baris. Klik baris untuk membuka rincian tiket pemindahan.</p>
+                <span class="text-[9px] font-bold text-slate-400">• Satu baris ringkas per tiket pemindahan</span>
             </div>
-            <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1 rounded-lg border border-gray-200">
+            <span class="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
                 <?= count($recent_events) ?> Catatan Terakhir
             </span>
         </div>
@@ -413,16 +415,16 @@ foreach ($equipment_list as $eq) {
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[720px]" id="eventTable">
                 <thead>
-                    <tr class="bg-gray-50/80 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
-                        <th class="py-3.5 px-4 font-semibold">Alat & Operator</th>
-                        <th class="py-3.5 px-4 font-semibold">Tipe Tugas</th>
-                        <th class="py-3.5 px-4 font-semibold">Nomor Kontainer</th>
-                        <th class="py-3.5 px-4 font-semibold">Perpindahan Koordinat</th>
-                        <th class="py-3.5 px-4 font-semibold">Waktu Eksekusi</th>
-                        <th class="py-3.5 px-4 font-semibold text-right">Aksi</th>
+                    <tr class="bg-slate-50/90 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-200/80">
+                        <th class="py-2 px-3">Alat & Operator</th>
+                        <th class="py-2 px-3">Tipe Tugas</th>
+                        <th class="py-2 px-3">Nomor Kontainer</th>
+                        <th class="py-2 px-3">Perpindahan Koordinat</th>
+                        <th class="py-2 px-3">Waktu Eksekusi</th>
+                        <th class="py-2 px-3 text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="text-xs divide-y divide-gray-100">
+                <tbody class="text-xs divide-y divide-slate-100">
                     <?php foreach ($recent_events as $ev): ?>
                         <?php
                         $badge_ev = 'bg-blue-50 text-blue-700 border-blue-200';
@@ -446,54 +448,54 @@ foreach ($equipment_list as $eq) {
                             'created_at' => date('d M Y, H:i \W\I\B', strtotime($ev['created_at']))
                         ]), ENT_QUOTES, 'UTF-8');
                         ?>
-                        <tr class="hover:bg-blue-50/40 transition cursor-pointer group"
+                        <tr class="hover:bg-orange-50/30 transition cursor-pointer group"
                             onclick='showJobModal(<?= $json_event ?>)'>
                             
                             <!-- Alat & Operator -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-mono font-bold text-gray-900 bg-slate-100 px-2 py-0.5 rounded text-xs">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="font-mono font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
                                         <?= htmlspecialchars($ev['equipment_id']) ?>
                                     </span>
-                                    <span class="text-gray-700 font-medium text-xs">
+                                    <span class="text-slate-700 font-medium text-xs">
                                         <?= htmlspecialchars($ev['operator_name']) ?>
                                     </span>
                                 </div>
                             </td>
 
                             <!-- Tipe Tugas -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <span class="px-2.5 py-0.5 rounded-full text-xs font-bold border uppercase <?= $badge_ev ?>">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold border uppercase <?= $badge_ev ?>">
                                     <?= htmlspecialchars($ev['event_type']) ?>
                                 </span>
                             </td>
 
                             <!-- Nomor Kontainer -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <span class="font-mono font-bold text-[#0170b9] text-xs">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <span class="font-mono font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200 text-[11px]">
                                     <?= htmlspecialchars($ev['container_number']) ?>
                                 </span>
                             </td>
 
                             <!-- Perpindahan Koordinat -->
-                            <td class="py-4 px-4 whitespace-nowrap">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
                                 <div class="flex items-center space-x-1.5 font-medium text-xs">
-                                    <span class="text-gray-600"><?= $from ?></span>
-                                    <i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
+                                    <span class="text-slate-600"><?= $from ?></span>
+                                    <i class="fa-solid fa-arrow-right text-[9px] text-slate-400"></i>
                                     <span class="text-emerald-700 font-bold"><?= $to ?></span>
                                 </div>
                             </td>
 
                             <!-- Waktu Eksekusi -->
-                            <td class="py-4 px-4 whitespace-nowrap text-gray-500 font-mono text-[11px]">
+                            <td class="py-1.5 px-3 whitespace-nowrap text-slate-500 font-mono text-[11px]">
                                 <?= date('d M Y, H:i', strtotime($ev['created_at'])) ?>
                             </td>
 
                             <!-- Aksi -->
-                            <td class="py-4 px-4 text-right whitespace-nowrap">
-                                <button class="px-3 py-1.5 bg-slate-100 hover:bg-[#0170b9] text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1.5">
+                            <td class="py-1.5 px-3 text-right whitespace-nowrap">
+                                <button class="px-2 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white text-[11px] font-semibold rounded transition shadow-2xs inline-flex items-center space-x-1">
                                     <span>Detail Job</span>
-                                    <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                                    <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                 </button>
                             </td>
 

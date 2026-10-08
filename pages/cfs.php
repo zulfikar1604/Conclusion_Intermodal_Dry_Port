@@ -625,147 +625,139 @@ $active_docks_count = 4;
 <!-- ========================================================================= -->
 <!-- HEADER & CONTEXT MODUL CFS WAREHOUSE 4.000 M² -->
 <!-- ========================================================================= -->
-<div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
-    <div class="flex items-center space-x-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+<div class="bg-white rounded-xl px-3 py-2 shadow-2xs border border-slate-200/80 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+    <div class="flex items-center space-x-2.5">
+        <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
             <i class="fa-solid fa-warehouse"></i>
         </div>
         <div>
-            <div class="flex items-center flex-wrap gap-2">
-                <h1 class="text-base font-bold text-gray-900 tracking-tight">
+            <div class="flex items-center flex-wrap gap-1.5">
+                <h1 class="text-[13px] font-extrabold text-slate-900 tracking-tight">
                     CFS &amp; Pergudangan LCL Konsolidasi 4.000 m²
                 </h1>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                    5 Rampa Hidrolik D1–D5
+                    5 Rampa Hidrolik
                 </span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
-                    GS1 SSCC-18 Label
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
+                    GS1 SSCC-18
                 </span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     Stripping &amp; Stuffing
                 </span>
             </div>
         </div>
     </div>
 
-        <!-- Tombol Aksi Cepat Header -->
-        <div class="flex items-center flex-wrap gap-2 w-full lg:w-auto">
-            <button onclick="openModal('modalNewJobOrder')" class="flex-1 sm:flex-none px-4 py-2.5 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white text-xs font-bold rounded-xl shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-dolly"></i>
-                <span>+ Buat Job Order Rampa</span>
-            </button>
-            <button onclick="openModal('modalAddPallet')" class="flex-1 sm:flex-none px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 text-xs font-bold rounded-xl shadow-xs transition flex items-center justify-center space-x-1.5">
-                <i class="fa-solid fa-pallet text-indigo-600"></i>
-                <span>Registrasi Palet</span>
-            </button>
-            <button onclick="exportCfsExcel()" class="px-3.5 py-2.5 bg-white border border-gray-300 hover:bg-emerald-50 text-emerald-700 text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5" title="Ekspor Manifest LCL ke Excel">
-                <i class="fa-solid fa-file-excel text-emerald-600"></i>
-                <span>Ekspor Excel</span>
-            </button>
-            <button onclick="window.print()" class="px-3 py-2.5 bg-white border border-gray-300 hover:bg-gray-50 text-gray-600 text-xs font-bold rounded-xl shadow-xs transition" title="Cetak Rekap">
-                <i class="fa-solid fa-print"></i>
-            </button>
-        </div>
+    <!-- Tombol Aksi Cepat Header (Compact) -->
+    <div class="flex items-center flex-wrap gap-1.5 w-full sm:w-auto">
+        <button onclick="openModal('modalNewJobOrder')" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+            <i class="fa-solid fa-dolly text-[10px]"></i>
+            <span>+ Job Order</span>
+        </button>
+        <button onclick="openModal('modalAddPallet')" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1 cursor-pointer">
+            <i class="fa-solid fa-pallet text-orange-600 text-[10px]"></i>
+            <span>Palet</span>
+        </button>
+        <button onclick="exportCfsExcel()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-emerald-50 text-emerald-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1 cursor-pointer" title="Ekspor Manifest LCL ke Excel">
+            <i class="fa-solid fa-file-excel text-emerald-600 text-[10px]"></i>
+            <span>Excel</span>
+        </button>
+        <button onclick="window.print()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition cursor-pointer" title="Cetak Rekap">
+            <i class="fa-solid fa-print text-[10px]"></i>
+        </button>
     </div>
 </div>
 
-<!-- ========================================================================= -->
-<!-- 5 KARTU INDIKATOR KPI EKSEKUTIF CFS WAREHOUSE -->
-<!-- ========================================================================= -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 mb-6">
+<!-- 5 Micro-Cards Indikator KPI Eksekutif CFS Warehouse -->
+<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2.5">
     <!-- Card 1: Okupansi Palet Gudang -->
-    <div class="bg-white rounded-2xl p-4 border border-gray-200/80 shadow-2xs hover:shadow-md transition">
-        <div class="flex items-center justify-between text-gray-500 mb-2">
-            <span class="text-[11px] font-bold uppercase tracking-wider">Okupansi Rak Palet</span>
-            <span class="w-8 h-8 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-                <i class="fa-solid fa-pallet"></i>
-            </span>
-        </div>
-        <div class="flex items-baseline space-x-2">
-            <span class="text-2xl font-black text-gray-900 tracking-tight"><?= $occupied_pallets ?></span>
-            <span class="text-xs text-gray-400 font-semibold">/ <?= $total_pallet_capacity ?> Posisi</span>
-        </div>
-        <div class="mt-2.5">
-            <div class="flex items-center justify-between text-[10px] text-gray-500 font-semibold mb-1">
-                <span>Utilisasi Rak A-F</span>
-                <span class="text-indigo-600"><?= $utilization_pct ?>%</span>
+    <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-orange-200">
+        <div class="min-w-0 pr-1.5 flex-1">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Okupansi Rak Palet</p>
+            <div class="flex items-baseline space-x-1">
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight"><?= $occupied_pallets ?></h3>
+                <span class="text-[9px] text-slate-400 font-semibold">/ <?= $total_pallet_capacity ?></span>
             </div>
-            <div class="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full" style="width: <?= $utilization_pct ?>%"></div>
+            <div class="mt-1 w-full h-1 bg-slate-100 rounded-full overflow-hidden">
+                <div class="h-full bg-gradient-to-r from-orange-500 to-orange-600 rounded-full" style="width: <?= $utilization_pct ?>%"></div>
             </div>
+            <p class="text-[8.5px] text-slate-500 mt-1 flex justify-between">
+                <span>Rak A-F</span>
+                <span class="text-orange-600 font-bold"><?= $utilization_pct ?>%</span>
+            </p>
+        </div>
+        <div class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+            <i class="fa-solid fa-pallet"></i>
         </div>
     </div>
 
     <!-- Card 2: 5 Rampa Dock Leveler D1-D5 -->
-    <div class="bg-white rounded-2xl p-4 border border-gray-200/80 shadow-2xs hover:shadow-md transition">
-        <div class="flex items-center justify-between text-gray-500 mb-2">
-            <span class="text-[11px] font-bold uppercase tracking-wider">Rampa Dock Leveler</span>
-            <span class="w-8 h-8 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-                <i class="fa-solid fa-truck-ramp-box"></i>
-            </span>
+    <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-emerald-200">
+        <div class="min-w-0 pr-1.5 flex-1">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Rampa Dock Leveler</p>
+            <div class="flex items-baseline space-x-1">
+                <h3 class="text-[13.5px] font-extrabold text-emerald-600 tracking-tight leading-tight"><?= $active_docks_count ?> / 5</h3>
+                <span class="text-[9px] text-slate-400 font-semibold">Aktif</span>
+            </div>
+            <p class="text-[8.5px] text-slate-500 mt-1.5 truncate">
+                D1-D2 Strip &bull; D4-D5 Stuff
+            </p>
         </div>
-        <div class="flex items-baseline space-x-2">
-            <span class="text-2xl font-black text-emerald-600 tracking-tight"><?= $active_docks_count ?> / 5</span>
-            <span class="text-xs text-gray-400 font-semibold">Rampa Aktif</span>
+        <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+            <i class="fa-solid fa-truck-ramp-box"></i>
         </div>
-        <p class="text-[10px] text-gray-500 mt-2.5 flex items-center gap-1 font-medium">
-            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
-            D1, D2 Stripping &bull; D4, D5 Stuffing &bull; D3 Standby
-        </p>
     </div>
 
     <!-- Card 3: Job Order Stripping Hari Ini -->
-    <div class="bg-white rounded-2xl p-4 border border-gray-200/80 shadow-2xs hover:shadow-md transition">
-        <div class="flex items-center justify-between text-gray-500 mb-2">
-            <span class="text-[11px] font-bold uppercase tracking-wider">Stripping FCL &rarr; LCL</span>
-            <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
-                <i class="fa-solid fa-box-open"></i>
-            </span>
+    <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-amber-200">
+        <div class="min-w-0 pr-1.5 flex-1">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Stripping FCL &rarr; LCL</p>
+            <div class="flex items-baseline space-x-1">
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">18</h3>
+                <span class="text-[9px] text-emerald-600 font-bold">420 Palet</span>
+            </div>
+            <p class="text-[8.5px] text-slate-500 mt-1.5 truncate">
+                Tally Sheet: 0 Selisih Kargo
+            </p>
         </div>
-        <div class="flex items-baseline space-x-2">
-            <span class="text-2xl font-black text-gray-900 tracking-tight">18</span>
-            <span class="text-xs text-emerald-600 font-bold flex items-center">
-                <i class="fa-solid fa-check text-[9px] mr-0.5"></i> 420 Palet
-            </span>
+        <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+            <i class="fa-solid fa-box-open"></i>
         </div>
-        <p class="text-[10px] text-gray-500 mt-2.5 font-medium">
-            Rekonsiliasi Tally Sheet: <strong>0 Selisih Kargo</strong> (100% Cocok)
-        </p>
     </div>
 
     <!-- Card 4: Job Order Stuffing Ekspor -->
-    <div class="bg-white rounded-2xl p-4 border border-gray-200/80 shadow-2xs hover:shadow-md transition">
-        <div class="flex items-center justify-between text-gray-500 mb-2">
-            <span class="text-[11px] font-bold uppercase tracking-wider">Stuffing Ekspor / Feeder</span>
-            <span class="w-8 h-8 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
-                <i class="fa-solid fa-boxes-packing"></i>
-            </span>
+    <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-blue-200">
+        <div class="min-w-0 pr-1.5 flex-1">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Stuffing Ekspor</p>
+            <div class="flex items-baseline space-x-1">
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">12</h3>
+                <span class="text-[9px] text-blue-600 font-bold">284 CBM</span>
+            </div>
+            <p class="text-[8.5px] text-slate-500 mt-1.5 truncate">
+                SOLAS VGM &bull; Segel ISO 17712
+            </p>
         </div>
-        <div class="flex items-baseline space-x-2">
-            <span class="text-2xl font-black text-gray-900 tracking-tight">12</span>
-            <span class="text-xs text-blue-600 font-bold">284.2 CBM</span>
+        <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+            <i class="fa-solid fa-boxes-packing"></i>
         </div>
-        <p class="text-[10px] text-gray-500 mt-2.5 font-medium">
-            SOLAS VGM Certified &bull; Segel High-Security ISO 17712
-        </p>
     </div>
 
     <!-- Card 5: Dwell Time Rata-rata LCL -->
-    <div class="bg-white rounded-2xl p-4 border border-gray-200/80 shadow-2xs hover:shadow-md transition">
-        <div class="flex items-center justify-between text-gray-500 mb-2">
-            <span class="text-[11px] font-bold uppercase tracking-wider">LCL Storage Dwell Time</span>
-            <span class="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center text-xs">
-                <i class="fa-solid fa-clock-rotate-left"></i>
-            </span>
+    <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-purple-200 col-span-2 md:col-span-1">
+        <div class="min-w-0 pr-1.5 flex-1">
+            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">LCL Dwell Time</p>
+            <div class="flex items-baseline space-x-1">
+                <h3 class="text-[13.5px] font-extrabold text-purple-700 tracking-tight leading-tight">2.8 Hari</h3>
+                <span class="text-[9px] text-emerald-600 font-bold">&lt; 3.5 Hari</span>
+            </div>
+            <p class="text-[8.5px] text-slate-500 mt-1.5 truncate">
+                Free Storage 3 Hari Kerja
+            </p>
         </div>
-        <div class="flex items-baseline space-x-2">
-            <span class="text-2xl font-black text-purple-700 tracking-tight">2.8 Hari</span>
-            <span class="text-xs text-emerald-600 font-bold">Target &lt; 3.5 Hari</span>
+        <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+            <i class="fa-solid fa-clock-rotate-left"></i>
         </div>
-        <p class="text-[10px] text-gray-500 mt-2.5 font-medium">
-            Free Storage 3 Hari Kerja &bull; Terhubung Billing ERP
-        </p>
     </div>
 </div>
 

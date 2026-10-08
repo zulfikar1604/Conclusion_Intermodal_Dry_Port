@@ -453,140 +453,140 @@ foreach ($active_reefers as $ar) {
         </div>
     <?php endif; ?>
 
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+    <!-- Header Modul: Compact Executive Style (Aligned with Sidebar) -->
+    <div class="bg-white rounded-xl px-3 py-2 shadow-2xs border border-slate-200/80 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
                 <i class="fa-solid <?= $reefer_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900 leading-tight">Monitor Reefer Cold Chain (300 Plugs)</h1>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200 flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 mr-1.5 animate-pulse"></span>LoRaWAN Online
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold tracking-tight text-slate-900 leading-tight">Monitor Reefer Cold Chain (300 Plugs)</h1>
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200 flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-cyan-500 mr-1 animate-pulse"></span>LoRaWAN Online
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
                         300 Steker 380V
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                         HACCP &amp; GDP
                     </span>
                 </div>
             </div>
         </div>
 
-        <!-- Tombol Aksi Cepat Header -->
-        <div class="flex flex-wrap items-center gap-2 self-start md:self-auto flex-shrink-0">
-            <button onclick="openPlugInModal()" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-plug text-xs"></i>
+        <!-- Tombol Aksi Cepat Header (Compact) -->
+        <div class="flex flex-wrap items-center gap-1.5 self-start md:self-auto flex-shrink-0">
+            <button onclick="openPlugInModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                <i class="fa-solid fa-plug text-[10px]"></i>
                 <span>+ Plug-In Baru</span>
             </button>
-            <a href="dashboard.php?page=simulator" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-2xs transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-cube text-amber-400 text-xs"></i>
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-cube text-amber-400 text-[10px]"></i>
                 <span>Simulasi 3D</span>
             </a>
-            <button onclick="exportReeferExcel()" class="px-3 py-2 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-xl shadow-2xs transition flex items-center space-x-1.5" title="Ekspor Log Suhu HACCP ke Excel">
-                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <button onclick="exportReeferExcel()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer" title="Ekspor Log Suhu HACCP ke Excel">
+                <i class="fa-solid fa-file-excel text-emerald-600 text-[10px]"></i>
                 <span>Log HACCP</span>
             </button>
         </div>
     </div>
 
-    <!-- 5 Kartu KPI Telemetri Utama Cold Chain -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3.5">
+    <!-- 5 Micro-Cards KPI Telemetri Utama Cold Chain -->
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2.5">
         <!-- KPI 1: Okupansi Steker -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-cyan-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Okupansi Steker</span>
-                <span class="w-8 h-8 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-plug-circle-check"></i>
-                </span>
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-cyan-300 transition flex items-center justify-between">
+            <div class="min-w-0 pr-1.5 flex-1">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Okupansi Steker</p>
+                <div class="flex items-baseline space-x-1">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight"><?= $connected_plugs_count ?></h3>
+                    <span class="text-[9px] text-slate-400 font-semibold">/ <?= $total_plugs_capacity ?></span>
+                </div>
+                <div class="mt-1 w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                    <div class="bg-cyan-500 h-1 rounded-full" style="width: <?= $occupancy_rate ?>%"></div>
+                </div>
+                <p class="text-[8.5px] text-slate-500 mt-1 flex justify-between">
+                    <span><?= $occupancy_rate ?>%</span>
+                    <span class="text-emerald-600 font-bold">Sisa <?= $empty_plugs_count ?></span>
+                </p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900"><?= $connected_plugs_count ?></span>
-                <span class="text-xs text-gray-400 font-semibold">/ <?= $total_plugs_capacity ?> Plugs</span>
+            <div class="w-7 h-7 rounded-lg bg-cyan-50 text-cyan-700 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+                <i class="fa-solid fa-plug-circle-check"></i>
             </div>
-            <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                <div class="bg-cyan-500 h-1.5 rounded-full" style="width: <?= $occupancy_rate ?>%"></div>
-            </div>
-            <p class="text-[10px] text-gray-500 mt-1.5 flex justify-between">
-                <span>Okupansi: <strong><?= $occupancy_rate ?>%</strong></span>
-                <span class="text-emerald-600">Sisa: <?= $empty_plugs_count ?> Colokan</span>
-            </p>
         </div>
 
         <!-- KPI 2: Beban Daya Listrik 380V -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-blue-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Total Beban Daya</span>
-                <span class="w-8 h-8 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-bolt"></i>
-                </span>
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-blue-300 transition flex items-center justify-between">
+            <div class="min-w-0 pr-1.5 flex-1">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Total Beban Daya</p>
+                <div class="flex items-baseline space-x-1">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight"><?= number_format($estimated_total_load_kw, 0, ',', '.') ?></h3>
+                    <span class="text-[9px] text-slate-400 font-semibold">kW</span>
+                </div>
+                <div class="mt-1 w-full bg-slate-100 rounded-full h-1 overflow-hidden">
+                    <div class="bg-blue-600 h-1 rounded-full" style="width: <?= round(($estimated_total_load_kw / $power_capacity_kw) * 100) ?>%"></div>
+                </div>
+                <p class="text-[8.5px] text-slate-500 mt-1 flex justify-between">
+                    <span>Trafo 1.2MVA</span>
+                    <span class="text-blue-600 font-bold">Genset OK</span>
+                </p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900"><?= number_format($estimated_total_load_kw, 0, ',', '.') ?></span>
-                <span class="text-xs text-gray-400 font-semibold">kW (380V)</span>
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-700 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+                <i class="fa-solid fa-bolt"></i>
             </div>
-            <div class="mt-2 w-full bg-gray-100 rounded-full h-1.5 overflow-hidden">
-                <div class="bg-blue-600 h-1.5 rounded-full" style="width: <?= round(($estimated_total_load_kw / $power_capacity_kw) * 100) ?>%"></div>
-            </div>
-            <p class="text-[10px] text-gray-500 mt-1.5 flex justify-between">
-                <span>Trafo: 1.200 kVA</span>
-                <span class="text-blue-600">Genset 1.500 kVA</span>
-            </p>
         </div>
 
         <!-- KPI 3: Integritas Rantai Dingin -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-emerald-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kepatuhan Suhu</span>
-                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-shield-virus"></i>
-                </span>
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-emerald-300 transition flex items-center justify-between">
+            <div class="min-w-0 pr-1.5 flex-1">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Kepatuhan Suhu</p>
+                <div class="flex items-baseline space-x-1">
+                    <h3 class="text-[13.5px] font-extrabold text-emerald-700 tracking-tight leading-tight">98,8%</h3>
+                    <span class="text-[8.5px] text-emerald-600 font-bold bg-emerald-50 px-1 py-0.2 rounded">HACCP</span>
+                </div>
+                <p class="text-[8.5px] text-slate-500 mt-1.5 flex items-center">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span>
+                    <span><?= $normal_count ?> Normal / <?= $warning_count ?> Drift</span>
+                </p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-emerald-700">98,8%</span>
-                <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">HACCP</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+                <i class="fa-solid fa-shield-virus"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-3 flex items-center">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>
-                <span><?= $normal_count ?> Normal / <?= $warning_count ?> Warning Drift</span>
-            </p>
         </div>
 
         <!-- KPI 4: Kamera Termal Inframerah HW-16 -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-amber-300 transition group">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kamera Termal HW-16</span>
-                <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-temperature-arrow-up"></i>
-                </span>
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-amber-300 transition flex items-center justify-between">
+            <div class="min-w-0 pr-1.5 flex-1">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Kamera Termal</p>
+                <div class="flex items-baseline space-x-1">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">4 Titik</h3>
+                    <span class="text-[9px] text-amber-600 font-bold">HW-16</span>
+                </div>
+                <p class="text-[8.5px] text-slate-500 mt-1.5 flex items-center">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1"></span>
+                    <span>Max Hotspot: 68.9°C</span>
+                </p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900">4 Titik</span>
-                <span class="text-xs text-amber-600 font-bold">Aktif</span>
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+                <i class="fa-solid fa-temperature-arrow-up"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-3 flex items-center">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5"></span>
-                <span>Max Hotspot: 68.9°C (Batas 85°C)</span>
-            </p>
         </div>
 
         <!-- KPI 5: Dwell Time Rata-rata -->
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-2xs hover:border-purple-300 transition group col-span-2 md:col-span-1">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Rata-rata Turnaround</span>
-                <span class="w-8 h-8 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-xs shadow-inner group-hover:scale-105 transition-transform">
-                    <i class="fa-solid fa-clock-rotate-left"></i>
-                </span>
+        <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-purple-300 transition flex items-center justify-between col-span-2 md:col-span-1">
+            <div class="min-w-0 pr-1.5 flex-1">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Turnaround Time</p>
+                <div class="flex items-baseline space-x-1">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">1,8</h3>
+                    <span class="text-[9px] text-purple-600 font-bold">Hari / Box</span>
+                </div>
+                <p class="text-[8.5px] text-slate-500 mt-1.5 truncate">
+                    Target Cold Chain: &lt; 3 Hari
+                </p>
             </div>
-            <div class="mt-2 flex items-baseline space-x-1.5">
-                <span class="text-2xl font-black text-gray-900">1,8</span>
-                <span class="text-xs text-purple-600 font-bold">Hari / Box</span>
+            <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-700 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
+                <i class="fa-solid fa-clock-rotate-left"></i>
             </div>
-            <p class="text-[10px] text-gray-500 mt-3">
-                Target Standar Cold Chain: &lt; 3 Hari
-            </p>
         </div>
     </div>
 

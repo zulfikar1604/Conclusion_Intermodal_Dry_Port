@@ -34,72 +34,73 @@ if (isset($pdo)) {
 <script src="assets/vendor/JsBarcode.all.min.js"></script>
 <script src="assets/vendor/qrcode.min.js"></script>
 
-<div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+<div class="space-y-3 animate-fadeIn pb-12">
+    <!-- Header Modul: Executive Compact -->
+    <div class="bg-white rounded-xl px-3.5 py-2.5 shadow-2xs border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center text-xs shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-barcode"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900 leading-tight">Scanner Optik SSCC-18, GS1 &amp; ISO 6346</h1>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center shadow-xs">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>AIDC Active
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold text-slate-900 leading-tight">Scanner Optik SSCC-18, GS1 &amp; ISO 6346</h1>
+                    <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>AIDC Active
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
                         GS1-128 / SSCC-18
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                    <span class="px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
                         ISO 6346 &amp; CEISA QR
                     </span>
                 </div>
+                <div class="text-[9px] font-bold text-orange-600 tracking-wider uppercase mt-0.5">Pemindai Barcode / QR • Validasi Check Digit • Integrasi YMS CIDP</div>
             </div>
         </div>
 
-        <div class="flex items-center gap-2 self-start sm:self-auto flex-shrink-0">
-            <a href="dashboard.php?page=simulator" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs rounded-lg transition flex items-center gap-1.5 shadow-xs">
-                <i class="fa-solid fa-cube text-xs"></i><span>Simulator 3D</span>
+        <div class="flex items-center gap-1.5 flex-shrink-0">
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-lg transition flex items-center gap-1 shadow-2xs">
+                <i class="fa-solid fa-cube text-[10px] text-amber-400"></i><span>Simulator 3D</span>
             </a>
         </div>
     </div>
 
-    <!-- 4 Kartu KPI & Parameter Mutu -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-lg">
+    <!-- 4 Kartu KPI & Parameter Mutu (Micro Compact Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-blue-300 transition">
+            <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 tracking-wider block">Total Pindai Sesi Ini</span>
+                <span class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5 block" id="statScanCount">0 Box</span>
+            </div>
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs">
                 <i class="fa-solid fa-expand"></i>
             </div>
-            <div>
-                <span class="text-[11px] font-semibold text-gray-500 block">Total Pindai Sesi Ini</span>
-                <span class="text-lg font-bold text-gray-800" id="statScanCount">0 Box</span>
-            </div>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-emerald-300 transition">
+            <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 tracking-wider block">Akurasi Validasi</span>
+                <span class="text-[13.5px] font-extrabold text-emerald-700 tracking-tight leading-tight mt-0.5 block">99.8% (Valid)</span>
+            </div>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-check-double"></i>
             </div>
-            <div>
-                <span class="text-[11px] font-semibold text-gray-500 block">Akurasi Validasi Algoritma</span>
-                <span class="text-lg font-bold text-emerald-700">99.8% (Valid)</span>
-            </div>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-lg">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-indigo-300 transition">
+            <div>
+                <span class="text-[9px] font-bold uppercase text-slate-400 tracking-wider block">Latensi Dekoder</span>
+                <span class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5 block" id="statLatency">&lt; 85 ms</span>
+            </div>
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-stopwatch"></i>
             </div>
-            <div>
-                <span class="text-[11px] font-semibold text-gray-500 block">Latensi Dekoder Optik</span>
-                <span class="text-lg font-bold text-gray-800" id="statLatency">&lt; 85 ms</span>
-            </div>
         </div>
-        <div class="bg-white p-4 rounded-xl border border-gray-100 shadow-xs flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-lg">
-                <i class="fa-solid fa-database"></i>
-            </div>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-amber-300 transition">
             <div>
-                <span class="text-[11px] font-semibold text-gray-500 block">Database CIDP Terhubung</span>
-                <span class="text-lg font-bold text-gray-800"><?= count($known_containers) ?> Kontainer</span>
+                <span class="text-[9px] font-bold uppercase text-slate-400 tracking-wider block">Database Terhubung</span>
+                <span class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5 block"><?= count($known_containers) ?> Kontainer</span>
+            </div>
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
+                <i class="fa-solid fa-database"></i>
             </div>
         </div>
     </div>

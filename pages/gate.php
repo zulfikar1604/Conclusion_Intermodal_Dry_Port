@@ -710,23 +710,23 @@ foreach ($hardware_list as $item) {
 </div>
 <?php endif; ?>
 
-<div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+<div class="space-y-2.5 animate-fadeIn pb-12">
+    <!-- Header Modul: Compact Executive Style (Aligned with Sidebar) -->
+    <div class="bg-white rounded-xl px-3 py-2 shadow-2xs border border-slate-200/80 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
                 <i class="fa-solid fa-door-open"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900">Manajemen Gate &amp; Otomasi Infrastruktur</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>Sensor Live
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold tracking-tight text-slate-900">Manajemen Gate &amp; Otomasi Infrastruktur</h1>
+                    <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[9px] font-bold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>Sensor Live
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold">
+                    <span class="px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded text-[9px] font-bold">
                         OCR ISO 6346 &amp; ANPR
                     </span>
-                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-semibold">
+                    <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold">
                         80T SOLAS VGM
                     </span>
                 </div>
@@ -734,108 +734,106 @@ foreach ($hardware_list as $item) {
         </div>
     </div>
 
-    <!-- KPI Ringkasan Gate & Hardware -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Inbound Gate Lanes</span>
-                <span class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
-                </span>
+    <!-- KPI Micro-Cards (High-Density Executive Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Inbound Gate Lanes</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">2 / 2 Lane</h3>
+                    <span class="text-[9px] text-emerald-600 font-bold">Aktif</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Lane 1 (OCR) &amp; Lane 2 (e-Seal)</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-gray-900">2 / 2 Lane</span>
-                <span class="text-xs text-emerald-600 font-semibold flex items-center">
-                    <i class="fa-solid fa-circle-check mr-1"></i> Aktif
-                </span>
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">Lane 1 (OCR+VGM) & Lane 2 (e-Seal Fast)</p>
         </div>
 
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Avg Transaction Time</span>
-                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-stopwatch"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Avg Transaction Time</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">28 Detik</h3>
+                    <span class="text-[9px] text-emerald-600 font-bold">-37%</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Target SOLAS: &lt; 45s / Truk</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-gray-900">28 Detik</span>
-                <span class="text-xs text-emerald-600 font-semibold">-37% vs Manual</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-stopwatch"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">Target SOLAS VGM: &lt; 45 Detik / Truk</p>
         </div>
 
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Katalog Hardware</span>
-                <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-server"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Katalog Hardware</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">26 Perangkat</h3>
+                    <span class="text-[9px] text-indigo-600 font-bold"><?= $live_count ?> Live</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Total 1.099 Unit di 35 Ha</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-gray-900">26 Perangkat</span>
-                <span class="text-xs text-indigo-600 font-semibold"><?= $live_count ?> Live / <?= $blueprint_count ?> Fisik</span>
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-server"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">Total 1.099 Unit Terpasang di 35 Ha</p>
         </div>
 
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Total CAPEX Hardware</span>
-                <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-coins"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Total CAPEX Hardware</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">Rp 18,94 M</h3>
+                    <span class="text-[9px] text-slate-500 font-bold">6 Klaster</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Investasi Fasilitas Dry Port</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-gray-900">Rp 18,94 M</span>
-                <span class="text-xs text-slate-500 font-semibold">6 Klaster</span>
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-coins"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">Investasi Fasilitas Pelabuhan Kering</p>
         </div>
     </div>
 
-    <!-- Toolbar Aksi Cepat & Registrasi Pra-Gate -->
-    <div class="bg-white rounded-xl p-3 border border-gray-100 shadow-2xs flex flex-wrap items-center justify-between gap-3">
+    <!-- Toolbar Aksi Cepat & Registrasi Pra-Gate (Compact) -->
+    <div class="bg-white rounded-xl px-3 py-2 border border-slate-200/80 shadow-2xs flex flex-wrap items-center justify-between gap-2 mb-2.5">
         <div class="flex items-center space-x-2">
-            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span class="text-xs font-bold text-gray-700">Status Gerbang Lapangan: <span class="text-emerald-600">Aktif &amp; Terhubung Sensor Telemetri</span></span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span class="text-[11px] font-bold text-slate-700">Status Gerbang: <span class="text-emerald-600">Aktif &amp; Terhubung Telemetri</span></span>
         </div>
-        <div class="flex flex-wrap items-center gap-2">
-            <button onclick="showGatePassModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-plus"></i>
-                <span>Registrasi Pra-Gate (Gate Pass)</span>
+        <div class="flex flex-wrap items-center gap-1.5">
+            <button onclick="showGatePassModal()" class="px-2.5 py-1 bg-[#0170b9] hover:bg-[#004b87] text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1.5 shadow-2xs cursor-pointer">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Registrasi Pra-Gate</span>
             </button>
-            <a href="dashboard.php?page=simulator" class="px-3.5 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-cube text-xs"></i>
-                <span>Buka Panel Simulasi 3D</span>
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1.5 shadow-2xs">
+                <i class="fa-solid fa-cube text-[10px]"></i>
+                <span>Simulasi 3D</span>
             </a>
-            <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak Rekap Gate
+            <button onclick="window.print()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center cursor-pointer">
+                <i class="fa-solid fa-print mr-1 text-slate-400 text-[10px]"></i> Cetak Rekap
             </button>
         </div>
     </div>
 
-    <!-- Tab Navigation -->
-    <div class="bg-white rounded-xl p-1.5 border border-gray-100 shadow-xs flex flex-wrap gap-1">
-        <button onclick="switchGateTab('tab-simulasi')" id="btn-tab-simulasi" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-bold transition-all text-[#0170b9] bg-blue-50/80 shadow-xs flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-tower-broadcast"></i>
-            <span>Monitoring Arus Gerbang &amp; Telemetri</span>
+    <!-- Tab Navigation (Compact Executive Pills) -->
+    <div class="bg-white rounded-xl p-1 border border-slate-200/80 shadow-2xs flex flex-wrap gap-1 mb-2.5">
+        <button onclick="switchGateTab('tab-simulasi')" id="btn-tab-simulasi" class="tab-btn flex-1 min-w-[120px] py-1.5 px-2.5 rounded-lg text-[11.5px] font-bold transition-all text-white bg-gradient-to-r from-orange-500 to-orange-600 shadow-xs shadow-orange-500/20 flex items-center justify-center space-x-1.5 cursor-pointer">
+            <i class="fa-solid fa-tower-broadcast text-[11px]"></i>
+            <span>Monitoring Arus Gerbang</span>
         </button>
-        <button onclick="switchGateTab('tab-ocr-iso')" id="btn-tab-ocr-iso" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-camera-retro"></i>
-            <span>Interactive OCR & ISO 6346</span>
+        <button onclick="switchGateTab('tab-ocr-iso')" id="btn-tab-ocr-iso" class="tab-btn flex-1 min-w-[120px] py-1.5 px-2.5 rounded-lg text-[11.5px] font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center justify-center space-x-1.5 cursor-pointer">
+            <i class="fa-solid fa-camera-retro text-[11px]"></i>
+            <span>Interactive OCR &amp; ISO 6346</span>
         </button>
-        <button onclick="switchGateTab('tab-katalog')" id="btn-tab-katalog" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-list-check"></i>
-            <span>Katalog Hardware & BOM (26 Item)</span>
+        <button onclick="switchGateTab('tab-katalog')" id="btn-tab-katalog" class="tab-btn flex-1 min-w-[120px] py-1.5 px-2.5 rounded-lg text-[11.5px] font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center justify-center space-x-1.5 cursor-pointer">
+            <i class="fa-solid fa-list-check text-[11px]"></i>
+            <span>Katalog Hardware (26 Item)</span>
         </button>
-        <button onclick="switchGateTab('tab-telemetri')" id="btn-tab-telemetri" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-tower-broadcast"></i>
+        <button onclick="switchGateTab('tab-telemetri')" id="btn-tab-telemetri" class="tab-btn flex-1 min-w-[120px] py-1.5 px-2.5 rounded-lg text-[11.5px] font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center justify-center space-x-1.5 cursor-pointer">
+            <i class="fa-solid fa-chart-line text-[11px]"></i>
             <span>Telemetri IoT Lapangan</span>
         </button>
-        <button onclick="switchGateTab('tab-dcsa')" id="btn-tab-dcsa" class="tab-btn flex-1 min-w-[150px] py-2.5 px-3.5 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-gray-900 hover:bg-gray-50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-satellite-dish"></i>
+        <button onclick="switchGateTab('tab-dcsa')" id="btn-tab-dcsa" class="tab-btn flex-1 min-w-[120px] py-1.5 px-2.5 rounded-lg text-[11.5px] font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center justify-center space-x-1.5 cursor-pointer">
+            <i class="fa-solid fa-satellite-dish text-[11px]"></i>
             <span>DCSA Event Log</span>
         </button>
     </div>
@@ -2504,12 +2502,15 @@ foreach ($hardware_list as $item) {
 
 <!-- JavaScript Interaktif Modul Gate -->
 <script>
-// Tab Switching Logic
+// Tab Switching Logic (Executive Pill Buttons Aligned with Sidebar)
 function switchGateTab(tabId) {
+    const activeClasses = ['text-white', 'bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'shadow-xs', 'shadow-orange-500/20', 'font-bold'];
+    const inactiveClasses = ['text-slate-600', 'font-medium', 'hover:text-orange-600', 'hover:bg-orange-50/70'];
+
     document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.tab-btn').forEach(btn => {
-        btn.classList.remove('text-[#0170b9]', 'bg-blue-50/80', 'shadow-xs', 'font-bold');
-        btn.classList.add('text-gray-600', 'font-semibold');
+        btn.classList.remove(...activeClasses);
+        btn.classList.add(...inactiveClasses);
     });
 
     const activeTab = document.getElementById(tabId);
@@ -2517,8 +2518,8 @@ function switchGateTab(tabId) {
 
     const activeBtn = document.getElementById('btn-' + tabId);
     if (activeBtn) {
-        activeBtn.classList.add('text-[#0170b9]', 'bg-blue-50/80', 'shadow-xs', 'font-bold');
-        activeBtn.classList.remove('text-gray-600', 'font-semibold');
+        activeBtn.classList.add(...activeClasses);
+        activeBtn.classList.remove(...inactiveClasses);
     }
 }
 

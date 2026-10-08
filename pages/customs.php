@@ -540,127 +540,121 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
 </div>
 <?php endif; ?>
 
-<div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+<div class="space-y-2.5 animate-fadeIn pb-12">
+    <!-- Header Modul: Compact Executive Style (Aligned with Sidebar) -->
+    <div class="bg-white rounded-xl px-3 py-2 shadow-2xs border border-slate-200/80 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
                 <i class="fa-solid <?= $customs_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900">Kepabeanan &amp; Bea Cukai — Integrasi CEISA 4.0</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>CEISA 4.0 Live
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold tracking-tight text-slate-900">Kepabeanan &amp; Bea Cukai — Integrasi CEISA 4.0</h1>
+                    <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[9px] font-bold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>CEISA 4.0 Live
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold flex items-center">
-                        <i class="fa-solid fa-stamp mr-1 text-[10px]"></i>KPPBC TMP Cikarang
+                    <span class="px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded text-[9px] font-bold flex items-center">
+                        <i class="fa-solid fa-stamp mr-1 text-[9px]"></i>KPPBC Cikarang
                     </span>
-                    <button type="button" onclick="openVerifyStampModal()" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-full text-[10px] font-semibold flex items-center transition cursor-pointer">
-                        <i class="fa-solid fa-certificate mr-1 text-[10px] text-blue-600"></i>Stempel Digital BSrE
+                    <button type="button" onclick="openVerifyStampModal()" class="px-1.5 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded text-[9px] font-bold flex items-center transition cursor-pointer">
+                        <i class="fa-solid fa-certificate mr-1 text-[9px] text-blue-600"></i>Stempel BSrE
                     </button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- KPI Summary Cards 4 Kolom -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- KPI Micro-Cards (High-Density Executive Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
         <!-- Card 1: Total Dokumen PIB/PEB -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Dokumen PIB / PEB Hari Ini</span>
-                <span class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-file-invoice"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-orange-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">PIB / PEB Hari Ini</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight" id="statTotalDocs"><?= $total_docs ?> Dokumen</h3>
+                    <span class="text-[9px] text-blue-600 font-bold">CEISA</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">CIF: Rp <?= number_format($total_cif_idr / 1000000000, 2, ',', '.') ?> M</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-gray-900" id="statTotalDocs"><?= $total_docs ?> Dokumen</span>
-                <span class="text-xs text-blue-600 font-semibold flex items-center">
-                    <i class="fa-solid fa-bolt mr-1"></i> CEISA
-                </span>
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-file-invoice"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">Nilai CIF: Rp <?= number_format($total_cif_idr / 1000000000, 2, ',', '.') ?> Miliar</p>
         </div>
 
         <!-- Card 2: Jalur Hijau (Auto SPPB) -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Jalur Hijau (Auto SPPB)</span>
-                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-circle-check"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-emerald-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Jalur Hijau (Auto SPPB)</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-emerald-700 tracking-tight leading-tight" id="statHijauDocs"><?= $count_hijau ?> Boks</h3>
+                    <span class="text-[9px] text-emerald-600 font-bold"><?= $persen_hijau ?>%</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Auto Release &lt; 3.2s</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-emerald-700" id="statHijauDocs"><?= $count_hijau ?> Boks</span>
-                <span class="text-xs text-emerald-600 font-semibold"><?= $persen_hijau ?>%</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-circle-check"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">SLA Auto Release: &lt; 3.2 Detik / Dokumen</p>
         </div>
 
         <!-- Card 3: Penerimaan Negara (Billing MPN G3) -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Penerimaan Negara (MPN G3)</span>
-                <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-receipt"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-indigo-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Penerimaan Negara (MPN)</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-indigo-700 tracking-tight leading-tight" id="statPungutanMpn">Rp <?= number_format($total_pungutan / 1000000, 1, ',', '.') ?> Jt</h3>
+                    <span class="text-[9px] text-indigo-600 font-bold">100% Lunas</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Bea Masuk, PPN &amp; PPh</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-indigo-700" id="statPungutanMpn">Rp <?= number_format($total_pungutan / 1000000, 1, ',', '.') ?> Jt</span>
-                <span class="text-xs text-indigo-600 font-semibold">100% Lunas</span>
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-receipt"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">Bea Masuk, PPN &amp; PPh Pasal 22</p>
         </div>
 
         <!-- Card 4: Jalur Merah (Behandle & X-Ray 6 MeV) -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Jalur Merah (Behandle Fisik)</span>
-                <span class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-radiation"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition hover:border-rose-200">
+            <div class="min-w-0 pr-2">
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Jalur Merah (Behandle)</p>
+                <div class="flex items-baseline space-x-1.5">
+                    <h3 class="text-[13.5px] font-extrabold text-rose-700 tracking-tight leading-tight" id="statMerahDocs"><?= $count_merah ?> Boks</h3>
+                    <span class="text-[9px] text-rose-600 font-bold"><?= $persen_merah ?>%</span>
+                </div>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">X-Ray Gantry &amp; Kanopi</p>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-xl sm:text-2xl font-bold text-rose-700" id="statMerahDocs"><?= $count_merah ?> Boks</span>
-                <span class="text-xs text-rose-600 font-semibold"><?= $persen_merah ?>%</span>
+            <div class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                <i class="fa-solid fa-radiation"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-1">Zona 5: X-Ray Gantry &amp; Kanopi Behandle</p>
         </div>
     </div>
 
-    <!-- Pipeline Kanal Pabean CEISA 4.0 Bar -->
-    <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2.5">
+    <!-- Pipeline Kanal Pabean CEISA 4.0 Bar (Compact) -->
+    <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs mb-2.5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-1.5">
             <div class="flex items-center space-x-2">
-                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider">Distribusi Kanal Pelayanan Pabean (Risk Profiling CEISA 4.0 - PMK 190/2022)</h3>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Distribusi Kanal Pabean (Risk Profiling CEISA 4.0)</h3>
             </div>
-            <div class="flex items-center space-x-3 text-[11px]">
-                <span class="text-gray-500">Penerimaan Negara (Billing NTPN): <strong class="text-gray-900">Rp <?= number_format($total_pungutan, 0, ',', '.') ?></strong></span>
-                <span class="px-2 py-0.5 bg-slate-100 rounded text-gray-600 font-mono text-[10px]">WGS-84 / CIDP-GATEWAY</span>
+            <div class="flex items-center space-x-2 text-[10px]">
+                <span class="text-slate-500">Penerimaan NTPN: <strong class="text-slate-900 font-mono">Rp <?= number_format($total_pungutan, 0, ',', '.') ?></strong></span>
+                <span class="px-1.5 py-0.2 bg-slate-100 rounded text-slate-600 font-mono text-[9px]">CIDP-GATEWAY</span>
             </div>
         </div>
 
-        <div class="w-full bg-gray-100 rounded-full h-3 flex overflow-hidden shadow-inner">
-            <div class="bg-emerald-500 h-3 transition-all duration-500" style="width: <?= $persen_hijau ?>%" title="Jalur Hijau: <?= $count_hijau ?> Dokumen (<?= $persen_hijau ?>%)"></div>
-            <div class="bg-rose-500 h-3 transition-all duration-500" style="width: <?= $persen_merah ?>%" title="Jalur Merah: <?= $count_merah ?> Dokumen (<?= $persen_merah ?>%)"></div>
+        <div class="w-full bg-slate-100 rounded-full h-2 flex overflow-hidden shadow-inner">
+            <div class="bg-emerald-500 h-2 transition-all duration-500" style="width: <?= $persen_hijau ?>%" title="Jalur Hijau: <?= $count_hijau ?> Dokumen (<?= $persen_hijau ?>%)"></div>
+            <div class="bg-rose-500 h-2 transition-all duration-500" style="width: <?= $persen_merah ?>%" title="Jalur Merah: <?= $count_merah ?> Dokumen (<?= $persen_merah ?>%)"></div>
         </div>
 
-        <div class="flex flex-wrap justify-between items-center text-xs text-gray-600 pt-2.5 border-t border-gray-50 mt-2.5">
-            <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-sm bg-emerald-500"></span>
-                <span class="font-medium">Jalur Hijau: <strong class="text-emerald-700"><?= $count_hijau ?> (<?= $persen_hijau ?>%)</strong></span>
-                <span class="text-gray-400 text-[10px] hidden sm:inline">&mdash; Auto SPPB terbit tanpa periksa fisik/dokumen (PMK 190/2022)</span>
+        <div class="flex flex-wrap justify-between items-center text-[10px] text-slate-600 pt-1.5 border-t border-slate-100 mt-1.5">
+            <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-xs bg-emerald-500"></span>
+                <span class="font-bold text-emerald-700">Jalur Hijau: <?= $count_hijau ?> (<?= $persen_hijau ?>%)</span>
+                <span class="text-slate-400 hidden sm:inline">&mdash; Auto SPPB terbit tanpa periksa fisik</span>
             </div>
-            <div class="flex items-center gap-1.5">
-                <span class="w-3 h-3 rounded-sm bg-rose-500"></span>
-                <span class="font-medium">Jalur Merah: <strong class="text-rose-700"><?= $count_merah ?> (<?= $persen_merah ?>%)</strong></span>
-                <span class="text-gray-400 text-[10px] hidden sm:inline">&mdash; Wajib Gantry X-Ray 6 MeV &amp; Behandle Fisik Zona 5</span>
-            </div>
-            <div class="flex items-center gap-1 text-[11px] text-gray-500 bg-slate-50 px-2 py-0.5 rounded border border-gray-200">
-                <i class="fa-solid fa-circle-info text-blue-500 text-[10px]"></i>
-                <span>Jalur Kuning dihapus DJBC sejak 2022</span>
+            <div class="flex items-center gap-1">
+                <span class="w-2 h-2 rounded-xs bg-rose-500"></span>
+                <span class="font-bold text-rose-700">Jalur Merah: <?= $count_merah ?> (<?= $persen_merah ?>%)</span>
+                <span class="text-slate-400 hidden sm:inline">&mdash; Wajib X-Ray &amp; Behandle Fisik</span>
             </div>
         </div>
     </div>

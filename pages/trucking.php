@@ -101,102 +101,103 @@ $total_trucks = count($trucks);
 
 <div class="space-y-4">
 
-    <!-- Header & Subtitle (Compact & Clean) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl shadow-2xs border border-gray-100">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+    <!-- Header & Subtitle (Executive Compact) -->
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 bg-white px-3.5 py-2.5 rounded-xl border border-slate-200/80 shadow-2xs">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center text-xs shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-truck-front"></i>
             </div>
             <div>
                 <div class="flex items-center space-x-2">
-                    <h2 class="text-base font-bold text-gray-900 leading-tight">Manajemen Trucking &amp; Arus Gerbang</h2>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    <h2 class="text-[13px] font-extrabold text-slate-900 leading-tight">Manajemen Trucking &amp; Arus Gerbang</h2>
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded-md text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> Gerbang &amp; Timbangan Aktif
                     </span>
-                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-orange-50 text-orange-700 border border-orange-200">
+                    <span class="px-1.5 py-0.5 text-[9px] font-bold rounded-md bg-orange-50 text-orange-700 border border-orange-200">
                         80T SOLAS VGM
                     </span>
                 </div>
+                <div class="text-[9px] font-bold text-orange-600 tracking-wider uppercase mt-0.5">Armada Terminal CIDP • Gate Pass • Turnaround Time</div>
             </div>
         </div>
-        <div class="flex items-center space-x-2 flex-shrink-0 flex-wrap gap-y-2">
-            <button onclick="showAddTruckModal()" class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-plus text-xs"></i>
+        <div class="flex items-center space-x-1.5 flex-shrink-0 flex-wrap">
+            <button onclick="showAddTruckModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1 shadow-xs">
+                <i class="fa-solid fa-plus text-[10px]"></i>
                 <span>+ Registrasi Truk</span>
             </button>
-            <button onclick="exportTruckingExcel()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs">
-                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+            <button onclick="exportTruckingExcel()" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-emerald-50 text-emerald-700 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 shadow-2xs">
+                <i class="fa-solid fa-file-excel text-emerald-600 text-[10px]"></i>
                 <span>Excel</span>
             </button>
-            <button onclick="exportTruckingPDF()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-rose-50 text-rose-700 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs">
-                <i class="fa-solid fa-file-pdf text-rose-600"></i>
+            <button onclick="exportTruckingPDF()" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-rose-50 text-rose-700 rounded-lg text-[11px] font-bold transition flex items-center space-x-1 shadow-2xs">
+                <i class="fa-solid fa-file-pdf text-rose-600 text-[10px]"></i>
                 <span>PDF</span>
             </button>
-            <a href="dashboard.php?page=alat" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-dolly mr-1.5 text-xs text-amber-400"></i> Alat Berat
+            <a href="dashboard.php?page=alat" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-dolly mr-1 text-[10px] text-amber-400"></i> Alat Berat
             </a>
         </div>
     </div>
 
-    <!-- 4 KPI Summary Cards (Compact Grid) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-indigo-300 transition-all flex items-center justify-between">
+    <!-- 4 KPI Summary Cards (Micro Compact Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-orange-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Armada di Terminal</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-indigo-600 mt-0.5"><?= $total_in_yard ?> <span class="text-[10px] font-normal text-gray-400">Armada</span></h3>
-                <div class="mt-0.5 text-[10px] text-gray-500 font-medium">Bongkar & Muat Lapangan</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Armada di Lapangan</p>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5"><?= $total_in_yard ?> <span class="text-[10px] font-medium text-slate-400">Armada</span></h3>
+                <div class="text-[9px] text-slate-500 font-medium">Bongkar &amp; Muat</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-truck-moving"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-amber-300 transition-all flex items-center justify-between">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-amber-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Antrian Gerbang</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-amber-600 mt-0.5"><?= $total_queuing + $total_at_gate ?> <span class="text-[10px] font-normal text-gray-400">Truk</span></h3>
-                <div class="mt-0.5 text-[10px] text-amber-600 font-medium"><?= $total_at_gate ?> Timbang / <?= $total_queuing ?> Antri</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Antrian Gerbang</p>
+                <h3 class="text-[13.5px] font-extrabold text-amber-600 tracking-tight leading-tight mt-0.5"><?= $total_queuing + $total_at_gate ?> <span class="text-[10px] font-medium text-slate-400">Truk</span></h3>
+                <div class="text-[9px] text-amber-600 font-medium"><?= $total_at_gate ?> Timbang / <?= $total_queuing ?> Antri</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-scale-balanced"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-emerald-300 transition-all flex items-center justify-between">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-emerald-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Turnaround</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">21.5 <span class="text-[10px] font-normal text-gray-400">Menit</span></h3>
-                <div class="mt-0.5 text-[10px] text-emerald-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Sesuai Target (&lt; 30m)</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Rata-Rata Turnaround</p>
+                <h3 class="text-[13.5px] font-extrabold text-emerald-600 tracking-tight leading-tight mt-0.5">21.5 <span class="text-[10px] font-medium text-slate-400">Menit</span></h3>
+                <div class="text-[9px] text-emerald-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Target (&lt; 30m)</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-stopwatch-20"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-blue-300 transition-all flex items-center justify-between">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-blue-300 transition">
             <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Selesai Gate-Out</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-blue-600 mt-0.5"><?= $total_gate_out ?> <span class="text-[10px] font-normal text-gray-400">Siklus</span></h3>
-                <div class="mt-0.5 text-[10px] text-blue-600 font-medium"><i class="fa-solid fa-file-circle-check mr-1"></i>Tiket Ditutup</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Selesai Gate-Out</p>
+                <h3 class="text-[13.5px] font-extrabold text-blue-600 tracking-tight leading-tight mt-0.5"><?= $total_gate_out ?> <span class="text-[10px] font-medium text-slate-400">Siklus</span></h3>
+                <div class="text-[9px] text-blue-600 font-medium"><i class="fa-solid fa-file-circle-check mr-1"></i>Tiket Ditutup</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
                 <i class="fa-solid fa-door-open"></i>
             </div>
         </div>
     </div>
 
-    <!-- Filter & Search Toolbar -->
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
+    <!-- Filter & Search Toolbar (Compact) -->
+    <div class="bg-white px-3.5 py-2 rounded-xl shadow-2xs border border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-2.5">
         <div class="relative w-full md:w-80">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+            <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400 pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass text-xs"></i>
             </span>
             <input type="text" id="searchTruckInput" onkeyup="filterTrucks()" placeholder="Cari Plat Nomor, Pengemudi, Kontainer..." 
-                   class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#0170b9] focus:bg-white transition">
+                   class="w-full pl-8 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs focus:outline-none focus:ring-1 focus:ring-orange-500 focus:bg-white transition">
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            <select id="filterStatus" onchange="filterTrucks()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+        <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+            <select id="filterStatus" onchange="filterTrucks()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-orange-500">
                 <option value="">Semua Status Armada</option>
                 <option value="in_yard">Di Lapangan</option>
                 <option value="loading">Bongkar/Muat</option>
@@ -205,22 +206,22 @@ $total_trucks = count($trucks);
                 <option value="gate_out">Selesai Gate-Out</option>
             </select>
 
-            <button onclick="resetTruckFilter()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-xl transition">
-                <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+            <button onclick="resetTruckFilter()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg transition">
+                <i class="fa-solid fa-rotate-left mr-1 text-[10px]"></i> Reset
             </button>
         </div>
     </div>
 
-    <!-- CLEAN & SPACIOUS TRUCK TABLE -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
-            <div>
-                <h3 class="font-bold text-gray-900 text-base flex items-center">
-                    <i class="fa-solid fa-truck-front mr-2 text-indigo-600"></i>Daftar Arus Armada Truk
+    <!-- CLEAN & COMPACT TRUCK TABLE -->
+    <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 overflow-hidden">
+        <div class="px-3.5 py-2 border-b border-slate-200/80 flex items-center justify-between bg-slate-50/70">
+            <div class="flex items-center space-x-2">
+                <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
+                    <i class="fa-solid fa-truck-front mr-1.5 text-orange-600"></i>Daftar Arus Armada Truk
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tampilan ringkas dan bersih. Klik pada baris atau tombol detail untuk membuka seluruh milestone data.</p>
+                <span class="text-[9px] font-bold text-slate-400">• Klik baris untuk detail milestone</span>
             </div>
-            <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1 rounded-lg border border-gray-200" id="truckRowCountDisplay">
+            <span class="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200" id="truckRowCountDisplay">
                 Menampilkan <?= count($trucks) ?> Armada
             </span>
         </div>
@@ -228,31 +229,31 @@ $total_trucks = count($trucks);
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[720px]" id="truckTable">
                 <thead>
-                    <tr class="bg-gray-50/80 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
-                        <th class="py-3.5 px-4 font-semibold">Armada / Plat Truk</th>
-                        <th class="py-3.5 px-4 font-semibold">Pengemudi</th>
-                        <th class="py-3.5 px-4 font-semibold">Tugas / Misi</th>
-                        <th class="py-3.5 px-4 font-semibold">Gerbang Masuk</th>
-                        <th class="py-3.5 px-4 font-semibold">Muatan Kontainer</th>
-                        <th class="py-3.5 px-4 font-semibold">Status Operasional</th>
-                        <th class="py-3.5 px-4 font-semibold text-right">Aksi</th>
+                    <tr class="bg-slate-50/90 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-200/80">
+                        <th class="py-2 px-3">Armada / Plat Truk</th>
+                        <th class="py-2 px-3">Pengemudi</th>
+                        <th class="py-2 px-3">Tugas / Misi</th>
+                        <th class="py-2 px-3">Gerbang Masuk</th>
+                        <th class="py-2 px-3">Muatan Kontainer</th>
+                        <th class="py-2 px-3">Status Operasional</th>
+                        <th class="py-2 px-3 text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="text-xs divide-y divide-gray-100">
+                <tbody class="text-xs divide-y divide-slate-100">
                     <?php foreach ($trucks as $t): ?>
                         <?php
                         // Status Badge Tunggal & Rapi
                         $badge_status = '';
                         if ($t['status'] === 'loading') {
-                            $badge_status = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 mr-1.5 animate-pulse"></span>Bongkar/Muat</span>';
+                            $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200"><span class="w-1.5 h-1.5 rounded-full bg-purple-500 mr-1 animate-pulse"></span>Bongkar/Muat</span>';
                         } elseif ($t['status'] === 'in_yard') {
-                            $badge_status = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1.5 animate-pulse"></span>Di Lapangan</span>';
+                            $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1 animate-pulse"></span>Di Lapangan</span>';
                         } elseif ($t['status'] === 'at_gate') {
-                            $badge_status = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1.5 animate-ping"></span>Jembatan Timbang</span>';
+                            $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1 animate-ping"></span>Jembatan Timbang</span>';
                         } elseif ($t['status'] === 'queuing') {
-                            $badge_status = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-700 border border-gray-300">Antrian Pra-Gate</span>';
+                            $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">Antrian Pra-Gate</span>';
                         } elseif ($t['status'] === 'gate_out') {
-                            $badge_status = '<span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1 text-[10px]"></i>Gate-Out Selesai</span>';
+                            $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check mr-1 text-[9px]"></i>Gate-Out Selesai</span>';
                         }
 
                         // Data JSON Lengkap untuk Modal
@@ -277,7 +278,7 @@ $total_trucks = count($trucks);
                             'status_text' => strtoupper($t['status'])
                         ]), ENT_QUOTES, 'UTF-8');
                         ?>
-                        <tr class="hover:bg-indigo-50/40 transition cursor-pointer truck-row group"
+                        <tr class="hover:bg-orange-50/30 transition cursor-pointer truck-row group"
                             onclick='showGatePassModal(<?= $json_pass ?>)'
                             data-plate="<?= strtolower($t['license_plate']) ?>"
                             data-driver="<?= strtolower($t['driver_name']) ?>"
@@ -286,111 +287,111 @@ $total_trucks = count($trucks);
                             data-container="<?= strtolower($t['container_number'] ?? '') ?>"
                             data-do="<?= strtolower($t['do_number']) ?>">
                             
-                            <!-- Armada / Plat Truk (Satu Baris Bersih) -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-mono font-bold text-gray-900 bg-slate-100 group-hover:bg-white group-hover:border-indigo-300 px-2.5 py-1 rounded-lg border border-slate-200 text-xs transition">
+                            <!-- Armada / Plat Truk -->
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="font-mono font-bold text-slate-900 bg-slate-100 group-hover:bg-white group-hover:border-orange-300 px-2 py-0.5 rounded border border-slate-200 text-[11px] transition">
                                         <?= htmlspecialchars($t['license_plate']) ?>
                                     </span>
-                                    <span class="text-gray-500 text-xs truncate max-w-[150px]">
+                                    <span class="text-slate-500 text-[11px] truncate max-w-[130px]">
                                         <?= htmlspecialchars($t['company']) ?>
                                     </span>
                                 </div>
                             </td>
 
                             <!-- Pengemudi -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="font-semibold text-gray-800 text-xs flex items-center">
-                                    <i class="fa-solid fa-user text-gray-400 mr-2 text-[11px]"></i>
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <div class="font-semibold text-slate-800 text-xs flex items-center">
+                                    <i class="fa-solid fa-user text-slate-400 mr-1.5 text-[10px]"></i>
                                     <span><?= htmlspecialchars($t['driver_name']) ?></span>
                                 </div>
                             </td>
 
-                            <!-- Tugas / Misi (5 Skenario Riil Dry Port) -->
-                            <td class="py-4 px-4 whitespace-nowrap">
+                            <!-- Tugas / Misi -->
+                            <td class="py-1.5 px-3 whitespace-nowrap">
                                 <?php
                                 $mType = $t['mission_type'] ?? '';
                                 if ($mType === 'drop_export'): ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                                        <i class="fa-solid fa-arrow-down-to-bracket mr-1 text-[10px] text-blue-600"></i>Drop Ekspor
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        <i class="fa-solid fa-arrow-down-to-bracket mr-1 text-[9px] text-blue-600"></i>Drop Ekspor
                                     </span>
                                 <?php elseif ($mType === 'pick_import'): ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-200">
-                                        <i class="fa-solid fa-arrow-up-from-bracket mr-1 text-[10px] text-amber-600"></i>Pick-Up Impor
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                        <i class="fa-solid fa-arrow-up-from-bracket mr-1 text-[9px] text-amber-600"></i>Pick-Up Impor
                                     </span>
                                 <?php elseif ($mType === 'empty_return'): ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-slate-100 text-slate-800 border border-slate-300">
-                                        <i class="fa-solid fa-rotate-left mr-1 text-[10px] text-slate-600"></i>Empty Return
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                                        <i class="fa-solid fa-rotate-left mr-1 text-[9px] text-slate-600"></i>Empty Return
                                     </span>
                                 <?php elseif ($mType === 'empty_release'): ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-cyan-100 text-cyan-900 border border-cyan-200">
-                                        <i class="fa-solid fa-box-open mr-1 text-[10px] text-cyan-600"></i>Empty Release
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-cyan-50 text-cyan-800 border border-cyan-200">
+                                        <i class="fa-solid fa-box-open mr-1 text-[9px] text-cyan-600"></i>Empty Release
                                     </span>
                                 <?php elseif ($mType === 'dual_cycle'): ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-100 text-purple-900 border border-purple-200">
-                                        <i class="fa-solid fa-arrows-rotate mr-1 text-[10px] text-purple-600"></i>Dual Cycle
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200">
+                                        <i class="fa-solid fa-arrows-rotate mr-1 text-[9px] text-purple-600"></i>Dual Cycle
                                     </span>
                                 <?php elseif (($t['job_type'] ?? 'drop_off') === 'pick_up'): ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
-                                        <i class="fa-solid fa-arrow-up-from-bracket mr-1 text-[10px] text-amber-600"></i>Pick-Up (Ambil)
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200">
+                                        <i class="fa-solid fa-arrow-up-from-bracket mr-1 text-[9px] text-amber-600"></i>Pick-Up
                                     </span>
                                 <?php else: ?>
-                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold bg-blue-50 text-blue-800 border border-blue-200">
-                                        <i class="fa-solid fa-arrow-down-to-bracket mr-1 text-[10px] text-blue-600"></i>Drop-Off (Antar)
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
+                                        <i class="fa-solid fa-arrow-down-to-bracket mr-1 text-[9px] text-blue-600"></i>Drop-Off
                                     </span>
                                 <?php endif; ?>
                             </td>
 
                             <!-- Gerbang Masuk -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="text-xs text-gray-700 flex items-center">
-                                    <i class="fa-solid fa-door-open text-indigo-500 mr-1.5 text-[11px]"></i>
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <div class="text-xs text-slate-700 flex items-center">
+                                    <i class="fa-solid fa-door-open text-orange-500 mr-1.5 text-[10px]"></i>
                                     <span class="font-medium"><?= explode('(', $t['gate_lane'])[0] ?></span>
-                                    <span class="text-gray-400 text-[11px] ml-1.5">• <?= $t['gate_in_time'] ? date('H:i', strtotime($t['gate_in_time'])) : '-' ?></span>
+                                    <span class="text-slate-400 text-[10px] ml-1.5">• <?= $t['gate_in_time'] ? date('H:i', strtotime($t['gate_in_time'])) : '-' ?></span>
                                 </div>
                             </td>
 
                             <!-- Muatan Kontainer & Tujuan Yard -->
-                            <td class="py-4 px-4 whitespace-nowrap">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
                                 <?php if (!empty($t['container_number'])): ?>
-                                    <span class="font-mono font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-100 text-xs block w-fit">
+                                    <span class="font-mono font-bold text-orange-600 bg-orange-50 px-2 py-0.5 rounded border border-orange-200 text-[11px] block w-fit">
                                         <?= htmlspecialchars($t['container_number']) ?>
                                     </span>
                                 <?php else: ?>
-                                    <span class="text-gray-400 italic text-xs block">Chassis Kosong</span>
+                                    <span class="text-slate-400 italic text-[11px] block">Chassis Kosong</span>
                                 <?php endif; ?>
                                 <?php if (!empty($t['destination']) || !empty($t['target_block'])): ?>
-                                    <span class="text-[10px] text-gray-500 flex items-center mt-0.5">
+                                    <span class="text-[9px] text-slate-500 flex items-center mt-0.5">
                                         <i class="fa-solid fa-location-dot mr-1 text-rose-500"></i><?= htmlspecialchars($t['destination'] ?: ('Blok ' . $t['target_block'])) ?>
                                     </span>
                                 <?php endif; ?>
                             </td>
 
                             <!-- Status Operasional -->
-                            <td class="py-4 px-4 whitespace-nowrap">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
                                 <?= $badge_status ?>
                             </td>
 
                             <!-- Tombol Aksi Detail & Aksi Pintas Lintas Modul -->
-                            <td class="py-4 px-4 text-right whitespace-nowrap">
-                                <div class="inline-flex items-center space-x-1.5" onclick="event.stopPropagation()">
-                                    <button onclick="showGatePassModal(<?= $json_pass ?>)" class="px-2.5 py-1.5 bg-slate-100 hover:bg-indigo-600 text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1" title="Lihat Detail Tiket Armada">
-                                        <i class="fa-solid fa-file-lines text-[10px]"></i>
+                            <td class="py-1.5 px-3 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center space-x-1" onclick="event.stopPropagation()">
+                                    <button onclick="showGatePassModal(<?= $json_pass ?>)" class="px-2 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white text-[11px] font-bold rounded transition shadow-2xs inline-flex items-center space-x-1" title="Lihat Detail Tiket Armada">
+                                        <i class="fa-solid fa-file-lines text-[9px]"></i>
                                         <span>Milestone</span>
                                     </button>
                                     <?php if (!empty($t['container_number'])): ?>
-                                    <a href="dashboard.php?page=kontainer&search=<?= urlencode($t['container_number']) ?>" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-[#002f5e] text-[#0170b9] hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Lacak Kontainer <?= $t['container_number'] ?>">
-                                        <i class="fa-solid fa-boxes-stacked text-[11px]"></i>
+                                    <a href="dashboard.php?page=kontainer&search=<?= urlencode($t['container_number']) ?>" class="w-6 h-6 rounded bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lacak Kontainer <?= $t['container_number'] ?>">
+                                        <i class="fa-solid fa-boxes-stacked"></i>
                                     </a>
-                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($t['container_number']) ?>" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-gray-950 flex items-center justify-center text-xs transition shadow-2xs" title="Lihat di Simulasi 3D">
-                                        <i class="fa-solid fa-cube text-[11px]"></i>
+                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($t['container_number']) ?>" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat di Simulasi 3D">
+                                        <i class="fa-solid fa-cube"></i>
                                     </a>
-                                    <a href="dashboard.php?page=billing&search=<?= urlencode($t['container_number']) ?>" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Cek Faktur Billing">
-                                        <i class="fa-solid fa-file-invoice-dollar text-[11px]"></i>
+                                    <a href="dashboard.php?page=billing&search=<?= urlencode($t['container_number']) ?>" class="w-6 h-6 rounded bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Cek Faktur Billing">
+                                        <i class="fa-solid fa-file-invoice-dollar"></i>
                                     </a>
                                     <?php endif; ?>
-                                    <a href="dashboard.php?page=denah&fac_id=f_gate_in" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Lihat Gerbang di Denah">
-                                        <i class="fa-solid fa-map-location-dot text-[11px]"></i>
+                                    <a href="dashboard.php?page=denah&fac_id=f_gate_in" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat Gerbang di Denah">
+                                        <i class="fa-solid fa-map-location-dot"></i>
                                     </a>
                                 </div>
                             </td>

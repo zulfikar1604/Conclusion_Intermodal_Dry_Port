@@ -350,144 +350,127 @@ $wagons = $wagons_inbound;
 }
 </style>
 
-<div class="space-y-6">
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+<div class="space-y-3">
+    <!-- Header Modul: Executive Compact -->
+    <div class="bg-white rounded-xl px-3.5 py-2.5 shadow-2xs border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center text-xs shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-train-subway"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900">Intermodal Rail Siding &amp; KA Logistik 2-Arah</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>Track Siding Aktif
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold text-slate-900 leading-tight">Intermodal Rail Siding &amp; KA Logistik 2-Arah</h1>
+                    <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-md text-[9px] font-bold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>Track Siding Aktif
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold">
+                    <span class="px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-md text-[9px] font-bold">
                         Dual Track 2 &times; 450M
                     </span>
-                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-semibold">
-                        Shuttle Pasoso &harr; CIDP
+                    <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-md text-[9px] font-bold">
+                        Pasoso &harr; CIDP
                     </span>
                 </div>
+                <div class="text-[9px] font-bold text-orange-600 tracking-wider uppercase mt-0.5">Shuttle Rel 2-Arah • Sensor Axle Frauscher • RMGC Rail Crane</div>
             </div>
+        </div>
+        <div class="flex items-center space-x-1.5 flex-shrink-0">
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Simulasi 3D
+            </a>
         </div>
     </div>
 
-    <!-- 4 Key Metrics Bar (Bidirectional Dry Port Model) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <!-- 4 Key Metrics Bar (Micro Compact Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <!-- Metric 1: Dual Active Trains -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Rangkaian KA 2-Arah Aktif</span>
-                <span class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-arrows-left-right"></i>
-                </span>
-            </div>
-            <div class="mt-2.5">
-                <div class="text-sm font-bold text-gray-900 truncate flex items-center space-x-1">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span><?= $train_inbound['train_code'] ?> (Inbound)</span>
-                </div>
-                <div class="text-sm font-bold text-blue-700 truncate flex items-center space-x-1 mt-0.5">
-                    <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
-                    <span><?= $train_outbound['train_code'] ?> (Outbound)</span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-orange-300 transition">
+            <div class="min-w-0 pr-1">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Rangkaian KA 2-Arah</p>
+                <div class="mt-0.5 space-y-0.5">
+                    <div class="text-xs font-extrabold text-slate-900 truncate flex items-center space-x-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                        <span class="truncate"><?= $train_inbound['train_code'] ?> (In)</span>
+                    </div>
+                    <div class="text-xs font-extrabold text-blue-700 truncate flex items-center space-x-1">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
+                        <span class="truncate"><?= $train_outbound['train_code'] ?> (Out)</span>
+                    </div>
                 </div>
             </div>
-            <p class="text-[11px] text-gray-400 mt-2">Sepur Utara: Bongkar &bull; Sepur Selatan: Muat</p>
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs flex-shrink-0">
+                <i class="fa-solid fa-arrows-left-right"></i>
+            </div>
         </div>
 
         <!-- Metric 2: Kapasitas Angkut TEU 2-Arah -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Total Muatan Siding 2-Arah</span>
-                <span class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-emerald-300 transition">
+            <div class="min-w-0 pr-1">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Total Muatan Siding</p>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5">
+                    <?= $total_loaded_teu ?>/<?= $total_active_teu_cap ?> <span class="text-[10px] font-medium text-slate-400">TEU</span>
+                    <span class="text-[10px] text-emerald-700 font-bold ml-1">(<?= $combined_load_factor ?>%)</span>
+                </h3>
+                <div class="text-[9px] text-slate-400 font-medium"><?= $total_active_wagons ?> Gerbong PPCW 42t</div>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-2xl font-bold text-gray-900"><?= $total_loaded_teu ?> / <?= $total_active_teu_cap ?> TEU</span>
-                <span class="text-xs text-emerald-700 font-bold"><?= $combined_load_factor ?>%</span>
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs flex-shrink-0">
+                <i class="fa-solid fa-boxes-stacked"></i>
             </div>
-            <div class="w-full h-1.5 bg-gray-100 rounded-full mt-2.5 overflow-hidden">
-                <div class="h-full bg-gradient-to-r from-emerald-500 to-blue-500" style="width: <?= min(100, $combined_load_factor) ?>%;"></div>
-            </div>
-            <p class="text-[11px] text-gray-400 mt-2"><?= $total_active_wagons ?> Gerbong Datar (PPCW 42t) di Siding</p>
         </div>
 
         <!-- Metric 3: Frauscher Axle Counter -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Sensor Gandeng Frauscher</span>
-                <span class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-microchip"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-indigo-300 transition">
+            <div class="min-w-0 pr-1">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Axle Counter Frauscher</p>
+                <h3 id="axle-count-display" class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5 font-mono">
+                    252 <span class="text-[10px] font-medium text-slate-400">As Roda</span>
+                </h3>
+                <div class="text-[9px] text-indigo-600 font-bold">SIL 4 • Trk-01 &amp; Trk-02</div>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span id="axle-count-display" class="text-2xl font-bold text-gray-900 font-mono">252 As Roda</span>
-                <span class="text-[11px] text-indigo-600 font-bold">SIL 4 OK</span>
+            <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-xs flex-shrink-0">
+                <i class="fa-solid fa-microchip"></i>
             </div>
-            <p class="text-[11px] text-gray-400 mt-2">Track-01: 126 As &bull; Track-02: 126 As Roda</p>
         </div>
 
         <!-- Metric 4: Turnaround Time (TAT) -->
-        <div class="bg-white rounded-xl p-4 sm:p-5 border border-gray-100 shadow-xs">
-            <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-gray-500">Target Waktu Alih Muat (TAT)</span>
-                <span class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs">
-                    <i class="fa-solid fa-stopwatch"></i>
-                </span>
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-amber-300 transition">
+            <div class="min-w-0 pr-1">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Target Alih Muat (TAT)</p>
+                <h3 class="text-[13.5px] font-extrabold text-amber-600 tracking-tight leading-tight mt-0.5">
+                    54 / 110 <span class="text-[10px] font-medium text-slate-400">Menit</span>
+                </h3>
+                <div class="text-[9px] text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-0.5"></i>On Schedule • 6 Loop/24j</div>
             </div>
-            <div class="mt-2.5 flex items-baseline space-x-2">
-                <span class="text-2xl font-bold text-gray-900">54 / 110 Menit</span>
-                <span class="text-xs text-emerald-600 font-bold">ON SCHEDULE</span>
-            </div>
-            <p class="text-[11px] text-gray-400 mt-2">6 Shuttle Loop Round-Trip / 24 Jam</p>
-        </div>
-    </div>
-
-    <!-- Banner Navigasi ke Panel Simulasi 3D -->
-    <div class="bg-gradient-to-r from-[#002f5e] to-indigo-900 rounded-2xl p-4 sm:p-5 text-white flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-amber-400 text-lg">
-                <i class="fa-solid fa-gamepad"></i>
-            </div>
-            <div>
-                <h3 class="text-sm font-bold">Simulasi Intermodal Kereta Api &amp; Alih Muat (Transshipment)</h3>
-                <p class="text-xs text-blue-200">Seluruh simulasi pergerakan kereta 2-arah, bongkar-muat RMGC crane, dan alur pabean dijalankan terpadu di Simulator 3D.</p>
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs flex-shrink-0">
+                <i class="fa-solid fa-stopwatch"></i>
             </div>
         </div>
-        <a href="dashboard.php?page=simulator" class="px-4 py-2 bg-amber-500 hover:bg-amber-400 text-gray-950 text-xs font-bold rounded-xl transition flex items-center space-x-1.5 shrink-0 shadow-sm">
-            <i class="fa-solid fa-cubes"></i>
-            <span>Buka Panel Simulasi 3D</span>
-        </a>
     </div>
 
     <!-- Siding Track Status Bar (Dual Track: Sepur Utara vs Sepur Selatan) -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
         <?php foreach ($siding_tracks as $track): ?>
-        <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm flex flex-col justify-between gap-3">
-            <div class="space-y-1.5">
+        <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex flex-col justify-between gap-1.5">
+            <div class="space-y-1">
                 <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full <?= $track['dot_color'] ?>"></span>
-                        <h3 class="font-bold text-sm text-gray-900"><?= $track['id'] ?></h3>
+                    <div class="flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full <?= $track['dot_color'] ?>"></span>
+                        <h3 class="font-extrabold text-xs text-slate-900"><?= $track['id'] ?></h3>
                     </div>
-                    <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold border <?= $track['status_color'] ?>">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border <?= $track['status_color'] ?>">
                         <?= $track['occupancy'] ?>
                     </span>
                 </div>
-                <p class="text-xs text-gray-600">
-                    <span class="font-semibold text-gray-800">Muatan:</span> <?= $track['cargo_type'] ?>
+                <p class="text-[11px] text-slate-600">
+                    <span class="font-semibold text-slate-800">Muatan:</span> <?= $track['cargo_type'] ?>
                 </p>
-                <div class="flex items-center space-x-4 text-xs text-gray-500 pt-1 font-mono">
+                <div class="flex items-center space-x-3 text-[11px] text-slate-500 font-mono">
                     <span>Panjang: <b><?= $track['length'] ?></b></span>
-                    <span>Alokasi: <b class="text-gray-900"><?= $track['loaded_teu'] ?></b></span>
+                    <span>Alokasi: <b class="text-slate-900"><?= $track['loaded_teu'] ?></b></span>
                     <span>Rel: <b>UIC 54</b></span>
                 </div>
             </div>
-            <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500">
-                <span>Alat Crane: <strong class="text-gray-700"><?= $track['equip'] ?></strong></span>
+            <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+                <span>Alat Crane: <strong class="text-slate-700"><?= $track['equip'] ?></strong></span>
                 <span class="font-mono text-indigo-600 font-bold"><?= $track['axles_count'] ?> As Roda</span>
             </div>
         </div>
@@ -497,63 +480,63 @@ $wagons = $wagons_inbound;
     <!-- ======================================================================= -->
     <!-- MASTER TIMETABLE: JADWAL SHUTTLE REL 2-ARAH (TANJUNG PRIOK <-> CIDP)   -->
     <!-- ======================================================================= -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-3">
+    <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-2xs space-y-2.5">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-200/80 pb-2">
             <div>
-                <h3 class="text-base font-bold text-gray-900 flex items-center">
-                    <i class="fa-solid fa-clock text-[#0170b9] mr-2"></i>
+                <h3 class="text-xs font-extrabold text-slate-900 flex items-center">
+                    <i class="fa-solid fa-clock text-orange-600 mr-1.5"></i>
                     Jadwal Harian Kereta Api Kontainer 2-Arah (24-Hour Shuttle Timetable)
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Siklus kontinu 6 perjalanan KA bolak-balik antara Stasiun Pasoso (Pelabuhan Priok) &amp; CIDP Hub Cikarang.</p>
+                <p class="text-[9px] text-slate-400 mt-0.5">Siklus 6 perjalanan KA bolak-balik antara Stasiun Pasoso (Pelabuhan Priok) &amp; CIDP Hub Cikarang.</p>
             </div>
-            <div class="flex items-center space-x-2 text-xs">
-                <span class="px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
-                    <i class="fa-solid fa-arrow-down mr-1"></i> 3 Inbound Impor
+            <div class="flex items-center space-x-1.5 text-[10px]">
+                <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                    <i class="fa-solid fa-arrow-down mr-0.5"></i> 3 Inbound
                 </span>
-                <span class="px-2.5 py-1 rounded-lg bg-blue-50 text-blue-700 font-bold border border-blue-200">
-                    <i class="fa-solid fa-arrow-up mr-1"></i> 3 Outbound Ekspor
+                <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200">
+                    <i class="fa-solid fa-arrow-up mr-0.5"></i> 3 Outbound
                 </span>
             </div>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left text-xs">
-                <thead class="bg-slate-50 text-gray-600 uppercase font-semibold text-[10px] tracking-wider border-b border-gray-200">
+                <thead class="bg-slate-50/90 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200/80">
                     <tr>
-                        <th class="py-2.5 px-3">Trip #</th>
-                        <th class="py-2.5 px-3">Nomor KA</th>
-                        <th class="py-2.5 px-3">Arah Relasi</th>
-                        <th class="py-2.5 px-3">Asal &rarr; Tujuan</th>
-                        <th class="py-2.5 px-3">Jadwal (WIB)</th>
-                        <th class="py-2.5 px-3">Kapasitas</th>
-                        <th class="py-2.5 px-3">Lokomotif</th>
-                        <th class="py-2.5 px-3">Manifest Kargo</th>
-                        <th class="py-2.5 px-3">Status</th>
+                        <th class="py-1.5 px-2.5">Trip #</th>
+                        <th class="py-1.5 px-2.5">Nomor KA</th>
+                        <th class="py-1.5 px-2.5">Arah Relasi</th>
+                        <th class="py-1.5 px-2.5">Asal &rarr; Tujuan</th>
+                        <th class="py-1.5 px-2.5">Jadwal (WIB)</th>
+                        <th class="py-1.5 px-2.5">Kapasitas</th>
+                        <th class="py-1.5 px-2.5">Lokomotif</th>
+                        <th class="py-1.5 px-2.5">Manifest Kargo</th>
+                        <th class="py-1.5 px-2.5">Status</th>
                     </tr>
                 </thead>
-                <tbody class="divide-y divide-gray-100 font-sans">
+                <tbody class="divide-y divide-slate-100 font-sans">
                     <?php foreach ($shuttle_timetable as $tt): ?>
-                    <tr class="hover:bg-slate-50/70 transition <?= strpos($tt['badge'], 'pulse') !== false ? 'bg-blue-50/30' : '' ?>">
-                        <td class="py-2.5 px-3 font-mono font-bold text-gray-500"><?= $tt['trip_no'] ?></td>
-                        <td class="py-2.5 px-3 font-mono font-bold text-gray-900"><?= $tt['train_code'] ?></td>
-                        <td class="py-2.5 px-3">
+                    <tr class="hover:bg-orange-50/30 transition <?= strpos($tt['badge'], 'pulse') !== false ? 'bg-orange-50/20' : '' ?>">
+                        <td class="py-1.5 px-2.5 font-mono font-bold text-slate-500"><?= $tt['trip_no'] ?></td>
+                        <td class="py-1.5 px-2.5 font-mono font-bold text-slate-900"><?= $tt['train_code'] ?></td>
+                        <td class="py-1.5 px-2.5">
                             <?php if ($tt['direction'] === 'INBOUND'): ?>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
                                     <i class="fa-solid fa-arrow-down mr-0.5"></i> INBOUND
                                 </span>
                             <?php else: ?>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
                                     <i class="fa-solid fa-arrow-up mr-0.5"></i> OUTBOUND
                                 </span>
                             <?php endif; ?>
                         </td>
-                        <td class="py-2.5 px-3 font-semibold text-gray-800"><?= $tt['origin'] ?> &rarr; <?= $tt['dest'] ?></td>
-                        <td class="py-2.5 px-3 font-mono font-semibold text-gray-700"><?= $tt['dep'] ?> - <?= $tt['arr'] ?></td>
-                        <td class="py-2.5 px-3 font-bold text-gray-900"><?= $tt['teu'] ?></td>
-                        <td class="py-2.5 px-3 font-mono text-gray-600"><?= $tt['loco'] ?></td>
-                        <td class="py-2.5 px-3 text-gray-600 max-w-[200px] truncate" title="<?= $tt['cargo'] ?>"><?= $tt['cargo'] ?></td>
-                        <td class="py-2.5 px-3">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] border <?= $tt['badge'] ?>">
+                        <td class="py-1.5 px-2.5 font-semibold text-slate-800"><?= $tt['origin'] ?> &rarr; <?= $tt['dest'] ?></td>
+                        <td class="py-1.5 px-2.5 font-mono font-semibold text-slate-700"><?= $tt['dep'] ?> - <?= $tt['arr'] ?></td>
+                        <td class="py-1.5 px-2.5 font-bold text-slate-900"><?= $tt['teu'] ?></td>
+                        <td class="py-1.5 px-2.5 font-mono text-slate-600"><?= $tt['loco'] ?></td>
+                        <td class="py-1.5 px-2.5 text-slate-600 max-w-[180px] truncate" title="<?= $tt['cargo'] ?>"><?= $tt['cargo'] ?></td>
+                        <td class="py-1.5 px-2.5">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border <?= $tt['badge'] ?>">
                                 <?= $tt['status'] ?>
                             </span>
                         </td>

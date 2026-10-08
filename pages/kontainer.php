@@ -81,111 +81,109 @@ unset($c);
 $total_containers = count($containers);
 ?>
 
-<div class="space-y-4">
+<div class="space-y-2.5 animate-fadeIn pb-12">
 
-    <!-- Header & Subtitle (Compact & Clean) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl shadow-2xs border border-gray-100">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+    <!-- Header Modul: Compact Executive Style (Aligned with Sidebar) -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-2 bg-white px-3 py-2 rounded-xl shadow-2xs border border-slate-200/80 mb-2.5">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
                 <i class="fa-solid fa-boxes-stacked"></i>
             </div>
             <div>
-                <div class="flex items-center space-x-2">
-                    <h2 class="text-base font-bold text-gray-900 leading-tight">Pelacakan Kontainer &amp; Audit Perjalanan</h2>
-                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <div class="flex items-center space-x-1.5">
+                    <h2 class="text-[13px] font-extrabold text-slate-900 tracking-tight leading-tight">Pelacakan Kontainer &amp; Audit Perjalanan</h2>
+                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> Live Sync
                     </span>
                 </div>
             </div>
         </div>
-        <div class="flex items-center space-x-2 flex-shrink-0">
-            <button onclick="showAddContainerModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-plus"></i>
-                <span>Tambah Kontainer</span>
+        <div class="flex items-center flex-wrap gap-1.5 flex-shrink-0">
+            <button onclick="showAddContainerModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1 shadow-xs cursor-pointer">
+                <i class="fa-solid fa-plus text-[10px]"></i>
+                <span>Tambah</span>
             </button>
-            <a href="dashboard.php?page=simulator" class="px-3 py-1.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-gray-950 text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-cubes mr-1.5"></i> Simulasi 3D
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1">
+                <i class="fa-solid fa-cubes text-amber-400 text-[10px]"></i>
+                <span>Simulasi 3D</span>
             </a>
-            <button onclick="exportKontainerExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-file-excel"></i>
-                <span>Export Excel</span>
+            <button onclick="exportKontainerExcel()" class="px-2 py-1 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[11px] font-semibold transition flex items-center space-x-1 cursor-pointer">
+                <i class="fa-solid fa-file-excel text-[10px]"></i>
+                <span>Excel</span>
             </button>
-            <button onclick="exportKontainerPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span>Export PDF</span>
+            <button onclick="window.print()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center cursor-pointer">
+                <i class="fa-solid fa-print text-slate-400 text-[10px]"></i>
             </button>
-            <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak
-            </button>
-            <a href="dashboard.php?page=trucking" class="px-3 py-1.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-truck-front mr-1.5"></i> Trucking <i class="fa-solid fa-arrow-right ml-1"></i>
+            <a href="dashboard.php?page=trucking" class="px-2.5 py-1 bg-[#004b87] hover:bg-[#002f5e] text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1">
+                <i class="fa-solid fa-truck-front text-[10px]"></i>
+                <span>Trucking</span>
             </a>
         </div>
     </div>
 
-    <!-- 4 KPI Summary Cards (Compact Grid) -->
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-3">
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-blue-300 transition-all flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Total Kontainer</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-gray-900 mt-0.5"><?= $total_containers ?> <span class="text-[10px] font-normal text-gray-400">Box</span></h3>
-                <div class="mt-0.5 text-[10px] text-blue-600 font-medium">Kapasitas 200 TEU</div>
+    <!-- 4 KPI Summary Cards (Compact Executive Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
+        <div class="bg-white p-2.5 rounded-xl shadow-2xs border border-slate-200/80 hover:border-orange-200 transition-all flex items-center justify-between">
+            <div class="min-w-0 pr-1.5">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider truncate mb-0.5">Total Kontainer</p>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 leading-tight"><?= $total_containers ?> <span class="text-[9px] font-normal text-slate-400">Box</span></h3>
+                <div class="mt-0.5 text-[9px] text-blue-600 font-semibold">Kapasitas 200 TEU</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
                 <i class="fa-solid fa-box-archive"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-emerald-300 transition-all flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Komposisi Muatan</p>
+        <div class="bg-white p-2.5 rounded-xl shadow-2xs border border-slate-200/80 hover:border-emerald-200 transition-all flex items-center justify-between">
+            <div class="min-w-0 pr-1.5">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider truncate mb-0.5">Komposisi Muatan</p>
                 <div class="flex items-center space-x-1 mt-0.5">
-                    <span class="text-[10px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded"><?= $total_dry ?> Dry</span>
-                    <span class="text-[10px] font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.2 rounded"><?= $total_reefer ?> Rf</span>
-                    <span class="text-[10px] font-bold text-red-700 bg-red-50 px-1.5 py-0.2 rounded"><?= $total_dg ?> DG</span>
+                    <span class="text-[9px] font-bold text-blue-700 bg-blue-50 px-1 py-0.2 rounded"><?= $total_dry ?> Dry</span>
+                    <span class="text-[9px] font-bold text-cyan-700 bg-cyan-50 px-1 py-0.2 rounded"><?= $total_reefer ?> Rf</span>
+                    <span class="text-[9px] font-bold text-red-700 bg-red-50 px-1 py-0.2 rounded"><?= $total_dg ?> DG</span>
                 </div>
-                <p class="mt-0.5 text-[10px] text-gray-400"><?= $total_empty ?> Empty Box</p>
+                <p class="mt-0.5 text-[9px] text-slate-400 truncate"><?= $total_empty ?> Empty Box</p>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
                 <i class="fa-solid fa-chart-pie"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-amber-300 transition-all flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Rata-Rata Dwell Time</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-amber-600 mt-0.5">1.8 <span class="text-[10px] font-normal text-gray-400">Hari</span></h3>
-                <div class="mt-0.5 text-[10px] text-green-600 font-medium"><i class="fa-solid fa-circle-check mr-1"></i>Sesuai Target (&lt; 3 Hari)</div>
+        <div class="bg-white p-2.5 rounded-xl shadow-2xs border border-slate-200/80 hover:border-amber-200 transition-all flex items-center justify-between">
+            <div class="min-w-0 pr-1.5">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider truncate mb-0.5">Rata-Rata Dwell Time</p>
+                <h3 class="text-[13.5px] font-extrabold text-amber-600 leading-tight">1.8 <span class="text-[9px] font-normal text-slate-400">Hari</span></h3>
+                <div class="mt-0.5 text-[9px] text-emerald-600 font-semibold"><i class="fa-solid fa-circle-check mr-1 text-[8px]"></i>Target (&lt; 3 Hari)</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
                 <i class="fa-regular fa-clock"></i>
             </div>
         </div>
 
-        <div class="bg-white p-3 sm:p-3.5 rounded-xl shadow-2xs border border-gray-200/80 hover:border-purple-300 transition-all flex items-center justify-between">
-            <div>
-                <p class="text-[10px] font-semibold uppercase text-gray-400 tracking-wider">Kliring SPPB Bea Cukai</p>
-                <h3 class="text-xl sm:text-2xl font-bold text-emerald-600 mt-0.5">94.7% <span class="text-[10px] font-normal text-gray-400">Cleared</span></h3>
-                <div class="mt-0.5 text-[10px] text-purple-600 font-medium"><i class="fa-solid fa-barcode mr-1"></i>RFID UHF Valid</div>
+        <div class="bg-white p-2.5 rounded-xl shadow-2xs border border-slate-200/80 hover:border-purple-200 transition-all flex items-center justify-between">
+            <div class="min-w-0 pr-1.5">
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider truncate mb-0.5">Kliring SPPB Bea Cukai</p>
+                <h3 class="text-[13.5px] font-extrabold text-emerald-600 leading-tight">94.7% <span class="text-[9px] font-normal text-slate-400">Cleared</span></h3>
+                <div class="mt-0.5 text-[9px] text-purple-600 font-semibold"><i class="fa-solid fa-barcode mr-1 text-[8px]"></i>RFID UHF Valid</div>
             </div>
-            <div class="w-8 h-8 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-xs shadow-inner">
+            <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center text-[11px] shadow-2xs flex-shrink-0">
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
         </div>
     </div>
 
-    <!-- Filter & Search Toolbar -->
-    <div class="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row items-center justify-between gap-4">
-        <div class="relative w-full md:w-80">
-            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400 pointer-events-none">
-                <i class="fa-solid fa-magnifying-glass text-sm"></i>
+    <!-- Filter & Search Toolbar (Compact) -->
+    <div class="bg-white px-3 py-2 rounded-xl shadow-2xs border border-slate-200/80 flex flex-col md:flex-row items-center justify-between gap-2 mb-2.5">
+        <div class="relative w-full md:w-72">
+            <span class="absolute inset-y-0 left-0 flex items-center pl-2.5 text-slate-400 pointer-events-none">
+                <i class="fa-solid fa-magnifying-glass text-[10px]"></i>
             </span>
-            <input type="text" id="searchInput" onkeyup="filterContainers()" placeholder="Cari Nomor Kontainer, Pemilik, RFID..." 
-                   class="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-[#0170b9] focus:bg-white transition">
+            <input type="text" id="searchInput" onkeyup="filterContainers()" placeholder="Cari No. Kontainer, Pemilik, RFID..." 
+                   class="w-full pl-7 pr-3 py-1 bg-white border border-slate-200 rounded-lg text-[11px] focus:outline-none focus:ring-1 focus:ring-orange-500 transition placeholder-slate-400">
         </div>
 
-        <div class="flex flex-wrap items-center gap-2 w-full md:w-auto">
-            <select id="filterBlock" onchange="filterContainers()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+        <div class="flex flex-wrap items-center gap-1.5 w-full md:w-auto">
+            <select id="filterBlock" onchange="filterContainers()" class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-orange-500">
                 <option value="">Semua Zona Yard</option>
                 <option value="A">Blok A (Dry 40ft)</option>
                 <option value="B">Blok B (Dry 20ft)</option>
@@ -195,7 +193,7 @@ $total_containers = count($containers);
                 <option value="EMPTY">Zona Empty</option>
             </select>
 
-            <select id="filterType" onchange="filterContainers()" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+            <select id="filterType" onchange="filterContainers()" class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[11px] text-slate-700 focus:outline-none focus:ring-1 focus:ring-orange-500">
                 <option value="">Semua Tipe Kargo</option>
                 <option value="dry">Dry Cargo</option>
                 <option value="reefer">Reefer Cold Chain</option>
@@ -203,22 +201,22 @@ $total_containers = count($containers);
                 <option value="empty">Empty Box</option>
             </select>
 
-            <button onclick="resetFilter()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 text-xs font-semibold rounded-xl transition">
-                <i class="fa-solid fa-rotate-left mr-1"></i> Reset
+            <button onclick="resetFilter()" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold rounded-lg transition cursor-pointer">
+                <i class="fa-solid fa-rotate-left mr-1 text-[10px]"></i> Reset
             </button>
         </div>
     </div>
 
-    <!-- CLEAN & SPACIOUS CONTAINER TABLE -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-gray-100 flex items-center justify-between bg-slate-50/50">
-            <div>
-                <h3 class="font-bold text-gray-900 text-base flex items-center">
-                    <i class="fa-solid fa-boxes-stacked mr-2 text-[#0170b9]"></i>Daftar Posisi & Alur Kontainer
+    <!-- CLEAN & COMPACT CONTAINER TABLE -->
+    <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 overflow-hidden">
+        <div class="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
+            <div class="flex items-center space-x-2">
+                <span class="w-1.5 h-3.5 bg-orange-500 rounded-full"></span>
+                <h3 class="font-extrabold text-slate-900 text-[12.5px] flex items-center">
+                    <i class="fa-solid fa-boxes-stacked mr-1.5 text-orange-600 text-[11px]"></i>Daftar Posisi &amp; Alur Kontainer
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Tampilan ringkas dan rapi. Klik pada baris atau tombol detail untuk membuka seluruh milestone perjalanan kontainer.</p>
             </div>
-            <span class="text-xs font-semibold text-gray-500 bg-white px-3 py-1 rounded-lg border border-gray-200" id="rowCountDisplay">
+            <span class="text-[10px] font-bold text-slate-500 bg-white px-2 py-0.5 rounded border border-slate-200" id="rowCountDisplay">
                 Menampilkan <?= count($containers) ?> Kontainer
             </span>
         </div>
@@ -226,16 +224,16 @@ $total_containers = count($containers);
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[720px]" id="containerTable">
                 <thead>
-                    <tr class="bg-gray-50/80 text-gray-600 text-xs uppercase tracking-wider border-b border-gray-200">
-                        <th class="py-3.5 px-4 font-semibold">Nomor Kontainer</th>
-                        <th class="py-3.5 px-4 font-semibold">Pemilik / Pengirim</th>
-                        <th class="py-3.5 px-4 font-semibold">Posisi di Yard</th>
-                        <th class="py-3.5 px-4 font-semibold">Rute (Asal ➔ Tujuan)</th>
-                        <th class="py-3.5 px-4 font-semibold">Status & Dwell</th>
-                        <th class="py-3.5 px-4 font-semibold text-right">Aksi</th>
+                    <tr class="bg-slate-50 text-slate-500 text-[9.5px] font-bold uppercase tracking-wider border-b border-slate-200/80">
+                        <th class="py-2 px-3 font-semibold">Nomor Kontainer</th>
+                        <th class="py-2 px-3 font-semibold">Pemilik / Pengirim</th>
+                        <th class="py-2 px-3 font-semibold">Posisi di Yard</th>
+                        <th class="py-2 px-3 font-semibold">Rute (Asal ➔ Tujuan)</th>
+                        <th class="py-2 px-3 font-semibold">Status &amp; Dwell</th>
+                        <th class="py-2 px-3 font-semibold text-right">Aksi</th>
                     </tr>
                 </thead>
-                <tbody class="text-xs divide-y divide-gray-100">
+                <tbody class="text-[11.5px] divide-y divide-slate-100">
                     <?php foreach ($containers as $c): ?>
                         <?php
                         $badge_cargo = 'bg-blue-50 text-blue-700 border-blue-200';
@@ -271,7 +269,7 @@ $total_containers = count($containers);
                             'commodity' => $c['commodity']
                         ]), ENT_QUOTES, 'UTF-8');
                         ?>
-                        <tr class="hover:bg-blue-50/40 transition cursor-pointer container-row group" 
+                        <tr class="hover:bg-orange-50/30 transition cursor-pointer container-row group" 
                             onclick='showJourneyModal(<?= $json_detail ?>)'
                             data-container="<?= strtolower($c['container_number']) ?>" 
                             data-owner="<?= strtolower($c['owner_company']) ?>"
@@ -279,79 +277,79 @@ $total_containers = count($containers);
                             data-type="<?= strtolower($c['cargo_type']) ?>"
                             data-rfid="<?= strtolower($c['rfid_tag']) ?>">
                             
-                            <!-- Nomor Kontainer (Bersih) -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="flex items-center space-x-2">
-                                    <span class="font-mono font-bold text-[#0170b9] text-sm group-hover:underline">
+                            <!-- Nomor Kontainer -->
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="font-mono font-bold text-orange-600 group-hover:text-orange-700 text-[11.5px]">
                                         <?= htmlspecialchars($c['container_number']) ?>
                                     </span>
-                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border uppercase <?= $badge_cargo ?>">
+                                    <span class="px-1.5 py-0.2 text-[9px] font-bold rounded border uppercase <?= $badge_cargo ?>">
                                         <?= htmlspecialchars($c['cargo_type']) ?>
                                     </span>
                                 </div>
                             </td>
 
                             <!-- Pemilik / Pengirim -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <span class="text-gray-700 font-medium text-xs truncate max-w-[200px] block">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <span class="text-slate-800 font-bold text-[11px] truncate max-w-[180px] block">
                                     <?= htmlspecialchars($c['owner_company']) ?>
                                 </span>
                             </td>
 
                             <!-- Posisi di Yard -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <span class="font-mono font-semibold text-gray-800 bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 text-xs">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <span class="font-mono font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded text-[10px] border border-slate-200">
                                     <?= $pos_text ?>
                                 </span>
                             </td>
 
                             <!-- Rute (Asal ➔ Tujuan) -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="flex items-center space-x-1.5 text-xs text-gray-700 font-medium">
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <div class="flex items-center space-x-1 text-[11px] text-slate-600 font-medium">
                                     <span><?= htmlspecialchars($c['origin']) ?></span>
-                                    <i class="fa-solid fa-arrow-right text-[10px] text-gray-400"></i>
-                                    <span class="text-[#0170b9] font-bold"><?= htmlspecialchars($c['destination']) ?></span>
+                                    <i class="fa-solid fa-arrow-right text-[8.5px] text-slate-400"></i>
+                                    <span class="text-orange-600 font-bold"><?= htmlspecialchars($c['destination']) ?></span>
                                 </div>
                             </td>
 
                             <!-- Status & Dwell -->
-                            <td class="py-4 px-4 whitespace-nowrap">
-                                <div class="flex items-center space-x-2">
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                                        <i class="fa-regular fa-clock mr-1 text-[10px]"></i><?= $c['dwell_time_text'] ?>
+                            <td class="py-1.5 px-3 whitespace-nowrap">
+                                <div class="flex items-center space-x-1.5">
+                                    <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                        <i class="fa-regular fa-clock mr-1 text-[8.5px]"></i><?= $c['dwell_time_text'] ?>
                                     </span>
                                     <?php if ($c['customs_status'] === 'SPPB_CLEARED'): ?>
-                                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">SPPB</span>
+                                        <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">SPPB</span>
                                     <?php else: ?>
-                                        <span class="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">Cek Fisik</span>
+                                        <span class="text-[9px] font-bold text-amber-800 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Cek Fisik</span>
                                     <?php endif; ?>
                                 </div>
                             </td>
 
                             <!-- Tombol Aksi Detail & Aksi Pintas Lintas Modul -->
-                            <td class="py-4 px-4 text-right whitespace-nowrap">
-                                <div class="inline-flex items-center space-x-1.5" onclick="event.stopPropagation()">
+                            <td class="py-1.5 px-3 text-right whitespace-nowrap">
+                                <div class="inline-flex items-center space-x-1" onclick="event.stopPropagation()">
                                     <!-- Detail Modal Button -->
-                                    <button onclick='showJourneyModal(<?= $json_detail ?>)' class="px-2.5 py-1.5 bg-slate-100 hover:bg-[#0170b9] text-slate-700 hover:text-white text-xs font-semibold rounded-lg transition shadow-2xs inline-flex items-center space-x-1" title="Buka Detail Milestone">
-                                        <i class="fa-solid fa-timeline text-[10px]"></i>
+                                    <button onclick='showJourneyModal(<?= $json_detail ?>)' class="px-2 py-1 bg-slate-100 hover:bg-orange-600 text-slate-700 hover:text-white text-[10px] font-semibold rounded-md transition shadow-2xs inline-flex items-center space-x-1 cursor-pointer" title="Buka Detail Milestone">
+                                        <i class="fa-solid fa-timeline text-[9px]"></i>
                                         <span>Milestone</span>
                                     </button>
                                     <!-- Denah 2D -->
-                                    <a href="dashboard.php?page=denah&highlight_block=<?= urlencode($c['block']) ?>" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-[#0170b9] text-[#0170b9] hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Sorot di Denah 2D (Blok <?= $c['block'] ?>)">
-                                        <i class="fa-solid fa-map-location-dot text-[11px]"></i>
+                                    <a href="dashboard.php?page=denah&highlight_block=<?= urlencode($c['block']) ?>" class="w-6 h-6 rounded-md bg-blue-50 hover:bg-[#0170b9] text-[#0170b9] hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Sorot di Denah 2D (Blok <?= $c['block'] ?>)">
+                                        <i class="fa-solid fa-map-location-dot"></i>
                                     </a>
                                     <!-- 3D Simulator -->
-                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($c['container_number']) ?>" class="w-7 h-7 rounded-lg bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-gray-950 flex items-center justify-center text-xs transition shadow-2xs" title="Lihat di Simulasi 3D">
-                                        <i class="fa-solid fa-cube text-[11px]"></i>
+                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($c['container_number']) ?>" class="w-6 h-6 rounded-md bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-gray-950 flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat di Simulasi 3D">
+                                        <i class="fa-solid fa-cube"></i>
                                     </a>
                                     <!-- Billing -->
-                                    <a href="dashboard.php?page=billing&search=<?= urlencode($c['container_number']) ?>" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Periksa Faktur Billing">
-                                        <i class="fa-solid fa-file-invoice-dollar text-[11px]"></i>
+                                    <a href="dashboard.php?page=billing&search=<?= urlencode($c['container_number']) ?>" class="w-6 h-6 rounded-md bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Periksa Faktur Billing">
+                                        <i class="fa-solid fa-file-invoice-dollar"></i>
                                     </a>
                                     <?php if ($c['cargo_type'] === 'reefer'): ?>
                                     <!-- Reefer -->
-                                    <a href="dashboard.php?page=reefer&search=<?= urlencode($c['container_number']) ?>" class="w-7 h-7 rounded-lg bg-cyan-50 hover:bg-cyan-600 text-cyan-700 hover:text-white flex items-center justify-center text-xs transition shadow-2xs" title="Monitoring Reefer Cold Chain">
-                                        <i class="fa-solid fa-snowflake text-[11px]"></i>
+                                    <a href="dashboard.php?page=reefer&search=<?= urlencode($c['container_number']) ?>" class="w-6 h-6 rounded-md bg-cyan-50 hover:bg-cyan-600 text-cyan-700 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Monitoring Reefer Cold Chain">
+                                        <i class="fa-solid fa-snowflake"></i>
                                     </a>
                                     <?php endif; ?>
                                 </div>

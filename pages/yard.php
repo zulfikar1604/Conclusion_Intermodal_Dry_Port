@@ -205,50 +205,52 @@ $vmt_job_orders = [
 </div>
 <?php endif; ?>
 
-<div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul: Clean & Minimal -->
-    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+<div class="space-y-2.5 animate-fadeIn pb-12">
+    <!-- Header Modul: Compact Executive Style (Aligned with Sidebar) -->
+    <div class="bg-white rounded-xl px-3 py-2 shadow-2xs border border-slate-200/80 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-7 h-7 rounded-lg bg-orange-50 border border-orange-200/70 text-orange-600 flex items-center justify-center text-xs shadow-2xs flex-shrink-0">
                 <i class="fa-solid <?= $yard_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2">
-                    <h1 class="text-base font-bold text-gray-900">Manajemen Stacking Yard &amp; Digital Twin 3D</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $yard_info['status'] ?>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <h1 class="text-[13px] font-extrabold tracking-tight text-slate-900">Manajemen Stacking Yard &amp; Digital Twin 3D</h1>
+                    <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[9px] font-bold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span><?= $yard_info['status'] ?>
                     </span>
-                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-semibold">
+                    <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold">
                         MySQL Sync (<?= count($yard_containers) ?> Box)
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold">
+                    <span class="px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded text-[9px] font-bold">
                         RTK GNSS &lt;1.4cm
                     </span>
                 </div>
             </div>
         </div>
 
-        <div class="flex items-center gap-2 self-start sm:self-auto flex-shrink-0">
-            <button onclick="openModalYardRelocate()" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-arrows-up-down-left-right text-xs"></i>
-                <span>+ Relokasi (VMT Move)</span>
+        <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
+            <button onclick="openModalYardRelocate()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                <i class="fa-solid fa-arrows-up-down-left-right text-[10px]"></i>
+                <span>+ Relokasi (VMT)</span>
             </button>
         </div>
     </div>
 
-    <!-- KPI Ringkasan Lapangan Penumpukan 15 Ha -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+    <!-- KPI Micro-Cards (High-Density Executive Grid) -->
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-2 mb-2.5">
         <?php foreach ($yard_kpis as $kpi): ?>
-            <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-xs">
-                <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-semibold text-gray-500 block"><?= $kpi['label'] ?></span>
-                    <i class="fa-solid <?= $kpi['icon'] ?> text-<?= $kpi['color'] ?>-600 text-xs"></i>
+            <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
+                <div class="min-w-0 pr-2">
+                    <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5"><?= $kpi['label'] ?></p>
+                    <div class="flex items-baseline space-x-1">
+                        <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight truncate"><?= $kpi['val'] ?></h3>
+                        <span class="text-[9px] text-<?= $kpi['color'] ?>-600 font-bold"><?= $kpi['unit'] ?></span>
+                    </div>
+                    <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate"><?= $kpi['sub'] ?></p>
                 </div>
-                <div class="mt-2 flex items-baseline space-x-1.5">
-                    <span class="text-xl sm:text-2xl font-bold text-gray-900"><?= $kpi['val'] ?></span>
-                    <span class="text-xs text-<?= $kpi['color'] ?>-600 font-semibold"><?= $kpi['unit'] ?></span>
+                <div class="w-7 h-7 rounded-lg bg-slate-50 text-<?= $kpi['color'] ?>-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
+                    <i class="fa-solid <?= $kpi['icon'] ?>"></i>
                 </div>
-                <p class="text-[10px] text-gray-400 mt-1"><?= $kpi['sub'] ?></p>
             </div>
         <?php endforeach; ?>
     </div>
