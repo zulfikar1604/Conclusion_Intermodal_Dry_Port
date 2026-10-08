@@ -190,15 +190,15 @@ if (isset($_POST['btn_login'])) {
             <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
                 <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-blue-100 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-orange-400 animate-pulse"></span>
-                    <span>Aplikasi Demonstrasi &bull; Prototipe Yard Management System (YMS)</span>
+                    <span>Prototipe Yard Management System (YMS)</span>
                 </div>
 
                 <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                    Simulasi Sistem Manajemen Lapangan Peti Kemas
+                    Simulasi Manajemen Lapangan Peti Kemas
                 </h1>
 
-                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
-                    Terhubung melalui moda rel kereta api dan jalan raya, kami menyusun rekomendasi arsitektur pelabuhan kering modern. Aplikasi percontohan (demo) ini menyimulasikan integrasi perangkat keras IoT, pemetaan lapangan 3D, dan rekonsiliasi finansial ERP.
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl mx-auto">
+                    Platform intermodal rel-jalan raya 35 Ha terintegrasi sensor IoT, visualisasi digital twin, dan rekonsiliasi ERP waktu-nyata.
                 </p>
 
                 <div class="pt-2 sm:pt-4">
@@ -217,21 +217,21 @@ if (isset($_POST['btn_login'])) {
             <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
                 <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-cyan-200 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
-                    <span>Konektivitas Rel Kereta Api Antarmoda &bull; Double Track Siding</span>
+                    <span>Konektivitas Rel Kereta Api Antarmoda</span>
                 </div>
 
                 <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                    Integrasi Angkutan Rel Peti Kemas Antarmoda
+                    Integrasi Angkutan Rel Peti Kemas
                 </h1>
 
-                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
-                    Menghubungkan pusat kawasan industri langsung ke pelabuhan laut Tanjung Priok melalui jalur rel kereta api barang berkapasitas 30 hingga 60 TEUs per rangkaian untuk memangkas kongesti jalan raya.
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl mx-auto">
+                    Konektivitas rel ganda Cikarang – Pelabuhan Tanjung Priok dengan kapasitas 30 hingga 60 TEUs per rangkaian.
                 </p>
 
                 <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
                             class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl shadow-orange-950/40 transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
-                        <span>Pelajari Solusi Antarmoda YMS</span>
+                        <span>Pelajari Solusi Antarmoda</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
@@ -244,15 +244,15 @@ if (isset($_POST['btn_login'])) {
             <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
                 <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-amber-200 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
-                    <span>Optimasi Penataan Lapangan &bull; Aturan Heaviest-on-Bottom</span>
+                    <span>Optimasi Penataan Lapangan 3D</span>
                 </div>
 
                 <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                    Pemetaan Presisi Koordinat Blok, Bay, Row, dan Tier
+                    Pemetaan Presisi Blok, Bay, Row &amp; Tier
                 </h1>
 
-                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
-                    Mencegah pergeseran kontainer liar (*unproductive shuffling*) dengan pemetaan visual lapangan 3D dan sensor telemetri RTK pada alat angkat *reach stacker* Kalmar Gloria.
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl mx-auto">
+                    Cegah shuffling liar dengan digital twin 3D, kaidah beban terberat di bawah, dan telemetri RTK reach stacker.
                 </p>
 
                 <div class="pt-2 sm:pt-4">
@@ -271,21 +271,21 @@ if (isset($_POST['btn_login'])) {
             <div class="w-full max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto space-y-4 sm:space-y-5 lg:space-y-6 py-16 sm:py-20 lg:py-24">
                 <div class="inline-flex items-center space-x-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-white/10 backdrop-blur-md text-xs sm:text-sm font-semibold text-emerald-200 border border-white/20">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span>Otomasi Gerbang Cerdas &bull; Rekonsiliasi Finansial ERP 100%</span>
+                    <span>Otomasi Gerbang &amp; Rekonsiliasi Finansial</span>
                 </div>
 
                 <h1 class="text-2xl sm:text-4xl lg:text-5xl xl:text-6xl font-extrabold tracking-tight text-white leading-tight">
-                    Otomasi Gerbang Masuk &amp; Integrasi Sistem ERP
+                    Otomasi Gate &amp; Penagihan ERP
                 </h1>
 
-                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl xl:max-w-4xl mx-auto">
-                    Kamera OCR ISO 6346 dan jembatan timbang terintegrasi secara instan dengan modul akuntansi sistem ERP terpadu untuk menerbitkan faktur komersial otomatis tanpa potensi kebocoran pendapatan.
+                <p class="text-xs sm:text-sm lg:text-base xl:text-lg text-blue-100 font-normal leading-relaxed max-w-2xl lg:max-w-3xl mx-auto">
+                    Kamera OCR ISO 6346, jembatan timbang 80T SOLAS VGM, dan penagihan komersial otomatis tanpa kebocoran pendapatan.
                 </p>
 
                 <div class="pt-2 sm:pt-4">
                     <button type="button" onclick="openLoginModal()"
                             class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-extrabold px-6 py-3 sm:px-8 sm:py-3.5 rounded-lg text-xs sm:text-sm shadow-xl shadow-orange-950/40 transition transform hover:-translate-y-0.5 inline-flex items-center space-x-2.5">
-                        <span>Eksplorasi Rekonsiliasi Finansial</span>
+                        <span>Eksplorasi Otomasi Gate &amp; ERP</span>
                         <i class="fa-solid fa-arrow-right text-xs"></i>
                     </button>
                 </div>
@@ -313,72 +313,88 @@ if (isset($_POST['btn_login'])) {
     </section>
 
     <!-- =================================================================== -->
-    <!-- 3. TENTANG KAMI: PERAN STRATEGIS KONSULTAN RANTAI PASOK -->
+    <!-- 3. TENTANG KAMI: PILAR STRATEGIS KONSULTAN -->
     <!-- =================================================================== -->
-    <section id="tentang" class="py-20 lg:py-28 xl:py-32 bg-white border-b border-slate-200">
+    <section id="tentang" class="py-16 lg:py-20 bg-white border-b border-slate-200">
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
+            <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 lg:mb-16">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold border border-orange-200/80 uppercase tracking-wider">
                     <i class="fa-solid fa-compass-drafting"></i>
-                    <span>Profil Konsultan &bull; Conclusion Supply Chain Consultant</span>
+                    <span>Solusi Terpadu &bull; Conclusion Supply Chain</span>
                 </div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                    Mitra Strategis Pengembangan Pelabuhan Kering Antarmoda
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                    Pengembangan Pelabuhan Kering Antarmoda
                 </h2>
-                <p class="text-sm sm:text-base lg:text-lg text-slate-600 leading-relaxed">
-                    Kami mendesain dan mengarahkan implementasi solusi logistik terpadu yang menghubungkan simpul pelabuhan laut utama dengan sentra industri manufaktur. Melalui aplikasi percontohan <strong>Yard Management System (YMS)</strong> ini, kami membuktikan bagaimana efisiensi operasional, keandalan telemetri, dan kepatuhan finansial dapat dicapai secara nyata.
+                <p class="text-xs sm:text-sm lg:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
+                    Arsitektur sistem manajemen dry port terintegrasi: percepatan logistik, otomasi telemetri, dan tata kelola finansial presisi.
                 </p>
             </div>
 
             <!-- 4 Nilai Unggulan Konsultansi -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 xl:gap-6">
                 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-blue-500 hover:shadow-md transition-all group flex flex-col justify-between">
                     <div>
-                        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-blue-100 text-cdp-navy flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-cdp-navy group-hover:text-white transition shadow-2xs">
+                        <div class="w-11 h-11 rounded-xl bg-blue-100 text-cdp-navy flex items-center justify-center text-lg mb-4 group-hover:bg-cdp-navy group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-clock-rotate-left"></i>
                         </div>
-                        <h3 class="font-bold text-base lg:text-lg text-slate-900 mb-2 lg:mb-3">Reduksi Waktu Inap</h3>
-                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                            Memangkas masa inap kontainer (<em>dwelling time</em>) di pelabuhan laut hingga 40% melalui pemindahan izin kepabeanan langsung ke pelabuhan kering pedalaman.
+                        <h3 class="font-bold text-sm lg:text-base text-slate-900 mb-1.5">Reduksi Waktu Inap</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Pemotongan masa inap kontainer di pelabuhan laut melalui kliring kepabeanan langsung di pedalaman.
                         </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-blue-700 bg-blue-100/70 px-2.5 py-0.5 rounded-full">-40% Dwelling Time</span>
+                        <i class="fa-solid fa-arrow-trend-down text-blue-500 text-xs"></i>
                     </div>
                 </div>
 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-cyan-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-cyan-500 hover:shadow-md transition-all group flex flex-col justify-between">
                     <div>
-                        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-cyan-100 text-cdp-blue flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-cdp-blue group-hover:text-white transition shadow-2xs">
+                        <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cdp-blue flex items-center justify-center text-lg mb-4 group-hover:bg-cdp-blue group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-train-subway"></i>
                         </div>
-                        <h3 class="font-bold text-base lg:text-lg text-slate-900 mb-2 lg:mb-3">Konektivitas Rel Barang</h3>
-                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                            Pengalihan beban kargo dari jalan raya ke jalur rel ganda (<em>double track siding</em>) berkapasitas masif guna menghemat biaya logistik dan emisi karbon.
+                        <h3 class="font-bold text-sm lg:text-base text-slate-900 mb-1.5">Konektivitas Rel Barang</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Pengalihan beban jalan raya ke koridor rel ganda langsung berkapasitas masif dan ramah lingkungan.
                         </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-cyan-800 bg-cyan-100 px-2.5 py-0.5 rounded-full">30–60 TEU / Rangkaian</span>
+                        <i class="fa-solid fa-train text-cyan-600 text-xs"></i>
                     </div>
                 </div>
 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-orange-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-orange-500 hover:shadow-md transition-all group flex flex-col justify-between">
                     <div>
-                        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition shadow-2xs">
+                        <div class="w-11 h-11 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg mb-4 group-hover:bg-gradient-to-r group-hover:from-orange-500 group-hover:to-orange-600 group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-microchip"></i>
                         </div>
-                        <h3 class="font-bold text-base lg:text-lg text-slate-900 mb-2 lg:mb-3">Otomasi Telemetri IoT</h3>
-                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                            Integrasi sensor <em>twistlock</em>, penimbangan bersertifikasi VGM SOLAS, dan pemindai optik OCR kamera untuk pelacakan kontainer secara waktu-nyata.
+                        <h3 class="font-bold text-sm lg:text-base text-slate-900 mb-1.5">Otomasi Telemetri IoT</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Integrasi sensor twistlock alat angkat, timbangan VGM SOLAS, dan pemindai optik OCR kamera.
                         </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-orange-700 bg-orange-100 px-2.5 py-0.5 rounded-full">Akurasi &gt; 99%</span>
+                        <i class="fa-solid fa-satellite text-orange-500 text-xs"></i>
                     </div>
                 </div>
 
-                <div class="p-6 lg:p-8 xl:p-10 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:shadow-lg transition-all group flex flex-col justify-between">
+                <div class="p-6 rounded-2xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:shadow-md transition-all group flex flex-col justify-between">
                     <div>
-                        <div class="w-12 h-12 lg:w-14 lg:h-14 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl lg:text-2xl mb-4 lg:mb-6 group-hover:bg-emerald-600 group-hover:text-white transition shadow-2xs">
+                        <div class="w-11 h-11 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-lg mb-4 group-hover:bg-emerald-600 group-hover:text-white transition shadow-2xs">
                             <i class="fa-solid fa-shield-halved"></i>
                         </div>
-                        <h3 class="font-bold text-base lg:text-lg text-slate-900 mb-2 lg:mb-3">Nir-Kebocoran Finansial</h3>
-                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                            Sinkronisasi instan setiap manuver alat lapangan ke modul tagihan komersial sistem ERP guna menjamin nol kebocoran pendapatan (<em>zero revenue leakage</em>).
+                        <h3 class="font-bold text-sm lg:text-base text-slate-900 mb-1.5">Nir-Kebocoran Finansial</h3>
+                        <p class="text-xs text-slate-600 leading-relaxed">
+                            Sinkronisasi otomatis setiap manuver fisik ke modul tagihan komersial sistem ERP secara instan.
                         </p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-slate-200/60 flex items-center justify-between">
+                        <span class="text-[11px] font-bold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded-full">Zero Revenue Leakage</span>
+                        <i class="fa-solid fa-receipt text-emerald-600 text-xs"></i>
                     </div>
                 </div>
 
@@ -390,244 +406,190 @@ if (isset($_POST['btn_login'])) {
     <!-- =================================================================== -->
     <!-- 4. FASILITAS & SOLUSI TERPADU (GAYA CIKARANG DRY PORT) -->
     <!-- =================================================================== -->
-    <section id="fasilitas" class="py-20 lg:py-28 xl:py-32 bg-slate-50 border-b border-slate-200">
+    <section id="fasilitas" class="py-16 lg:py-20 bg-slate-50 border-b border-slate-200">
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
+            <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 lg:mb-16">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold border border-orange-200/80 uppercase tracking-wider">
                     <i class="fa-solid fa-warehouse"></i>
-                    <span>Infrastruktur &amp; Kapabilitas Layanan</span>
+                    <span>Infrastruktur Lapangan</span>
                 </div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                    Fasilitas &amp; Solusi Pelabuhan Kering Antarmoda
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                    Fasilitas &amp; Solusi Terpadu 35 Ha
                 </h2>
-                <p class="text-sm sm:text-base lg:text-lg text-slate-600 leading-relaxed">
-                    Dirancang dengan standar operasional terminal peti kemas internasional, berikut adalah enam infrastruktur utama yang disimulasikan dan diintegrasikan oleh <strong>Conclusion Supply Chain Consultant</strong>.
+                <p class="text-xs sm:text-sm lg:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
+                    Infrastruktur modern berstandar internasional yang disimulasikan dan diintegrasikan secara menyeluruh.
                 </p>
             </div>
 
             <!-- Grid 6 Fasilitas Utama -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 xl:gap-10">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8">
                 
                 <!-- Fasilitas 1: KPPT Bea Cukai & Karantina -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
-                    <div class="h-48 lg:h-56 xl:h-64 overflow-hidden relative">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
+                    <div class="h-44 lg:h-48 overflow-hidden relative">
                         <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&w=800&q=80" 
                              alt="Kawasan Pelayanan Pabean Terpadu" 
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                        <span class="absolute top-3.5 left-3.5 bg-cdp-navy/90 backdrop-blur-xs text-white text-[11px] lg:text-xs font-bold px-3 py-1 rounded-md shadow-xs">
-                            Layanan Terpadu Pabean
+                        <span class="absolute top-3 left-3 bg-cdp-navy/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xs">
+                            Pelayanan Pabean
                         </span>
                     </div>
-                    <div class="p-6 lg:p-8 flex-1 flex flex-col justify-between space-y-4 lg:space-y-6">
-                        <div class="space-y-2 lg:space-y-3">
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 group-hover:text-cdp-blue transition">
-                                Kawasan Pelayanan Pabean Terpadu (KPPT) &amp; Karantina
+                    <div class="p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-3.5">
+                        <div class="space-y-1.5">
+                            <h3 class="font-bold text-sm lg:text-base text-slate-900 group-hover:text-cdp-blue transition">
+                                Kawasan Pabean Terpadu &amp; Karantina
                             </h3>
-                            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                                Penyelesaian administrasi kepabeanan satu atap bersama instansi Bea Cukai dan Balai Karantina sebelum peti kemas meninggalkan pelabuhan kering menuju pabrik.
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Kliring dokumen kepabeanan satu atap jalur hijau/merah dan sertifikasi karantina terpadu.
                             </p>
                         </div>
-                        <ul class="text-xs lg:text-sm text-slate-600 space-y-2.5 pt-4 border-t border-slate-100">
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Sinkronisasi dokumen elektronik SPPB, BC 1.1, BC 1.2</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Area jalur hijau dan jalur merah pemeriksaan fisik (PMK 190/2022)</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Pemeriksaan karantina hewan, tumbuhan, dan ikan (HPIK)</span>
-                            </li>
-                        </ul>
+                        <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-100 text-[10.5px] font-semibold text-slate-700">
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">SPPB &amp; BC 1.1</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Jalur Hijau / Merah</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Karantina HPIK</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Fasilitas 2: Emplasemen Rel Antarmoda -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
-                    <div class="h-48 lg:h-56 xl:h-64 overflow-hidden relative">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
+                    <div class="h-44 lg:h-48 overflow-hidden relative">
                         <img src="https://images.unsplash.com/photo-1494412574643-ff11b0a5c1c3?auto=format&fit=crop&w=800&q=80" 
                              alt="Emplasemen Kereta Api Antarmoda" 
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                        <span class="absolute top-3.5 left-3.5 bg-cyan-700/90 backdrop-blur-xs text-white text-[11px] lg:text-xs font-bold px-3 py-1 rounded-md shadow-xs">
-                            Rel Antarmoda KAI Logistik
+                        <span class="absolute top-3 left-3 bg-cyan-700/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xs">
+                            Rel Antarmoda KA
                         </span>
                     </div>
-                    <div class="p-6 lg:p-8 flex-1 flex flex-col justify-between space-y-4 lg:space-y-6">
-                        <div class="space-y-2 lg:space-y-3">
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 group-hover:text-cdp-blue transition">
-                                Emplasemen Jalur Rel Kereta Api Antarmoda
+                    <div class="p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-3.5">
+                        <div class="space-y-1.5">
+                            <h3 class="font-bold text-sm lg:text-base text-slate-900 group-hover:text-cdp-blue transition">
+                                Emplasemen Jalur Rel Kereta Api
                             </h3>
-                            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                                Jalur rel ganda khusus (<em>dedicated double track siding</em>) yang terhubung langsung ke koridor rel nasional menuju dermaga Pelabuhan Tanjung Priok Jakarta.
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Jalur rel ganda khusus terhubung langsung ke koridor rel nasional menuju Pelabuhan Tanjung Priok.
                             </p>
                         </div>
-                        <ul class="text-xs lg:text-sm text-slate-600 space-y-2.5 pt-4 border-t border-slate-100">
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Kapasitas rangkaian 30 hingga 60 TEUs per keberangkatan</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Dukungan bongkar muat cepat gerbong datar (*flat car*)</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Pencegahan kongesti lalu lintas jalan raya arteri dan tol</span>
-                            </li>
-                        </ul>
+                        <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-100 text-[10.5px] font-semibold text-slate-700">
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Double Track Siding</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">30–60 TEU / Rangkaian</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Gerbong PPCW</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Fasilitas 3: Pusat Logistik Berikat & CFS -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
-                    <div class="h-48 lg:h-56 xl:h-64 overflow-hidden relative">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
+                    <div class="h-44 lg:h-48 overflow-hidden relative">
                         <img src="https://images.unsplash.com/photo-1587293852726-70cdb56c2866?auto=format&fit=crop&w=800&q=80" 
                              alt="Gudang Berikat & CFS" 
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                        <span class="absolute top-3.5 left-3.5 bg-amber-700/90 backdrop-blur-xs text-white text-[11px] lg:text-xs font-bold px-3 py-1 rounded-md shadow-xs">
-                            Pergudangan Berikat &amp; CFS
+                        <span class="absolute top-3 left-3 bg-amber-700/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xs">
+                            Gudang CFS &amp; PLB
                         </span>
                     </div>
-                    <div class="p-6 lg:p-8 flex-1 flex flex-col justify-between space-y-4 lg:space-y-6">
-                        <div class="space-y-2 lg:space-y-3">
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 group-hover:text-cdp-blue transition">
-                                Pusat Logistik Berikat (PLB) &amp; Gudang CFS
+                    <div class="p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-3.5">
+                        <div class="space-y-1.5">
+                            <h3 class="font-bold text-sm lg:text-base text-slate-900 group-hover:text-cdp-blue transition">
+                                Pusat Logistik Berikat &amp; Gudang CFS
                             </h3>
-                            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                                Fasilitas penangguhan bea masuk serta gudang <em>Container Freight Station</em> (CFS) modern untuk konsolidasi dan dekonsolidasi kargo muatan ekspor-impor.
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Fasilitas penangguhan bea masuk serta gudang konsolidasi &amp; dekonsolidasi muatan LCL/FCL.
                             </p>
                         </div>
-                        <ul class="text-xs lg:text-sm text-slate-600 space-y-2.5 pt-4 border-t border-slate-100">
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Penangguhan bea masuk &amp; pajak impor hingga pengeluaran barang</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Konsolidasi kargo LCL (<em>Less than Container Load</em>)</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Pengawasan CCTV terintegrasi 24 jam dan manajemen WMS</span>
-                            </li>
-                        </ul>
+                        <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-100 text-[10.5px] font-semibold text-slate-700">
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Rampa D1–D5 Hidrolik</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Konsolidasi LCL</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">WMS &amp; CCTV 24 Jam</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Fasilitas 4: Depo Rantai Dingin (Reefer Hub) -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
-                    <div class="h-48 lg:h-56 xl:h-64 overflow-hidden relative">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
+                    <div class="h-44 lg:h-48 overflow-hidden relative">
                         <img src="https://images.unsplash.com/photo-1586528116493-a029325540fa?auto=format&fit=crop&w=800&q=80" 
                              alt="Depo Peti Kemas Reefer" 
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                        <span class="absolute top-3.5 left-3.5 bg-blue-700/90 backdrop-blur-xs text-white text-[11px] lg:text-xs font-bold px-3 py-1 rounded-md shadow-xs">
-                            Depo Rantai Dingin
+                        <span class="absolute top-3 left-3 bg-blue-700/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xs">
+                            Cold Chain Hub
                         </span>
                     </div>
-                    <div class="p-6 lg:p-8 flex-1 flex flex-col justify-between space-y-4 lg:space-y-6">
-                        <div class="space-y-2 lg:space-y-3">
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 group-hover:text-cdp-blue transition">
-                                Depo Rantai Dingin (Reefer Hub 300+ Plugs)
+                    <div class="p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-3.5">
+                        <div class="space-y-1.5">
+                            <h3 class="font-bold text-sm lg:text-base text-slate-900 group-hover:text-cdp-blue transition">
+                                Depo Rantai Dingin (Reefer Hub)
                             </h3>
-                            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                                Stasiun penanganan peti kemas berpendingin untuk menjamin mutu komoditas suhu terkendali seperti produk farmasi, produk susu, daging beku, dan hasil pertanian.
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Stasiun penanganan peti kemas berpendingin untuk komoditas sensitif suhu (-20&deg;C stabil).
                             </p>
                         </div>
-                        <ul class="text-xs lg:text-sm text-slate-600 space-y-2.5 pt-4 border-t border-slate-100">
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>300+ titik colokan daya listrik (<em>reefer plugs</em>) bersertifikasi</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Pencatatan suhu otomatis berkala oleh teknisi rantai dingin</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Genset cadangan berdaya besar (<em>heavy-duty power back-up</em>)</span>
-                            </li>
-                        </ul>
+                        <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-100 text-[10.5px] font-semibold text-slate-700">
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">300+ Reefer Plugs</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Telemetri Suhu -20&deg;C</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Backup Genset 24 Jam</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Fasilitas 5: Gerbang Cerdas & Timbangan VGM SOLAS -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
-                    <div class="h-48 lg:h-56 xl:h-64 overflow-hidden relative">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
+                    <div class="h-44 lg:h-48 overflow-hidden relative">
                         <img src="https://images.unsplash.com/photo-1519003722824-194d4455a60c?auto=format&fit=crop&w=800&q=80" 
                              alt="Gerbang Cerdas & Jembatan Timbang" 
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                        <span class="absolute top-3.5 left-3.5 bg-emerald-700/90 backdrop-blur-xs text-white text-[11px] lg:text-xs font-bold px-3 py-1 rounded-md shadow-xs">
-                            Otomasi Gerbang &amp; Timbang
+                        <span class="absolute top-3 left-3 bg-emerald-700/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xs">
+                            Gerbang Cerdas &amp; VGM
                         </span>
                     </div>
-                    <div class="p-6 lg:p-8 flex-1 flex flex-col justify-between space-y-4 lg:space-y-6">
-                        <div class="space-y-2 lg:space-y-3">
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 group-hover:text-cdp-blue transition">
-                                Gerbang Cerdas &amp; Jembatan Timbang VGM SOLAS
+                    <div class="p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-3.5">
+                        <div class="space-y-1.5">
+                            <h3 class="font-bold text-sm lg:text-base text-slate-900 group-hover:text-cdp-blue transition">
+                                Gerbang Cerdas &amp; Timbangan VGM
                             </h3>
-                            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                                Pintu masuk dan keluar otomatis berbasis pemindai optik nomor kontainer, pengenal pelat nomor truk, dan jembatan timbang bersertifikasi internasional.
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Pintu masuk-keluar otomatis berbasis kamera OCR nomor kontainer, ANPR truk, dan timbangan SOLAS.
                             </p>
                         </div>
-                        <ul class="text-xs lg:text-sm text-slate-600 space-y-2.5 pt-4 border-t border-slate-100">
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Kamera OCR ISO 6346 &amp; kamera ANPR (pelat truk) otomatis</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Jembatan timbang terkalibrasi VGM (<em>Verified Gross Mass</em>) IMO SOLAS</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Penerbitan surat jalan elektronik (<em>e-Interchange Receipt</em>) instan</span>
-                            </li>
-                        </ul>
+                        <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-100 text-[10.5px] font-semibold text-slate-700">
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Kamera OCR ISO 6346</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Timbangan 80T SOLAS</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">e-Pass Instan</span>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Fasilitas 6: Armada Penanganan Lapangan -->
-                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-xl hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
-                    <div class="h-48 lg:h-56 xl:h-64 overflow-hidden relative">
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-lg hover:border-cdp-blue transition-all overflow-hidden flex flex-col group">
+                    <div class="h-44 lg:h-48 overflow-hidden relative">
                         <img src="https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&w=800&q=80" 
                              alt="Armada Alat Angkat Lapangan" 
                              class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/20 to-transparent"></div>
-                        <span class="absolute top-3.5 left-3.5 bg-indigo-700/90 backdrop-blur-xs text-white text-[11px] lg:text-xs font-bold px-3 py-1 rounded-md shadow-xs">
-                            Armada Alat Berat Lapangan
+                        <span class="absolute top-3 left-3 bg-indigo-700/90 backdrop-blur-xs text-white text-[10px] font-bold px-2.5 py-1 rounded-md shadow-xs">
+                            Armada Alat Berat
                         </span>
                     </div>
-                    <div class="p-6 lg:p-8 flex-1 flex flex-col justify-between space-y-4 lg:space-y-6">
-                        <div class="space-y-2 lg:space-y-3">
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 group-hover:text-cdp-blue transition">
-                                Armada Alat Angkat Berat Kalmar Gloria 45 Ton
+                    <div class="p-5 lg:p-6 flex-1 flex flex-col justify-between space-y-3.5">
+                        <div class="space-y-1.5">
+                            <h3 class="font-bold text-sm lg:text-base text-slate-900 group-hover:text-cdp-blue transition">
+                                Armada Reach Stacker &amp; RTG 45 Ton
                             </h3>
-                            <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                                Didukung unit <em>Reach Stacker</em> generasi mutakhir berdaya angkat 45 ton, RTG (<em>Rubber Tyred Gantry</em>), serta <em>Empty Container Handler</em> berteknologi telemetri.
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Unit reach stacker Kalmar Gloria dan RTG berteknologi telemetri sensor twistlock dan GPS presisi.
                             </p>
                         </div>
-                        <ul class="text-xs lg:text-sm text-slate-600 space-y-2.5 pt-4 border-t border-slate-100">
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Sensor <em>twistlock</em> pintar &amp; telemetri tekanan hidrolik *spreader*</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Pemosisian satelit akurat DGPS RTK pada kabin alat angkat</span>
-                            </li>
-                            <li class="flex items-center space-x-2.5">
-                                <i class="fa-solid fa-circle-check text-emerald-500 text-xs lg:text-sm"></i>
-                                <span>Instruksi kerja nirkabel langsung tersinkronisasi ke konsol YMS</span>
-                            </li>
-                        </ul>
+                        <div class="flex flex-wrap gap-1.5 pt-3 border-t border-slate-100 text-[10.5px] font-semibold text-slate-700">
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Daya Angkat 45 Ton</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Sensor Twistlock</span>
+                            <span class="bg-slate-100 px-2.5 py-0.5 rounded-md">Navigasi DGPS RTK</span>
+                        </div>
                     </div>
                 </div>
 
@@ -636,175 +598,180 @@ if (isset($_POST['btn_login'])) {
         </div>
     </section>
 
+            </div>
+
+        </div>
+    </section>
+
     <!-- =================================================================== -->
-    <!-- 5. TIGA ALUR OPERASIONAL TERINTEGRASI (ARSITEKTUR END-TO-END) -->
+    <!-- 5. TIGA ALUR OPERASIONAL TERINTEGRASI -->
     <!-- =================================================================== -->
-    <section id="tiga-alur" class="py-20 lg:py-28 xl:py-32 bg-white border-b border-slate-200">
+    <section id="tiga-alur" class="py-16 lg:py-20 bg-white border-b border-slate-200">
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
+            <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 lg:mb-16">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold border border-orange-200/80 uppercase tracking-wider">
                     <i class="fa-solid fa-diagram-project"></i>
-                    <span>Arsitektur Ekosistem YMS</span>
+                    <span>Arsitektur End-to-End</span>
                 </div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
                     3 Alur Operasional Terintegrasi
                 </h2>
-                <p class="text-sm sm:text-base lg:text-lg text-slate-600 leading-relaxed">
-                    Sistem yang kami bangun menjamin bahwa <strong>setiap gerakan fisik di lapangan</strong> secara otomatis memicu <strong>aliran data telemetri waktu-nyata</strong>, yang kemudian secara langsung tercatat ke dalam <strong>modul keuangan sistem ERP</strong> tanpa campur tangan manual.
+                <p class="text-xs sm:text-sm lg:text-base text-slate-600 leading-relaxed max-w-2xl mx-auto">
+                    Setiap gerakan fisik di lapangan memicu transmisi telemetri IoT dan mencatat faktur finansial ERP secara otomatis.
                 </p>
             </div>
 
             <!-- Tiga Pilar Komparasi -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 xl:gap-10 mb-12 lg:mb-16">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
                 
                 <!-- Pilar 1: Alur Fisik Lapangan -->
-                <div class="bg-gradient-to-b from-blue-50/50 to-white rounded-2xl border-2 border-blue-200/80 p-6 lg:p-8 xl:p-10 flex flex-col justify-between relative shadow-xs">
-                    <div class="space-y-4 lg:space-y-5">
+                <div class="bg-gradient-to-b from-blue-50/40 to-white rounded-2xl border border-blue-200/80 p-6 lg:p-7 flex flex-col justify-between shadow-xs">
+                    <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-cdp-navy text-white flex items-center justify-center font-extrabold text-xs lg:text-sm shadow-xs">01</span>
-                            <span class="text-[11px] lg:text-xs font-bold text-cdp-navy bg-blue-100 px-3 py-1 rounded-full uppercase tracking-wider">Lapangan Fisik</span>
+                            <span class="w-8 h-8 rounded-lg bg-cdp-navy text-white flex items-center justify-center font-bold text-xs shadow-xs">01</span>
+                            <span class="text-[10.5px] font-bold text-cdp-navy bg-blue-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Lapangan Fisik</span>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-extrabold text-slate-900">Alur Fisik Lapangan</h3>
-                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                            Pergerakan fisik armada truk kontainer, gerbong kereta api barang, dan alat angkat <em>reach stacker</em> di seluruh penjuru pelabuhan kering.
-                        </p>
+                        <div>
+                            <h3 class="text-base lg:text-lg font-bold text-slate-900">Alur Fisik Lapangan</h3>
+                            <p class="text-xs text-slate-600 mt-1">Pergerakan fisik truk kontainer, rangkaian KA kargo, dan reach stacker di lapangan.</p>
+                        </div>
 
-                        <div class="space-y-3.5 lg:space-y-4 pt-4 border-t border-slate-200/60 text-xs lg:text-sm">
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-blue-200 text-cdp-navy flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+                        <div class="space-y-2.5 pt-3 border-t border-slate-200/60 text-xs">
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-blue-100 text-cdp-navy flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
                                 <div>
-                                    <strong class="text-slate-800">Pemeriksaan Gerbang Masuk:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Truk tiba di <em>in-gate</em>, penimbangan bobot kotor di jembatan timbang VGM SOLAS.</p>
+                                    <strong class="text-slate-800">Gerbang Masuk:</strong>
+                                    <span class="text-slate-500">Truk tiba di in-gate dan penimbangan 80T SOLAS VGM.</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-blue-200 text-cdp-navy flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-blue-100 text-cdp-navy flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
                                 <div>
-                                    <strong class="text-slate-800">Penataan Lapangan Penumpukan:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Penempatan di slot Blok-Bay-Row-Tier dengan kaidah beban terberat di lapisan bawah (<em>heaviest-on-bottom</em>).</p>
+                                    <strong class="text-slate-800">Penataan Yard:</strong>
+                                    <span class="text-slate-500">Penempatan di slot Blok-Bay-Row-Tier (heaviest-on-bottom).</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-blue-200 text-cdp-navy flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-blue-100 text-cdp-navy flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
                                 <div>
-                                    <strong class="text-slate-800">Alih Muat Antarmoda Rel:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Pemindahan kontainer ke rangkaian kereta api barang KAI Logistik menuju Tanjung Priok.</p>
+                                    <strong class="text-slate-800">Alih Muat Rel:</strong>
+                                    <span class="text-slate-500">Transfer kontainer ke gerbong KA Logistik ke Priok.</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-blue-200 text-cdp-navy flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">4</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-blue-100 text-cdp-navy flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">4</span>
                                 <div>
-                                    <strong class="text-slate-800">Gerbang Keluar (Out-Gate):</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Verifikasi dokumen SPPB kepabeanan dan pelepasan segel elektronik RFID.</p>
+                                    <strong class="text-slate-800">Gerbang Keluar:</strong>
+                                    <span class="text-slate-500">Verifikasi dokumen SPPB pabean dan pelepasan rilis out-gate.</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] lg:text-xs text-slate-500 font-semibold">
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
                         <span>Fokus: Ketepatan Fisik &amp; K3</span>
-                        <i class="fa-solid fa-truck-ramp-box text-cdp-navy text-sm lg:text-base"></i>
+                        <i class="fa-solid fa-truck-ramp-box text-cdp-navy text-xs"></i>
                     </div>
                 </div>
 
                 <!-- Pilar 2: Alur Informasi & Telemetri IoT -->
-                <div class="bg-gradient-to-b from-cyan-50/50 to-white rounded-2xl border-2 border-cyan-200/80 p-6 lg:p-8 xl:p-10 flex flex-col justify-between relative shadow-xs">
-                    <div class="space-y-4 lg:space-y-5">
+                <div class="bg-gradient-to-b from-cyan-50/40 to-white rounded-2xl border border-cyan-200/80 p-6 lg:p-7 flex flex-col justify-between shadow-xs">
+                    <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-cdp-blue text-white flex items-center justify-center font-extrabold text-xs lg:text-sm shadow-xs">02</span>
-                            <span class="text-[11px] lg:text-xs font-bold text-cdp-blue bg-cyan-100 px-3 py-1 rounded-full uppercase tracking-wider">Telemetri &amp; Data</span>
+                            <span class="w-8 h-8 rounded-lg bg-cdp-blue text-white flex items-center justify-center font-bold text-xs shadow-xs">02</span>
+                            <span class="text-[10.5px] font-bold text-cdp-blue bg-cyan-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Telemetri &amp; Data</span>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-extrabold text-slate-900">Alur Informasi &amp; IoT</h3>
-                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                            Transmisi data telemetri otomatis dari perangkat keras lapangan ke konsol visual <em>Yard Management System</em> berbasis format standar JSON.
-                        </p>
+                        <div>
+                            <h3 class="text-base lg:text-lg font-bold text-slate-900">Alur Informasi &amp; IoT</h3>
+                            <p class="text-xs text-slate-600 mt-1">Transmisi data telemetri otomatis dari perangkat lapangan ke konsol YMS.</p>
+                        </div>
 
-                        <div class="space-y-3.5 lg:space-y-4 pt-4 border-t border-slate-200/60 text-xs lg:text-sm">
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-cyan-200 text-cdp-blue flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+                        <div class="space-y-2.5 pt-3 border-t border-slate-200/60 text-xs">
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-cyan-100 text-cdp-blue flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
                                 <div>
-                                    <strong class="text-slate-800">Pemindaian Optik OCR &amp; ANPR:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Pengenalan instan kode ISO 6346 dan pelat nomor truk dengan akurasi tinggi &gt;99%.</p>
+                                    <strong class="text-slate-800">OCR &amp; ANPR:</strong>
+                                    <span class="text-slate-500">Pemindaian otomatis kode ISO kontainer &amp; plat truk (&gt;99%).</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-cyan-200 text-cdp-blue flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-cyan-100 text-cdp-blue flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
                                 <div>
-                                    <strong class="text-slate-800">Sensor Twistlock &amp; Spreader:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Sensor mekanis alat angkat mendeteksi penguncian (<em>locked</em>) dan pelepasan (<em>unlocked</em>).</p>
+                                    <strong class="text-slate-800">Sensor Twistlock:</strong>
+                                    <span class="text-slate-500">Deteksi penguncian spreader reach stacker secara otomatis.</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-cyan-200 text-cdp-blue flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-cyan-100 text-cdp-blue flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
                                 <div>
-                                    <strong class="text-slate-800">Transmisi Payload JSON:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Pengiriman paket data telemetri via jaringan lokal berkecepatan tinggi ke *broker* sistem YMS.</p>
+                                    <strong class="text-slate-800">Payload JSON:</strong>
+                                    <span class="text-slate-500">Transmisi paket telemetri via jaringan lokal ke broker YMS.</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-cyan-200 text-cdp-blue flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">4</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-cyan-100 text-cdp-blue flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">4</span>
                                 <div>
-                                    <strong class="text-slate-800">Sinkronisasi Visual 3D:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Tampilan peta lapangan di layar supervisor langsung diperbarui dalam milidetik.</p>
+                                    <strong class="text-slate-800">Digital Twin 3D:</strong>
+                                    <span class="text-slate-500">Pembaruan posisi visual denah lapangan secara instan.</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] lg:text-xs text-slate-500 font-semibold">
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
                         <span>Fokus: Visibilitas Waktu-Nyata</span>
-                        <i class="fa-solid fa-network-wired text-cdp-blue text-sm lg:text-base"></i>
+                        <i class="fa-solid fa-network-wired text-cdp-blue text-xs"></i>
                     </div>
                 </div>
 
                 <!-- Pilar 3: Alur Finansial Sistem ERP -->
-                <div class="bg-gradient-to-b from-emerald-50/50 to-white rounded-2xl border-2 border-emerald-200/80 p-6 lg:p-8 xl:p-10 flex flex-col justify-between relative shadow-xs">
-                    <div class="space-y-4 lg:space-y-5">
+                <div class="bg-gradient-to-b from-emerald-50/40 to-white rounded-2xl border border-emerald-200/80 p-6 lg:p-7 flex flex-col justify-between shadow-xs">
+                    <div class="space-y-4">
                         <div class="flex items-center justify-between">
-                            <span class="w-8 h-8 lg:w-10 lg:h-10 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-extrabold text-xs lg:text-sm shadow-xs">03</span>
-                            <span class="text-[11px] lg:text-xs font-bold text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full uppercase tracking-wider">Keuangan ERP</span>
+                            <span class="w-8 h-8 rounded-lg bg-emerald-600 text-white flex items-center justify-center font-bold text-xs shadow-xs">03</span>
+                            <span class="text-[10.5px] font-bold text-emerald-700 bg-emerald-100 px-2.5 py-0.5 rounded-full uppercase tracking-wider">Keuangan ERP</span>
                         </div>
-                        <h3 class="text-lg lg:text-xl font-extrabold text-slate-900">Alur Finansial (Sistem ERP)</h3>
-                        <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                            Penetapan tarif jasa komersial secara otomatis berdasarkan rekaman peristiwa lapangan (<em>event-driven billing</em>) ke dalam buku besar akuntansi.
-                        </p>
+                        <div>
+                            <h3 class="text-base lg:text-lg font-bold text-slate-900">Alur Finansial (Sistem ERP)</h3>
+                            <p class="text-xs text-slate-600 mt-1">Penetapan tarif dan penerbitan faktur otomatis berbasis rekaman aktivitas lapangan.</p>
+                        </div>
 
-                        <div class="space-y-3.5 lg:space-y-4 pt-4 border-t border-slate-200/60 text-xs lg:text-sm">
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">1</div>
+                        <div class="space-y-2.5 pt-3 border-t border-slate-200/60 text-xs">
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">1</span>
                                 <div>
-                                    <strong class="text-slate-800">Pemicu Tarif Berbasis Peristiwa:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Setiap aktivitas angkat (*Lift-On/Lift-Off*) langsung membentuk entri tagihan tertaut.</p>
+                                    <strong class="text-slate-800">Event Billing:</strong>
+                                    <span class="text-slate-500">Pemicu tarif otomatis pada setiap aktivitas Lift-On / Lift-Off.</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">2</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">2</span>
                                 <div>
-                                    <strong class="text-slate-800">Perhitungan Penimbangan VGM:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Biaya sertifikasi penimbangan kontainer langsung dibebankan ke akun tagihan pemilik barang.</p>
+                                    <strong class="text-slate-800">Biaya VGM:</strong>
+                                    <span class="text-slate-500">Pembebanan jasa penimbangan resmi IMO SOLAS ke tagihan shipper.</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">3</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">3</span>
                                 <div>
-                                    <strong class="text-slate-800">Akrual Biaya Penumpukan:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Perhitungan tarif harian masa inap (<em>dwell time storage</em>) dihitung otomatis per jam 00:00.</p>
+                                    <strong class="text-slate-800">Tarif Penumpukan:</strong>
+                                    <span class="text-slate-500">Perhitungan harian masa inap (dwell time) terhitung otomatis.</span>
                                 </div>
                             </div>
-                            <div class="flex items-start space-x-3">
-                                <div class="w-5 h-5 lg:w-6 lg:h-6 rounded-full bg-emerald-200 text-emerald-700 flex items-center justify-center text-[10px] lg:text-xs font-bold flex-shrink-0 mt-0.5">4</div>
+                            <div class="flex items-start space-x-2.5">
+                                <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">4</span>
                                 <div>
-                                    <strong class="text-slate-800">Penerbitan Faktur Sistem ERP:</strong>
-                                    <p class="text-slate-500 text-[11px] lg:text-xs mt-0.5">Faktur komersial langsung tersinkronisasi ke jurnal umum tanpa selisih atau manipulasi.</p>
+                                    <strong class="text-slate-800">Faktur ERP:</strong>
+                                    <span class="text-slate-500">Penerbitan faktur komersial langsung tersinkronisasi ke jurnal umum.</span>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="mt-6 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] lg:text-xs text-slate-500 font-semibold">
+                    <div class="mt-5 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500 font-semibold">
                         <span>Fokus: Nir-Kebocoran Pendapatan</span>
-                        <i class="fa-solid fa-file-invoice-dollar text-emerald-600 text-sm lg:text-base"></i>
+                        <i class="fa-solid fa-file-invoice-dollar text-emerald-600 text-xs"></i>
                     </div>
                 </div>
 
@@ -816,163 +783,152 @@ if (isset($_POST['btn_login'])) {
     <!-- =================================================================== -->
     <!-- 6. INFORMASI TIM KONSULTAN (KELOMPOK 3 ITL TRISAKTI) -->
     <!-- =================================================================== -->
-    <section id="tim" class="py-20 lg:py-28 xl:py-32 bg-slate-50 border-b border-slate-200">
+    <section id="tim" class="py-16 lg:py-20 bg-slate-50 border-b border-slate-200">
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
-            <div class="max-w-3xl lg:max-w-4xl xl:max-w-5xl mx-auto text-center space-y-3.5 lg:space-y-4 mb-16 lg:mb-20">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 lg:px-4 lg:py-1.5 rounded-full bg-orange-50 text-orange-600 text-xs lg:text-sm font-bold border border-orange-200/80 uppercase tracking-wider">
+            <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 lg:mb-16">
+                <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold border border-orange-200/80 uppercase tracking-wider">
                     <i class="fa-solid fa-graduation-cap text-orange-500"></i>
-                    <span>Kelompok 3 &bull; Inland Container Depot &amp; Dry Port Management</span>
+                    <span>Kelompok 3 &bull; ITL Trisakti</span>
                 </div>
-                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
                     Tim Pengembang &amp; Konsultan Sistem
                 </h2>
-                <p class="text-sm sm:text-base lg:text-lg text-slate-600 leading-relaxed">
-                    Disusun untuk memenuhi luaran proyek perancangan sistem terpadu pada mata kuliah <strong>Teknologi dan Perangkat Lunak Logistik</strong> di bawah bimbingan Dosen Pengampu <strong>Dr. Tigor Franky, S.T., M.T.</strong>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl mx-auto">
+                    Mata Kuliah Teknologi &amp; Perangkat Lunak Logistik &bull; Dosen: <strong>Dr. Tigor Franky, S.T., M.T.</strong>
                 </p>
-                <div class="text-xs lg:text-sm text-slate-500 font-medium">
-                    Program Studi S1 Logistik &bull; Fakultas Sistem Transportasi dan Logistik &bull; <strong>Institut Transportasi dan Logistik (ITL) Trisakti, Jakarta &bull; 2026</strong>
-                </div>
             </div>
 
-            <!-- Grid 5 Anggota Tim Konsultan -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 xl:gap-8 mb-12 lg:mb-16">
+            <!-- Grid 5 Anggota Tim Konsultan + Box Afiliasi -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 xl:gap-6">
                 
                 <!-- 1. Zulfikar Jafarudin Fatah -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 lg:p-8 shadow-xs hover:border-orange-400 hover:shadow-lg transition-all space-y-4 lg:space-y-5">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center font-extrabold text-lg lg:text-xl shadow-md flex-shrink-0">
-                            ZF
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 leading-snug">Zulfikar Jafarudin Fatah</h3>
-                            <span class="inline-block mt-0.5 text-[11px] lg:text-xs font-bold text-orange-700 bg-orange-50 px-2.5 py-0.5 rounded-md border border-orange-200/80">
-                                Lead System Architect (Ketua Tim)
-                            </span>
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-orange-400 hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3.5 mb-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
+                                ZF
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Zulfikar Jafarudin Fatah</h3>
+                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded border border-orange-200/80">
+                                    Lead System Architect (Ketua)
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                        Bertanggung jawab memimpin perancangan arsitektur sistem menyeluruh YMS, orkestrasi integrasi antarmoda pelabuhan kering, koordinasi tim pengembang, dan penyusunan tata kelola data sistem.
-                    </p>
-                    <div class="pt-3 lg:pt-4 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] lg:text-xs font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Lead Architect</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Ketua Tim</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Integrasi Antarmoda</span>
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Arsitektur YMS</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Integrasi Antarmoda</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Koordinator Tim</span>
                     </div>
                 </div>
 
                 <!-- 2. Armansyah Muchtarrom -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 lg:p-8 shadow-xs hover:border-cdp-blue hover:shadow-lg transition-all space-y-4 lg:space-y-5">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-cyan-700 text-white flex items-center justify-center font-extrabold text-lg lg:text-xl shadow-md flex-shrink-0">
-                            AM
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 leading-snug">Armansyah Muchtarrom</h3>
-                            <span class="inline-block mt-0.5 text-[11px] lg:text-xs font-bold text-cyan-800 bg-cyan-50 px-2.5 py-0.5 rounded-md border border-cyan-100">
-                                Hardware &amp; Infrastructure Specialist
-                            </span>
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3.5 mb-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-700 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
+                                AM
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Armansyah Muchtarrom</h3>
+                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-100">
+                                    Hardware &amp; Infra Specialist
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                        Bertanggung jawab atas analisis infrastruktur fisik lapangan, integrasi sensor telemetri alat angkat (<em>spreader/twistlock</em>), jembatan timbang bersertifikasi VGM SOLAS, dan otomasi gerbang masuk/keluar.
-                    </p>
-                    <div class="pt-3 lg:pt-4 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] lg:text-xs font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Infrastruktur Lapangan</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Sensor Twistlock</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Otomasi Gerbang</span>
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Infrastruktur Lapangan</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Sensor Twistlock</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Gate ANPR &amp; VGM</span>
                     </div>
                 </div>
 
                 <!-- 3. Afriansayah Ayubi -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 lg:p-8 shadow-xs hover:border-cdp-blue hover:shadow-lg transition-all space-y-4 lg:space-y-5">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-extrabold text-lg lg:text-xl shadow-md flex-shrink-0">
-                            AA
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 leading-snug">Afriansayah Ayubi</h3>
-                            <span class="inline-block mt-0.5 text-[11px] lg:text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded-md border border-amber-100">
-                                Software &amp; ERP Process Specialist
-                            </span>
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3.5 mb-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
+                                AA
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Afriansayah Ayubi</h3>
+                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
+                                    Software &amp; ERP Specialist
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                        Bertanggung jawab atas rekayasa logika proses perangkat lunak, perancangan alur penanganan peti kemas, serta sinkronisasi peristiwa operasional lapangan ke dalam modul keuangan sistem ERP terpadu.
-                    </p>
-                    <div class="pt-3 lg:pt-4 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] lg:text-xs font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Rekayasa Software</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Proses Sistem ERP</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Logika Alur Kerja</span>
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Logika Proses</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Alur Kerja YMS</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Penagihan ERP</span>
                     </div>
                 </div>
 
                 <!-- 4. Juan Gamaliel -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 lg:p-8 shadow-xs hover:border-cdp-blue hover:shadow-lg transition-all space-y-4 lg:space-y-5">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-extrabold text-lg lg:text-xl shadow-md flex-shrink-0">
-                            JG
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 leading-snug">Juan Gamaliel</h3>
-                            <span class="inline-block mt-0.5 text-[11px] lg:text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-md border border-emerald-100">
-                                Data Integration Specialist
-                            </span>
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3.5 mb-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
+                                JG
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Juan Gamaliel</h3>
+                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
+                                    Data Integration Specialist
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                        Bertanggung jawab atas integrasi aliran data antarsistem, pemodelan pertukaran data JSON/API, rekonsiliasi basis data waktu-nyata, dan sinkronisasi informasi kepabeanan serta pelayaran.
-                    </p>
-                    <div class="pt-3 lg:pt-4 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] lg:text-xs font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Integrasi Data API</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Format JSON Telemetri</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Sinkronisasi Basis Data</span>
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Integrasi API</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Payload JSON</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Sinkronisasi Database</span>
                     </div>
                 </div>
 
                 <!-- 5. Naufal Andika Heditya -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-6 lg:p-8 shadow-xs hover:border-cdp-blue hover:shadow-lg transition-all space-y-4 lg:space-y-5 md:col-span-2 lg:col-span-1">
-                    <div class="flex items-center space-x-4">
-                        <div class="w-14 h-14 lg:w-16 lg:h-16 rounded-2xl bg-indigo-600 text-white flex items-center justify-center font-extrabold text-lg lg:text-xl shadow-md flex-shrink-0">
-                            NA
-                        </div>
-                        <div>
-                            <h3 class="font-extrabold text-base lg:text-lg text-slate-900 leading-snug">Naufal Andika Heditya</h3>
-                            <span class="inline-block mt-0.5 text-[11px] lg:text-xs font-bold text-indigo-800 bg-indigo-50 px-2.5 py-0.5 rounded-md border border-indigo-100">
-                                Business Analyst &amp; QA Specialist
-                            </span>
+                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center space-x-3.5 mb-3.5">
+                            <div class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
+                                NA
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Naufal Andika Heditya</h3>
+                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
+                                    Business Analyst &amp; QA
+                                </span>
+                            </div>
                         </div>
                     </div>
-                    <p class="text-xs lg:text-sm text-slate-600 leading-relaxed">
-                        Bertanggung jawab atas analisis kebutuhan proses bisnis operasional pelabuhan kering, standardisasi mutu, pengujian penjaminan kualitas (<em>Quality Assurance</em>), dan kepatuhan regulasi pabean.
-                    </p>
-                    <div class="pt-3 lg:pt-4 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] lg:text-xs font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Analisis Bisnis</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Quality Assurance (QA)</span>
-                        <span class="bg-slate-100 px-2.5 py-1 rounded">Regulasi Pabean</span>
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Analisis Bisnis</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Quality Assurance</span>
+                        <span class="bg-slate-100 px-2 py-0.5 rounded">Regulasi Pabean</span>
                     </div>
                 </div>
 
-                <!-- Kartu Identitas Akademis & Mata Kuliah ITL Trisakti -->
-                <div class="bg-gradient-to-br from-cdp-navy to-cdp-dark rounded-2xl p-6 lg:p-8 text-white flex flex-col justify-between shadow-md md:col-span-2 lg:col-span-1 border border-blue-900">
-                    <div class="space-y-3.5">
-                        <div class="inline-flex items-center space-x-2 text-xs lg:text-sm text-blue-200 font-bold uppercase tracking-wider">
+                <!-- Kartu Identitas Akademis ITL Trisakti -->
+                <div class="bg-gradient-to-br from-cdp-navy to-cdp-dark rounded-2xl p-5 lg:p-6 text-white flex flex-col justify-between shadow-sm border border-blue-900">
+                    <div>
+                        <div class="inline-flex items-center space-x-1.5 text-xs text-blue-200 font-bold uppercase tracking-wider mb-2">
                             <i class="fa-solid fa-graduation-cap text-amber-400"></i>
-                            <span>Afiliasi Akademis Resmi</span>
+                            <span>Afiliasi Akademis</span>
                         </div>
-                        <h3 class="text-base lg:text-lg font-extrabold text-white">
-                            Institut Transportasi dan Logistik (ITL) Trisakti
+                        <h3 class="text-sm lg:text-base font-bold text-white">
+                            ITL Trisakti, Jakarta
                         </h3>
-                        <div class="space-y-1.5 text-xs lg:text-sm text-blue-100 leading-relaxed">
-                            <p><strong>Mata Kuliah:</strong> Teknologi dan Perangkat Lunak Logistik</p>
-                            <p><strong>Dosen Pengampu:</strong> Dr. Tigor Franky, S.T., M.T.</p>
-                            <p><strong>Program Studi:</strong> S1 Logistik, Fakultas Sistem Transportasi dan Logistik</p>
-                            <p><strong>Topik Proyek:</strong> Inland Container Depot &amp; Dry Port Management</p>
-                        </div>
+                        <p class="text-xs text-blue-100 mt-1 leading-relaxed">
+                            S1 Logistik &bull; Fakultas Sistem Transportasi dan Logistik &bull; 2026
+                        </p>
                     </div>
-                    <div class="pt-4 lg:pt-5 border-t border-white/20 flex items-center justify-between text-xs lg:text-sm text-blue-200">
+                    <div class="pt-3 border-t border-white/20 flex items-center justify-between text-[11px] text-blue-200">
                         <span>Jakarta, Indonesia</span>
-                        <span class="font-bold text-white">Kelompok 3 &bull; 2026</span>
+                        <span class="font-bold text-white">Kelompok 3</span>
                     </div>
                 </div>
 
@@ -984,58 +940,58 @@ if (isset($_POST['btn_login'])) {
     <!-- =================================================================== -->
     <!-- 7. CATATAN KAKI RESMI (FOOTER KORPORAT) -->
     <!-- =================================================================== -->
-    <footer class="bg-cdp-dark text-slate-300 text-xs lg:text-sm py-12 lg:py-16 xl:py-20 border-t border-slate-800">
+    <footer class="bg-cdp-dark text-slate-300 text-xs py-10 lg:py-12 border-t border-slate-800">
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12 xl:gap-16 mb-8 lg:mb-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 lg:gap-8 mb-8">
                 
                 <!-- Kolom 1: Merek & Profil -->
-                <div class="md:col-span-2 space-y-3 lg:space-y-4">
-                    <div class="flex items-center space-x-3.5">
-                        <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-9 h-9 lg:w-11 lg:h-11 object-contain bg-white rounded-lg p-0.5">
+                <div class="md:col-span-2 space-y-2.5">
+                    <div class="flex items-center space-x-3">
+                        <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-8 h-8 object-contain bg-white rounded-lg p-0.5">
                         <div>
-                            <span class="font-extrabold text-base lg:text-lg text-white tracking-tight">CONCLUSION</span>
-                            <span class="block text-[10px] lg:text-xs font-bold text-blue-300 uppercase tracking-widest">Supply Chain Consultant</span>
+                            <span class="font-extrabold text-sm lg:text-base text-white tracking-tight">CONCLUSION</span>
+                            <span class="block text-[9px] font-bold text-orange-400 uppercase tracking-widest">Supply Chain Consultant</span>
                         </div>
                     </div>
-                    <p class="text-xs lg:text-sm text-slate-400 max-w-md lg:max-w-lg leading-relaxed">
-                        Aplikasi ini merupakan sarana demonstrasi dan studi percontohan <strong>Yard Management System (YMS)</strong> untuk pelabuhan kering antarmoda. Seluruh data transaksi, sensor, dan pergerakan disimulasikan untuk keperluan konsultansi profesional dan tugas mata kuliah Teknologi dan Perangkat Lunak Logistik.
+                    <p class="text-xs text-slate-400 max-w-md leading-relaxed">
+                        Aplikasi percontohan Yard Management System (YMS) dry port 35 Ha terintegrasi otomasi lapangan, telemetri IoT, dan penagihan ERP.
                     </p>
                 </div>
 
                 <!-- Kolom 2: Navigasi Cepat -->
-                <div class="space-y-2 lg:space-y-3">
-                    <span class="text-xs lg:text-sm font-bold text-white uppercase tracking-wider block mb-2">Tautan Bagian</span>
-                    <ul class="space-y-2 text-xs lg:text-sm text-slate-400">
+                <div class="space-y-2">
+                    <span class="text-xs font-bold text-white uppercase tracking-wider block">Menu</span>
+                    <ul class="space-y-1.5 text-xs text-slate-400">
                         <li><a href="#tentang" class="hover:text-white transition">Tentang Kami</a></li>
-                        <li><a href="#fasilitas" class="hover:text-white transition">Fasilitas &amp; Solusi</a></li>
+                        <li><a href="#fasilitas" class="hover:text-white transition">Fasilitas 35 Ha</a></li>
                         <li><a href="#tiga-alur" class="hover:text-white transition">3 Alur Operasional</a></li>
                         <li><a href="#tim" class="hover:text-white transition">Tim Konsultan</a></li>
                     </ul>
                 </div>
 
                 <!-- Kolom 3: Kontak & Demonstrasi -->
-                <div class="space-y-2 lg:space-y-3">
-                    <span class="text-xs lg:text-sm font-bold text-white uppercase tracking-wider block mb-2">Akses Demonstrasi</span>
-                    <p class="text-xs lg:text-sm text-slate-400 leading-relaxed">
-                        Gunakan akun pengujian terdaftar untuk menguji fitur penataan lapangan dan pelacakan telemetri.
+                <div class="space-y-2">
+                    <span class="text-xs font-bold text-white uppercase tracking-wider block">Akses Demonstrasi</span>
+                    <p class="text-xs text-slate-400 leading-relaxed">
+                        Gunakan akun demo terdaftar untuk menguji fitur penataan lapangan dan telemetri.
                     </p>
                     <button type="button" onclick="openLoginModal()" 
-                            class="mt-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-4 py-2 lg:px-5 lg:py-2.5 rounded-lg text-xs lg:text-sm font-bold shadow-sm shadow-orange-500/25 transition-all inline-flex items-center space-x-2">
-                        <i class="fa-solid fa-arrow-right-to-bracket text-xs lg:text-sm"></i>
-                        <span>Buka Modal Masuk</span>
+                            class="bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white px-3.5 py-1.5 rounded-lg text-xs font-bold shadow-sm shadow-orange-500/25 transition-all inline-flex items-center space-x-1.5">
+                        <i class="fa-solid fa-arrow-right-to-bracket text-xs"></i>
+                        <span>Masuk Demo</span>
                     </button>
                 </div>
 
             </div>
 
-            <div class="pt-8 lg:pt-10 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-3 text-[11px] lg:text-xs text-slate-500">
+            <div class="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
                 <div>
-                    &copy; 2026 <strong>Conclusion Supply Chain Consultant</strong> &bull; Disusun oleh Kelompok 3 S1 Logistik ITL Trisakti (Dosen Pengampu: Dr. Tigor Franky, S.T., M.T.).
+                    &copy; 2026 <strong>Conclusion Supply Chain Consultant</strong> &bull; Kelompok 3 S1 Logistik ITL Trisakti.
                 </div>
-                <div class="flex items-center space-x-4">
-                    <span>Bahasa Indonesia (EYD)</span>
+                <div class="flex items-center space-x-3">
+                    <span>Yard Management System</span>
                     <span>&bull;</span>
-                    <span>Yard Management System Demo</span>
+                    <span>Intermodal Dry Port 35 Ha</span>
                 </div>
             </div>
         </div>

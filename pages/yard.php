@@ -9,7 +9,7 @@
 $yard_info = [
     'pic'    => 'Juan Gamaliel & Armansyah Muchtarrom',
     'role'   => 'Yard Planning Specialist & IoT Infrastructure Specialist',
-    'desc'   => 'Digital Twin penataan peti kemas 3D berbasis WebGL/Three.js. Mengintegrasikan optimasi penumpukan Bay-Row-Tier, mitigasi Container Relocation Problem (CRP), telemetri sensor RTK GNSS reach stacker (<1.4 cm), dan pemantauan dwell time.',
+    'desc'   => 'Digital Twin 3D Bay-Row-Tier, mitigasi Container Relocation Problem (CRP), dan telemetri RTK GNSS alat berat.',
     'icon'   => 'fa-boxes-stacked',
     'status' => 'Digital Twin 3D Aktif & Terintegrasi RTK'
 ];
@@ -206,42 +206,43 @@ $vmt_job_orders = [
 <?php endif; ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul & Info PIC Bersama -->
-    <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="flex items-start space-x-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-[#002f5e] via-[#004b87] to-[#0170b9] text-white rounded-2xl flex items-center justify-center text-2xl shadow-md flex-shrink-0">
+    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white rounded-xl flex items-center justify-center text-xl shadow-xs flex-shrink-0">
                 <i class="fa-solid <?= $yard_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Manajemen Stacking Yard & Digital Twin 3D</h1>
-                    <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold flex items-center">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $yard_info['status'] ?>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h1 class="text-base sm:text-lg font-bold text-gray-900">Manajemen Stacking Yard &amp; Digital Twin 3D</h1>
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $yard_info['status'] ?>
                     </span>
-                    <span class="px-2.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-xs font-semibold">
-                        Live Binding MySQL (<?= count($yard_containers) ?> Box)
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[11px] font-semibold">
+                        MySQL Sync (<?= count($yard_containers) ?> Box)
+                    </span>
+                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[11px] font-semibold">
+                        RTK GNSS &lt;1.4cm
                     </span>
                 </div>
-                <p class="text-xs sm:text-sm text-gray-500 max-w-3xl leading-relaxed">
+                <p class="text-xs text-gray-500 leading-normal">
                     <?= $yard_info['desc'] ?>
                 </p>
             </div>
         </div>
 
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5">
-            <button onclick="openModalYardRelocate()" class="px-4 py-2.5 bg-gradient-to-r from-blue-600 to-[#0170b9] hover:from-blue-700 hover:to-[#004b87] text-white text-xs font-bold rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-arrows-up-down-left-right"></i>
-                <span>+ Relokasi Kontainer (VMT Move)</span>
+        <div class="flex items-center gap-2.5 self-start md:self-auto flex-shrink-0">
+            <button onclick="openModalYardRelocate()" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-arrows-up-down-left-right text-xs"></i>
+                <span>+ Relokasi (VMT Move)</span>
             </button>
-            <!-- Kartu PIC Bersama -->
-            <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 flex items-center space-x-3 flex-shrink-0">
-                <div class="w-9 h-9 rounded-full bg-[#002f5e] text-white flex items-center justify-center font-bold text-sm shadow-xs">
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 flex items-center space-x-2.5">
+                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#002f5e] to-orange-500 text-white flex items-center justify-center text-xs shadow-xs">
                     <i class="fa-solid fa-cube"></i>
                 </div>
-                <div>
-                    <span class="text-[9.5px] uppercase font-bold text-gray-400 block tracking-wider">PIC Bersama:</span>
-                    <p class="font-bold text-gray-900 text-xs"><?= $yard_info['pic'] ?></p>
-                    <span class="text-[10.5px] text-[#0170b9] font-semibold block"><?= $yard_info['role'] ?></span>
+                <div class="leading-tight">
+                    <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">PIC Yard:</span>
+                    <span class="font-bold text-gray-800 text-xs">Juan G. &amp; Armansyah</span>
                 </div>
             </div>
         </div>

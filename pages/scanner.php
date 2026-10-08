@@ -12,7 +12,7 @@
 $scanner_info = [
     'pic'    => 'Naufal Andika Heditya',
     'role'   => 'Business Analyst & QA Specialist',
-    'desc'   => 'Modul verifikasi mutu optik berkecepatan tinggi berbasis standar GS1-128 (SSCC-18), ISO 6346 (Container ID), dan QR Code Pabean CEISA 4.0. Menggunakan engine computer vision terbuka html5-qrcode untuk pemindaian real-time melalui kamera video, dokumen gambar, dan simulasi telemetri terintegrasi basis data YMS.',
+    'desc'   => 'Pemindaian optik otomatis nomor kontainer ISO 6346, label palet GS1 SSCC-18, dan QR Code pabean CEISA 4.0 via kamera & upload berkas.',
     'icon'   => 'fa-barcode',
     'status' => 'Operasional — Engine Optik Terbuka Aktif'
 ];
@@ -35,57 +35,52 @@ if (isset($pdo)) {
 <script src="assets/vendor/qrcode.min.js"></script>
 
 <div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul & Status Penjaminan Mutu (QA) -->
-    <div class="bg-white rounded-2xl p-6 sm:p-7 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="flex items-start sm:items-center space-x-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-blue-400 text-white flex items-center justify-center text-2xl shadow-md flex-shrink-0">
+    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-xl shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-barcode"></i>
             </div>
             <div>
-                <div class="flex items-center space-x-2.5 flex-wrap gap-y-1">
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Scanner Optik SSCC-18, GS1 & ISO 6346</h1>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center shadow-xs">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-                        AIDC Engine Active
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h1 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Scanner Optik SSCC-18, GS1 &amp; ISO 6346</h1>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center shadow-xs">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>AIDC Active
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                        GitHub Open-Source (html5-qrcode)
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                        GS1-128 / SSCC-18
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                        ISO 6346 &amp; CEISA QR
                     </span>
                 </div>
-                <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-3xl leading-relaxed">
-                    Sistem verifikasi mutu identitas peti kemas otomatis (AIDC). Memvalidasi nomor kontainer ISO 6346, Serial Shipping Container Code (SSCC-18), dan e-Seal pabean CEISA 4.0 secara langsung dari kamera perangkat atau unggahan gambar.
+                <p class="text-xs text-gray-500 leading-normal">
+                    <?= $scanner_info['desc'] ?>
                 </p>
             </div>
         </div>
 
-        <!-- PIC Badge Card -->
-        <div class="flex items-center space-x-3 bg-slate-50 border border-slate-200/80 rounded-xl p-3 shrink-0 self-start md:self-auto">
-            <div class="w-10 h-10 rounded-full bg-[#002f5e] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                <i class="fa-solid fa-clipboard-check"></i>
-            </div>
-            <div>
-                <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">Quality Assurance & BA:</span>
-                <p class="font-bold text-gray-800 text-xs mt-0.5"><?= $scanner_info['pic'] ?></p>
-                <span class="text-[10px] text-[#0170b9] font-medium block">Pemeriksaan Mutu Standardisasi GS1</span>
+        <div class="flex items-center space-x-3 flex-shrink-0 self-start md:self-auto">
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#002f5e] to-orange-500 text-white flex items-center justify-center text-xs shadow-xs">
+                    <i class="fa-solid fa-clipboard-check"></i>
+                </div>
+                <div class="leading-tight">
+                    <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">PIC QA:</span>
+                    <span class="font-bold text-gray-800 text-xs"><?= $scanner_info['pic'] ?></span>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Integration Banner: Centralized Simulation Hub -->
-    <div class="bg-gradient-to-r from-[#002f5e] to-[#0170b9] text-white p-3.5 sm:p-4 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
-        <div class="flex items-center space-x-3">
-            <div class="w-8 h-8 rounded-lg bg-white/10 text-amber-300 flex items-center justify-center text-sm shrink-0 border border-white/10">
-                <i class="fa-solid fa-tower-broadcast"></i>
-            </div>
-            <div>
-                <span class="font-bold text-sm block">Uji Coba &amp; Simulasi Telemetri Terpusat</span>
-                <p class="text-[11.5px] text-blue-100 mt-0.5">
-                    Seluruh pengujian fungsionalitas sensor, alur otomatis truk/kereta, dan dekoder optik instan telah dipadukan dalam satu panel di <strong>Simulator IoT SCADA</strong>. Halaman ini difokuskan untuk pemindaian fisik kamera &amp; berkas.
-                </p>
-            </div>
+    <!-- Quick Simulation Shortcut Strip -->
+    <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-4 py-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+        <div class="flex items-center space-x-2.5 text-gray-600">
+            <i class="fa-solid fa-cube text-[#0170b9]"></i>
+            <span>Pengujian otomatis alur sensor gerbang dan pergerakan 3D telah terintegrasi di Simulator Terpusat.</span>
         </div>
-        <a href="dashboard.php?page=simulator" class="px-3.5 py-1.5 bg-amber-500 hover:bg-amber-400 text-gray-950 font-bold rounded-lg transition flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-xs">
-            <i class="fa-solid fa-cube text-xs"></i><span>Buka Panel Simulasi Terpusat</span>
+        <a href="dashboard.php?page=simulator" class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs rounded-lg transition flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-xs">
+            <i class="fa-solid fa-play text-[10px]"></i><span>Buka Panel Simulasi 3D</span>
         </a>
     </div>
 

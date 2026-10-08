@@ -102,39 +102,41 @@ $total_trucks = count($trucks);
 <div class="space-y-4">
 
     <!-- Header & Subtitle (Compact & Clean) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-gray-200/80">
-        <div>
-            <div class="flex items-center space-x-2 mb-1">
-                <span class="px-2 py-0.5 text-[10px] font-bold uppercase rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">
-                    <i class="fa-solid fa-truck-front mr-1"></i> Trucking & Gate Traffic
-                </span>
-                <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> Gerbang & Timbangan Aktif
-                </span>
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-gray-100">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+                <i class="fa-solid fa-truck-front"></i>
             </div>
-            <h2 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Manajemen Trucking & Arus Gerbang</h2>
-            <p class="text-gray-500 text-xs mt-0.5">
-                Monitoring arus truk secara ringkas dan rapi. Klik pada baris armada untuk melihat rincian milestone perjalanan, slip timbangan, dan dokumen masuk.
-            </p>
+            <div>
+                <div class="flex items-center space-x-2 mb-1">
+                    <h2 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Manajemen Trucking &amp; Arus Gerbang</h2>
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> Gerbang &amp; Timbangan Aktif
+                    </span>
+                    <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-orange-50 text-orange-700 border border-orange-200">
+                        80T SOLAS VGM
+                    </span>
+                </div>
+                <p class="text-gray-500 text-xs leading-normal">
+                    Pemantauan arus pergerakan truk trailer, jembatan timbang 80T SOLAS VGM, dan milestone rute armada.
+                </p>
+            </div>
         </div>
-        <div class="flex items-center space-x-2 flex-shrink-0">
-            <button onclick="showAddTruckModal()" class="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-plus"></i>
-                <span>Registrasi Truk Masuk</span>
+        <div class="flex items-center space-x-2 flex-shrink-0 flex-wrap gap-y-2">
+            <button onclick="showAddTruckModal()" class="px-3 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
+                <i class="fa-solid fa-plus text-xs"></i>
+                <span>+ Registrasi Truk</span>
             </button>
-            <button onclick="exportTruckingExcel()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-file-excel"></i>
-                <span>Export Excel</span>
+            <button onclick="exportTruckingExcel()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs">
+                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                <span>Excel</span>
             </button>
-            <button onclick="exportTruckingPDF()" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs">
-                <i class="fa-solid fa-file-pdf"></i>
-                <span>Export PDF</span>
+            <button onclick="exportTruckingPDF()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-rose-50 text-rose-700 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-2xs">
+                <i class="fa-solid fa-file-pdf text-rose-600"></i>
+                <span>PDF</span>
             </button>
-            <button onclick="window.print()" class="px-3 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 text-xs font-semibold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-print mr-1.5 text-gray-500"></i> Cetak Rekap
-            </button>
-            <a href="dashboard.php?page=alat" class="px-3 py-1.5 bg-[#004b87] hover:bg-[#002f5e] text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-dolly mr-1.5"></i> Monitor Alat Berat <i class="fa-solid fa-arrow-right ml-1"></i>
+            <a href="dashboard.php?page=alat" class="px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-2xs transition flex items-center">
+                <i class="fa-solid fa-dolly mr-1.5 text-xs text-amber-400"></i> Alat Berat
             </a>
         </div>
     </div>

@@ -12,9 +12,9 @@ require_once __DIR__ . '/../connection.php';
 $cfs_info = [
     'pic'      => 'Eko Prasetyo',
     'role'     => 'Head of CFS & Warehouse Operations',
-    'desc'     => 'Pusat operasional Container Freight Station (CFS) modern 4.000 m² terintegrasi 5 rampa loading dock hidrolik (D1–D5), layanan stripping FCL ke LCL, konsolidasi stuffing ekspor, manajemen rak palet selektif Aisle A-F berlabel GS1 SSCC-18, serta rekonsiliasi tally sheet kepabeanan CEISA.',
+    'desc'     => 'Layanan konsolidasi LCL/FCL, otomasi 5 rampa loading dock hidrolik (D1–D5), pelabelan palet GS1 SSCC-18, dan tally sheet digital.',
     'icon'     => 'fa-warehouse',
-    'status'   => '5 Rampa Dock Hidrolik Aktif & MHE Zero-Emission Siaga',
+    'status'   => '5 Rampa Dock Hidrolik Aktif & MHE Siaga',
     'badge'    => 'bg-indigo-50 text-indigo-700 border-indigo-200'
 ];
 
@@ -625,41 +625,31 @@ $active_docks_count = 4;
 <!-- ========================================================================= -->
 <!-- HEADER & CONTEXT MODUL CFS WAREHOUSE 4.000 M² -->
 <!-- ========================================================================= -->
-<div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-200/80 mb-6">
+<div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 mb-6">
     <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div class="flex items-start sm:items-center space-x-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-700 via-indigo-600 to-blue-500 text-white flex items-center justify-center text-2xl shadow-lg shadow-indigo-500/20 flex-shrink-0">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-xl shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-warehouse"></i>
             </div>
             <div>
-                <div class="flex items-center flex-wrap gap-2">
-                    <h1 class="text-lg sm:text-xl font-black text-gray-900 tracking-tight">
+                <div class="flex items-center flex-wrap gap-2 mb-1">
+                    <h1 class="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
                         CFS &amp; Pergudangan LCL Konsolidasi 4.000 m²
                     </h1>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $cfs_info['badge'] ?> border flex items-center gap-1">
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
                         <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                        5 Rampa Hidrolik Aktif (D1–D5)
+                        5 Rampa Hidrolik D1–D5
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                        GS1 SSCC-18 Logistics Label
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                        GS1 SSCC-18 Label
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        Stripping &amp; Stuffing
                     </span>
                 </div>
-                <p class="text-xs text-gray-600 mt-1 max-w-4xl leading-relaxed">
+                <p class="text-xs text-gray-500 leading-normal">
                     <?= $cfs_info['desc'] ?>
                 </p>
-                <div class="flex items-center flex-wrap gap-3 mt-2 text-[11px] text-gray-500">
-                    <span class="inline-flex items-center gap-1 font-semibold text-gray-700">
-                        <i class="fa-solid fa-user-tie text-indigo-600"></i> PIC: <?= $cfs_info['pic'] ?> (<?= $cfs_info['role'] ?>)
-                    </span>
-                    <span class="text-gray-300">&bull;</span>
-                    <span class="inline-flex items-center gap-1 text-emerald-700 font-medium">
-                        <i class="fa-solid fa-circle-check"></i> Standard: FIATA LCL Rules &bull; WCO SAFE Framework &bull; ISO 9001
-                    </span>
-                    <span class="text-gray-300">&bull;</span>
-                    <span class="inline-flex items-center gap-1 text-purple-700 font-medium">
-                        <i class="fa-solid fa-barcode"></i> Terhubung Scanner GS1 (HW-15)
-                    </span>
-                </div>
             </div>
         </div>
 

@@ -9,9 +9,9 @@
 $denah_info = [
     'pic'    => 'Juan Gamaliel & Armansyah Muchtarrom',
     'role'   => 'Terminal Operations & Infrastructure Specialists',
-    'desc'   => 'Master plan tata letak fisik 35 Ha berbasis model Cikarang Dry Port. Memuat 7 zona operasional, 25 fasilitas lapangan, dan pemetaan sebaran 26 titik hardware (11 Live Telemetri & 15 Blueprint Fisik) dengan sistem kontrol 4 Layer.',
+    'desc'   => 'Master plan tata letak fisik 35 Ha: 7 zona operasional, 25 fasilitas terminal, dan 26 titik hardware dengan 4 layer kontrol.',
     'icon'   => 'fa-map-location-dot',
-    'status' => 'Master Plan Aktif — 4 Layer Interaktif'
+    'status' => 'Master Plan 4 Layer Interaktif'
 ];
 
 // Data 7 Zona Operasional & 25 Fasilitas Lapangan
@@ -301,34 +301,40 @@ foreach ($zones_data as $z) {
 ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul & Info PIC -->
-    <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div class="flex items-start space-x-4">
-            <div class="w-14 h-14 bg-gradient-to-br from-[#002f5e] via-[#004b87] to-[#0170b9] text-white rounded-2xl flex items-center justify-center text-2xl shadow-md flex-shrink-0">
+    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white rounded-xl flex items-center justify-center text-xl shadow-xs flex-shrink-0">
                 <i class="fa-solid <?= $denah_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2 mb-1.5">
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">Denah Terminal 35 Ha & Master Plan CIDP</h1>
-                    <span class="px-2.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-xs font-semibold flex items-center">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $denah_info['status'] ?>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h1 class="text-base sm:text-lg font-bold text-gray-900">Denah Terminal 35 Ha &amp; Master Plan CIDP</h1>
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $denah_info['status'] ?>
+                    </span>
+                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[11px] font-semibold">
+                        7 Zona &amp; 25 Fasilitas
+                    </span>
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[11px] font-semibold">
+                        26 Hardware Pins
                     </span>
                 </div>
-                <p class="text-xs sm:text-sm text-gray-500 max-w-3xl leading-relaxed">
+                <p class="text-xs text-gray-500 leading-normal">
                     <?= $denah_info['desc'] ?>
                 </p>
             </div>
         </div>
 
-        <!-- Kartu PIC Bersama -->
-        <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 flex items-center space-x-3 flex-shrink-0">
-            <div class="w-10 h-10 rounded-full bg-[#002f5e] text-white flex items-center justify-center font-bold text-sm shadow-xs">
-                <i class="fa-solid fa-compass-drafting"></i>
-            </div>
-            <div>
-                <span class="text-[10px] uppercase font-bold text-gray-400 block tracking-wider">Penanggung Jawab Bersama:</span>
-                <p class="font-bold text-gray-900 text-xs sm:text-sm"><?= $denah_info['pic'] ?></p>
-                <span class="text-[11px] text-[#0170b9] font-semibold block"><?= $denah_info['role'] ?></span>
+        <div class="flex items-center space-x-3 flex-shrink-0 self-start md:self-auto">
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#002f5e] to-orange-500 text-white flex items-center justify-center text-xs shadow-xs">
+                    <i class="fa-solid fa-compass-drafting"></i>
+                </div>
+                <div class="leading-tight">
+                    <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">PIC Terminal:</span>
+                    <span class="font-bold text-gray-800 text-xs">Juan G. &amp; Armansyah</span>
+                </div>
             </div>
         </div>
     </div>

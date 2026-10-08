@@ -147,46 +147,41 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         </div>
     <?php endif; ?>
 
-    <!-- Header Modul: Pengaturan Global & Tata Kelola Sistem -->
-    <div class="bg-white rounded-2xl p-5 sm:p-6 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div class="flex items-start sm:items-center space-x-4">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-2xl shadow-md shadow-orange-950/20 flex-shrink-0">
+    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-xl shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-sliders"></i>
             </div>
             <div>
-                <div class="flex items-center space-x-2.5 flex-wrap gap-y-1">
-                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">Pengaturan Global &amp; Tata Kelola Sistem YMS</h1>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold <?= $db_badge ?> border flex items-center shadow-2xs">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-                        <?= $db_status ?>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h1 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Pengaturan Global &amp; Tata Kelola Sistem YMS</h1>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold <?= $db_badge ?> border flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $db_status ?>
                     </span>
-                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200">
-                        YMS v2.4 Enterprise Edition
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                        RBAC &amp; API Gateway
+                    </span>
+                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                        CEISA 4.0 &amp; ERP Sync
                     </span>
                 </div>
-                <p class="text-xs sm:text-sm text-gray-500 mt-1 max-w-3xl leading-relaxed">
-                    Pusat komando tata kelola arsitektur sistem, parameter fasilitas terminal intermodal 35 Ha, manajemen hak akses pengguna (RBAC), integrasi gateway API kepabeanan CEISA 4.0 / Inaportnet / Odoo ERP, dan kalibrasi master 26 hardware IoT.
+                <p class="text-xs text-gray-500 leading-normal">
+                    Manajemen arsitektur sistem, parameter fasilitas 35 Ha, otentikasi hak akses (RBAC), dan konektivitas API enterprise.
                 </p>
-                <div class="flex items-center space-x-2 text-[11px] text-gray-400 mt-1.5 font-mono">
-                    <span><i class="fa-solid fa-crown text-orange-500 mr-1"></i>Ketua Tim &amp; Lead Architect: <strong><?= htmlspecialchars($cur_nama) ?></strong> &bull; <?= $cur_role ?></span>
-                </div>
             </div>
         </div>
 
         <!-- Tombol Aksi Cepat Header -->
         <div class="flex flex-wrap items-center gap-2 self-start md:self-auto flex-shrink-0">
-            <button onclick="exportSettingsJson()" class="px-3.5 py-2 bg-white border border-gray-200 hover:bg-orange-50/60 hover:border-orange-200 text-gray-700 text-xs font-bold rounded-xl shadow-2xs transition flex items-center space-x-1.5" title="Ekspor Seluruh Parameter ke Format JSON">
+            <button onclick="exportSettingsJson()" class="px-3 py-2 bg-white border border-gray-200 hover:bg-orange-50/60 text-gray-700 text-xs font-semibold rounded-xl shadow-2xs transition flex items-center space-x-1.5" title="Ekspor Seluruh Parameter ke Format JSON">
                 <i class="fa-solid fa-file-code text-orange-600"></i>
                 <span>Ekspor JSON</span>
             </button>
-            <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/25 transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-user-plus"></i>
-                <span>Tambah Pengguna</span>
+            <button onclick="openAddUserModal()" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-user-plus text-xs"></i>
+                <span>+ Pengguna</span>
             </button>
-            <a href="dashboard.php?page=beranda" class="px-3 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl shadow-2xs transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-gauge-high text-orange-400"></i>
-                <span>Dashboard</span>
-            </a>
         </div>
     </div>
 

@@ -124,7 +124,7 @@ $status_colors = [
 $billing_info = [
     'pic'    => 'Afriansayah Ayubi',
     'role'   => 'Software & ERP Process Specialist',
-    'desc'   => 'Bertanggung jawab atas rekayasa logika proses perangkat lunak, perancangan alur penanganan peti kemas, serta sinkronisasi peristiwa operasional lapangan ke dalam modul keuangan sistem ERP terpadu.',
+    'desc'   => 'Kalkulasi tarif otomatis, faktur lift-on/off, penagihan dwell time kontainer, dan integrasi modul keuangan ERP.',
     'icon'   => 'fa-file-invoice-dollar',
     'status' => 'ERP Odoo Connected'
 ];
@@ -146,24 +146,41 @@ $billing_info = [
 <?php endif; ?>
 
 <div class="animate-fadeIn">
-    <!-- Header Modul -->
-    <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row items-center justify-between">
-        <div class="flex items-center space-x-4 mb-4 md:mb-0">
-            <div class="w-14 h-14 bg-blue-50 text-[#0170b9] rounded-xl flex items-center justify-center text-2xl shadow-inner">
+    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div class="flex items-center space-x-3.5">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-xl shadow-xs flex-shrink-0">
                 <i class="fa-solid <?= $billing_info['icon'] ?>"></i>
             </div>
             <div>
-                <h2 class="text-xl font-bold text-gray-800">Modul Billing & Faktur ERP</h2>
-                <div class="flex items-center mt-1 space-x-2">
-                    <span class="px-2.5 py-1 bg-green-50 text-green-700 border border-green-200 rounded-md text-[10px] font-bold tracking-wide flex items-center">
-                        <span class="w-1.5 h-1.5 rounded-full bg-green-500 mr-1.5 animate-pulse"></span><?= $billing_info['status'] ?>
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <h1 class="text-base sm:text-lg font-bold text-gray-900">Modul Billing &amp; Faktur ERP</h1>
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold flex items-center">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $billing_info['status'] ?>
                     </span>
-                    <span class="text-xs text-gray-500"><i class="fa-solid fa-user-pen mr-1"></i> PIC: <span class="font-semibold text-gray-700"><?= $billing_info['pic'] ?></span></span>
+                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[11px] font-semibold">
+                        Otomasi Tarif PMK
+                    </span>
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[11px] font-semibold">
+                        Lift-On / Lift-Off
+                    </span>
                 </div>
+                <p class="text-xs text-gray-500 leading-normal">
+                    <?= $billing_info['desc'] ?>
+                </p>
             </div>
         </div>
-        <div class="text-sm text-gray-500 max-w-sm text-right hidden md:block">
-            <?= $billing_info['desc'] ?>
+
+        <div class="flex items-center space-x-3 flex-shrink-0 self-start md:self-auto">
+            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center space-x-2.5">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#002f5e] to-orange-500 text-white flex items-center justify-center text-xs shadow-xs">
+                    <i class="fa-solid fa-file-invoice-dollar"></i>
+                </div>
+                <div class="leading-tight">
+                    <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">PIC Billing:</span>
+                    <span class="font-bold text-gray-800 text-xs"><?= $billing_info['pic'] ?></span>
+                </div>
+            </div>
         </div>
     </div>
 
