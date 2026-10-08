@@ -761,6 +761,11 @@ foreach ($zones_data as $z) {
                 <line x1="1095" y1="95" x2="1110" y2="142" stroke="#facc15" stroke-width="1.2"/>
                 <line x1="1125" y1="95" x2="1140" y2="142" stroke="#facc15" stroke-width="1.2"/>
                 <text x="1055" y="150" fill="#94a3b8" font-size="6" text-anchor="middle">HOLDING AREA PRE-GATE</text>
+                <!-- Connector Apron to Transfer Road -->
+                <rect x="965" y="155" width="65" height="20" fill="url(#asphaltFill)" stroke="none"/>
+                <line x1="965" y1="155" x2="965" y2="175" stroke="#ffffff" stroke-width="1"/>
+                <line x1="1030" y1="155" x2="1030" y2="175" stroke="#ffffff" stroke-width="1"/>
+                <polygon points="997,172 992,162 1002,162" fill="#facc15"/>
             </g>
         </g>
 
@@ -777,10 +782,11 @@ foreach ($zones_data as $z) {
         <!-- E. TRANSFER HAUL ROAD (y=175..205)                          -->
         <!-- ══════════════════════════════════════════════════════════════ -->
         <g id="haulRoadTransfer">
-            <rect x="230" y="175" width="870" height="30" fill="url(#asphaltFill)" stroke="none"/>
-            <line x1="230" y1="190" x2="1100" y2="190" stroke="#facc15" stroke-width="1.8" stroke-dasharray="8 6"/>
+            <rect x="225" y="175" width="927" height="30" fill="url(#asphaltFill)" stroke="none"/>
+            <line x1="225" y1="190" x2="1148" y2="190" stroke="#facc15" stroke-width="1.8" stroke-dasharray="8 6"/>
             <polygon points="450,186 460,182 460,190" fill="#facc15"/>
-            <polygon points="800,186 810,182 810,190" fill="#facc15"/>
+            <polygon points="780,186 790,182 790,190" fill="#facc15"/>
+            <polygon points="1035,186 1045,182 1045,190" fill="#facc15"/>
             <text x="550" y="188" fill="#f8fafc" font-size="8" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">← TRANSFER HAUL ROAD (CONTAINER KE YARD &amp; GATE) →</text>
         </g>
 
@@ -883,14 +889,15 @@ foreach ($zones_data as $z) {
                 <text x="855" y="360" fill="#2563eb" font-size="6.5" font-weight="bold">BAY 09</text>
             </g>
 
-            <!-- CENTRAL HAUL ROAD (y=375..405) -->
-            <rect x="260" y="375" width="625" height="32" fill="url(#asphaltFill)" stroke="none"/>
-            <line x1="260" y1="391" x2="885" y2="391" stroke="#facc15" stroke-width="1.8" stroke-dasharray="8 6"/>
-            <line x1="260" y1="377" x2="885" y2="377" stroke="#ffffff" stroke-width="1.2"/>
-            <line x1="260" y1="405" x2="885" y2="405" stroke="#ffffff" stroke-width="1.2"/>
+            <!-- CENTRAL HAUL ROAD (y=375..407, LEBAR 20.00 M — KONEKSI PENUH BARAT-TIMUR) -->
+            <rect x="225" y="375" width="841" height="32" fill="url(#asphaltFill)" stroke="none"/>
+            <line x1="225" y1="391" x2="1066" y2="391" stroke="#facc15" stroke-width="1.8" stroke-dasharray="8 6"/>
+            <line x1="225" y1="377" x2="1066" y2="377" stroke="#ffffff" stroke-width="1.2"/>
+            <line x1="225" y1="405" x2="1066" y2="405" stroke="#ffffff" stroke-width="1.2"/>
             <polygon points="400,388 390,384 390,392" fill="#facc15"/>
-            <polygon points="700,388 690,384 690,392" fill="#facc15"/>
-            <text x="550" y="388" fill="#f8fafc" font-size="8" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">← CENTRAL HAUL ROAD (LEBAR 20.00 M) →</text>
+            <polygon points="690,388 700,384 700,392" fill="#facc15"/>
+            <polygon points="980,388 990,384 990,392" fill="#facc15"/>
+            <text x="550" y="388" fill="#f8fafc" font-size="8" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">← CENTRAL HAUL ROAD (LEBAR 20.00 M — KONEKSI ARTERI BARAT - TIMUR) →</text>
 
             <!-- BLOK C: DOMESTIC (y=415..535) -->
             <g id="blokC">
@@ -926,70 +933,135 @@ foreach ($zones_data as $z) {
         </g>
 
         <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- H. REEFER (COLD CHAIN) & HAZMAT DG (EAST, y=210..535)       -->
+        <!-- H. REEFER (COLD CHAIN) & HAZMAT DG (EAST-CENTRAL, y=210..535) -->
         <!-- ══════════════════════════════════════════════════════════════ -->
         <g id="zone_reefer" class="zone-element cursor-pointer" onclick="showZoneDetails('reefer')">
             <!-- REEFER TERMINAL -->
             <g id="fac_f_reefer_racks" onclick="showFacilityDetails('f_reefer_racks', event)">
-                <rect x="895" y="210" width="165" height="195" fill="#ecfeff" stroke="#06b6d4" stroke-width="2" rx="3"/>
-                <text x="977" y="235" fill="#0e7490" font-family="'Consolas', monospace" font-size="9" font-weight="bold" text-anchor="middle">REEFER YARD (COLD CHAIN)</text>
-                <text x="977" y="252" fill="#0891b2" font-family="'Consolas', monospace" font-size="8" text-anchor="middle">KAPASITAS: 300 POWER PLUGS</text>
-                <circle cx="925" cy="275" r="3" fill="#06b6d4"/><circle cx="950" cy="275" r="3" fill="#06b6d4"/><circle cx="975" cy="275" r="3" fill="#06b6d4"/><circle cx="1000" cy="275" r="3" fill="#06b6d4"/><circle cx="1025" cy="275" r="3" fill="#06b6d4"/>
-                <circle cx="925" cy="300" r="3" fill="#06b6d4"/><circle cx="950" cy="300" r="3" fill="#06b6d4"/><circle cx="975" cy="300" r="3" fill="#06b6d4"/><circle cx="1000" cy="300" r="3" fill="#06b6d4"/><circle cx="1025" cy="300" r="3" fill="#06b6d4"/>
-                <circle cx="925" cy="325" r="3" fill="#06b6d4"/><circle cx="950" cy="325" r="3" fill="#06b6d4"/><circle cx="975" cy="325" r="3" fill="#06b6d4"/><circle cx="1000" cy="325" r="3" fill="#06b6d4"/><circle cx="1025" cy="325" r="3" fill="#06b6d4"/>
-                <text x="977" y="380" fill="#0891b2" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">CATWALK MONITORING 380V/32A</text>
+                <rect x="890" y="210" width="135" height="155" fill="#ecfeff" stroke="#06b6d4" stroke-width="2" rx="3"/>
+                <text x="957" y="233" fill="#0e7490" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">REEFER YARD (COLD CHAIN)</text>
+                <text x="957" y="248" fill="#0891b2" font-family="'Consolas', monospace" font-size="7.5" text-anchor="middle">KAPASITAS: 300 POWER PLUGS</text>
+                <circle cx="915" cy="275" r="3" fill="#06b6d4"/><circle cx="936" cy="275" r="3" fill="#06b6d4"/><circle cx="957" cy="275" r="3" fill="#06b6d4"/><circle cx="978" cy="275" r="3" fill="#06b6d4"/><circle cx="999" cy="275" r="3" fill="#06b6d4"/>
+                <circle cx="915" cy="300" r="3" fill="#06b6d4"/><circle cx="936" cy="300" r="3" fill="#06b6d4"/><circle cx="957" cy="300" r="3" fill="#06b6d4"/><circle cx="978" cy="300" r="3" fill="#06b6d4"/><circle cx="999" cy="300" r="3" fill="#06b6d4"/>
+                <circle cx="915" cy="325" r="3" fill="#06b6d4"/><circle cx="936" cy="325" r="3" fill="#06b6d4"/><circle cx="957" cy="325" r="3" fill="#06b6d4"/><circle cx="978" cy="325" r="3" fill="#06b6d4"/><circle cx="999" cy="325" r="3" fill="#06b6d4"/>
+                <text x="957" y="352" fill="#0891b2" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">CATWALK MONITORING 380V/32A</text>
             </g>
 
             <!-- BLOK E: DANGEROUS GOODS HAZMAT -->
             <g id="blokDG">
-                <rect x="895" y="415" width="165" height="120" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="3"/>
-                <rect x="899" y="419" width="157" height="112" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="8 4"/>
-                <rect x="895" y="415" width="165" height="16" fill="url(#hazardStripe)" opacity="0.3"/>
-                <text x="977" y="445" fill="#b91c1c" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">BLOK E — BUNDED DG YARD</text>
-                <text x="977" y="460" fill="#dc2626" font-family="'Consolas', monospace" font-size="7" text-anchor="middle">HAZMAT DANGEROUS GOODS</text>
-                <text x="977" y="478" fill="#ef4444" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">TANGGUL BETON 1.4 METER</text>
-                <rect x="947" y="490" width="60" height="25" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
-                <text x="977" y="506" fill="#991b1b" font-size="7" font-weight="bold" text-anchor="middle">SUMP PIT</text>
+                <rect x="890" y="415" width="135" height="120" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="3"/>
+                <rect x="894" y="419" width="127" height="112" fill="none" stroke="#dc2626" stroke-width="2" stroke-dasharray="8 4"/>
+                <rect x="890" y="415" width="135" height="16" fill="url(#hazardStripe)" opacity="0.3"/>
+                <text x="957" y="445" fill="#b91c1c" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">BLOK E — BUNDED DG YARD</text>
+                <text x="957" y="460" fill="#dc2626" font-family="'Consolas', monospace" font-size="7" text-anchor="middle">HAZMAT DANGEROUS GOODS</text>
+                <text x="957" y="478" fill="#ef4444" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">TANGGUL BETON 1.4 METER</text>
+                <rect x="927" y="490" width="60" height="25" fill="#fecaca" stroke="#dc2626" stroke-width="1"/>
+                <text x="957" y="506" fill="#991b1b" font-size="7" font-weight="bold" text-anchor="middle">SUMP PIT</text>
             </g>
 
-            <!-- Reefer Control Room -->
+            <!-- Reefer Control Room & Parking Akses Teknisi -->
             <g id="fac_f_reefer_control" onclick="showFacilityDetails('f_reefer_control', event)">
-                <rect x="1070" y="210" width="85" height="65" fill="#ffffff" stroke="#0891b2" stroke-width="1.6" rx="2"/>
-                <text x="1112" y="235" fill="#0e7490" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">REEFER CONTROL</text>
-                <text x="1112" y="250" fill="#64748b" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">RUANG MONITORING</text>
+                <!-- Paved Access Driveway in front -->
+                <rect x="1066" y="210" width="14" height="55" fill="url(#asphaltFill)" stroke="none"/>
+                <line x1="1066" y1="210" x2="1080" y2="210" stroke="#ffffff" stroke-width="1"/>
+                <line x1="1066" y1="265" x2="1080" y2="265" stroke="#ffffff" stroke-width="1"/>
+                <!-- Building -->
+                <rect x="1080" y="210" width="72" height="55" fill="#ffffff" stroke="#0891b2" stroke-width="1.8" rx="2"/>
+                <rect x="1084" y="214" width="64" height="14" fill="#ecfeff" stroke="#0891b2" stroke-width="0.8"/>
+                <text x="1116" y="224" fill="#0e7490" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">REEFER CONTROL</text>
+                <text x="1116" y="242" fill="#0f172a" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">RUANG MONITORING</text>
+                <text x="1116" y="254" fill="#64748b" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">TEKNISI 24/7</text>
             </g>
         </g>
 
         <!-- ══════════════════════════════════════════════════════════════ -->
-        <!-- I. ZONA BEA CUKAI & BEHANDLE (EAST, y=285..535)             -->
+        <!-- EASTERN HAUL ROAD: ARTERI TIMUR & JALUR MERAH (y=175..571)  -->
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <g id="haulRoadEast">
+            <!-- Main North-South Asphalt Haul Road (Width ~13m) -->
+            <rect x="1028" y="175" width="38" height="396" fill="url(#asphaltFill)" stroke="none"/>
+            <line x1="1047" y1="175" x2="1047" y2="571" stroke="#facc15" stroke-width="1.8" stroke-dasharray="6 4"/>
+            <!-- Road Border White Lines -->
+            <line x1="1028" y1="205" x2="1028" y2="375" stroke="#ffffff" stroke-width="1.2"/>
+            <line x1="1028" y1="407" x2="1028" y2="545" stroke="#ffffff" stroke-width="1.2"/>
+            <line x1="1066" y1="205" x2="1066" y2="280" stroke="#ffffff" stroke-width="1.2"/>
+            <!-- Directional Flow Arrows -->
+            <polygon points="1047,242 1043,234 1051,234" fill="#facc15"/>
+            <polygon points="1047,472 1043,464 1051,464" fill="#facc15"/>
+            <polygon points="1047,330 1043,338 1051,338" fill="#facc15"/>
+            <!-- Road Label Vertical -->
+            <text x="1049" y="300" fill="#f8fafc" font-size="7" font-family="'Consolas', monospace" font-weight="bold" transform="rotate(90 1049 300)" text-anchor="middle">EASTERN HAUL ROAD (KORIDOR PABEAN &amp; JALUR MERAH) →</text>
+        </g>
+
+        <!-- ══════════════════════════════════════════════════════════════ -->
+        <!-- I. ZONA BEA CUKAI & BEHANDLE (EAST, y=272..542)             -->
         <!-- ══════════════════════════════════════════════════════════════ -->
         <g id="zone_customs" class="zone-element cursor-pointer" onclick="showZoneDetails('customs')">
-            <rect x="1070" y="285" width="85" height="250" rx="3" fill="#fef2f2" fill-opacity="0.4" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6 3"/>
+            <!-- Inspection Apron Background Paving -->
+            <rect x="1066" y="272" width="88" height="270" rx="3" fill="url(#asphaltLight)" stroke="#dc2626" stroke-width="1.5" stroke-dasharray="6 3"/>
+            <text x="1110" y="281" fill="#dc2626" font-family="'Consolas', monospace" font-size="6" font-weight="bold" text-anchor="middle">ZONA PABEAN STERIL (CEISA 4.0)</text>
 
-            <!-- X-Ray Scanner -->
+            <!-- 1. X-Ray Scanner 6 MeV Nuctech MB1215DE (Drive-Through Lane + Gantry Arch) -->
             <g id="fac_f_behandle_xray" onclick="showFacilityDetails('f_behandle_xray', event)">
-                <rect x="1075" y="295" width="75" height="65" fill="#ffffff" stroke="#0f172a" stroke-width="2" rx="2"/>
-                <rect x="1080" y="300" width="65" height="15" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/>
-                <text x="1112" y="311" fill="#991b1b" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">X-RAY 6 MeV</text>
-                <text x="1112" y="330" fill="#475569" font-family="'Consolas', monospace" font-size="6" text-anchor="middle">NUCTECH MB1215DE</text>
-                <text x="1112" y="345" fill="#dc2626" font-family="'Consolas', monospace" font-size="6" text-anchor="middle">JALUR MERAH</text>
+                <!-- Dedicated Container Drive-Through Inspection Lane -->
+                <rect x="1068" y="285" width="42" height="76" fill="url(#asphaltFill)" stroke="#dc2626" stroke-width="1" rx="1"/>
+                <line x1="1089" y1="285" x2="1089" y2="361" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 2"/>
+                <!-- Stop Line for X-Ray Scanner -->
+                <rect x="1071" y="318" width="36" height="8" fill="#facc15" fill-opacity="0.3" stroke="#facc15" stroke-width="0.8"/>
+                <text x="1089" y="324" fill="#facc15" font-family="'Consolas', monospace" font-size="5" font-weight="bold" text-anchor="middle">STOP LINE</text>
+                <!-- Inspection Flow Arrows -->
+                <polygon points="1089,302 1086,295 1092,295" fill="#38bdf8"/>
+                <polygon points="1089,350 1086,343 1092,343" fill="#38bdf8"/>
+                <text x="1089" y="340" fill="#f8fafc" font-size="5" font-weight="bold" text-anchor="middle">5-15 KM/H</text>
+
+                <!-- 6 MeV Gantry Scanner Structure -->
+                <rect x="1112" y="285" width="40" height="76" fill="#ffffff" stroke="#0f172a" stroke-width="2" rx="2"/>
+                <rect x="1114" y="287" width="36" height="15" fill="#fee2e2" stroke="#ef4444" stroke-width="1"/>
+                <text x="1132" y="297" fill="#991b1b" font-family="'Consolas', monospace" font-size="6" font-weight="bold" text-anchor="middle">X-RAY 6 MeV</text>
+                <text x="1132" y="316" fill="#0f172a" font-family="'Consolas', monospace" font-size="5.5" font-weight="bold" text-anchor="middle">NUCTECH</text>
+                <text x="1132" y="326" fill="#475569" font-family="'Consolas', monospace" font-size="5" text-anchor="middle">MB1215DE</text>
+                <text x="1132" y="340" fill="#dc2626" font-family="'Consolas', monospace" font-size="5.5" font-weight="bold" text-anchor="middle">JALUR MERAH</text>
+                <text x="1132" y="352" fill="#64748b" font-family="'Consolas', monospace" font-size="5" text-anchor="middle">LINAC GANTRY</text>
             </g>
 
-            <!-- Quarantine Lab -->
+            <!-- 2. Quarantine Lab & Behandle Physical Inspection Bays -->
             <g id="fac_f_quarantine" onclick="showFacilityDetails('f_quarantine', event)">
-                <rect x="1075" y="370" width="75" height="55" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" rx="2"/>
-                <text x="1112" y="392" fill="#0f172a" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">LAB KARANTINA</text>
-                <text x="1112" y="408" fill="#64748b" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">HEWAN &amp; TUMBUHAN</text>
+                <!-- Staging / Behandle Physical Inspection Bays -->
+                <rect x="1068" y="367" width="42" height="66" fill="url(#asphaltFill)" stroke="#94a3b8" stroke-width="1" rx="1"/>
+                <rect x="1070" y="371" width="38" height="27" fill="none" stroke="#facc15" stroke-width="1" stroke-dasharray="3 2"/>
+                <text x="1089" y="387" fill="#facc15" font-size="5.5" font-weight="bold" text-anchor="middle">BAY 01 INSPEKSI</text>
+                <rect x="1070" y="402" width="38" height="27" fill="none" stroke="#facc15" stroke-width="1" stroke-dasharray="3 2"/>
+                <text x="1089" y="418" fill="#facc15" font-size="5.5" font-weight="bold" text-anchor="middle">BAY 02 BEHANDLE</text>
+
+                <!-- Lab Karantina Building -->
+                <rect x="1112" y="367" width="40" height="66" fill="#ffffff" stroke="#0f172a" stroke-width="1.8" rx="2"/>
+                <text x="1132" y="385" fill="#0f172a" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">LAB KARANTINA</text>
+                <text x="1132" y="401" fill="#64748b" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">HEWAN &amp; TUMBUHAN</text>
+                <text x="1132" y="415" fill="#16a34a" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">UJI SAMPEL K3</text>
+                <text x="1132" y="427" fill="#0284c7" font-family="'Consolas', monospace" font-size="5" text-anchor="middle">BIO-SECURITY</text>
             </g>
 
-            <!-- Kantor KPPBC -->
+            <!-- 3. Kantor KPPBC & Pos Smart E-Seal Checkpoint -->
             <g id="fac_f_kppbc" onclick="showFacilityDetails('f_kppbc', event)">
-                <rect x="1075" y="435" width="75" height="90" fill="#ffffff" stroke="#dc2626" stroke-width="2" rx="2"/>
-                <rect x="1078" y="440" width="69" height="18" fill="#fee2e2" stroke="#dc2626" stroke-width="1"/>
-                <text x="1112" y="453" fill="#991b1b" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">KANTOR KPPBC</text>
-                <text x="1112" y="478" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" text-anchor="middle">PELAYANAN PABEAN</text>
-                <text x="1112" y="494" fill="#64748b" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">SISTEM CEISA 4.0</text>
-                <text x="1112" y="512" fill="#dc2626" font-family="'Consolas', monospace" font-size="6" text-anchor="middle">POS SMART E-SEAL</text>
+                <!-- Pos E-Seal Driveway & Exit Channel -->
+                <rect x="1068" y="439" width="42" height="97" fill="url(#asphaltFill)" stroke="#dc2626" stroke-width="1" rx="1"/>
+                <line x1="1089" y1="439" x2="1089" y2="536" stroke="#facc15" stroke-width="1.5" stroke-dasharray="4 2"/>
+                <!-- E-Seal Checkpoint Island -->
+                <rect x="1071" y="475" width="36" height="22" fill="#fef2f2" stroke="#dc2626" stroke-width="1" rx="1"/>
+                <text x="1089" y="486" fill="#dc2626" font-size="5.5" font-weight="bold" text-anchor="middle">POS SMART E-SEAL</text>
+                <text x="1089" y="494" fill="#475569" font-size="4.5" text-anchor="middle">VALIDASI CEISA</text>
+                <!-- Exit Flow Arrow to South Road -->
+                <polygon points="1089,530 1085,520 1093,520" fill="#facc15"/>
+                <text x="1089" y="515" fill="#f8fafc" font-size="5" font-weight="bold" text-anchor="middle">EXIT PABEAN ▼</text>
+
+                <!-- Kantor KPPBC Building -->
+                <rect x="1112" y="439" width="40" height="97" fill="#ffffff" stroke="#dc2626" stroke-width="2" rx="2"/>
+                <rect x="1114" y="443" width="36" height="16" fill="#fee2e2" stroke="#dc2626" stroke-width="1"/>
+                <text x="1132" y="454" fill="#991b1b" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">KANTOR KPPBC</text>
+                <text x="1132" y="477" fill="#0f172a" font-family="'Consolas', monospace" font-size="6" text-anchor="middle">BEA CUKAI</text>
+                <text x="1132" y="493" fill="#64748b" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">SISTEM CEISA 4.0</text>
+                <text x="1132" y="509" fill="#dc2626" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">PELAYANAN 24/7</text>
+                <text x="1132" y="525" fill="#0284c7" font-family="'Consolas', monospace" font-size="5" text-anchor="middle">PORT CLEARANCE</text>
             </g>
         </g>
 
@@ -997,9 +1069,12 @@ foreach ($zones_data as $z) {
         <!-- J. SOUTH HAUL ROAD (y=545..572)                             -->
         <!-- ══════════════════════════════════════════════════════════════ -->
         <g id="haulRoadSouth">
-            <rect x="55" y="545" width="1045" height="26" fill="url(#asphaltLight)" stroke="none"/>
-            <line x1="55" y1="558" x2="1100" y2="558" stroke="#facc15" stroke-width="1.5" stroke-dasharray="6 4"/>
-            <text x="580" y="556" fill="#f8fafc" font-size="7.5" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">← SOUTH HAUL ROAD (APRON CFS &amp; ACCESS KE SIDING KA) →</text>
+            <rect x="55" y="545" width="1097" height="26" fill="url(#asphaltLight)" stroke="none"/>
+            <line x1="55" y1="558" x2="1148" y2="558" stroke="#facc15" stroke-width="1.5" stroke-dasharray="6 4"/>
+            <polygon points="400,556 410,552 410,560" fill="#facc15"/>
+            <polygon points="780,556 790,552 790,560" fill="#facc15"/>
+            <polygon points="1050,556 1060,552 1060,560" fill="#facc15"/>
+            <text x="580" y="556" fill="#f8fafc" font-size="7.5" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">← SOUTH HAUL ROAD (APRON CFS, KORIDOR PABEAN &amp; ACCESS KE SIDING KA) →</text>
         </g>
 
         <!-- ══════════════════════════════════════════════════════════════ -->
@@ -1061,17 +1136,27 @@ foreach ($zones_data as $z) {
             <line x1="490" y1="386" x2="515" y2="386" stroke="#ffffff" stroke-width="3"/>
             <line x1="490" y1="393" x2="515" y2="393" stroke="#ffffff" stroke-width="3"/>
             <line x1="490" y1="400" x2="515" y2="400" stroke="#ffffff" stroke-width="3"/>
+            <!-- Zebra 4: Across Eastern Haul Road (Reefer Control to Yard) -->
+            <rect x="1028" y="208" width="38" height="16" fill="#1e293b"/>
+            <line x1="1028" y1="212" x2="1066" y2="212" stroke="#ffffff" stroke-width="3"/>
+            <line x1="1028" y1="218" x2="1066" y2="218" stroke="#ffffff" stroke-width="3"/>
+            <!-- Zebra 5: Across Central Haul at Reefer Yard -->
+            <rect x="888" y="375" width="22" height="32" fill="#1e293b"/>
+            <line x1="892" y1="379" x2="906" y2="379" stroke="#ffffff" stroke-width="3"/>
+            <line x1="892" y1="386" x2="906" y2="386" stroke="#ffffff" stroke-width="3"/>
+            <line x1="892" y1="393" x2="906" y2="393" stroke="#ffffff" stroke-width="3"/>
+            <line x1="892" y1="400" x2="906" y2="400" stroke="#ffffff" stroke-width="3"/>
         </g>
 
         <!-- DIMENSION LINES -->
         <g id="dimensionLines" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold">
             <!-- Total Width 380m -->
-            <line x1="40" y1="755" x2="880" y2="755" stroke="#002f5e" stroke-width="1"/>
+            <line x1="40" y1="755" x2="1160" y2="755" stroke="#002f5e" stroke-width="1"/>
             <line x1="40" y1="748" x2="40" y2="762" stroke="#002f5e" stroke-width="1.4"/>
-            <line x1="880" y1="748" x2="880" y2="762" stroke="#002f5e" stroke-width="1.4"/>
+            <line x1="1160" y1="748" x2="1160" y2="762" stroke="#002f5e" stroke-width="1.4"/>
             <polygon points="40,755 48,753 48,757" fill="#002f5e"/>
-            <polygon points="880,755 872,753 872,757" fill="#002f5e"/>
-            <text x="460" y="752" fill="#002f5e" text-anchor="middle">LEBAR TOTAL KAWASAN = 380.00 METER</text>
+            <polygon points="1160,755 1152,753 1152,757" fill="#002f5e"/>
+            <text x="600" y="752" fill="#002f5e" text-anchor="middle">LEBAR TOTAL KAWASAN = 380.00 METER</text>
 
             <!-- Total Height 260m -->
             <line x1="1175" y1="42" x2="1175" y2="717" stroke="#002f5e" stroke-width="1"/>
@@ -1096,6 +1181,13 @@ foreach ($zones_data as $z) {
             <!-- Turning Radius Arcs -->
             <path d="M 260 375 Q 285 375 285 350" fill="none" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="3 3"/>
             <text x="270" y="370" fill="#ef4444" font-size="6.5" font-family="'Consolas', monospace" font-weight="bold">R15M</text>
+            <!-- Turning Radius Arcs East Side -->
+            <path d="M 1028 175 Q 1028 195 1010 195" fill="none" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <text x="1014" y="188" fill="#ef4444" font-size="6" font-family="'Consolas', monospace" font-weight="bold">R15M</text>
+            <path d="M 1028 375 Q 1028 360 1010 360" fill="none" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <text x="1014" y="370" fill="#ef4444" font-size="6" font-family="'Consolas', monospace" font-weight="bold">R15M</text>
+            <path d="M 1028 545 Q 1028 530 1010 530" fill="none" stroke="#ef4444" stroke-width="1.2" stroke-dasharray="3 3"/>
+            <text x="1014" y="540" fill="#ef4444" font-size="6" font-family="'Consolas', monospace" font-weight="bold">R15M</text>
         </g>
 
         <!-- COMPASS ROSE (NORTH = UP) -->

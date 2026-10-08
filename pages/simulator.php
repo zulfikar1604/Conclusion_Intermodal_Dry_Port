@@ -2483,21 +2483,23 @@ function buildCivilPavementsAndRoadNetwork() {
 
     const roadMarkings = [
         // North Cross Road (Connecting Gate to Admin, Transfer Lanes, Customs)
-        { sx: -130, ex: 130, z: 28, orient: 'h' },
-        // Central Yard Spine Road (Between Blok A/B and Blok C/D)
-        { sx: -84, ex: 84, z: -5, orient: 'h' },
-        // South Haul Road (Alongside Rail Siding Loading Ramp)
-        { sx: -130, ex: 130, z: -39, orient: 'h' },
+        { sx: -140, ex: 130, z: 28, orient: 'h' },
+        // Central Yard Spine Road (Connecting West CFS across Blok A-D and Reefer to Eastern Haul Road)
+        { sx: -122, ex: 84, z: -5, orient: 'h' },
+        // South Haul Road (Alongside Rail Siding Loading Ramp to Customs Exit)
+        { sx: -140, ex: 130, z: -39, orient: 'h' },
         // Gate Inbound Corridor (Lane 1)
         { sz: 75, ez: 28, x: -49, orient: 'v' },
         // Gate Outbound Corridor (Lane 2)
         { sz: 75, ez: 28, x: -41, orient: 'v' },
         // Central Transfer Boulevard (Between Blok A and Blok B - 16m Wide)
         { sz: 28, ez: -39, x: 0, orient: 'v' },
-        // East Corridor (Connecting Reefer & DG to Customs)
-        { sz: 28, ez: -39, x: -84, orient: 'v' },   // koridor Timur (Reefer/DG)
+        // Mid-East Corridor (Between Yard Blok B/D and Reefer Yard)
+        { sz: 28, ez: -39, x: -84, orient: 'v' },
+        // Eastern Haul Road (Connecting Reefer/DG to Customs, X-Ray & Behandle)
+        { sz: 28, ez: -39, x: -122, orient: 'v' },
         // West Corridor (Connecting Empty Depot to CFS)
-        { sz: 28, ez: -39, x: 82, orient: 'v' }    // koridor Barat (Empty Depot)
+        { sz: 28, ez: -39, x: 82, orient: 'v' }
     ];
 
     roadMarkings.forEach(rm => {
