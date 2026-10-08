@@ -206,45 +206,33 @@ $vmt_job_orders = [
 <?php endif; ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
-    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white rounded-xl flex items-center justify-center text-xl shadow-xs flex-shrink-0">
+    <!-- Header Modul: Clean & Minimal -->
+    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
                 <i class="fa-solid <?= $yard_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h1 class="text-base sm:text-lg font-bold text-gray-900">Manajemen Stacking Yard &amp; Digital Twin 3D</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold flex items-center">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-base font-bold text-gray-900">Manajemen Stacking Yard &amp; Digital Twin 3D</h1>
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $yard_info['status'] ?>
                     </span>
-                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[11px] font-semibold">
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-semibold">
                         MySQL Sync (<?= count($yard_containers) ?> Box)
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[11px] font-semibold">
+                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold">
                         RTK GNSS &lt;1.4cm
                     </span>
                 </div>
-                <p class="text-xs text-gray-500 leading-normal">
-                    <?= $yard_info['desc'] ?>
-                </p>
             </div>
         </div>
 
-        <div class="flex items-center gap-2.5 self-start md:self-auto flex-shrink-0">
-            <button onclick="openModalYardRelocate()" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5">
+        <div class="flex items-center gap-2 self-start sm:self-auto flex-shrink-0">
+            <button onclick="openModalYardRelocate()" class="px-3.5 py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5">
                 <i class="fa-solid fa-arrows-up-down-left-right text-xs"></i>
                 <span>+ Relokasi (VMT Move)</span>
             </button>
-            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5 flex items-center space-x-2.5">
-                <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-[#002f5e] to-orange-500 text-white flex items-center justify-center text-xs shadow-xs">
-                    <i class="fa-solid fa-cube"></i>
-                </div>
-                <div class="leading-tight">
-                    <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">PIC Yard:</span>
-                    <span class="font-bold text-gray-800 text-xs">Juan G. &amp; Armansyah</span>
-                </div>
-            </div>
         </div>
     </div>
 

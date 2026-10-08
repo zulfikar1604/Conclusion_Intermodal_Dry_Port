@@ -152,10 +152,9 @@ if (isset($_POST['btn_login'])) {
 
             <!-- TAUTAN MENU UTAMA (Tengah Layar / Centered) -->
             <nav class="hidden lg:flex items-center justify-center space-x-5 xl:space-x-8 text-xs font-bold text-slate-700">
-                <a href="#tentang" class="hover:text-orange-600 transition whitespace-nowrap">Tentang Kami</a>
-                <a href="#fasilitas" class="hover:text-orange-600 transition whitespace-nowrap">Fasilitas &amp; Solusi</a>
+                <a href="#solusi" class="hover:text-orange-600 transition whitespace-nowrap">Solusi Dry Port</a>
+                <a href="#fasilitas" class="hover:text-orange-600 transition whitespace-nowrap">Fasilitas 35 Ha</a>
                 <a href="#tiga-alur" class="hover:text-orange-600 transition whitespace-nowrap">3 Alur Operasional</a>
-                <a href="#tim" class="hover:text-orange-600 transition whitespace-nowrap">Tim Konsultan</a>
             </nav>
 
             <!-- BAGIAN KANAN: PENCARIAN & TOMBOL MASUK DEMO YMS (Sisi Kanan) -->
@@ -313,9 +312,10 @@ if (isset($_POST['btn_login'])) {
     </section>
 
     <!-- =================================================================== -->
-    <!-- 3. TENTANG KAMI: PILAR STRATEGIS KONSULTAN -->
+    <!-- 3. SOLUSI STRATEGIS KONSULTAN -->
     <!-- =================================================================== -->
-    <section id="tentang" class="py-16 lg:py-20 bg-white border-b border-slate-200">
+    <section id="solusi" class="py-16 lg:py-20 bg-white border-b border-slate-200">
+        <a id="tentang"></a>
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
             
             <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 lg:mb-16">
@@ -598,11 +598,6 @@ if (isset($_POST['btn_login'])) {
         </div>
     </section>
 
-            </div>
-
-        </div>
-    </section>
-
     <!-- =================================================================== -->
     <!-- 5. TIGA ALUR OPERASIONAL TERINTEGRASI -->
     <!-- =================================================================== -->
@@ -781,164 +776,7 @@ if (isset($_POST['btn_login'])) {
     </section>
 
     <!-- =================================================================== -->
-    <!-- 6. INFORMASI TIM KONSULTAN (KELOMPOK 3 ITL TRISAKTI) -->
-    <!-- =================================================================== -->
-    <section id="tim" class="py-16 lg:py-20 bg-slate-50 border-b border-slate-200">
-        <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
-            
-            <div class="max-w-3xl mx-auto text-center space-y-3 mb-12 lg:mb-16">
-                <div class="inline-flex items-center space-x-2 px-3.5 py-1 rounded-full bg-orange-50 text-orange-600 text-xs font-bold border border-orange-200/80 uppercase tracking-wider">
-                    <i class="fa-solid fa-graduation-cap text-orange-500"></i>
-                    <span>Kelompok 3 &bull; ITL Trisakti</span>
-                </div>
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                    Tim Pengembang &amp; Konsultan Sistem
-                </h2>
-                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-xl mx-auto">
-                    Mata Kuliah Teknologi &amp; Perangkat Lunak Logistik &bull; Dosen: <strong>Dr. Tigor Franky, S.T., M.T.</strong>
-                </p>
-            </div>
-
-            <!-- Grid 5 Anggota Tim Konsultan + Box Afiliasi -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 xl:gap-6">
-                
-                <!-- 1. Zulfikar Jafarudin Fatah -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-orange-400 hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center space-x-3.5 mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
-                                ZF
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Zulfikar Jafarudin Fatah</h3>
-                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-orange-700 bg-orange-50 px-2 py-0.5 rounded border border-orange-200/80">
-                                    Lead System Architect (Ketua)
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Arsitektur YMS</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Integrasi Antarmoda</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Koordinator Tim</span>
-                    </div>
-                </div>
-
-                <!-- 2. Armansyah Muchtarrom -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center space-x-3.5 mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-cyan-700 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
-                                AM
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Armansyah Muchtarrom</h3>
-                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-cyan-800 bg-cyan-50 px-2 py-0.5 rounded border border-cyan-100">
-                                    Hardware &amp; Infra Specialist
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Infrastruktur Lapangan</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Sensor Twistlock</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Gate ANPR &amp; VGM</span>
-                    </div>
-                </div>
-
-                <!-- 3. Afriansayah Ayubi -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center space-x-3.5 mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-amber-600 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
-                                AA
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Afriansayah Ayubi</h3>
-                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded border border-amber-100">
-                                    Software &amp; ERP Specialist
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Logika Proses</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Alur Kerja YMS</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Penagihan ERP</span>
-                    </div>
-                </div>
-
-                <!-- 4. Juan Gamaliel -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center space-x-3.5 mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
-                                JG
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Juan Gamaliel</h3>
-                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100">
-                                    Data Integration Specialist
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Integrasi API</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Payload JSON</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Sinkronisasi Database</span>
-                    </div>
-                </div>
-
-                <!-- 5. Naufal Andika Heditya -->
-                <div class="bg-white rounded-2xl border border-slate-200 p-5 lg:p-6 shadow-xs hover:border-cdp-blue hover:shadow-md transition-all flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center space-x-3.5 mb-3.5">
-                            <div class="w-12 h-12 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-base shadow-sm flex-shrink-0">
-                                NA
-                            </div>
-                            <div>
-                                <h3 class="font-bold text-sm lg:text-base text-slate-900 leading-snug">Naufal Andika Heditya</h3>
-                                <span class="inline-block mt-0.5 text-[10.5px] font-bold text-indigo-800 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-100">
-                                    Business Analyst &amp; QA
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pt-3 border-t border-slate-100 flex flex-wrap gap-1.5 text-[10px] font-semibold text-slate-600">
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Analisis Bisnis</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Quality Assurance</span>
-                        <span class="bg-slate-100 px-2 py-0.5 rounded">Regulasi Pabean</span>
-                    </div>
-                </div>
-
-                <!-- Kartu Identitas Akademis ITL Trisakti -->
-                <div class="bg-gradient-to-br from-cdp-navy to-cdp-dark rounded-2xl p-5 lg:p-6 text-white flex flex-col justify-between shadow-sm border border-blue-900">
-                    <div>
-                        <div class="inline-flex items-center space-x-1.5 text-xs text-blue-200 font-bold uppercase tracking-wider mb-2">
-                            <i class="fa-solid fa-graduation-cap text-amber-400"></i>
-                            <span>Afiliasi Akademis</span>
-                        </div>
-                        <h3 class="text-sm lg:text-base font-bold text-white">
-                            ITL Trisakti, Jakarta
-                        </h3>
-                        <p class="text-xs text-blue-100 mt-1 leading-relaxed">
-                            S1 Logistik &bull; Fakultas Sistem Transportasi dan Logistik &bull; 2026
-                        </p>
-                    </div>
-                    <div class="pt-3 border-t border-white/20 flex items-center justify-between text-[11px] text-blue-200">
-                        <span>Jakarta, Indonesia</span>
-                        <span class="font-bold text-white">Kelompok 3</span>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-    </section>
-
-    <!-- =================================================================== -->
-    <!-- 7. CATATAN KAKI RESMI (FOOTER KORPORAT) -->
+    <!-- 6. CATATAN KAKI RESMI (FOOTER KORPORAT) -->
     <!-- =================================================================== -->
     <footer class="bg-cdp-dark text-slate-300 text-xs py-10 lg:py-12 border-t border-slate-800">
         <div class="max-w-[1680px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
@@ -962,10 +800,9 @@ if (isset($_POST['btn_login'])) {
                 <div class="space-y-2">
                     <span class="text-xs font-bold text-white uppercase tracking-wider block">Menu</span>
                     <ul class="space-y-1.5 text-xs text-slate-400">
-                        <li><a href="#tentang" class="hover:text-white transition">Tentang Kami</a></li>
+                        <li><a href="#solusi" class="hover:text-white transition">Solusi Dry Port</a></li>
                         <li><a href="#fasilitas" class="hover:text-white transition">Fasilitas 35 Ha</a></li>
                         <li><a href="#tiga-alur" class="hover:text-white transition">3 Alur Operasional</a></li>
-                        <li><a href="#tim" class="hover:text-white transition">Tim Konsultan</a></li>
                     </ul>
                 </div>
 
@@ -986,7 +823,7 @@ if (isset($_POST['btn_login'])) {
 
             <div class="pt-6 border-t border-slate-800/80 flex flex-col sm:flex-row items-center justify-between gap-2 text-[11px] text-slate-500">
                 <div>
-                    &copy; 2026 <strong>Conclusion Supply Chain Consultant</strong> &bull; Kelompok 3 S1 Logistik ITL Trisakti.
+                    &copy; 2026 <strong>Conclusion Supply Chain Consultant</strong> &bull; Inland Dry Port Yard Management System.
                 </div>
                 <div class="flex items-center space-x-3">
                     <span>Yard Management System</span>

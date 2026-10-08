@@ -147,28 +147,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         </div>
     <?php endif; ?>
 
-    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
-    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-xl shadow-xs flex-shrink-0">
+    <!-- Header Modul: Clean & Minimal -->
+    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-sliders"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h1 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Pengaturan Global &amp; Tata Kelola Sistem YMS</h1>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold <?= $db_badge ?> border flex items-center">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-base font-bold text-gray-900 leading-tight">Pengaturan Global &amp; Tata Kelola Sistem YMS</h1>
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold <?= $db_badge ?> border flex items-center">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span><?= $db_status ?>
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
                         RBAC &amp; API Gateway
                     </span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
+                    <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                         CEISA 4.0 &amp; ERP Sync
                     </span>
                 </div>
-                <p class="text-xs text-gray-500 leading-normal">
-                    Manajemen arsitektur sistem, parameter fasilitas 35 Ha, otentikasi hak akses (RBAC), dan konektivitas API enterprise.
-                </p>
             </div>
         </div>
 
@@ -294,10 +291,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         <button onclick="switchSettingsTab('tab-database')" id="btn-tab-database" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
             <i class="fa-solid fa-database"></i>
             <span>Basis Data &amp; Log Audit</span>
-        </button>
-        <button onclick="switchSettingsTab('tab-team')" id="btn-tab-team" class="settings-tab-btn flex-1 min-w-[150px] py-2.5 px-3 rounded-lg text-xs sm:text-sm font-semibold transition-all text-gray-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-2">
-            <i class="fa-solid fa-users-gear"></i>
-            <span>Struktur Tim &amp; Akademis ITL</span>
         </button>
     </div>
 
@@ -903,150 +896,6 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ======================================================================= -->
-    <!-- TAB 6: STRUKTUR TIM & TATA KELOLA AKADEMIS ITL TRISAKTI               -->
-    <!-- ======================================================================= -->
-    <div id="tab-team" class="settings-tab-content hidden space-y-6">
-        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
-            <div class="flex flex-col md:flex-row md:items-center justify-between pb-3 border-b border-gray-100 gap-3">
-                <div>
-                    <h3 class="font-bold text-base text-gray-900">Struktur Matriks Tim Pengembang CIDP (Kelompok 3)</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Penanggung jawab divisi perancangan sistem terpadu Yard Management System</p>
-                </div>
-                <span class="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full border border-blue-200">
-                    5 Spesialis Operasi &amp; Teknologi Logistik
-                </span>
-            </div>
-
-            <!-- Grid 5 Anggota Tim -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
-                <!-- 1. Zulfikar Jafarudin Fatah -->
-                <div class="p-4 bg-gradient-to-br from-blue-50/60 to-white rounded-xl border border-blue-200 shadow-2xs space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 rounded-xl bg-[#002f5e] text-white flex items-center justify-center font-bold text-base shadow-sm">
-                            ZF
-                        </div>
-                        <div>
-                            <h4 class="font-extrabold text-sm text-gray-900">Zulfikar Jafarudin Fatah</h4>
-                            <span class="text-[10.5px] font-bold text-[#0170b9] block">Lead System Architect (Ketua Tim)</span>
-                            <span class="text-[10px] text-gray-400 font-mono">admin@cidp.ac.id</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-gray-600 leading-relaxed">
-                        Arsitektur menyeluruh YMS, orkestrasi integrasi antarmoda, Beranda Eksekutif, Kontainer, Trucking, Alat Berat, Simulator 3D, dan Pengaturan Global.
-                    </p>
-                    <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-[10.5px]">
-                        <span class="text-emerald-700 font-bold"><i class="fa-solid fa-circle-check mr-1"></i>Penanggung Jawab Inti</span>
-                        <a href="dashboard.php?page=beranda" class="text-blue-600 hover:underline font-bold">Buka Beranda &rarr;</a>
-                    </div>
-                </div>
-
-                <!-- 2. Armansyah Muchtarrom -->
-                <div class="p-4 bg-white rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 rounded-xl bg-cyan-700 text-white flex items-center justify-center font-bold text-base shadow-sm">
-                            AM
-                        </div>
-                        <div>
-                            <h4 class="font-extrabold text-sm text-gray-900">Armansyah Muchtarrom</h4>
-                            <span class="text-[10.5px] font-bold text-cyan-800 block">Hardware &amp; Infra Specialist</span>
-                            <span class="text-[10px] text-gray-400 font-mono">armansyah@cidp.ac.id</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-gray-600 leading-relaxed">
-                        Otomasi Gate (ANPR &amp; Barrier), sensor twistlock alat angkat, jembatan timbang SOLAS VGM, dan sistem telemetri rantai dingin Reefer (300 Plugs).
-                    </p>
-                    <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-[10.5px]">
-                        <span class="text-blue-700 font-semibold"><i class="fa-solid fa-shield-halved mr-1"></i>Hardware Divisi</span>
-                        <a href="dashboard.php?page=reefer" class="text-blue-600 hover:underline font-bold">Buka Reefer &rarr;</a>
-                    </div>
-                </div>
-
-                <!-- 3. Afriansayah Ayubi -->
-                <div class="p-4 bg-white rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 rounded-xl bg-amber-700 text-white flex items-center justify-center font-bold text-base shadow-sm">
-                            AA
-                        </div>
-                        <div>
-                            <h4 class="font-extrabold text-sm text-gray-900">Afriansayah Ayubi</h4>
-                            <span class="text-[10.5px] font-bold text-amber-800 block">Software &amp; ERP Specialist</span>
-                            <span class="text-[10px] text-gray-400 font-mono">afriansayah@cidp.ac.id</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-gray-600 leading-relaxed">
-                        Rekayasa software logistik, alur penanganan kontainer, dan integrasi penagihan modul Billing Faktur otomatis dengan sistem ERP akuntansi.
-                    </p>
-                    <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-[10.5px]">
-                        <span class="text-amber-700 font-semibold"><i class="fa-solid fa-receipt mr-1"></i>Billing &amp; ERP</span>
-                        <a href="dashboard.php?page=billing" class="text-blue-600 hover:underline font-bold">Buka Billing &rarr;</a>
-                    </div>
-                </div>
-
-                <!-- 4. Juan Gamaliel -->
-                <div class="p-4 bg-white rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-700 text-white flex items-center justify-center font-bold text-base shadow-sm">
-                            JG
-                        </div>
-                        <div>
-                            <h4 class="font-extrabold text-sm text-gray-900">Juan Gamaliel</h4>
-                            <span class="text-[10.5px] font-bold text-emerald-800 block">Data Integration Specialist</span>
-                            <span class="text-[10px] text-gray-400 font-mono">juan@cidp.ac.id</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-gray-600 leading-relaxed">
-                        Integrasi aliran data API, master plan denah terminal 35 Ha, stacking rules Bay-Row-Tier, dan operasional intermodal rail siding kereta api kontainer.
-                    </p>
-                    <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-[10.5px]">
-                        <span class="text-emerald-700 font-semibold"><i class="fa-solid fa-map mr-1"></i>Denah &amp; Rail</span>
-                        <a href="dashboard.php?page=denah" class="text-blue-600 hover:underline font-bold">Buka Denah &rarr;</a>
-                    </div>
-                </div>
-
-                <!-- 5. Naufal Andika Heditya -->
-                <div class="p-4 bg-white rounded-xl border border-gray-200 shadow-2xs space-y-3">
-                    <div class="flex items-center space-x-3">
-                        <div class="w-12 h-12 rounded-xl bg-indigo-700 text-white flex items-center justify-center font-bold text-base shadow-sm">
-                            NA
-                        </div>
-                        <div>
-                            <h4 class="font-extrabold text-sm text-gray-900">Naufal Andika Heditya</h4>
-                            <span class="text-[10.5px] font-bold text-indigo-800 block">Business Analyst &amp; QA</span>
-                            <span class="text-[10px] text-gray-400 font-mono">naufal@cidp.ac.id</span>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-gray-600 leading-relaxed">
-                        Analisis kebutuhan proses bisnis pelabuhan kering, standardisasi GS1 barcode/SSCC scanner di CFS, dan integrasi pabean CEISA 4.0 Bea Cukai.
-                    </p>
-                    <div class="pt-2 border-t border-gray-100 flex justify-between items-center text-[10.5px]">
-                        <span class="text-indigo-700 font-semibold"><i class="fa-solid fa-stamp mr-1"></i>Customs &amp; QA</span>
-                        <a href="dashboard.php?page=customs" class="text-blue-600 hover:underline font-bold">Buka Bea Cukai &rarr;</a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Card Identitas Akademis ITL Trisakti -->
-            <div class="mt-4 bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-5">
-                <div class="space-y-1.5">
-                    <div class="flex items-center space-x-2 text-xs text-blue-200 font-bold uppercase tracking-wider">
-                        <i class="fa-solid fa-graduation-cap text-amber-400 text-base"></i>
-                        <span>Institut Transportasi dan Logistik (ITL) Trisakti Jakarta</span>
-                    </div>
-                    <h4 class="text-base font-extrabold">Program Studi S1 Logistik &bull; Fakultas Sistem Transportasi dan Logistik</h4>
-                    <p class="text-xs text-blue-100 max-w-2xl leading-relaxed">
-                        Mata Kuliah: <strong>Teknologi dan Perangkat Lunak Logistik</strong> &bull; Dosen Pengampu: <strong>Dr. Tigor Franky, S.T., M.T.</strong>
-                    </p>
-                </div>
-                <div class="bg-white/10 border border-white/20 px-4 py-3 rounded-xl text-center flex-shrink-0">
-                    <span class="text-[10px] font-bold uppercase text-blue-200 block">Tahun Akademik</span>
-                    <span class="text-lg font-black text-amber-300">2026 / Genap</span>
-                    <span class="text-[10px] text-blue-100 block">Proyek Inland Dry Port</span>
                 </div>
             </div>
         </div>

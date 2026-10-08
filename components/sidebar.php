@@ -68,7 +68,7 @@
                 </span>
             </div>
             <p class="text-[11.5px] font-bold text-slate-900 truncate">Conclusion Consultant</p>
-            <p class="text-[9.5px] text-slate-500 truncate mt-0.5">ITL Trisakti &bull; Dr. Tigor Franky</p>
+            <p class="text-[9.5px] text-slate-500 truncate mt-0.5">Supply Chain &amp; Logistics YMS</p>
         </div>
     </div>
 </aside>

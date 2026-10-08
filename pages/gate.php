@@ -711,39 +711,24 @@ foreach ($hardware_list as $item) {
 <?php endif; ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
-    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white rounded-xl flex items-center justify-center text-xl shadow-xs flex-shrink-0">
+    <!-- Header Modul: Clean & Minimal -->
+    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-door-open"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h1 class="text-base sm:text-lg font-bold text-gray-900">Manajemen Gate &amp; Otomasi Infrastruktur</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold flex items-center">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-base font-bold text-gray-900">Manajemen Gate &amp; Otomasi Infrastruktur</h1>
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>Sensor Live
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[11px] font-semibold">
+                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold">
                         OCR ISO 6346 &amp; ANPR
                     </span>
-                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[11px] font-semibold">
+                    <span class="px-2 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded-full text-[10px] font-semibold">
                         80T SOLAS VGM
                     </span>
-                </div>
-                <p class="text-xs text-gray-500 leading-normal">
-                    <?= $gate_info['desc'] ?>
-                </p>
-            </div>
-        </div>
-
-        <div class="flex items-center space-x-3 flex-shrink-0 self-start md:self-auto">
-            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#002f5e] to-orange-500 text-white flex items-center justify-center text-xs shadow-xs">
-                    <i class="fa-solid fa-hard-hat"></i>
-                </div>
-                <div class="leading-tight">
-                    <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">PIC Infrastruktur:</span>
-                    <span class="font-bold text-gray-800 text-xs"><?= $gate_info['pic'] ?></span>
                 </div>
             </div>
         </div>
@@ -2505,11 +2490,6 @@ foreach ($hardware_list as $item) {
                 </div>
             </div>
 
-            <!-- Catatan Integrasi Simulasi -->
-            <div class="p-3 bg-blue-50/70 border border-blue-200/60 rounded-xl text-[11px] text-blue-800 flex items-start space-x-2">
-                <i class="fa-solid fa-circle-info text-blue-600 mt-0.5 shrink-0"></i>
-                <span>Setelah registrasi disimpan, armada otomatis terdaftar dengan status <strong>Antrian Pra-Gate</strong>. Anda dapat menguji proses gate-in fisik armada di <strong>Panel Simulasi 3D</strong>.</span>
-            </div>
 
             <div class="pt-2 flex items-center justify-end space-x-2 border-t border-gray-100">
                 <button type="button" onclick="closeGatePassModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs transition">Batal</button>

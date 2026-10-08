@@ -20,7 +20,6 @@
                                     Live 35 Ha
                                 </span>
                             </div>
-                            <p class="text-gray-500 text-[11px] mt-0.5">Simulasi Inland Container Depot (ICD), Siding KA Daop 1, &amp; Pabean CEISA 4.0</p>
                         </div>
                     </div>
                     <!-- Micro Telemetry Badges & Real-Time Clock -->

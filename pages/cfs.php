@@ -625,33 +625,29 @@ $active_docks_count = 4;
 <!-- ========================================================================= -->
 <!-- HEADER & CONTEXT MODUL CFS WAREHOUSE 4.000 M² -->
 <!-- ========================================================================= -->
-<div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 mb-6">
-    <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-xl shadow-xs flex-shrink-0">
-                <i class="fa-solid fa-warehouse"></i>
-            </div>
-            <div>
-                <div class="flex items-center flex-wrap gap-2 mb-1">
-                    <h1 class="text-base sm:text-lg font-bold text-gray-900 tracking-tight">
-                        CFS &amp; Pergudangan LCL Konsolidasi 4.000 m²
-                    </h1>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
-                        5 Rampa Hidrolik D1–D5
-                    </span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
-                        GS1 SSCC-18 Label
-                    </span>
-                    <span class="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                        Stripping &amp; Stuffing
-                    </span>
-                </div>
-                <p class="text-xs text-gray-500 leading-normal">
-                    <?= $cfs_info['desc'] ?>
-                </p>
+<div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+    <div class="flex items-center space-x-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+            <i class="fa-solid fa-warehouse"></i>
+        </div>
+        <div>
+            <div class="flex items-center flex-wrap gap-2">
+                <h1 class="text-base font-bold text-gray-900 tracking-tight">
+                    CFS &amp; Pergudangan LCL Konsolidasi 4.000 m²
+                </h1>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-600 animate-pulse"></span>
+                    5 Rampa Hidrolik D1–D5
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-orange-50 text-orange-700 border border-orange-200">
+                    GS1 SSCC-18 Label
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Stripping &amp; Stuffing
+                </span>
             </div>
         </div>
+    </div>
 
         <!-- Tombol Aksi Cepat Header -->
         <div class="flex items-center flex-wrap gap-2 w-full lg:w-auto">

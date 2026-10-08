@@ -541,39 +541,24 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
 <?php endif; ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
-    <!-- Header Modul: Compact, Feature-Driven & Elegant -->
-    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white rounded-xl flex items-center justify-center text-xl shadow-xs flex-shrink-0">
+    <!-- Header Modul: Clean & Minimal -->
+    <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
                 <i class="fa-solid <?= $customs_info['icon'] ?>"></i>
             </div>
             <div>
-                <div class="flex flex-wrap items-center gap-2 mb-1">
-                    <h1 class="text-base sm:text-lg font-bold text-gray-900">Kepabeanan &amp; Bea Cukai — Integrasi CEISA 4.0</h1>
-                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[11px] font-semibold flex items-center">
+                <div class="flex flex-wrap items-center gap-2">
+                    <h1 class="text-base font-bold text-gray-900">Kepabeanan &amp; Bea Cukai — Integrasi CEISA 4.0</h1>
+                    <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full text-[10px] font-semibold flex items-center">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>CEISA 4.0 Live
                     </span>
-                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[11px] font-semibold flex items-center">
+                    <span class="px-2 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded-full text-[10px] font-semibold flex items-center">
                         <i class="fa-solid fa-stamp mr-1 text-[10px]"></i>KPPBC TMP Cikarang
                     </span>
-                    <button type="button" onclick="openVerifyStampModal()" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-full text-[11px] font-semibold flex items-center transition cursor-pointer">
+                    <button type="button" onclick="openVerifyStampModal()" class="px-2 py-0.5 bg-blue-50 hover:bg-blue-100 text-blue-800 border border-blue-200 rounded-full text-[10px] font-semibold flex items-center transition cursor-pointer">
                         <i class="fa-solid fa-certificate mr-1 text-[10px] text-blue-600"></i>Stempel Digital BSrE
                     </button>
-                </div>
-                <p class="text-xs text-gray-500 leading-normal">
-                    <?= $customs_info['desc'] ?>
-                </p>
-            </div>
-        </div>
-
-        <div class="flex items-center space-x-3 flex-shrink-0 self-start md:self-auto">
-            <div class="bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-2 flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-[#002f5e] to-orange-500 text-white flex items-center justify-center text-xs shadow-xs">
-                    <i class="fa-solid fa-user-shield"></i>
-                </div>
-                <div class="leading-tight">
-                    <span class="text-[9px] uppercase font-bold text-gray-400 block tracking-wider">PIC Kepabeanan:</span>
-                    <span class="font-bold text-gray-800 text-xs">Naufal Andika H.</span>
                 </div>
             </div>
         </div>

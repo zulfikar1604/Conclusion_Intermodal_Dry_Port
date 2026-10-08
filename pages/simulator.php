@@ -18,8 +18,8 @@ if (session_status() === PHP_SESSION_NONE) {
 
 <div class="space-y-3.5">
     
-    <!-- Top Header Banner (Executive, Clean & Modern) -->
-    <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-xl p-3.5 sm:p-4 text-white shadow-xs border border-blue-900/30">
+    <!-- Top Header Banner (Clean & Modern) -->
+    <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-xl px-4 py-3 text-white shadow-xs border border-blue-900/30">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
                 <div class="flex items-center space-x-2 mb-1">
@@ -34,9 +34,6 @@ if (session_status() === PHP_SESSION_NONE) {
                     </span>
                 </div>
                 <h1 class="text-base sm:text-lg font-bold tracking-tight">Virtual 3D Twin &amp; Konsol Sensor IoT</h1>
-                <p class="text-blue-100/90 text-xs mt-0.5 leading-relaxed">
-                    Emulasi fisik 11 perangkat keras operasional, sinkronisasi data lapangan ke MySQL, dan otomasi pembebanan tarif logistik.
-                </p>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
                 <button onclick="runAutoInboundDemo()" id="btnAutoDemo" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center border border-emerald-400/40">
@@ -1637,8 +1634,8 @@ if (session_status() === PHP_SESSION_NONE) {
                 <span>2. Matriks 11 Hardware Live Telemetri</span>
             </button>
             <button onclick="switchGuideTab('cheatsheet')" id="tabBtnCheatsheet" class="guide-tab-btn px-3.5 py-2 text-xs font-medium rounded-t-xl transition-all border-b-2 border-transparent text-gray-600 hover:text-gray-900 flex items-center space-x-2">
-                <i class="fa-solid fa-graduation-cap text-xs"></i>
-                <span>3. Contekan Presentasi Dosen (Dr. Tigor Franky)</span>
+                <i class="fa-solid fa-circle-question text-xs"></i>
+                <span>3. FAQ &amp; Arsitektur Teknis YMS</span>
             </button>
         </div>
 
@@ -1889,14 +1886,14 @@ if (session_status() === PHP_SESSION_NONE) {
                 </div>
             </div>
 
-            <!-- TAB 3: CONTEKAN PRESENTASI DOSEN -->
+            <!-- TAB 3: FAQ & ARSITEKTUR TEKNIS -->
             <div id="guideTabCheatsheet" class="space-y-4 hidden">
                 <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 flex items-start space-x-3">
                     <i class="fa-solid fa-lightbulb text-amber-600 text-base mt-0.5"></i>
                     <div>
-                        <h4 class="font-bold text-amber-950 text-xs sm:text-sm">Panduan Menjawab Pertanyaan Kritis Dr. Tigor Franky</h4>
+                        <h4 class="font-bold text-amber-950 text-xs sm:text-sm">Arsitektur Teknis &amp; Dampak Finansial YMS</h4>
                         <p class="text-xs text-amber-800 mt-0.5">
-                            Gunakan struktur 3 langkah konsultan: <strong>1. Sinyal Fisik Hardware &rarr; 2. Logika Pemrosesan YMS &rarr; 3. Dampak Finansial &amp; Operasional Terminal</strong>.
+                            Struktur operasional konsultan: <strong>1. Sinyal Fisik Hardware &rarr; 2. Logika Pemrosesan YMS &rarr; 3. Dampak Finansial &amp; Operasional Terminal</strong>.
                         </p>
                     </div>
                 </div>
@@ -1905,9 +1902,9 @@ if (session_status() === PHP_SESSION_NONE) {
                     <!-- Q1 -->
                     <div class="bg-white rounded-xl border border-gray-200 p-4 shadow-2xs">
                         <span class="text-[10px] font-bold text-cdp-blue uppercase block mb-1">Pertanyaan 1: Integrasi Hardware Gerbang</span>
-                        <h5 class="font-bold text-gray-900 text-sm mb-2">"Bagaimana kamera gerbang, timbangan, dan sistem web Anda saling terhubung tanpa delay?"</h5>
+                        <h5 class="font-bold text-gray-900 text-sm mb-2">"Bagaimana kamera gerbang, timbangan, dan sistem web saling terhubung tanpa delay?"</h5>
                         <p class="text-xs text-gray-600 leading-relaxed bg-slate-50 p-3 rounded-lg border border-gray-100">
-                            <em>"Izin menjelaskan, Pak. Seluruh sensor di gerbang (ANPR, OCR kontainer, timbangan 80T, dan RFID) tidak mengirim data mentah langsung ke server cloud yang rawan latency. Kami menempatkan <strong>Advantech Fanless Industrial Edge PC</strong> tepat di tiang gerbang. Edge PC memproses OCR dan menimbang bobot kotor VGM secara lokal dalam hitungan milidetik. Begitu seluruh parameter valid, sistem mengirim sinyal relay membuka Barrier Gate dalam 1.2 detik sembari mengarahkan supir via LED Display. Secara finansial, aksi ini seketika membentuk pos piutang Pas Gerbang (Rp 50.000) dan Jasa VGM (Rp 120.000) di modul Billing ERP kami."</em>
+                            <em>"Seluruh sensor di gerbang (ANPR, OCR kontainer, timbangan 80T, dan RFID) tidak mengirim data mentah langsung ke server cloud yang rawan latency. Kami menempatkan <strong>Advantech Fanless Industrial Edge PC</strong> tepat di tiang gerbang. Edge PC memproses OCR dan menimbang bobot kotor VGM secara lokal dalam hitungan milidetik. Begitu seluruh parameter valid, sistem mengirim sinyal relay membuka Barrier Gate dalam 1.2 detik sembari mengarahkan supir via LED Display. Secara finansial, aksi ini seketika membentuk pos piutang Pas Gerbang (Rp 50.000) dan Jasa VGM (Rp 120.000) di modul Billing ERP."</em>
                         </p>
                     </div>
 
@@ -1936,7 +1933,7 @@ if (session_status() === PHP_SESSION_NONE) {
         <!-- Modal Footer -->
         <div class="p-3.5 bg-gray-50 border-t border-gray-200 flex items-center justify-between shrink-0">
             <span class="text-[11px] text-gray-500 font-medium">
-                Conclusion Supply Chain Consultant &copy; 2026 &bull; ITL Trisakti
+                Conclusion Supply Chain Consultant &copy; 2026 &bull; CIDP Yard Management System
             </span>
             <button onclick="closeEndToEndGuideModal()" class="px-4 py-2 bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs rounded-xl transition shadow-xs">
                 Tutup Panduan

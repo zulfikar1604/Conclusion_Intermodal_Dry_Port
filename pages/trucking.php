@@ -102,14 +102,14 @@ $total_trucks = count($trucks);
 <div class="space-y-4">
 
     <!-- Header & Subtitle (Compact & Clean) -->
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white p-3.5 sm:p-4 rounded-xl shadow-2xs border border-gray-100">
-        <div class="flex items-center space-x-3.5">
-            <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 bg-white px-4 py-3 rounded-xl shadow-2xs border border-gray-100">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
                 <i class="fa-solid fa-truck-front"></i>
             </div>
             <div>
-                <div class="flex items-center space-x-2 mb-1">
-                    <h2 class="text-base sm:text-lg font-bold text-gray-900 leading-tight">Manajemen Trucking &amp; Arus Gerbang</h2>
+                <div class="flex items-center space-x-2">
+                    <h2 class="text-base font-bold text-gray-900 leading-tight">Manajemen Trucking &amp; Arus Gerbang</h2>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                         <span class="w-1.5 h-1.5 mr-1 rounded-full bg-emerald-500 animate-pulse"></span> Gerbang &amp; Timbangan Aktif
                     </span>
@@ -117,9 +117,6 @@ $total_trucks = count($trucks);
                         80T SOLAS VGM
                     </span>
                 </div>
-                <p class="text-gray-500 text-xs leading-normal">
-                    Pemantauan arus pergerakan truk trailer, jembatan timbang 80T SOLAS VGM, dan milestone rute armada.
-                </p>
             </div>
         </div>
         <div class="flex items-center space-x-2 flex-shrink-0 flex-wrap gap-y-2">

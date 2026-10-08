@@ -235,7 +235,7 @@
                     <!-- Card Footer -->
                     <div class="px-4 py-2.5 bg-gray-50 border-t border-gray-100 text-center">
                         <p class="text-[9.5px] text-gray-500 font-medium">Conclusion Supply Chain Consultant &copy; 2026</p>
-                        <p class="text-[9px] text-gray-400">ITL Trisakti &bull; Dr. Tigor Franky, S.T., M.T.</p>
+                        <p class="text-[9px] text-gray-400">CIDP Yard Management System &bull; 35 Ha Terminal</p>
                     </div>
                 </div>
             </div>
