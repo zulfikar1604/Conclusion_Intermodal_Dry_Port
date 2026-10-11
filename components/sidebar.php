@@ -14,8 +14,8 @@
                 <img src="assets/img/logo.png" alt="Logo" class="w-full h-full object-contain" onerror="this.src='https://via.placeholder.com/32?text=C'">
             </div>
             <div class="logo-text min-w-0">
-                <span class="text-[13px] font-extrabold tracking-tight text-slate-900 block leading-tight">CIDP YMS</span>
-                <span class="text-[9px] font-bold text-orange-600 tracking-wider block uppercase mt-0.5">Hub 35 Ha &bull; v2.5</span>
+                <span class="text-[13px] font-extrabold tracking-tight text-slate-900 block leading-tight">CIDP DPMS</span>
+                <span class="text-[9px] font-bold text-orange-600 tracking-wider block uppercase mt-0.5">YMS &bull; TMS &bull; WMS Hub</span>
             </div>
         </div>
         <!-- Mobile Close Button -->
@@ -24,7 +24,7 @@
         </button>
     </div>
     
-    <!-- Middle: Navigation (4 Kluster Divisi Operasional Dry Port) -->
+    <!-- Middle: Navigation (5 Kluster Divisi DPMS) -->
     <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-3.5">
         <?php foreach ($menu_clusters as $cluster_title => $items): ?>
             <div class="space-y-0.5">
@@ -68,7 +68,7 @@
                 </span>
             </div>
             <p class="text-[11.5px] font-bold text-slate-900 truncate">Conclusion Consultant</p>
-            <p class="text-[9.5px] text-slate-500 truncate mt-0.5">Supply Chain &amp; Logistics YMS</p>
+            <p class="text-[9.5px] text-slate-500 truncate mt-0.5">Intermodal DPMS Platform</p>
         </div>
     </div>
 </aside>

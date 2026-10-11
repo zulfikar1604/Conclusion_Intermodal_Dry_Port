@@ -108,30 +108,32 @@ if (!function_exists('can_view')) {
     }
 }
 
-// Navigation Clusters: 4 Concise English Core Divisions
+// Navigation Clusters: 5 Kluster Resmi DPMS (Executive, TMS, YMS, WMS, Compliance & Finance)
 $menu_clusters = [
-    'Executive' => [
-        'beranda' => ['icon' => 'fa-house', 'label' => 'Dashboard'],
-        'denah' => ['icon' => 'fa-map-location-dot', 'label' => 'Terminal Map']
+    'Executive & Map' => [
+        'beranda'   => ['icon' => 'fa-house', 'label' => 'Cockpit Eksekutif'],
+        'denah'     => ['icon' => 'fa-map-location-dot', 'label' => 'Denah Master 35 Ha'],
+        'simulator' => ['icon' => 'fa-cube', 'label' => 'Simulator 3D Hub']
     ],
-    'Operations' => [
-        'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => 'Containers'],
-        'trucking' => ['icon' => 'fa-truck-front', 'label' => 'Trucking'],
-        'alat' => ['icon' => 'fa-dolly', 'label' => 'Equipment GPS'],
-        'gate' => ['icon' => 'fa-door-open', 'label' => 'Gate Control'],
-        'yard' => ['icon' => 'fa-cubes', 'label' => 'Yard & Stacking'],
-        'cfs' => ['icon' => 'fa-warehouse', 'label' => 'CFS Warehouse'],
-        'intermodal' => ['icon' => 'fa-train-subway', 'label' => 'Rail Siding']
+    'TMS (Transport)' => [
+        'gate'       => ['icon' => 'fa-door-open', 'label' => 'Gate & Timbangan VGM'],
+        'trucking'   => ['icon' => 'fa-truck-front', 'label' => 'Trucking & Shunting'],
+        'intermodal' => ['icon' => 'fa-train-subway', 'label' => 'Rail Siding KA Pasoso']
     ],
-    'Facilities & Customs' => [
-        'reefer' => ['icon' => 'fa-snowflake', 'label' => 'Reefer Terminal'],
-        'customs' => ['icon' => 'fa-shield-halved', 'label' => 'Customs & CEISA'],
-        'scanner' => ['icon' => 'fa-barcode', 'label' => 'GS1 Scanner']
+    'YMS (Yard)' => [
+        'yard'      => ['icon' => 'fa-cubes', 'label' => 'Yard & Stacking Block'],
+        'alat'      => ['icon' => 'fa-dolly', 'label' => 'Alat Berat & RTG GPS'],
+        'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => 'Inventori Kontainer'],
+        'reefer'    => ['icon' => 'fa-snowflake', 'label' => 'Reefer Cold Chain']
     ],
-    'System & Finance' => [
-        'billing' => ['icon' => 'fa-file-invoice-dollar', 'label' => 'Billing & Invoicing'],
-        'simulator' => ['icon' => 'fa-vr-cardboard', 'label' => 'Simulation Panel'],
-        'settings' => ['icon' => 'fa-gear', 'label' => 'Settings']
+    'WMS (Warehouse / CFS)' => [
+        'cfs' => ['icon' => 'fa-warehouse', 'label' => 'CFS Rampa D1-D5']
+    ],
+    'Compliance & Finance' => [
+        'customs'  => ['icon' => 'fa-shield-halved', 'label' => 'Bea Cukai CEISA 4.0'],
+        'billing'  => ['icon' => 'fa-file-invoice-dollar', 'label' => 'Billing & ERP Odoo'],
+        'scanner'  => ['icon' => 'fa-barcode', 'label' => 'Scanner Optik AIDC'],
+        'settings' => ['icon' => 'fa-sliders', 'label' => 'Pengaturan Global']
     ]
 ];
 
@@ -144,7 +146,7 @@ foreach ($menu_clusters as $c_name => $items) {
 }
 
 // Active cluster for breadcrumb navigation
-$current_cluster = 'Operations';
+$current_cluster = 'YMS (Yard)';
 foreach ($menu_clusters as $c_name => $c_items) {
     if (isset($c_items[$page])) {
         $current_cluster = $c_name;
@@ -164,7 +166,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulation Project Conclusion</title>
+    <title>CIDP DPMS — Conclusion Intermodal Dry Port Management System</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     

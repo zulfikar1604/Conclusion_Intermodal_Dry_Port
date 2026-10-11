@@ -20,9 +20,14 @@
             <button onclick="toggleDesktopSidebar()" class="mr-2.5 sm:mr-3 p-1.5 text-gray-500 hover:text-orange-600 focus:outline-none hidden md:block transition-colors rounded-lg hover:bg-orange-50/60" title="Kecilkan/Perbesar Menu">
                 <i class="fa-solid fa-bars-staggered text-base" id="desktopToggleIcon"></i>
             </button>
-            <h1 class="text-sm sm:text-base font-bold text-gray-800 capitalize truncate">
-                <?= isset($menu_items[$page]) ? $menu_items[$page]['label'] : 'Dashboard' ?>
-            </h1>
+            <div class="flex items-center space-x-2 truncate">
+                <span class="hidden lg:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-orange-50 text-orange-700 border border-orange-200 uppercase tracking-wider">
+                    <?= $current_cluster ?>
+                </span>
+                <h1 class="text-xs sm:text-sm font-bold text-gray-800 capitalize truncate">
+                    <?= isset($menu_items[$page]) ? $menu_items[$page]['label'] : 'Dashboard' ?>
+                </h1>
+            </div>
         </div>
         
         <!-- Right: User & Actions (Executive Consultant Theme) -->
