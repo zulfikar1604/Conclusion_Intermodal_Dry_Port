@@ -11,6 +11,45 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
+require_once __DIR__ . '/connection.php';
+
+$error_message = '';
+$showLoginModal = isset($_GET['login']) && $_GET['login'] == '1';
+
+// TANGANI PROSES AUTENTIKASI MASUK (LOGIN)
+if (isset($_POST['btn_login'])) {
+    $email    = trim($_POST['email'] ?? '');
+    $password = trim($_POST['password'] ?? '');
+
+    if (empty($email) || empty($password)) {
+        $error_message = 'Alamat pos-el (email) dan kata sandi wajib diisi!';
+        $showLoginModal = true;
+    } else {
+        try {
+            $stmt = $pdo->prepare("SELECT iduser, nama, email, password, role FROM login WHERE email = ? LIMIT 1");
+            $stmt->execute([$email]);
+            $user = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($user && password_verify($password, $user['password'])) {
+                $_SESSION['login']  = true;
+                $_SESSION['iduser'] = $user['iduser'];
+                $_SESSION['nama']   = $user['nama'];
+                $_SESSION['email']  = $user['email'];
+                $_SESSION['role']   = $user['role'];
+
+                header("Location: dashboard.php");
+                exit;
+            } else {
+                $error_message = 'Alamat pos-el atau kata sandi yang Anda masukkan tidak sesuai!';
+                $showLoginModal = true;
+            }
+        } catch (PDOException $e) {
+            $error_message = 'Terjadi kendala pada sistem: ' . $e->getMessage();
+            $showLoginModal = true;
+        }
+    }
+}
+
 $isLoggedIn = isset($_SESSION['login']) && $_SESSION['login'] === true;
 $userName   = $_SESSION['nama'] ?? 'Pengguna';
 $userRole   = $_SESSION['role'] ?? 'Tamu';
@@ -29,14 +68,11 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- Google Fonts: Plus Jakarta Sans & JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
     
     <!-- FontAwesome 6 (Local with CDN fallback) -->
     <link rel="stylesheet" href="assets/vendor/fontawesome/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- AOS Animation Library (CDN) -->
-    <link rel="stylesheet" href="https://unpkg.com/aos@2.3.1/dist/aos.css">
     
     <!-- Tailwind CSS (Local with CDN fallback) -->
     <script src="assets/vendor/tailwindcss.js"></script>
@@ -70,7 +106,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             font-family: 'Plus Jakarta Sans', sans-serif;
         }
 
-        /* --- Custom Scrollbar --- */
+        /* Custom Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
@@ -85,45 +121,145 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             background: #c2410c;
         }
 
-        /* --- Header Navigation Transition (Petronas-style) --- */
-        .petronas-nav {
-            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        /* Header Transition (Petronas style) */
+        .petronas-header {
+            transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
         }
-        .petronas-nav.nav-scrolled {
-            background-color: rgba(255, 255, 255, 0.98);
+        .petronas-header.scrolled {
+            background-color: rgba(255, 255, 255, 0.98) !important;
             backdrop-filter: blur(12px);
-            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.12);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.15);
+        }
+        .petronas-header.scrolled .nav-text-main {
             color: #0f172a !important;
-            padding-top: 8px;
-            padding-bottom: 8px;
         }
-        .petronas-nav.nav-scrolled .nav-link-top {
-            color: #475569;
+        .petronas-header.scrolled .nav-text-sub {
+            color: #475569 !important;
         }
-        .petronas-nav.nav-scrolled .nav-link-top:hover {
-            color: #ea580c;
+        .petronas-header.scrolled .nav-border {
+            border-color: rgba(226, 232, 240, 0.8) !important;
         }
-        .petronas-nav.nav-scrolled .nav-link-main {
+        .petronas-header.scrolled .lang-box {
+            background-color: rgba(241, 245, 249, 1);
             color: #0f172a;
         }
-        .petronas-nav.nav-scrolled .nav-link-main:hover {
-            color: #ea580c;
+
+        /* Hero Carousel Slider */
+        .hero-slide-item {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s cubic-bezier(0.4, 0, 0.2, 1);
+            background-size: cover;
+            background-position: center;
         }
-        .petronas-nav.nav-scrolled .logo-text-sub {
-            color: #64748b;
+        .hero-slide-item.active {
+            opacity: 1;
+            visibility: visible;
+            z-index: 10;
         }
 
-        /* --- Floating Side Navigation (Petronas JsideNaviContainer) --- */
-        .side-floating-nav {
+        /* Vignette Overlay */
+        .hero-vignette {
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.75) 0%, rgba(15, 23, 42, 0.45) 40%, rgba(15, 23, 42, 0.95) 100%),
+                        linear-gradient(90deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.3) 65%, transparent 100%);
+        }
+
+        /* Hero Bottom Progress Bar */
+        .hero-tab-item {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .hero-tab-item .tab-title {
+            opacity: 0.7;
+            transition: opacity 0.3s ease, color 0.3s ease;
+        }
+        .hero-tab-item.active .tab-title {
+            opacity: 1;
+            font-weight: 700;
+            color: #ffffff;
+        }
+        .hero-tab-item .progress-track {
+            height: 3px;
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+        .hero-tab-item .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #ea580c;
+            border-radius: 999px;
+            transition: width 0.1s linear;
+        }
+
+        /* Tall Pillar Cards (Petronas 3-Cards) */
+        .tall-pillar-card {
+            position: relative;
+            min-h: 460px;
+            height: 480px;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
+        }
+        .tall-pillar-card .pillar-img {
+            position: absolute;
+            inset: 0;
+            background-size: cover;
+            background-position: center;
+            transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tall-pillar-card:hover .pillar-img {
+            transform: scale(1.06);
+        }
+        .tall-pillar-card .pillar-grad {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 47, 94, 0.2) 0%, rgba(0, 47, 94, 0.8) 60%, rgba(15, 23, 42, 0.98) 100%);
+            transition: background 0.4s ease;
+        }
+        .tall-pillar-card:hover .pillar-grad {
+            background: linear-gradient(180deg, rgba(0, 47, 94, 0.5) 0%, rgba(0, 47, 94, 0.95) 45%, rgba(15, 23, 42, 1) 100%);
+        }
+        .tall-pillar-card .pillar-base {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            right: 24px;
+            transition: all 0.35s ease;
+        }
+        .tall-pillar-card .pillar-hover {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            right: 24px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tall-pillar-card:hover .pillar-base {
+            opacity: 0;
+            transform: translateY(-16px);
+        }
+        .tall-pillar-card:hover .pillar-hover {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Floating Side Navigation */
+        .petronas-side-nav {
             position: fixed;
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 50;
+            z-index: 40;
         }
-        .side-floating-nav .nav-item {
-            width: 48px;
-            height: 48px;
+        .petronas-side-nav .side-btn {
+            width: 46px;
+            height: 46px;
             background: rgba(15, 23, 42, 0.92);
             border-left: 2px solid #ea580c;
             margin-bottom: 4px;
@@ -132,17 +268,16 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             justify-content: center;
             color: #ffffff;
             cursor: pointer;
-            transition: all 0.25s ease;
+            transition: all 0.2s ease;
             position: relative;
         }
-        .side-floating-nav .nav-item:hover {
+        .petronas-side-nav .side-btn:hover {
             background: #ea580c;
-            width: 54px;
-            color: #ffffff;
+            width: 52px;
         }
-        .side-floating-nav .social-drawer {
+        .petronas-side-nav .side-social-popover {
             position: absolute;
-            right: 48px;
+            right: 46px;
             top: 0;
             background: #0f172a;
             border: 1px solid rgba(255, 255, 255, 0.1);
@@ -154,239 +289,124 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             opacity: 0;
             pointer-events: none;
             transform: translateX(10px);
-            transition: all 0.3s ease;
-            box-shadow: -4px 4px 16px rgba(0,0,0,0.4);
+            transition: all 0.25s ease;
+            box-shadow: -4px 4px 16px rgba(0,0,0,0.5);
         }
-        .side-floating-nav .nav-item-social:hover .social-drawer {
+        .petronas-side-nav .side-btn-social:hover .side-social-popover {
             opacity: 1;
             pointer-events: auto;
             transform: translateX(0);
         }
 
-        /* --- Hero Carousel Slider with Crossfade --- */
-        .hero-slide {
-            position: absolute;
-            inset: 0;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1), transform 6s linear;
-            transform: scale(1.05);
-            background-size: cover;
-            background-position: center;
-        }
-        .hero-slide.active {
-            opacity: 1;
-            visibility: visible;
-            transform: scale(1);
-            z-index: 10;
-        }
-
-        /* Vignette Gradient Overlay (Petronas standard) */
-        .hero-vignette {
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.65) 0%, rgba(15, 23, 42, 0.45) 40%, rgba(15, 23, 42, 0.95) 100%),
-                        linear-gradient(90deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.3) 60%, transparent 100%);
-        }
-
-        /* Hero Nav Tabs & Progress Bar (Petronas Banner Nav) */
-        .banner-tab-item {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-        .banner-tab-item .tab-title {
-            opacity: 0.7;
-            transition: opacity 0.3s ease;
-        }
-        .banner-tab-item.active .tab-title {
-            opacity: 1;
+        /* Read More Arrow Link (Petronas signature) */
+        .petronas-readmore {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
             font-weight: 700;
             color: #ffffff;
+            transition: all 0.2s ease;
         }
-        .banner-tab-item .progress-track {
-            height: 3px;
-            background: rgba(255, 255, 255, 0.25);
+        .petronas-readmore i {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 24px;
+            height: 24px;
             border-radius: 999px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-        .banner-tab-item .progress-bar-fill {
-            height: 100%;
-            width: 0%;
             background: #ea580c;
-            border-radius: 999px;
-            transition: width 0.1s linear;
+            color: #ffffff;
+            font-size: 10px;
+            transition: transform 0.2s ease;
         }
-        .banner-tab-item.active .progress-bar-fill {
-            background: #ea580c;
-        }
-
-        /* --- Tall Rounded Cards (Petronas Journey Cards) --- */
-        .pillar-card {
-            position: relative;
-            height: 480px;
-            border-radius: 28px;
-            overflow: hidden;
-            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
-        }
-        .pillar-card .pillar-bg {
-            position: absolute;
-            inset: 0;
-            background-size: cover;
-            background-position: center;
-            transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .pillar-card:hover .pillar-bg {
-            transform: scale(1.08);
-        }
-        .pillar-card .pillar-overlay {
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(180deg, rgba(0, 47, 94, 0.2) 0%, rgba(0, 47, 94, 0.85) 70%, rgba(15, 23, 42, 0.98) 100%);
-            transition: all 0.4s ease;
-        }
-        .pillar-card:hover .pillar-overlay {
-            background: linear-gradient(180deg, rgba(0, 47, 94, 0.5) 0%, rgba(0, 47, 94, 0.95) 50%, rgba(15, 23, 42, 1) 100%);
-        }
-        .pillar-card .pillar-body-default {
-            position: absolute;
-            bottom: 28px;
-            left: 28px;
-            right: 28px;
-            transition: all 0.4s ease;
-        }
-        .pillar-card .pillar-body-hover {
-            position: absolute;
-            bottom: 28px;
-            left: 28px;
-            right: 28px;
-            opacity: 0;
-            transform: translateY(24px);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .pillar-card:hover .pillar-body-default {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        .pillar-card:hover .pillar-body-hover {
-            opacity: 1;
-            transform: translateY(0);
+        .petronas-readmore:hover i {
+            transform: translateX(4px);
         }
 
-        /* --- Accordion Image Preview Transition --- */
-        .highlight-image-stage {
-            transition: opacity 0.4s ease, transform 0.4s ease;
-            background-size: cover;
-            background-position: center;
-        }
-
-        /* --- Flip / Hover Card for Our Network (Petronas dm-card) --- */
-        .dm-card-box {
-            position: relative;
-            height: 160px;
-            perspective: 1000px;
-            cursor: pointer;
-        }
-        .dm-card-inner {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-            border-radius: 20px;
-        }
-        .dm-card-box:hover .dm-card-inner {
-            transform: rotateY(180deg);
-        }
-        .dm-face-front, .dm-face-back {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            backface-visibility: hidden;
-            border-radius: 20px;
+        /* Network Card (Clean slide-reveal) */
+        .network-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 18px;
             padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            min-height: 145px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
-        .dm-face-front {
-            background: rgba(255, 255, 255, 0.05);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            color: #ffffff;
-        }
-        .dm-face-back {
-            background: linear-gradient(135deg, #ea580c 0%, #004b87 100%);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            transform: rotateY(180deg);
-        }
-
-        /* --- Search Modal Overlay --- */
-        .modal-blur {
-            backdrop-filter: blur(16px);
-            background: rgba(15, 23, 42, 0.85);
+        .network-card:hover {
+            background: rgba(234, 88, 12, 0.12);
+            border-color: rgba(234, 88, 12, 0.5);
+            transform: translateY(-2px);
         }
     </style>
 </head>
 <body class="bg-slate-900 text-slate-100 antialiased selection:bg-orange-500 selection:text-white">
 
     <!-- =================================================================== -->
-    <!-- 1. HEADER DUA TINGKAT (Petronas Two-Tier Navigation)               -->
+    <!-- 1. BILAH NAVIGASI DUA TINGKAT (Petronas Two-Tier Header)           -->
     <!-- =================================================================== -->
-    <header id="mainHeader" class="petronas-nav fixed top-0 left-0 right-0 z-40 text-white w-full">
+    <header id="mainHeader" class="petronas-header fixed top-0 left-0 right-0 z-40 w-full transition-all duration-300">
         <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between py-2 sm:py-3 border-b border-white/10" id="headerTopRow">
+            
+            <!-- BARIS ATAS: UTILITAS & PENCARIAN -->
+            <div class="flex items-center justify-between py-2 sm:py-2.5 border-b border-white/10 nav-border transition-colors">
                 
-                <!-- BRAND LOGO & BADGE -->
-                <a href="landing.php" class="flex items-center gap-3 group">
-                    <img src="assets/img/logo.png" alt="Conclusion Logo" class="h-9 sm:h-11 w-auto drop-shadow-md group-hover:scale-105 transition-transform duration-200">
+                <!-- BRAND LOGO -->
+                <a href="index.php" class="flex items-center gap-3 group">
+                    <img src="assets/img/logo.png" alt="Conclusion Logo" class="h-9 sm:h-10 w-auto drop-shadow group-hover:scale-105 transition-transform">
                     <div>
                         <div class="flex items-center gap-2">
-                            <span class="font-black text-lg sm:text-xl tracking-tight uppercase text-white drop-shadow" id="brandTextMain">CONCLUSION</span>
-                            <span class="text-[10px] uppercase font-bold tracking-widest bg-orange-600 text-white px-2 py-0.5 rounded-full shadow-sm">CIDP</span>
+                            <span class="font-black text-lg tracking-tight uppercase text-white nav-text-main" id="brandTitle">CONCLUSION</span>
+                            <span class="text-[9px] uppercase font-bold tracking-widest bg-orange-600 text-white px-2 py-0.5 rounded-full shadow-sm">CIDP</span>
                         </div>
-                        <div class="text-[11px] font-medium tracking-wide text-slate-300 logo-text-sub" id="brandTextSub">Intermodal Dry Port &bull; 35 Ha Hub</div>
+                        <div class="text-[10px] font-medium tracking-wide text-slate-300 nav-text-sub" id="brandSub">Intermodal Dry Port &bull; 35 Ha Hub</div>
                     </div>
                 </a>
 
-                <!-- TOP NAV UTILITY LINKS (Petronas-style) -->
-                <div class="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-200">
-                    <a href="#about" class="nav-link-top hover:text-orange-400 transition-colors">Tentang Kami</a>
-                    <a href="#updates" class="nav-link-top hover:text-orange-400 transition-colors">Berita & Rilis</a>
-                    <a href="#performance" class="nav-link-top hover:text-orange-400 transition-colors">Kinerja 35 Ha</a>
-                    <a href="#highlights" class="nav-link-top hover:text-orange-400 transition-colors">Fasilitas & NOC</a>
-                    <a href="#network" class="nav-link-top hover:text-orange-400 transition-colors">Mitra Ekosistem</a>
+                <!-- LINK UTILITAS KANAN (Desktop) -->
+                <div class="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-200 nav-text-sub">
+                    <a href="#about" class="hover:text-orange-400 transition-colors">Tentang Kami</a>
+                    <a href="#updates" class="hover:text-orange-400 transition-colors">Berita & Rilis</a>
+                    <a href="#performance" class="hover:text-orange-400 transition-colors">Kinerja 35 Ha</a>
+                    <a href="#highlights" class="hover:text-orange-400 transition-colors">Fasilitas & NOC</a>
+                    <a href="#network" class="hover:text-orange-400 transition-colors">Mitra Ekosistem</a>
                     
                     <span class="text-white/20">|</span>
                     
-                    <!-- Search Icon Trigger -->
-                    <button onclick="toggleSearchModal(true)" class="p-1.5 hover:text-orange-400 transition-colors" title="Cari Informasi...">
+                    <!-- Search Trigger -->
+                    <button onclick="toggleSearchModal(true)" class="p-1 hover:text-orange-400 transition-colors" title="Pencarian Cepat">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                     
-                    <!-- Language Indicator -->
-                    <div class="flex items-center gap-1 bg-white/10 px-2 py-1 rounded text-[11px] font-mono">
+                    <!-- Language Box -->
+                    <div class="flex items-center gap-1 bg-white/10 lang-box px-2 py-0.5 rounded text-[11px] font-mono">
                         <span class="text-orange-400 font-bold">ID</span>
-                        <span class="text-white/40">/</span>
+                        <span class="opacity-40">/</span>
                         <span class="text-slate-400 hover:text-white cursor-pointer">EN</span>
                     </div>
                 </div>
 
-                <!-- MOBILE BURGER TOGGLE -->
+                <!-- BURGER MENU BUTTON (Mobile) -->
                 <button onclick="toggleMobileMenu()" class="lg:hidden p-2 text-white hover:text-orange-400 focus:outline-none">
                     <i class="fa-solid fa-bars text-xl" id="burgerIcon"></i>
                 </button>
             </div>
 
-            <!-- BOTTOM ROW: MEGA MENU & CTA PORTAL -->
-            <div class="hidden lg:flex items-center justify-between py-2.5">
-                <nav class="flex items-center gap-8 text-sm font-semibold tracking-wide">
-                    <!-- Dropdown 1: Ekosistem Intermodal -->
+            <!-- BARIS BAWAH: NAVIGASI UTAMA & TOMBOL MASUK PORTAL -->
+            <div class="hidden lg:flex items-center justify-between py-2 sm:py-2.5">
+                <nav class="flex items-center gap-8 text-sm font-semibold tracking-wide text-white nav-text-main">
+                    
+                    <!-- Mega Menu 1: Ekosistem Intermodal -->
                     <div class="relative group">
-                        <button class="nav-link-main flex items-center gap-1.5 py-1 hover:text-orange-400 transition-colors focus:outline-none">
+                        <button class="flex items-center gap-1.5 py-1 hover:text-orange-400 transition-colors focus:outline-none">
                             <span>Ekosistem Intermodal</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] group-hover:rotate-180 transition-transform duration-200"></i>
+                            <i class="fa-solid fa-chevron-down text-[10px] group-hover:rotate-180 transition-transform"></i>
                         </button>
                         <div class="absolute left-0 top-full mt-2 w-72 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2 z-50">
                             <a href="#pillars" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/10 transition-colors">
@@ -420,11 +440,11 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         </div>
                     </div>
 
-                    <!-- Dropdown 2: Keberlanjutan & Green Port -->
+                    <!-- Mega Menu 2: Green Dry Port -->
                     <div class="relative group">
-                        <button class="nav-link-main flex items-center gap-1.5 py-1 hover:text-orange-400 transition-colors focus:outline-none">
+                        <button class="flex items-center gap-1.5 py-1 hover:text-orange-400 transition-colors focus:outline-none">
                             <span>Keberlanjutan & Green Port</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] group-hover:rotate-180 transition-transform duration-200"></i>
+                            <i class="fa-solid fa-chevron-down text-[10px] group-hover:rotate-180 transition-transform"></i>
                         </button>
                         <div class="absolute left-0 top-full mt-2 w-72 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2 z-50">
                             <a href="#performance" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/10 transition-colors">
@@ -444,11 +464,11 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         </div>
                     </div>
 
-                    <!-- Dropdown 3: Kinerja & Dokumen -->
+                    <!-- Mega Menu 3: Kinerja & Dokumen -->
                     <div class="relative group">
-                        <button class="nav-link-main flex items-center gap-1.5 py-1 hover:text-orange-400 transition-colors focus:outline-none">
+                        <button class="flex items-center gap-1.5 py-1 hover:text-orange-400 transition-colors focus:outline-none">
                             <span>Kinerja & Laporan</span>
-                            <i class="fa-solid fa-chevron-down text-[10px] group-hover:rotate-180 transition-transform duration-200"></i>
+                            <i class="fa-solid fa-chevron-down text-[10px] group-hover:rotate-180 transition-transform"></i>
                         </button>
                         <div class="absolute left-0 top-full mt-2 w-72 bg-slate-900/95 backdrop-blur-xl border border-slate-700/80 rounded-2xl p-3 shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 transform group-hover:translate-y-0 translate-y-2 z-50">
                             <a href="#performance" class="flex items-start gap-3 p-2.5 rounded-xl hover:bg-white/10 transition-colors">
@@ -468,35 +488,35 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         </div>
                     </div>
 
-                    <!-- Direct Link: Digital Twin -->
-                    <a href="dashboard.php?page=simulator" class="nav-link-main hover:text-orange-400 transition-colors flex items-center gap-1.5">
+                    <!-- 3D Digital Twin Link -->
+                    <a href="dashboard.php?page=simulator" class="hover:text-orange-400 transition-colors flex items-center gap-1.5">
                         <i class="fa-solid fa-vr-cardboard text-purple-400"></i>
                         <span>3D Digital Twin</span>
                     </a>
                 </nav>
 
-                <!-- RIGHT CTA BUTTON -->
+                <!-- TOMBOL CTA MASUK SISTEM -->
                 <div class="flex items-center gap-3">
                     <?php if ($isLoggedIn): ?>
-                        <a href="dashboard.php" class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs uppercase tracking-wider hover:from-orange-500 hover:to-amber-500 shadow-lg shadow-orange-900/30 transition-all duration-200 transform hover:-translate-y-0.5">
+                        <a href="dashboard.php" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs uppercase tracking-wider hover:from-orange-500 hover:to-amber-500 shadow-lg shadow-orange-900/30 transition-all transform hover:-translate-y-0.5">
                             <i class="fa-solid fa-gauge-high"></i>
                             <span>Buka Dashboard (<?= htmlspecialchars($userName) ?>)</span>
                             <i class="fa-solid fa-arrow-right text-[10px]"></i>
                         </a>
                     <?php else: ?>
-                        <a href="login.php" class="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs uppercase tracking-wider hover:from-orange-500 hover:to-amber-500 shadow-lg shadow-orange-900/30 transition-all duration-200 transform hover:-translate-y-0.5">
+                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-600 to-amber-600 text-white font-bold text-xs uppercase tracking-wider hover:from-orange-500 hover:to-amber-500 shadow-lg shadow-orange-900/30 transition-all transform hover:-translate-y-0.5">
                             <i class="fa-solid fa-right-to-bracket"></i>
                             <span>Masuk Portal DPMS</span>
                             <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                        </a>
+                        </button>
                     <?php endif; ?>
                 </div>
             </div>
         </div>
 
-        <!-- MOBILE MENU OVERLAY -->
-        <div id="mobileMenu" class="hidden lg:hidden bg-slate-900/98 backdrop-blur-2xl border-b border-slate-800 px-6 py-6 text-slate-200 transition-all">
-            <div class="flex flex-col gap-4 text-sm font-semibold">
+        <!-- MENU MOBILE POPUP -->
+        <div id="mobileMenu" class="hidden lg:hidden bg-slate-900/98 backdrop-blur-2xl border-b border-slate-800 px-6 py-6 text-slate-200">
+            <div class="flex flex-col gap-3 text-sm font-semibold">
                 <a href="#about" onclick="toggleMobileMenu()" class="py-2 hover:text-orange-400 border-b border-slate-800">Tentang CIDP 35 Ha</a>
                 <a href="#pillars" onclick="toggleMobileMenu()" class="py-2 hover:text-orange-400 border-b border-slate-800">Pilar YMS &bull; TMS &bull; WMS</a>
                 <a href="#performance" onclick="toggleMobileMenu()" class="py-2 hover:text-orange-400 border-b border-slate-800">Kinerja & Reduksi Emisi</a>
@@ -506,11 +526,18 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     <i class="fa-solid fa-vr-cardboard"></i>
                     <span>Simulasi 3D Digital Twin</span>
                 </a>
-                <div class="pt-4">
-                    <a href="login.php" class="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-orange-600 text-white font-bold text-xs uppercase tracking-wider hover:bg-orange-500">
-                        <i class="fa-solid fa-right-to-bracket"></i>
-                        <span>Masuk Portal DPMS</span>
-                    </a>
+                <div class="pt-3">
+                    <?php if ($isLoggedIn): ?>
+                        <a href="dashboard.php" class="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-orange-600 text-white font-bold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-gauge-high"></i>
+                            <span>Buka Dashboard</span>
+                        </a>
+                    <?php else: ?>
+                        <button type="button" onclick="openLoginModal(); toggleMobileMenu();" class="w-full inline-flex items-center justify-center gap-2 py-3 rounded-xl bg-orange-600 text-white font-bold text-xs uppercase tracking-wider">
+                            <i class="fa-solid fa-right-to-bracket"></i>
+                            <span>Masuk Portal DPMS</span>
+                        </button>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -519,21 +546,16 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 2. FLOATING RIGHT-SIDE VERTICAL QUICK-NAV (Petronas JsideNavi)       -->
     <!-- =================================================================== -->
-    <div class="side-floating-nav hidden md:block">
-        <!-- Quick Link 1: Media Updates -->
-        <a href="#updates" class="nav-item" title="Pembaruan Terkini">
+    <div class="petronas-side-nav hidden md:block">
+        <a href="#updates" class="side-btn" title="Pembaruan Terkini">
             <i class="fa-solid fa-bullhorn text-sm"></i>
         </a>
-        
-        <!-- Quick Link 2: Search Modal Trigger -->
-        <div onclick="toggleSearchModal(true)" class="nav-item" title="Cari di Situs">
+        <div onclick="toggleSearchModal(true)" class="side-btn" title="Cari di Situs">
             <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </div>
-        
-        <!-- Quick Link 3: Social Share Popover Drawer -->
-        <div class="nav-item nav-item-social" title="Bagikan & Media Sosial">
+        <div class="side-btn side-btn-social" title="Bagikan & Media Sosial">
             <i class="fa-solid fa-share-nodes text-sm"></i>
-            <div class="social-drawer">
+            <div class="side-social-popover">
                 <a href="https://linkedin.com" target="_blank" class="text-slate-300 hover:text-blue-400 transition-colors" title="LinkedIn"><i class="fa-brands fa-linkedin text-lg"></i></a>
                 <a href="https://youtube.com" target="_blank" class="text-slate-300 hover:text-red-500 transition-colors" title="YouTube"><i class="fa-brands fa-youtube text-lg"></i></a>
                 <a href="https://instagram.com" target="_blank" class="text-slate-300 hover:text-pink-400 transition-colors" title="Instagram"><i class="fa-brands fa-instagram text-lg"></i></a>
@@ -543,32 +565,33 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     </div>
 
     <!-- =================================================================== -->
-    <!-- 3. HERO BANNER CAROUSEL (Petronas 5-Slide Fullscreen Slider)        -->
+    <!-- 3. HERO BANNER CAROUSEL DENGAN PROGRESS BAR (Petronas Banner Nav)  -->
+    <!-- TIDAK TUMPANG TINDIH: Menggunakan paddingTop yang aman (pt-36 / pt-40) -->
     <!-- =================================================================== -->
-    <section class="relative h-screen min-h-[640px] w-full overflow-hidden flex flex-col justify-end">
+    <section class="relative min-h-[720px] lg:min-h-[780px] h-[100vh] max-h-[1000px] w-full overflow-hidden flex flex-col justify-between">
         
         <!-- SLIDE 1: Solusi Logistik Intermodal 35 Ha -->
-        <div class="hero-slide active" style="background-image: url('assets/img/facilities/stacking_yard.jpg');" data-index="0">
+        <div class="hero-slide-item active" style="background-image: url('assets/img/facilities/stacking_yard.jpg');" data-index="0">
             <div class="absolute inset-0 hero-vignette"></div>
-            <div class="relative h-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center text-white pb-24 md:pb-32">
-                <div class="max-w-3xl" data-aos="fade-up" data-aos-duration="800">
-                    <span class="inline-flex items-center gap-2 bg-orange-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm">
+            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-32 sm:pt-36 md:pt-40 pb-32 text-white">
+                <div class="max-w-3xl">
+                    <span class="inline-flex items-center gap-2 bg-orange-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm shadow-sm">
                         <i class="fa-solid fa-network-wired"></i> Hub Intermodal 35 Hektare
                     </span>
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white mb-4">
                         Solusi Logistik <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">Terintegrasi Intermodal</span>
                     </h1>
-                    <p class="text-base sm:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
+                    <p class="text-sm sm:text-base lg:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
                         Menghubungkan simpul pelabuhan laut, jalur ganda kereta api logistik, dan armada angkutan darat dengan kapasitas throughput 45.000 TEU per tahun demi efisiensi rantai pasok nasional.
                     </p>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="login.php" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm tracking-wide shadow-xl shadow-orange-950/40 transition-all duration-200 transform hover:scale-105">
+                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm tracking-wide shadow-xl shadow-orange-950/40 transition-all transform hover:scale-105">
                             <span>Jelajahi Portal DPMS</span>
                             <i class="fa-solid fa-arrow-right"></i>
-                        </a>
-                        <a href="#about" class="inline-flex items-center gap-2 px-6 py-3.5 rounded-full bg-white/10 hover:bg-white/20 text-white font-semibold text-sm backdrop-blur-md border border-white/20 transition-all">
-                            <span>Profil Terminal</span>
-                            <i class="fa-solid fa-circle-info text-xs"></i>
+                        </button>
+                        <a href="#about" class="petronas-readmore px-4 py-2 hover:text-orange-400">
+                            <i><i class="fa-solid fa-arrow-right"></i></i>
+                            <p>Pelajari Profil Terminal</p>
                         </a>
                     </div>
                 </div>
@@ -576,23 +599,27 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         </div>
 
         <!-- SLIDE 2: Rail Siding Pasoso Connection -->
-        <div class="hero-slide" style="background-image: url('assets/img/facilities/rail_siding.jpg');" data-index="1">
+        <div class="hero-slide-item" style="background-image: url('assets/img/facilities/rail_siding.jpg');" data-index="1">
             <div class="absolute inset-0 hero-vignette"></div>
-            <div class="relative h-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center text-white pb-24 md:pb-32">
+            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-32 sm:pt-36 md:pt-40 pb-32 text-white">
                 <div class="max-w-3xl">
-                    <span class="inline-flex items-center gap-2 bg-sky-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm">
+                    <span class="inline-flex items-center gap-2 bg-sky-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm shadow-sm">
                         <i class="fa-solid fa-train"></i> Konektivitas Rel Pasoso
                     </span>
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white mb-4">
                         Akses Kereta Api <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-cyan-300">Langsung ke Tanjung Priok</span>
                     </h1>
-                    <p class="text-base sm:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
+                    <p class="text-sm sm:text-base lg:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
                         Rangkaian 60 TEU kereta kargo intermodal memotong dwell time pelabuhan dari 3,8 hari menjadi 1,8 hari tanpa hambatan kemacetan jalur arteri.
                     </p>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="#pillars" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all">
-                            <span>Sistem Shunting TMS</span>
+                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all transform hover:scale-105">
+                            <span>Buka Modul TMS</span>
                             <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <a href="#pillars" class="petronas-readmore px-4 py-2 hover:text-sky-400">
+                            <i><i class="fa-solid fa-arrow-right"></i></i>
+                            <p>Sistem Shunting Kereta</p>
                         </a>
                     </div>
                 </div>
@@ -600,23 +627,27 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         </div>
 
         <!-- SLIDE 3: CFS Warehouse & Smart Consolidation -->
-        <div class="hero-slide" style="background-image: url('assets/img/facilities/cfs_warehouse.jpg');" data-index="2">
+        <div class="hero-slide-item" style="background-image: url('assets/img/facilities/cfs_warehouse.jpg');" data-index="2">
             <div class="absolute inset-0 hero-vignette"></div>
-            <div class="relative h-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center text-white pb-24 md:pb-32">
+            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-32 sm:pt-36 md:pt-40 pb-32 text-white">
                 <div class="max-w-3xl">
-                    <span class="inline-flex items-center gap-2 bg-emerald-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm">
+                    <span class="inline-flex items-center gap-2 bg-emerald-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm shadow-sm">
                         <i class="fa-solid fa-warehouse"></i> CFS Warehouse Modern
                     </span>
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white mb-4">
                         Konsolidasi Pintar & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-300">Gudang CFS Berstandar WMS</span>
                     </h1>
-                    <p class="text-base sm:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
+                    <p class="text-sm sm:text-base lg:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
                         Stuffing, stripping, dan cross-docking LCL/FCL otomatis dengan pembacaan barcode palet GS1 serta integrasi faktur perpajakan kepabeanan.
                     </p>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="#pillars" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all">
-                            <span>Solusi WMS Konsolidasi</span>
+                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all transform hover:scale-105">
+                            <span>Buka Modul WMS</span>
                             <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <a href="#pillars" class="petronas-readmore px-4 py-2 hover:text-emerald-400">
+                            <i><i class="fa-solid fa-arrow-right"></i></i>
+                            <p>Pelajari Alur Konsolidasi</p>
                         </a>
                     </div>
                 </div>
@@ -624,23 +655,27 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         </div>
 
         <!-- SLIDE 4: Reefer Terminal & Precision Cold Chain -->
-        <div class="hero-slide" style="background-image: url('assets/img/facilities/reefer_terminal.jpg');" data-index="3">
+        <div class="hero-slide-item" style="background-image: url('assets/img/facilities/reefer_terminal.jpg');" data-index="3">
             <div class="absolute inset-0 hero-vignette"></div>
-            <div class="relative h-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center text-white pb-24 md:pb-32">
+            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-32 sm:pt-36 md:pt-40 pb-32 text-white">
                 <div class="max-w-3xl">
-                    <span class="inline-flex items-center gap-2 bg-cyan-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm">
+                    <span class="inline-flex items-center gap-2 bg-cyan-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm shadow-sm">
                         <i class="fa-solid fa-snowflake"></i> Rantai Pendingin Presisi
                     </span>
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white mb-4">
                         Terminal Reefer & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-300">Pemantauan Suhu IoT 24/7</span>
                     </h1>
-                    <p class="text-base sm:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
+                    <p class="text-sm sm:text-base lg:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
                         120 soket plug points mandiri dengan sistem deteksi deviasi suhu real-time untuk kargo farmasi, daging, susu, dan buah bernilai tinggi.
                     </p>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="#highlights" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all">
-                            <span>Spesifikasi Reefer Plug</span>
+                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all transform hover:scale-105">
+                            <span>Monitoring Reefer</span>
                             <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <a href="#highlights" class="petronas-readmore px-4 py-2 hover:text-cyan-400">
+                            <i><i class="fa-solid fa-arrow-right"></i></i>
+                            <p>Spesifikasi Cold Chain</p>
                         </a>
                     </div>
                 </div>
@@ -648,68 +683,74 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         </div>
 
         <!-- SLIDE 5: Customs CEISA 4.0 & Smart Gate -->
-        <div class="hero-slide" style="background-image: url('assets/img/facilities/gatehouse_in.jpg');" data-index="4">
+        <div class="hero-slide-item" style="background-image: url('assets/img/facilities/gatehouse_in.jpg');" data-index="4">
             <div class="absolute inset-0 hero-vignette"></div>
-            <div class="relative h-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 flex flex-col justify-center text-white pb-24 md:pb-32">
+            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-32 sm:pt-36 md:pt-40 pb-32 text-white">
                 <div class="max-w-3xl">
-                    <span class="inline-flex items-center gap-2 bg-amber-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm">
+                    <span class="inline-flex items-center gap-2 bg-amber-600/90 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 backdrop-blur-sm shadow-sm">
                         <i class="fa-solid fa-shield-halved"></i> Host-to-Host CEISA 4.0
                     </span>
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white mb-4">
                         Smart Gate Otomatis & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-orange-300">Clearance Bea Cukai Instan</span>
                     </h1>
-                    <p class="text-base sm:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
+                    <p class="text-sm sm:text-base lg:text-lg text-slate-200/90 leading-relaxed mb-8 max-w-2xl">
                         Pembacaan RFID UHF ISO 18000-6C, kamera OCR pelat nomor, dan timbangan gantry 80 ton otomatis yang tersinkronisasi langsung dengan SPPB DJBC.
                     </p>
                     <div class="flex flex-wrap items-center gap-4">
-                        <a href="#documents" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-orange-600 hover:bg-orange-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all">
-                            <span>Lihat Alur Gate CEISA</span>
+                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-3 px-7 py-3.5 rounded-full bg-amber-600 hover:bg-amber-500 text-white font-bold text-sm tracking-wide shadow-xl transition-all transform hover:scale-105">
+                            <span>Sistem Smart Gate</span>
                             <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                        <a href="#documents" class="petronas-readmore px-4 py-2 hover:text-amber-400">
+                            <i><i class="fa-solid fa-arrow-right"></i></i>
+                            <p>SOP Gate Bea Cukai</p>
                         </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- BOTTOM NAV TABS WITH ANIMATED PROGRESS BARS (Petronas Carousel Nav) -->
-        <div class="relative z-20 w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-6">
-            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 border-t border-white/10 pt-4">
-                
-                <div class="banner-tab-item active" onclick="switchHeroSlide(0)">
-                    <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Solusi Intermodal</div>
-                    <div class="progress-track">
-                        <div class="progress-bar-fill" id="progressBar0"></div>
+        <!-- PROGRESS BAR BOTTOM TABS (Petronas Carousel Tabs Bar) -->
+        <div class="relative z-30 w-full bg-gradient-to-t from-slate-950 via-slate-950/80 to-transparent pt-8 pb-5">
+            <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 border-t border-white/10 pt-4">
+                    
+                    <div class="hero-tab-item active" onclick="switchHeroSlide(0)">
+                        <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Solusi Intermodal</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBar0"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="banner-tab-item" onclick="switchHeroSlide(1)">
-                    <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Rail Siding Pasoso</div>
-                    <div class="progress-track">
-                        <div class="progress-bar-fill" id="progressBar1"></div>
+                    <div class="hero-tab-item" onclick="switchHeroSlide(1)">
+                        <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Rail Siding Pasoso</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBar1"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="banner-tab-item" onclick="switchHeroSlide(2)">
-                    <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">CFS & Konsolidasi</div>
-                    <div class="progress-track">
-                        <div class="progress-bar-fill" id="progressBar2"></div>
+                    <div class="hero-tab-item" onclick="switchHeroSlide(2)">
+                        <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">CFS & Konsolidasi</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBar2"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="banner-tab-item" onclick="switchHeroSlide(3)">
-                    <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Reefer Cold Chain</div>
-                    <div class="progress-track">
-                        <div class="progress-bar-fill" id="progressBar3"></div>
+                    <div class="hero-tab-item" onclick="switchHeroSlide(3)">
+                        <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Reefer Cold Chain</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBar3"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="banner-tab-item col-span-2 sm:col-span-1" onclick="switchHeroSlide(4)">
-                    <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Smart Gate CEISA 4.0</div>
-                    <div class="progress-track">
-                        <div class="progress-bar-fill" id="progressBar4"></div>
+                    <div class="hero-tab-item col-span-2 sm:col-span-1" onclick="switchHeroSlide(4)">
+                        <div class="text-[11px] sm:text-xs tracking-wider uppercase tab-title truncate">Smart Gate CEISA 4.0</div>
+                        <div class="progress-track">
+                            <div class="progress-fill" id="progressBar4"></div>
+                        </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
     </section>
@@ -717,22 +758,22 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 4. LATEST UPDATES (Petronas Media Releases / News Section)         -->
     <!-- =================================================================== -->
-    <section id="updates" class="py-20 bg-slate-950 text-white relative">
+    <section id="updates" class="py-20 bg-slate-950 text-white relative border-t border-slate-800/80">
         <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- Section Header -->
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6" data-aos="fade-up">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12 gap-6">
                 <div>
                     <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight">
                         <span class="text-orange-500 font-black">Pembaruan</span> Terkini & Rilis Operasional
                     </h2>
                     <p class="text-slate-400 text-sm sm:text-base mt-2 max-w-xl">
-                        Dapatkan informasi terbaru mengenai pengumuman kepabeanan, pembaruan jadwal shunting kereta, dan inisiatif digital CIDP DPMS.
+                        Dapatkan informasi terbaru mengenai pengumuman kepabeanan, pembaruan jadwal shunting kereta, dan inovasi telemetri CIDP DPMS.
                     </p>
                 </div>
-                <a href="#documents" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-400 hover:text-orange-300 transition-colors">
-                    <span>Lihat Semua Dokumen & Rilis</span>
-                    <i class="fa-solid fa-arrow-right"></i>
+                <a href="#documents" class="petronas-readmore text-orange-400 hover:text-orange-300">
+                    <i><i class="fa-solid fa-arrow-right"></i></i>
+                    <p>Lihat Semua Dokumen & Rilis</p>
                 </a>
             </div>
 
@@ -740,8 +781,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
                 
                 <!-- FEATURED CARD (Col 5) -->
-                <div class="lg:col-span-5" data-aos="fade-right">
-                    <a href="login.php" class="group relative block h-full min-h-[420px] rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+                <div class="lg:col-span-5">
+                    <div onclick="openLoginModal()" class="group relative block h-full min-h-[440px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 cursor-pointer">
                         <div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style="background-image: url('assets/img/facilities/customs_office.jpg');"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-transparent"></div>
                         
@@ -762,19 +803,19 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 CIDP Resmikan Integrasi API Host-to-Host CEISA 4.0 Bea Cukai untuk Otomasi SPPB 24 Jam
                             </h3>
                             <div class="mt-4 flex items-center gap-2 text-xs font-semibold text-slate-300 group-hover:text-white transition-colors">
-                                <span>Baca Rilis Lengkap</span>
+                                <span>Buka Akses Konsol Sistem</span>
                                 <i class="fa-solid fa-arrow-right text-[10px] transform group-hover:translate-x-1 transition-transform"></i>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 </div>
 
                 <!-- RIGHT CARDS (Col 7 - 3 Cards Horizontal / Stack) -->
-                <div class="lg:col-span-7 flex flex-col justify-between gap-6" data-aos="fade-left">
+                <div class="lg:col-span-7 flex flex-col justify-between gap-6">
                     
                     <!-- Card 1 -->
-                    <a href="#highlights" class="group flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-slate-800/60 transition-all duration-200">
-                        <div class="sm:w-44 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/img/facilities/workshop_mr.jpg');"></div>
+                    <div onclick="openLoginModal()" class="group flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-slate-800/60 transition-all cursor-pointer">
+                        <div class="w-full sm:w-44 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/img/facilities/workshop_mr.jpg');"></div>
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
                                 <span class="text-sky-400 font-semibold">MAINTENANCE & REPAIR</span>
@@ -787,11 +828,11 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 Uji beban dinamis dan pemeriksaan sertifikasi twistlock memastikan kesiapan alat berat dalam melayani penumpukan 4-tier berstandar keselamatan internasional.
                             </p>
                         </div>
-                    </a>
+                    </div>
 
                     <!-- Card 2 -->
-                    <a href="#highlights" class="group flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-slate-800/60 transition-all duration-200">
-                        <div class="sm:w-44 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/img/facilities/datacenter_noc.jpg');"></div>
+                    <div onclick="openLoginModal()" class="group flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-slate-800/60 transition-all cursor-pointer">
+                        <div class="w-full sm:w-44 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/img/facilities/datacenter_noc.jpg');"></div>
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
                                 <span class="text-purple-400 font-semibold">INFRASTRUKTUR NOC</span>
@@ -804,11 +845,11 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 Pemantauan 24/7 telemetri 26 titik hardware IoT dan sistem auto-failover cloud menjamin operasional gerbang dan penumpukan tanpa henti.
                             </p>
                         </div>
-                    </a>
+                    </div>
 
                     <!-- Card 3 -->
-                    <a href="#about" class="group flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-slate-800/60 transition-all duration-200">
-                        <div class="sm:w-44 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/img/facilities/kantor_utama.jpg');"></div>
+                    <div onclick="openLoginModal()" class="group flex flex-col sm:flex-row gap-5 p-5 rounded-2xl bg-slate-900/80 border border-slate-800 hover:border-orange-500/50 hover:bg-slate-800/60 transition-all cursor-pointer">
+                        <div class="w-full sm:w-44 h-36 rounded-xl overflow-hidden flex-shrink-0 bg-cover bg-center" style="background-image: url('assets/img/facilities/kantor_utama.jpg');"></div>
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center justify-between text-xs font-mono text-slate-400 mb-2">
                                 <span class="text-emerald-400 font-semibold">KEMITRAAN EKOSISTEM</span>
@@ -821,7 +862,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 Percepat proses pengurusan dokumen ekspor-impor dan pembayaran nota tagihan jasa pelabuhan kering hanya dalam hitungan menit di Gedung Utama.
                             </p>
                         </div>
-                    </a>
+                    </div>
 
                 </div>
 
@@ -837,7 +878,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- Section Header -->
-            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6" data-aos="fade-up">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-6">
                 <div>
                     <span class="text-xs font-bold uppercase tracking-widest text-orange-400">TRIDHARMA LOGISTIK CIDP</span>
                     <h2 class="text-3xl sm:text-5xl font-extrabold tracking-tight text-white mt-2">
@@ -847,22 +888,22 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         Tiga serangkai sistem yang dirancang selaras untuk melacak, menggerakkan, dan mengonsolidasi muatan dari hulu ke hilir dengan ketepatan data 100%.
                     </p>
                 </div>
-                <a href="dashboard.php" class="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-orange-400 hover:text-orange-300 transition-colors">
-                    <span>Lihat Seluruh Modul Terpadu</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </a>
+                <button type="button" onclick="openLoginModal()" class="petronas-readmore text-orange-400 hover:text-orange-300">
+                    <i><i class="fa-solid fa-arrow-right"></i></i>
+                    <p>Buka Seluruh Modul Terpadu</p>
+                </button>
             </div>
 
             <!-- 3 Tall Rounded Image Cards with Slide-Up Hover Overlays -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 
                 <!-- CARD 1: Yard Management System (YMS) -->
-                <div class="pillar-card group" data-aos="fade-up" data-aos-delay="100">
-                    <div class="pillar-bg" style="background-image: url('assets/img/facilities/stacking_yard.jpg');"></div>
-                    <div class="pillar-overlay"></div>
+                <div class="tall-pillar-card group">
+                    <div class="pillar-img" style="background-image: url('assets/img/facilities/stacking_yard.jpg');"></div>
+                    <div class="pillar-grad"></div>
                     
-                    <!-- Default State (Title at Bottom) -->
-                    <div class="pillar-body-default">
+                    <!-- Default State -->
+                    <div class="pillar-base">
                         <div class="text-xs font-mono text-orange-400 uppercase tracking-widest mb-1">01 &bull; MANAJEMEN LAPANGAN</div>
                         <h3 class="text-2xl font-black text-white">Yard Management System</h3>
                         <div class="mt-3 flex items-center gap-2 text-xs text-slate-300">
@@ -871,30 +912,30 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         </div>
                     </div>
 
-                    <!-- Hover State (Slide Up Full Content) -->
-                    <div class="pillar-body-hover">
+                    <!-- Hover State -->
+                    <div class="pillar-hover">
                         <div class="text-xs font-mono text-orange-400 uppercase tracking-widest mb-1">01 &bull; YMS ENGINE</div>
                         <h4 class="text-xl font-black text-white mb-2">Presisi Spasial & Zero Misplacement</h4>
                         <p class="text-xs text-slate-300 leading-relaxed mb-4">
                             Otomasi penataan Blok A hingga E dengan batasan 4-tier stacking, kalkulasi dwell time otomatis, dan pelacakan GPS alat berat Kalmar Reach Stacker dalam visualisasi denah interaktif.
                         </p>
-                        <div class="pt-2 border-t border-white/20 flex items-center justify-between">
+                        <div class="pt-3 border-t border-white/20 flex items-center justify-between">
                             <span class="text-[11px] font-mono text-emerald-400"><i class="fa-solid fa-check mr-1"></i> 100% Akurasi Slot</span>
-                            <a href="dashboard.php?page=denah" class="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5">
-                                <span>Buka Denah</span>
+                            <button type="button" onclick="openLoginModal()" class="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5">
+                                <span>Buka Modul</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- CARD 2: Transport Management System (TMS) -->
-                <div class="pillar-card group" data-aos="fade-up" data-aos-delay="200">
-                    <div class="pillar-bg" style="background-image: url('assets/img/facilities/rail_siding.jpg');"></div>
-                    <div class="pillar-overlay"></div>
+                <div class="tall-pillar-card group">
+                    <div class="pillar-img" style="background-image: url('assets/img/facilities/rail_siding.jpg');"></div>
+                    <div class="pillar-grad"></div>
                     
                     <!-- Default State -->
-                    <div class="pillar-body-default">
+                    <div class="pillar-base">
                         <div class="text-xs font-mono text-sky-400 uppercase tracking-widest mb-1">02 &bull; ANTARMODA KERETA & TRUK</div>
                         <h3 class="text-2xl font-black text-white">Transport Management System</h3>
                         <div class="mt-3 flex items-center gap-2 text-xs text-slate-300">
@@ -904,29 +945,29 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     </div>
 
                     <!-- Hover State -->
-                    <div class="pillar-body-hover">
+                    <div class="pillar-hover">
                         <div class="text-xs font-mono text-sky-400 uppercase tracking-widest mb-1">02 &bull; TMS ENGINE</div>
                         <h4 class="text-xl font-black text-white mb-2">Sinkronisasi Shunting Pasoso</h4>
                         <p class="text-xs text-slate-300 leading-relaxed mb-4">
                             Manajemen jadwal rangkaian 60 TEU kereta api logistik rute Tanjung Priok &ndash; CIDP, serta pengaturan internal shunting Head Truck KTT-01/02/03 demi kelancaran gate dispatch.
                         </p>
-                        <div class="pt-2 border-t border-white/20 flex items-center justify-between">
+                        <div class="pt-3 border-t border-white/20 flex items-center justify-between">
                             <span class="text-[11px] font-mono text-sky-400"><i class="fa-solid fa-train mr-1"></i> Rangkaian 60 TEU</span>
-                            <a href="dashboard.php?page=trucking" class="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5">
-                                <span>Buka Modul TMS</span>
+                            <button type="button" onclick="openLoginModal()" class="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5">
+                                <span>Buka Modul</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
 
                 <!-- CARD 3: Warehouse Management System (WMS & CFS) -->
-                <div class="pillar-card group" data-aos="fade-up" data-aos-delay="300">
-                    <div class="pillar-bg" style="background-image: url('assets/img/facilities/cfs_warehouse.jpg');"></div>
-                    <div class="pillar-overlay"></div>
+                <div class="tall-pillar-card group">
+                    <div class="pillar-img" style="background-image: url('assets/img/facilities/cfs_warehouse.jpg');"></div>
+                    <div class="pillar-grad"></div>
                     
                     <!-- Default State -->
-                    <div class="pillar-body-default">
+                    <div class="pillar-base">
                         <div class="text-xs font-mono text-emerald-400 uppercase tracking-widest mb-1">03 &bull; CFS & GUDANG KONSOLIDASI</div>
                         <h3 class="text-2xl font-black text-white">Warehouse Management System</h3>
                         <div class="mt-3 flex items-center gap-2 text-xs text-slate-300">
@@ -936,18 +977,18 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     </div>
 
                     <!-- Hover State -->
-                    <div class="pillar-body-hover">
+                    <div class="pillar-hover">
                         <div class="text-xs font-mono text-emerald-400 uppercase tracking-widest mb-1">03 &bull; WMS & CFS ENGINE</div>
                         <h4 class="text-xl font-black text-white mb-2">Stripping, Stuffing & Barcoding</h4>
                         <p class="text-xs text-slate-300 leading-relaxed mb-4">
                             Pengelolaan alur konsolidasi LCL/FCL, pelacakan barcode palet berstandar GS1, penataan racking gudang CFS, dan koneksi langsung dengan penagihan biaya storage ERP.
                         </p>
-                        <div class="pt-2 border-t border-white/20 flex items-center justify-between">
+                        <div class="pt-3 border-t border-white/20 flex items-center justify-between">
                             <span class="text-[11px] font-mono text-emerald-400"><i class="fa-solid fa-barcode mr-1"></i> Barcode GS1 Ready</span>
-                            <a href="dashboard.php?page=cfs" class="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5">
-                                <span>Buka Modul CFS</span>
+                            <button type="button" onclick="openLoginModal()" class="text-xs font-bold text-orange-400 hover:text-orange-300 flex items-center gap-1.5">
+                                <span>Buka Modul</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
-                            </a>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -961,14 +1002,13 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- 6. OPERATIONAL & FINANCIAL RESULTS (Petronas Glass Stat Cards)     -->
     <!-- =================================================================== -->
     <section id="performance" class="relative py-24 bg-slate-950 text-white overflow-hidden">
-        <!-- Full-bleed Background Image with Dark Tint -->
         <div class="absolute inset-0 bg-cover bg-center opacity-30" style="background-image: url('assets/img/facilities/datacenter_noc.jpg');"></div>
         <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/70"></div>
 
         <div class="relative z-10 max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- Heading -->
-            <div class="max-w-2xl mb-14" data-aos="fade-right">
+            <div class="max-w-2xl mb-14">
                 <span class="text-xs font-mono text-orange-400 uppercase tracking-widest">PENGUMUMAN KINERJA OPERASIONAL & HSSE</span>
                 <h2 class="text-3xl sm:text-5xl font-black text-white mt-2 leading-tight">
                     Hasil Kinerja Terminal <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">Tahun Berjalan 2026</span>
@@ -981,7 +1021,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             <!-- 3 Rounded Glass Stat Cards (Petronas Style) -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-16">
                 
-                <div class="rounded-3xl p-8 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl" data-aos="fade-up" data-aos-delay="100">
+                <div class="rounded-3xl p-8 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
                     <div class="text-xs font-mono text-slate-300 uppercase tracking-wider">Kapasitas Throughput</div>
                     <div class="text-4xl sm:text-5xl font-extrabold text-orange-400 my-4 font-mono">45.000 <span class="text-2xl text-white">TEU</span></div>
                     <div class="text-xs text-slate-300 flex items-center gap-1.5">
@@ -990,7 +1030,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     </div>
                 </div>
 
-                <div class="rounded-3xl p-8 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl" data-aos="fade-up" data-aos-delay="200">
+                <div class="rounded-3xl p-8 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
                     <div class="text-xs font-mono text-slate-300 uppercase tracking-wider">Rata-Rata Dwell Time</div>
                     <div class="text-4xl sm:text-5xl font-extrabold text-sky-400 my-4 font-mono">1.8 <span class="text-2xl text-white">Hari</span></div>
                     <div class="text-xs text-slate-300 flex items-center gap-1.5">
@@ -999,7 +1039,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     </div>
                 </div>
 
-                <div class="rounded-3xl p-8 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl" data-aos="fade-up" data-aos-delay="300">
+                <div class="rounded-3xl p-8 bg-white/10 backdrop-blur-md border border-white/20 shadow-xl">
                     <div class="text-xs font-mono text-slate-300 uppercase tracking-wider">Reduksi Emisi Gas Buang (CO₂)</div>
                     <div class="text-4xl sm:text-5xl font-extrabold text-emerald-400 my-4 font-mono">-76% <span class="text-2xl text-white">CO₂</span></div>
                     <div class="text-xs text-slate-300 flex items-center gap-1.5">
@@ -1010,8 +1050,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 
             </div>
 
-            <!-- KEY DOCUMENTS (Petronas Key Documents Download Row) -->
-            <div id="documents" class="pt-8 border-t border-white/10" data-aos="fade-up">
+            <!-- KEY DOCUMENTS DOWNLOAD ROWS (Petronas Key Documents Row) -->
+            <div id="documents" class="pt-8 border-t border-white/10">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-file-pdf text-red-400"></i>
@@ -1095,7 +1135,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
             
             <!-- Section Header -->
-            <div class="mb-14" data-aos="fade-up">
+            <div class="mb-14">
                 <span class="text-xs font-mono text-orange-400 uppercase tracking-widest">INFRASTRUKTUR FISIK KELAS DUNIA</span>
                 <h2 class="text-3xl sm:text-5xl font-black text-white mt-2">
                     Sorotan <span class="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-amber-300">Fasilitas Unggulan</span>
@@ -1108,10 +1148,10 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             <!-- 2-Column: Left Large Square Image Stage + Right Accordion -->
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
                 
-                <!-- LEFT IMAGE STAGE (Col 6) -->
-                <div class="lg:col-span-6" data-aos="fade-right">
+                <!-- LEFT IMAGE STAGE (Desktop) -->
+                <div class="lg:col-span-6 hidden lg:block">
                     <div class="relative w-full aspect-square rounded-3xl overflow-hidden shadow-2xl border border-white/10">
-                        <div id="highlightImageDisplay" class="highlight-image-stage absolute inset-0" style="background-image: url('assets/img/facilities/datacenter_noc.jpg');"></div>
+                        <div id="highlightImageDisplay" class="absolute inset-0 bg-cover bg-center transition-all duration-300" style="background-image: url('assets/img/facilities/datacenter_noc.jpg');"></div>
                         <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent"></div>
                         <div class="absolute bottom-6 left-6 right-6">
                             <span id="highlightBadge" class="bg-orange-600 text-white text-[11px] font-bold uppercase tracking-wider px-3 py-1 rounded-full">
@@ -1124,11 +1164,13 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     </div>
                 </div>
 
-                <!-- RIGHT ACCORDION LIST (Col 6) -->
-                <div class="lg:col-span-6 space-y-4" data-aos="fade-left">
+                <!-- RIGHT ACCORDION LIST -->
+                <div class="lg:col-span-6 space-y-4">
                     
                     <!-- Accordion Item 1 (Active by default) -->
-                    <div class="accordion-card p-5 rounded-2xl bg-slate-800/80 border border-orange-500/60 cursor-pointer transition-all" onclick="selectHighlight(0, 'assets/img/facilities/datacenter_noc.jpg', 'PUSAT KENDALI NOC', 'Data Center Tier-3 & Network Operations Center (NOC)')">
+                    <div class="accordion-item-box p-5 rounded-2xl bg-slate-800/80 border border-orange-500/60 cursor-pointer transition-all" onclick="selectHighlight(0, 'assets/img/facilities/datacenter_noc.jpg', 'PUSAT KENDALI NOC', 'Data Center Tier-3 & Network Operations Center (NOC)')">
+                        <!-- Mobile Thumbnail -->
+                        <div class="lg:hidden w-full h-44 rounded-xl bg-cover bg-center mb-3" style="background-image: url('assets/img/facilities/datacenter_noc.jpg');"></div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-orange-600 text-white flex items-center justify-center font-bold text-xs">
@@ -1138,13 +1180,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                             </div>
                             <i class="fa-solid fa-chevron-right text-orange-400 text-xs"></i>
                         </div>
-                        <div class="accordion-content mt-3 text-xs text-slate-300 leading-relaxed pl-11">
+                        <div class="accordion-desc mt-3 text-xs text-slate-300 leading-relaxed pl-11">
                             Pusat komando telemetri 26 perangkat hardware IoT, server redundansi high-availability untuk DPMS, dan pengawasan CCTV AI 24/7 di seluruh perimeter 35 Ha.
                         </div>
                     </div>
 
                     <!-- Accordion Item 2 -->
-                    <div class="accordion-card p-5 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition-all" onclick="selectHighlight(1, 'assets/img/facilities/workshop_mr.jpg', 'BENGKEL ALAT & KONTAINER', 'Workshop Maintenance & Repair (M&R) Kalmar')">
+                    <div class="accordion-item-box p-5 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition-all" onclick="selectHighlight(1, 'assets/img/facilities/workshop_mr.jpg', 'BENGKEL ALAT & KONTAINER', 'Workshop Maintenance & Repair (M&R) Kalmar')">
+                        <!-- Mobile Thumbnail -->
+                        <div class="lg:hidden w-full h-44 rounded-xl bg-cover bg-center mb-3" style="background-image: url('assets/img/facilities/workshop_mr.jpg');"></div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
@@ -1154,13 +1198,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                         </div>
-                        <div class="accordion-content mt-3 text-xs text-slate-300 leading-relaxed pl-11 hidden">
+                        <div class="accordion-desc mt-3 text-xs text-slate-300 leading-relaxed pl-11 hidden">
                             Fasilitas perawatan alat berat Kalmar DRG450 Reach Stacker, pengelasan struktur peti kemas, pencucian kimia berstandar IICL, dan perbaikan segel ISO.
                         </div>
                     </div>
 
                     <!-- Accordion Item 3 -->
-                    <div class="accordion-card p-5 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition-all" onclick="selectHighlight(2, 'assets/img/facilities/gatehouse_in.jpg', 'GERBANG OTOMATIS & TIMBANGAN', 'Gatehouse Otomatis 4 Lajur OCR & Timbangan Gantry')">
+                    <div class="accordion-item-box p-5 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition-all" onclick="selectHighlight(2, 'assets/img/facilities/gatehouse_in.jpg', 'GERBANG OTOMATIS & TIMBANGAN', 'Gatehouse Otomatis 4 Lajur OCR & Timbangan Gantry')">
+                        <!-- Mobile Thumbnail -->
+                        <div class="lg:hidden w-full h-44 rounded-xl bg-cover bg-center mb-3" style="background-image: url('assets/img/facilities/gatehouse_in.jpg');"></div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
@@ -1170,13 +1216,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                         </div>
-                        <div class="accordion-content mt-3 text-xs text-slate-300 leading-relaxed pl-11 hidden">
+                        <div class="accordion-desc mt-3 text-xs text-slate-300 leading-relaxed pl-11 hidden">
                             Empat lajur cerdas dilengkapi kamera OCR nomor kontainer dan pelat truk, scanner kartu RFID UHF, pembaca barcode SPK, dan jembatan timbang gantry 80 ton.
                         </div>
                     </div>
 
                     <!-- Accordion Item 4 -->
-                    <div class="accordion-card p-5 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition-all" onclick="selectHighlight(3, 'assets/img/facilities/kantor_utama.jpg', 'LAYANAN SATU ATAP', 'Gedung Administrasi & Hanggar Bea Cukai Hanggar CIDP')">
+                    <div class="accordion-item-box p-5 rounded-2xl bg-slate-900/60 border border-slate-800 cursor-pointer hover:border-slate-700 transition-all" onclick="selectHighlight(3, 'assets/img/facilities/kantor_utama.jpg', 'LAYANAN SATU ATAP', 'Gedung Administrasi & Hanggar Bea Cukai Hanggar CIDP')">
+                        <!-- Mobile Thumbnail -->
+                        <div class="lg:hidden w-full h-44 rounded-xl bg-cover bg-center mb-3" style="background-image: url('assets/img/facilities/kantor_utama.jpg');"></div>
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-lg bg-slate-800 text-slate-300 flex items-center justify-center font-bold text-xs">
@@ -1186,7 +1234,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-500 text-xs"></i>
                         </div>
-                        <div class="accordion-content mt-3 text-xs text-slate-300 leading-relaxed pl-11 hidden">
+                        <div class="accordion-desc mt-3 text-xs text-slate-300 leading-relaxed pl-11 hidden">
                             Pusat pelayanan administrasi terpadu satu atap (One Stop Service) mencakup perwakilan Hanggar Bea Cukai, perbankan, customer care, dan verifikasi dokumen pengapalan.
                         </div>
                     </div>
@@ -1199,7 +1247,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     </section>
 
     <!-- =================================================================== -->
-    <!-- 8. OUR NETWORK (Petronas Collapsible Flip Grid)                    -->
+    <!-- 8. OUR NETWORK (Petronas Collapsible Discover More Section)         -->
     <!-- =================================================================== -->
     <section id="network" class="py-24 bg-slate-950 text-white border-t border-slate-800">
         <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -1212,7 +1260,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         Modul Sistem DPMS & Jaringan Mitra
                     </h2>
                 </div>
-                <button class="w-12 h-12 rounded-full bg-slate-800 hover:bg-orange-600 text-white flex items-center justify-center transition-all duration-200" title="Buka/Tutup Jaringan">
+                <button class="w-11 h-11 rounded-full bg-slate-800 hover:bg-orange-600 text-white flex items-center justify-center transition-colors" title="Buka/Tutup Jaringan">
                     <i class="fa-solid fa-chevron-down transition-transform duration-300" id="networkToggleCaret"></i>
                 </button>
             </div>
@@ -1220,7 +1268,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             <!-- Collapsible Body Content -->
             <div id="networkContent" class="transition-all duration-500 overflow-hidden">
                 
-                <!-- Subtitle 1: 8 Core Modules of DPMS (Flip Cards) -->
+                <!-- 8 Core Modules of DPMS -->
                 <div class="mb-12">
                     <div class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
                         <i class="fa-solid fa-layer-group text-orange-400"></i>
@@ -1229,194 +1277,122 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                         
-                        <!-- Flip Card 1: Gate -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-id-card-clip"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Gate Automation</h4>
-                                        <span class="text-[11px] text-slate-400">RFID UHF & OCR Camera</span>
-                                    </div>
+                        <!-- Card 1: Gate -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-orange-600/20 text-orange-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-id-card-clip"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Deteksi otomatis truk di timbangan, validasi e-Ticket SPK, dan cetak instruksi slot CMS secara real-time.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Buka Gate &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">01</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Gate Automation</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">RFID UHF, kamera OCR, timbangan gantry otomatis & cetak e-Ticket SPK.</p>
                             </div>
                         </div>
 
-                        <!-- Flip Card 2: Yard Stacking -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-sky-600/20 text-sky-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-cubes"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Yard Stacking Engine</h4>
-                                        <span class="text-[11px] text-slate-400">Slot Blok A-E & 4-Tier</span>
-                                    </div>
+                        <!-- Card 2: Yard Stacking -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-sky-600/20 text-sky-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-cubes"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Optimasi penataan kontainer berdasarkan Port of Discharge (POD) dan tanggal jadwal keberangkatan KA.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Lihat Yard &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">02</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Yard Stacking Engine</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">Slot Blok A-E, 4-tier stacking, dan optimasi Port of Discharge.</p>
                             </div>
                         </div>
 
-                        <!-- Flip Card 3: Rail Siding -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-train-subway"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Rail Siding Pasoso</h4>
-                                        <span class="text-[11px] text-slate-400">60 TEU Rangkaian Kereta</span>
-                                    </div>
+                        <!-- Card 3: Rail Siding -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-purple-600/20 text-purple-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-train-subway"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Manajemen jadwal kedatangan gerbong datar, proses lift on/off RTG, dan manifest perjalanan KA logistik.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Lihat Rail &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">03</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Rail Siding Pasoso</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">Rangkaian 60 TEU kereta kargo langsung terhubung Pelabuhan Tanjung Priok.</p>
                             </div>
                         </div>
 
-                        <!-- Flip Card 4: CFS & Konsolidasi -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-dolly"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">CFS Consolidation</h4>
-                                        <span class="text-[11px] text-slate-400">Barcode GS1 Pallet</span>
-                                    </div>
+                        <!-- Card 4: CFS & Konsolidasi -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-dolly"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Pencatatan stuffing dan stripping barang parsial LCL di gudang CFS dengan pelacakan lokasi rak bertingkat.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Buka CFS &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">04</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">CFS Consolidation</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">Stripping/stuffing kargo LCL dan pelacakan barcode palet berstandar GS1.</p>
                             </div>
                         </div>
 
-                        <!-- Flip Card 5: Reefer Telematics -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-cyan-600/20 text-cyan-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-temperature-arrow-down"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Reefer Telematics</h4>
-                                        <span class="text-[11px] text-slate-400">120 Plug IoT Sensors</span>
-                                    </div>
+                        <!-- Card 5: Reefer Telematics -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-cyan-600/20 text-cyan-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-temperature-arrow-down"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Monitoring data logger temperatur dan daya genset reefer container 24 jam nonstop dengan peringatan alarm instan.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Buka Reefer &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">05</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Reefer Telematics</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">120 soket plug points mandiri dengan logger suhu real-time 24 jam nonstop.</p>
                             </div>
                         </div>
 
-                        <!-- Flip Card 6: Kalmar Equipment GPS -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-truck-moving"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Equipment Telemetry</h4>
-                                        <span class="text-[11px] text-slate-400">Reach Stacker RS-01..03</span>
-                                    </div>
+                        <!-- Card 6: Kalmar Equipment GPS -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-amber-600/20 text-amber-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-truck-moving"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Pantau konsumsi BBM, jam operasi, lokasi GPS akurat, dan status kargo yang sedang diangkat secara real-time.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Buka Telemetri &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">06</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Equipment Telemetry</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">Telemetri BBM, jam kerja, dan GPS presisi Kalmar DRG450 Reach Stacker.</p>
                             </div>
                         </div>
 
-                        <!-- Flip Card 7: Customs CEISA 4.0 -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-stamp"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Bea Cukai CEISA 4.0</h4>
-                                        <span class="text-[11px] text-slate-400">Host-to-Host Host API</span>
-                                    </div>
+                        <!-- Card 7: Customs CEISA 4.0 -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-red-600/20 text-red-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-stamp"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Sinkronisasi otomatis nomor SPPB, PEB, PIB, dan status jalur hijau/merah langsung dari server DJBC.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Buka CEISA &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">07</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Bea Cukai CEISA 4.0</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">Pertukaran data elektronik manifes, SPPB, PEB, PIB instan DJBC.</p>
                             </div>
                         </div>
 
-                        <!-- Flip Card 8: Billing ERP & Tarif -->
-                        <div class="dm-card-box">
-                            <div class="dm-card-inner">
-                                <div class="dm-face-front">
-                                    <div class="w-10 h-10 rounded-xl bg-green-600/20 text-green-400 flex items-center justify-center text-lg">
-                                        <i class="fa-solid fa-receipt"></i>
-                                    </div>
-                                    <div>
-                                        <h4 class="font-bold text-white text-sm">Billing ERP Engine</h4>
-                                        <span class="text-[11px] text-slate-400">e-Invoice & Progresif</span>
-                                    </div>
+                        <!-- Card 8: Billing ERP & Tarif -->
+                        <div onclick="openLoginModal()" class="network-card">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-xl bg-green-600/20 text-green-400 flex items-center justify-center text-lg">
+                                    <i class="fa-solid fa-receipt"></i>
                                 </div>
-                                <div class="dm-face-back">
-                                    <p class="text-xs leading-relaxed">
-                                        Kalkulasi otomatis biaya lift on/off, penumpukan progresif, plug-in reefer, dan penerbitan nota e-Faktur pajak.
-                                    </p>
-                                    <div class="text-right">
-                                        <span class="text-[11px] font-bold uppercase underline">Buka Billing &rarr;</span>
-                                    </div>
-                                </div>
+                                <span class="text-slate-500 text-xs font-mono">08</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-white text-sm">Billing ERP Engine</h4>
+                                <p class="text-xs text-slate-400 mt-1 line-clamp-2">Otomasi kalkulasi lift-on/off, penumpukan progresif & faktur e-Tax.</p>
                             </div>
                         </div>
 
                     </div>
                 </div>
 
-                <!-- Subtitle 2: Mitra Terintegrasi -->
+                <!-- Mitra Terintegrasi -->
                 <div class="pt-8 border-t border-slate-800">
                     <div class="text-xs font-mono text-slate-400 uppercase tracking-wider mb-6 flex items-center gap-2">
                         <i class="fa-solid fa-handshake text-sky-400"></i>
@@ -1466,10 +1442,10 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             </p>
 
             <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
-                <a href="login.php" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-slate-950 hover:bg-slate-900 text-white font-extrabold text-xs uppercase tracking-wider shadow-2xl transition-all duration-200 transform hover:scale-105">
+                <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-3 px-8 py-4 rounded-full bg-slate-950 hover:bg-slate-900 text-white font-extrabold text-xs uppercase tracking-wider shadow-2xl transition-all duration-200 transform hover:scale-105">
                     <i class="fa-solid fa-right-to-bracket text-orange-400"></i>
                     <span>Masuk ke Konsol DPMS</span>
-                </a>
+                </button>
                 <a href="dashboard.php?page=simulator" class="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs uppercase tracking-wider backdrop-blur-md border border-white/30 transition-all">
                     <i class="fa-solid fa-vr-cardboard"></i>
                     <span>Buka Simulasi 3D Real-Time</span>
@@ -1564,10 +1540,9 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 11. SEARCH OVERLAY MODAL (Petronas-style Fullscreen Search)         -->
     <!-- =================================================================== -->
-    <div id="searchOverlayModal" class="fixed inset-0 z-50 modal-blur hidden flex items-start justify-center pt-20 px-4 transition-all">
+    <div id="searchOverlayModal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-xl hidden flex items-start justify-center pt-20 px-4 transition-all">
         <div class="w-full max-w-3xl bg-slate-900 border border-slate-700 rounded-3xl p-6 sm:p-8 shadow-2xl relative text-white">
             
-            <!-- Close Button -->
             <button onclick="toggleSearchModal(false)" class="absolute top-6 right-6 w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors">
                 <i class="fa-solid fa-xmark text-sm"></i>
             </button>
@@ -1577,13 +1552,11 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <span>Pencarian Cepat CIDP DPMS</span>
             </h3>
 
-            <!-- Search Input Box -->
             <div class="relative mb-6">
                 <input type="text" id="quickSearchInput" oninput="handleQuickSearch(this.value)" placeholder="Ketik kata kunci: YMS, Reefer, CEISA, SOP, Shunting, atau Tarif..." class="w-full px-5 py-3.5 pl-12 rounded-2xl bg-slate-800 border border-slate-700 text-white placeholder-slate-400 focus:outline-none focus:border-orange-500 font-medium text-sm">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
             </div>
 
-            <!-- Popular Quick Tags -->
             <div class="flex flex-wrap items-center gap-2 mb-6 text-xs">
                 <span class="text-slate-400">Paling Sering Dicari:</span>
                 <button onclick="fillSearchKeyword('YMS')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-orange-600/30 text-orange-400 border border-slate-700 transition-colors">YMS Stacking</button>
@@ -1593,7 +1566,6 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <button onclick="fillSearchKeyword('SOP')" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-emerald-600/30 text-emerald-400 border border-slate-700 transition-colors">Unduh SOP</button>
             </div>
 
-            <!-- Live Search Results Container -->
             <div id="searchResultsBox" class="space-y-2 max-h-60 overflow-y-auto pr-2">
                 <div class="text-xs text-slate-500 italic p-3 text-center">
                     Masukkan kata kunci di atas untuk mencari data fasilitas, modul, atau dokumen.
@@ -1603,38 +1575,153 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         </div>
     </div>
 
-    <!-- AOS JS Library -->
-    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <!-- =================================================================== -->
+    <!-- 12. MODAL MASUK SISTEM DPMS (Satu-satunya Halaman Masuk Terpadu)    -->
+    <!-- Tidak Dobel: Langsung muncul di atas landing page                  -->
+    <!-- =================================================================== -->
+    <div id="loginModal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md <?= $showLoginModal ? '' : 'hidden' ?> flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden text-slate-800 relative animate-fadeIn">
+            
+            <!-- Kepala Modal -->
+            <div class="bg-gradient-to-r from-[#002f5e] via-[#0170b9] to-orange-600 px-6 py-5 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 p-1">
+                        <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-full h-full object-contain">
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-base leading-tight">Masuk Portal DPMS</h3>
+                        <p class="text-[11px] text-blue-100 font-medium">Conclusion Intermodal Dry Port Hub 35 Ha</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeLoginModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
+                    <i class="fa-solid fa-xmark text-sm"></i>
+                </button>
+            </div>
+
+            <!-- Form Body -->
+            <div class="p-6 space-y-4">
+                
+                <?php if (!empty($error_message)): ?>
+                    <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start space-x-2.5">
+                        <i class="fa-solid fa-circle-exclamation text-red-500 text-sm mt-0.5 shrink-0"></i>
+                        <span class="font-medium leading-relaxed"><?= htmlspecialchars($error_message); ?></span>
+                    </div>
+                <?php endif; ?>
+
+                <form method="POST" action="landing.php" id="formLoginModal" class="space-y-4">
+                    <div>
+                        <label for="modalEmail" class="block text-xs font-bold text-slate-700 mb-1.5">
+                            Alamat Pos-el (Email)
+                        </label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none text-xs">
+                                <i class="fa-regular fa-envelope"></i>
+                            </span>
+                            <input type="email" id="modalEmail" name="email" value="admin@cidp.ac.id" required 
+                                   placeholder="admin@cidp.ac.id"
+                                   class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium">
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label for="modalPassword" class="block text-xs font-bold text-slate-700">
+                                Kata Sandi
+                            </label>
+                            <span class="text-[10px] text-slate-400">Default: admin123</span>
+                        </div>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none text-xs">
+                                <i class="fa-solid fa-lock"></i>
+                            </span>
+                            <input type="password" id="modalPassword" name="password" value="admin123" required 
+                                   placeholder="Kata Sandi Anda"
+                                   class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium">
+                            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 text-xs focus:outline-none">
+                                <i class="fa-regular fa-eye" id="iconEye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="pt-1">
+                        <button type="submit" name="btn_login" 
+                                class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-500 hover:to-amber-500 text-white font-bold text-xs uppercase tracking-wider shadow-lg shadow-orange-900/30 transition-all flex items-center justify-center space-x-2">
+                            <span>Masuk ke Konsol DPMS</span>
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- AKUN DEMONSTRASI (1-Click Fill) -->
+                <div class="pt-3 border-t border-slate-200">
+                    <div class="text-[11px] font-bold text-slate-600 mb-2 flex items-center justify-between">
+                        <span>Pilih Akun Demo Cepat:</span>
+                        <span class="text-[10px] text-orange-600 font-mono">1-Klik Terisi</span>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-left">
+                        <button type="button" onclick="setDemoCredentials('admin@cidp.ac.id', 'admin123')"
+                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/50 transition-all text-[11px] group">
+                            <div class="font-bold text-slate-800 group-hover:text-orange-600 flex items-center gap-1.5">
+                                <i class="fa-solid fa-user-shield text-orange-500 text-[10px]"></i>
+                                <span>Super Admin</span>
+                            </div>
+                            <div class="text-[9.5px] text-slate-500 font-mono truncate">admin@cidp.ac.id</div>
+                        </button>
+
+                        <button type="button" onclick="setDemoCredentials('operator@cidp.ac.id', 'admin123')"
+                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-sky-500 hover:bg-sky-50/50 transition-all text-[11px] group">
+                            <div class="font-bold text-slate-800 group-hover:text-sky-600 flex items-center gap-1.5">
+                                <i class="fa-solid fa-person-digging text-sky-500 text-[10px]"></i>
+                                <span>Operator Yard</span>
+                            </div>
+                            <div class="text-[9.5px] text-slate-500 font-mono truncate">operator@cidp.ac.id</div>
+                        </button>
+
+                        <button type="button" onclick="setDemoCredentials('client@cidp.ac.id', 'admin123')"
+                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all text-[11px] group">
+                            <div class="font-bold text-slate-800 group-hover:text-emerald-600 flex items-center gap-1.5">
+                                <i class="fa-solid fa-building text-emerald-500 text-[10px]"></i>
+                                <span>Shipper / Client</span>
+                            </div>
+                            <div class="text-[9.5px] text-slate-500 font-mono truncate">client@cidp.ac.id</div>
+                        </button>
+
+                        <button type="button" onclick="setDemoCredentials('driver@cidp.ac.id', 'admin123')"
+                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-purple-500 hover:bg-purple-50/50 transition-all text-[11px] group">
+                            <div class="font-bold text-slate-800 group-hover:text-purple-600 flex items-center gap-1.5">
+                                <i class="fa-solid fa-truck text-purple-500 text-[10px]"></i>
+                                <span>Supir Truk</span>
+                            </div>
+                            <div class="text-[9.5px] text-slate-500 font-mono truncate">driver@cidp.ac.id</div>
+                        </button>
+                    </div>
+
+                    <!-- 1-Click Instant Enter -->
+                    <div class="mt-3">
+                        <button type="button" onclick="quickDirectLogin()" 
+                                class="w-full py-2.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-bolt text-amber-400"></i>
+                            <span>Masuk Otomatis Instan (Super Admin)</span>
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
 
     <!-- =================================================================== -->
-    <!-- INTERACTIVE JAVASCRIPT CONTROLLERS                                 -->
+    <!-- JAVASCRIPT CONTROLLERS                                             -->
     <!-- =================================================================== -->
     <script>
-        // Inisialisasi AOS (Animate on Scroll)
-        document.addEventListener('DOMContentLoaded', function() {
-            if (typeof AOS !== 'undefined') {
-                AOS.init({
-                    duration: 700,
-                    once: true,
-                    offset: 80
-                });
-            }
-        });
-
-        // 1. NAVBAR SCROLL EFFECT (Petronas: Transparent to Solid White)
+        // 1. NAVBAR SCROLL EFFECT
         const mainHeader = document.getElementById('mainHeader');
-        const brandTextMain = document.getElementById('brandTextMain');
-        const brandTextSub = document.getElementById('brandTextSub');
-
         window.addEventListener('scroll', function() {
-            if (window.scrollY > 40) {
-                mainHeader.classList.add('nav-scrolled');
-                brandTextMain.classList.remove('text-white');
-                brandTextMain.classList.add('text-slate-900');
+            if (window.scrollY > 30) {
+                mainHeader.classList.add('scrolled');
             } else {
-                mainHeader.classList.remove('nav-scrolled');
-                brandTextMain.classList.add('text-white');
-                brandTextMain.classList.remove('text-slate-900');
+                mainHeader.classList.remove('scrolled');
             }
         });
 
@@ -1653,15 +1740,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             }
         }
 
-        // 3. HERO CAROUSEL ENGINE WITH AUTOPLAY PROGRESS BARS (Petronas-style)
+        // 3. HERO CAROUSEL ENGINE WITH AUTOPLAY PROGRESS BARS
         let currentSlide = 0;
         const totalSlides = 5;
-        const slideDuration = 6000; // 6 detik per slide
+        const slideDuration = 6000;
         let progressStart = Date.now();
         let animationFrameId = null;
 
-        const slides = document.querySelectorAll('.hero-slide');
-        const tabItems = document.querySelectorAll('.banner-tab-item');
+        const slides = document.querySelectorAll('.hero-slide-item');
+        const tabItems = document.querySelectorAll('.hero-tab-item');
         const progressBars = [
             document.getElementById('progressBar0'),
             document.getElementById('progressBar1'),
@@ -1674,7 +1761,6 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             currentSlide = targetIndex;
             progressStart = Date.now();
 
-            // Perbarui class active pada slide
             slides.forEach((slide, idx) => {
                 if (idx === targetIndex) {
                     slide.classList.add('active');
@@ -1683,7 +1769,6 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 }
             });
 
-            // Perbarui class active pada tab item
             tabItems.forEach((tab, idx) => {
                 if (idx === targetIndex) {
                     tab.classList.add('active');
@@ -1692,14 +1777,10 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 }
             });
 
-            // Reset progress bar lainnya
             progressBars.forEach((bar, idx) => {
                 if (bar) {
-                    if (idx < targetIndex) {
-                        bar.style.width = '100%';
-                    } else if (idx > targetIndex) {
-                        bar.style.width = '0%';
-                    }
+                    if (idx < targetIndex) bar.style.width = '100%';
+                    else if (idx > targetIndex) bar.style.width = '0%';
                 }
             });
         }
@@ -1721,7 +1802,6 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             animationFrameId = requestAnimationFrame(runCarouselLoop);
         }
 
-        // Mulai autoplay carousel
         switchHeroSlide(0);
         runCarouselLoop();
 
@@ -1730,29 +1810,26 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             const imgDisplay = document.getElementById('highlightImageDisplay');
             const badge = document.getElementById('highlightBadge');
             const caption = document.getElementById('highlightCaption');
-            const cards = document.querySelectorAll('.accordion-card');
+            const cards = document.querySelectorAll('.accordion-item-box');
 
-            // Fade transition out
-            imgDisplay.style.opacity = '0.3';
-            imgDisplay.style.transform = 'scale(0.98)';
+            if (imgDisplay) {
+                imgDisplay.style.opacity = '0.3';
+                setTimeout(() => {
+                    imgDisplay.style.backgroundImage = `url('${imagePath}')`;
+                    if (badge) badge.innerText = badgeText;
+                    if (caption) caption.innerText = captionText;
+                    imgDisplay.style.opacity = '1';
+                }, 150);
+            }
 
-            setTimeout(() => {
-                imgDisplay.style.backgroundImage = `url('${imagePath}')`;
-                badge.innerText = badgeText;
-                caption.innerText = captionText;
-                imgDisplay.style.opacity = '1';
-                imgDisplay.style.transform = 'scale(1)';
-            }, 180);
-
-            // Update border style and open content
             cards.forEach((card, idx) => {
-                const content = card.querySelector('.accordion-content');
+                const desc = card.querySelector('.accordion-desc');
                 const chevron = card.querySelector('.fa-chevron-right');
 
                 if (idx === index) {
                     card.classList.remove('bg-slate-900/60', 'border-slate-800');
                     card.classList.add('bg-slate-800/80', 'border-orange-500/60');
-                    content.classList.remove('hidden');
+                    if (desc) desc.classList.remove('hidden');
                     if (chevron) {
                         chevron.classList.remove('text-slate-500');
                         chevron.classList.add('text-orange-400');
@@ -1760,7 +1837,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 } else {
                     card.classList.add('bg-slate-900/60', 'border-slate-800');
                     card.classList.remove('bg-slate-800/80', 'border-orange-500/60');
-                    content.classList.add('hidden');
+                    if (desc) desc.classList.add('hidden');
                     if (chevron) {
                         chevron.classList.add('text-slate-500');
                         chevron.classList.remove('text-orange-400');
@@ -1799,18 +1876,17 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             }
         }
 
-        // Keyboard ESC to close modal
         window.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 toggleSearchModal(false);
+                closeLoginModal();
             }
         });
 
-        // Search directory data
         const searchDatabase = [
-            { title: 'Yard Management System (YMS)', desc: 'Penataan kontainer blok A-E, 4-tier stacking, dan alat berat Kalmar RS-01..03', link: 'dashboard.php?page=denah' },
-            { title: 'Rail Siding Pasoso (TMS)', desc: 'Konektivitas rangkaian 60 TEU kereta api logistik langsung ke Tanjung Priok', link: 'dashboard.php?page=trucking' },
-            { title: 'CFS Warehouse (WMS)', desc: 'Gudang konsolidasi LCL/FCL, auto-dock leveller, dan pelacakan barcode palet GS1', link: 'dashboard.php?page=cfs' },
+            { title: 'Yard Management System (YMS)', desc: 'Penataan kontainer blok A-E, 4-tier stacking, dan alat berat Kalmar RS-01..03', action: 'openLoginModal()' },
+            { title: 'Rail Siding Pasoso (TMS)', desc: 'Konektivitas rangkaian 60 TEU kereta api logistik langsung ke Tanjung Priok', action: 'openLoginModal()' },
+            { title: 'CFS Warehouse (WMS)', desc: 'Gudang konsolidasi LCL/FCL, auto-dock leveller, dan pelacakan barcode palet GS1', action: 'openLoginModal()' },
             { title: 'Reefer Cold Chain Terminal', desc: '120 soket plug points telemetri IoT 24/7 untuk kargo dingin bernilai tinggi', link: '#highlights' },
             { title: 'Integrasi Host-to-Host CEISA 4.0', desc: 'Otomasi validasi SPPB, PEB, PIB, dan gate in clearance Bea Cukai', link: '#documents' },
             { title: 'SOP Gate & Panduan Pengemudi', desc: 'Dokumen panduan kartu RFID UHF dan standar keselamatan operasional', link: 'docs/CIDP_DPMS_Comprehensive_Tutorial_Guide.docx' },
@@ -1848,14 +1924,56 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 `;
             } else {
                 resultsBox.innerHTML = matched.map(item => `
-                    <a href="${item.link}" class="block p-3 rounded-xl bg-slate-800/80 hover:bg-orange-600/20 border border-slate-700 hover:border-orange-500/50 transition-colors">
+                    <div onclick="${item.action || "window.location.href='" + item.link + "'"}" class="block p-3 rounded-xl bg-slate-800/80 hover:bg-orange-600/20 border border-slate-700 hover:border-orange-500/50 transition-colors cursor-pointer">
                         <div class="font-bold text-white text-xs flex items-center justify-between">
                             <span>${item.title}</span>
                             <i class="fa-solid fa-arrow-right text-[10px] text-orange-400"></i>
                         </div>
                         <div class="text-[11px] text-slate-300 mt-1">${item.desc}</div>
-                    </a>
+                    </div>
                 `).join('');
+            }
+        }
+
+        // 7. LOGIN MODAL LOGIC
+        function openLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+        }
+
+        function closeLoginModal() {
+            document.getElementById('loginModal').classList.add('hidden');
+        }
+
+        function togglePasswordVisibility() {
+            const passInput = document.getElementById('modalPassword');
+            const eyeIcon = document.getElementById('iconEye');
+            if (passInput.type === 'password') {
+                passInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        function setDemoCredentials(email, password) {
+            document.getElementById('modalEmail').value = email;
+            document.getElementById('modalPassword').value = password;
+        }
+
+        function quickDirectLogin() {
+            document.getElementById('modalEmail').value = 'admin@cidp.ac.id';
+            document.getElementById('modalPassword').value = 'admin123';
+            const form = document.getElementById('formLoginModal');
+            if (form) {
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = 'btn_login';
+                hiddenInput.value = '1';
+                form.appendChild(hiddenInput);
+                form.submit();
             }
         }
     </script>
