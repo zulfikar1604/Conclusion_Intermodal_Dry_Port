@@ -1,16 +1,9 @@
 <?php
 // =============================================================================
 // FILE: index.php
-// FUNGSI: Mengarahkan pengguna ke login.php atau dashboard.php
+// FUNGSI: Halaman Depan Korporat (Landing Page) Terpadu CIDP DPMS
 // =============================================================================
 
-session_start();
+require_once __DIR__ . '/landing.php';
 
-if (isset($_SESSION['login']) && $_SESSION['login'] === true) {
-    header("Location: dashboard.php");
-    exit;
-}
-
-header("Location: login.php");
-exit;
 ?>

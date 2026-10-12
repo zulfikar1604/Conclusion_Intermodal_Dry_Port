@@ -138,7 +138,7 @@ if (isset($_POST['btn_login'])) {
         <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-4 w-full">
             
             <!-- LOGO MEREK: Conclusion Supply Chain Consultant (Sisi Kiri) -->
-            <a href="login.php" class="flex items-center space-x-3 group shrink-0">
+            <a href="index.php" class="flex items-center space-x-3 group shrink-0" title="Kembali ke Laman Korporat">
                 <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-9 h-9 sm:w-10 sm:h-10 object-contain transition-transform group-hover:scale-105">
                 <div>
                     <div class="font-extrabold text-base sm:text-lg text-cdp-navy tracking-tight leading-none">
@@ -152,6 +152,7 @@ if (isset($_POST['btn_login'])) {
 
             <!-- TAUTAN MENU UTAMA (Tengah Layar / Centered) -->
             <nav class="hidden lg:flex items-center justify-center space-x-5 xl:space-x-8 text-xs font-bold text-slate-700">
+                <a href="index.php" class="text-orange-600 hover:text-orange-700 transition whitespace-nowrap flex items-center gap-1.5"><i class="fa-solid fa-house text-xs"></i> Laman Korporat</a>
                 <a href="#solusi" class="hover:text-orange-600 transition whitespace-nowrap">Solusi Dry Port</a>
                 <a href="#fasilitas" class="hover:text-orange-600 transition whitespace-nowrap">Fasilitas 35 Ha</a>
                 <a href="#tiga-alur" class="hover:text-orange-600 transition whitespace-nowrap">3 Alur Operasional</a>
