@@ -47,7 +47,7 @@ $zones_data = [
         'icon' => 'fa-snowflake',
         'color' => '#06b6d4',
         'facilities' => [
-            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin 24/7 dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera Reefer Monitoring', 'img' => 'hardware/images/converted/item_16.png'],
+            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin real-time presisi dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera Reefer Monitoring', 'img' => 'hardware/images/converted/item_16.png'],
             ['id' => 'f_genset_shelter', 'nama' => 'Genset Shelter Cadangan', 'desc' => 'Gedung pembangkit daya darurat 1.500 kVA Caterpillar untuk menjamin kelangsungan listrik reefer jika PLN padam.', 'icon' => 'fa-bolt', 'hw_id' => 14, 'hw_nama' => 'UPS Online & Sistem Kelistrikan Darurat', 'img' => 'hardware/images/converted/item_14.png'],
             ['id' => 'f_reefer_racks', 'nama' => 'Reefer Stacking Racks (300 Plugs)', 'desc' => 'Platform bertingkat dilengkapi 300 titik colokan Smart Reefer Socket 380V/32A dengan meteran digital.', 'icon' => 'fa-plug-circle-check', 'hw_id' => 23, 'hw_nama' => 'Smart Reefer Power Socket 380V/32A', 'img' => 'hardware/images/converted/item_23.png']
         ]
@@ -970,7 +970,7 @@ foreach ($zones_data as $z) {
                 <rect x="1084" y="214" width="64" height="14" fill="#ecfeff" stroke="#0891b2" stroke-width="0.8"/>
                 <text x="1116" y="224" fill="#0e7490" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">REEFER CONTROL</text>
                 <text x="1116" y="242" fill="#0f172a" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">RUANG MONITORING</text>
-                <text x="1116" y="254" fill="#64748b" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">TEKNISI 24/7</text>
+                <text x="1116" y="254" fill="#64748b" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">TEKNISI SIAGA</text>
             </g>
         </g>
 
@@ -1060,7 +1060,7 @@ foreach ($zones_data as $z) {
                 <text x="1132" y="454" fill="#991b1b" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">KANTOR KPPBC</text>
                 <text x="1132" y="477" fill="#0f172a" font-family="'Consolas', monospace" font-size="6" text-anchor="middle">BEA CUKAI</text>
                 <text x="1132" y="493" fill="#64748b" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">SISTEM CEISA 4.0</text>
-                <text x="1132" y="509" fill="#dc2626" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">PELAYANAN 24/7</text>
+                <text x="1132" y="509" fill="#dc2626" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">PELAYANAN NON-STOP</text>
                 <text x="1132" y="525" fill="#0284c7" font-family="'Consolas', monospace" font-size="5" text-anchor="middle">PORT CLEARANCE</text>
             </g>
         </g>

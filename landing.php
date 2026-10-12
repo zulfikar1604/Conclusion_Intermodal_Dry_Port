@@ -232,13 +232,14 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             right: 0;
             top: 50%;
             transform: translateY(-50%);
-            z-index: 40;
+            z-index: 35;
         }
         .side-nav-float .float-btn {
-            width: 44px;
-            height: 44px;
+            width: 42px;
+            height: 42px;
             background: #ffffff;
             border-left: 3px solid #ea580c;
+            border-radius: 8px 0 0 8px;
             box-shadow: -2px 4px 12px rgba(0, 0, 0, 0.08);
             margin-bottom: 4px;
             display: flex;
@@ -252,7 +253,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         .side-nav-float .float-btn:hover {
             background: #ea580c;
             color: #ffffff;
-            width: 50px;
+            width: 48px;
         }
         .side-nav-float .popover-social {
             position: absolute;
@@ -392,7 +393,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <i class="fa-solid fa-snowflake text-cyan-600 mt-1"></i>
                                 <div>
                                     <div class="font-bold text-slate-900 text-xs normal-case">Reefer Cold Chain Hub</div>
-                                    <div class="text-[11px] text-slate-500 normal-case">120 plug points telemetri IoT 24/7</div>
+                                    <div class="text-[11px] text-slate-500 normal-case">120 soket telemetri IoT real-time presisi</div>
                                 </div>
                             </a>
                         </div>
@@ -623,7 +624,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <i class="fa-solid fa-snowflake"></i> Rantai Pendingin Presisi
                     </span>
                     <h1 class="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight leading-tight text-white mb-4">
-                        Terminal Reefer & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-300 to-sky-200">Pemantauan Suhu IoT 24/7</span>
+                        Terminal Reefer & <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-300 to-sky-200">Pemantauan Suhu IoT Real-Time</span>
                     </h1>
                     <p class="text-sm sm:text-base lg:text-lg text-slate-100 font-normal leading-relaxed mb-8 max-w-2xl drop-shadow">
                         120 soket plug points mandiri dengan sistem deteksi deviasi suhu real-time untuk kargo farmasi, daging, susu, dan buah bernilai tinggi.
@@ -802,7 +803,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 Peningkatan Data Center Tier-3 CIDP Mencapai Uptime 99.98% untuk Sistem Billing & IoT
                             </h4>
                             <p class="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-                                Pemantauan 24/7 telemetri 26 titik hardware IoT dan sistem auto-failover cloud menjamin operasional gerbang dan penumpukan tanpa henti.
+                                Pemantauan telemetri terpadu 26 titik hardware IoT dan sistem redundansi cloud multi-zona menjamin kelancaran operasional gerbang dan penumpukan tanpa henti.
                             </p>
                         </div>
                     </div>
@@ -1141,7 +1142,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                             <i class="fa-solid fa-chevron-right text-orange-600 text-xs"></i>
                         </div>
                         <div class="accordion-desc mt-3 text-xs text-slate-600 leading-relaxed pl-11">
-                            Pusat komando telemetri 26 perangkat hardware IoT, server redundansi high-availability untuk DPMS, dan pengawasan CCTV AI 24/7 di seluruh perimeter 35 Ha.
+                            Pusat komando telemetri 26 perangkat hardware IoT, infrastruktur server redundansi berkeandalan tinggi untuk DPMS, serta pengawasan CCTV AI berkesinambungan di seluruh perimeter 35 Ha.
                         </div>
                     </div>
 
@@ -1417,80 +1418,148 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 10. FOOTER (Petronas Multilevel Corporate Footer)                  -->
     <!-- =================================================================== -->
-    <footer class="bg-[#002f5e] text-slate-300 text-xs border-t border-blue-900/40">
-        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-16">
+    <footer class="bg-[#002244] text-slate-300 text-xs border-t border-blue-900/40 relative z-20">
+        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:pr-24 py-16">
             
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-14">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 mb-14">
                 
-                <!-- Col 1: Brand Info -->
-                <div class="lg:col-span-2">
-                    <div class="flex items-center gap-3 mb-4">
-                        <img src="assets/img/logo.png" alt="Conclusion Logo" class="h-10 w-auto bg-white/10 rounded-lg p-1">
+                <!-- Col 1: Corporate Profile & Certifications (lg:col-span-4) -->
+                <div class="lg:col-span-4 space-y-4">
+                    <div class="flex items-center gap-3">
+                        <img src="assets/img/logo.png" alt="Conclusion Logo" class="h-11 w-auto bg-white/10 rounded-xl p-1.5 border border-white/10">
                         <div>
-                            <span class="font-black text-lg tracking-tight uppercase text-white">CONCLUSION</span>
-                            <div class="text-[10px] text-orange-400 font-bold uppercase tracking-wider">Intermodal Dry Port &bull; DPMS</div>
+                            <span class="font-black text-lg tracking-tight uppercase text-white block leading-tight">CONCLUSION</span>
+                            <div class="text-[10px] text-orange-400 font-bold uppercase tracking-wider">Intermodal Dry Port &bull; DPMS Platform</div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-300 leading-relaxed max-w-sm mb-6">
-                        Pusat logistik terintegrasi 35 Hektare berstandar internasional yang menghubungkan ekosistem pelabuhan laut, kereta api logistik, dan pergudangan modern dengan kepatuhan Bea Cukai CEISA 4.0.
+                    <p class="text-xs text-slate-300 leading-relaxed max-w-sm">
+                        Konsorsium infrastruktur pelabuhan darat 35 Hektare berstandar kelas dunia yang menghubungkan multimoda kereta api logistik, terminal peti kemas digital, serta ekosistem kepabeanan CEISA 4.0 secara berkesinambungan.
                     </p>
-                    <div class="text-[11px] text-blue-200">
-                        Lokasi: Koridor Industri Intermodal &bull; Hub Cikarang &ndash; Tanjung Priok
+                    
+                    <!-- Certification badges -->
+                    <div class="pt-2">
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-2">Standar & Kepatuhan Terakreditasi</div>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-slate-200 font-mono">
+                                <i class="fa-solid fa-shield-halved text-orange-400"></i> ISPS Code
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-slate-200 font-mono">
+                                <i class="fa-solid fa-network-wired text-blue-400"></i> CEISA 4.0 B2B
+                            </span>
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-slate-200 font-mono">
+                                <i class="fa-solid fa-certificate text-emerald-400"></i> ISO 9001 &bull; 27001
+                            </span>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Col 2: Solusi Fungsional -->
-                <div>
-                    <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4">Solusi DPMS</h5>
+                <!-- Col 2: Solusi Fungsional DPMS (lg:col-span-3) -->
+                <div class="lg:col-span-3">
+                    <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-3 bg-orange-500 rounded-full inline-block"></span>
+                        Solusi Sistem DPMS
+                    </h5>
                     <ul class="space-y-2.5 text-xs text-slate-300">
-                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors">Yard Management (YMS)</a></li>
-                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors">Transport & Shunting (TMS)</a></li>
-                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors">CFS & Konsolidasi (WMS)</a></li>
-                        <li><a href="#highlights" class="hover:text-orange-400 transition-colors">Reefer Cold Chain 24/7</a></li>
-                        <li><a href="dashboard.php?page=simulator" class="hover:text-orange-400 transition-colors">3D Digital Twin Engine</a></li>
+                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Yard Management System (YMS)</a></li>
+                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Transport & Shunting KA (TMS)</a></li>
+                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> CFS Warehouse & Konsolidasi (WMS)</a></li>
+                        <li><a href="#highlights" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Terminal Rantai Pendingin (Reefer Hub)</a></li>
+                        <li><a href="dashboard.php?page=simulator" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> 3D Digital Twin Engine Simulator</a></li>
+                        <li><a href="#network" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Gerbang Otomatis RFID & ANPR</a></li>
                     </ul>
                 </div>
 
-                <!-- Col 3: Regulasi & Dokumen -->
-                <div>
-                    <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4">Regulasi & Tata Kelola</h5>
+                <!-- Col 3: Regulasi & Tata Kelola (lg:col-span-2) -->
+                <div class="lg:col-span-2">
+                    <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-3 bg-blue-500 rounded-full inline-block"></span>
+                        Tata Kelola & HSSE
+                    </h5>
                     <ul class="space-y-2.5 text-xs text-slate-300">
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors">SOP Gate & CEISA 4.0</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors">Kebijakan K3 & HSSE Terminal</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors">Laporan Emisi Net-Zero 2050</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors">Pedoman Pengemudi Truk</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors">Whistleblowing System</a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> SOP Gate & CEISA 4.0</a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Kebijakan K3 & HSSE Terminal</a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Inisiatif Dekarbonisasi Green Port</a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Pedoman Pengemudi Truk Logistik</a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Whistleblowing System (WBS)</a></li>
                     </ul>
                 </div>
 
-                <!-- Col 4: Hubungi Kami -->
-                <div>
-                    <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4">Hubungi Kami</h5>
-                    <ul class="space-y-2.5 text-xs text-slate-300">
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-phone text-orange-400"></i> (021) 893-7890</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-envelope text-orange-400"></i> info@conclusion-dryport.com</li>
-                        <li class="flex items-center gap-2"><i class="fa-solid fa-headset text-orange-400"></i> Layanan NOC 24/7</li>
-                        <li class="pt-2">
-                            <span class="inline-block bg-emerald-500/20 border border-emerald-400/40 text-emerald-300 text-[10px] font-mono px-2.5 py-1 rounded">
-                                ● Terminal Aktif 24/7
-                            </span>
-                        </li>
-                    </ul>
+                <!-- Col 4: Pusat Operasi & Komando (lg:col-span-3) -->
+                <div class="lg:col-span-3 pr-4">
+                    <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
+                        <span class="w-1.5 h-3 bg-emerald-500 rounded-full inline-block"></span>
+                        Pusat Operasi & Komando
+                    </h5>
+                    <div class="space-y-3 text-xs text-slate-300">
+                        <div class="flex items-start gap-2.5">
+                            <i class="fa-solid fa-location-dot text-orange-400 mt-0.5 text-xs shrink-0"></i>
+                            <div>
+                                <span class="text-slate-400 text-[11px] block">Terminal & Kantor Pusat:</span>
+                                <span class="text-white font-medium">Kawasan Intermodal Pasoso, Km 32 Koridor Cikarang &ndash; Tanjung Priok</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <i class="fa-solid fa-phone text-orange-400 mt-0.5 text-xs shrink-0"></i>
+                            <div>
+                                <span class="text-slate-400 text-[11px] block">Layanan Informasi Korporat:</span>
+                                <span class="text-white font-medium">(021) 893-7890 (Hunting)</span>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-2.5">
+                            <i class="fa-solid fa-tower-broadcast text-blue-400 mt-0.5 text-xs shrink-0"></i>
+                            <div>
+                                <span class="text-slate-400 text-[11px] block">Pusat Kendali Operasi NOC:</span>
+                                <span class="text-white font-medium">noc-support@conclusion-dryport.com</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Prestigious Operational Status Card -->
+                        <div class="mt-4 p-3.5 rounded-xl bg-white/[0.04] border border-white/10">
+                            <div class="flex items-center gap-2.5 mb-1.5">
+                                <span class="relative flex h-2 w-2">
+                                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </span>
+                                <span class="text-[11px] font-bold text-white tracking-wide uppercase">Kesiapan Operasional Penuh</span>
+                            </div>
+                            <p class="text-[10px] text-slate-400 leading-relaxed">
+                                Seluruh subsistem gerbang RFID, reach stacker, rel, dan telemetri IoT beroperasi berkesinambungan dengan siklus multi-shift non-stop.
+                            </p>
+                        </div>
+                    </div>
                 </div>
 
             </div>
 
+            <!-- Petronas Governance & Policy Row -->
+            <div class="pt-8 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
+                <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px]">
+                    <a href="#documents" class="hover:text-white transition-colors">Syarat &amp; Ketentuan Layanan</a>
+                    <span class="text-white/20">&bull;</span>
+                    <a href="#documents" class="hover:text-white transition-colors">Kebijakan Privasi &amp; Data</a>
+                    <span class="text-white/20">&bull;</span>
+                    <a href="#documents" class="hover:text-white transition-colors">Whistleblowing System (WBS)</a>
+                    <span class="text-white/20">&bull;</span>
+                    <a href="#documents" class="hover:text-white transition-colors">Kebijakan HSSE &amp; K3L</a>
+                    <span class="text-white/20">&bull;</span>
+                    <a href="#network" class="hover:text-white transition-colors">Peta Ekosistem Antarmoda</a>
+                </div>
+                <div class="text-[11px] text-slate-400 font-mono">
+                    Sistem Manajemen Keamanan Informasi &bull; ISO/IEC 27001
+                </div>
+            </div>
+
             <!-- Footer Bottom: Copyright & Social Media Links -->
-            <div class="pt-8 border-t border-blue-900/60 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-[11px] text-blue-200 text-center sm:text-left">
-                    Hak Cipta &copy; <?= date('Y') ?> Conclusion Intermodal Dry Port (CIDP). Didesain dengan standar arsitektur kelas dunia. Hak cipta dilindungi undang-undang.
+            <div class="mt-6 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="text-[11px] text-slate-400 text-center sm:text-left">
+                    Hak Cipta &copy; <?= date('Y') ?> PT Conclusion Intermodal Dry Port Tbk. Seluruh hak cipta dilindungi undang-undang.
                 </div>
 
-                <div class="flex items-center gap-5 text-sm text-blue-200">
-                    <a href="https://linkedin.com" target="_blank" class="hover:text-white transition-colors"><i class="fa-brands fa-linkedin"></i></a>
-                    <a href="https://youtube.com" target="_blank" class="hover:text-white transition-colors"><i class="fa-brands fa-youtube"></i></a>
-                    <a href="https://instagram.com" target="_blank" class="hover:text-white transition-colors"><i class="fa-brands fa-instagram"></i></a>
-                    <a href="https://twitter.com" target="_blank" class="hover:text-white transition-colors"><i class="fa-brands fa-x-twitter"></i></a>
+                <div class="flex items-center gap-2.5 text-xs text-slate-400">
+                    <a href="https://linkedin.com" target="_blank" class="w-8 h-8 rounded-full bg-white/5 hover:bg-orange-600 hover:text-white border border-white/10 flex items-center justify-center transition-all" title="LinkedIn"><i class="fa-brands fa-linkedin text-xs"></i></a>
+                    <a href="https://youtube.com" target="_blank" class="w-8 h-8 rounded-full bg-white/5 hover:bg-orange-600 hover:text-white border border-white/10 flex items-center justify-center transition-all" title="YouTube"><i class="fa-brands fa-youtube text-xs"></i></a>
+                    <a href="https://instagram.com" target="_blank" class="w-8 h-8 rounded-full bg-white/5 hover:bg-orange-600 hover:text-white border border-white/10 flex items-center justify-center transition-all" title="Instagram"><i class="fa-brands fa-instagram text-xs"></i></a>
+                    <a href="https://twitter.com" target="_blank" class="w-8 h-8 rounded-full bg-white/5 hover:bg-orange-600 hover:text-white border border-white/10 flex items-center justify-center transition-all" title="Twitter / X"><i class="fa-brands fa-x-twitter text-xs"></i></a>
                 </div>
             </div>
 
@@ -1836,7 +1905,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             { title: 'Yard Management System (YMS)', desc: 'Penataan kontainer blok A-E, 4-tier stacking, dan alat berat Kalmar RS-01..03', action: 'openLoginModal()' },
             { title: 'Rail Siding Pasoso (TMS)', desc: 'Konektivitas rangkaian 60 TEU kereta api logistik langsung ke Tanjung Priok', action: 'openLoginModal()' },
             { title: 'CFS Warehouse (WMS)', desc: 'Gudang konsolidasi LCL/FCL, auto-dock leveller, dan pelacakan barcode palet GS1', action: 'openLoginModal()' },
-            { title: 'Reefer Cold Chain Terminal', desc: '120 soket plug points telemetri IoT 24/7 untuk kargo dingin bernilai tinggi', link: '#highlights' },
+            { title: 'Reefer Cold Chain Terminal', desc: '120 soket plug points telemetri IoT real-time presisi untuk kargo dingin bernilai tinggi', link: '#highlights' },
             { title: 'Integrasi Host-to-Host CEISA 4.0', desc: 'Otomasi validasi SPPB, PEB, PIB, dan gate in clearance Bea Cukai', link: '#documents' },
             { title: 'SOP Gate & Panduan Pengemudi', desc: 'Dokumen panduan kartu RFID UHF dan standar keselamatan operasional', link: 'docs/CIDP_DPMS_Comprehensive_Tutorial_Guide.docx' },
             { title: '3D Digital Twin Simulation', desc: 'Simulasi spasial visualisasi interaktif denah terminal Three.js 1:1 ISO scale', link: 'dashboard.php?page=simulator' }
