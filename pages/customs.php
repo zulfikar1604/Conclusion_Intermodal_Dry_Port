@@ -812,7 +812,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                         </button>
 
                                         <!-- Aksi Pintas Lintas Modul -->
-                                        <a href="dashboard.php?page=kontainer&search=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-[#002f5e] hover:text-white rounded flex items-center justify-center transition" title="Lacak Kontainer di Tracking Box">
+                                        <a href="dashboard.php?page=kontainer&search=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-[#0170b9] hover:text-white rounded flex items-center justify-center transition" title="Lacak Kontainer di Tracking Box">
                                             <i class="fa-solid fa-boxes-stacked text-xs"></i>
                                         </a>
                                         <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white rounded flex items-center justify-center transition" title="Lihat Posisi Fisik 3D">
@@ -874,9 +874,9 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
     <!-- TAB 2: GATEWAY SIMULASI PIB & RISK PROFILING CEISA 4.0           -->
     <!-- ================================================================= -->
     <div id="tab-simulator" class="customs-tab-content space-y-6 hidden">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <!-- Form Input Pengajuan PIB Baru (Kolom Kiri 7 Col) -->
-            <div class="lg:col-span-7 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
+            <div class="xl:col-span-7 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                     <div>
                         <h2 class="text-base font-bold text-gray-900 flex items-center">
@@ -990,7 +990,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
             </div>
 
             <!-- Panel Live Decision Engine CEISA 4.0 (Kolom Kanan 5 Col) -->
-            <div class="lg:col-span-5 space-y-4">
+            <div class="xl:col-span-5 space-y-4">
                 <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                     <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                         <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center">
@@ -1041,7 +1041,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                 </div>
 
                 <!-- Live JSON API Payload Preview Card -->
-                <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-sm space-y-3 font-mono">
+                <div class="bg-gradient-to-br from-blue-50 to-slate-50 rounded-2xl p-5 text-slate-800 border border-blue-200 shadow-xs space-y-3 font-mono">
                     <div class="flex items-center justify-between text-xs pb-2 border-b border-slate-800">
                         <span class="text-slate-400 flex items-center">
                             <i class="fa-solid fa-brackets-curly mr-1.5 text-emerald-400"></i>CEISA REST API Payload
@@ -1070,7 +1070,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
     <!-- ================================================================= -->
     <div id="tab-behandle" class="customs-tab-content space-y-6 hidden">
         <!-- Banner Zona 5 Lapangan & Hardware Overview -->
-        <div class="bg-gradient-to-r from-slate-900 via-[#002f5e] to-slate-900 rounded-2xl p-6 text-white shadow-md flex flex-col lg:flex-row items-center justify-between gap-6">
+        <div class="bg-gradient-to-r from-[#0170b9] via-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex flex-col lg:flex-row items-center justify-between gap-6">
             <div class="space-y-2">
                 <div class="flex items-center space-x-2">
                     <span class="px-2.5 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-full text-xs font-bold uppercase tracking-wider flex items-center">
@@ -1086,7 +1086,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
 
             <!-- Thumbnail Produk Hardware #19 -->
             <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 flex items-center space-x-3.5 flex-shrink-0">
-                <img src="hardware/images/converted/item_19.png" alt="Gantry Container X-Ray" class="w-16 h-16 object-contain bg-white rounded-lg p-1 shadow-sm" />
+                <img src="assets/img/hardware/converted/item_19.png" alt="Gantry Container X-Ray" class="w-16 h-16 object-contain bg-white rounded-lg p-1 shadow-sm" />
                 <div class="text-left">
                     <span class="text-[10px] text-amber-300 font-bold block uppercase">Hardware #19 &bull; CAPEX Rp 12,5 M</span>
                     <strong class="text-xs font-bold text-white block">Nuctech MB1215DE 6 MeV</strong>
@@ -1096,9 +1096,9 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
         </div>
 
         <!-- 2 Kolom: Kolom Kiri Simulator Gantry X-Ray, Kolom Kanan 4 Bay Behandle -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <!-- Kolom Kiri: Simulator Gantry X-Ray 6 MeV (7 Col) -->
-            <div class="lg:col-span-7 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <div class="xl:col-span-7 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                     <div>
                         <h3 class="text-sm font-bold text-gray-900 flex items-center">
@@ -1116,7 +1116,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                 </div>
 
                 <!-- Visual Kanvas Radiografi X-Ray -->
-                <div class="relative bg-slate-950 rounded-xl p-4 overflow-hidden border border-slate-800 shadow-inner">
+                <div class="relative bg-slate-50 rounded-xl p-4 overflow-hidden border border-slate-200 shadow-inner">
                     <!-- Scanner Head Laser Guide Line -->
                     <div id="xrayScanLaser" class="absolute top-0 bottom-0 w-1 bg-rose-500 shadow-[0_0_15px_#f43f5e] z-20 left-0 hidden transition-all duration-300"></div>
 
@@ -1157,7 +1157,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                         </svg>
 
                         <!-- Live Status Overlay di Kanvas -->
-                        <div class="absolute top-2 right-2 bg-slate-900/90 backdrop-blur px-2.5 py-1 rounded border border-slate-700 text-[10px] font-mono text-emerald-400" id="xrayStatusOverlay">
+                        <div class="absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border border-slate-200 shadow-xs text-[10px] font-mono text-emerald-400" id="xrayStatusOverlay">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span>DETEKTOR SIAP
                         </div>
                     </div>
@@ -1188,7 +1188,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
             </div>
 
             <!-- Kolom Kanan: 4 Bay Kanopi Behandle Fisik (5 Col) -->
-            <div class="lg:col-span-5 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <div class="xl:col-span-5 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                     <div>
                         <h3 class="text-sm font-bold text-gray-900 flex items-center">
@@ -1205,7 +1205,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                     <div class="p-3.5 rounded-xl border border-gray-200 hover:border-blue-300 transition bg-slate-50 flex items-center justify-between">
                         <div>
                             <div class="flex items-center space-x-2">
-                                <span class="w-6 h-6 rounded bg-[#002f5e] text-white flex items-center justify-center font-bold text-[11px]">B1</span>
+                                <span class="w-6 h-6 rounded bg-[#0170b9] text-white flex items-center justify-center font-bold text-[11px]">B1</span>
                                 <strong class="text-xs text-gray-900">Bay 01: Kanopi Hazmat / DG</strong>
                                 <span class="px-1.5 py-0.2 bg-amber-100 text-amber-800 text-[9.5px] font-bold rounded">Terisi</span>
                             </div>
@@ -1222,7 +1222,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                     <div class="p-3.5 rounded-xl border border-gray-200 hover:border-blue-300 transition bg-slate-50 flex items-center justify-between">
                         <div>
                             <div class="flex items-center space-x-2">
-                                <span class="w-6 h-6 rounded bg-[#002f5e] text-white flex items-center justify-center font-bold text-[11px]">B2</span>
+                                <span class="w-6 h-6 rounded bg-[#0170b9] text-white flex items-center justify-center font-bold text-[11px]">B2</span>
                                 <strong class="text-xs text-gray-900">Bay 02: Dry Box Inspection</strong>
                                 <span class="px-1.5 py-0.2 bg-purple-100 text-purple-800 text-[9.5px] font-bold rounded">Stripping 30%</span>
                             </div>
@@ -1268,7 +1268,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
 
                 <!-- SOP 5 Langkah Pemeriksaan Behandle -->
                 <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100 text-xs space-y-1.5">
-                    <strong class="text-[#002f5e] font-bold block flex items-center">
+                    <strong class="text-[#0170b9] font-bold block flex items-center">
                         <i class="fa-solid fa-list-ol mr-1.5"></i>Alur Standar Pemeriksaan Fisik Pabean (SOP DJBC):
                     </strong>
                     <ol class="list-decimal list-inside text-[11px] text-gray-600 space-y-0.5">
@@ -1290,7 +1290,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
         <!-- Banner Hardware #26 -->
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
             <div class="flex items-start space-x-4">
-                <img src="hardware/images/converted/item_26.png" alt="Smart GPS E-Seal" class="w-16 h-16 object-contain bg-slate-50 rounded-xl p-1 border border-gray-200 flex-shrink-0" />
+                <img src="assets/img/hardware/converted/item_26.png" alt="Smart GPS E-Seal" class="w-16 h-16 object-contain bg-slate-50 rounded-xl p-1 border border-gray-200 flex-shrink-0" />
                 <div>
                     <div class="flex items-center space-x-2 mb-1">
                         <h2 class="text-lg font-bold text-gray-900">Monitoring Segel Elektronik (Smart GPS E-Seal Jointech JT701)</h2>
@@ -1311,9 +1311,9 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
         </div>
 
         <!-- Koridor Transit Rute 4 Checkpoints & Live Telemetri -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <!-- Peta Visual Koridor Transit (Kolom Kiri 8 Col) -->
-            <div class="lg:col-span-8 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <div class="xl:col-span-8 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                     <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center">
                         <i class="fa-solid fa-route mr-2 text-[#0170b9]"></i>Koridor Pengawasan Pabean Priok &harr; CIDP Cikarang (54.8 km)
@@ -1322,7 +1322,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                 </div>
 
                 <!-- Visual Koridor Checkpoint SVG -->
-                <div class="bg-slate-900 rounded-xl p-4 text-white">
+                <div class="bg-gradient-to-br from-[#0170b9] to-blue-700 rounded-xl p-4 text-white shadow-xs">
                     <svg viewBox="0 0 760 160" class="w-full h-auto">
                         <!-- Jalur Penghubung Tol & Rel -->
                         <line x1="80" y1="80" x2="680" y2="80" stroke="#334155" stroke-width="6" stroke-linecap="round" />
@@ -1330,7 +1330,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
 
                         <!-- Checkpoint 1: Tanjung Priok -->
                         <g transform="translate(80, 80)">
-                            <circle cx="0" cy="0" r="16" fill="#002f5e" stroke="#38bdf8" stroke-width="2" />
+                            <circle cx="0" cy="0" r="16" fill="#0170b9" stroke="#38bdf8" stroke-width="2" />
                             <circle cx="0" cy="0" r="6" fill="#38bdf8" />
                             <text x="0" y="-25" text-anchor="middle" fill="#ffffff" font-size="10" font-weight="bold">PEL. TJ. PRIOK</text>
                             <text x="0" y="32" text-anchor="middle" fill="#94a3b8" font-size="8.5">Origin / Pasang e-Seal</text>
@@ -1391,7 +1391,9 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                 <td class="py-2.5 px-3"><span class="text-emerald-700 font-bold">98%</span></td>
                                 <td class="py-2.5 px-3 text-center"><span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 rounded-full font-bold text-[10px]">UNLOCKED</span></td>
                                 <td class="py-2.5 px-3 text-center">
-                                    <button disabled class="px-2.5 py-1 bg-gray-100 text-gray-400 rounded text-[11px] cursor-not-allowed">Selesai</button>
+                                    <button onclick="viewESealLog('JT701-ID-8821', 'MSKU7829104')" class="px-2.5 py-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded text-[11px] font-semibold transition cursor-pointer inline-flex items-center gap-1" title="Lihat Riwayat Pelepasan Segel Pabean">
+                                        <i class="fa-solid fa-clock-rotate-left text-[9px]"></i> Log Rilis
+                                    </button>
                                 </td>
                             </tr>
                             <tr class="hover:bg-slate-50">
@@ -1422,7 +1424,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
             </div>
 
             <!-- Panel Simulator Uji Integritas Kawat e-Seal (Kolom Kanan 4 Col) -->
-            <div class="lg:col-span-4 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+            <div class="xl:col-span-4 bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                     <h3 class="text-xs font-bold text-gray-800 uppercase tracking-wider flex items-center">
                         <i class="fa-solid fa-shield-virus mr-2 text-rose-600"></i>Simulasi Uji Tampering Kawat
@@ -1492,7 +1494,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
             </div>
 
             <!-- Teks Area EDIFACT terformat rapi -->
-            <div class="bg-slate-900 rounded-xl p-4 text-emerald-400 font-mono text-xs overflow-x-auto border border-slate-800 shadow-inner">
+            <div class="bg-slate-50 rounded-xl p-4 text-emerald-700 font-mono text-xs overflow-x-auto border border-slate-200 shadow-inner">
                 <pre id="edifactMessageText" class="leading-relaxed whitespace-pre font-mono">UNA:+.? '
 UNB+UNOC:3+IDCKG:CUSTOMS+CIDP:TERMINAL+260929:0816+042819'
 UNH+1+CUSRES:D:95B:UN:DJBC40'
@@ -1529,15 +1531,15 @@ UNZ+1+042819'</pre>
 <div id="modalOfficialSPPB" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden animate-fadeIn">
     <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[92vh]">
         <!-- Header Modal & Tombol Cetak -->
-        <div class="bg-slate-900 text-white px-6 py-4 flex items-center justify-between">
+        <div class="bg-gradient-to-r from-[#0170b9] to-blue-600 text-white px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-stamp text-emerald-400 text-lg"></i>
                 <h3 class="font-bold text-sm sm:text-base">Dokumen Resmi Pabean: SPPB CEISA 4.0</h3>
             </div>
             <div class="flex items-center space-x-2">
-                <button onclick="window.print()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded text-xs font-bold transition flex items-center space-x-1">
+                <button onclick="printCustomsSPPB()" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-sm cursor-pointer">
                     <i class="fa-solid fa-print"></i>
-                    <span>Cetak PDF</span>
+                    <span>Cetak SPPB Resmi</span>
                 </button>
                 <button onclick="closeModal('modalOfficialSPPB')" class="w-8 h-8 rounded-full hover:bg-white/10 flex items-center justify-center text-gray-300 hover:text-white transition">
                     <i class="fa-solid fa-xmark text-base"></i>
@@ -1567,7 +1569,8 @@ UNZ+1+042819'</pre>
             </p>
 
             <!-- Tabel Data PIB -->
-            <table class="w-full font-sans text-xs border border-gray-300">
+            <div class="overflow-x-auto">
+                <table class="w-full font-sans text-xs border border-gray-300 min-w-[480px]">
                 <tr class="border-b border-gray-200">
                     <td class="w-1/3 p-2 font-bold bg-gray-50 border-r border-gray-200">Nama Importir</td>
                     <td class="p-2 font-bold text-gray-900" id="sppbDocImportir">PT Unilever Indonesia Tbk</td>
@@ -1601,6 +1604,7 @@ UNZ+1+042819'</pre>
                     <td class="p-2 font-mono text-emerald-700 font-bold" id="sppbDocNtpn">&#10003; LUNAS / NTPN: 9A8B7C6D5E4F3A2B</td>
                 </tr>
             </table>
+            </div>
 
             <!-- Catatan Pengeluaran Gate Out -->
             <div class="font-sans text-[10.5px] p-2.5 bg-slate-50 border border-gray-200 rounded">
@@ -1701,7 +1705,7 @@ UNZ+1+042819'</pre>
 <!-- ===================================================================== -->
 <div id="modalPIBDetail" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden animate-fadeIn">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[90vh]">
-        <div class="bg-[#002f5e] text-white px-6 py-4 flex items-center justify-between">
+        <div class="bg-[#0170b9] text-white px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-file-invoice text-blue-300"></i>
                 <h3 class="font-bold text-sm sm:text-base">Detail Dokumen Pabean &amp; Audit Trail</h3>
@@ -1791,7 +1795,7 @@ UNZ+1+042819'</pre>
 <div id="modalVerifyStamp" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 hidden animate-fadeIn">
     <div class="bg-white rounded-2xl max-w-xl w-full shadow-2xl overflow-hidden border border-gray-200 flex flex-col max-h-[92vh]">
         <!-- Header Modal -->
-        <div class="bg-gradient-to-r from-[#002f5e] to-[#0170b9] text-white px-6 py-4 flex items-center justify-between">
+        <div class="bg-gradient-to-r from-[#0170b9] to-blue-600 text-white px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-2.5">
                 <div class="w-9 h-9 rounded-lg bg-white/10 flex items-center justify-center text-amber-300">
                     <i class="fa-solid fa-stamp text-lg"></i>
@@ -1903,7 +1907,7 @@ UNZ+1+042819'</pre>
                 <i class="fa-solid fa-download text-blue-600"></i>
                 <span>Unduh Sertifikat (.cer)</span>
             </button>
-            <button onclick="closeModal('modalVerifyStamp')" class="px-5 py-2 bg-[#002f5e] hover:bg-[#0170b9] text-white rounded-lg text-xs font-bold transition">
+            <button onclick="closeModal('modalVerifyStamp')" class="px-5 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded-lg text-xs font-bold transition">
                 Tutup
             </button>
         </div>
@@ -1917,6 +1921,18 @@ UNZ+1+042819'</pre>
 // Data Lokal Dokumen Pabean (di-clone dari PHP untuk manipulasi interaktif)
 let customsData = <?= json_encode($customs_docs) ?>;
 let activeBehandleId = 5;
+
+// Cetak Dokumen SPPB Resmi via CIDP Print Engine (Format A4 Resmi & Bebas Layar Web)
+function printCustomsSPPB() {
+    const el = document.getElementById('sppbPrintArea');
+    if (!el) return;
+    if (typeof CIDPPrint !== 'undefined') {
+        const docNo = document.getElementById('sppbDocNumber')?.textContent || 'SPPB-CEISA';
+        CIDPPrint.openPrintWindow(docNo, el.innerHTML);
+    } else {
+        window.print();
+    }
+}
 
 // Tab Switcher
 function switchCustomsTab(tabId) {
@@ -2181,7 +2197,7 @@ function triggerXRayScan() {
 
     if (statusOverlay) {
         statusOverlay.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block mr-1 animate-ping"></span>X-RAY AKTIF: 6 MeV SCANNING';
-        statusOverlay.className = 'absolute top-2 right-2 bg-slate-900/90 backdrop-blur px-2.5 py-1 rounded border border-rose-500 text-[10px] font-mono text-rose-400';
+        statusOverlay.className = 'absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border border-rose-500 text-[10px] font-mono text-rose-400';
     }
 
     let pos = 0;
@@ -2197,7 +2213,7 @@ function triggerXRayScan() {
                 
                 if (statusOverlay) {
                     statusOverlay.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span>PEMINDAIAN SELESAI (100%)';
-                    statusOverlay.className = 'absolute top-2 right-2 bg-slate-900/90 backdrop-blur px-2.5 py-1 rounded border border-emerald-500 text-[10px] font-mono text-emerald-400';
+                    statusOverlay.className = 'absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border border-emerald-500 text-[10px] font-mono text-emerald-400';
                 }
             }, 400);
         }
@@ -2287,21 +2303,21 @@ function viewDocDetail(docId) {
         ${doc.status === 'SPPB_TERBIT' ? `
         <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-xl flex items-center justify-between">
             <div class="flex items-center space-x-2.5">
-                <div class="w-8 h-8 rounded-lg bg-[#002f5e] text-amber-300 flex items-center justify-center text-sm shadow-xs">
+                <div class="w-8 h-8 rounded-lg bg-[#0170b9] text-amber-300 flex items-center justify-center text-sm shadow-xs">
                     <i class="fa-solid fa-stamp"></i>
                 </div>
                 <div>
-                    <span class="text-[10.5px] text-[#002f5e] font-bold block">Stempel Digital Resmi Pabean BSrE</span>
+                    <span class="text-[10.5px] text-[#0170b9] font-bold block">Stempel Digital Resmi Pabean BSrE</span>
                     <span class="text-[10px] text-gray-500">Telah dibubuhi secara elektronik &bull; CEISA 4.0 DJBC</span>
                 </div>
             </div>
-            <button type="button" onclick="openVerifyStampModal()" class="px-2.5 py-1 bg-[#002f5e] hover:bg-[#0170b9] text-white rounded text-[11px] font-bold transition shadow-2xs cursor-pointer">
+            <button type="button" onclick="openVerifyStampModal()" class="px-2.5 py-1 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded text-[11px] font-bold transition shadow-2xs cursor-pointer">
                 Verifikasi Stempel
             </button>
         </div>` : ''}
 
         <div class="p-3 bg-blue-50/70 border border-blue-200 rounded-xl space-y-1">
-            <span class="text-[#002f5e] font-bold text-[11px] block flex items-center">
+            <span class="text-[#0170b9] font-bold text-[11px] block flex items-center">
                 <i class="fa-solid fa-clock-rotate-left mr-1"></i>Audit Trail CEISA 4.0:
             </span>
             <ul class="text-[10.5px] text-gray-600 space-y-1">
@@ -2327,6 +2343,16 @@ function remoteUnlockESeal(sealId, containerNo) {
     if (confirm('Konfirmasi Pembukaan Segel Elektronik (Remote Unlock):\nID e-Seal: ' + sealId + '\nPeti Kemas: ' + containerNo + '\n\nApakah kontainer telah diverifikasi memasuki batas geofence pabean CIDP?')) {
         alert('Otorisasi pabean berhasil dikirimkan via sinyal RFID terenkripsi!\nStatus ' + sealId + ' kini: UNLOCKED (Segel Terbuka Sah).');
     }
+}
+
+function viewESealLog(sealId, containerNo) {
+    alert("=== AUDIT LOG E-SEAL PABEAN DJBC ===\n" +
+          "ID Perangkat: " + sealId + "\n" +
+          "Kontainer: " + containerNo + "\n" +
+          "Status Terkini: UNLOCKED (Segel Terbuka Sah)\n" +
+          "Waktu Otorisasi: 29 September 2026, 08:30 WIB\n" +
+          "Petugas Otorisator: Pemeriksa Bea Cukai KPPBC Cikarang\n" +
+          "Integritas Geofence: 100% Sesuai Koridor Sah CIDP");
 }
 
 function simulateWireTamper() {

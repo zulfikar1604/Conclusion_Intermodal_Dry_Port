@@ -374,7 +374,7 @@ $wagons = $wagons_inbound;
             </div>
         </div>
         <div class="flex items-center space-x-1.5 flex-shrink-0">
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
                 <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Simulasi 3D
             </a>
         </div>
@@ -578,7 +578,7 @@ $wagons = $wagons_inbound;
             <div class="flex items-center space-x-2 flex-wrap gap-y-2">
                 <!-- Direction Mode Toggles -->
                 <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs space-x-1">
-                    <button type="button" onclick="setCorridorDirection('both')" id="btnDirBoth" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#002f5e] text-white shadow-xs">
+                    <button type="button" onclick="setCorridorDirection('both')" id="btnDirBoth" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#0170b9] text-white shadow-xs">
                         <i class="fa-solid fa-arrows-left-right text-[10px]"></i>
                         <span>2-Arah (Berpapasan)</span>
                     </button>
@@ -592,7 +592,7 @@ $wagons = $wagons_inbound;
                     </button>
                 </div>
 
-                <button type="button" onclick="toggleTrainAnimation()" id="btnPlayTrain" class="px-3.5 py-2 bg-[#002f5e] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 shadow-xs">
+                <button type="button" onclick="toggleTrainAnimation()" id="btnPlayTrain" class="px-3.5 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition-all flex items-center space-x-1.5 shadow-xs">
                     <i class="fa-solid fa-play text-[10px]" id="playTrainIcon"></i>
                     <span id="playTrainText">Simulasikan Perjalanan KA</span>
                 </button>
@@ -746,7 +746,7 @@ $wagons = $wagons_inbound;
             <!-- Track Switcher & BAPLIE Button -->
             <div class="flex items-center space-x-2 flex-wrap gap-y-2">
                 <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs space-x-1">
-                    <button type="button" onclick="switchWagonTrack('track1')" id="btnWagonTrk1" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-[#002f5e] text-white shadow-xs">
+                    <button type="button" onclick="switchWagonTrack('track1')" id="btnWagonTrk1" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-[#0170b9] text-white shadow-xs">
                         <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
                         <span>Track-01: Inbound Impor (KA 2518)</span>
                     </button>
@@ -772,7 +772,7 @@ $wagons = $wagons_inbound;
                 <span class="font-mono text-gray-400 text-[11px]">Alat: Reach Stacker RS-05 &amp; RMGC 01</span>
             </div>
 
-            <div class="bg-slate-900 rounded-2xl p-6 overflow-x-auto shadow-inner border border-slate-800">
+            <div class="bg-slate-50/80 rounded-2xl p-6 overflow-x-auto shadow-xs border border-slate-200/80">
                 <!-- Legend Indicators -->
                 <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-300 border-b border-slate-800 pb-3">
                     <div class="flex items-center space-x-4">
@@ -811,10 +811,10 @@ $wagons = $wagons_inbound;
                             <span>KAI LOGISTIK</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-4 right-4 flex justify-between">
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
                         </div>
                     </div>
 
@@ -852,10 +852,10 @@ $wagons = $wagons_inbound;
                             <span class="text-emerald-400 group-hover:underline">Bongkar &rarr;</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-3 right-3 flex justify-between">
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
                         </div>
                     </div>
                     <?php if ($idx < count($wagons_inbound) - 1): ?>
@@ -864,7 +864,7 @@ $wagons = $wagons_inbound;
                     <?php endforeach; ?>
                 </div>
 
-                <div class="w-full h-3 border-t-2 border-b-2 border-slate-600 bg-slate-950 flex items-center justify-around opacity-60">
+                <div class="w-full h-3 border-t-2 border-b-2 border-slate-300 bg-slate-200 flex items-center justify-around opacity-60">
                     <?php for ($i = 0; $i < 30; $i++): ?>
                     <div class="w-1 h-3 bg-amber-900/60"></div>
                     <?php endfor; ?>
@@ -881,7 +881,7 @@ $wagons = $wagons_inbound;
                 <span class="font-mono text-gray-400 text-[11px]">Alat: Reach Stacker RS-02 &amp; RMGC 02</span>
             </div>
 
-            <div class="bg-slate-900 rounded-2xl p-6 overflow-x-auto shadow-inner border border-slate-800">
+            <div class="bg-slate-50/80 rounded-2xl p-6 overflow-x-auto shadow-xs border border-slate-200/80">
                 <!-- Legend Indicators Track 2 -->
                 <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-300 border-b border-slate-800 pb-3">
                     <div class="flex items-center space-x-4">
@@ -920,10 +920,10 @@ $wagons = $wagons_inbound;
                             <span>KAI LOGISTIK</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-4 right-4 flex justify-between">
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-900 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
                         </div>
                     </div>
 
@@ -961,10 +961,10 @@ $wagons = $wagons_inbound;
                             <span class="text-blue-400 group-hover:underline">Muat &rarr;</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-3 right-3 flex justify-between">
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-900 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
                         </div>
                     </div>
                     <?php if ($idx < count($wagons_outbound) - 1): ?>
@@ -973,7 +973,7 @@ $wagons = $wagons_inbound;
                     <?php endforeach; ?>
                 </div>
 
-                <div class="w-full h-3 border-t-2 border-b-2 border-slate-600 bg-slate-950 flex items-center justify-around opacity-60">
+                <div class="w-full h-3 border-t-2 border-b-2 border-slate-300 bg-slate-200 flex items-center justify-around opacity-60">
                     <?php for ($i = 0; $i < 30; $i++): ?>
                     <div class="w-1 h-3 bg-amber-900/60"></div>
                     <?php endfor; ?>
@@ -985,9 +985,9 @@ $wagons = $wagons_inbound;
     <!-- ======================================================================= -->
     <!-- DUAL COLUMNS: FRAUSCHER AXLE SENSOR & TRANSSHIPMENT WORKFLOW 2-ARAH     -->
     <!-- ======================================================================= -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
         <!-- Left: Frauscher Axle Counter Telemetry & Pulse Simulator (6 cols) -->
-        <div class="lg:col-span-6 space-y-4">
+        <div class="xl:col-span-6 space-y-4">
             <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
                 <div class="flex items-center justify-between border-b border-gray-100 pb-4">
                     <div class="flex items-center space-x-3">
@@ -1005,7 +1005,7 @@ $wagons = $wagons_inbound;
                 </div>
 
                 <!-- Sensor Diagram & Diagnostics -->
-                <div class="bg-slate-900 text-white rounded-xl p-4 border border-slate-800 space-y-4">
+                <div class="bg-slate-50 text-slate-800 rounded-xl p-4 border border-slate-200 space-y-4">
                     <div class="flex items-center justify-between text-xs font-mono">
                         <span class="text-slate-400">SENSOR DUAL CHANNEL (TRACK 1 &amp; TRACK 2)</span>
                         <span class="text-emerald-400 flex items-center">
@@ -1033,7 +1033,7 @@ $wagons = $wagons_inbound;
                     </div>
 
                     <!-- Pulse Waveform Graphic Animation -->
-                    <div class="relative h-12 bg-slate-950 rounded-lg border border-slate-800 overflow-hidden flex items-center px-3">
+                    <div class="relative h-12 bg-slate-100 rounded-lg border border-slate-200 overflow-hidden flex items-center px-3 text-slate-700">
                         <div class="text-[10px] font-mono text-slate-500 mr-2 flex-shrink-0">PULSE INDUKTIF DUAL-TRACK:</div>
                         <div id="pulse-indicator" class="flex-1 flex items-center space-x-1 overflow-hidden h-6">
                             <?php for ($pulse_i = 0; $pulse_i < 24; $pulse_i++): ?>
@@ -1057,7 +1057,7 @@ $wagons = $wagons_inbound;
         </div>
 
         <!-- Right: 5-Stage Intermodal Transshipment Workflow (6 cols) -->
-        <div class="lg:col-span-6 space-y-4">
+        <div class="xl:col-span-6 space-y-4">
             <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
                 <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                     <h3 class="text-sm font-bold text-gray-900 flex items-center">
@@ -1147,7 +1147,7 @@ $wagons = $wagons_inbound;
             <!-- BAPLIE Switcher & Actions -->
             <div class="flex items-center space-x-2 flex-wrap gap-y-2">
                 <div class="flex items-center bg-slate-100 p-1 rounded-xl text-xs space-x-1">
-                    <button type="button" onclick="switchBaplieTab('inbound')" id="btnBaplieInbound" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#002f5e] text-white shadow-xs">
+                    <button type="button" onclick="switchBaplieTab('inbound')" id="btnBaplieInbound" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#0170b9] text-white shadow-xs">
                         <span>BAPLIE Inbound (KA 2518)</span>
                     </button>
                     <button type="button" onclick="switchBaplieTab('outbound')" id="btnBaplieOutbound" class="px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1 text-slate-700 hover:text-gray-900">
@@ -1158,7 +1158,7 @@ $wagons = $wagons_inbound;
                     <i class="fa-regular fa-copy"></i>
                     <span id="copy-baplie-btn-text">Salin BAPLIE</span>
                 </button>
-                <button type="button" onclick="downloadBaplieFile()" class="px-3.5 py-2 bg-[#0170b9] hover:bg-[#002f5e] text-white rounded-xl text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-sm">
+                <button type="button" onclick="downloadBaplieFile()" class="px-3.5 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-sm">
                     <i class="fa-solid fa-download"></i>
                     <span>Unduh File (.edi)</span>
                 </button>
@@ -1166,7 +1166,7 @@ $wagons = $wagons_inbound;
         </div>
 
         <!-- Raw EDIFACT BAPLIE Block (Inbound vs Outbound) -->
-        <div class="relative bg-slate-950 rounded-xl p-4 border border-slate-800 shadow-inner">
+        <div class="relative bg-slate-100 rounded-xl p-4 border border-slate-200 shadow-inner text-slate-700">
             <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px] font-mono text-slate-400">
                 <span id="baplie-buffer-name">BUFFER: BAPLIE_KA2518_INBOUND_PRIOK_CIDP.EDI</span>
                 <span class="text-emerald-400">STANDARD SMDG BAPLIE 2.2 / D.95B</span>
@@ -1207,9 +1207,9 @@ UNZ+1+BAP251801'</pre>
 <!-- ======================================================================= -->
 <!-- MODAL: WAGON INSPECTOR MODAL -->
 <!-- ======================================================================= -->
-<div id="wagonModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
+<div id="wagonModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
     <div class="bg-white rounded-2xl max-w-lg w-full border border-gray-200 shadow-2xl overflow-hidden">
-        <div class="bg-[#002f5e] text-white px-6 py-4 flex items-center justify-between">
+        <div class="bg-[#0170b9] text-white px-6 py-4 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-train text-blue-300"></i>
                 <h3 id="modal-wagon-title" class="font-bold text-sm">Inspeksi Gerbong Datar</h3>
@@ -1238,7 +1238,7 @@ UNZ+1+BAP251801'</pre>
                 <button type="button" onclick="closeWagonModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-xs transition-colors">
                     Tutup
                 </button>
-                <button type="button" onclick="dispatchReachStackerToWagon()" class="px-4 py-2 bg-[#0170b9] hover:bg-[#002f5e] text-white font-bold rounded-xl text-xs transition-colors">
+                <button type="button" onclick="dispatchReachStackerToWagon()" class="px-4 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white font-bold rounded-xl text-xs transition-colors">
                     <i class="fa-solid fa-dolly mr-1"></i> Dispatch Reach Stacker (VMT)
                 </button>
             </div>
@@ -1326,7 +1326,7 @@ function switchWagonTrack(track) {
         if (v1) v1.classList.remove('hidden');
         if (v2) v2.classList.add('hidden');
         if (btn1) {
-            btn1.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-[#002f5e] text-white shadow-xs";
+            btn1.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-[#0170b9] text-white shadow-xs";
         }
         if (btn2) {
             btn2.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 text-slate-700 hover:text-gray-900";
@@ -1338,7 +1338,7 @@ function switchWagonTrack(track) {
             btn1.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5 text-slate-700 hover:text-gray-900";
         }
         if (btn2) {
-            btn2.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-[#002f5e] text-white shadow-xs";
+            btn2.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 bg-[#0170b9] text-white shadow-xs";
         }
     }
 }
@@ -1449,13 +1449,13 @@ function switchBaplieTab(mode) {
     const bufName = document.getElementById('baplie-buffer-name');
 
     if (mode === 'inbound') {
-        if (btnIn) btnIn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#002f5e] text-white shadow-xs";
+        if (btnIn) btnIn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#0170b9] text-white shadow-xs";
         if (btnOut) btnOut.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1 text-slate-700 hover:text-gray-900";
         if (preText) preText.textContent = baplieInboundData;
         if (bufName) bufName.textContent = "BUFFER: BAPLIE_KA2518_INBOUND_PRIOK_CIDP.EDI";
     } else {
         if (btnIn) btnIn.className = "px-3 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1 text-slate-700 hover:text-gray-900";
-        if (btnOut) btnOut.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#002f5e] text-white shadow-xs";
+        if (btnOut) btnOut.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#0170b9] text-white shadow-xs";
         if (preText) preText.textContent = baplieOutboundData;
         if (bufName) bufName.textContent = "BUFFER: BAPLIE_KA2519_OUTBOUND_CIDP_PRIOK.EDI";
     }
@@ -1690,7 +1690,7 @@ function initCorridorGisMap() {
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-600 via-orange-500 to-amber-400 border-2 border-white shadow-xl flex items-center justify-center text-white text-sm z-10">
                     <i class="fa-solid fa-train"></i>
                 </div>
-                <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-900/90 text-amber-300 px-2 py-0.5 rounded-full shadow text-[10px] font-mono font-bold border border-amber-500/50 z-20 flex items-center space-x-1">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 text-amber-700 border border-amber-300 shadow-sm px-2 py-0.5 rounded-full shadow text-[10px] font-mono font-bold border border-amber-500/50 z-20 flex items-center space-x-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping"></span>
                     <span>KA 2518 [Inbound]</span>
                 </div>
@@ -1709,7 +1709,7 @@ function initCorridorGisMap() {
                 <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-700 via-sky-600 to-blue-500 border-2 border-white shadow-xl flex items-center justify-center text-white text-sm z-10">
                     <i class="fa-solid fa-train-subway"></i>
                 </div>
-                <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-gray-900/90 text-sky-300 px-2 py-0.5 rounded-full shadow text-[10px] font-mono font-bold border border-sky-500/50 z-20 flex items-center space-x-1">
+                <div class="absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/95 text-sky-700 border border-sky-300 shadow-sm px-2 py-0.5 rounded-full shadow text-[10px] font-mono font-bold border border-sky-500/50 z-20 flex items-center space-x-1">
                     <span class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-ping"></span>
                     <span>KA 2519 [Outbound]</span>
                 </div>
@@ -1721,7 +1721,7 @@ function initCorridorGisMap() {
 
     // Polyline tracks
     const railCoords = railCorridorPoints.map(p => [p.lat, p.lng]);
-    L.polyline(railCoords, { color: '#002f5e', weight: 6, opacity: 0.85 }).addTo(railLayerGroup);
+    L.polyline(railCoords, { color: '#0170b9', weight: 6, opacity: 0.85 }).addTo(railLayerGroup);
     L.polyline(railCoords, { color: '#38bdf8', weight: 3.5, opacity: 0.95, dashArray: '8, 8' }).addTo(railLayerGroup);
 
     L.polyline(roadCorridorCoords, { color: '#f59e0b', weight: 4, opacity: 0.75, dashArray: '6, 6' }).addTo(roadLayerGroup);
@@ -1843,7 +1843,7 @@ function setCorridorDirection(dir) {
     const btnIn = document.getElementById('btnDirInbound');
     const btnOut = document.getElementById('btnDirOutbound');
 
-    const activeCls = "px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#002f5e] text-white shadow-xs";
+    const activeCls = "px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1 bg-[#0170b9] text-white shadow-xs";
     const idleCls = "px-2.5 py-1.5 rounded-lg text-xs font-semibold transition flex items-center space-x-1 text-slate-700 hover:text-gray-900";
 
     if (btnBoth) btnBoth.className = dir === 'both' ? activeCls : idleCls;

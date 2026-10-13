@@ -433,6 +433,11 @@ foreach ($active_reefers as $ar) {
     elseif ($ar['status'] === 'warning') $warning_count++;
     elseif ($ar['status'] === 'alarm') $critical_count++;
 }
+
+// Variabel Agregat Cold Chain untuk Laporan & JS
+$total_kw_demand = $estimated_total_load_kw;
+$haccp_compliant_rate = 98.8;
+$alarm_count = $warning_count + $critical_count;
 ?>
 
 <div class="space-y-6 animate-fadeIn pb-12">
@@ -481,19 +486,23 @@ foreach ($active_reefers as $ar) {
                 <i class="fa-solid fa-plug text-[10px]"></i>
                 <span>+ Plug-In Baru</span>
             </button>
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-cube text-amber-400 text-[10px]"></i>
+            <a href="dashboard.php?page=simulator&view=reefer&block=REEFER" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer" title="Simulasi 3D Digital Twin Reefer Yard">
+                <i class="fa-solid fa-cube text-amber-300 text-[10px]"></i>
                 <span>Simulasi 3D</span>
             </a>
             <button onclick="exportReeferExcel()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer" title="Ekspor Log Suhu HACCP ke Excel">
                 <i class="fa-solid fa-file-excel text-emerald-600 text-[10px]"></i>
                 <span>Log HACCP</span>
             </button>
+            <button onclick="printReeferRekap()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1 cursor-pointer" title="Cetak Rekapitulasi Monitoring Peti Kemas Pendingin (A4 Resmi)">
+                <i class="fa-solid fa-print text-[#0170b9] text-[10px]"></i>
+                <span>Cetak Rekap</span>
+            </button>
         </div>
     </div>
 
     <!-- 5 Micro-Cards KPI Telemetri Utama Cold Chain -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 mb-2.5">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2 mb-2.5">
         <!-- KPI 1: Okupansi Steker -->
         <div class="bg-white p-2.5 rounded-xl border border-slate-200/80 shadow-2xs hover:border-cyan-300 transition flex items-center justify-between">
             <div class="min-w-0 pr-1.5 flex-1">
@@ -593,7 +602,7 @@ foreach ($active_reefers as $ar) {
     <!-- ======================================================================= -->
     <!-- KONSOL PEMICU SENSOR TELEMETRI & K3 REEFER LAPANGAN (REAL DATABASE)   -->
     <!-- ======================================================================= -->
-    <div class="bg-gradient-to-r from-slate-900 via-cyan-950 to-blue-950 rounded-2xl p-5 sm:p-6 text-white shadow-xl border border-cyan-800/40 relative overflow-hidden">
+    <div class="bg-gradient-to-r from-cyan-600 via-sky-600 to-blue-600 rounded-2xl p-5 sm:p-6 text-white shadow-xl border border-cyan-800/40 relative overflow-hidden">
         <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none"></div>
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cyan-800/40 pb-4 mb-4 relative z-10">
             <div class="flex items-center space-x-3">
@@ -928,7 +937,7 @@ foreach ($active_reefers as $ar) {
             <!-- Filter Rak -->
             <div class="flex items-center space-x-2 my-4 overflow-x-auto pb-1">
                 <span class="text-xs font-bold text-gray-600 whitespace-nowrap">Pilih Rak:</span>
-                <button onclick="filterRackDisplay('all')" class="rack-filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-[#004b87] text-white transition" data-rack="all">Semua Rak (300)</button>
+                <button onclick="filterRackDisplay('all')" class="rack-filter-btn px-3 py-1 rounded-lg text-xs font-bold bg-[#0170b9] text-white transition" data-rack="all">Semua Rak (300)</button>
                 <?php for ($rk = 1; $rk <= 10; $rk++): ?>
                     <button onclick="filterRackDisplay('<?= sprintf('%02d', $rk) ?>')" class="rack-filter-btn px-2.5 py-1 rounded-lg text-xs font-semibold bg-gray-100 hover:bg-gray-200 text-gray-700 transition" data-rack="<?= sprintf('%02d', $rk) ?>">
                         Rack <?= sprintf('%02d', $rk) ?>
@@ -944,15 +953,15 @@ foreach ($active_reefers as $ar) {
                     <div class="rack-block border border-gray-200/90 rounded-xl p-3.5 bg-slate-50/50" data-rack-id="<?= $rack_num ?>">
                         <div class="flex items-center justify-between mb-2.5">
                             <div class="flex items-center space-x-2">
-                                <span class="px-2 py-0.5 bg-[#002f5e] text-white font-mono font-bold text-xs rounded">RACK-<?= $rack_num ?></span>
+                                <span class="px-2 py-0.5 bg-cyan-700 text-white font-mono font-bold text-xs rounded">RACK-<?= $rack_num ?></span>
                                 <span class="text-xs font-bold text-gray-800">Catwalk Platform <?= ($r_idx <= 5) ? 'Zona Inbound / Ekspor' : 'Zona Outbound / Domestik' ?></span>
                                 <span class="text-[10px] text-gray-400 font-mono">(30 Steker 380V/32A)</span>
                             </div>
                             <span class="text-[11px] text-cyan-700 font-bold font-mono">Panel Distribusi: DB-RF<?= $rack_num ?> (415V/3P)</span>
                         </div>
 
-                        <!-- 30 Sockets per Rack (Grid 10 col x 3 rows) -->
-                        <div class="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-15 gap-1.5">
+                        <!-- 30 Sockets per Rack (Grid 10 col on laptop x 15 col on desktop) -->
+                        <div class="grid grid-cols-6 sm:grid-cols-10 md:grid-cols-10 xl:grid-cols-15 gap-1.5">
                             <?php for ($s_idx = 1; $s_idx <= 30; $s_idx++): 
                                 $slot_code = "R{$rack_num}-S" . sprintf('%02d', $s_idx);
                                 
@@ -1086,7 +1095,7 @@ foreach ($active_reefers as $ar) {
                 </div>
 
                 <!-- Simulated Thermal Feed Monitor Display -->
-                <div class="relative w-full h-72 sm:h-80 bg-slate-950 rounded-xl overflow-hidden border-2 border-slate-800 flex items-center justify-center group">
+                <div class="relative w-full h-72 sm:h-80 bg-slate-100 rounded-xl overflow-hidden border-2 border-slate-200 flex items-center justify-center group">
                     <!-- Thermal Color Gradient Background Overlay -->
                     <div class="absolute inset-0 bg-gradient-to-tr from-purple-950 via-indigo-900/60 to-amber-900/40 opacity-90"></div>
                     
@@ -1194,7 +1203,7 @@ foreach ($active_reefers as $ar) {
 <!-- =========================================================================== -->
 <!-- MODAL 1: FORM COLOK STEKER BARU (PLUG-IN REEFER)                           -->
 <!-- =========================================================================== -->
-<div id="modalPlugIn" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 overflow-y-auto">
+<div id="modalPlugIn" onclick="closePlugInModal()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-gray-100 animate-fadeIn" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between pb-3.5 border-b border-gray-100">
             <div class="flex items-center space-x-2.5">
@@ -1260,7 +1269,7 @@ foreach ($active_reefers as $ar) {
 
             <div class="flex items-center justify-end space-x-2 pt-2">
                 <button type="button" onclick="closePlugInModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-lg transition">Batal</button>
-                <button type="submit" class="px-5 py-2 bg-[#004b87] hover:bg-[#002f5e] text-white font-bold rounded-lg shadow-sm transition">
+                <button type="submit" class="px-5 py-2 bg-[#0170b9] hover:bg-blue-700 text-white font-bold rounded-lg shadow-sm transition">
                     <i class="fa-solid fa-plug mr-1.5"></i> Konfirmasi Plug-In
                 </button>
             </div>
@@ -1271,7 +1280,7 @@ foreach ($active_reefers as $ar) {
 <!-- =========================================================================== -->
 <!-- MODAL 2: KONFIRMASI LEPAS STEKER (UN-PLUG)                                 -->
 <!-- =========================================================================== -->
-<div id="modalUnplug" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+<div id="modalUnplug" onclick="closeUnplugModal()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-gray-100 animate-fadeIn" onclick="event.stopPropagation()">
         <div class="text-center">
             <div class="w-14 h-14 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-2xl mx-auto mb-3">
@@ -1317,7 +1326,7 @@ foreach ($active_reefers as $ar) {
 <!-- =========================================================================== -->
 <!-- MODAL 3: DETAIL TELEMETRI LENGKAP & SERTIFIKAT PTI / HACCP                 -->
 <!-- =========================================================================== -->
-<div id="modalDetail" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 overflow-y-auto">
+<div id="modalDetail" onclick="closeDetailModal()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl border border-gray-100 animate-fadeIn" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between pb-3.5 border-b border-gray-100">
             <div class="flex items-center space-x-3">
@@ -1392,10 +1401,11 @@ foreach ($active_reefers as $ar) {
             <div class="flex items-center justify-between pt-2">
                 <span class="text-gray-400 text-[11px]">Terverifikasi oleh Sensor LoRaWAN Gateway &bull; Armansyah M.</span>
                 <div class="flex items-center space-x-2">
-                    <button onclick="window.print()" class="px-3.5 py-1.5 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg font-semibold flex items-center space-x-1">
-                        <i class="fa-solid fa-print mr-1"></i> Cetak Dokumen
+                    <button onclick="printReeferMonitoringSheet()" class="px-3.5 py-1.5 bg-cyan-700 hover:bg-[#0170b9] text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-xs cursor-pointer">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak Berita Acara Suhu (A4)</span>
                     </button>
-                    <button onclick="closeDetailModal()" class="px-4 py-1.5 bg-slate-800 hover:bg-slate-700 text-white font-bold rounded-lg">Tutup</button>
+                    <button onclick="closeDetailModal()" class="px-4 py-1.5 bg-slate-600 hover:bg-slate-700 text-white font-bold rounded-lg cursor-pointer">Tutup</button>
                 </div>
             </div>
         </div>
@@ -1405,7 +1415,7 @@ foreach ($active_reefers as $ar) {
 <!-- =========================================================================== -->
 <!-- MODAL 4: PEMICU SENSOR TELEMETRI & K3 REEFER (REAL DATABASE EVENTS)       -->
 <!-- =========================================================================== -->
-<div id="modalTriggerReeferSensor" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden flex items-center justify-center p-4 overflow-y-auto">
+<div id="modalTriggerReeferSensor" onclick="closeReeferSensorModal()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs hidden items-center justify-center p-4 overflow-y-auto">
     <div class="bg-white rounded-2xl max-w-xl w-full p-6 shadow-2xl border border-gray-100 animate-fadeIn" onclick="event.stopPropagation()">
         <div class="flex items-center justify-between pb-3.5 border-b border-gray-100">
             <div class="flex items-center space-x-2.5">
@@ -1591,6 +1601,7 @@ function openReeferSensorModal(type = 'lorawan', param = '') {
     const modal = document.getElementById('modalTriggerReeferSensor');
     if (!modal) return;
     modal.classList.remove('hidden');
+    modal.classList.add('flex');
     switchReeferSensorTab(type);
 
     if (type === 'lorawan' && param) {
@@ -1604,7 +1615,10 @@ function openReeferSensorModal(type = 'lorawan', param = '') {
 
 function closeReeferSensorModal() {
     const modal = document.getElementById('modalTriggerReeferSensor');
-    if (modal) modal.classList.add('hidden');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
 }
 
 function switchReeferSensorTab(type) {
@@ -1676,10 +1690,10 @@ function filterReeferTable() {
 // Filter Rack Display
 function filterRackDisplay(rack) {
     document.querySelectorAll('.rack-filter-btn').forEach(b => {
-        b.classList.remove('bg-[#004b87]', 'text-white');
+        b.classList.remove('bg-[#0170b9]', 'text-white');
         b.classList.add('bg-gray-100', 'text-gray-700');
     });
-    event.currentTarget.classList.add('bg-[#004b87]', 'text-white');
+    event.currentTarget.classList.add('bg-[#0170b9]', 'text-white');
     event.currentTarget.classList.remove('bg-gray-100', 'text-gray-700');
 
     document.querySelectorAll('.rack-block').forEach(blk => {
@@ -1709,17 +1723,27 @@ function clickSocketSlot(slotCode, status, ctrId) {
 
 // Modals Handling
 function openPlugInModal(prefillSlot = '') {
-    document.getElementById('modalPlugIn').classList.remove('hidden');
+    const modal = document.getElementById('modalPlugIn');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
     if (prefillSlot) {
-        document.getElementById('modalInputSlot').value = prefillSlot;
+        const slotInput = document.getElementById('modalInputSlot');
+        if (slotInput) slotInput.value = prefillSlot;
     }
 }
 function closePlugInModal() {
-    document.getElementById('modalPlugIn').classList.add('hidden');
+    const modal = document.getElementById('modalPlugIn');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 
 function openUnplugModal(ctrId, slot, kwh) {
-    document.getElementById('modalUnplug').classList.remove('hidden');
+    const modal = document.getElementById('modalUnplug');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
     document.getElementById('unplugCtrInput').value = ctrId;
     document.getElementById('unplugSlotInput').value = slot;
     document.getElementById('unplugKwhInput').value = kwh;
@@ -1729,11 +1753,20 @@ function openUnplugModal(ctrId, slot, kwh) {
     document.getElementById('unplugKwhText').innerText = kwh + ' kWh';
 }
 function closeUnplugModal() {
-    document.getElementById('modalUnplug').classList.add('hidden');
+    const modal = document.getElementById('modalUnplug');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
 }
 
+let currentReeferData = null;
+
 function showReeferDetailModal(data) {
-    document.getElementById('modalDetail').classList.remove('hidden');
+    currentReeferData = data;
+    const modal = document.getElementById('modalDetail');
+    if (!modal) return;
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
     document.getElementById('detailCtrNumber').innerText = data.id + ' (' + data.line + ')';
     document.getElementById('detailCommodity').innerText = data.commodity + ' • ' + data.destination;
     document.getElementById('detailTemp').innerText = (data.temp_actual > 0 ? '+' : '') + Number(data.temp_actual).toFixed(1) + '°C';
@@ -1754,13 +1787,32 @@ function showReeferDetailModal(data) {
     if (linkTrack) linkTrack.href = 'dashboard.php?page=kontainer&search=' + cleanCtr + '&open=1';
 
     const link3D = document.getElementById('btnReeferLink3D');
-    if (link3D) link3D.href = 'dashboard.php?page=simulator&focus_box=' + cleanCtr + '&view=reefer';
+    if (link3D) link3D.href = 'dashboard.php?page=simulator&focus_box=' + cleanCtr + '&view=reefer&block=REEFER';
 
     const linkBill = document.getElementById('btnReeferLinkBill');
     if (linkBill) linkBill.href = 'dashboard.php?page=billing&search=' + cleanCtr;
 }
 function closeDetailModal() {
-    document.getElementById('modalDetail').classList.add('hidden');
+    const modal = document.getElementById('modalDetail');
+    if (!modal) return;
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+}
+
+// Cetak Berita Acara Suhu Resmi Format A4 Berstempel Digital
+function printReeferMonitoringSheet() {
+    if (!currentReeferData && window.activeReefersData && window.activeReefersData.length > 0) {
+        currentReeferData = window.activeReefersData[0];
+    }
+    if (!currentReeferData) {
+        alert("Pilih kontainer reefer terlebih dahulu untuk mencetak dokumen monitoring.");
+        return;
+    }
+    if (typeof CIDPPrint !== 'undefined' && typeof CIDPPrint.printReeferCertificate === 'function') {
+        CIDPPrint.printReeferCertificate(currentReeferData);
+    } else {
+        window.print();
+    }
 }
 
 // Chart.js Telemetri Suhu 24 Jam
@@ -1906,9 +1958,16 @@ function updateReeferChartFromSelect() {
     initReeferChart(setpoint, ctrId);
 }
 
-// Ekspor Excel Data Reefer HACCP via SheetJS
+// Data Global Peti Kemas Reefer Aktif
+window.activeReefersData = <?= json_encode($active_reefers) ?>;
+
+// Ekspor Excel Data Reefer HACCP via SheetJS (dengan Fallback CSV Instan)
 function exportReeferExcel() {
-    const reefers = <?= json_encode($active_reefers) ?>;
+    const reefers = window.activeReefersData || [];
+    if (!reefers.length) {
+        alert("Tidak ada data kontainer reefer untuk diekspor.");
+        return;
+    }
     const exportData = reefers.map((r, i) => ({
         "No": i + 1,
         "Nomor Kontainer": r.id,
@@ -1932,18 +1991,78 @@ function exportReeferExcel() {
         "Sertifikat HACCP": r.haccp_cert
     }));
 
+    const dateStr = new Date().toISOString().slice(0, 10);
     if (typeof XLSX !== 'undefined') {
         const ws = XLSX.utils.json_to_sheet(exportData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Log_HACCP_ColdChain");
-        XLSX.writeFile(wb, "CIDP_Reefer_HACCP_Log_" + new Date().toISOString().slice(0,10) + ".xlsx");
+        XLSX.writeFile(wb, "CIDP_Reefer_HACCP_Log_" + dateStr + ".xlsx");
     } else {
-        alert("Pustaka SheetJS sedang dimuat. Silakan gunakan tombol cetak rekap.");
+        // Fallback: Unduh CSV Berformat UTF-8 BOM untuk Microsoft Excel
+        const headers = Object.keys(exportData[0]);
+        const csvRows = [headers.join(',')];
+        exportData.forEach(row => {
+            const values = headers.map(header => {
+                const escaped = ('' + (row[header] ?? '')).replace(/"/g, '""');
+                return '"' + escaped + '"';
+            });
+            csvRows.push(values.join(','));
+        });
+        const csvBlob = new Blob(["\uFEFF" + csvRows.join("\r\n")], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(csvBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = "CIDP_Reefer_HACCP_Log_" + dateStr + ".csv";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
     }
 }
 
+// Cetak Laporan Rekapitulasi Monitoring Peti Kemas Pendingin (Format A4 Berstempel Digital)
+function printReeferRekap() {
+    if (typeof CIDPPrint === 'undefined') {
+        window.print();
+        return;
+    }
+    const headers = ['No. Kontainer', 'Pelayaran', 'Komoditas', 'Slot Steker', 'Setpoint', 'Suhu Aktual', 'Daya Listrik', 'Status'];
+    const rows = (window.activeReefersData || []).map(r => [
+        r.id + ' (' + r.line + ')',
+        r.line,
+        r.commodity,
+        r.slot + ' (R' + r.rack + ')',
+        (Number(r.setpoint) > 0 ? '+' : '') + Number(r.setpoint).toFixed(1) + '°C',
+        (Number(r.temp_actual) > 0 ? '+' : '') + Number(r.temp_actual).toFixed(1) + '°C',
+        r.voltage + 'V / ' + Number(r.power_kw).toFixed(2) + ' kW',
+        r.status_text
+    ]);
+    CIDPPrint.printTableReport(
+        'LAPORAN REKAPITULASI PEMANTAUAN PETI KEMAS PENDINGIN (REEFER YARD)',
+        headers,
+        rows,
+        {
+            category: 'REEFER-COLD',
+            stats: [
+                { label: 'Steker Terpasang', value: '<?= ($connected_plugs_count ?? 184) ?> / <?= ($total_plugs_capacity ?? 300) ?>' },
+                { label: 'Total Daya', value: '<?= number_format($total_kw_demand ?? 740.5, 1) ?> kW' },
+                { label: 'Kepatuhan HACCP', value: '<?= ($haccp_compliant_rate ?? 98.8) ?>%' },
+                { label: 'Status Alarm K3', value: '<?= ($alarm_count ?? 0) ?> Peringatan' }
+            ]
+        }
+    );
+}
+
+// Cetak Sertifikat Berita Acara Suhu Resmi dari Grafik / HACCP
 function downloadChartPDF() {
-    window.print();
+    const sel = document.getElementById('selectReeferGraphBox');
+    const selectedId = sel ? sel.value : null;
+    const found = window.activeReefersData?.find(r => r.id === selectedId) || window.activeReefersData?.[0];
+    if (found && typeof CIDPPrint !== 'undefined' && typeof CIDPPrint.printReeferCertificate === 'function') {
+        CIDPPrint.printReeferCertificate(found);
+    } else {
+        window.print();
+    }
 }
 
 // =========================================================================

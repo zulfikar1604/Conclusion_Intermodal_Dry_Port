@@ -808,8 +808,8 @@ foreach ($hardware_list as $item) {
                 <i class="fa-solid fa-cube text-[10px]"></i>
                 <span>Simulasi 3D</span>
             </a>
-            <button onclick="window.print()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center cursor-pointer">
-                <i class="fa-solid fa-print mr-1 text-slate-400 text-[10px]"></i> Cetak Rekap
+            <button onclick="printGateRekap()" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center cursor-pointer" title="Cetak Rekapitulasi Arus Gerbang Format Resmi A4">
+                <i class="fa-solid fa-print mr-1 text-[#0170b9] text-[10px]"></i> Cetak Rekap Resmi
             </button>
         </div>
     </div>
@@ -848,7 +848,7 @@ foreach ($hardware_list as $item) {
                 <i class="fa-solid fa-diagram-project text-[#0170b9] mr-2"></i>
                 Alur Otomasi Gerbang Masuk (Inbound Lane 1)
             </h2>
-            <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
                 <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
                     <span class="text-[10px] font-extrabold text-blue-600 bg-blue-100/70 px-2 py-0.5 rounded-md inline-block mb-2">TAHAP 1</span>
                     <h3 class="text-xs font-bold text-gray-900">Kamera ANPR</h3>
@@ -948,7 +948,7 @@ foreach ($hardware_list as $item) {
                 <div class="mt-4 flex items-center justify-center space-x-2">
                     <form method="POST" class="inline">
                         <input type="hidden" name="gate_action" value="reset_demo_queue">
-                        <button type="submit" class="px-4 py-2 bg-[#002f5e] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-2">
+                        <button type="submit" class="px-4 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-2">
                             <i class="fa-solid fa-arrows-rotate text-amber-400"></i>
                             <span>Muat Ulang 5 Skenario Antrean Pra-Gate</span>
                         </button>
@@ -1087,7 +1087,7 @@ foreach ($hardware_list as $item) {
                         <input type="hidden" name="lane_id" value="<?= htmlspecialchars($m_info['lane']) ?>">
                         <input type="hidden" name="weight_gross" value="<?= $qt['weight_gross'] ?? 32000 ?>">
                         <input type="hidden" name="weight_tare" value="<?= $qt['weight_tare'] ?? 14000 ?>">
-                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-[#002f5e] to-[#0170b9] hover:from-[#002244] hover:to-[#01558c] text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center space-x-1.5 group-hover:shadow-sm">
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-[#0170b9] to-blue-600 hover:from-blue-700 hover:to-[#01558c] text-white rounded-lg text-xs font-bold transition shadow-xs flex items-center justify-center space-x-1.5 group-hover:shadow-sm">
                             <i class="fa-solid fa-bolt text-amber-400"></i>
                             <span><?= $m_info['btn_label'] ?></span>
                         </button>
@@ -1101,19 +1101,22 @@ foreach ($hardware_list as $item) {
         <!-- ================================================================= -->
         <!-- KONSOL UJI PEMICU SENSOR GERBANG REAL-TIME (LIVE IOT TRIGGER)     -->
         <!-- ================================================================= -->
-        <div class="bg-gradient-to-br from-slate-900 via-slate-800 to-[#002f5e] rounded-2xl p-6 text-white shadow-xl border border-blue-900/50 space-y-4">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-700/80">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/90 space-y-4">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-slate-200">
                 <div class="flex items-center space-x-3.5">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-400 text-slate-950 flex items-center justify-center text-xl shadow-lg shrink-0">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-amber-500 to-amber-600 text-white flex items-center justify-center text-xl shadow-md shrink-0">
                         <i class="fa-solid fa-satellite-dish"></i>
                     </div>
                     <div>
                         <div class="flex items-center space-x-2">
-                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">Live Sensor Trigger</span>
-                            <h3 class="text-base font-bold text-white">Konsol Pemicu Sensor Gerbang Lapangan (Real Database Events)</h3>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                Live Sensor Trigger
+                            </span>
+                            <h3 class="text-base font-extrabold text-blue-700">Konsol Pemicu Sensor Gerbang Lapangan (Real Database Events)</h3>
                         </div>
-                        <p class="text-xs text-slate-300 mt-1 max-w-3xl leading-relaxed">
-                            Uji dan picu sensor gerbang secara langsung. Setiap aksi mengeksekusi telemetri riil dan <strong>mencatat perubahan status nyata</strong> ke basis data MySQL (tabel <code>trucks</code>, <code>containers</code>, dan <code>yard_events</code>).
+                        <p class="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
+                            Uji dan picu sensor gerbang secara langsung. Setiap aksi mengeksekusi telemetri riil dan <strong>mencatat perubahan status nyata</strong> ke basis data MySQL (tabel <code class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono text-[11px] border border-slate-200">trucks</code>, <code class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono text-[11px] border border-slate-200">containers</code>, dan <code class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono text-[11px] border border-slate-200">yard_events</code>).
                         </p>
                     </div>
                 </div>
@@ -1122,28 +1125,28 @@ foreach ($hardware_list as $item) {
             <!-- 3 Trigger Action Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
                 <!-- Trigger 1: ANPR & Induction Loop Lane 1 -->
-                <div class="bg-slate-800/90 rounded-xl p-4 border border-slate-700 flex flex-col justify-between hover:border-amber-400/60 transition">
+                <div class="bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white rounded-xl p-4 border-2 border-amber-300 hover:border-amber-500 hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10.5px] font-mono text-amber-400 uppercase font-bold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                            <span class="text-[10.5px] font-mono text-amber-800 uppercase font-extrabold flex items-center gap-1.5 bg-amber-100/90 px-2 py-0.5 rounded-md border border-amber-200">
+                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                                 HW-01 &bull; ANPR &amp; LOOP
                             </span>
-                            <span class="px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded text-[9px] font-mono">Lane 1 Inbound</span>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Lane 1 Inbound</span>
                         </div>
-                        <h4 class="text-xs font-bold text-white">Trigger Loop &amp; Kamera ANPR Gate-In</h4>
-                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Trigger Loop &amp; Kamera ANPR Gate-In</h4>
+                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
                             Simulasikan truk melindas sensor loop induksi. Kamera ANPR membaca plat nomor, OCR membaca peti kemas, palang masuk terbuka, dan armada tercatat MASUK (in_yard) ke database.
                         </p>
                     </div>
-                    <form method="POST" class="mt-4 pt-3 border-t border-slate-700/70 space-y-2">
+                    <form method="POST" class="mt-4 pt-3 border-t border-amber-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="trigger_anpr_gate_in">
                         <input type="hidden" name="lane_id" value="Lane 1 (Heavy Inbound)">
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-amber-300 uppercase" placeholder="Plat Truk">
-                            <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-cyan-300 uppercase" placeholder="No. Kontainer">
+                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-white border border-amber-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 rounded-lg text-xs font-mono font-extrabold text-slate-900 uppercase shadow-2xs" placeholder="Plat Truk">
+                            <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-white border border-amber-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 rounded-lg text-xs font-mono font-extrabold text-blue-700 uppercase shadow-2xs" placeholder="No. Kontainer">
                         </div>
-                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-lg transition shadow-md flex items-center justify-center gap-1.5">
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-white font-extrabold text-xs rounded-lg transition shadow-xs hover:shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
                             <i class="fa-solid fa-bolt"></i>
                             <span>Trigger ANPR Masuk &amp; Buka Palang</span>
                         </button>
@@ -1151,27 +1154,27 @@ foreach ($hardware_list as $item) {
                 </div>
 
                 <!-- Trigger 2: Weighbridge 80 Ton (SOLAS VGM) -->
-                <div class="bg-slate-800/90 rounded-xl p-4 border border-slate-700 flex flex-col justify-between hover:border-emerald-400/60 transition">
+                <div class="bg-gradient-to-b from-emerald-50/70 via-emerald-50/20 to-white rounded-xl p-4 border-2 border-emerald-300 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10.5px] font-mono text-emerald-400 uppercase font-bold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                            <span class="text-[10.5px] font-mono text-emerald-800 uppercase font-extrabold flex items-center gap-1.5 bg-emerald-100/90 px-2 py-0.5 rounded-md border border-emerald-200">
+                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 HW-04 &bull; WEIGHBRIDGE 80T
                             </span>
-                            <span class="px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded text-[9px] font-mono">Loadcell Otomatis</span>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Loadcell Otomatis</span>
                         </div>
-                        <h4 class="text-xs font-bold text-white">Trigger Penimbangan Riil (SOLAS VGM)</h4>
-                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Trigger Penimbangan Riil (SOLAS VGM)</h4>
+                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
                             Memicu penimbangan beban statis pada jembatan timbang Fangda 80 Ton, menghitung bobot netto peti kemas, dan mencatat sertifikasi VGM resmi ke database.
                         </p>
                     </div>
-                    <form method="POST" class="mt-4 pt-3 border-t border-slate-700/70 space-y-2">
+                    <form method="POST" class="mt-4 pt-3 border-t border-emerald-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="trigger_weighbridge">
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-emerald-300 uppercase" placeholder="Plat Truk">
-                            <input type="number" name="gross_weight_kg" value="32450" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-emerald-300 text-right" placeholder="Berat Bruto (kg)">
+                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-white border border-emerald-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-lg text-xs font-mono font-extrabold text-slate-900 uppercase shadow-2xs" placeholder="Plat Truk">
+                            <input type="number" name="gross_weight_kg" value="32450" class="px-2.5 py-1.5 bg-white border border-emerald-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-lg text-xs font-mono font-extrabold text-emerald-800 text-right shadow-2xs" placeholder="Berat Bruto (kg)">
                         </div>
-                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-slate-950 font-bold text-xs rounded-lg transition shadow-md flex items-center justify-center gap-1.5">
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-extrabold text-xs rounded-lg transition shadow-xs hover:shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
                             <i class="fa-solid fa-scale-balanced"></i>
                             <span>Trigger Timbang &amp; Terbitkan VGM</span>
                         </button>
@@ -1179,27 +1182,27 @@ foreach ($hardware_list as $item) {
                 </div>
 
                 <!-- Trigger 3: Dual-Clearance Gate Outbound -->
-                <div class="bg-slate-800/90 rounded-xl p-4 border border-slate-700 flex flex-col justify-between hover:border-blue-400/60 transition">
+                <div class="bg-gradient-to-b from-blue-50/70 via-blue-50/20 to-white rounded-xl p-4 border-2 border-blue-300 hover:border-blue-500 hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10.5px] font-mono text-blue-400 uppercase font-bold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                            <span class="text-[10.5px] font-mono text-blue-800 uppercase font-extrabold flex items-center gap-1.5 bg-blue-100/90 px-2 py-0.5 rounded-md border border-blue-200">
+                                <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                                 HW-05 &bull; BARRIER GATE OUT
                             </span>
-                            <span class="px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded text-[9px] font-mono">Lane 3 Outbound</span>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Lane 3 Outbound</span>
                         </div>
-                        <h4 class="text-xs font-bold text-white">Trigger Rilis Keluar (Dual Clearance)</h4>
-                        <p class="text-[11px] text-slate-400 mt-1 leading-relaxed">
+                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Trigger Rilis Keluar (Dual Clearance)</h4>
+                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
                             Memicu verifikasi digital dual-clearance (Validasi SPPB Bea Cukai CEISA + Faktur Billing Lunas) lalu mengangkat palang keluar otomatis dan mencatat waktu Gate-Out.
                         </p>
                     </div>
-                    <form method="POST" class="mt-4 pt-3 border-t border-slate-700/70 space-y-2">
+                    <form method="POST" class="mt-4 pt-3 border-t border-blue-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="release_gate_out">
                         <div class="grid grid-cols-2 gap-2">
-                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-blue-300 uppercase" placeholder="Plat Truk">
-                            <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs font-mono font-bold text-blue-300 uppercase" placeholder="No. Kontainer">
+                            <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-white border border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg text-xs font-mono font-extrabold text-slate-900 uppercase shadow-2xs" placeholder="Plat Truk">
+                            <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-white border border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg text-xs font-mono font-extrabold text-blue-700 uppercase shadow-2xs" placeholder="No. Kontainer">
                         </div>
-                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-400 hover:to-indigo-500 text-white font-bold text-xs rounded-lg transition shadow-md flex items-center justify-center gap-1.5">
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-[#0170b9] to-blue-600 hover:from-blue-700 hover:to-[#015891] text-white font-extrabold text-xs rounded-lg transition shadow-xs hover:shadow-sm flex items-center justify-center gap-1.5 cursor-pointer">
                             <i class="fa-solid fa-door-open"></i>
                             <span>Trigger Rilis Gate-Out</span>
                         </button>
@@ -1211,153 +1214,153 @@ foreach ($hardware_list as $item) {
         <!-- Live Gate Lanes Telemetry Feeds -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Lane 1: Inbound Heavy (OCR + Weighbridge 80t) -->
-            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-md border border-slate-800 flex flex-col justify-between">
+            <div class="bg-gradient-to-b from-emerald-50/50 via-white to-white rounded-2xl p-5 shadow-sm border-2 border-emerald-300/80 hover:border-emerald-500 transition-all flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                    <div class="flex items-center justify-between pb-3 border-b border-emerald-100 mb-3">
                         <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
-                            <span class="text-xs font-mono font-bold tracking-wider text-emerald-400 uppercase">Lane 1 (Inbound Heavy)</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                            <span class="text-xs font-mono font-extrabold tracking-wider text-emerald-800 uppercase">Lane 1 (Inbound Heavy)</span>
                         </div>
-                        <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[10px] font-mono">ONLINE</span>
+                        <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-[10px] font-mono font-extrabold">ONLINE</span>
                     </div>
 
                     <div class="space-y-3">
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-camera text-blue-400 mr-1"></i> Kamera ANPR</span>
-                                <span class="text-[9px] text-emerald-400 font-mono">LIVE FEED</span>
+                        <div class="bg-white rounded-xl p-3 border border-amber-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-camera text-blue-600 mr-1.5"></i> Kamera ANPR</span>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">LIVE FEED</span>
                             </span>
-                            <span class="text-base font-mono font-bold tracking-wider text-amber-300 block mt-1">
+                            <span class="text-base font-mono font-black tracking-wider text-amber-600 block mt-1">
                                 <?= !empty($latest_truck['license_plate']) ? htmlspecialchars($latest_truck['license_plate']) : 'B 9182 TE' ?>
                             </span>
                         </div>
 
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-expand text-indigo-400 mr-1"></i> OCR Container Gantry</span>
-                                <span class="text-[9px] text-emerald-400 font-mono">ISO 6346</span>
+                        <div class="bg-white rounded-xl p-3 border border-sky-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-expand text-indigo-600 mr-1.5"></i> OCR Container Gantry</span>
+                                <span class="text-[9px] bg-sky-100 text-sky-800 border border-sky-200 px-1.5 py-0.5 rounded font-mono font-bold">ISO 6346</span>
                             </span>
-                            <span class="text-base font-mono font-bold tracking-wider text-cyan-300 block mt-1">
+                            <span class="text-base font-mono font-black tracking-wider text-blue-700 block mt-1">
                                 <?= !empty($latest_truck['container_number']) ? htmlspecialchars($latest_truck['container_number']) : 'MSKU 782910-4' ?>
                             </span>
                         </div>
 
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-scale-balanced text-emerald-400 mr-1"></i> Jembatan Timbang 80T</span>
-                                <span class="text-[9px] text-emerald-400 font-mono font-bold">VGM SOLAS</span>
+                        <div class="bg-white rounded-xl p-3 border border-emerald-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-scale-balanced text-emerald-600 mr-1.5"></i> Jembatan Timbang 80T</span>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">VGM SOLAS</span>
                             </span>
                             <div class="flex items-center justify-between mt-1">
-                                <span class="text-sm font-mono font-bold text-white">32.450 kg</span>
-                                <span class="px-2 py-0.5 bg-emerald-500/20 text-emerald-300 text-[10px] font-bold rounded">VERIFIED</span>
+                                <span class="text-sm font-mono font-black text-slate-900">32.450 kg</span>
+                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold rounded">VERIFIED</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <span class="text-slate-400">Barrier Gate:</span>
-                    <span class="text-emerald-400 font-mono font-bold flex items-center"><i class="fa-solid fa-check-circle mr-1"></i> NORMAL STANDBY</span>
+                <div class="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500 font-semibold">Barrier Gate:</span>
+                    <span class="text-emerald-700 font-mono font-extrabold flex items-center gap-1"><i class="fa-solid fa-check-circle text-emerald-600"></i> NORMAL STANDBY</span>
                 </div>
             </div>
 
             <!-- Lane 2: Inbound Fast-Track / Empty & Reefer -->
-            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-md border border-slate-800 flex flex-col justify-between">
+            <div class="bg-gradient-to-b from-cyan-50/50 via-white to-white rounded-2xl p-5 shadow-sm border-2 border-cyan-300/80 hover:border-cyan-500 transition-all flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                    <div class="flex items-center justify-between pb-3 border-b border-cyan-100 mb-3">
                         <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-400"></span>
-                            <span class="text-xs font-mono font-bold tracking-wider text-cyan-400 uppercase">Lane 2 (Fast-Track / Reefer)</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
+                            <span class="text-xs font-mono font-extrabold tracking-wider text-cyan-900 uppercase">Lane 2 (Fast-Track / Reefer)</span>
                         </div>
-                        <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[10px] font-mono">STANDBY</span>
+                        <span class="px-2.5 py-0.5 bg-cyan-100 text-cyan-800 border border-cyan-300 rounded-full text-[10px] font-mono font-extrabold">STANDBY</span>
                     </div>
 
                     <div class="space-y-3">
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-tower-broadcast text-cyan-400 mr-1"></i> RFID UHF Reader</span>
-                                <span class="text-[9px] text-cyan-400 font-mono">20 METERS</span>
+                        <div class="bg-white rounded-xl p-3 border border-cyan-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-tower-broadcast text-cyan-600 mr-1.5"></i> RFID UHF Reader</span>
+                                <span class="text-[9px] bg-cyan-100 text-cyan-800 border border-cyan-200 px-1.5 py-0.5 rounded font-mono font-bold">20 METERS</span>
                             </span>
-                            <span class="text-sm font-mono font-bold text-white block mt-1">
+                            <span class="text-sm font-mono font-black text-slate-900 block mt-1">
                                 TAG-CIDP-882104
                             </span>
                         </div>
 
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-lock text-amber-400 mr-1"></i> e-Seal Bea Cukai (CEISA 4.0)</span>
-                                <span class="text-[9px] text-emerald-400 font-mono">SECURE</span>
+                        <div class="bg-white rounded-xl p-3 border border-amber-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-lock text-amber-600 mr-1.5"></i> e-Seal Bea Cukai (CEISA 4.0)</span>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">SECURE</span>
                             </span>
-                            <span class="text-sm font-mono font-bold text-emerald-300 block mt-1">
+                            <span class="text-sm font-mono font-extrabold text-emerald-700 block mt-1">
                                 JT701-098231 • Lolos Inspeksi
                             </span>
                         </div>
 
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-snowflake text-blue-400 mr-1"></i> Monitoring Reefer Plug</span>
-                                <span class="text-[9px] text-blue-400 font-mono">-20.5°C</span>
+                        <div class="bg-white rounded-xl p-3 border border-blue-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-snowflake text-blue-600 mr-1.5"></i> Monitoring Reefer Plug</span>
+                                <span class="text-[9px] bg-blue-100 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded font-mono font-bold">-20.5°C</span>
                             </span>
-                            <span class="text-xs font-mono text-slate-300 block mt-1">
+                            <span class="text-xs font-mono font-bold text-slate-700 block mt-1">
                                 PTI Pass • Jalur Prioritas C-01
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <span class="text-slate-400">Barrier Gate:</span>
-                    <span class="text-slate-400 font-mono">CLOSED (AUTO DETECT)</span>
+                <div class="mt-4 pt-3 border-t border-cyan-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500 font-semibold">Barrier Gate:</span>
+                    <span class="text-slate-700 font-mono font-bold">CLOSED (AUTO DETECT)</span>
                 </div>
             </div>
 
             <!-- Lane 3: Outbound Gate-Out -->
-            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-md border border-slate-800 flex flex-col justify-between">
+            <div class="bg-gradient-to-b from-indigo-50/50 via-white to-white rounded-2xl p-5 shadow-sm border-2 border-indigo-300/80 hover:border-indigo-500 transition-all flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between pb-3 border-b border-slate-800 mb-3">
+                    <div class="flex items-center justify-between pb-3 border-b border-indigo-100 mb-3">
                         <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
-                            <span class="text-xs font-mono font-bold tracking-wider text-purple-400 uppercase">Lane 3 (Outbound Gate-Out)</span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
+                            <span class="text-xs font-mono font-extrabold tracking-wider text-indigo-900 uppercase">Lane 3 (Outbound Gate-Out)</span>
                         </div>
-                        <span class="px-2 py-0.5 bg-slate-800 text-slate-300 rounded-full text-[10px] font-mono">ONLINE</span>
+                        <span class="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 border border-indigo-300 rounded-full text-[10px] font-mono font-extrabold">ONLINE</span>
                     </div>
 
                     <div class="space-y-3">
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-barcode text-purple-400 mr-1"></i> Scanner Slip Keluar</span>
-                                <span class="text-[9px] text-purple-400 font-mono">QR CODE</span>
+                        <div class="bg-white rounded-xl p-3 border border-indigo-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-barcode text-indigo-600 mr-1.5"></i> Scanner Slip Keluar</span>
+                                <span class="text-[9px] bg-indigo-100 text-indigo-800 border border-indigo-200 px-1.5 py-0.5 rounded font-mono font-bold">QR CODE</span>
                             </span>
-                            <span class="text-sm font-mono font-bold text-white block mt-1">
+                            <span class="text-sm font-mono font-black text-slate-900 block mt-1">
                                 Verifikasi Surat Jalan &amp; Billing
                             </span>
                         </div>
 
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-file-invoice text-emerald-400 mr-1"></i> Odoo ERP Status</span>
-                                <span class="text-[9px] text-emerald-400 font-mono">SYNCED</span>
+                        <div class="bg-white rounded-xl p-3 border border-emerald-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-file-invoice text-emerald-600 mr-1.5"></i> Odoo ERP Status</span>
+                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">SYNCED</span>
                             </span>
-                            <span class="text-xs font-mono text-emerald-300 block mt-1">
+                            <span class="text-xs font-mono font-extrabold text-emerald-700 block mt-1">
                                 Invoicing &amp; Lift-On/Off Selesai
                             </span>
                         </div>
 
-                        <div class="bg-slate-800/80 rounded-xl p-3 border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-road text-amber-400 mr-1"></i> Akses Tol Otomatis</span>
-                                <span class="text-[9px] text-slate-400 font-mono">KM 34 CIKARANG</span>
+                        <div class="bg-white rounded-xl p-3 border border-amber-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
+                                <span><i class="fa-solid fa-road text-amber-600 mr-1.5"></i> Akses Tol Otomatis</span>
+                                <span class="text-[9px] bg-amber-100 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-mono font-bold">KM 34 CIKARANG</span>
                             </span>
-                            <span class="text-xs text-slate-300 block mt-1">
+                            <span class="text-xs font-bold text-slate-700 block mt-1">
                                 Menuju Tol Jakarta - Cikampek
                             </span>
                         </div>
                     </div>
                 </div>
 
-                <div class="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-xs">
-                    <span class="text-slate-400">Barrier Gate:</span>
-                    <span class="text-emerald-400 font-mono font-bold flex items-center"><i class="fa-solid fa-check-circle mr-1"></i> NORMAL STANDBY</span>
+                <div class="mt-4 pt-3 border-t border-indigo-100 flex items-center justify-between text-xs">
+                    <span class="text-slate-500 font-semibold">Barrier Gate:</span>
+                    <span class="text-emerald-700 font-mono font-extrabold flex items-center gap-1"><i class="fa-solid fa-check-circle text-emerald-600"></i> NORMAL STANDBY</span>
                 </div>
             </div>
         </div>
@@ -1486,7 +1489,7 @@ foreach ($hardware_list as $item) {
                                             </button>
                                         </form>
                                         <?php else: ?>
-                                        <button onclick="alert('=== DUAL-CLEARANCE CHECK ===\nKontainer: <?= $cRef ?>\nPlat: <?= $t['license_plate'] ?>\n\n1. Pabean CEISA: <?= $cStat ?> <?= $cStat === 'SPPB_CLEARED' ? '(LOLOS)' : '(TERTAHAN - Harap setujui di modul Customs)' ?>\n2. Billing ERP: <?= $bStat ?> <?= $bStat === 'PAID' ? '(LUNAS)' : '(BELUM LUNAS - Harap bayar di modul Billing)' ?>\n\nPalang keluar terkunci hingga kedua syarat terpenuhi.')" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded text-[11px] transition border border-amber-200" title="Cek Dual Clearance">
+                                        <button onclick="checkDualClearanceLock('<?= htmlspecialchars($cRef) ?>', '<?= htmlspecialchars($t['license_plate']) ?>', '<?= $cStat ?>', '<?= $bStat ?>')" class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-700 font-bold rounded text-[11px] transition border border-amber-200 cursor-pointer" title="Cek Dual Clearance">
                                             <i class="fa-solid fa-lock mr-0.5"></i> Lock
                                         </button>
                                         <?php endif; ?>
@@ -1511,7 +1514,7 @@ foreach ($hardware_list as $item) {
     <!-- ======================================================================= -->
     <div id="tab-ocr-iso" class="tab-content hidden space-y-6">
         <!-- Banner Intro -->
-        <div class="bg-gradient-to-r from-[#002f5e] via-[#014d80] to-[#0170b9] rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="bg-gradient-to-r from-[#0170b9] via-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="space-y-1.5">
                 <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-blue-400/20 border border-blue-300/30 text-xs font-mono text-blue-200">
                     <i class="fa-solid fa-microchip"></i>
@@ -1572,10 +1575,10 @@ foreach ($hardware_list as $item) {
         </div>
 
         <!-- Main OCR Visualizer & Calculation Engine Grid -->
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
             <!-- Left: Simulated Container Door & Camera Detection (5 cols) -->
-            <div class="lg:col-span-5 space-y-4">
-                <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 text-white shadow-sm relative overflow-hidden">
+            <div class="xl:col-span-5 space-y-4">
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/80 text-slate-800 shadow-xs shadow-sm relative overflow-hidden">
                     <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
                         <div class="flex items-center space-x-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -1653,7 +1656,7 @@ foreach ($hardware_list as $item) {
 
                 <!-- Fast Actions -->
                 <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
-                    <button type="button" onclick="transferOcrToGateLane()" class="w-full py-2.5 px-4 bg-[#002f5e] hover:bg-[#0170b9] text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 shadow-xs">
+                    <button type="button" onclick="transferOcrToGateLane()" class="w-full py-2.5 px-4 bg-[#0170b9] hover:bg-[#0170b9] text-white font-bold rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 shadow-xs">
                         <i class="fa-solid fa-id-card"></i>
                         <span>Gunakan Kontainer untuk Registrasi Pra-Gate</span>
                     </button>
@@ -1665,7 +1668,7 @@ foreach ($hardware_list as $item) {
             </div>
 
             <!-- Right: ISO 6346 Mathematical Check Digit Engine (7 cols) -->
-            <div class="lg:col-span-7 space-y-4">
+            <div class="xl:col-span-7 space-y-4">
                 <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-gray-100 pb-4 mb-4">
                         <div>
@@ -1774,7 +1777,7 @@ foreach ($hardware_list as $item) {
     <div id="tab-katalog" class="tab-content hidden space-y-6">
         <!-- Ringkasan CAPEX & Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-[#002f5e] to-[#0170b9] text-white rounded-2xl p-5 shadow-sm">
+            <div class="bg-gradient-to-br from-[#0170b9] to-blue-600 text-white rounded-2xl p-5 shadow-sm">
                 <span class="text-[11px] font-bold uppercase tracking-wider text-blue-200">Total Nilai Investasi (CAPEX)</span>
                 <p class="text-2xl sm:text-3xl font-bold mt-1">Rp <?= number_format($total_capex, 0, ',', '.') ?></p>
                 <p class="text-xs text-blue-100 mt-2">Mencakup 26 jenis hardware untuk lahan operasional 35 Ha</p>
@@ -1816,7 +1819,7 @@ foreach ($hardware_list as $item) {
         <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                 <div class="flex flex-wrap gap-1.5" id="category-filter-buttons">
-                    <button onclick="filterCategory('all')" class="filter-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#002f5e] text-white" data-cat="all">Semua (26)</button>
+                    <button onclick="filterCategory('all')" class="filter-cat-btn px-3 py-1.5 rounded-lg text-xs font-bold transition-all bg-[#0170b9] text-white" data-cat="all">Semua (26)</button>
                     <button onclick="filterCategory('Otomasi Gate')" class="filter-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-cat="Otomasi Gate">Gate (8)</button>
                     <button onclick="filterCategory('Yard & Alat Angkat')" class="filter-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-cat="Yard & Alat Angkat">Yard & Crane (4)</button>
                     <button onclick="filterCategory('Cold Chain Reefer')" class="filter-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-cat="Cold Chain Reefer">Cold Chain (2)</button>
@@ -1881,7 +1884,7 @@ foreach ($hardware_list as $item) {
                             <td class="py-3 px-3.5 text-gray-500 max-w-xs text-[11px] leading-relaxed"><?= htmlspecialchars($hw['spesifikasi']) ?></td>
                             <td class="py-3 px-3.5 text-right font-mono font-semibold text-gray-800"><?= $hw['harga_label'] ?></td>
                             <td class="py-3 px-3.5 text-center font-mono text-gray-600"><?= $hw['unit_label'] ?></td>
-                            <td class="py-3 px-3.5 text-right font-mono font-bold text-[#002f5e]"><?= $hw['subtotal_label'] ?></td>
+                            <td class="py-3 px-3.5 text-right font-mono font-bold text-blue-700"><?= $hw['subtotal_label'] ?></td>
                             <td class="py-3 px-3.5 text-center">
                                 <div class="flex items-center justify-center space-x-1">
                                     <a href="dashboard.php?page=denah&hw_id=<?= $hw['no'] ?>" class="p-1.5 text-amber-600 hover:text-amber-800 rounded hover:bg-amber-50 transition-colors inline-block" title="Sorot Lokasi Sensor di Denah 2D">
@@ -2265,15 +2268,15 @@ foreach ($hardware_list as $item) {
 
             <!-- API Payload Preview & Controls -->
             <div class="space-y-6">
-                <div class="bg-slate-900 rounded-2xl p-5 border border-slate-800 shadow-md">
-                    <div class="flex items-center justify-between mb-3 border-b border-slate-700 pb-2">
-                        <h3 class="text-xs font-bold text-slate-200 flex items-center">
-                            <i class="fa-solid fa-code text-blue-400 mr-2"></i>
+                <div class="bg-white rounded-2xl p-5 border border-slate-200/80 shadow-sm">
+                    <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                        <h3 class="text-xs font-bold text-slate-900 flex items-center">
+                            <i class="fa-solid fa-code text-[#0170b9] mr-2"></i>
                             DCSA API Payload Preview
                         </h3>
-                        <span class="text-[9px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded font-mono">JSON</span>
+                        <span class="text-[9px] bg-blue-50 text-blue-700 font-bold border border-blue-200 px-2 py-0.5 rounded font-mono">JSON</span>
                     </div>
-                    <pre class="text-[10px] font-mono text-emerald-400 bg-slate-950 p-3 rounded-lg overflow-x-auto border border-slate-800">{
+                    <pre id="dcsaJsonPayloadBox" class="text-[10.5px] font-mono text-emerald-700 bg-slate-50 p-3.5 rounded-xl overflow-x-auto border border-slate-200 shadow-inner">{
   "eventID": "EVT-CIDP-001",
   "eventType": "EQUIPMENT",
   "eventDateTime": "2026-09-29T08:15:00+07:00",
@@ -2284,8 +2287,8 @@ foreach ($hardware_list as $item) {
   "facilityCode": "IDCKG",
   "facilityCodeListProvider": "SMDG"
 }</pre>
-                    <button class="w-full mt-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-lg transition-colors border border-slate-700 flex items-center justify-center">
-                        <i class="fa-regular fa-copy mr-1.5"></i> Salin JSON Payload
+                    <button id="btnCopyDcsaJson" onclick="copyDcsaJsonPayload()" class="w-full mt-4 py-2 bg-[#0170b9] hover:bg-[#004b87] text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center cursor-pointer">
+                        <i class="fa-regular fa-copy mr-1.5" id="btnCopyDcsaIcon"></i> <span id="btnCopyDcsaText">Salin JSON Payload</span>
                     </button>
                 </div>
 
@@ -2294,17 +2297,17 @@ foreach ($hardware_list as $item) {
                     <div class="space-y-3">
                         <div>
                             <label class="block text-[10px] text-gray-500 font-semibold mb-1">Event Type</label>
-                            <select class="w-full text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:border-blue-400">
-                                <option>EQUIPMENT_EVENT</option>
-                                <option>TRANSPORT_EVENT</option>
-                                <option>SHIPMENT_EVENT</option>
+                            <select id="dcsaSimEventType" class="w-full text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:border-blue-400">
+                                <option value="EQUIPMENT">EQUIPMENT_EVENT</option>
+                                <option value="TRANSPORT">TRANSPORT_EVENT</option>
+                                <option value="SHIPMENT">SHIPMENT_EVENT</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-[10px] text-gray-500 font-semibold mb-1">Equipment Reference</label>
-                            <input type="text" value="MSKU7829104" class="w-full text-xs font-mono border border-gray-200 rounded-lg px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:border-blue-400">
+                            <input id="dcsaSimEquipRef" type="text" value="MSKU7829104" class="w-full text-xs font-mono border border-gray-200 rounded-lg px-2.5 py-1.5 bg-gray-50 focus:outline-none focus:border-blue-400">
                         </div>
-                        <button class="w-full py-2 bg-[#0170b9] hover:bg-[#004b87] text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 mt-2">
+                        <button onclick="generateDcsaEventSim()" class="w-full py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center space-x-1.5 mt-2 cursor-pointer">
                             <i class="fa-solid fa-paper-plane"></i>
                             <span>Generate DCSA Event</span>
                         </button>
@@ -2318,10 +2321,10 @@ foreach ($hardware_list as $item) {
 <!-- ======================================================================= -->
 <!-- MODAL: UN/EDIFACT CODECO (Container Gate-In/Out Report) -->
 <!-- ======================================================================= -->
-<div id="edifactModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
+<div id="edifactModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
     <div class="bg-white rounded-2xl max-w-4xl w-full border border-gray-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Header -->
-        <div class="bg-[#002f5e] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <div class="bg-[#0170b9] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-lg">
                     <i class="fa-solid fa-file-code"></i>
@@ -2359,7 +2362,7 @@ foreach ($hardware_list as $item) {
             </div>
 
             <!-- Monospace EDIFACT Message Preview -->
-            <div class="relative bg-slate-950 rounded-xl p-4 border border-slate-800 shadow-inner">
+            <div class="relative bg-slate-50 rounded-xl p-4 border border-slate-200 shadow-inner text-slate-800">
                 <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px] font-mono text-slate-400">
                     <span>TRANSMISSION BUFFER: CODECO_PAYLOAD.EDI</span>
                     <span class="text-emerald-400">SYNTAX 2 • SEGMENT TERM (')</span>
@@ -2392,7 +2395,7 @@ foreach ($hardware_list as $item) {
                     <i class="fa-regular fa-copy"></i>
                     <span id="copy-edi-btn-text">Salin Pesan EDI</span>
                 </button>
-                <button type="button" onclick="downloadEdifactFile()" class="px-4 py-2 bg-[#0170b9] hover:bg-[#002f5e] text-white font-bold rounded-xl text-xs transition-colors flex items-center space-x-1.5 shadow-sm">
+                <button type="button" onclick="downloadEdifactFile()" class="px-4 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white font-bold rounded-xl text-xs transition-colors flex items-center space-x-1.5 shadow-sm">
                     <i class="fa-solid fa-download"></i>
                     <span>Unduh File (.edi)</span>
                 </button>
@@ -2404,10 +2407,10 @@ foreach ($hardware_list as $item) {
 <!-- ======================================================================= -->
 <!-- MODAL: REGISTRASI PRA-GATE (GATE PASS BOOKING) -->
 <!-- ======================================================================= -->
-<div id="gatePassModal" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
+<div id="gatePassModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
     <div class="bg-white rounded-2xl max-w-xl w-full border border-gray-200 shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         <!-- Header -->
-        <div class="bg-[#002f5e] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
+        <div class="bg-[#0170b9] text-white px-6 py-4 flex items-center justify-between flex-shrink-0">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300 text-lg">
                     <i class="fa-solid fa-id-card"></i>
@@ -2502,6 +2505,36 @@ foreach ($hardware_list as $item) {
 
 <!-- JavaScript Interaktif Modul Gate -->
 <script>
+// Cetak Rekapitulasi Arus Gerbang Format Resmi A4 Berstempel Digital
+function printGateRekap() {
+    if (typeof CIDPPrint === 'undefined') {
+        window.print();
+        return;
+    }
+    const headers = ['No. Polisi', 'Pengemudi', 'Peti Kemas', 'Tipe Gerakan', 'Timbangan VGM', 'Status'];
+    const rows = [
+        ['B 9201 UEK', 'Agus Suprianto (SIM B2)', 'TCLU8192031 (40HC)', 'GATE IN', '38.450 kg (VGM OK)', 'IN YARD'],
+        ['B 9481 FTR', 'Bambang Irawan (SIM B2)', 'MSKU7829104 (40HC)', 'GATE OUT', '32.100 kg (VGM OK)', 'RELEASED'],
+        ['B 9012 KHA', 'Dedi Kurniawan (SIM B2)', 'SEGU4421908 (20GP)', 'GATE IN', '21.500 kg (VGM OK)', 'WEIGHING'],
+        ['B 9554 WRT', 'Hendra Wijaya (SIM B2)', 'CMAU9021844 (40HC)', 'GATE IN', '34.800 kg (VGM OK)', 'IN YARD'],
+        ['B 9112 PZX', 'Surya Saputra (SIM B2)', 'TEMU2910482 (20GP)', 'GATE OUT', '23.400 kg (VGM OK)', 'RELEASED']
+    ];
+    CIDPPrint.printTableReport(
+        'LAPORAN REKAPITULASI ARUS GERBANG & TIMBANGAN SOLAS VGM',
+        headers,
+        rows,
+        {
+            category: 'GATE-TMS',
+            stats: [
+                { label: 'Total Inbound', value: '14 Unit' },
+                { label: 'Total Outbound', value: '9 Unit' },
+                { label: 'Rerata Waktu Timbang', value: '42 Detik' },
+                { label: 'Status Kalibrasi', value: '100% METROLOGI' }
+            ]
+        }
+    );
+}
+
 // Tab Switching Logic (Executive Pill Buttons Aligned with Sidebar)
 function switchGateTab(tabId) {
     const activeClasses = ['text-white', 'bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'shadow-xs', 'shadow-orange-500/20', 'font-bold'];
@@ -2604,12 +2637,102 @@ function submitGatePass(e) {
 }
 
 function viewGatePassDetail(plate, contOrDo, driver) {
-    alert("=== E-GATE PASS RESMI CIDP ===\n" +
-          "Plat Truk: " + plate + "\n" +
-          "Pengemudi: " + (driver || 'Driver CIDP') + "\n" +
-          "Muatan / DO: " + contOrDo + "\n" +
-          "Status: Terverifikasi Digital Gate System\n" +
-          "Sertifikasi: VGM SOLAS Compliant (Fangda 80T)");
+    if (typeof CIDPPrint !== 'undefined' && typeof CIDPPrint.printGatePass === 'function') {
+        CIDPPrint.printGatePass({
+            passNo: 'GP-' + (plate.replace(/[^A-Za-z0-9]/g, '')) + '-' + Math.floor(1000 + Math.random() * 9000),
+            plate: plate,
+            driver: driver || 'Agus Suprianto (Mitra Angkutan)',
+            sim: 'SIM B2 Umum: 8901239102',
+            transporter: 'PT Samudera Logistik Nusantara',
+            ctrNum: contOrDo || 'MSKU7829104',
+            ctrSize: "40' High Cube (40HC)",
+            gross: 34500,
+            tare: 12200,
+            net: 22300,
+            yardSlot: 'Blok B-02',
+            status: 'Gate-In Terverifikasi (VGM SOLAS)'
+        });
+    } else {
+        alert("=== E-GATE PASS RESMI CIDP ===\n" +
+              "Plat Truk: " + plate + "\n" +
+              "Pengemudi: " + (driver || 'Driver CIDP') + "\n" +
+              "Muatan / DO: " + contOrDo + "\n" +
+              "Status: Terverifikasi Digital Gate System\n" +
+              "Sertifikasi: VGM SOLAS Compliant (Fangda 80T)");
+    }
+}
+
+function copyDcsaJsonPayload() {
+    const pre = document.getElementById('dcsaJsonPayloadBox');
+    const btnText = document.getElementById('btnCopyDcsaText');
+    const btnIcon = document.getElementById('btnCopyDcsaIcon');
+    if (!pre) return;
+
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+        if (btnText) btnText.textContent = 'Berhasil Disalin!';
+        if (btnIcon) btnIcon.className = 'fa-solid fa-check mr-1.5 text-emerald-300';
+        setTimeout(() => {
+            if (btnText) btnText.textContent = 'Salin JSON Payload';
+            if (btnIcon) btnIcon.className = 'fa-regular fa-copy mr-1.5';
+        }, 2000);
+    }).catch(() => {
+        alert('Gagal menyalin. Silakan seleksi teks secara manual.');
+    });
+}
+
+function generateDcsaEventSim() {
+    const eventType = document.getElementById('dcsaSimEventType')?.value || 'EQUIPMENT';
+    const equipRef = (document.getElementById('dcsaSimEquipRef')?.value || 'MSKU7829104').trim().toUpperCase();
+    const pre = document.getElementById('dcsaJsonPayloadBox');
+    if (!pre) return;
+
+    const nowIso = new Date().toISOString();
+    const randomEventId = 'EVT-CIDP-' + Math.floor(100 + Math.random() * 900);
+
+    let eventTypeCode = 'GATE_IN';
+    if (eventType === 'TRANSPORT') eventTypeCode = 'DEPARTURE';
+    if (eventType === 'SHIPMENT') eventTypeCode = 'LOADED';
+
+    const payload = {
+        eventID: randomEventId,
+        eventType: eventType + "_EVENT",
+        eventDateTime: nowIso,
+        eventClassifierCode: "ACT",
+        equipmentEventTypeCode: eventTypeCode,
+        equipmentReference: equipRef,
+        transportCallID: "TC-CIDP-KA" + Math.floor(2000 + Math.random() * 900),
+        facilityCode: "IDCKG",
+        facilityCodeListProvider: "SMDG",
+        terminalOperator: "Conclusion Intermodal Dry Port",
+        vgmStatus: "VERIFIED_WEIGHED"
+    };
+
+    pre.textContent = JSON.stringify(payload, null, 2);
+    
+    // Feedback visual kilas
+    pre.classList.add('ring-2', 'ring-orange-500');
+    setTimeout(() => pre.classList.remove('ring-2', 'ring-orange-500'), 1000);
+}
+
+function checkDualClearanceLock(cRef, plate, cStat, bStat) {
+    const isCustomsCleared = (cStat === 'SPPB_CLEARED');
+    const isBillingPaid = (bStat === 'PAID');
+    
+    let msg = "=== DUAL-CLEARANCE CHECK (GERBANG KELUAR) ===\n\n";
+    msg += "Nomor Peti Kemas : " + cRef + "\n";
+    msg += "Plat Armada Truk  : " + plate + "\n\n";
+    msg += "1. Bea Cukai (CEISA) : " + cStat + " " + (isCustomsCleared ? "[✓ LOLOS]" : "[✗ TERTAHAN - Butuh SPPB]") + "\n";
+    msg += "2. Billing ERP (Odoo): " + bStat + " " + (isBillingPaid ? "[✓ LUNAS]" : "[✗ BELUM LUNAS - Butuh Pembayaran]") + "\n\n";
+    
+    if (!isCustomsCleared && !isBillingPaid) {
+        msg += "Palang gerbang keluar TERKUNCI OTOMATIS karena kedua syarat belum terpenuhi.";
+    } else if (!isCustomsCleared) {
+        msg += "Palang keluar TERKUNCI: Selesaikan persetujuan SPPB di modul Bea Cukai.";
+    } else if (!isBillingPaid) {
+        msg += "Palang keluar TERKUNCI: Selesaikan pelunasan invoice di modul Billing & ERP.";
+    }
+    
+    alert(msg);
 }
 
 // Filter Kategori Hardware BOM
@@ -2617,10 +2740,10 @@ function filterCategory(category) {
     const buttons = document.querySelectorAll('.filter-cat-btn');
     buttons.forEach(btn => {
         if (btn.getAttribute('data-cat') === category) {
-            btn.classList.add('bg-[#002f5e]', 'text-white');
+            btn.classList.add('bg-[#0170b9]', 'text-white');
             btn.classList.remove('bg-gray-100', 'text-gray-600');
         } else {
-            btn.classList.remove('bg-[#002f5e]', 'text-white');
+            btn.classList.remove('bg-[#0170b9]', 'text-white');
             btn.classList.add('bg-gray-100', 'text-gray-600');
         }
     });

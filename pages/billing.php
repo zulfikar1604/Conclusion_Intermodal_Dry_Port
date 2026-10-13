@@ -389,7 +389,7 @@ $billing_info = [
                             <span class="text-[11px] font-bold text-slate-700 uppercase tracking-wider">TOTAL BIAYA</span>
                             <span id="out-total" class="text-base font-extrabold text-orange-600 font-mono">Rp 0</span>
                         </div>
-                        <button class="w-full py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11.5px] font-bold rounded-lg transition-all shadow-xs cursor-pointer">
+                        <button onclick="createDraftInvoiceFromCalc()" class="w-full py-1.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11.5px] font-bold rounded-lg transition-all shadow-xs cursor-pointer">
                             <i class="fa-solid fa-file-invoice mr-1.5"></i>Buat Draft Invoice
                         </button>
                     </div>
@@ -695,7 +695,7 @@ $billing_info = [
 <div id="invoiceModal" class="fixed inset-0 bg-black/60 z-50 hidden items-center justify-center p-4 backdrop-blur-sm">
     <div class="bg-white rounded-2xl max-w-3xl w-full max-h-[90vh] flex flex-col shadow-2xl transform transition-all" id="printArea">
         <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-slate-50 rounded-t-2xl">
-            <h3 class="text-xl font-bold text-[#002f5e]">Detail Invoice</h3>
+            <h3 class="text-xl font-bold text-blue-700">Detail Invoice</h3>
             <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-red-500 transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-red-50">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
@@ -703,9 +703,9 @@ $billing_info = [
         
         <div class="p-8 overflow-y-auto custom-scrollbar flex-1">
             <!-- Kop Surat -->
-            <div class="flex justify-between items-start border-b-2 border-[#002f5e] pb-6 mb-6">
+            <div class="flex justify-between items-start border-b-2 border-blue-600 pb-6 mb-6">
                 <div>
-                    <h1 class="text-2xl font-black text-[#002f5e] tracking-tight">CONCLUSION<span class="text-[#0170b9]">.</span></h1>
+                    <h1 class="text-2xl font-black text-blue-700 tracking-tight">CONCLUSION<span class="text-[#0170b9]">.</span></h1>
                     <p class="text-xs text-gray-500 font-semibold tracking-wider">INTERMODAL DRY PORT</p>
                     <div class="mt-2 text-[11px] text-gray-600">
                         <p>Jl. Pelabuhan Kering No. 1, Cikarang, Jawa Barat</p>
@@ -734,9 +734,10 @@ $billing_info = [
                 </div>
             </div>
 
-            <table class="w-full text-left mb-6 border-collapse">
+            <div class="overflow-x-auto mb-6">
+                <table class="w-full text-left border-collapse min-w-[500px]">
                 <thead>
-                    <tr class="bg-[#002f5e] text-white text-xs uppercase">
+                    <tr class="bg-[#0170b9] text-white text-xs uppercase">
                         <th class="p-3 rounded-tl-lg">Deskripsi Layanan</th>
                         <th class="p-3 text-center">Qty</th>
                         <th class="p-3 text-right">Harga Satuan</th>
@@ -758,6 +759,7 @@ $billing_info = [
                     </tr>
                 </tbody>
             </table>
+            </div>
 
             <div class="flex justify-end mb-8">
                 <div class="w-1/2">
@@ -770,25 +772,49 @@ $billing_info = [
                         <span class="font-semibold text-gray-800" id="mdl-inv-ppn">Rp 0</span>
                     </div>
                     <div class="flex justify-between py-3 text-lg font-bold">
-                        <span class="text-[#002f5e]">Grand Total</span>
+                        <span class="text-blue-700">Grand Total</span>
                         <span class="text-[#0170b9]" id="mdl-inv-total">Rp 0</span>
                     </div>
                 </div>
             </div>
 
-            <div class="text-xs text-gray-500">
-                <p class="font-bold text-gray-700 mb-1">Instruksi Pembayaran:</p>
-                <p>Pembayaran dapat ditransfer melalui Bank Mandiri Cabang Cikarang.</p>
-                <p>No Rekening: 156-00-1234567-8 a/n PT Conclusion Dry Port.</p>
-                <p>Harap cantumkan nomor invoice pada berita transfer.</p>
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 pt-4 border-t border-gray-200">
+                <div class="text-xs text-gray-500 max-w-sm">
+                    <p class="font-bold text-gray-700 mb-1">Instruksi Pembayaran Resmi:</p>
+                    <p>Pembayaran ditransfer ke rekening resmi <strong>PT Conclusion Dry Port</strong>.</p>
+                    <p>Bank Mandiri Cabang Cikarang: <strong class="font-mono text-gray-800">156-00-1234567-8</strong></p>
+                    <p class="text-[11px] text-gray-400 mt-1">Sistem ERP Odoo Terhubung &bull; Dokumen Sah Tanpa Tanda Tangan Basah Manual</p>
+                </div>
+
+                <!-- Bagian Pengesahan Dokumen & Stempel Digital Resmi -->
+                <div class="flex items-center gap-4">
+                    <div id="mdl-inv-qr" class="hidden sm:block">
+                        <!-- QR Code Container -->
+                    </div>
+                    <div class="text-center relative w-48">
+                        <div class="text-[10px] font-bold text-gray-500 uppercase">Manager Keuangan</div>
+                        <div class="relative h-20 flex items-center justify-center my-1" id="mdl-inv-stamp-holder">
+                            <!-- Stempel SVG Disuntikkan via JS -->
+                        </div>
+                        <div class="text-xs font-bold text-gray-900 border-t border-gray-400 pt-1">Budi Santoso, S.E., Ak.</div>
+                        <div class="text-[9.5px] text-gray-500">NPP. 201408 198205 101</div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-end space-x-3">
-            <button onclick="closeInvoiceModal()" class="px-5 py-2 text-sm font-semibold text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Tutup</button>
-            <button onclick="window.print()" class="px-5 py-2 text-sm font-bold text-white bg-[#0170b9] rounded-lg hover:bg-[#004b87] transition-colors shadow-sm flex items-center">
-                <i class="fa-solid fa-print mr-2"></i>Cetak PDF / Print
-            </button>
+        <div class="p-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl flex justify-between items-center">
+            <span class="text-xs text-gray-400 flex items-center gap-1">
+                <i class="fa-solid fa-stamp text-red-500"></i>
+                <span>Dilengkapi Stempel Digital &amp; QR Otorisasi</span>
+            </span>
+            <div class="flex space-x-2">
+                <button onclick="closeInvoiceModal()" class="px-4 py-2 text-xs font-semibold text-gray-600 bg-white border border-gray-300 rounded-xl hover:bg-gray-50 transition-colors">Tutup</button>
+                <button onclick="printCurrentInvoice()" class="px-5 py-2 text-xs font-bold text-white bg-[#0170b9] hover:bg-blue-700 rounded-xl transition-all shadow-sm flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-print"></i>
+                    <span>Cetak Dokumen Resmi (A4)</span>
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -881,12 +907,14 @@ $billing_info = [
     // Init calculation
     document.addEventListener('DOMContentLoaded', calculateTariff);
 
-    // Modal Logic
+    // Modal Logic & Official Print System
+    let currentInvoiceData = null;
+
     function openInvoiceModal(no, cust, total, status) {
         document.getElementById('mdl-inv-no').textContent = no;
         document.getElementById('mdl-inv-cust').textContent = cust;
         
-        const subtotal = total / 1.11;
+        const subtotal = Math.round(total / 1.11);
         const ppn = total - subtotal;
         
         document.getElementById('mdl-inv-sub').textContent = formatIDR(subtotal);
@@ -901,13 +929,58 @@ $billing_info = [
         else if(status === 'Menunggu') badge.className += 'bg-amber-100 text-amber-700 border border-amber-200';
         else badge.className += 'bg-red-100 text-red-700 border border-red-200';
 
+        // Render Stempel Digital Resmi & QR ke Tampilan Modal
+        const stampHolder = document.getElementById('mdl-inv-stamp-holder');
+        if (stampHolder && typeof CIDPPrint !== 'undefined') {
+            stampHolder.innerHTML = CIDPPrint.stamps.finance(no);
+        }
+        const qrHolder = document.getElementById('mdl-inv-qr');
+        if (qrHolder && typeof CIDPPrint !== 'undefined') {
+            qrHolder.innerHTML = CIDPPrint.generateQrSvg(no, 'Verifikasi Status Pelunasan Faktur');
+        }
+
+        currentInvoiceData = {
+            no: no,
+            customer: cust,
+            total: total,
+            subtotal: subtotal,
+            ppn: ppn,
+            status: status
+        };
+
         document.getElementById('invoiceModal').classList.remove('hidden');
         document.getElementById('invoiceModal').classList.add('flex');
+    }
+
+    function printCurrentInvoice() {
+        if (!currentInvoiceData) return;
+        if (typeof CIDPPrint !== 'undefined') {
+            CIDPPrint.printInvoice(currentInvoiceData);
+        } else {
+            window.print();
+        }
     }
 
     function closeInvoiceModal() {
         document.getElementById('invoiceModal').classList.add('hidden');
         document.getElementById('invoiceModal').classList.remove('flex');
+    }
+
+    function createDraftInvoiceFromCalc() {
+        const tipe = document.getElementById('calc-tipe')?.value || '20GP';
+        const hari = document.getElementById('calc-hari')?.value || '3';
+        const totalText = document.getElementById('out-total')?.textContent || 'Rp 0';
+        
+        // Parse numeric total dari hasil kalkulasi
+        const totalNum = parseInt(totalText.replace(/[^0-9]/g, '')) || 850000;
+        const now = new Date();
+        const yearMonth = now.getFullYear() + String(now.getMonth() + 1).padStart(2, '0');
+        const randomId = Math.floor(1000 + Math.random() * 9000);
+        const invNo = 'INV-' + yearMonth + '-' + randomId;
+        const custName = 'PT Shipper Nusantara (Simulasi Peti ' + tipe + ', ' + hari + ' Hari)';
+        
+        // Buka modal invoice resmi dengan stempel dan opsi cetak
+        openInvoiceModal(invNo, custName, totalNum, 'Menunggu');
     }
 
     // -------------------------------------------------------------------------
@@ -1018,7 +1091,7 @@ $billing_info = [
 
                         return `
                             <tr class="hover:bg-blue-50/40 transition-colors">
-                                <td class="p-3 font-mono font-bold text-[#002f5e]">${inv.name}</td>
+                                <td class="p-3 font-mono font-bold text-blue-700">${inv.name}</td>
                                 <td class="p-3 font-medium">${inv.partner_id ? inv.partner_id[1] : '-'}</td>
                                 <td class="p-3 text-gray-600 text-[11px]">${inv.invoice_date || '-'} <span class="text-gray-400">s/d</span> ${dueDateStr}</td>
                                 <td class="p-3 font-bold text-right text-gray-900">${formatIDR(inv.amount_total)}${sisa}</td>

@@ -59,7 +59,7 @@ if (isset($pdo)) {
         </div>
 
         <div class="flex items-center gap-1.5 flex-shrink-0">
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white font-bold text-[11px] rounded-lg transition flex items-center gap-1 shadow-2xs">
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white font-bold text-[11px] rounded-lg transition flex items-center gap-1 shadow-2xs">
                 <i class="fa-solid fa-cube text-[10px] text-amber-400"></i><span>Simulator 3D</span>
             </a>
         </div>
@@ -106,15 +106,15 @@ if (isset($pdo)) {
     </div>
 
     <!-- AREA UTAMA: KONSOL SCANNER & INSPECTOR HASIL (2 KOLOM) -->
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <div class="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
         
         <!-- KOLOM KIRI: KONSOL PEMINDAI KAMERA & BERKAS (Span 7 Kolom) -->
-        <div class="lg:col-span-7 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+        <div class="xl:col-span-7 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
             
             <!-- Tab Mode Pemindaian -->
             <div class="flex items-center justify-between border-b border-gray-100 pb-3 flex-wrap gap-2">
                 <div class="flex items-center space-x-1 sm:space-x-2">
-                    <button onclick="switchScannerMode('webcam')" id="tabBtnWebcam" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#002f5e] text-white shadow-xs transition-all flex items-center space-x-1.5">
+                    <button onclick="switchScannerMode('webcam')" id="tabBtnWebcam" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#0170b9] text-white shadow-xs transition-all flex items-center space-x-1.5">
                         <i class="fa-solid fa-video"></i>
                         <span>Kamera Langsung</span>
                     </button>
@@ -158,13 +158,13 @@ if (isset($pdo)) {
                 </div>
 
                 <!-- Box Viewport Kamera Video -->
-                <div class="relative w-full aspect-video sm:aspect-[4/3] max-h-[380px] bg-slate-950 rounded-2xl overflow-hidden border-2 border-slate-800 flex items-center justify-center" id="scannerViewportBox">
+                <div class="relative w-full aspect-video sm:aspect-[4/3] max-h-[380px] bg-slate-100 rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner flex items-center justify-center" id="scannerViewportBox">
                     
                     <!-- html5-qrcode video viewport container -->
                     <div id="reader" class="w-full h-full"></div>
 
                     <!-- Placeholder Sebelum Kamera Nyala -->
-                    <div id="cameraStandbyPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-slate-400 bg-slate-900/90 z-10 space-y-3">
+                    <div id="cameraStandbyPlaceholder" class="absolute inset-0 flex flex-col items-center justify-center p-6 text-center text-slate-400 bg-white/90 text-slate-700 z-10 space-y-3">
                         <div class="w-16 h-16 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-center justify-center text-2xl text-blue-400">
                             <i class="fa-solid fa-camera-retro"></i>
                         </div>
@@ -215,7 +215,7 @@ if (isset($pdo)) {
                     <p class="text-xs text-gray-500 mt-1 max-w-sm mx-auto">
                         Mendukung foto stiker kontainer, scan surat jalan (EIR), atau tangkapan layar barcode (PNG, JPG, WEBP).
                     </p>
-                    <button type="button" class="mt-4 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl shadow-xs hover:bg-gray-50 transition">
+                    <button type="button" onclick="event.stopPropagation(); document.getElementById('fileInput').click();" class="mt-4 px-4 py-2 bg-white border border-gray-200 text-gray-700 text-xs font-bold rounded-xl shadow-xs hover:bg-gray-50 transition cursor-pointer">
                         Pilih Berkas dari Komputer
                     </button>
                 </div>
@@ -288,7 +288,7 @@ if (isset($pdo)) {
         </div>
 
         <!-- KOLOM KANAN: INSPECTOR HASIL VERIFIKASI & METADATA LOGISTIK (Span 5 Kolom) -->
-        <div class="lg:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
+        <div class="xl:col-span-5 bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
             
             <div class="flex items-center justify-between border-b border-gray-100 pb-3">
                 <div class="flex items-center space-x-2">
@@ -313,7 +313,7 @@ if (isset($pdo)) {
 
             <div id="inspectResultCard" class="hidden space-y-4 animate-fadeIn">
                 <!-- Raw Code Box -->
-                <div class="bg-slate-900 text-white rounded-xl p-3.5 space-y-1 relative group">
+                <div class="bg-gradient-to-br from-blue-50 to-slate-50 text-slate-800 border border-blue-200/80 rounded-xl p-3.5 space-y-1 relative group shadow-xs">
                     <div class="flex items-center justify-between text-[10px] text-slate-400">
                         <span class="uppercase tracking-wider font-mono">Decoded Raw String</span>
                         <button onclick="copyRawCode()" class="hover:text-white transition" title="Salin Kode">
@@ -361,7 +361,7 @@ if (isset($pdo)) {
 
                 <!-- Tombol Aksi Lanjutan -->
                 <div class="space-y-2 pt-1">
-                    <button onclick="logCurrentScan()" class="w-full py-2 bg-[#002f5e] hover:bg-[#004b87] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center space-x-1.5">
+                    <button onclick="logCurrentScan()" class="w-full py-2 bg-[#0170b9] hover:bg-[#004b87] text-white text-xs font-bold rounded-xl transition-all shadow-xs flex items-center justify-center space-x-1.5">
                         <i class="fa-solid fa-bookmark text-[11px]"></i>
                         <span>Simpan ke Log Pemeriksaan QA</span>
                     </button>
@@ -577,14 +577,14 @@ function switchScannerMode(mode) {
 
     if (mode === 'webcam') {
         document.getElementById('modeWebcam').classList.remove('hidden');
-        btnW.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#002f5e] text-white shadow-xs transition-all flex items-center space-x-1.5";
+        btnW.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#0170b9] text-white shadow-xs transition-all flex items-center space-x-1.5";
     } else if (mode === 'file') {
         document.getElementById('modeFile').classList.remove('hidden');
-        btnF.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#002f5e] text-white shadow-xs transition-all flex items-center space-x-1.5";
+        btnF.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#0170b9] text-white shadow-xs transition-all flex items-center space-x-1.5";
         if (isCameraRunning) stopCameraScanner();
     } else if (mode === 'quick') {
         document.getElementById('modeQuick').classList.remove('hidden');
-        btnQ.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#002f5e] text-white shadow-xs transition-all flex items-center space-x-1.5";
+        btnQ.className = "px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#0170b9] text-white shadow-xs transition-all flex items-center space-x-1.5";
     }
 }
 
@@ -911,7 +911,7 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
             <div><span class="text-gray-400 block">Pemilik Kargo:</span><span class="text-gray-800 font-medium truncate block">${matchedContainer.owner_company}</span></div>
             <div><span class="text-gray-400 block">Status Bea Cukai:</span><strong class="text-emerald-700 font-semibold">${matchedContainer.customs_status || 'SPPB_CLEARED'}</strong></div>
             <div class="col-span-2 pt-2 mt-1 border-t border-slate-200 flex flex-wrap gap-1.5">
-                <a href="dashboard.php?page=kontainer&search=${encodeURIComponent(matchedContainer.container_number)}&open=1" class="px-2.5 py-1 bg-white hover:bg-[#002f5e] text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                <a href="dashboard.php?page=kontainer&search=${encodeURIComponent(matchedContainer.container_number)}&open=1" class="px-2.5 py-1 bg-white hover:bg-[#0170b9] text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
                     <i class="fa-solid fa-boxes-stacked mr-1 text-[#0170b9]"></i>Lacak Perjalanan
                 </a>
                 <a href="dashboard.php?page=simulator&focus_box=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-gray-950 rounded-lg text-[11px] font-bold transition flex items-center shadow-2xs">
@@ -936,7 +936,7 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
                 Nomor identitas ini valid secara optik tetapi belum terdaftar dalam lapangan penumpukan CIDP. Siap untuk diterbitkan dokumen Gate-In.
             </div>
             <div class="col-span-2 pt-2 mt-1 border-t border-slate-200 flex flex-wrap gap-1.5">
-                <a href="dashboard.php?page=gate" class="px-2.5 py-1 bg-[#0170b9] hover:bg-[#002f5e] text-white rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                <a href="dashboard.php?page=gate" class="px-2.5 py-1 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
                     <i class="fa-solid fa-door-open mr-1"></i>Proses Gate-In di Modul Gate
                 </a>
                 <a href="dashboard.php?page=customs" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
@@ -1080,7 +1080,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: "CEISA4-JT701-884210",
                 width: 76,
                 height: 76,
-                colorDark : "#002f5e",
+                colorDark : "#0170b9",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.M
             });
@@ -1088,7 +1088,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 text: "TRK-B9821-EXP",
                 width: 76,
                 height: 76,
-                colorDark : "#002f5e",
+                colorDark : "#0170b9",
                 colorLight : "#ffffff",
                 correctLevel : QRCode.CorrectLevel.M
             });

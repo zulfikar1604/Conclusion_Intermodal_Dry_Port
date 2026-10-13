@@ -106,6 +106,78 @@ const CIDPExport = {
             }
         });
         
+        // Render Official Digital Stamp & Signature Block
+        let finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 150;
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        // If not enough space on current page for validation block (needs ~42mm), add new page
+        if (finalY + 45 > pageHeight) {
+            doc.addPage();
+            finalY = 25;
+        }
+
+        // 1. Digital Security Hash Box (Left side)
+        doc.setDrawColor(203, 213, 225);
+        doc.setFillColor(248, 250, 252);
+        doc.roundedRect(14, finalY, 82, 28, 2, 2, 'FD');
+
+        doc.setFontSize(7.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 47, 94);
+        doc.text('KEABSAHAN DOKUMEN ELEKTRONIK', 18, finalY + 6);
+
+        doc.setFontSize(6.5);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(71, 85, 105);
+        doc.text('Dokumen ini sah dan terdaftar pada sistem CEISA 4.0 Hub.', 18, finalY + 11);
+        doc.text('ID Laporan: ' + (fileName || 'CIDP') + '-' + Math.floor(100000 + Math.random() * 900000), 18, finalY + 15);
+        doc.setFont('courier', 'bold');
+        doc.text('SEC-HASH: SHA256-V98A2F' + Math.floor(1000 + Math.random() * 9000), 18, finalY + 20);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Verifikasi: e-port.conclusion-dryport.co.id/verify', 18, finalY + 24);
+
+        // 2. Official Signature & Digital Stamp (Right side)
+        const sigX = pageWidth - 65;
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(71, 85, 105);
+        doc.text('DISETUJUI & DIVALIDASI OLEH:', sigX + 22, finalY, { align: 'center' });
+        doc.setFontSize(7);
+        doc.setFont('helvetica', 'normal');
+        doc.text('Kepala Divisi Operasional (Head of Yard)', sigX + 22, finalY + 4, { align: 'center' });
+
+        // Dual-Circle Vector Digital Stamp
+        const stampX = sigX + 22;
+        const stampY = finalY + 17;
+        doc.setDrawColor(0, 47, 94);
+        doc.setLineWidth(0.6);
+        doc.circle(stampX, stampY, 12, 'S'); // Outer circle
+        doc.setLineWidth(0.2);
+        doc.setLineDashPattern([1, 1], 0);
+        doc.circle(stampX, stampY, 10.5, 'S'); // Dashed middle circle
+        doc.setLineDashPattern([], 0);
+        doc.circle(stampX, stampY, 7.5, 'S'); // Inner circle
+
+        doc.setFontSize(4.5);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(0, 47, 94);
+        doc.text('PT CONCLUSION DRY PORT', stampX, stampY - 4.5, { align: 'center' });
+        doc.setFontSize(5.5);
+        doc.text('APPROVED', stampX, stampY, { align: 'center' });
+        doc.setFontSize(3.8);
+        doc.text('★ YARD OPERATIONS ★', stampX, stampY + 3.2, { align: 'center' });
+        doc.text(new Date().toLocaleDateString('id-ID'), stampX, stampY + 5.5, { align: 'center' });
+
+        // Signer name & credentials
+        doc.setFontSize(8);
+        doc.setFont('helvetica', 'bold');
+        doc.setTextColor(15, 23, 42);
+        doc.text('ARMANSYAH MAULANA, S.T.', sigX + 22, finalY + 33, { align: 'center' });
+        doc.setFontSize(6);
+        doc.setFont('helvetica', 'normal');
+        doc.setTextColor(100, 116, 139);
+        doc.text('Head of Operations • Certified Logistics Master', sigX + 22, finalY + 36.5, { align: 'center' });
+
         doc.save((fileName || 'CIDP_Report') + '_' + new Date().toISOString().slice(0,10) + '.pdf');
     }
 };

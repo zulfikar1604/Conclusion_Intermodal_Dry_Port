@@ -1,0 +1,97 @@
+/**
+ * =============================================================================
+ * CIDP MASTER PRINT STYLESHEET
+ * Standar: Cetak Kertas A4 Bersih Tanpa Elemen Layar / Screenshot
+ * Menghilangkan Sidebar, Navbar, Tombol, Background Gelap, dan Modal Backdrops
+ * =============================================================================
+ */
+
+@media print {
+    /* 1. Aturan Halaman A4 Presisi */
+    @page {
+        size: A4 portrait;
+        margin: 12mm 14mm 12mm 14mm;
+    }
+
+    /* 2. Reset Tampilan Global */
+    html, body {
+        background: #ffffff !important;
+        color: #0f172a !important;
+        font-family: 'Plus Jakarta Sans', Arial, sans-serif !important;
+        font-size: 11pt !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: auto !important;
+        overflow: visible !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* 3. Paksa Warna Asli (Stempel, Border, Kop Surat) Tidak Dihilangkan Browser */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        box-shadow: none !important;
+        text-shadow: none !important;
+    }
+
+    /* 4. Sembunyikan SEMUA Elemen Antarmuka Web (UI Chrome) */
+    aside,
+    nav,
+    header,
+    footer,
+    #sidebar,
+    .sidebar,
+    .sb-sidenav,
+    .navbar,
+    .no-print,
+    button,
+    .btn,
+    .cfs-tab-btn,
+    .tab-btn,
+    input,
+    select,
+    .screen-action-bar,
+    .floating-controls,
+    .leaflet-control,
+    #cadDrawingContainer > div.absolute.top-7.right-7,
+    .fixed.inset-0.bg-black\/60,
+    .fixed.inset-0.bg-slate-950\/70,
+    .custom-scrollbar::-webkit-scrollbar {
+        display: none !important;
+    }
+
+    /* 5. Isolasi Wadah Dokumen Aktif (Jika Dicetak dari Modal Langsung) */
+    #printArea,
+    #sppbPrintArea,
+    .printable-document {
+        position: static !important;
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        background: #ffffff !important;
+        box-shadow: none !important;
+    }
+
+    /* Sembunyikan elemen modal header & tombol tutup saat dicetak */
+    #invoiceModal .border-b,
+    #invoiceModal .rounded-b-2xl,
+    #modalOfficialSPPB .bg-slate-900,
+    #gatePassModal .bg-\[\#002f5e\] {
+        display: none !important;
+    }
+
+    /* Cegah pemutusan baris yang buruk pada tabel dan tanda tangan */
+    tr, td, th {
+        page-break-inside: avoid !important;
+    }
+
+    .validation-section,
+    .sig-box,
+    .digital-stamp {
+        page-break-inside: avoid !important;
+    }
+}

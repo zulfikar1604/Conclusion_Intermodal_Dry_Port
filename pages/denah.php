@@ -24,11 +24,11 @@ $zones_data = [
         'icon' => 'fa-door-open',
         'color' => '#0284c7',
         'facilities' => [
-            ['id' => 'f_gate_in', 'nama' => 'Gatehouse Inbound', 'desc' => 'Pos kontrol masuk 2 lane dilengkapi Kamera ANPR, OCR Portal, RFID Reader, dan Industrial Edge AI PC.', 'icon' => 'fa-arrow-right-to-bracket', 'hw_id' => 2, 'hw_nama' => 'Kamera OCR Kontainer Portal & ANPR', 'img' => 'hardware/images/converted/item_2.png'],
-            ['id' => 'f_gate_out', 'nama' => 'Gatehouse Outbound', 'desc' => 'Pos kontrol keluar 2 lane dengan pembacaan e-Pass dan palang barrier gate otomatis.', 'icon' => 'fa-arrow-right-from-bracket', 'hw_id' => 9, 'hw_nama' => 'Automatic Barrier Gate & ANPR', 'img' => 'hardware/images/converted/item_9.png'],
-            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station', 'desc' => 'Bangunan jembatan timbang kendaraan kapasitas 80 ton bersertifikasi SOLAS VGM.', 'icon' => 'fa-scale-balanced', 'hw_id' => 6, 'hw_nama' => 'Weighbridge / VGM Scale 80t', 'img' => 'hardware/images/converted/item_6.png'],
-            ['id' => 'f_security_gate', 'nama' => 'Security Post 24 Jam', 'desc' => 'Pos keamanan gerbang utama, verifikasi dokumen surat jalan, dan penerbitan izin masuk.', 'icon' => 'fa-shield-halved', 'hw_id' => 7, 'hw_nama' => 'Long-Range UHF RFID Reader', 'img' => 'hardware/images/converted/item_7.png'],
-            ['id' => 'f_truck_queue', 'nama' => 'Parkir Truk Antrian', 'desc' => 'Area parkir tunggu (queuing yard) berkapasitas 40 truk trailer untuk mencegah antrean di jalan arteri.', 'icon' => 'fa-truck-moving', 'hw_id' => 17, 'hw_nama' => 'GPS Tracker Truck & Fleet', 'img' => 'hardware/images/converted/item_17.png']
+            ['id' => 'f_gate_in', 'nama' => 'Gatehouse Inbound', 'desc' => 'Pos kontrol masuk 2 lane dilengkapi Kamera ANPR, OCR Portal, RFID Reader, dan Industrial Edge AI PC.', 'icon' => 'fa-arrow-right-to-bracket', 'hw_id' => 2, 'hw_nama' => 'Kamera OCR Kontainer Portal & ANPR', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
+            ['id' => 'f_gate_out', 'nama' => 'Gatehouse Outbound', 'desc' => 'Pos kontrol keluar 2 lane dengan pembacaan e-Pass dan palang barrier gate otomatis.', 'icon' => 'fa-arrow-right-from-bracket', 'hw_id' => 9, 'hw_nama' => 'Automatic Barrier Gate & ANPR', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
+            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station', 'desc' => 'Bangunan jembatan timbang kendaraan kapasitas 80 ton bersertifikasi SOLAS VGM.', 'icon' => 'fa-scale-balanced', 'hw_id' => 6, 'hw_nama' => 'Weighbridge / VGM Scale 80t', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
+            ['id' => 'f_security_gate', 'nama' => 'Security Post 24 Jam', 'desc' => 'Pos keamanan gerbang utama, verifikasi dokumen surat jalan, dan penerbitan izin masuk.', 'icon' => 'fa-shield-halved', 'hw_id' => 7, 'hw_nama' => 'Long-Range UHF RFID Reader', 'img' => 'assets/img/facilities/security_gate.jpg'],
+            ['id' => 'f_truck_queue', 'nama' => 'Parkir Truk Antrian', 'desc' => 'Area parkir tunggu (queuing yard) berkapasitas 40 truk trailer untuk mencegah antrean di jalan arteri.', 'icon' => 'fa-truck-moving', 'hw_id' => 17, 'hw_nama' => 'GPS Tracker Truck & Fleet', 'img' => 'assets/img/facilities/security_gate.jpg']
         ]
     ],
     'cfs_yard' => [
@@ -36,10 +36,10 @@ $zones_data = [
         'icon' => 'fa-boxes-stacked',
         'color' => '#4f46e5',
         'facilities' => [
-            ['id' => 'f_cfs', 'nama' => 'Container Freight Station (CFS)', 'desc' => 'Gudang modern 4.000 m² untuk aktivitas bongkar muat kargo LCL (stripping-stuffing) dan konsolidasi barang.', 'icon' => 'fa-warehouse', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Gudang CFS', 'img' => 'hardware/images/converted/item_15.png'],
-            ['id' => 'f_empty_depot', 'nama' => 'Empty Container Depot', 'desc' => 'Area penyimpanan peti kemas kosong (empty boxes) 20ft/40ft dengan kapasitas 2.500 TEUs.', 'icon' => 'fa-box-open', 'hw_id' => 20, 'hw_nama' => 'Terminal VMT Alat Berat Empty Depot', 'img' => 'hardware/images/converted/item_20.png'],
-            ['id' => 'f_warehouse', 'nama' => 'Warehouse / Gudang Transit', 'desc' => 'Gudang tertutup untuk muatan bernilai tinggi, transit distribusi barang, dan cross-docking.', 'icon' => 'fa-dolly', 'hw_id' => 17, 'hw_nama' => 'GPS Asset Tracker Transit Kargo', 'img' => 'hardware/images/converted/item_17.png'],
-            ['id' => 'f_stacking_yard', 'nama' => 'Container Stacking Yard (Blok A-E)', 'desc' => 'Lapangan penumpukan utama 15 Ha: Blok A/B (Laden Ekspor-Impor), Blok C (Domestik), Blok D (Buffer), Blok E (Dangerous Goods).', 'icon' => 'fa-cubes', 'hw_id' => 21, 'hw_nama' => 'DGPS / RTK GNSS Receiver Reach Stacker', 'img' => 'hardware/images/converted/item_21.png']
+            ['id' => 'f_cfs', 'nama' => 'Container Freight Station (CFS)', 'desc' => 'Gudang modern 4.000 m² untuk aktivitas bongkar muat kargo LCL (stripping-stuffing) dan konsolidasi barang.', 'icon' => 'fa-warehouse', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Gudang CFS', 'img' => 'assets/img/facilities/cfs_warehouse.jpg'],
+            ['id' => 'f_empty_depot', 'nama' => 'Empty Container Depot', 'desc' => 'Area penyimpanan peti kemas kosong (empty boxes) 20ft/40ft dengan kapasitas 2.500 TEUs.', 'icon' => 'fa-box-open', 'hw_id' => 20, 'hw_nama' => 'Terminal VMT Alat Berat Empty Depot', 'img' => 'assets/img/facilities/stacking_yard.jpg'],
+            ['id' => 'f_warehouse', 'nama' => 'Warehouse / Gudang Transit', 'desc' => 'Gudang tertutup untuk muatan bernilai tinggi, transit distribusi barang, dan cross-docking.', 'icon' => 'fa-dolly', 'hw_id' => 17, 'hw_nama' => 'GPS Asset Tracker Transit Kargo', 'img' => 'assets/img/facilities/cfs_warehouse.jpg'],
+            ['id' => 'f_stacking_yard', 'nama' => 'Container Stacking Yard (Blok A-E)', 'desc' => 'Lapangan penumpukan utama 15 Ha: Blok A/B (Laden Ekspor-Impor), Blok C (Domestik), Blok D (Buffer), Blok E (Dangerous Goods).', 'icon' => 'fa-cubes', 'hw_id' => 21, 'hw_nama' => 'DGPS / RTK GNSS Receiver Reach Stacker', 'img' => 'assets/img/facilities/stacking_yard.jpg']
         ]
     ],
     'reefer' => [
@@ -47,9 +47,9 @@ $zones_data = [
         'icon' => 'fa-snowflake',
         'color' => '#06b6d4',
         'facilities' => [
-            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin real-time presisi dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera Reefer Monitoring', 'img' => 'hardware/images/converted/item_16.png'],
-            ['id' => 'f_genset_shelter', 'nama' => 'Genset Shelter Cadangan', 'desc' => 'Gedung pembangkit daya darurat 1.500 kVA Caterpillar untuk menjamin kelangsungan listrik reefer jika PLN padam.', 'icon' => 'fa-bolt', 'hw_id' => 14, 'hw_nama' => 'UPS Online & Sistem Kelistrikan Darurat', 'img' => 'hardware/images/converted/item_14.png'],
-            ['id' => 'f_reefer_racks', 'nama' => 'Reefer Stacking Racks (300 Plugs)', 'desc' => 'Platform bertingkat dilengkapi 300 titik colokan Smart Reefer Socket 380V/32A dengan meteran digital.', 'icon' => 'fa-plug-circle-check', 'hw_id' => 23, 'hw_nama' => 'Smart Reefer Power Socket 380V/32A', 'img' => 'hardware/images/converted/item_23.png']
+            ['id' => 'f_reefer_control', 'nama' => 'Reefer Control Room', 'desc' => 'Ruang pusat kendali monitoring suhu boks pendingin real-time presisi dan pencatatan fluktuasi rantai dingin.', 'icon' => 'fa-temperature-arrow-down', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera Reefer Monitoring', 'img' => 'assets/img/facilities/reefer_terminal.jpg'],
+            ['id' => 'f_genset_shelter', 'nama' => 'Genset Shelter Cadangan', 'desc' => 'Gedung pembangkit daya darurat 1.500 kVA Caterpillar untuk menjamin kelangsungan listrik reefer jika PLN padam.', 'icon' => 'fa-bolt', 'hw_id' => 14, 'hw_nama' => 'UPS Online & Sistem Kelistrikan Darurat', 'img' => 'assets/img/facilities/reefer_terminal.jpg'],
+            ['id' => 'f_reefer_racks', 'nama' => 'Reefer Stacking Racks (300 Plugs)', 'desc' => 'Platform bertingkat dilengkapi 300 titik colokan Smart Reefer Socket 380V/32A dengan meteran digital.', 'icon' => 'fa-plug-circle-check', 'hw_id' => 23, 'hw_nama' => 'Smart Reefer Power Socket 380V/32A', 'img' => 'assets/img/facilities/reefer_terminal.jpg']
         ]
     ],
     'rail' => [
@@ -57,8 +57,8 @@ $zones_data = [
         'icon' => 'fa-train-subway',
         'color' => '#d97706',
         'facilities' => [
-            ['id' => 'f_rail_office', 'nama' => 'Rail Office / Stasiun Operator', 'desc' => 'Kantor pengendali operasi langsiran dan persinyalan kereta api kontainer bekerja sama dengan KAI Logistik.', 'icon' => 'fa-train', 'hw_id' => 25, 'hw_nama' => 'Rail Trackside Axle Counter Frauscher', 'img' => 'hardware/images/converted/item_25.png'],
-            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Sepur Ganda (Dual Track 450m)', 'desc' => '2 sepur rel berkapasitas 2x30 gerbong (Sepur Utara: Bongkar Inbound Impor ex-Priok; Sepur Selatan: Muat Outbound Ekspor siap kapal) untuk alih muat langsung gerbong datar (flatcar PPCW) dan cross-docking.', 'icon' => 'fa-arrows-split-up-and-left', 'hw_id' => 12, 'hw_nama' => 'Access Point Outdoor WiFi 7 Siding KA', 'img' => 'hardware/images/converted/item_12.png']
+            ['id' => 'f_rail_office', 'nama' => 'Rail Office / Stasiun Operator', 'desc' => 'Kantor pengendali operasi langsiran dan persinyalan kereta api kontainer bekerja sama dengan KAI Logistik.', 'icon' => 'fa-train', 'hw_id' => 25, 'hw_nama' => 'Rail Trackside Axle Counter Frauscher', 'img' => 'assets/img/facilities/rail_siding.jpg'],
+            ['id' => 'f_loading_ramp', 'nama' => 'Loading Ramp & Sepur Ganda (Dual Track 450m)', 'desc' => '2 sepur rel berkapasitas 2x30 gerbong (Sepur Utara: Bongkar Inbound Impor ex-Priok; Sepur Selatan: Muat Outbound Ekspor siap kapal) untuk alih muat langsung gerbong datar (flatcar PPCW) dan cross-docking.', 'icon' => 'fa-arrows-split-up-and-left', 'hw_id' => 12, 'hw_nama' => 'Access Point Outdoor WiFi 7 Siding KA', 'img' => 'assets/img/facilities/rail_siding.jpg']
         ]
     ],
     'customs' => [
@@ -66,9 +66,9 @@ $zones_data = [
         'icon' => 'fa-stamp',
         'color' => '#dc2626',
         'facilities' => [
-            ['id' => 'f_kppbc', 'nama' => 'Kantor Bea Cukai (KPPBC)', 'desc' => 'Kantor pelayanan kepabeanan dan pabean impor/ekspor terhubung langsung dengan sistem nasional CEISA 4.0.', 'icon' => 'fa-building-columns', 'hw_id' => 26, 'hw_nama' => 'Electronic Cargo Smart Seal (E-Seal)', 'img' => 'hardware/images/converted/item_26.png'],
-            ['id' => 'f_behandle_xray', 'nama' => 'Behandle Area & Gantry X-Ray', 'desc' => 'Gedung pemindaian kontainer X-Ray energi tinggi (6 MeV) Nuctech dan kanopi pemeriksaan fisik Jalur Merah.', 'icon' => 'fa-radiation', 'hw_id' => 19, 'hw_nama' => 'Gantry Container X-Ray Scanner 6 MeV', 'img' => 'hardware/images/converted/item_19.png'],
-            ['id' => 'f_quarantine', 'nama' => 'Quarantine Inspection Room', 'desc' => 'Laboratorium dan ruang pemeriksaan Balai Karantina Hewan, Ikan, dan Tumbuhan Kementerian Pertanian.', 'icon' => 'fa-biohazard', 'hw_id' => 26, 'hw_nama' => 'Smart E-Seal & Inspeksi Pabean', 'img' => 'hardware/images/converted/item_26.png']
+            ['id' => 'f_kppbc', 'nama' => 'Kantor Bea Cukai (KPPBC)', 'desc' => 'Kantor pelayanan kepabeanan dan pabean impor/ekspor terhubung langsung dengan sistem nasional CEISA 4.0.', 'icon' => 'fa-building-columns', 'hw_id' => 26, 'hw_nama' => 'Electronic Cargo Smart Seal (E-Seal)', 'img' => 'assets/img/facilities/customs_office.jpg'],
+            ['id' => 'f_behandle_xray', 'nama' => 'Behandle Area & Gantry X-Ray', 'desc' => 'Gedung pemindaian kontainer X-Ray energi tinggi (6 MeV) Nuctech dan kanopi pemeriksaan fisik Jalur Merah.', 'icon' => 'fa-radiation', 'hw_id' => 19, 'hw_nama' => 'Gantry Container X-Ray Scanner 6 MeV', 'img' => 'assets/img/facilities/customs_office.jpg'],
+            ['id' => 'f_quarantine', 'nama' => 'Quarantine Inspection Room', 'desc' => 'Laboratorium dan ruang pemeriksaan Balai Karantina Hewan, Ikan, dan Tumbuhan Kementerian Pertanian.', 'icon' => 'fa-biohazard', 'hw_id' => 26, 'hw_nama' => 'Smart E-Seal & Inspeksi Pabean', 'img' => 'assets/img/facilities/customs_office.jpg']
         ]
     ],
     'office' => [
@@ -76,10 +76,10 @@ $zones_data = [
         'icon' => 'fa-building',
         'color' => '#7c3aed',
         'facilities' => [
-            ['id' => 'f_admin_office', 'nama' => 'Kantor Utama / Admin Building', 'desc' => 'Gedung kantor pusat pengelola terminal PT Multi Terminal Indonesia (MTI) 2 lantai.', 'icon' => 'fa-briefcase', 'hw_id' => 13, 'hw_nama' => 'Server NVR & Database YMS Core', 'img' => 'hardware/images/converted/item_13.png'],
-            ['id' => 'f_datacenter', 'nama' => 'Datacenter / Server Room (NOC)', 'desc' => 'Ruang server sentral berpendingin presisi, NVR 64-Channel, Online UPS 5000VA, dan rak switch jaringan inti.', 'icon' => 'fa-server', 'hw_id' => 11, 'hw_nama' => 'Industrial Network Switch PoE+ & Datacenter', 'img' => 'hardware/images/converted/item_11.png'],
-            ['id' => 'f_meeting_room', 'nama' => 'Ruang Meeting & Training Room', 'desc' => 'Ruang rapat operasional dan ruang simulasi/pelatihan bersertifikasi untuk operator terminal.', 'icon' => 'fa-users-gear', 'hw_id' => 10, 'hw_nama' => 'LED Information Display Ruang Operasi', 'img' => 'hardware/images/converted/item_10.png'],
-            ['id' => 'f_workshop_mr', 'nama' => 'Workshop / Bengkel M&R', 'desc' => 'Bengkel perawatan alat berat lapangan (Reach Stacker, Empty Handler, Forklift, dan perbaikan kontainer).', 'icon' => 'fa-wrench', 'hw_id' => 24, 'hw_nama' => 'Rugged Mobile PDA Tallyman & M&R', 'img' => 'hardware/images/converted/item_24.png']
+            ['id' => 'f_admin_office', 'nama' => 'Kantor Utama / Admin Building', 'desc' => 'Gedung kantor pusat pengelola terminal PT Multi Terminal Indonesia (MTI) 2 lantai.', 'icon' => 'fa-briefcase', 'hw_id' => 13, 'hw_nama' => 'Server NVR & Database YMS Core', 'img' => 'assets/img/facilities/kantor_utama.jpg'],
+            ['id' => 'f_datacenter', 'nama' => 'Datacenter / Server Room (NOC)', 'desc' => 'Ruang server sentral berpendingin presisi, NVR 64-Channel, Online UPS 5000VA, dan rak switch jaringan inti.', 'icon' => 'fa-server', 'hw_id' => 11, 'hw_nama' => 'Industrial Network Switch PoE+ & Datacenter', 'img' => 'assets/img/facilities/datacenter_noc.jpg'],
+            ['id' => 'f_meeting_room', 'nama' => 'Ruang Meeting & Training Room', 'desc' => 'Ruang rapat operasional dan ruang simulasi/pelatihan bersertifikasi untuk operator terminal.', 'icon' => 'fa-users-gear', 'hw_id' => 10, 'hw_nama' => 'LED Information Display Ruang Operasi', 'img' => 'assets/img/facilities/kantor_utama.jpg'],
+            ['id' => 'f_workshop_mr', 'nama' => 'Workshop / Bengkel M&R', 'desc' => 'Bengkel perawatan alat berat lapangan (Reach Stacker, Empty Handler, Forklift, dan perbaikan kontainer).', 'icon' => 'fa-wrench', 'hw_id' => 24, 'hw_nama' => 'Rugged Mobile PDA Tallyman & M&R', 'img' => 'assets/img/facilities/workshop_mr.jpg']
         ]
     ],
     'public' => [
@@ -87,14 +87,14 @@ $zones_data = [
         'icon' => 'fa-hands-holding-child',
         'color' => '#059669',
         'facilities' => [
-            ['id' => 'f_musholla', 'nama' => 'Musholla / Masjid Al-Hidayah', 'desc' => 'Fasilitas ibadah representatif berkapasitas 150 jamaah untuk pekerja terminal, petugas pabean, dan sopir truk.', 'icon' => 'fa-mosque', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'hardware/images/converted/item_12.png'],
-            ['id' => 'f_kantin', 'nama' => 'Kantin / Warung Makan 🍛', 'desc' => 'Area pujasera bersih dan terjangkau untuk kebutuhan makan dan minum seluruh pekerja lapangan dan sopir.', 'icon' => 'fa-utensils', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'hardware/images/converted/item_12.png'],
-            ['id' => 'f_koperasi', 'nama' => 'Koperasi Karyawan 🏪', 'desc' => 'Toko ritel penyedia kebutuhan sehari-hari, minuman, makanan ringan, perlengkapan APD, dan ATK.', 'icon' => 'fa-shop', 'hw_id' => 8, 'hw_nama' => 'RFID Tag UHF ISO Karyawan', 'img' => 'hardware/images/converted/item_8.png'],
-            ['id' => 'f_klinik', 'nama' => 'Klinik P3K / Pos Kesehatan', 'desc' => 'Pos pertolongan pertama pada kecelakaan kerja (K3) dilengkapi tenaga medis jaga dan ambulans darurat.', 'icon' => 'fa-kit-medical', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Medis K3', 'img' => 'hardware/images/converted/item_15.png'],
-            ['id' => 'f_toilet', 'nama' => 'Toilet Umum Tersebar', 'desc' => 'Fasilitas sanitasi dan MCK bersih yang tersebar di 3 lokasi strategis (Gerbang, Kantor, dan Siding KA).', 'icon' => 'fa-restroom', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Area Layanan', 'img' => 'hardware/images/converted/item_12.png'],
-            ['id' => 'f_parking_staff', 'nama' => 'Parkir Karyawan & Tamu', 'desc' => 'Area parkir kendaraan roda 2 dan roda 4 khusus pegawai terminal, tamu dinas, dan mitra logistik.', 'icon' => 'fa-square-parking', 'hw_id' => 1, 'hw_nama' => 'Kamera ANPR Gerbang Karyawan', 'img' => 'hardware/images/converted/item_1.png'],
-            ['id' => 'f_damkar', 'nama' => 'Pos Damkar & Fire Station', 'desc' => 'Pos tanggap darurat kebakaran dilengkapi armada pemadam kimia, reservoir air, dan jaringan hydrant yard.', 'icon' => 'fa-fire-extinguisher', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera & Sensor Api', 'img' => 'hardware/images/converted/item_16.png'],
-            ['id' => 'f_driver_rest', 'nama' => 'Ruang Istirahat Driver (Rest Area)', 'desc' => 'Ruang istirahat ber-AC dilengkapi colokan listrik, dispenser air minum, dan kasur santai bagi sopir truk jarak jauh.', 'icon' => 'fa-couch', 'hw_id' => 8, 'hw_nama' => 'Kartu Akses RFID Tag Pengemudi', 'img' => 'hardware/images/converted/item_8.png']
+            ['id' => 'f_musholla', 'nama' => 'Musholla / Masjid Al-Hidayah', 'desc' => 'Fasilitas ibadah representatif berkapasitas 150 jamaah untuk pekerja terminal, petugas pabean, dan sopir truk.', 'icon' => 'fa-mosque', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'assets/img/facilities/masjid_musholla.jpg'],
+            ['id' => 'f_kantin', 'nama' => 'Kantin / Warung Makan 🍛', 'desc' => 'Area pujasera bersih dan terjangkau untuk kebutuhan makan dan minum seluruh pekerja lapangan dan sopir.', 'icon' => 'fa-utensils', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Fasum', 'img' => 'assets/img/facilities/canteen_clinic.jpg'],
+            ['id' => 'f_koperasi', 'nama' => 'Koperasi Karyawan 🏪', 'desc' => 'Toko ritel penyedia kebutuhan sehari-hari, minuman, makanan ringan, perlengkapan APD, dan ATK.', 'icon' => 'fa-shop', 'hw_id' => 8, 'hw_nama' => 'RFID Tag UHF ISO Karyawan', 'img' => 'assets/img/facilities/canteen_clinic.jpg'],
+            ['id' => 'f_klinik', 'nama' => 'Klinik P3K / Pos Kesehatan', 'desc' => 'Pos pertolongan pertama pada kecelakaan kerja (K3) dilengkapi tenaga medis jaga dan ambulans darurat.', 'icon' => 'fa-kit-medical', 'hw_id' => 15, 'hw_nama' => 'Barcode / QR Scanner Medis K3', 'img' => 'assets/img/facilities/canteen_clinic.jpg'],
+            ['id' => 'f_toilet', 'nama' => 'Toilet Umum Tersebar', 'desc' => 'Fasilitas sanitasi dan MCK bersih yang tersebar di 3 lokasi strategis (Gerbang, Kantor, dan Siding KA).', 'icon' => 'fa-restroom', 'hw_id' => 12, 'hw_nama' => 'Access Point WiFi 7 Area Layanan', 'img' => 'assets/img/facilities/canteen_clinic.jpg'],
+            ['id' => 'f_parking_staff', 'nama' => 'Parkir Karyawan & Tamu', 'desc' => 'Area parkir kendaraan roda 2 dan roda 4 khusus pegawai terminal, tamu dinas, dan mitra logistik.', 'icon' => 'fa-square-parking', 'hw_id' => 1, 'hw_nama' => 'Kamera ANPR Gerbang Karyawan', 'img' => 'assets/img/facilities/kantor_utama.jpg'],
+            ['id' => 'f_damkar', 'nama' => 'Pos Damkar & Fire Station', 'desc' => 'Pos tanggap darurat kebakaran dilengkapi armada pemadam kimia, reservoir air, dan jaringan hydrant yard.', 'icon' => 'fa-fire-extinguisher', 'hw_id' => 16, 'hw_nama' => 'Thermal Camera & Sensor Api', 'img' => 'assets/img/facilities/workshop_mr.jpg'],
+            ['id' => 'f_driver_rest', 'nama' => 'Ruang Istirahat Driver (Rest Area)', 'desc' => 'Ruang istirahat ber-AC dilengkapi colokan listrik, dispenser air minum, dan kasur santai bagi sopir truk jarak jauh.', 'icon' => 'fa-couch', 'hw_id' => 8, 'hw_nama' => 'Kartu Akses RFID Tag Pengemudi', 'img' => 'assets/img/facilities/canteen_clinic.jpg']
         ]
     ]
 ];
@@ -106,63 +106,63 @@ $hardware_pins = [
         'id' => 1, 'nama' => 'Kamera ANPR Gate', 'model' => 'Hikvision DS-TCG406-E', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Gatehouse Inbound & Outbound',
         'x' => 875, 'y' => 85, 'harga' => 'Rp 16.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 64.000.000',
-        'img' => 'hardware/images/converted/item_1.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_1.png', 'modul' => 'gate',
         'desc' => 'Kamera pembaca nomor plat otomatis berkecepatan tinggi, mendeteksi kedatangan truk trailer di loop masuk.'
     ],
     [
         'id' => 2, 'nama' => 'Kamera OCR Kontainer', 'model' => 'Hikvision iDS-TCV300-A6I', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Portal Inbound Lane 1 & 2',
         'x' => 875, 'y' => 110, 'harga' => 'Rp 55.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 220.000.000',
-        'img' => 'hardware/images/converted/item_2.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_2.png', 'modul' => 'gate',
         'desc' => 'Portal pemindai multi-sudut untuk mengekstraksi kode kontainer ISO 6346 (4 huruf + 7 angka) dan tipe kontainer.'
     ],
     [
         'id' => 6, 'nama' => 'Weighbridge / VGM Scale 80t', 'model' => 'Fangda Electronic Truck Scale 80 Ton', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Weighbridge Station Inbound',
         'x' => 875, 'y' => 145, 'harga' => 'Rp 267.000.000', 'unit' => '2 unit', 'subtotal' => 'Rp 534.000.000',
-        'img' => 'hardware/images/converted/item_6.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_6.png', 'modul' => 'gate',
         'desc' => 'Jembatan timbang terintegrasi load cell digital berkapasitas 80 ton untuk verifikasi berat kotor bersertifikat SOLAS VGM.'
     ],
     [
         'id' => 7, 'nama' => 'RFID Reader Long-Range', 'model' => 'UHF RFID Reader (20m)', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Tiang e-Pass Gatehouse',
         'x' => 855, 'y' => 95, 'harga' => 'Rp 3.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 12.000.000',
-        'img' => 'hardware/images/converted/item_7.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_7.png', 'modul' => 'gate',
         'desc' => 'Antena pembaca tag RFID jarak jauh hingga 20 meter untuk identifikasi kartu pengemudi dan verifikasi izin akses gerbang.'
     ],
     [
         'id' => 8, 'nama' => 'RFID Tag UHF ISO', 'model' => 'RFID UHF ID Tag ISO', 'tipe' => 'blueprint', 'layer' => 1,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Security Post & Loket Tag',
         'x' => 818, 'y' => 75, 'harga' => 'Rp 690.000 / pack', 'unit' => '50 pack', 'subtotal' => 'Rp 34.500.000',
-        'img' => 'hardware/images/converted/item_8.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_8.png', 'modul' => 'gate',
         'desc' => 'Kartu tag pintar anti-metal standar ISO 18000-6C yang dibagikan kepada mitra truk dan kartu akses pengemudi.'
     ],
     [
         'id' => 9, 'nama' => 'Automatic Barrier Gate', 'model' => 'High-Speed Barrier Gate', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Lane 1, 2, 3, 4 Gatehouses',
         'x' => 875, 'y' => 175, 'harga' => 'Rp 60.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 240.000.000',
-        'img' => 'hardware/images/converted/item_9.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_9.png', 'modul' => 'gate',
         'desc' => 'Palang otomatis kecepatan tinggi (buka 1.2 detik) yang digerakkan sinyal relay Edge PC setelah dokumen tervalidasi.'
     ],
     [
         'id' => 10, 'nama' => 'LED Information Display', 'model' => 'Outdoor P6/P8 Industrial LED', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Kanopi Gerbang Inbound/Outbound',
         'x' => 897, 'y' => 65, 'harga' => 'Rp 47.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 188.000.000',
-        'img' => 'hardware/images/converted/item_10.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_10.png', 'modul' => 'gate',
         'desc' => 'Display LED outdoor cerah yang menampilkan instruksi sopir ("SILAHKAN MASUK", "KE YARD BLOK B"), dan nomor gate pass.'
     ],
     [
         'id' => 18, 'nama' => 'Industrial Edge AI PC Gate', 'model' => 'Advantech ARK-3532 Fanless', 'tipe' => 'live', 'layer' => 2,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Kabinet Kontrol Gate Inbound/Outbound',
         'x' => 897, 'y' => 135, 'harga' => 'Rp 42.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 168.000.000',
-        'img' => 'hardware/images/converted/item_18.png', 'modul' => 'gate',
+        'img' => 'assets/img/hardware/converted/item_18.png', 'modul' => 'gate',
         'desc' => 'Komputer tepi tangguh tanpa kipas (-20°C s/d 60°C) yang memproses validasi transaksi gerbang lokal dan kontrol relay palang.'
     ],
     [
         'id' => 15, 'nama' => 'Barcode / QR Scanner', 'model' => 'Zebra Symbol LS2208 Handheld', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Gate', 'zona_id' => 'gate', 'posisi' => 'Security Post & Loket Pelayanan',
         'x' => 818, 'y' => 95, 'harga' => 'Rp 1.600.000', 'unit' => '8 unit', 'subtotal' => 'Rp 12.800.000',
-        'img' => 'hardware/images/converted/item_15.png', 'modul' => 'scanner',
+        'img' => 'assets/img/hardware/converted/item_15.png', 'modul' => 'scanner',
         'desc' => 'Pemindai laser 1D/2D untuk membaca barcode surat jalan cetak, gate pass digital di smartphone sopir, dan dokumen booking.'
     ],
 
@@ -171,42 +171,42 @@ $hardware_pins = [
         'id' => 3, 'nama' => 'CCTV Yard 4 MP', 'model' => 'Hikvision DS-2CD2046G2H-IU', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Tiang Lampu Blok A, B, C, D (32 Titik)',
         'x' => 502, 'y' => 290, 'harga' => 'Rp 3.500.000', 'unit' => '32 unit', 'subtotal' => 'Rp 112.000.000',
-        'img' => 'hardware/images/converted/item_3.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_3.png', 'modul' => 'yard',
         'desc' => 'Kamera pengawas berdefinisi tinggi IP67 weatherproof dengan night vision IR untuk memantau keselamatan penumpukan kontainer.'
     ],
     [
         'id' => 5, 'nama' => 'CCTV PTZ 360°', 'model' => 'Hikvision DS-2SE4C425MWG TandemVu', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Menara Pengawas Pusat (Tower 1 & 2)',
         'x' => 630, 'y' => 391, 'harga' => 'Rp 10.300.000', 'unit' => '8 unit', 'subtotal' => 'Rp 82.400.000',
-        'img' => 'hardware/images/converted/item_5.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_5.png', 'modul' => 'yard',
         'desc' => 'Kamera bergerak 360 derajat dengan 25x optical zoom untuk pemantauan insiden darurat dan pergerakan alat berat di yard.'
     ],
     [
         'id' => 20, 'nama' => 'Vehicle Mounted Terminal (VMT)', 'model' => 'Zebra VC8300 Rugged Terminal', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Kabin Reach Stacker 01 & 02',
         'x' => 757, 'y' => 290, 'harga' => 'Rp 74.000.000', 'unit' => '6 unit', 'subtotal' => 'Rp 444.000.000',
-        'img' => 'hardware/images/converted/item_20.png', 'modul' => 'alat',
+        'img' => 'assets/img/hardware/converted/item_20.png', 'modul' => 'alat',
         'desc' => 'Terminal komputer kabin layar sentuh tahan guncangan ekstrem (MIL-STD-810G) untuk menerima perintah kerja (Job Order) dari YMS.'
     ],
     [
         'id' => 21, 'nama' => 'DGPS / RTK GNSS Receiver', 'model' => 'CHCNAV CGI-610 Dual Antenna', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Atap Boom Reach Stacker 01 & 02',
         'x' => 450, 'y' => 290, 'harga' => 'Rp 45.000.000', 'unit' => '6 unit', 'subtotal' => 'Rp 270.000.000',
-        'img' => 'hardware/images/converted/item_21.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_21.png', 'modul' => 'yard',
         'desc' => 'Antena navigasi satelit berakurasi centimeter (<1.4 cm) untuk mendeteksi secara otomatis posisi penumpukan Bay-Row-Tier.'
     ],
     [
         'id' => 22, 'nama' => 'Spreader Twistlock & Load Cell', 'model' => 'Bromma SmartSpreader Kit', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Head Spreader Alat Angkat RS',
         'x' => 550, 'y' => 290, 'harga' => 'Rp 35.000.000', 'unit' => '6 unit', 'subtotal' => 'Rp 210.000.000',
-        'img' => 'hardware/images/converted/item_22.png', 'modul' => 'yard',
+        'img' => 'assets/img/hardware/converted/item_22.png', 'modul' => 'yard',
         'desc' => 'Sensor induktif penguncian twistlock dan load cell telemetri untuk auto-update status kontainer (lift-on / lift-off) ke basis data.'
     ],
     [
         'id' => 24, 'nama' => 'Rugged Mobile PDA', 'model' => 'Zebra TC57x Handheld PDA', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Container Yard', 'zona_id' => 'cfs_yard', 'posisi' => 'Petugas Tallyman & Checker Lapangan',
         'x' => 470, 'y' => 480, 'harga' => 'Rp 16.000.000', 'unit' => '10 unit', 'subtotal' => 'Rp 160.000.000',
-        'img' => 'hardware/images/converted/item_24.png', 'modul' => 'kontainer',
+        'img' => 'assets/img/hardware/converted/item_24.png', 'modul' => 'kontainer',
         'desc' => 'Perangkat genggam enterprise tahan banting (IP68) untuk inspeksi fisik kontainer rusak (EIR) dan checklist kondisi segel.'
     ],
 
@@ -215,14 +215,14 @@ $hardware_pins = [
         'id' => 16, 'nama' => 'Thermal Camera Reefer', 'model' => 'Hikvision DS-2TD2636B-13/P Thermal', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Reefer Yard', 'zona_id' => 'reefer', 'posisi' => 'Menara Pengawas Reefer Yard',
         'x' => 1112, 'y' => 245, 'harga' => 'Rp 30.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 120.000.000',
-        'img' => 'hardware/images/converted/item_16.png', 'modul' => 'reefer',
+        'img' => 'assets/img/hardware/converted/item_16.png', 'modul' => 'reefer',
         'desc' => 'Kamera pemindai suhu inframerah untuk mendeteksi dini panas abnormal pada kompresor reefer dan mencegah bahaya kebakaran.'
     ],
     [
         'id' => 23, 'nama' => 'Smart Reefer Power Socket', 'model' => 'Marechal 380V/32A DECONTACTOR', 'tipe' => 'live', 'layer' => 2,
         'zona' => 'Zona Reefer Yard', 'zona_id' => 'reefer', 'posisi' => 'Rak Penumpukan Reefer (300 Titik)',
         'x' => 977, 'y' => 295, 'harga' => 'Rp 8.500.000 / titik', 'unit' => '300 titik', 'subtotal' => 'Rp 2.550.000.000',
-        'img' => 'hardware/images/converted/item_23.png', 'modul' => 'reefer',
+        'img' => 'assets/img/hardware/converted/item_23.png', 'modul' => 'reefer',
         'desc' => 'Colokan industri 380V dengan meteran listrik Modbus dan sensor suhu kontinu untuk memantau rantai dingin dan alarm listrik trip.'
     ],
 
@@ -231,21 +231,21 @@ $hardware_pins = [
         'id' => 25, 'nama' => 'Rail Trackside Axle Counter', 'model' => 'Frauscher RSR180 Wheel Sensor', 'tipe' => 'live', 'layer' => 4,
         'zona' => 'Zona Intermodal Rail Siding', 'zona_id' => 'rail', 'posisi' => 'Kepala Rel Ujung Barat & Timur Siding',
         'x' => 220, 'y' => 638, 'harga' => 'Rp 85.000.000', 'unit' => '4 sensor', 'subtotal' => 'Rp 340.000.000',
-        'img' => 'hardware/images/converted/item_25.png', 'modul' => 'intermodal',
+        'img' => 'assets/img/hardware/converted/item_25.png', 'modul' => 'intermodal',
         'desc' => 'Sensor induktif pada kepala rel untuk menghitung gandar roda KA, estimasi kecepatan, dan konfirmasi kedatangan gerbong otomatis.'
     ],
     [
         'id' => 12, 'nama' => 'Access Point Outdoor', 'model' => 'Ubiquiti U7 Pro Outdoor WiFi 7', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Intermodal Rail Siding', 'zona_id' => 'rail', 'posisi' => 'Tiang Lampu Yard & Rail Siding (18 Titik)',
         'x' => 522, 'y' => 600, 'harga' => 'Rp 7.200.000', 'unit' => '18 unit', 'subtotal' => 'Rp 129.600.000',
-        'img' => 'hardware/images/converted/item_12.png', 'modul' => 'intermodal',
+        'img' => 'assets/img/hardware/converted/item_12.png', 'modul' => 'intermodal',
         'desc' => 'Pemancar nirkabel generasi WiFi 7 bersertifikasi IP67 untuk transmisi data real-time ke terminal VMT alat berat dan PDA tallyman.'
     ],
     [
         'id' => 17, 'nama' => 'GPS Tracker Truck & Asset', 'model' => 'Teltonika TAT240 4G LTE', 'tipe' => 'blueprint', 'layer' => 4,
         'zona' => 'Zona Intermodal Rail Siding', 'zona_id' => 'rail', 'posisi' => 'Gerbong Kereta Api & Armada Mitra',
         'x' => 750, 'y' => 638, 'harga' => 'Rp 2.500.000 / unit', 'unit' => '40 unit', 'subtotal' => 'Rp 100.000.000',
-        'img' => 'hardware/images/converted/item_17.png', 'modul' => 'trucking',
+        'img' => 'assets/img/hardware/converted/item_17.png', 'modul' => 'trucking',
         'desc' => 'Modul pelacak otonom dengan baterai mandiri untuk memantau posisi rangkaian gerbong kontainer di rute Priok - Cikarang.'
     ],
 
@@ -254,21 +254,21 @@ $hardware_pins = [
         'id' => 19, 'nama' => 'Gantry Container X-Ray Scanner', 'model' => 'Nuctech MB1215DE (6 MeV)', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Behandle & Bea Cukai', 'zona_id' => 'customs', 'posisi' => 'Gedung Pemindai X-Ray Jalur Merah',
         'x' => 1112, 'y' => 330, 'harga' => 'Rp 12.500.000.000', 'unit' => '1 sistem', 'subtotal' => 'Rp 12.500.000.000',
-        'img' => 'hardware/images/converted/item_19.png', 'modul' => 'customs',
+        'img' => 'assets/img/hardware/converted/item_19.png', 'modul' => 'customs',
         'desc' => 'Pemindai radiasi sinar-X energi tinggi berdaya tembus baja >300 mm untuk pemeriksaan non-intrusif peti kemas impor Jalur Merah.'
     ],
     [
         'id' => 26, 'nama' => 'Electronic Cargo Smart Seal (E-Seal)', 'model' => 'Jointech JT701 GPS Smart E-Seal', 'tipe' => 'live', 'layer' => 3,
         'zona' => 'Zona Behandle & Bea Cukai', 'zona_id' => 'customs', 'posisi' => 'Pos Stasiun Pemeriksaan Segel Bea Cukai',
         'x' => 1112, 'y' => 495, 'harga' => 'Rp 3.200.000 / unit', 'unit' => '100 unit', 'subtotal' => 'Rp 320.000.000',
-        'img' => 'hardware/images/converted/item_26.png', 'modul' => 'customs',
+        'img' => 'assets/img/hardware/converted/item_26.png', 'modul' => 'customs',
         'desc' => 'Gembok elektronik pintar ber-GPS dan sensor anti-tamper untuk mengamankan kontainer transit pabean terintegrasi CEISA 4.0.'
     ],
     [
         'id' => 4, 'nama' => 'CCTV Yard 8 MP Perimeter', 'model' => 'Hikvision DS-2CD2T87G2H-LI 4K', 'tipe' => 'blueprint', 'layer' => 3,
         'zona' => 'Zona Behandle & Bea Cukai', 'zona_id' => 'customs', 'posisi' => 'Pagar Batas Perimeter Pabean (16 Titik)',
         'x' => 1112, 'y' => 410, 'harga' => 'Rp 6.500.000', 'unit' => '16 unit', 'subtotal' => 'Rp 104.000.000',
-        'img' => 'hardware/images/converted/item_4.png', 'modul' => 'customs',
+        'img' => 'assets/img/hardware/converted/item_4.png', 'modul' => 'customs',
         'desc' => 'Kamera perimeter 4K UHD dengan teknologi ColorVu malam hari untuk menjaga sterilitas kawasan pabean internasional.'
     ],
 
@@ -277,21 +277,21 @@ $hardware_pins = [
         'id' => 13, 'nama' => 'Server NVR & Database YMS', 'model' => 'Hikvision DS-9664NI-M16/R & Rack Server', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Kantor & Datacenter', 'zona_id' => 'office', 'posisi' => 'Datacenter / Server Room (NOC)',
         'x' => 437, 'y' => 95, 'harga' => 'Rp 102.000.000', 'unit' => '2 unit', 'subtotal' => 'Rp 204.000.000',
-        'img' => 'hardware/images/converted/item_13.png', 'modul' => 'settings',
+        'img' => 'assets/img/hardware/converted/item_13.png', 'modul' => 'settings',
         'desc' => 'Pusat server rekaman CCTV 64 saluran dan server komputasi basis data MySQL sistem operasi pelabuhan kering CIDP YMS.'
     ],
     [
         'id' => 14, 'nama' => 'UPS Online 5000VA Rackmount', 'model' => 'APC Smart-UPS SRT 5000VA (SRT5KRMXLI)', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Kantor & Datacenter', 'zona_id' => 'office', 'posisi' => 'Datacenter & Ruang Kontrol Gate',
         'x' => 457, 'y' => 125, 'harga' => 'Rp 81.000.000', 'unit' => '4 unit', 'subtotal' => 'Rp 324.000.000',
-        'img' => 'hardware/images/converted/item_14.png', 'modul' => 'settings',
+        'img' => 'assets/img/hardware/converted/item_14.png', 'modul' => 'settings',
         'desc' => 'Pencatu daya cadangan darurat (On-Line Double Conversion 5kVA) untuk menjaga server dan gerbang tetap beroperasi saat listrik PLN padam.'
     ],
     [
         'id' => 11, 'nama' => 'Industrial Network Switch PoE+', 'model' => 'Managed Industrial PoE+ Gigabit Switch', 'tipe' => 'blueprint', 'layer' => 2,
         'zona' => 'Zona Kantor & Datacenter', 'zona_id' => 'office', 'posisi' => 'Core Switch Datacenter & Distribusi Lapangan',
         'x' => 417, 'y' => 125, 'harga' => 'Rp 10.000.000', 'unit' => '12 unit', 'subtotal' => 'Rp 120.000.000',
-        'img' => 'hardware/images/converted/item_11.png', 'modul' => 'settings',
+        'img' => 'assets/img/hardware/converted/item_11.png', 'modul' => 'settings',
         'desc' => 'Switch jaringan gigabit berpelindung logam tahan suhu ekstrem untuk menghubungkan seluruh kamera, access point, dan kontroler sensor.'
     ]
 ];
@@ -307,7 +307,7 @@ foreach ($zones_data as $z) {
     <!-- Header Modul: Clean & Minimal -->
     <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#002f5e] via-[#0170b9] to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#0170b9] via-blue-600 to-orange-500 text-white flex items-center justify-center text-lg shadow-xs flex-shrink-0">
                 <i class="fa-solid <?= $denah_info['icon'] ?>"></i>
             </div>
             <div>
@@ -328,7 +328,7 @@ foreach ($zones_data as $z) {
     </div>
 
     <!-- KPI Ringkasan Denah -->
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-4">
+    <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3.5 sm:gap-4">
         <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-xs">
             <span class="text-[11px] font-semibold text-gray-500 block">Luas Total Lahan</span>
             <div class="mt-1 flex items-baseline space-x-1.5">
@@ -341,7 +341,7 @@ foreach ($zones_data as $z) {
         <div class="bg-white rounded-xl p-4 border border-gray-100 shadow-xs">
             <span class="text-[11px] font-semibold text-gray-500 block">Zona Operasional</span>
             <div class="mt-1 flex items-baseline space-x-1.5">
-                <span class="text-xl sm:text-2xl font-bold text-[#002f5e]">7</span>
+                <span class="text-xl sm:text-2xl font-bold text-[#0170b9]">7</span>
                 <span class="text-xs text-gray-400 font-semibold">Zona Fungsional</span>
             </div>
             <p class="text-[10px] text-gray-400 mt-1">Sirkulasi Satu Arah Terpadu</p>
@@ -431,7 +431,7 @@ foreach ($zones_data as $z) {
             <!-- Filter Zona -->
             <div class="flex flex-wrap items-center gap-1.5" id="zoneFilterContainer">
                 <span class="text-xs font-bold text-gray-500 mr-1"><i class="fa-solid fa-filter mr-1"></i>Zona:</span>
-                <button onclick="filterZone('all')" class="zone-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#002f5e] text-white transition-all" data-zone="all">Semua (7)</button>
+                <button onclick="filterZone('all')" class="zone-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-[#0170b9] text-white transition-all" data-zone="all">Semua (7)</button>
                 <button onclick="filterZone('gate')" class="zone-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all" data-zone="gate">🏗️ Gate</button>
                 <button onclick="filterZone('cfs_yard')" class="zone-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all" data-zone="cfs_yard">📦 Yard & CFS</button>
                 <button onclick="filterZone('reefer')" class="zone-btn px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-all" data-zone="reefer">❄️ Reefer</button>
@@ -451,11 +451,8 @@ foreach ($zones_data as $z) {
         </div>
     </div>
 
-    <!-- AREA UTAMA: PETA DENAH SVG INTERAKTIF & INSPECTOR DRAWER -->
-    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
-        
-        <!-- Kanvas Peta SVG 35 Ha (Span 3 Kolom) -->
-        <div class="xl:col-span-3 bg-white rounded-2xl p-4 sm:p-5 shadow-lg border border-gray-200 relative overflow-hidden">
+    <!-- AREA UTAMA: PETA DENAH SVG INTERAKTIF (FULL WIDTH) -->
+    <div class="bg-white rounded-2xl p-4 sm:p-5 shadow-sm border border-gray-200 relative overflow-hidden">
             
             <!-- Map Floating Controls & Legend Overlay -->
             <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-3 border-b border-gray-200">
@@ -660,9 +657,9 @@ foreach ($zones_data as $z) {
         <g id="zone_office" class="zone-element cursor-pointer" onclick="showZoneDetails('office')">
             <!-- Datacenter & Server Room NOC -->
             <g id="fac_f_datacenter" onclick="showFacilityDetails('f_datacenter', event)">
-                <rect x="390" y="50" width="95" height="95" fill="#ffffff" stroke="#002f5e" stroke-width="2.2" rx="3"/>
+                <rect x="390" y="50" width="95" height="95" fill="#ffffff" stroke="#0170b9" stroke-width="2.2" rx="3"/>
                 <rect x="395" y="55" width="85" height="22" fill="#e0f2fe" stroke="#0284c7" stroke-width="1"/>
-                <text x="437" y="69" fill="#002f5e" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">DATACENTER NOC</text>
+                <text x="437" y="69" fill="#0170b9" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">DATACENTER NOC</text>
                 <text x="437" y="95" fill="#0f172a" font-family="'Consolas', monospace" font-size="7.5" text-anchor="middle">SERVER TIER-3</text>
                 <text x="437" y="112" fill="#64748b" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">NVR REKAMAN 64CH</text>
                 <text x="437" y="128" fill="#0284c7" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">UPS 5KVA &amp; MYSQL DB</text>
@@ -670,9 +667,9 @@ foreach ($zones_data as $z) {
 
             <!-- Kantor Utama PT MTI -->
             <g id="fac_f_admin_office" onclick="showFacilityDetails('f_admin_office', event)">
-                <rect x="495" y="50" width="125" height="95" fill="#ffffff" stroke="#002f5e" stroke-width="2.2" rx="3"/>
+                <rect x="495" y="50" width="125" height="95" fill="#ffffff" stroke="#0170b9" stroke-width="2.2" rx="3"/>
                 <rect x="500" y="55" width="115" height="22" fill="#e0f2fe" stroke="#0284c7" stroke-width="1"/>
-                <text x="557" y="70" fill="#002f5e" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">KANTOR UTAMA PT MTI</text>
+                <text x="557" y="70" fill="#0170b9" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">KANTOR UTAMA PT MTI</text>
                 <text x="557" y="95" fill="#0f172a" font-family="'Consolas', monospace" font-size="8" text-anchor="middle">HEADQUARTERS 2 LANTAI</text>
                 <text x="557" y="112" fill="#64748b" font-family="'Consolas', monospace" font-size="7" text-anchor="middle">OPERATION &amp; CUSTOMER CARE</text>
                 <text x="557" y="128" fill="#0284c7" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">PORT BILLING &amp; FINANCE</text>
@@ -701,8 +698,8 @@ foreach ($zones_data as $z) {
         <g id="zone_gate" class="zone-element cursor-pointer" onclick="showZoneDetails('gate')">
             <!-- Security Post -->
             <g id="fac_f_security_gate" onclick="showFacilityDetails('f_security_gate', event)">
-                <rect x="795" y="50" width="45" height="55" fill="#f8fafc" stroke="#002f5e" stroke-width="2" rx="2"/>
-                <rect x="798" y="55" width="39" height="15" fill="#002f5e" rx="1"/>
+                <rect x="795" y="50" width="45" height="55" fill="#f8fafc" stroke="#0170b9" stroke-width="2" rx="2"/>
+                <rect x="798" y="55" width="39" height="15" fill="#0170b9" rx="1"/>
                 <text x="818" y="66" fill="#ffffff" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">SECURITY</text>
                 <text x="818" y="85" fill="#0f172a" font-family="'Consolas', monospace" font-size="6" text-anchor="middle">LOKET e-PASS</text>
                 <text x="818" y="98" fill="#0284c7" font-family="'Consolas', monospace" font-size="6" text-anchor="middle">SCANNER QR</text>
@@ -1151,20 +1148,20 @@ foreach ($zones_data as $z) {
         <!-- DIMENSION LINES -->
         <g id="dimensionLines" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold">
             <!-- Total Width 380m -->
-            <line x1="40" y1="755" x2="1160" y2="755" stroke="#002f5e" stroke-width="1"/>
-            <line x1="40" y1="748" x2="40" y2="762" stroke="#002f5e" stroke-width="1.4"/>
-            <line x1="1160" y1="748" x2="1160" y2="762" stroke="#002f5e" stroke-width="1.4"/>
-            <polygon points="40,755 48,753 48,757" fill="#002f5e"/>
-            <polygon points="1160,755 1152,753 1152,757" fill="#002f5e"/>
-            <text x="600" y="752" fill="#002f5e" text-anchor="middle">LEBAR TOTAL KAWASAN = 380.00 METER</text>
+            <line x1="40" y1="755" x2="1160" y2="755" stroke="#0170b9" stroke-width="1"/>
+            <line x1="40" y1="748" x2="40" y2="762" stroke="#0170b9" stroke-width="1.4"/>
+            <line x1="1160" y1="748" x2="1160" y2="762" stroke="#0170b9" stroke-width="1.4"/>
+            <polygon points="40,755 48,753 48,757" fill="#0170b9"/>
+            <polygon points="1160,755 1152,753 1152,757" fill="#0170b9"/>
+            <text x="600" y="752" fill="#0170b9" text-anchor="middle">LEBAR TOTAL KAWASAN = 380.00 METER</text>
 
             <!-- Total Height 260m -->
-            <line x1="1175" y1="42" x2="1175" y2="717" stroke="#002f5e" stroke-width="1"/>
-            <line x1="1168" y1="42" x2="1182" y2="42" stroke="#002f5e" stroke-width="1.4"/>
-            <line x1="1168" y1="717" x2="1182" y2="717" stroke="#002f5e" stroke-width="1.4"/>
-            <polygon points="1175,42 1173,50 1177,50" fill="#002f5e"/>
-            <polygon points="1175,717 1173,709 1177,709" fill="#002f5e"/>
-            <text x="1188" y="380" fill="#002f5e" text-anchor="middle" transform="rotate(90 1188 380)">PANJANG TOTAL = 260.00 M</text>
+            <line x1="1175" y1="42" x2="1175" y2="717" stroke="#0170b9" stroke-width="1"/>
+            <line x1="1168" y1="42" x2="1182" y2="42" stroke="#0170b9" stroke-width="1.4"/>
+            <line x1="1168" y1="717" x2="1182" y2="717" stroke="#0170b9" stroke-width="1.4"/>
+            <polygon points="1175,42 1173,50 1177,50" fill="#0170b9"/>
+            <polygon points="1175,717 1173,709 1177,709" fill="#0170b9"/>
+            <text x="1188" y="380" fill="#0170b9" text-anchor="middle" transform="rotate(90 1188 380)">PANJANG TOTAL = 260.00 M</text>
 
             <!-- Blok A Dimension -->
             <line x1="380" y1="206" x2="625" y2="206" stroke="#0284c7" stroke-width="0.8"/>
@@ -1192,14 +1189,14 @@ foreach ($zones_data as $z) {
 
         <!-- COMPASS ROSE (NORTH = UP) -->
         <g transform="translate(1120, 30)" class="select-none pointer-events-none">
-            <circle cx="0" cy="0" r="18" fill="#ffffff" stroke="#002f5e" stroke-width="1.5" />
-            <polygon points="0,0 0,-22 -5,-5" fill="#002f5e" />
+            <circle cx="0" cy="0" r="18" fill="#ffffff" stroke="#0170b9" stroke-width="1.5" />
+            <polygon points="0,0 0,-22 -5,-5" fill="#0170b9" />
             <polygon points="0,0 0,-22 5,-5" fill="#0284c7" />
             <polygon points="0,0 22,0 5,5" fill="#64748b" />
             <polygon points="0,0 -22,0 -5,-5" fill="#94a3b8" />
             <polygon points="0,0 0,22 5,5" fill="#94a3b8" />
-            <circle cx="0" cy="0" r="3" fill="#f8fafc" stroke="#002f5e" stroke-width="1"/>
-            <text x="0" y="-25" text-anchor="middle" fill="#002f5e" font-family="'Consolas', sans-serif" font-size="11" font-weight="900">U</text>
+            <circle cx="0" cy="0" r="3" fill="#f8fafc" stroke="#0170b9" stroke-width="1"/>
+            <text x="0" y="-25" text-anchor="middle" fill="#0170b9" font-family="'Consolas', sans-serif" font-size="11" font-weight="900">U</text>
             <text x="0" y="-34" text-anchor="middle" fill="#64748b" font-family="'Consolas', sans-serif" font-size="6" font-weight="bold">NORTH</text>
         </g>
 
@@ -1219,8 +1216,8 @@ foreach ($zones_data as $z) {
 
         <!-- TITLE BLOCK (ISO 7200 Etiket Gambar Teknik) - Placed neatly at bottom right -->
         <g id="cadTitleBlock" transform="translate(890, 580)" class="select-none pointer-events-none">
-            <rect width="265" height="135" fill="#ffffff" stroke="#002f5e" stroke-width="2" rx="3"/>
-            <rect width="265" height="24" fill="#002f5e" rx="2"/>
+            <rect width="265" height="135" fill="#ffffff" stroke="#0170b9" stroke-width="2" rx="3"/>
+            <rect width="265" height="24" fill="#0170b9" rx="2"/>
             <text x="132" y="16" fill="#ffffff" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">CONCLUSION INTERMODAL DRY PORT (CIDP)</text>
             <line x1="0" y1="52" x2="265" y2="52" stroke="#cbd5e1" stroke-width="1"/>
             <line x1="0" y1="80" x2="265" y2="80" stroke="#cbd5e1" stroke-width="1"/>
@@ -1231,7 +1228,7 @@ foreach ($zones_data as $z) {
             <text x="8" y="46" fill="#64748b" font-family="'Consolas', monospace" font-size="6">OPERATOR: PT MULTI TERMINAL INDONESIA</text>
             <text x="8" y="66" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" font-weight="bold">JUDUL: MASTER SITE PLAN TATA LETAK</text>
             <text x="8" y="74" fill="#64748b" font-family="'Consolas', monospace" font-size="6">ORIENTASI: KANTOR UTARA, REL SELATAN</text>
-            <text x="8" y="94" fill="#002f5e" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">ENGINEER: JUAN G. &amp; ARMANSYAH M.</text>
+            <text x="8" y="94" fill="#0170b9" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">ENGINEER: JUAN G. &amp; ARMANSYAH M.</text>
             <text x="8" y="102" fill="#16a34a" font-family="'Consolas', monospace" font-size="6" font-weight="bold">STATUS: AS-BUILT APPROVED</text>
             <text x="8" y="122" fill="#0284c7" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">SISTEM: 4 LAYER INTERAKTIF</text>
 
@@ -1239,7 +1236,7 @@ foreach ($zones_data as $z) {
             <text x="153" y="46" fill="#64748b" font-family="'Consolas', monospace" font-size="6">SATUAN: METER (WGS84)</text>
             <text x="153" y="66" fill="#0f172a" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">TGL: 30 SEP 2026</text>
             <text x="153" y="74" fill="#64748b" font-family="'Consolas', monospace" font-size="6">REVISI: REV.08 FINAL</text>
-            <text x="153" y="94" fill="#002f5e" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">DWG-CIV-001</text>
+            <text x="153" y="94" fill="#0170b9" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">DWG-CIV-001</text>
             <text x="153" y="102" fill="#64748b" font-family="'Consolas', monospace" font-size="5.5">LEMBAR: 01 / 01</text>
             <text x="153" y="122" fill="#1e293b" font-family="'Consolas', monospace" font-size="6" font-weight="bold">26 SENSORS &amp; 25 FAC</text>
         </g>
@@ -1337,87 +1334,96 @@ foreach ($zones_data as $z) {
             <div class="mt-3 flex flex-wrap items-center justify-between text-[11px] text-slate-400">
                 <span class="flex items-center">
                     <i class="fa-solid fa-hand-pointer mr-1.5 text-blue-400"></i>
-                    <strong>Petunjuk:</strong> Klik salah satu pin lingkaran nomor atau kotak fasilitas untuk memeriksa spesifikasi lengkap, foto produk, dan status live di panel samping.
+                    <strong>Petunjuk:</strong> Klik salah satu pin lingkaran nomor atau kotak fasilitas pada denah untuk memeriksa detail foto & spesifikasi di panel bawah.
                 </span>
                 <span class="font-mono text-slate-500">26 Hardware • 25 Fasilitas • 35 Hektar</span>
             </div>
 
         </div>
 
-        <!-- =================================================================== -->
-        <!-- INSPECTOR DRAWER SAMPING (DETAIL SPESIFIKASI & FOTO PRODUK) -->
-        <!-- =================================================================== -->
-        <div class="xl:col-span-1 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-4" id="inspectorSidebar">
+    <!-- =================================================================== -->
+    <!-- INSPECTOR LAPANGAN DI BAWAH PETA (DETAIL SPESIFIKASI & FOTO) -->
+    <!-- =================================================================== -->
+    <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-4" id="inspectorSidebar">
+        
+        <div class="flex items-center justify-between border-b border-gray-100 pb-3 flex-wrap gap-2">
+            <div class="flex items-center space-x-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-gray-800">Inspector Lapangan &bull; Detail Terpilih</span>
+                <span class="text-[11px] text-gray-400 font-normal hidden sm:inline">(Klik fasilitas atau pin hardware pada denah untuk melihat foto & informasi)</span>
+            </div>
+            <span id="inspTypeBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                LIVE SOFTWARE
+            </span>
+        </div>
+
+        <!-- Layout 2 Kolom: Foto di Kiri, Detail & Aksi di Kanan -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-5 items-start">
             
-            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-700">Inspector Lapangan</span>
-                </div>
-                <span id="inspTypeBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    LIVE SOFTWARE
-                </span>
-            </div>
-
             <!-- Kontainer Foto Produk / Fasilitas -->
-            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-center min-h-[160px] relative overflow-hidden" id="inspImageWrapper">
-                <img id="inspImg" src="hardware/images/converted/item_1.png" alt="Hardware Image" class="max-h-36 max-w-full object-contain transition-all duration-300 drop-shadow-sm">
-                <div id="inspIconFallback" class="hidden text-5xl text-slate-400">
-                    <i class="fa-solid fa-building" id="inspFallbackIcon"></i>
+            <div class="md:col-span-4 lg:col-span-3">
+                <div class="bg-slate-50 rounded-xl p-3 border border-slate-200/80 flex items-center justify-center min-h-[180px] h-52 sm:h-56 relative overflow-hidden group shadow-2xs" id="inspImageWrapper">
+                    <img id="inspImg" src="assets/img/hardware/converted/item_1.png" alt="Foto Fasilitas / Hardware" class="max-h-48 max-w-full object-contain transition-all duration-300 drop-shadow-sm cursor-pointer group-hover:scale-105" onclick="openImageLightbox()" title="Klik untuk memperbesar foto">
+                    <div id="inspIconFallback" class="hidden text-5xl text-slate-400">
+                        <i class="fa-solid fa-building" id="inspFallbackIcon"></i>
+                    </div>
+                    <div id="inspImageZoomHint" class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md bg-black/60 backdrop-blur-xs text-white text-[10px] font-medium flex items-center space-x-1 pointer-events-none opacity-80 group-hover:opacity-100 transition-opacity">
+                        <i class="fa-solid fa-expand text-[9px]"></i>
+                        <span>Perbesar</span>
+                    </div>
                 </div>
             </div>
 
-            <!-- Informasi Pokok -->
-            <div>
-                <span id="inspNum" class="text-[10px] font-mono font-bold text-blue-600 uppercase tracking-widest block">HARDWARE #1</span>
-                <h3 id="inspTitle" class="text-sm font-bold text-gray-900 leading-tight mt-0.5">Kamera ANPR Gate</h3>
-                <p id="inspModel" class="text-xs font-medium text-slate-600 mt-0.5">Hikvision DS-TCG406-E</p>
-            </div>
-
-            <!-- Detail Grid -->
-            <div class="space-y-2.5 text-xs border-t border-gray-100 pt-3">
-                <div class="bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
-                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Lokasi di Denah 35 Ha:</span>
-                    <p id="inspLocation" class="font-semibold text-gray-800 text-xs mt-0.5">Gatehouse Inbound & Outbound</p>
+            <!-- Detail Spesifikasi & Aksi (Tanpa Harga) -->
+            <div class="md:col-span-8 lg:col-span-9 space-y-3">
+                <div class="flex flex-wrap items-baseline justify-between gap-2">
+                    <div>
+                        <span id="inspNum" class="text-[10px] font-mono font-bold text-blue-600 uppercase tracking-widest block">HARDWARE #1</span>
+                        <h3 id="inspTitle" class="text-base sm:text-lg font-bold text-gray-900 leading-tight mt-0.5">Kamera ANPR Gate</h3>
+                        <p id="inspModel" class="text-xs font-semibold text-slate-600 mt-0.5">Hikvision DS-TCG406-E</p>
+                    </div>
                 </div>
 
-                <div class="bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Lokasi di Denah 35 Ha:</span>
+                        <p id="inspLocation" class="font-semibold text-gray-800 text-xs mt-1">Gatehouse Inbound & Outbound</p>
+                    </div>
+
+                    <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100">
+                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Status Operasional:</span>
+                        <p class="font-semibold text-emerald-700 text-xs mt-1 flex items-center">
+                            <i class="fa-solid fa-circle-check mr-1.5 text-emerald-500"></i>Aktif & Terpetakan di Kawasan 35 Ha
+                        </p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50/80 p-3 rounded-xl border border-gray-100 text-xs">
                     <span class="text-[10px] uppercase font-bold text-gray-400 block">Deskripsi & Peran Operasional:</span>
-                    <p id="inspDesc" class="text-gray-600 text-[11px] leading-relaxed mt-0.5">
+                    <p id="inspDesc" class="text-gray-600 text-xs leading-relaxed mt-1">
                         Kamera pembaca nomor plat otomatis berkecepatan tinggi, mendeteksi kedatangan truk trailer di loop masuk.
                     </p>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2" id="inspPriceBox">
-                    <div class="bg-blue-50/50 p-2 rounded-lg border border-blue-100">
-                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Harga Satuan:</span>
-                        <p id="inspPrice" class="font-mono font-bold text-blue-700 text-xs mt-0.5">Rp 16.000.000</p>
-                    </div>
-                    <div class="bg-blue-50/50 p-2 rounded-lg border border-blue-100">
-                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Subtotal (35 Ha):</span>
-                        <p id="inspSubtotal" class="font-mono font-bold text-gray-900 text-xs mt-0.5">Rp 64.000.000</p>
-                    </div>
+                <!-- Tombol Aksi Langsung ke Modul Terkait (Hanya untuk Live Software) -->
+                <div class="pt-1 flex flex-wrap items-center gap-3" id="inspActionWrapper">
+                    <a id="inspActionBtn" href="dashboard.php?page=gate" class="px-5 py-2.5 bg-[#0170b9] hover:bg-[#004b87] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center space-x-2">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span id="inspActionText">Buka Simulasi di Modul Gate</span>
+                    </a>
                 </div>
-            </div>
 
-            <!-- Tombol Aksi Langsung ke Modul Terkait (Hanya untuk Live Software) -->
-            <div class="pt-2" id="inspActionWrapper">
-                <a id="inspActionBtn" href="dashboard.php?page=gate" class="w-full py-2.5 bg-[#0170b9] hover:bg-[#004b87] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                    <span id="inspActionText">Buka Simulasi di Modul Gate</span>
-                </a>
-            </div>
-
-            <!-- Notifikasi Khusus Blueprint Fisik (Tidak memerlukan simulasi software) -->
-            <div id="inspBlueprintNotice" class="hidden pt-2">
-                <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl text-center space-y-1">
-                    <span class="text-xs font-bold text-slate-700 flex items-center justify-center space-x-1.5">
-                        <i class="fa-solid fa-compass-drafting text-indigo-500"></i>
-                        <span>Spesifikasi Blueprint Fisik</span>
-                    </span>
-                    <p class="text-[11px] text-slate-500 leading-snug">
-                        Infrastruktur fisik terpasang di lapangan (Perangkat Pasif / Hardware Pendukung). Tidak memerlukan modul simulasi software.
-                    </p>
+                <!-- Notifikasi Khusus Blueprint Fisik (Tidak memerlukan simulasi software) -->
+                <div id="inspBlueprintNotice" class="hidden pt-1">
+                    <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
+                        <span class="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
+                            <i class="fa-solid fa-compass-drafting text-indigo-500"></i>
+                            <span>Spesifikasi Blueprint Fisik</span>
+                        </span>
+                        <p class="text-[11px] text-slate-500 leading-snug">
+                            Infrastruktur fisik terpasang di lapangan (Perangkat Pasif / Hardware Pendukung). Tidak memerlukan modul simulasi software.
+                        </p>
+                    </div>
                 </div>
             </div>
 
@@ -1425,106 +1431,64 @@ foreach ($zones_data as $z) {
 
     </div>
 
-    <!-- ======================================================================= -->
-    <!-- TABEL DIREKTORI FASILITAS & SEBARAN 26 HARDWARE -->
-    <!-- ======================================================================= -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-        
-        <!-- Tab Sub-Navigasi Bawah -->
-        <div class="flex items-center justify-between border-b border-gray-100 pb-3 flex-wrap gap-2">
-            <div class="flex items-center space-x-2">
-                <button onclick="switchDirectoryTab('tab-facilities')" id="btnTabFacilities" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-[#002f5e] text-white transition-all shadow-xs flex items-center space-x-1.5">
-                    <i class="fa-solid fa-building"></i>
-                    <span>Direktori 25 Fasilitas Lapangan (7 Zona)</span>
-                </button>
-                <button onclick="switchDirectoryTab('tab-hardware')" id="btnTabHardware" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-100 transition-all flex items-center space-x-1.5">
-                    <i class="fa-solid fa-microchip"></i>
-                    <span>Matriks Sebaran 26 Hardware & Layer</span>
-                </button>
+<!-- Modal Lightbox Pembesar Foto Fasilitas & Hardware -->
+<div id="imageLightboxModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 transition-all" onclick="closeImageLightbox()">
+    <div class="bg-white rounded-2xl max-w-2xl w-full overflow-hidden shadow-2xl border border-gray-100 flex flex-col max-h-[90vh] animate-fadeIn" onclick="event.stopPropagation()">
+        <div class="flex items-center justify-between px-5 py-3.5 border-b border-gray-100 bg-slate-50/70">
+            <div class="flex items-center space-x-2.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-[#0170b9]"></span>
+                <h4 id="lightboxTitle" class="font-bold text-sm text-gray-900 truncate">Foto Fasilitas</h4>
             </div>
-            <span class="text-xs text-gray-400">Master Data Kawasan Terintegrasi</span>
+            <button onclick="closeImageLightbox()" class="text-gray-400 hover:text-gray-700 w-8 h-8 rounded-full flex items-center justify-center hover:bg-gray-100 transition cursor-pointer">
+                <i class="fa-solid fa-xmark text-base"></i>
+            </button>
         </div>
-
-        <!-- Konten Tab 1: 25 Fasilitas Lapangan -->
-        <div id="tab-facilities" class="space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                <?php foreach ($zones_data as $z_key => $z_val): ?>
-                    <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-2">
-                        <div class="flex items-center space-x-2 border-b border-slate-200/60 pb-2">
-                            <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs text-white" style="background-color: <?= $z_val['color'] ?>;">
-                                <i class="fa-solid <?= $z_val['icon'] ?>"></i>
-                            </span>
-                            <h4 class="font-bold text-xs text-gray-900 truncate"><?= htmlspecialchars($z_val['nama']) ?></h4>
-                        </div>
-                        <ul class="space-y-1.5 text-[11px] text-gray-600">
-                            <?php foreach ($z_val['facilities'] as $fac): ?>
-                                <li class="flex items-start space-x-2 hover:text-[#0170b9] cursor-pointer transition-colors" onclick="showFacilityDetails('<?= $fac['id'] ?>', event)">
-                                    <i class="fa-solid <?= $fac['icon'] ?> text-slate-400 text-[10px] mt-0.5 shrink-0"></i>
-                                    <div>
-                                        <strong class="text-gray-800 text-[11.5px] block leading-tight"><?= htmlspecialchars($fac['nama']) ?></strong>
-                                        <span class="text-[10px] text-gray-500 line-clamp-1"><?= htmlspecialchars($fac['desc']) ?></span>
-                                    </div>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                <?php endforeach; ?>
-            </div>
+        <div class="p-4 bg-slate-100 border border-slate-200 flex items-center justify-center overflow-auto max-h-[60vh]">
+            <img id="lightboxImg" src="" alt="Enlarged Image" class="max-h-[55vh] max-w-full object-contain rounded-lg shadow-lg">
         </div>
-
-        <!-- Konten Tab 2: Matriks Sebaran 26 Hardware -->
-        <div id="tab-hardware" class="hidden overflow-x-auto">
-            <table class="w-full text-left text-xs">
-                <thead>
-                    <tr class="bg-slate-50 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-200">
-                        <th class="py-3 px-3 text-center w-12">No</th>
-                        <th class="py-3 px-3.5">Nama Hardware</th>
-                        <th class="py-3 px-3.5">Model / Seri</th>
-                        <th class="py-3 px-3.5">Tipe Integrasi</th>
-                        <th class="py-3 px-3.5">Layer GIS</th>
-                        <th class="py-3 px-3.5">Zona Denah 35 Ha</th>
-                        <th class="py-3 px-3.5">Lokasi Spesifik</th>
-                        <th class="py-3 px-3.5 text-right">Subtotal Investasi</th>
-                        <th class="py-3 px-3 text-center">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-100 text-gray-700">
-                    <?php foreach ($hardware_pins as $hw): ?>
-                    <tr class="hover:bg-slate-50/70 transition-colors cursor-pointer" onclick="showHardwareDetails(<?= $hw['id'] ?>, event)">
-                        <td class="py-2.5 px-3 text-center font-bold text-gray-400 font-mono"><?= $hw['id'] ?></td>
-                        <td class="py-2.5 px-3.5 font-bold text-gray-900"><?= htmlspecialchars($hw['nama']) ?></td>
-                        <td class="py-2.5 px-3.5 font-medium text-slate-600"><?= htmlspecialchars($hw['model']) ?></td>
-                        <td class="py-2.5 px-3.5">
-                            <?php if ($hw['tipe'] === 'live'): ?>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center w-fit">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span> Live Software
-                                </span>
-                            <?php else: ?>
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200 flex items-center w-fit">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mr-1.5"></span> Blueprint Fisik
-                                </span>
-                            <?php endif; ?>
-                        </td>
-                        <td class="py-2.5 px-3.5 font-semibold text-slate-700">Layer <?= $hw['layer'] ?></td>
-                        <td class="py-2.5 px-3.5"><span class="px-2 py-0.5 bg-slate-100 rounded text-[11px] font-medium text-slate-700"><?= $hw['zona'] ?></span></td>
-                        <td class="py-2.5 px-3.5 text-gray-500 text-[11px]"><?= $hw['posisi'] ?></td>
-                        <td class="py-2.5 px-3.5 text-right font-mono font-bold text-[#002f5e]"><?= $hw['subtotal'] ?></td>
-                        <td class="py-2.5 px-3 text-center">
-                            <button class="p-1 text-[#0170b9] hover:bg-blue-50 rounded transition" title="Lihat di Inspector">
-                                <i class="fa-solid fa-eye"></i>
-                            </button>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+        <div class="p-4 bg-white border-t border-gray-100 flex items-center justify-between">
+            <p id="lightboxDesc" class="text-xs text-gray-600 leading-relaxed pr-4 line-clamp-2"></p>
+            <button onclick="closeImageLightbox()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition cursor-pointer shrink-0">
+                Tutup
+            </button>
         </div>
-
     </div>
 </div>
 
+<style>
+.fac-selected rect, .fac-selected polygon, .fac-selected path {
+    stroke: #f59e0b !important;
+    stroke-width: 2.5 !important;
+    filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.7));
+}
+.pin-selected circle:nth-of-type(2) {
+    stroke: #f59e0b !important;
+    stroke-width: 3.5 !important;
+    filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.9));
+}
+</style>
+
 <!-- DATA JAVASCRIPT & LOGIKA INTERAKTIF -->
 <script>
+// Lightbox Pembesar Foto Fasilitas / Hardware
+function openImageLightbox() {
+    const imgEl = document.getElementById('inspImg');
+    if (!imgEl || imgEl.classList.contains('hidden') || !imgEl.src) return;
+    
+    document.getElementById('lightboxImg').src = imgEl.src;
+    document.getElementById('lightboxTitle').textContent = document.getElementById('inspTitle').textContent;
+    document.getElementById('lightboxDesc').textContent = document.getElementById('inspDesc').textContent;
+    document.getElementById('imageLightboxModal').classList.remove('hidden');
+}
+
+function closeImageLightbox() {
+    document.getElementById('imageLightboxModal').classList.add('hidden');
+}
+
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') closeImageLightbox();
+});
+
 // Dataset Hardware Javascript untuk Inspector
 const hardwareDataset = <?= json_encode($hardware_pins, JSON_PRETTY_PRINT) ?>;
 
@@ -1552,6 +1516,12 @@ function showHardwareDetails(id, event) {
     const hw = hardwareDataset.find(item => item.id === id);
     if (!hw) return;
 
+    // Highlight aktif pada denah SVG
+    document.querySelectorAll('.fac-selected').forEach(el => el.classList.remove('fac-selected'));
+    document.querySelectorAll('.pin-selected').forEach(el => el.classList.remove('pin-selected'));
+    const pinSvg = document.getElementById('pin_' + id);
+    if (pinSvg) pinSvg.classList.add('pin-selected');
+
     document.getElementById('inspNum').textContent = "HARDWARE #" + hw.id;
     document.getElementById('inspTitle').textContent = hw.nama;
     document.getElementById('inspModel').textContent = hw.model;
@@ -1561,9 +1531,22 @@ function showHardwareDetails(id, event) {
     // Foto Produk
     const imgEl = document.getElementById('inspImg');
     const fallbackEl = document.getElementById('inspIconFallback');
+    const zoomHint = document.getElementById('inspImageZoomHint');
+
     imgEl.src = hw.img;
+    imgEl.alt = hw.nama;
+    imgEl.className = "max-h-36 max-w-full object-contain transition-all duration-300 drop-shadow-sm cursor-pointer hover:scale-105";
     imgEl.classList.remove('hidden');
     fallbackEl.classList.add('hidden');
+    if (zoomHint) zoomHint.classList.remove('hidden');
+
+    imgEl.onerror = function() {
+        imgEl.classList.add('hidden');
+        fallbackEl.classList.remove('hidden');
+        if (zoomHint) zoomHint.classList.add('hidden');
+        const fallbackIcon = document.getElementById('inspFallbackIcon');
+        fallbackIcon.className = "fa-solid fa-microchip text-[#0170b9]";
+    };
 
     // Tipe Badge
     const badge = document.getElementById('inspTypeBadge');
@@ -1574,11 +1557,6 @@ function showHardwareDetails(id, event) {
         badge.textContent = "BLUEPRINT FISIK";
         badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200";
     }
-
-    // Kotak Harga
-    document.getElementById('inspPriceBox').classList.remove('hidden');
-    document.getElementById('inspPrice').textContent = hw.harga;
-    document.getElementById('inspSubtotal').textContent = hw.subtotal + " (" + hw.unit + ")";
 
     // Tombol Aksi Modul Terkait (Hanya untuk Live Software)
     const actionWrapper = document.getElementById('inspActionWrapper');
@@ -1624,7 +1602,7 @@ function showHardwareDetails(id, event) {
             'alat': { url: 'dashboard.php?page=alat', label: '⚡ Monitor Alat di Modul Fleet' },
             'scanner': { url: 'dashboard.php?page=cfs', label: '⚡ Uji Scanner di Modul CFS' },
             'kontainer': { url: 'dashboard.php?page=kontainer', label: '⚡ Buka Modul Kontainer' },
-            'trucking': { url: 'dashboard.php?page=trucking', label: '⚡ Buka Modul Trucking' },
+            'trucking': { url: 'dashboard.php?page=trucking', label: '⚡ Monitor GPS Truk & Armada' },
             'settings': { url: 'dashboard.php?page=settings', label: '⚡ Buka Konfigurasi Server' }
         };
         const bpTarget = bpMapping[hw.modul] || { url: 'dashboard.php?page=gate', label: '⚡ Buka Modul Terkait' };
@@ -1640,22 +1618,42 @@ function showFacilityDetails(facId, event) {
     const fac = facilitiesDataset[facId];
     if (!fac) return;
 
+    // Highlight aktif pada denah SVG
+    document.querySelectorAll('.fac-selected').forEach(el => el.classList.remove('fac-selected'));
+    document.querySelectorAll('.pin-selected').forEach(el => el.classList.remove('pin-selected'));
+    const facSvg = document.getElementById('fac_' + facId);
+    if (facSvg) facSvg.classList.add('fac-selected');
+
     document.getElementById('inspNum').textContent = "FASILITAS LAPANGAN";
     document.getElementById('inspTitle').textContent = fac.nama;
     document.getElementById('inspModel').textContent = fac.zona;
     document.getElementById('inspLocation').textContent = "Kawasan Dry Port 35 Ha";
     document.getElementById('inspDesc').textContent = fac.desc;
 
-    // Foto Produk / Perangkat Utama Terpasang
+    // Foto Produk / Fasilitas Lapangan
     const imgEl = document.getElementById('inspImg');
     const fallbackEl = document.getElementById('inspIconFallback');
+    const zoomHint = document.getElementById('inspImageZoomHint');
+
     if (fac.img) {
         imgEl.src = fac.img;
+        imgEl.alt = fac.nama;
+        imgEl.className = "w-full h-44 object-cover rounded-xl transition-all duration-300 drop-shadow-sm cursor-pointer hover:scale-[1.02]";
         imgEl.classList.remove('hidden');
         fallbackEl.classList.add('hidden');
+        if (zoomHint) zoomHint.classList.remove('hidden');
+
+        imgEl.onerror = function() {
+            imgEl.classList.add('hidden');
+            fallbackEl.classList.remove('hidden');
+            if (zoomHint) zoomHint.classList.add('hidden');
+            const fallbackIcon = document.getElementById('inspFallbackIcon');
+            fallbackIcon.className = "fa-solid " + fac.icon + " text-[#0170b9]";
+        };
     } else {
         imgEl.classList.add('hidden');
         fallbackEl.classList.remove('hidden');
+        if (zoomHint) zoomHint.classList.add('hidden');
         const fallbackIcon = document.getElementById('inspFallbackIcon');
         fallbackIcon.className = "fa-solid " + fac.icon + " text-[#0170b9]";
     }
@@ -1665,8 +1663,6 @@ function showFacilityDetails(facId, event) {
     badge.textContent = "FASILITAS OPERASIONAL";
     badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200";
 
-    // Sembunyikan harga satuan murni fasilitas
-    document.getElementById('inspPriceBox').classList.add('hidden');
     const blueprintNotice = document.getElementById('inspBlueprintNotice');
     if (blueprintNotice) blueprintNotice.classList.add('hidden');
 
@@ -1745,10 +1741,10 @@ function toggleLayer(layerNum) {
 function filterZone(zoneId) {
     document.querySelectorAll('.zone-btn').forEach(btn => {
         if (btn.getAttribute('data-zone') === zoneId) {
-            btn.classList.add('bg-[#002f5e]', 'text-white');
+            btn.classList.add('bg-[#0170b9]', 'text-white');
             btn.classList.remove('bg-gray-100', 'text-gray-700');
         } else {
-            btn.classList.remove('bg-[#002f5e]', 'text-white');
+            btn.classList.remove('bg-[#0170b9]', 'text-white');
             btn.classList.add('bg-gray-100', 'text-gray-700');
         }
     });
@@ -1791,24 +1787,7 @@ function filterHardwareType(type) {
     });
 }
 
-// Switch Tab Direktori Bawah
-function switchDirectoryTab(tabId) {
-    document.getElementById('tab-facilities').classList.add('hidden');
-    document.getElementById('tab-hardware').classList.add('hidden');
-    document.getElementById('btnTabFacilities').classList.replace('bg-[#002f5e]', 'text-gray-600');
-    document.getElementById('btnTabFacilities').classList.remove('text-white', 'shadow-xs');
-    document.getElementById('btnTabHardware').classList.replace('bg-[#002f5e]', 'text-gray-600');
-    document.getElementById('btnTabHardware').classList.remove('text-white', 'shadow-xs');
 
-    document.getElementById(tabId).classList.remove('hidden');
-    if (tabId === 'tab-facilities') {
-        document.getElementById('btnTabFacilities').classList.add('bg-[#002f5e]', 'text-white', 'shadow-xs');
-        document.getElementById('btnTabFacilities').classList.remove('text-gray-600');
-    } else {
-        document.getElementById('btnTabHardware').classList.add('bg-[#002f5e]', 'text-white', 'shadow-xs');
-        document.getElementById('btnTabHardware').classList.remove('text-gray-600');
-    }
-}
 
 // Reset Map View
 

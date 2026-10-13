@@ -45,14 +45,39 @@ if (isset($pdo)) {
     }
 }
 
+// Preferensi Bahasa Sistem
+$cur_lang = $_SESSION['lang'] ?? ($_COOKIE['cidp_lang'] ?? 'id');
+
 // Handle Form Aksi POST
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     $action = $_POST['action_type'] ?? '';
 
-    if ($action === 'save_terminal_params') {
+    if ($action === 'save_language') {
+        $selected_lang = in_array($_POST['system_language'] ?? '', ['id', 'en']) ? $_POST['system_language'] : 'id';
+        $_SESSION['lang'] = $selected_lang;
+        setcookie('cidp_lang', $selected_lang, time() + (86400 * 30), "/");
+        $cur_lang = $selected_lang;
+
+        $lang_names = [
+            'id' => 'Bahasa Indonesia (Standar Nasional Indonesia - SNI)',
+            'en' => 'English (International Port & Logistics Standard)'
+        ];
+
+        $action_alert = [
+            'type'  => 'success',
+            'title' => 'Preferensi Bahasa Berhasil Disimpan',
+            'msg'   => "Bahasa antarmuka sistem telah diperbarui ke <strong>{$lang_names[$selected_lang]}</strong>. Pengaturan ini tersimpan di sesi dan disinkronkan ke seluruh modul CIDP DPMS."
+        ];
+    } elseif ($action === 'save_terminal_params') {
         $terminal_name = trim($_POST['terminal_name'] ?? 'Conclusion Intermodal Dry Port (CIDP)');
         $dwell_target  = floatval($_POST['target_dwell'] ?? 3.0);
         $reefer_plugs  = intval($_POST['reefer_plugs'] ?? 300);
+
+        if (isset($_POST['system_language']) && in_array($_POST['system_language'], ['id', 'en'])) {
+            $_SESSION['lang'] = $_POST['system_language'];
+            setcookie('cidp_lang', $_POST['system_language'], time() + (86400 * 30), "/");
+            $cur_lang = $_POST['system_language'];
+        }
 
         $action_alert = [
             'type'  => 'success',
@@ -184,7 +209,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     </div>
 
     <!-- 5 Kartu KPI Status Sistem & Metrik Basis Data (Micro Compact Grid) -->
-    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+    <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
         <!-- KPI 1: Total Rekaman Basis Data -->
         <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-orange-300 transition flex items-center justify-between">
             <div>
@@ -277,6 +302,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         <button onclick="switchSettingsTab('tab-database')" id="btn-tab-database" class="settings-tab-btn flex-1 min-w-[130px] py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-1.5">
             <i class="fa-solid fa-database text-[10px]"></i>
             <span>Basis Data &amp; Log</span>
+        </button>
+        <button onclick="switchSettingsTab('tab-language')" id="btn-tab-language" class="settings-tab-btn flex-1 min-w-[130px] py-1.5 px-2.5 rounded-lg text-xs font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/50 flex items-center justify-center space-x-1.5">
+            <i class="fa-solid fa-language text-[10px]"></i>
+            <span>Bahasa &amp; Lokalisasi</span>
         </button>
     </div>
 
@@ -468,10 +497,60 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     </div>
                 </div>
 
+                <!-- Card Pilihan Bahasa Antarmuka Sistem -->
+                <div class="mt-6 pt-5 border-t border-gray-100 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-sm">
+                                <i class="fa-solid fa-language"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-sm text-gray-900">Pilihan Bahasa Antarmuka Sistem (Language Preference)</h4>
+                                <p class="text-[11px] text-gray-500">Pilih bahasa pengantar antarmuka DPMS (Bahasa Indonesia atau English)</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold px-2.5 py-0.5 rounded-full <?= ($cur_lang === 'en') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-orange-50 text-orange-700 border border-orange-200' ?>">
+                            <?= ($cur_lang === 'en') ? '🇬🇧 English Active' : '🇮🇩 Bahasa Indonesia Aktif' ?>
+                        </span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- Opsi 1: Bahasa Indonesia -->
+                        <label class="relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all <?= ($cur_lang === 'id') ? 'border-orange-500 bg-orange-50/40 shadow-2xs' : 'border-gray-200 hover:border-gray-300 bg-white' ?>">
+                            <input type="radio" name="system_language" value="id" <?= ($cur_lang === 'id') ? 'checked' : '' ?> onchange="localStorage.setItem('cidp_lang', 'id')" class="mt-1 text-orange-600 focus:ring-orange-500 h-4 w-4">
+                            <div class="ml-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">🇮🇩</span>
+                                    <span class="font-bold text-sm text-gray-900">Bahasa Indonesia</span>
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded">Standar SNI</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
+                                    Antarmuka dalam Bahasa Indonesia resmi. Standar operasional domestik, regulasi kepabeanan CEISA 4.0 Bea Cukai, mata uang IDR (Rupiah), dan zona waktu WIB (UTC+7).
+                                </p>
+                            </div>
+                        </label>
+
+                        <!-- Opsi 2: English -->
+                        <label class="relative flex items-start p-4 rounded-xl border-2 cursor-pointer transition-all <?= ($cur_lang === 'en') ? 'border-blue-500 bg-blue-50/40 shadow-2xs' : 'border-gray-200 hover:border-gray-300 bg-white' ?>">
+                            <input type="radio" name="system_language" value="en" <?= ($cur_lang === 'en') ? 'checked' : '' ?> onchange="localStorage.setItem('cidp_lang', 'en')" class="mt-1 text-blue-600 focus:ring-blue-500 h-4 w-4">
+                            <div class="ml-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-lg">🇬🇧</span>
+                                    <span class="font-bold text-sm text-gray-900">English (International)</span>
+                                    <span class="text-[10px] font-bold px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">IMO &bull; DCSA</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
+                                    International maritime & intermodal terminal standard. Fully compatible with DCSA v2.2, UN/CEFACT EDIFACT, global shipping line standards (Maersk, MSC, CMA CGM), and ISO documentation.
+                                </p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="flex justify-end pt-3 border-t border-gray-100">
                     <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5">
                         <i class="fa-solid fa-floppy-disk"></i>
-                        <span>Simpan Parameter Fasilitas 35 Ha</span>
+                        <span>Simpan Parameter &amp; Bahasa Sistem</span>
                     </button>
                 </div>
             </div>
@@ -538,7 +617,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                                     </span>
                                 </td>
                                 <td class="py-3 px-3.5 text-center">
-                                    <button onclick="alert('Fitur reset password untuk <?= htmlspecialchars($u['email']) ?> dikirim ke email.')" class="p-1.5 text-gray-400 hover:text-blue-600 rounded transition" title="Kirim Tautan Reset Password">
+                                    <button onclick="sendPasswordResetLink('<?= htmlspecialchars($u['email'] ?? '') ?>', '<?= htmlspecialchars($u['nama'] ?? $u['name'] ?? 'User') ?>')" class="p-1.5 text-gray-400 hover:text-orange-600 rounded transition cursor-pointer" title="Kirim Tautan Reset Password">
                                         <i class="fa-solid fa-key"></i>
                                     </button>
                                 </td>
@@ -832,7 +911,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             </div>
 
             <!-- Grid 9 Tabel Basis Data -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-xs">
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-3 text-xs">
                 <?php foreach ($table_counts as $tbl_name => $count): ?>
                     <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 flex flex-col justify-between">
                         <div>
@@ -885,6 +964,158 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 </div>
             </div>
         </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- TAB 6: PENGATURAN BAHASA & LOKALISASI ANTARMUKA (LANGUAGE PREFERENCES)   -->
+    <!-- ======================================================================= -->
+    <div id="tab-language" class="settings-tab-content hidden space-y-6">
+        <form method="POST" action="dashboard.php?page=settings&tab=language" class="space-y-6">
+            <input type="hidden" name="action_type" value="save_language">
+
+            <!-- Card Utama: Pilihan Bahasa Sistem -->
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-3">
+                    <div class="flex items-center space-x-3">
+                        <div class="w-10 h-10 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center text-lg shadow-2xs">
+                            <i class="fa-solid fa-language"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-base text-gray-900">Preferensi Bahasa &amp; Lokalisasi Antarmuka</h3>
+                            <p class="text-xs text-gray-500 mt-0.5">Atur bahasa pengantar resmi untuk seluruh modul operasional dan konsol YMS</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-semibold text-gray-500">Status Saat Ini:</span>
+                        <span class="text-xs font-bold px-3 py-1 rounded-full <?= ($cur_lang === 'en') ? 'bg-blue-50 text-blue-700 border border-blue-200' : 'bg-orange-50 text-orange-700 border border-orange-200' ?>">
+                            <?= ($cur_lang === 'en') ? '🇬🇧 English (Active)' : '🇮🇩 Bahasa Indonesia (Aktif)' ?>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Pilihan 2 Bahasa: Radio Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 pt-2">
+                    
+                    <!-- Pilihan 1: Bahasa Indonesia -->
+                    <label class="relative flex flex-col p-5 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md <?= ($cur_lang === 'id') ? 'border-orange-500 bg-orange-50/30 ring-2 ring-orange-500/20' : 'border-gray-200 hover:border-gray-300 bg-white' ?>">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">🇮🇩</span>
+                                <div>
+                                    <h4 class="font-bold text-base text-gray-900">Bahasa Indonesia</h4>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 bg-orange-100 text-orange-700 rounded-md">Standar Nasional (SNI)</span>
+                                </div>
+                            </div>
+                            <input type="radio" name="system_language" value="id" <?= ($cur_lang === 'id') ? 'checked' : '' ?> onchange="localStorage.setItem('cidp_lang', 'id')" class="mt-1 text-orange-600 focus:ring-orange-500 h-5 w-5">
+                        </div>
+                        
+                        <p class="text-xs text-gray-600 mt-3 leading-relaxed">
+                            Format terminologi operasional nasional sesuai standar Kementerian Perhubungan RI, Direktorat Jenderal Bea dan Cukai (CEISA 4.0), mata uang Rupiah (IDR), dan zona waktu Indonesia Barat (WIB).
+                        </p>
+
+                        <div class="mt-4 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-[11px] text-gray-500 font-mono">
+                            <div>• Format Tanggal: <strong class="text-gray-700">DD/MM/YYYY</strong></div>
+                            <div>• Jam Operasional: <strong class="text-gray-700">24-Jam (WIB)</strong></div>
+                            <div>• Satuan Berat: <strong class="text-gray-700">Ton / Kilogram</strong></div>
+                            <div>• Simbol Mata Uang: <strong class="text-gray-700">Rp (IDR)</strong></div>
+                        </div>
+
+                        <div class="mt-4 pt-2">
+                            <a href="dashboard.php?page=settings&lang=id&tab=language" onclick="localStorage.setItem('cidp_lang', 'id')" class="w-full inline-flex items-center justify-center py-2 px-3 rounded-xl bg-orange-600 hover:bg-orange-700 text-white text-xs font-bold transition shadow-xs">
+                                <i class="fa-solid fa-check mr-1.5 text-xs"></i>
+                                <span>Gunakan Bahasa Indonesia</span>
+                            </a>
+                        </div>
+                    </label>
+
+                    <!-- Pilihan 2: English -->
+                    <label class="relative flex flex-col p-5 rounded-2xl border-2 cursor-pointer transition-all hover:shadow-md <?= ($cur_lang === 'en') ? 'border-blue-500 bg-blue-50/30 ring-2 ring-blue-500/20' : 'border-gray-200 hover:border-gray-300 bg-white' ?>">
+                        <div class="flex items-start justify-between">
+                            <div class="flex items-center space-x-3">
+                                <span class="text-3xl">🇬🇧</span>
+                                <div>
+                                    <h4 class="font-bold text-base text-gray-900">English (International)</h4>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-md">IMO &bull; DCSA &bull; ISO</span>
+                                </div>
+                            </div>
+                            <input type="radio" name="system_language" value="en" <?= ($cur_lang === 'en') ? 'checked' : '' ?> onchange="localStorage.setItem('cidp_lang', 'en')" class="mt-1 text-blue-600 focus:ring-blue-500 h-5 w-5">
+                        </div>
+                        
+                        <p class="text-xs text-gray-600 mt-3 leading-relaxed">
+                            Official international maritime standard for intermodal dry ports. Fully conforms with DCSA (Digital Container Shipping Association) APIs, UN/CEFACT EDIFACT messages, and global carrier documentation.
+                        </p>
+
+                        <div class="mt-4 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-[11px] text-gray-500 font-mono">
+                            <div>• Date Format: <strong class="text-gray-700">MM/DD/YYYY</strong></div>
+                            <div>• Operational Clock: <strong class="text-gray-700">UTC+7 / Local</strong></div>
+                            <div>• Weight Metric: <strong class="text-gray-700">Metric Ton / Lbs</strong></div>
+                            <div>• Financial Unit: <strong class="text-gray-700">USD / IDR</strong></div>
+                        </div>
+
+                        <div class="mt-4 pt-2">
+                            <a href="dashboard.php?page=settings&lang=en&tab=language" onclick="localStorage.setItem('cidp_lang', 'en')" class="w-full inline-flex items-center justify-center py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shadow-xs">
+                                <i class="fa-solid fa-globe mr-1.5 text-xs"></i>
+                                <span>Switch to English</span>
+                            </a>
+                        </div>
+                    </label>
+
+                </div>
+
+                <div class="flex items-center justify-between pt-4 border-t border-gray-100">
+                    <p class="text-xs text-gray-500">
+                        <i class="fa-solid fa-circle-info text-orange-500 mr-1"></i>
+                        Pilihan bahasa akan disimpan ke dalam profil sesi dan disinkronkan secara global ke modul Landing Page.
+                    </p>
+                    <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        <span>Simpan Preferensi Bahasa</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Card Informasi & Standar Kepatuhan Internasional -->
+            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+                <div class="flex items-center space-x-2.5 pb-3 border-b border-gray-100">
+                    <div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-certificate"></i>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm text-gray-900">Standar Akreditasi Lokalisasi &amp; Kompatibilitas Sistem</h4>
+                        <p class="text-[11px] text-gray-500">Daftar kepatuhan format data antarmuka CIDP Yard Management System</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <span class="font-bold text-gray-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-anchor text-blue-600"></i> DCSA Interface Standard
+                        </span>
+                        <p class="text-[11px] text-gray-500 mt-1">
+                            Mendukung pelabelan atribut peti kemas sesuai DCSA v2.2 (Booking Reference, ISO 6346 Container Codes, Equipment Status).
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <span class="font-bold text-gray-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-file-invoice text-emerald-600"></i> Bea Cukai CEISA 4.0
+                        </span>
+                        <p class="text-[11px] text-gray-500 mt-1">
+                            Validasi dokumen kepabeanan otomatis untuk SPPB, PEB, PIB, dan manifest respon dalam format resmi DJBC.
+                        </p>
+                    </div>
+                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <span class="font-bold text-gray-800 flex items-center gap-1.5">
+                            <i class="fa-solid fa-shield-halved text-purple-600"></i> ISO/IEC 27001 InfoSec
+                        </span>
+                        <p class="text-[11px] text-gray-500 mt-1">
+                            Audit trail dan pencatatan riwayat sesi bahasa terenkripsi dengan proteksi data pribadi pengguna.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </form>
     </div>
 
 </div>
@@ -976,6 +1207,19 @@ function openAddUserModal() {
 }
 function closeAddUserModal() {
     document.getElementById('modalAddUser').classList.add('hidden');
+}
+
+function sendPasswordResetLink(email, name) {
+    const token = Math.random().toString(36).substring(2, 10).toUpperCase();
+    const resetUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/') + 'login.php?action=reset&token=' + token;
+    
+    if (confirm("Kirim Tautan Reset Password?\n\nPengguna: " + name + " (" + email + ")\nToken Keamanan: " + token + "\n\nKlik OK untuk menyalin tautan reset password ke clipboard.")) {
+        navigator.clipboard.writeText(resetUrl).then(() => {
+            alert("✅ Tautan reset password berhasil disalin ke clipboard:\n" + resetUrl);
+        }).catch(() => {
+            alert("Tautan reset password:\n" + resetUrl);
+        });
+    }
 }
 
 // Ekspor Konfigurasi JSON

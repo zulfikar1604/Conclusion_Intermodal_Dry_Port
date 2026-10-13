@@ -14,7 +14,7 @@ if (isset($_SESSION['login']) && $_SESSION['login'] === true) {
     exit;
 }
 
-// Alihkan langsung ke halaman depan utama dengan modal login aktif
-header("Location: index.php?login=1");
+// Alihkan langsung ke halaman depan utama tanpa modal login otomatis
+header("Location: index.php");
 exit;
 ?>

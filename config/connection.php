@@ -30,3 +30,18 @@ try {
         </div>");
     }
 }
+
+// Inisialisasi koneksi MySQLi untuk kompatibilitas skrip mysqli_query($conn, ...)
+if (!isset($conn) || !$conn) {
+    try {
+        $conn = @mysqli_connect($host, $user, $pass, $db);
+        if (!$conn) {
+            $conn = @mysqli_connect($host, $user, $pass, 'cidp');
+        }
+        if ($conn) {
+            mysqli_set_charset($conn, 'utf8mb4');
+        }
+    } catch (Throwable $th) {
+        $conn = false;
+    }
+}

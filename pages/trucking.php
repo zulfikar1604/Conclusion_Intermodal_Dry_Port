@@ -233,7 +233,7 @@ $total_trucks = count($trucks);
                 <i class="fa-solid fa-file-pdf text-rose-600 text-[10px]"></i>
                 <span>PDF</span>
             </button>
-            <a href="dashboard.php?page=alat" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
+            <a href="dashboard.php?page=alat" class="px-2.5 py-1 bg-orange-500 hover:bg-orange-600 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
                 <i class="fa-solid fa-dolly mr-1 text-[10px] text-amber-400"></i> Alat Berat YMS
             </a>
         </div>
@@ -558,7 +558,7 @@ $total_trucks = count($trucks);
     <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full overflow-hidden animate-fadeIn border border-gray-100">
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-[#002f5e] to-indigo-800 text-white p-6 relative">
+        <div class="bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600 text-white p-6 relative">
             <div class="flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center text-2xl border border-white/20">
@@ -787,11 +787,11 @@ $total_trucks = count($trucks);
 
         <!-- Aksi Pintas Lintas Modul -->
         <div class="bg-indigo-50/70 border-t border-b border-indigo-100 px-6 py-3 flex flex-wrap items-center justify-between gap-3 text-xs">
-            <span class="font-bold text-[#002f5e] flex items-center">
+            <span class="font-bold text-orange-600 flex items-center">
                 <i class="fa-solid fa-compass mr-1.5 text-indigo-600"></i>Aksi Pintas Lintas Modul:
             </span>
             <div class="flex items-center space-x-2 flex-wrap gap-y-1" id="truckModalShortcuts">
-                <a id="btnTrkCont" href="#" class="px-3 py-1 bg-white hover:bg-[#002f5e] text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs hidden">
+                <a id="btnTrkCont" href="#" class="px-3 py-1 bg-white hover:bg-gradient-to-r from-orange-500 to-orange-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs hidden">
                     <i class="fa-solid fa-boxes-stacked mr-1 text-[#0170b9]"></i>Lacak Kontainer
                 </a>
                 <a id="btnTrk3D" href="#" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold rounded-lg transition flex items-center shadow-2xs hidden">
@@ -808,10 +808,10 @@ $total_trucks = count($trucks);
 
         <!-- Footer -->
         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex items-center justify-between">
-            <button onclick="window.print()" class="px-4 py-2 bg-white border border-gray-200 hover:bg-gray-100 text-gray-700 text-xs font-bold rounded-xl transition flex items-center">
-                <i class="fa-solid fa-print mr-1.5"></i> Cetak Dokumen
+            <button onclick="printTruckGatePass()" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:bg-[#0170b9] text-white text-xs font-bold rounded-xl transition flex items-center shadow-xs cursor-pointer">
+                <i class="fa-solid fa-print mr-1.5"></i> Cetak Surat Jalan Resmi (A4)
             </button>
-            <button onclick="closeGatePassModal()" class="px-5 py-2 bg-gray-800 hover:bg-gray-900 text-white text-xs font-bold rounded-xl transition">
+            <button onclick="closeGatePassModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition">
                 Tutup Jendela
             </button>
         </div>
@@ -860,8 +860,31 @@ function resetTruckFilter() {
     filterTrucks();
 }
 
-// Buka Modal Tiket & Milestone
+// Buka Modal Tiket & Milestone Dokumen Resmi
+let currentGatePassData = null;
+
+function printTruckGatePass() {
+    if (!currentGatePassData) return;
+    if (typeof CIDPPrint !== 'undefined') {
+        const passNo = document.getElementById('p_ticket_no')?.innerText || 'E-PASS-2026';
+        CIDPPrint.printGatePass({
+            passNo: passNo,
+            plate: currentGatePassData.license_plate,
+            driver: currentGatePassData.driver_name,
+            sim: currentGatePassData.driver_sim,
+            transporter: currentGatePassData.company,
+            ctrNum: currentGatePassData.container_number,
+            gross: currentGatePassData.weight_gross,
+            tare: currentGatePassData.weight_tare,
+            net: currentGatePassData.weight_net
+        });
+    } else {
+        window.print();
+    }
+}
+
 function showGatePassModal(data) {
+    currentGatePassData = data;
     const isShunting = (data.fleet_type === 'internal_shunting');
 
     document.getElementById('p_ticket_no').innerText = isShunting 
@@ -1120,7 +1143,7 @@ function submitAddTruck(e) {
 <!-- Add Truck Modal -->
 <div id="addTruckModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn border border-gray-100">
-        <div class="bg-gradient-to-r from-[#002f5e] to-indigo-800 text-white p-4 flex items-center justify-between">
+        <div class="bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600 text-white p-4 flex items-center justify-between">
             <h3 class="font-bold text-lg">Registrasi Truk Masuk</h3>
             <button onclick="closeAddTruckModal()" class="text-white hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
         </div>

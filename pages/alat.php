@@ -169,7 +169,7 @@ foreach ($equipment_list as $eq) {
             <button onclick="openDispatchModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center">
                 <i class="fa-solid fa-paper-plane mr-1 text-[10px]"></i> + Dispatch Job
             </button>
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
+            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
                 <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Simulasi 3D
             </a>
             <button onclick="refreshEquipment()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center">
@@ -246,7 +246,7 @@ foreach ($equipment_list as $eq) {
             </div>
         </div>
 
-        <div class="bg-slate-900 rounded-xl p-3 text-white relative overflow-hidden border border-slate-800">
+        <div class="bg-gradient-to-br from-blue-50 to-slate-50 rounded-xl p-3 text-slate-800 relative overflow-hidden border border-blue-200 shadow-xs">
             <?php
             $rs01 = $eq_map['RS-01'] ?? ['operator_name' => 'Budi Santoso', 'status' => 'idle', 'current_container' => '', 'last_block' => 'A', 'fuel_percent' => 85];
             $rs02 = $eq_map['RS-02'] ?? ['operator_name' => 'Agus Setiawan', 'status' => 'idle', 'current_container' => '', 'last_block' => 'B', 'fuel_percent' => 87];
@@ -266,7 +266,7 @@ foreach ($equipment_list as $eq) {
                         <span class="text-[11px] font-bold text-blue-400">BLOK A (Dry 40ft)</span>
                         <span class="w-2 h-2 rounded-full <?= $rs01_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
                     </div>
-                    <div class="bg-slate-900/90 p-2 rounded-lg border <?= $rs01_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
+                    <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs <?= $rs01_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
                         <span class="font-mono font-bold <?= $rs01_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-xs px-1.5 py-0.5 rounded">RS-01</span>
                         <div class="text-xs">
                             <strong class="text-slate-200 block text-[11px]"><?= htmlspecialchars($rs01['operator_name']) ?></strong>
@@ -285,7 +285,7 @@ foreach ($equipment_list as $eq) {
                         <span class="text-[11px] font-bold text-purple-400">BLOK B (Dry 20ft)</span>
                         <span class="w-2 h-2 rounded-full <?= $rs02_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
                     </div>
-                    <div class="bg-slate-900/90 p-2 rounded-lg border <?= $rs02_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
+                    <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs <?= $rs02_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
                         <span class="font-mono font-bold <?= $rs02_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-xs px-1.5 py-0.5 rounded">RS-02</span>
                         <div class="text-xs">
                             <strong class="text-slate-100 block text-[11px]"><?= htmlspecialchars($rs02['operator_name']) ?></strong>
@@ -304,7 +304,7 @@ foreach ($equipment_list as $eq) {
                         <span class="text-[11px] font-bold text-cyan-400">ZONA REEFER &amp; DG</span>
                         <span class="w-2 h-2 rounded-full <?= $rs03_op ? 'bg-purple-500 animate-ping' : 'bg-cyan-400' ?>"></span>
                     </div>
-                    <div class="bg-slate-900/90 p-2 rounded-lg border <?= $rs03_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
+                    <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs <?= $rs03_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
                         <span class="font-mono font-bold <?= $rs03_op ? 'text-purple-300 bg-purple-950' : 'text-cyan-400 bg-cyan-950' ?> text-xs px-1.5 py-0.5 rounded">RS-03</span>
                         <div class="text-xs">
                             <strong class="text-slate-200 block text-[11px]"><?= htmlspecialchars($rs03['operator_name']) ?></strong>
@@ -493,7 +493,21 @@ foreach ($equipment_list as $eq) {
 
                             <!-- Aksi -->
                             <td class="py-1.5 px-3 text-right whitespace-nowrap">
-                                <button class="px-2 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white text-[11px] font-semibold rounded transition shadow-2xs inline-flex items-center space-x-1">
+                                <?php
+                                $jobData = [
+                                    'id' => $ev['id'],
+                                    'event_type' => $ev['event_type'],
+                                    'equipment_id' => $ev['equipment_id'],
+                                    'operator_name' => $ev['operator_name'],
+                                    'container_number' => $ev['container_number'],
+                                    'billable_amount' => 'Rp ' . number_format($ev['billable_amount'] ?? 0, 0, ',', '.'),
+                                    'from_pos' => $from,
+                                    'to_pos' => $to,
+                                    'notes' => $ev['notes'] ?? 'Relokasi kontainer terminal YMS',
+                                    'created_at' => date('d M Y, H:i', strtotime($ev['created_at'])) . ' WIB'
+                                ];
+                                ?>
+                                <button onclick='showJobModal(<?= json_encode($jobData, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>)' class="px-2 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white text-[11px] font-semibold rounded transition shadow-2xs inline-flex items-center space-x-1 cursor-pointer" title="Buka Detail Tiket Pekerjaan">
                                     <span>Detail Job</span>
                                     <i class="fa-solid fa-chevron-right text-[9px]"></i>
                                 </button>
@@ -513,7 +527,7 @@ foreach ($equipment_list as $eq) {
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-fadeIn border border-gray-100">
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-[#002f5e] to-[#0170b9] text-white p-5 flex items-center justify-between">
+        <div class="bg-gradient-to-r from-[#0170b9] to-blue-600 text-white p-5 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl border border-white/20">
                     <i class="fa-solid fa-dolly"></i>
@@ -575,7 +589,7 @@ foreach ($equipment_list as $eq) {
 
         <!-- Footer -->
         <div class="bg-gray-50 px-6 py-4 border-t border-gray-100 flex items-center justify-end">
-            <button onclick="closeJobModal()" class="px-5 py-2 bg-gray-800 hover:bg-gray-900 text-white text-xs font-bold rounded-xl transition">
+            <button onclick="closeJobModal()" class="px-5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 text-xs font-bold rounded-xl transition">
                 Tutup
             </button>
         </div>
@@ -588,7 +602,7 @@ foreach ($equipment_list as $eq) {
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-fadeIn border border-gray-100">
         
         <!-- Header -->
-        <div class="bg-gradient-to-r from-[#002f5e] to-[#0170b9] text-white p-5 flex items-center justify-between">
+        <div class="bg-gradient-to-r from-[#0170b9] to-blue-600 text-white p-5 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center text-xl border border-white/20">
                     <i class="fa-solid fa-satellite-dish"></i>
@@ -688,7 +702,7 @@ foreach ($equipment_list as $eq) {
                 <button type="button" onclick="closeDispatchModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition">
                     Batal
                 </button>
-                <button type="submit" class="px-5 py-2 bg-[#0170b9] hover:bg-[#002f5e] text-white text-xs font-bold rounded-xl transition shadow-sm flex items-center space-x-1.5">
+                <button type="submit" class="px-5 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white text-xs font-bold rounded-xl transition shadow-sm flex items-center space-x-1.5">
                     <i class="fa-solid fa-paper-plane text-[10px]"></i>
                     <span>Kirim ke VMT Terminal</span>
                 </button>

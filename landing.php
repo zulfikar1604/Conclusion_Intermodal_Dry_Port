@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/connection.php';
 
 $error_message = '';
-$showLoginModal = isset($_GET['login']) && $_GET['login'] == '1';
+$showLoginModal = false; // Tetap di landing page, modal tidak muncul otomatis saat refresh atau logout
 
 // PROSES AUTENTIKASI MASUK (LOGIN)
 if (isset($_POST['btn_login'])) {
@@ -36,6 +36,11 @@ if (isset($_POST['btn_login'])) {
                 $_SESSION['nama']   = $user['nama'];
                 $_SESSION['email']  = $user['email'];
                 $_SESSION['role']   = $user['role'];
+                $_SESSION['login_toast'] = [
+                    'nama' => $user['nama'],
+                    'role' => $user['role'],
+                    'time' => date('H:i') . ' WIB'
+                ];
 
                 header("Location: dashboard.php");
                 exit;
@@ -308,30 +313,104 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 </head>
 <body class="bg-white text-slate-800 antialiased selection:bg-orange-500 selection:text-white">
 
+    <?php if (isset($_GET['status']) && $_GET['status'] === 'logout_success'): ?>
+    <!-- =================================================================== -->
+    <!-- TOAST NOTIFIKASI KELUAR SISTEM (COMPACT LOGOUT SUCCESS TOAST)         -->
+    <!-- =================================================================== -->
+    <div id="logoutToast" class="fixed top-16 sm:top-20 right-4 sm:right-6 z-[70] max-w-[320px] w-[calc(100%-2rem)] transition-all duration-300 transform translate-y-0 opacity-100 animate-fadeIn" role="alert">
+        <div class="bg-white/95 backdrop-blur-md rounded-xl shadow-xl border border-slate-200/90 p-2.5 sm:p-3 relative overflow-hidden flex items-center gap-2.5">
+            <!-- Subtle Luxury Batik Kawung Rosette Watermark in Toast -->
+            <div class="absolute -right-3 -bottom-3 w-16 h-16 pointer-events-none opacity-[0.05] z-0" aria-hidden="true">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+                    <ellipse cx="50" cy="22" rx="16" ry="24" />
+                    <ellipse cx="50" cy="78" rx="16" ry="24" />
+                    <ellipse cx="22" cy="50" rx="24" ry="16" />
+                    <ellipse cx="78" cy="50" rx="24" ry="16" />
+                    <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
+                </svg>
+            </div>
+
+            <!-- Left Security Icon Badge -->
+            <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200/80 text-[#0170b9] flex items-center justify-center shrink-0 shadow-2xs text-xs relative z-10">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </div>
+
+            <!-- Content Body -->
+            <div class="flex-1 min-w-0 relative z-10">
+                <div class="flex items-center justify-between gap-1">
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-blue-600 flex items-center gap-1">
+                        Logout Berhasil
+                    </span>
+                    <button type="button" onclick="dismissLogoutToast()" class="text-slate-400 hover:text-slate-600 p-0.5 transition-colors leading-none" title="Tutup">
+                        <i class="fa-solid fa-xmark text-xs"></i>
+                    </button>
+                </div>
+                <p class="text-xs font-semibold text-slate-800 leading-snug mt-0.5 truncate">
+                    Sesi konsol DPMS telah ditutup.
+                </p>
+                <div class="flex items-center gap-2 mt-1">
+                    <button type="button" onclick="dismissLogoutToast(); openLoginModal();" class="text-[10px] font-bold text-orange-600 hover:text-orange-700 underline flex items-center gap-1">
+                        <span>Masuk Kembali &rarr;</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Timer Progress Bar (2.4s) -->
+            <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-100 overflow-hidden">
+                <div id="logoutToastProgress" class="h-full bg-gradient-to-r from-[#0170b9] to-orange-500 w-full transition-all duration-[2400ms] ease-linear"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    function dismissLogoutToast() {
+        const toast = document.getElementById('logoutToast');
+        if (toast) {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(-10px)';
+            setTimeout(() => toast.remove(), 250);
+        }
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+        const bar = document.getElementById('logoutToastProgress');
+        if (bar) setTimeout(() => bar.style.width = '0%', 40);
+        setTimeout(dismissLogoutToast, 2400);
+
+        if (window.history && window.history.replaceState) {
+            try {
+                const url = new URL(window.location.href);
+                url.searchParams.delete('status');
+                window.history.replaceState({}, document.title, url.pathname + (url.search ? url.search : '') + url.hash);
+            } catch(e) {}
+        }
+    });
+    </script>
+    <?php endif; ?>
+
     <!-- =================================================================== -->
     <!-- 1. BILAH NAVIGASI DUA TINGKAT (Clean Bright White Corporate Header) -->
     <!-- TIDAK TERTABRAK: Header solid putih dengan batas tegas              -->
     <!-- =================================================================== -->
     <header id="mainHeader" class="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
             <!-- BARIS ATAS: LOGO & UTILITAS PENCARIAN -->
             <div class="flex items-center justify-between py-2 border-b border-slate-100">
                 
                 <!-- BRAND LOGO -->
-                <a href="index.php" class="flex items-center gap-3 group">
-                    <img src="assets/img/logo.png" alt="Conclusion Logo" class="h-9 sm:h-10 w-auto group-hover:scale-105 transition-transform">
+                <a href="index.php" class="flex items-center gap-2.5 sm:gap-3 group shrink-0">
+                    <img src="assets/img/logo.png" alt="Conclusion Logo" class="h-8.5 sm:h-9 xl:h-10 w-auto group-hover:scale-105 transition-transform">
                     <div>
-                        <div class="flex items-center gap-2">
-                            <span class="font-black text-lg tracking-tight uppercase text-cdp-navy">CONCLUSION</span>
-                            <span class="text-[9px] uppercase font-bold tracking-widest bg-orange-600 text-white px-2 py-0.5 rounded-full shadow-xs">CIDP</span>
+                        <div class="flex items-center gap-1.5 sm:gap-2">
+                            <span class="font-black text-base xl:text-lg tracking-tight uppercase text-cdp-navy">CONCLUSION</span>
+                            <span class="text-[8.5px] xl:text-[9px] uppercase font-bold tracking-widest bg-orange-600 text-white px-2 py-0.5 rounded-full shadow-xs">CIDP</span>
                         </div>
-                        <div class="text-[10px] font-medium tracking-wide text-slate-500">Intermodal Dry Port &bull; 35 Ha Hub</div>
+                        <div class="text-[9.5px] xl:text-[10px] font-medium tracking-wide text-slate-500 whitespace-nowrap">Intermodal Dry Port &bull; 35 Ha Hub</div>
                     </div>
                 </a>
 
                 <!-- LINK UTILITAS KANAN (Desktop) -->
-                <div class="hidden lg:flex items-center gap-6 text-xs font-semibold text-slate-600">
+                <div class="hidden lg:flex items-center gap-3 xl:gap-5 2xl:gap-6 text-[11px] xl:text-xs font-semibold text-slate-600 shrink-0">
                     <a href="#about" class="hover:text-orange-600 transition-colors" data-i18n="nav_about">Tentang Kami</a>
                     <a href="#updates" class="hover:text-orange-600 transition-colors" data-i18n="nav_updates">Berita &amp; Rilis</a>
                     <a href="#performance" class="hover:text-orange-600 transition-colors" data-i18n="nav_perf">Kinerja 35 Ha</a>
@@ -341,12 +420,12 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     <span class="text-slate-200">|</span>
                     
                     <!-- Search Trigger -->
-                    <button onclick="toggleSearchModal(true)" class="p-1 hover:text-orange-600 text-slate-500 transition-colors" title="Pencarian Cepat">
+                    <button onclick="toggleSearchModal(true)" class="p-1 hover:text-orange-600 text-slate-500 transition-colors" title="Pencarian Cepat" data-i18n-title="search_btn_title">
                         <i class="fa-solid fa-magnifying-glass"></i>
                     </button>
                     
                     <!-- Language Box (Functional ID / EN Switcher) -->
-                    <div class="flex items-center gap-1 bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded text-[11px] font-mono text-slate-700">
+                    <div class="flex items-center gap-1 bg-slate-100 border border-slate-200/60 px-2 py-0.5 rounded text-[10.5px] xl:text-[11px] font-mono text-slate-700">
                         <button type="button" id="langBtnID" onclick="setLanguage('id')" class="font-bold text-orange-600 transition-colors focus:outline-none">ID</button>
                         <span class="text-slate-300">/</span>
                         <button type="button" id="langBtnEN" onclick="setLanguage('en')" class="text-slate-500 hover:text-slate-900 transition-colors focus:outline-none">EN</button>
@@ -361,7 +440,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 
             <!-- BARIS BAWAH: NAVIGASI UTAMA & TOMBOL MASUK PORTAL -->
             <div class="hidden lg:flex items-center justify-between py-2 sm:py-2.5">
-                <nav class="flex items-center gap-8 text-xs font-bold tracking-wide text-slate-700 uppercase">
+                <nav class="flex items-center gap-3.5 xl:gap-6 2xl:gap-8 text-[11px] xl:text-xs font-bold tracking-wide text-slate-700 uppercase shrink-0">
                     
                     <!-- Mega Menu 1: Ekosistem Intermodal -->
                     <div class="relative group">
@@ -457,18 +536,18 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 </nav>
 
                 <!-- TOMBOL CTA MASUK SISTEM -->
-                <div class="flex items-center gap-3">
+                <div class="flex items-center gap-2.5 xl:gap-3 shrink-0">
                     <?php if ($isLoggedIn): ?>
-                        <a href="dashboard.php" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-orange-500/25 transition-all transform hover:-translate-y-0.5">
+                        <a href="dashboard.php" class="inline-flex items-center gap-2 px-3.5 py-2 xl:px-5 xl:py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-[11px] xl:text-xs uppercase tracking-wider shadow-md shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 whitespace-nowrap">
                             <i class="fa-solid fa-gauge-high"></i>
                             <span data-i18n="nav_dashboard">Buka Dashboard (<?= htmlspecialchars($userName) ?>)</span>
-                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            <i class="fa-solid fa-arrow-right text-[9px] xl:text-[10px]"></i>
                         </a>
                     <?php else: ?>
-                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-orange-500/25 transition-all transform hover:-translate-y-0.5">
+                        <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-2 px-4 py-2 xl:px-6 xl:py-2.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-[11px] xl:text-xs uppercase tracking-wider shadow-md shadow-orange-500/25 transition-all transform hover:-translate-y-0.5 whitespace-nowrap">
                             <i class="fa-solid fa-right-to-bracket"></i>
                             <span data-i18n="nav_cta">Masuk Portal DPMS</span>
-                            <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            <i class="fa-solid fa-arrow-right text-[9px] xl:text-[10px]"></i>
                         </button>
                     <?php endif; ?>
                 </div>
@@ -518,13 +597,13 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- 2. FLOATING RIGHT-SIDE VERTICAL QUICK-NAV (Petronas JsideNavi)       -->
     <!-- =================================================================== -->
     <div class="side-nav-float hidden md:block">
-        <a href="#updates" class="float-btn" title="Pembaruan Terkini">
+        <a href="#updates" class="float-btn" title="Pembaruan Terkini" data-i18n-title="float_updates">
             <i class="fa-solid fa-bullhorn text-sm"></i>
         </a>
-        <div onclick="toggleSearchModal(true)" class="float-btn" title="Cari di Situs">
+        <div onclick="toggleSearchModal(true)" class="float-btn" title="Cari di Situs" data-i18n-title="float_search">
             <i class="fa-solid fa-magnifying-glass text-sm"></i>
         </div>
-        <div class="float-btn float-social" title="Bagikan & Media Sosial">
+        <div class="float-btn float-social" title="Bagikan & Media Sosial" data-i18n-title="float_social">
             <i class="fa-solid fa-share-nodes text-sm"></i>
             <div class="popover-social">
                 <a href="https://linkedin.com" target="_blank" class="text-slate-600 hover:text-blue-600 transition-colors" title="LinkedIn"><i class="fa-brands fa-linkedin text-lg"></i></a>
@@ -546,7 +625,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <!-- SLIDE 1: Solusi Logistik Intermodal 35 Ha -->
         <div class="hero-slide active" style="background-image: url('assets/img/facilities/stacking_yard.jpg');" data-index="0">
             <div class="absolute inset-0 hero-daylight-vignette"></div>
-            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-28 pb-28 text-white">
+            <div class="relative w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 h-full flex flex-col justify-center pt-28 pb-28 text-white">
                 <div class="max-w-3xl">
                     <span class="inline-flex items-center gap-2 bg-orange-600 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 shadow-sm">
                         <i class="fa-solid fa-network-wired"></i> <span data-i18n="hero_1_badge">Hub Intermodal 35 Hektare</span>
@@ -574,7 +653,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <!-- SLIDE 2: Rail Siding Pasoso Connection -->
         <div class="hero-slide" style="background-image: url('assets/img/facilities/rail_siding.jpg');" data-index="1">
             <div class="absolute inset-0 hero-daylight-vignette"></div>
-            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-28 pb-28 text-white">
+            <div class="relative w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 h-full flex flex-col justify-center pt-28 pb-28 text-white">
                 <div class="max-w-3xl">
                     <span class="inline-flex items-center gap-2 bg-blue-600 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 shadow-sm">
                         <i class="fa-solid fa-train"></i> <span data-i18n="hero_2_badge">Konektivitas Rel Pasoso</span>
@@ -602,7 +681,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <!-- SLIDE 3: CFS Warehouse & Smart Consolidation -->
         <div class="hero-slide" style="background-image: url('assets/img/facilities/cfs_warehouse.jpg');" data-index="2">
             <div class="absolute inset-0 hero-daylight-vignette"></div>
-            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-28 pb-28 text-white">
+            <div class="relative w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 h-full flex flex-col justify-center pt-28 pb-28 text-white">
                 <div class="max-w-3xl">
                     <span class="inline-flex items-center gap-2 bg-emerald-600 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 shadow-sm">
                         <i class="fa-solid fa-warehouse"></i> <span data-i18n="hero_3_badge">CFS Warehouse Modern</span>
@@ -630,7 +709,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <!-- SLIDE 4: Reefer Terminal & Precision Cold Chain -->
         <div class="hero-slide" style="background-image: url('assets/img/facilities/reefer_terminal.jpg');" data-index="3">
             <div class="absolute inset-0 hero-daylight-vignette"></div>
-            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-28 pb-28 text-white">
+            <div class="relative w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 h-full flex flex-col justify-center pt-28 pb-28 text-white">
                 <div class="max-w-3xl">
                     <span class="inline-flex items-center gap-2 bg-cyan-600 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 shadow-sm">
                         <i class="fa-solid fa-snowflake"></i> <span data-i18n="hero_4_badge">Rantai Pendingin Presisi</span>
@@ -658,7 +737,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <!-- SLIDE 5: Customs CEISA 4.0 & Smart Gate -->
         <div class="hero-slide" style="background-image: url('assets/img/facilities/gatehouse_in.jpg');" data-index="4">
             <div class="absolute inset-0 hero-daylight-vignette"></div>
-            <div class="relative max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-full flex flex-col justify-center pt-28 pb-28 text-white">
+            <div class="relative w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 h-full flex flex-col justify-center pt-28 pb-28 text-white">
                 <div class="max-w-3xl">
                     <span class="inline-flex items-center gap-2 bg-amber-600 text-white text-[11px] font-bold uppercase tracking-widest px-3 py-1 rounded-full mb-4 shadow-sm">
                         <i class="fa-solid fa-shield-halved"></i> <span data-i18n="hero_5_badge">Otomasi Gerbang & CEISA 4.0</span>
@@ -685,7 +764,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 
         <!-- PROGRESS BAR BOTTOM TABS (TERLETAK PASTI DI BOTTOM: 0, TIDAK BISA TERTABRAK HEADER!) -->
         <div class="absolute bottom-0 left-0 right-0 z-30 pt-6 pb-5 bg-gradient-to-t from-slate-950 via-slate-950/70 to-transparent">
-            <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3 sm:gap-4 border-t border-white/20 pt-3">
                     
                     <div class="hero-tab active" onclick="switchHeroSlide(0)">
@@ -731,8 +810,49 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 4. LATEST UPDATES (Petronas Media Releases / News Section - CERAH)  -->
     <!-- =================================================================== -->
-    <section id="updates" class="py-14 sm:py-16 bg-white text-slate-800 relative">
-        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="updates" class="py-14 sm:py-16 bg-white text-slate-800 relative overflow-hidden">
+        <!-- Subtle Luxury Batik Kawung Maritim Watermark Background -->
+        <div class="absolute inset-0 pointer-events-none opacity-[0.045] z-0 overflow-hidden select-none" aria-hidden="true">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="patUpdatesKawung" width="56" height="56" patternUnits="userSpaceOnUse">
+                        <g stroke="#0170b9" stroke-width="1.1" fill="none">
+                            <ellipse cx="28" cy="14" rx="8" ry="13" />
+                            <ellipse cx="28" cy="42" rx="8" ry="13" />
+                            <ellipse cx="14" cy="28" rx="13" ry="8" />
+                            <ellipse cx="42" cy="28" rx="13" ry="8" />
+                            <ellipse cx="28" cy="14" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
+                            <ellipse cx="28" cy="42" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
+                            <ellipse cx="14" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
+                            <ellipse cx="42" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
+                            <ellipse cx="0" cy="0" rx="8" ry="13" />
+                            <ellipse cx="56" cy="0" rx="8" ry="13" />
+                            <ellipse cx="0" cy="56" rx="8" ry="13" />
+                            <ellipse cx="56" cy="56" rx="8" ry="13" />
+                        </g>
+                        <circle cx="28" cy="28" r="2.5" fill="#ea580c" />
+                        <circle cx="0" cy="0" r="2" fill="#ea580c" />
+                        <circle cx="56" cy="0" r="2" fill="#ea580c" />
+                        <circle cx="0" cy="56" r="2" fill="#ea580c" />
+                        <circle cx="56" cy="56" r="2" fill="#ea580c" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#patUpdatesKawung)" />
+            </svg>
+        </div>
+        <!-- Decorative Ambient Corner Rosette Watermark -->
+        <div class="absolute -right-16 -top-16 w-80 h-80 pointer-events-none opacity-[0.05] z-0" aria-hidden="true">
+            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.5">
+                <ellipse cx="50" cy="22" rx="16" ry="24" />
+                <ellipse cx="50" cy="78" rx="16" ry="24" />
+                <ellipse cx="22" cy="50" rx="24" ry="16" />
+                <ellipse cx="78" cy="50" rx="24" ry="16" />
+                <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
+                <circle cx="50" cy="50" r="14" stroke="#0170b9" stroke-width="1" stroke-dasharray="2 2" />
+            </svg>
+        </div>
+
+        <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
             <!-- Section Header -->
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
@@ -770,7 +890,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <div class="absolute bottom-6 left-6 right-6 text-white">
                             <div class="flex items-center justify-between text-xs font-mono text-orange-400 mb-2">
                                 <span data-i18n="upd_f_cat">KEPABEANAN & CEISA</span>
-                                <span>12 Oktober 2026</span>
+                                <span data-i18n="upd_date_1">12 Oktober 2026</span>
                             </div>
                             <h3 class="text-xl sm:text-2xl font-bold leading-snug group-hover:text-orange-300 transition-colors" data-i18n="upd_f_title">
                                 CIDP Resmikan Integrasi API Host-to-Host CEISA 4.0 Bea Cukai untuk Otomasi SPPB Real-Time
@@ -792,7 +912,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center justify-between text-xs font-mono text-slate-500 mb-1.5">
                                 <span class="text-blue-600 font-bold" data-i18n="upd_c1_cat">MAINTENANCE & REPAIR</span>
-                                <span>8 Oktober 2026</span>
+                                <span data-i18n="upd_date_2">8 Oktober 2026</span>
                             </div>
                             <h4 class="text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors leading-snug" data-i18n="upd_c1_title">
                                 Workshop M&R Rampungkan Kalibrasi Berkala 3 Unit Reach Stacker Kalmar DRG450
@@ -809,7 +929,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center justify-between text-xs font-mono text-slate-500 mb-1.5">
                                 <span class="text-purple-600 font-bold" data-i18n="upd_c2_cat">INFRASTRUKTUR NOC</span>
-                                <span>1 Oktober 2026</span>
+                                <span data-i18n="upd_date_3">1 Oktober 2026</span>
                             </div>
                             <h4 class="text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors leading-snug" data-i18n="upd_c2_title">
                                 Peningkatan Data Center Tier-3 CIDP Mencapai Uptime 99.98% untuk Sistem Billing & IoT
@@ -826,7 +946,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <div class="flex flex-col justify-center">
                             <div class="flex items-center justify-between text-xs font-mono text-slate-500 mb-1.5">
                                 <span class="text-emerald-600 font-bold" data-i18n="upd_c3_cat">KEMITRAAN EKOSISTEM</span>
-                                <span>24 September 2026</span>
+                                <span data-i18n="upd_date_4">24 September 2026</span>
                             </div>
                             <h4 class="text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors leading-snug" data-i18n="upd_c3_title">
                                 Pembukaan Loket Satu Atap Bea Cukai, Bank Mandiri, dan Kantor Perwakilan ALFI
@@ -847,23 +967,43 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 5. OUR INTERMODAL JOURNEY (Petronas 3-Card Transition Journey)       -->
     <!-- =================================================================== -->
-    <section id="pillars" class="py-14 sm:py-16 bg-slate-50 border-y border-slate-200">
-        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="pillars" class="py-14 sm:py-16 bg-slate-50 border-y border-slate-200 relative overflow-hidden">
+        <!-- Subtle Batik Parang Bahari Watermark Background -->
+        <div class="absolute inset-0 pointer-events-none opacity-[0.038] z-0 overflow-hidden select-none" aria-hidden="true">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="patPillarsParang" width="48" height="48" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                        <g stroke="#0170b9" stroke-width="1.1" fill="none">
+                            <path d="M 0 12 Q 12 6, 24 12 T 48 12" />
+                            <path d="M 0 24 Q 12 18, 24 24 T 48 24" />
+                            <path d="M 0 36 Q 12 30, 24 36 T 48 36" />
+                            <polygon points="12,12 15,9 18,12 15,15" fill="#ea580c" />
+                            <polygon points="36,24 39,21 42,24 39,27" fill="#ea580c" />
+                            <circle cx="24" cy="18" r="1.5" fill="#0170b9" />
+                            <circle cx="12" cy="30" r="1.5" fill="#0170b9" />
+                        </g>
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#patPillarsParang)" />
+            </svg>
+        </div>
+
+        <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
             <!-- Section Header -->
             <div class="flex flex-col md:flex-row md:items-end justify-between mb-8 sm:mb-10 gap-4">
                 <div>
-                    <span class="text-xs font-bold uppercase tracking-widest text-orange-600">TRIDHARMA LOGISTIK CIDP</span>
-                    <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mt-1.5">
+                    <span class="text-xs font-bold uppercase tracking-widest text-orange-600" data-i18n="pil_tag">TRIDHARMA LOGISTIK CIDP</span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mt-1.5" data-i18n-html="pil_title">
                         Pilar <span class="text-orange-600">Ekosistem Digital</span> Terpadu
                     </h2>
-                    <p class="text-slate-600 text-xs sm:text-sm mt-1.5 max-w-xl">
+                    <p class="text-slate-600 text-xs sm:text-sm mt-1.5 max-w-xl" data-i18n="pil_desc">
                         Tiga sistem inti untuk melacak, menggerakkan, dan mengonsolidasi muatan kargo antarmoda secara presisi.
                     </p>
                 </div>
                 <button type="button" onclick="openLoginModal()" class="link-arrow-circle text-orange-600 hover:text-orange-700">
                     <i><i class="fa-solid fa-arrow-right"></i></i>
-                    <span>Buka Seluruh Modul Terpadu</span>
+                    <span data-i18n="pil_all">Buka Seluruh Modul Terpadu</span>
                 </button>
             </div>
 
@@ -877,25 +1017,25 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     
                     <!-- Default State -->
                     <div class="box-base text-white">
-                        <div class="text-xs font-mono text-amber-300 uppercase tracking-widest mb-1">01 &bull; MANAJEMEN LAPANGAN</div>
-                        <h3 class="text-2xl font-black">Yard Management System</h3>
+                        <div class="text-xs font-mono text-amber-300 uppercase tracking-widest mb-1" data-i18n-html="pil_card1_base_tag">01 &bull; MANAJEMEN LAPANGAN</div>
+                        <h3 class="text-2xl font-black" data-i18n="pil_card1_base_title">Yard Management System</h3>
                         <div class="mt-3 flex items-center gap-2 text-xs text-slate-200">
-                            <span>Arahkan kursor untuk rincian</span>
+                            <span data-i18n="pil_hover_hint">Arahkan kursor untuk rincian</span>
                             <i class="fa-solid fa-arrow-up text-[10px]"></i>
                         </div>
                     </div>
 
                     <!-- Hover State -->
                     <div class="box-hover text-white">
-                        <div class="text-xs font-mono text-amber-300 uppercase tracking-widest mb-1">01 &bull; YMS ENGINE</div>
-                        <h4 class="text-xl font-black mb-2">Presisi Spasial & Zero Misplacement</h4>
-                        <p class="text-xs text-slate-200 leading-relaxed mb-4">
+                        <div class="text-xs font-mono text-amber-300 uppercase tracking-widest mb-1" data-i18n-html="pil_card1_hover_tag">01 &bull; YMS ENGINE</div>
+                        <h4 class="text-xl font-black mb-2" data-i18n="pil_card1_hover_title">Presisi Spasial & Zero Misplacement</h4>
+                        <p class="text-xs text-slate-200 leading-relaxed mb-4" data-i18n="pil_card1_hover_desc">
                             Otomasi penataan Blok A hingga E dengan batasan 4-tier stacking, kalkulasi dwell time otomatis, dan pelacakan GPS alat berat Kalmar Reach Stacker dalam visualisasi denah interaktif.
                         </p>
                         <div class="pt-3 border-t border-white/20 flex items-center justify-between">
-                            <span class="text-[11px] font-mono text-emerald-300"><i class="fa-solid fa-check mr-1"></i> 100% Akurasi Slot</span>
+                            <span class="text-[11px] font-mono text-emerald-300"><i class="fa-solid fa-check mr-1"></i> <span data-i18n="pil_card1_hover_stat">100% Akurasi Slot</span></span>
                             <button type="button" onclick="openLoginModal()" class="text-xs font-bold text-amber-300 hover:text-white flex items-center gap-1.5">
-                                <span>Buka Modul</span>
+                                <span data-i18n="pil_card1_btn">Buka Modul</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </button>
                         </div>
@@ -909,25 +1049,25 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     
                     <!-- Default State -->
                     <div class="box-base text-white">
-                        <div class="text-xs font-mono text-cyan-300 uppercase tracking-widest mb-1">02 &bull; ANTARMODA KERETA & TRUK</div>
-                        <h3 class="text-2xl font-black">Transport Management System</h3>
+                        <div class="text-xs font-mono text-cyan-300 uppercase tracking-widest mb-1" data-i18n-html="pil_card2_base_tag">02 &bull; ANTARMODA KERETA & TRUK</div>
+                        <h3 class="text-2xl font-black" data-i18n="pil_card2_base_title">Transport Management System</h3>
                         <div class="mt-3 flex items-center gap-2 text-xs text-slate-200">
-                            <span>Arahkan kursor untuk rincian</span>
+                            <span data-i18n="pil_hover_hint">Arahkan kursor untuk rincian</span>
                             <i class="fa-solid fa-arrow-up text-[10px]"></i>
                         </div>
                     </div>
 
                     <!-- Hover State -->
                     <div class="box-hover text-white">
-                        <div class="text-xs font-mono text-cyan-300 uppercase tracking-widest mb-1">02 &bull; TMS ENGINE</div>
-                        <h4 class="text-xl font-black mb-2">Sinkronisasi Shunting Pasoso</h4>
-                        <p class="text-xs text-slate-200 leading-relaxed mb-4">
+                        <div class="text-xs font-mono text-cyan-300 uppercase tracking-widest mb-1" data-i18n-html="pil_card2_hover_tag">02 &bull; TMS ENGINE</div>
+                        <h4 class="text-xl font-black mb-2" data-i18n="pil_card2_hover_title">Sinkronisasi Shunting Pasoso</h4>
+                        <p class="text-xs text-slate-200 leading-relaxed mb-4" data-i18n-html="pil_card2_hover_desc">
                             Manajemen jadwal rangkaian 60 TEU kereta api logistik rute Tanjung Priok &ndash; CIDP, serta pengaturan internal shunting Head Truck KTT-01/02/03 demi kelancaran gate dispatch.
                         </p>
                         <div class="pt-3 border-t border-white/20 flex items-center justify-between">
-                            <span class="text-[11px] font-mono text-cyan-300"><i class="fa-solid fa-train mr-1"></i> Rangkaian 60 TEU</span>
+                            <span class="text-[11px] font-mono text-cyan-300"><i class="fa-solid fa-train mr-1"></i> <span data-i18n="pil_card2_hover_stat">Rangkaian 60 TEU</span></span>
                             <button type="button" onclick="openLoginModal()" class="text-xs font-bold text-cyan-300 hover:text-white flex items-center gap-1.5">
-                                <span>Buka Modul</span>
+                                <span data-i18n="pil_card2_btn">Buka Modul</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </button>
                         </div>
@@ -941,25 +1081,25 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     
                     <!-- Default State -->
                     <div class="box-base text-white">
-                        <div class="text-xs font-mono text-emerald-300 uppercase tracking-widest mb-1">03 &bull; CFS & GUDANG KONSOLIDASI</div>
-                        <h3 class="text-2xl font-black">Warehouse Management System</h3>
+                        <div class="text-xs font-mono text-emerald-300 uppercase tracking-widest mb-1" data-i18n-html="pil_card3_base_tag">03 &bull; CFS & GUDANG KONSOLIDASI</div>
+                        <h3 class="text-2xl font-black" data-i18n="pil_card3_base_title">Warehouse Management System</h3>
                         <div class="mt-3 flex items-center gap-2 text-xs text-slate-200">
-                            <span>Arahkan kursor untuk rincian</span>
+                            <span data-i18n="pil_hover_hint">Arahkan kursor untuk rincian</span>
                             <i class="fa-solid fa-arrow-up text-[10px]"></i>
                         </div>
                     </div>
 
                     <!-- Hover State -->
                     <div class="box-hover text-white">
-                        <div class="text-xs font-mono text-emerald-300 uppercase tracking-widest mb-1">03 &bull; WMS & CFS ENGINE</div>
-                        <h4 class="text-xl font-black mb-2">Stripping, Stuffing & Barcoding</h4>
-                        <p class="text-xs text-slate-200 leading-relaxed mb-4">
+                        <div class="text-xs font-mono text-emerald-300 uppercase tracking-widest mb-1" data-i18n-html="pil_card3_hover_tag">03 &bull; WMS & CFS ENGINE</div>
+                        <h4 class="text-xl font-black mb-2" data-i18n="pil_card3_hover_title">Stripping, Stuffing & Barcoding</h4>
+                        <p class="text-xs text-slate-200 leading-relaxed mb-4" data-i18n="pil_card3_hover_desc">
                             Pengelolaan alur konsolidasi LCL/FCL, pelacakan barcode palet berstandar GS1, penataan racking gudang CFS, dan koneksi langsung dengan penagihan biaya storage ERP.
                         </p>
                         <div class="pt-3 border-t border-white/20 flex items-center justify-between">
-                            <span class="text-[11px] font-mono text-emerald-300"><i class="fa-solid fa-barcode mr-1"></i> Barcode GS1 Ready</span>
+                            <span class="text-[11px] font-mono text-emerald-300"><i class="fa-solid fa-barcode mr-1"></i> <span data-i18n="pil_card3_hover_stat">Barcode GS1 Ready</span></span>
                             <button type="button" onclick="openLoginModal()" class="text-xs font-bold text-emerald-300 hover:text-white flex items-center gap-1.5">
-                                <span>Buka Modul</span>
+                                <span data-i18n="pil_card3_btn">Buka Modul</span>
                                 <i class="fa-solid fa-arrow-right text-[10px]"></i>
                             </button>
                         </div>
@@ -978,15 +1118,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         <!-- Subtle Pattern Overlay -->
         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]"></div>
 
-        <div class="relative z-10 max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
             <!-- Heading -->
             <div class="max-w-2xl mb-8">
-                <span class="text-xs font-mono text-amber-300 uppercase tracking-widest font-bold">KINERJA OPERASIONAL &amp; HSSE</span>
-                <h2 class="text-2xl sm:text-4xl font-black text-white mt-1.5 leading-tight">
+                <span class="text-xs font-mono text-amber-300 uppercase tracking-widest font-bold" data-i18n="perf_tag">KINERJA OPERASIONAL &amp; HSSE</span>
+                <h2 class="text-2xl sm:text-4xl font-black text-white mt-1.5 leading-tight" data-i18n-html="perf_title">
                     Hasil Kinerja Terminal <br><span class="text-amber-300">Tahun Berjalan 2026</span>
                 </h2>
-                <p class="text-blue-100 text-xs sm:text-sm mt-2 leading-relaxed font-normal">
+                <p class="text-blue-100 text-xs sm:text-sm mt-2 leading-relaxed font-normal" data-i18n="perf_desc">
                     Efisiensi teruji melalui integrasi digital penuh dan koridor kereta kargo antarmoda terpadu.
                 </p>
             </div>
@@ -995,29 +1135,29 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mb-8 sm:mb-10">
                 
                 <div class="rounded-2xl p-6 bg-white/15 backdrop-blur-md border border-white/25 shadow-xl">
-                    <div class="text-xs font-mono text-blue-100 uppercase tracking-wider font-semibold">Kapasitas Throughput</div>
-                    <div class="text-3xl sm:text-4xl font-extrabold text-white my-3 font-mono">45.000 <span class="text-xl text-amber-300">TEU</span></div>
+                    <div class="text-xs font-mono text-blue-100 uppercase tracking-wider font-semibold" data-i18n="perf_kpi1_title">Kapasitas Throughput</div>
+                    <div class="text-3xl sm:text-4xl font-extrabold text-white my-3 font-mono">45.000 <span class="text-xl text-amber-300" data-i18n="perf_kpi1_unit">TEU</span></div>
                     <div class="text-xs text-blue-100 flex items-center gap-1.5">
                         <i class="fa-solid fa-arrow-trend-up text-amber-300"></i>
-                        <span>Meningkat 28% dibandingkan tahun lalu</span>
+                        <span data-i18n="perf_kpi1_sub">Meningkat 28% dibandingkan tahun lalu</span>
                     </div>
                 </div>
 
                 <div class="rounded-2xl p-6 bg-white/15 backdrop-blur-md border border-white/25 shadow-xl">
-                    <div class="text-xs font-mono text-blue-100 uppercase tracking-wider font-semibold">Rata-Rata Dwell Time</div>
-                    <div class="text-3xl sm:text-4xl font-extrabold text-white my-3 font-mono">1.8 <span class="text-xl text-cyan-300">Hari</span></div>
+                    <div class="text-xs font-mono text-blue-100 uppercase tracking-wider font-semibold" data-i18n="perf_kpi2_title">Rata-Rata Dwell Time</div>
+                    <div class="text-3xl sm:text-4xl font-extrabold text-white my-3 font-mono">1.8 <span class="text-xl text-cyan-300" data-i18n="perf_kpi2_unit">Hari</span></div>
                     <div class="text-xs text-blue-100 flex items-center gap-1.5">
                         <i class="fa-solid fa-clock text-cyan-300"></i>
-                        <span>Di bawah rata-rata konvensional 3.8 hari</span>
+                        <span data-i18n="perf_kpi2_sub">Di bawah rata-rata konvensional 3.8 hari</span>
                     </div>
                 </div>
 
                 <div class="rounded-2xl p-6 bg-white/15 backdrop-blur-md border border-white/25 shadow-xl">
-                    <div class="text-xs font-mono text-blue-100 uppercase tracking-wider font-semibold">Reduksi Emisi Gas Buang (CO₂)</div>
-                    <div class="text-3xl sm:text-4xl font-extrabold text-white my-3 font-mono">-76% <span class="text-xl text-emerald-300">CO₂</span></div>
+                    <div class="text-xs font-mono text-blue-100 uppercase tracking-wider font-semibold" data-i18n="perf_kpi3_title">Reduksi Emisi Gas Buang (CO₂)</div>
+                    <div class="text-3xl sm:text-4xl font-extrabold text-white my-3 font-mono">-76% <span class="text-xl text-emerald-300" data-i18n="perf_kpi3_unit">CO₂</span></div>
                     <div class="text-xs text-blue-100 flex items-center gap-1.5">
                         <i class="fa-solid fa-leaf text-emerald-300"></i>
-                        <span>Pengalihan ke moda kereta logistik hijau</span>
+                        <span data-i18n="perf_kpi3_sub">Pengalihan ke moda kereta logistik hijau</span>
                     </div>
                 </div>
 
@@ -1028,9 +1168,9 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-file-pdf text-amber-300"></i>
-                        <span>Dokumen Regulasi, SOP & Laporan Resmi</span>
+                        <span data-i18n="perf_doc_title">Dokumen Regulasi, SOP & Laporan Resmi</span>
                     </h3>
-                    <span class="text-xs font-mono text-blue-200">Format: Dokumen Resmi Terverifikasi</span>
+                    <span class="text-xs font-mono text-blue-200" data-i18n="perf_doc_format">Format: Dokumen Resmi Terverifikasi</span>
                 </div>
 
                 <div class="space-y-3">
@@ -1042,15 +1182,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 SOP
                             </div>
                             <div>
-                                <div class="text-sm font-bold text-white">Standar Operasional Prosedur (SOP) Gate In/Out & Pemeriksaan CEISA 4.0</div>
-                                <div class="text-[11px] text-blue-100">Pedoman resmi pengemudi truk, kartu RFID, dan validasi SPPB Bea Cukai</div>
+                                <div class="text-sm font-bold text-white" data-i18n="perf_doc1_title">Standar Operasional Prosedur (SOP) Gate In/Out & Pemeriksaan CEISA 4.0</div>
+                                <div class="text-[11px] text-blue-100" data-i18n="perf_doc1_desc">Pedoman resmi pengemudi truk, kartu RFID, dan validasi SPPB Bea Cukai</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-4 text-xs font-mono text-blue-100">
-                            <span>28 Feb 2026</span>
+                            <span data-i18n="perf_doc1_date">28 Feb 2026</span>
                             <a href="docs/CIDP_DPMS_Comprehensive_Tutorial_Guide.docx" download class="px-4 py-2 rounded-xl bg-white text-cdp-navy hover:bg-orange-500 hover:text-white font-bold transition-all shadow-xs flex items-center gap-2">
                                 <i class="fa-solid fa-download text-xs"></i>
-                                <span>Unduh</span>
+                                <span data-i18n="perf_doc_btn">Unduh</span>
                             </a>
                         </div>
                     </div>
@@ -1062,15 +1202,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 LPR
                             </div>
                             <div>
-                                <div class="text-sm font-bold text-white">Laporan Kinerja Integrasi Antarmoda Dry Port FY2025/2026</div>
-                                <div class="text-[11px] text-blue-100">Analisis statistik dwell time, penghematan bahan bakar, dan throughput kontainer</div>
+                                <div class="text-sm font-bold text-white" data-i18n="perf_doc2_title">Laporan Kinerja Integrasi Antarmoda Dry Port FY2025/2026</div>
+                                <div class="text-[11px] text-blue-100" data-i18n="perf_doc2_desc">Analisis statistik dwell time, penghematan bahan bakar, dan throughput kontainer</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-4 text-xs font-mono text-blue-100">
-                            <span>15 Jan 2026</span>
+                            <span data-i18n="perf_doc2_date">15 Jan 2026</span>
                             <a href="docs/CIDP_DPMS_Comprehensive_Tutorial_Guide.docx" download class="px-4 py-2 rounded-xl bg-white text-cdp-navy hover:bg-cyan-500 hover:text-white font-bold transition-all shadow-xs flex items-center gap-2">
                                 <i class="fa-solid fa-download text-xs"></i>
-                                <span>Unduh</span>
+                                <span data-i18n="perf_doc_btn">Unduh</span>
                             </a>
                         </div>
                     </div>
@@ -1082,15 +1222,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 K3
                             </div>
                             <div>
-                                <div class="text-sm font-bold text-white">Manual Kepatuhan HSSE & Tanggap Darurat Dangerous Goods (DG Yard)</div>
-                                <div class="text-[11px] text-blue-100">Protokol keselamatan kerja zona penumpukan muatan B3 berstandar IMO</div>
+                                <div class="text-sm font-bold text-white" data-i18n="perf_doc3_title">Manual Kepatuhan HSSE & Tanggap Darurat Dangerous Goods (DG Yard)</div>
+                                <div class="text-[11px] text-blue-100" data-i18n="perf_doc3_desc">Protokol keselamatan kerja zona penumpukan muatan B3 berstandar IMO</div>
                             </div>
                         </div>
                         <div class="flex items-center gap-4 text-xs font-mono text-blue-100">
-                            <span>10 Jan 2026</span>
+                            <span data-i18n="perf_doc3_date">10 Jan 2026</span>
                             <a href="docs/CIDP_DPMS_Comprehensive_Tutorial_Guide.docx" download class="px-4 py-2 rounded-xl bg-white text-cdp-navy hover:bg-emerald-500 hover:text-white font-bold transition-all shadow-xs flex items-center gap-2">
                                 <i class="fa-solid fa-download text-xs"></i>
-                                <span>Unduh</span>
+                                <span data-i18n="perf_doc_btn">Unduh</span>
                             </a>
                         </div>
                     </div>
@@ -1104,16 +1244,57 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 7. HIGHLIGHTS (Petronas Accordion + Dynamic Image Swap - CERAH)      -->
     <!-- =================================================================== -->
-    <section id="highlights" class="py-14 sm:py-16 bg-white text-slate-800 relative">
-        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="highlights" class="py-14 sm:py-16 bg-white text-slate-800 relative overflow-hidden">
+        <!-- Subtle Luxury Batik Kawung Maritim Watermark Background -->
+        <div class="absolute inset-0 pointer-events-none opacity-[0.045] z-0 overflow-hidden select-none" aria-hidden="true">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="patHighlightsKawung" width="56" height="56" patternUnits="userSpaceOnUse">
+                        <g stroke="#0170b9" stroke-width="1.1" fill="none">
+                            <ellipse cx="28" cy="14" rx="8" ry="13" />
+                            <ellipse cx="28" cy="42" rx="8" ry="13" />
+                            <ellipse cx="14" cy="28" rx="13" ry="8" />
+                            <ellipse cx="42" cy="28" rx="13" ry="8" />
+                            <ellipse cx="28" cy="14" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
+                            <ellipse cx="28" cy="42" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
+                            <ellipse cx="14" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
+                            <ellipse cx="42" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
+                            <ellipse cx="0" cy="0" rx="8" ry="13" />
+                            <ellipse cx="56" cy="0" rx="8" ry="13" />
+                            <ellipse cx="0" cy="56" rx="8" ry="13" />
+                            <ellipse cx="56" cy="56" rx="8" ry="13" />
+                        </g>
+                        <circle cx="28" cy="28" r="2.5" fill="#ea580c" />
+                        <circle cx="0" cy="0" r="2" fill="#ea580c" />
+                        <circle cx="56" cy="0" r="2" fill="#ea580c" />
+                        <circle cx="0" cy="56" r="2" fill="#ea580c" />
+                        <circle cx="56" cy="56" r="2" fill="#ea580c" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#patHighlightsKawung)" />
+            </svg>
+        </div>
+        <!-- Decorative Ambient Corner Rosette Watermark -->
+        <div class="absolute -left-16 -bottom-16 w-80 h-80 pointer-events-none opacity-[0.05] z-0" aria-hidden="true">
+            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.5">
+                <ellipse cx="50" cy="22" rx="16" ry="24" />
+                <ellipse cx="50" cy="78" rx="16" ry="24" />
+                <ellipse cx="22" cy="50" rx="24" ry="16" />
+                <ellipse cx="78" cy="50" rx="24" ry="16" />
+                <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
+                <circle cx="50" cy="50" r="14" stroke="#0170b9" stroke-width="1" stroke-dasharray="2 2" />
+            </svg>
+        </div>
+
+        <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
             <!-- Section Header -->
             <div class="mb-8">
-                <span class="text-xs font-mono text-orange-600 uppercase tracking-widest font-bold">INFRASTRUKTUR TERMINAL 35 HA</span>
-                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-1">
+                <span class="text-xs font-mono text-orange-600 uppercase tracking-widest font-bold" data-i18n="fac_tag">INFRASTRUKTUR TERMINAL 35 HA</span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-1" data-i18n-html="fac_title">
                     Sorotan <span class="text-orange-600">Fasilitas Unggulan</span>
                 </h2>
-                <p class="text-slate-500 text-xs sm:text-sm mt-1 max-w-xl">
+                <p class="text-slate-500 text-xs sm:text-sm mt-1 max-w-xl" data-i18n="fac_desc">
                     Pilih fasilitas untuk memeriksa spesifikasi teknis dan visualisasi operasional.
                 </p>
             </div>
@@ -1134,7 +1315,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 Data Center Tier-3 & Network Operations Center (NOC)
                             </h4>
                             <div id="highlightSpecs" class="mt-2.5 flex flex-wrap gap-2 text-[10px] text-slate-200">
-                                <span class="bg-white/15 px-2.5 py-0.5 rounded backdrop-blur-xs font-mono">Uptime 99.98%</span>
+                                <span class="bg-white/15 px-2.5 py-0.5 rounded backdrop-blur-xs font-mono">Tier-3 Uptime 99.98%</span>
                                 <span class="bg-white/15 px-2.5 py-0.5 rounded backdrop-blur-xs font-mono">26 Sensor IoT</span>
                                 <span class="bg-white/15 px-2.5 py-0.5 rounded backdrop-blur-xs font-mono">Redundansi Cloud</span>
                             </div>
@@ -1146,7 +1327,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <div class="lg:col-span-6 space-y-3">
                     
                     <!-- Accordion Item 1 (Active by default) -->
-                    <div class="accordion-item-box p-4 rounded-2xl bg-orange-50/50 border border-orange-500 cursor-pointer transition-all shadow-xs" onclick="selectHighlight(0, 'assets/img/facilities/datacenter_noc.jpg', 'PUSAT KENDALI NOC', 'Data Center Tier-3 & Network Operations Center (NOC)', ['Uptime 99.98%', '26 Sensor IoT', 'Redundansi Cloud'])">
+                    <div class="accordion-item-box p-4 rounded-2xl bg-orange-50/50 border border-orange-500 cursor-pointer transition-all shadow-xs" onclick="selectHighlight(0)">
                         <!-- Mobile Thumbnail -->
                         <div class="lg:hidden w-full h-40 rounded-xl bg-cover bg-center mb-3 shadow-xs" style="background-image: url('assets/img/facilities/datacenter_noc.jpg');"></div>
                         <div class="flex items-center justify-between">
@@ -1155,24 +1336,24 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                     01
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">Data Center Tier-3 & NOC CIDP</h3>
-                                    <div class="text-[11px] text-slate-500">Pusat Komando Jaringan & Telemetri</div>
+                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="fac_item1_title">Data Center Tier-3 & NOC CIDP</h3>
+                                    <div class="text-[11px] text-slate-500" data-i18n="fac_item1_sub">Pusat Komando Jaringan & Telemetri</div>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-right text-orange-600 text-xs"></i>
                         </div>
                         <div class="accordion-desc mt-2.5 text-xs text-slate-600 leading-relaxed pl-11">
-                            <p class="mb-2">Pusat kontrol 26 perangkat hardware IoT, server redundansi DPMS, dan pengawasan CCTV AI perimeter berkesinambungan.</p>
+                            <p class="mb-2" data-i18n="fac_item1_desc">Pusat kontrol 26 perangkat hardware IoT, server redundansi DPMS, dan pengawasan CCTV AI perimeter berkesinambungan.</p>
                             <div class="flex flex-wrap gap-1.5 text-[10px]">
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">Tier-3 Uptime 99.98%</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">26 Hardware IoT</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">AI Perimeter CCTV</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item1_tag1">Tier-3 Uptime 99.98%</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item1_tag2">26 Hardware IoT</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item1_tag3">AI Perimeter CCTV</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Accordion Item 2 -->
-                    <div class="accordion-item-box p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-slate-300 transition-all" onclick="selectHighlight(1, 'assets/img/facilities/workshop_mr.jpg', 'BENGKEL ALAT & KONTAINER', 'Workshop Maintenance & Repair (M&R) Kalmar', ['Standar IICL', 'Kalmar DRG450', 'Uji Segel ISO'])">
+                    <div class="accordion-item-box p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-slate-300 transition-all" onclick="selectHighlight(1)">
                         <!-- Mobile Thumbnail -->
                         <div class="lg:hidden w-full h-40 rounded-xl bg-cover bg-center mb-3 shadow-xs" style="background-image: url('assets/img/facilities/workshop_mr.jpg');"></div>
                         <div class="flex items-center justify-between">
@@ -1181,24 +1362,22 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                     02
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">Workshop Maintenance & Repair (M&R)</h3>
-                                    <div class="text-[11px] text-slate-500">Bengkel Kalmar & Rekondisi Kontainer</div>
+                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="fac_item2_title">Workshop Maintenance & Repair (M&R)</h3>
+                                    <div class="text-[11px] text-slate-500" data-i18n="fac_item2_sub">Bengkel Kalmar & Rekondisi Kontainer</div>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </div>
                         <div class="accordion-desc mt-2.5 text-xs text-slate-600 leading-relaxed pl-11 hidden">
-                            <p class="mb-2">Pemeliharaan alat berat Kalmar Reach Stacker, pengelasan struktur kontainer, dan pencucian kimia standar IICL.</p>
+                            <p class="mb-2" data-i18n="fac_item2_desc">Pemeliharaan alat berat Kalmar Reach Stacker, pengelasan struktur kontainer, dan pencucian kimia standar IICL.</p>
                             <div class="flex flex-wrap gap-1.5 text-[10px]">
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">Standar IICL</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">Kalmar DRG450 Care</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">Uji Segel ISO</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item2_tag1">Standar IICL</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item2_tag2">Kalmar DRG450 Care</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item2_tag3">Uji Segel ISO</span>
                             </div>
                         </div>
-                    </div>
-
                     <!-- Accordion Item 3 -->
-                    <div class="accordion-item-box p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-slate-300 transition-all" onclick="selectHighlight(2, 'assets/img/facilities/gatehouse_in.jpg', 'GERBANG OTOMATIS & TIMBANGAN', 'Gatehouse Otomatis 4 Lajur OCR & Timbangan Gantry', ['4 Lajur Ganda', 'OCR & UHF RFID', 'Timbangan 80 Ton'])">
+                    <div class="accordion-item-box p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-slate-300 transition-all" onclick="selectHighlight(2)">
                         <!-- Mobile Thumbnail -->
                         <div class="lg:hidden w-full h-40 rounded-xl bg-cover bg-center mb-3 shadow-xs" style="background-image: url('assets/img/facilities/gatehouse_in.jpg');"></div>
                         <div class="flex items-center justify-between">
@@ -1207,24 +1386,24 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                     03
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">Gatehouse Otomatis 4 Lajur & Timbangan</h3>
-                                    <div class="text-[11px] text-slate-500">Otomasi Gerbang & Verifikasi Muatan</div>
+                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="fac_item3_title">Gatehouse Otomatis 4 Lajur & Timbangan</h3>
+                                    <div class="text-[11px] text-slate-500" data-i18n="fac_item3_sub">Otomasi Gerbang & Verifikasi Muatan</div>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </div>
                         <div class="accordion-desc mt-2.5 text-xs text-slate-600 leading-relaxed pl-11 hidden">
-                            <p class="mb-2">Empat lajur otomatis dengan kamera OCR nomor kontainer & pelat truk, scanner RFID UHF, dan timbangan 80 ton.</p>
+                            <p class="mb-2" data-i18n="fac_item3_desc">Empat lajur otomatis dengan kamera OCR nomor kontainer & pelat truk, scanner RFID UHF, dan timbangan 80 ton.</p>
                             <div class="flex flex-wrap gap-1.5 text-[10px]">
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">4 Lajur Cerdas</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">OCR & RFID UHF</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">Jembatan Timbang 80 Ton</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item3_tag1">4 Lajur Cerdas</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item3_tag2">OCR & RFID UHF</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item3_tag3">Jembatan Timbang 80 Ton</span>
                             </div>
                         </div>
                     </div>
 
                     <!-- Accordion Item 4 -->
-                    <div class="accordion-item-box p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-slate-300 transition-all" onclick="selectHighlight(3, 'assets/img/facilities/kantor_utama.jpg', 'LAYANAN SATU ATAP', 'Gedung Administrasi & Hanggar Bea Cukai CIDP', ['Hanggar Bea Cukai', 'One Stop Service', 'Host CEISA 4.0'])">
+                    <div class="accordion-item-box p-4 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-slate-300 transition-all" onclick="selectHighlight(3)">
                         <!-- Mobile Thumbnail -->
                         <div class="lg:hidden w-full h-40 rounded-xl bg-cover bg-center mb-3 shadow-xs" style="background-image: url('assets/img/facilities/kantor_utama.jpg');"></div>
                         <div class="flex items-center justify-between">
@@ -1233,18 +1412,18 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                     04
                                 </div>
                                 <div>
-                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base">Gedung Kantor Utama & Bea Cukai</h3>
-                                    <div class="text-[11px] text-slate-500">Pusat Pelayanan Terpadu & Perbankan</div>
+                                    <h3 class="font-bold text-slate-900 text-sm sm:text-base" data-i18n="fac_item4_title">Gedung Kantor Utama & Bea Cukai</h3>
+                                    <div class="text-[11px] text-slate-500" data-i18n="fac_item4_sub">Pusat Pelayanan Terpadu & Perbankan</div>
                                 </div>
                             </div>
                             <i class="fa-solid fa-chevron-right text-slate-400 text-xs"></i>
                         </div>
                         <div class="accordion-desc mt-2.5 text-xs text-slate-600 leading-relaxed pl-11 hidden">
-                            <p class="mb-2">Pelayanan satu atap (One Stop Service) terpadu: perwakilan Hanggar Bea Cukai, perbankan, dan loket verifikasi dokumen.</p>
+                            <p class="mb-2" data-i18n="fac_item4_desc">Pelayanan satu atap (One Stop Service) terpadu: perwakilan Hanggar Bea Cukai, perbankan, dan loket verifikasi dokumen.</p>
                             <div class="flex flex-wrap gap-1.5 text-[10px]">
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">Hanggar Bea Cukai</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">One Stop Service</span>
-                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono">Validasi CEISA 4.0</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item4_tag1">Hanggar Bea Cukai</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item4_tag2">One Stop Service</span>
+                                <span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 font-mono" data-i18n="fac_item4_tag3">Validasi CEISA 4.0</span>
                             </div>
                         </div>
                     </div>
@@ -1259,14 +1438,44 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 8. OUR NETWORK (Petronas Collapsible Discover More Section - CERAH) -->
     <!-- =================================================================== -->
-    <section id="network" class="py-14 sm:py-16 bg-slate-50 text-slate-800 border-t border-slate-200">
-        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <section id="network" class="py-14 sm:py-16 bg-slate-50 text-slate-800 border-t border-slate-200 relative overflow-hidden">
+        <!-- Subtle Luxury Batik Kawung Maritim Watermark Background -->
+        <div class="absolute inset-0 pointer-events-none opacity-[0.038] z-0 overflow-hidden select-none" aria-hidden="true">
+            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <pattern id="patNetworkKawung" width="56" height="56" patternUnits="userSpaceOnUse">
+                        <g stroke="#0170b9" stroke-width="1.1" fill="none">
+                            <ellipse cx="28" cy="14" rx="8" ry="13" />
+                            <ellipse cx="28" cy="42" rx="8" ry="13" />
+                            <ellipse cx="14" cy="28" rx="13" ry="8" />
+                            <ellipse cx="42" cy="28" rx="13" ry="8" />
+                            <ellipse cx="28" cy="14" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
+                            <ellipse cx="28" cy="42" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
+                            <ellipse cx="14" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
+                            <ellipse cx="42" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
+                            <ellipse cx="0" cy="0" rx="8" ry="13" />
+                            <ellipse cx="56" cy="0" rx="8" ry="13" />
+                            <ellipse cx="0" cy="56" rx="8" ry="13" />
+                            <ellipse cx="56" cy="56" rx="8" ry="13" />
+                        </g>
+                        <circle cx="28" cy="28" r="2.5" fill="#ea580c" />
+                        <circle cx="0" cy="0" r="2" fill="#ea580c" />
+                        <circle cx="56" cy="0" r="2" fill="#ea580c" />
+                        <circle cx="0" cy="56" r="2" fill="#ea580c" />
+                        <circle cx="56" cy="56" r="2" fill="#ea580c" />
+                    </pattern>
+                </defs>
+                <rect width="100%" height="100%" fill="url(#patNetworkKawung)" />
+            </svg>
+        </div>
+
+        <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
             <!-- Collapsible Section Header (Petronas discover-more header) -->
             <div class="flex items-center justify-between mb-6 cursor-pointer" onclick="toggleNetworkSection()">
                 <div>
-                    <span class="text-xs font-mono text-orange-600 uppercase tracking-widest font-bold">JEJAK JARINGAN KAMI</span>
-                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1">
+                    <span class="text-xs font-mono text-orange-600 uppercase tracking-widest font-bold" data-i18n="net_tag">JEJAK JARINGAN KAMI</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1" data-i18n-html="net_title">
                         Modul Sistem DPMS &amp; Jaringan Mitra
                     </h2>
                 </div>
@@ -1282,7 +1491,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <div class="mb-8">
                     <div class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-5 flex items-center gap-2 font-bold">
                         <i class="fa-solid fa-layer-group text-orange-600"></i>
-                        <span>8 Modul Fungsional Conclusion DPMS</span>
+                        <span data-i18n="net_mod_title">8 Modul Fungsional Conclusion DPMS</span>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
@@ -1296,8 +1505,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">01</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">Gate Automation</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">RFID UHF, kamera OCR, timbangan gantry otomatis & cetak e-Ticket SPK.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m1_title">Gate Automation</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m1_desc">RFID UHF, kamera OCR, timbangan gantry otomatis & cetak e-Ticket SPK.</p>
                             </div>
                         </div>
 
@@ -1310,8 +1519,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">02</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">Yard Stacking Engine</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">Slot Blok A-E, 4-tier stacking, dan optimasi Port of Discharge.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m2_title">Yard Stacking Engine</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m2_desc">Slot Blok A-E, 4-tier stacking, dan optimasi Port of Discharge.</p>
                             </div>
                         </div>
 
@@ -1324,8 +1533,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">03</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">Rail Siding Pasoso</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">Rangkaian 60 TEU kereta kargo langsung terhubung Pelabuhan Tanjung Priok.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m3_title">Rail Siding Pasoso</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m3_desc">Rangkaian 60 TEU kereta kargo langsung terhubung Pelabuhan Tanjung Priok.</p>
                             </div>
                         </div>
 
@@ -1338,8 +1547,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">04</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">CFS Consolidation</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">Stripping/stuffing kargo LCL dan pelacakan barcode palet berstandar GS1.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m4_title">CFS Consolidation</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m4_desc">Stripping/stuffing kargo LCL dan pelacakan barcode palet berstandar GS1.</p>
                             </div>
                         </div>
 
@@ -1352,8 +1561,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">05</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">Reefer Telematics</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">120 soket plug points mandiri dengan telemetri suhu real-time presisi.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m5_title">Reefer Telematics</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m5_desc">120 soket plug points mandiri dengan telemetri suhu real-time presisi.</p>
                             </div>
                         </div>
 
@@ -1366,8 +1575,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">06</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">Equipment Telemetry</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">Telemetri BBM, jam kerja, dan GPS presisi Kalmar DRG450 Reach Stacker.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m6_title">Equipment Telemetry</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m6_desc">Telemetri BBM, jam kerja, dan GPS presisi Kalmar DRG450 Reach Stacker.</p>
                             </div>
                         </div>
 
@@ -1380,8 +1589,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">07</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">Bea Cukai CEISA 4.0</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">Pertukaran data elektronik manifes, SPPB, PEB, PIB instan DJBC.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m7_title">Bea Cukai CEISA 4.0</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m7_desc">Pertukaran data elektronik manifes, SPPB, PEB, PIB instan DJBC.</p>
                             </div>
                         </div>
 
@@ -1394,8 +1603,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 <span class="text-slate-400 text-xs font-mono">08</span>
                             </div>
                             <div class="mt-3">
-                                <h4 class="font-bold text-slate-900 text-sm">Billing ERP Engine</h4>
-                                <p class="text-xs text-slate-500 mt-1 line-clamp-2">Otomasi kalkulasi lift-on/off, penumpukan progresif & faktur e-Tax.</p>
+                                <h4 class="font-bold text-slate-900 text-sm" data-i18n="net_m8_title">Billing ERP Engine</h4>
+                                <p class="text-xs text-slate-500 mt-1 line-clamp-2" data-i18n="net_m8_desc">Otomasi kalkulasi lift-on/off, penumpukan progresif & faktur e-Tax.</p>
                             </div>
                         </div>
 
@@ -1406,25 +1615,25 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <div class="pt-8 border-t border-slate-200">
                     <div class="text-xs font-mono text-slate-500 uppercase tracking-wider mb-6 flex items-center gap-2 font-bold">
                         <i class="fa-solid fa-handshake text-cdp-blue"></i>
-                        <span>Ekosistem Mitra Logistik Terintegrasi</span>
+                        <span data-i18n="net_part_title">Ekosistem Mitra Logistik Terintegrasi</span>
                     </div>
 
                     <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
                         <div class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-orange-500 transition-colors shadow-2xs">
                             <div class="font-extrabold text-sm sm:text-base text-cdp-navy">KAI LOGISTIK</div>
-                            <div class="text-[10px] text-slate-500 mt-1">Operator Kereta Intermodal</div>
+                            <div class="text-[10px] text-slate-500 mt-1" data-i18n="net_p1_role">Operator Kereta Intermodal</div>
                         </div>
                         <div class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-orange-500 transition-colors shadow-2xs">
                             <div class="font-extrabold text-sm sm:text-base text-cdp-navy">PELINDO</div>
-                            <div class="text-[10px] text-slate-500 mt-1">Pelabuhan Tanjung Priok</div>
+                            <div class="text-[10px] text-slate-500 mt-1" data-i18n="net_p2_role">Pelabuhan Tanjung Priok</div>
                         </div>
                         <div class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-orange-500 transition-colors shadow-2xs">
                             <div class="font-extrabold text-sm sm:text-base text-cdp-navy">BEA CUKAI</div>
-                            <div class="text-[10px] text-slate-500 mt-1">CEISA 4.0 H2H Clearance</div>
+                            <div class="text-[10px] text-slate-500 mt-1" data-i18n="net_p3_role">CEISA 4.0 H2H Clearance</div>
                         </div>
                         <div class="p-4 rounded-2xl bg-white border border-slate-200 hover:border-orange-500 transition-colors shadow-2xs">
                             <div class="font-extrabold text-sm sm:text-base text-cdp-navy">ALFI / ILFA</div>
-                            <div class="text-[10px] text-slate-500 mt-1">Asosiasi Forwarder Indonesia</div>
+                            <div class="text-[10px] text-slate-500 mt-1" data-i18n="net_p4_role">Asosiasi Forwarder Indonesia</div>
                         </div>
                     </div>
                 </div>
@@ -1440,25 +1649,25 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <section id="about" class="py-12 sm:py-14 bg-gradient-to-r from-orange-600 via-orange-500 to-[#0170b9] text-white relative overflow-hidden shadow-inner">
         <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
         
-        <div class="relative z-10 max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 text-center">
             <span class="inline-flex items-center gap-2 bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest px-3.5 py-1 rounded-full mb-4 backdrop-blur-sm">
-                <i class="fa-solid fa-crown text-amber-300"></i> Solusi Dry Port Terdepan di Indonesia
+                <i class="fa-solid fa-crown text-amber-300"></i> <span data-i18n="cta_badge">Solusi Dry Port Terdepan di Indonesia</span>
             </span>
-            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight max-w-3xl mx-auto leading-tight drop-shadow-sm">
+            <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight max-w-3xl mx-auto leading-tight drop-shadow-sm" data-i18n="cta_title">
                 Siap Meningkatkan Efisiensi Rantai Pasok Anda Bersama Conclusion DPMS?
             </h2>
-            <p class="text-orange-50 text-xs sm:text-sm mt-2.5 max-w-2xl mx-auto leading-relaxed font-normal">
+            <p class="text-orange-50 text-xs sm:text-sm mt-2.5 max-w-2xl mx-auto leading-relaxed font-normal" data-i18n="cta_desc">
                 Akses konsol kendali operasional, pantau pergerakan kontainer real-time, atau jalankan simulasi 3D Digital Twin sekarang.
             </p>
 
             <div class="mt-6 flex flex-wrap items-center justify-center gap-3.5">
                 <button type="button" onclick="openLoginModal()" class="inline-flex items-center gap-2.5 px-7 py-3 rounded-full bg-white hover:bg-slate-50 text-cdp-navy font-bold text-xs uppercase tracking-wider shadow-xl transition-all duration-200 transform hover:scale-105">
                     <i class="fa-solid fa-right-to-bracket text-orange-600"></i>
-                    <span>Masuk ke Konsol DPMS</span>
+                    <span data-i18n="cta_btn1">Masuk ke Konsol DPMS</span>
                 </button>
                 <a href="dashboard.php?page=simulator" class="inline-flex items-center gap-2 px-7 py-3 rounded-full bg-white/20 hover:bg-white/30 text-white font-bold text-xs uppercase tracking-wider backdrop-blur-md border border-white/30 transition-all">
                     <i class="fa-solid fa-vr-cardboard"></i>
-                    <span>Buka Simulasi 3D Real-Time</span>
+                    <span data-i18n="cta_btn2">Buka Simulasi 3D Real-Time</span>
                 </a>
             </div>
         </div>
@@ -1468,7 +1677,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- 10. FOOTER (Petronas Multilevel Corporate Footer)                  -->
     <!-- =================================================================== -->
     <footer class="bg-[#002244] text-slate-300 text-xs border-t border-blue-900/40 relative z-20">
-        <div class="max-w-7xl 2xl:max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:pr-24 py-12 sm:py-14">
+        <div class="w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 xl:pr-24 py-12 sm:py-14">
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 mb-10">
                 
@@ -1478,16 +1687,16 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <img src="assets/img/logo.png" alt="Conclusion Logo" class="h-11 w-auto bg-white/10 rounded-xl p-1.5 border border-white/10">
                         <div>
                             <span class="font-black text-lg tracking-tight uppercase text-white block leading-tight">CONCLUSION</span>
-                            <div class="text-[10px] text-orange-400 font-bold uppercase tracking-wider">Intermodal Dry Port &bull; DPMS Platform</div>
+                            <div class="text-[10px] text-orange-400 font-bold uppercase tracking-wider" data-i18n-html="foot_platform">Intermodal Dry Port &bull; DPMS Platform</div>
                         </div>
                     </div>
-                    <p class="text-xs text-slate-300 leading-relaxed max-w-sm">
+                    <p class="text-xs text-slate-300 leading-relaxed max-w-sm" data-i18n="foot_desc">
                         Konsorsium infrastruktur pelabuhan darat 35 Hektare berstandar kelas dunia yang menghubungkan multimoda kereta api logistik, terminal peti kemas digital, serta ekosistem kepabeanan CEISA 4.0 secara berkesinambungan.
                     </p>
                     
                     <!-- Certification badges -->
                     <div class="pt-2">
-                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-2">Standar & Kepatuhan Terakreditasi</div>
+                        <div class="text-[10px] uppercase font-bold tracking-wider text-slate-400 mb-2" data-i18n="foot_col1_title">Standar & Kepatuhan Terakreditasi</div>
                         <div class="flex flex-wrap gap-2">
                             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded bg-white/5 border border-white/10 text-[10px] text-slate-200 font-mono">
                                 <i class="fa-solid fa-shield-halved text-orange-400"></i> ISPS Code
@@ -1506,15 +1715,15 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <div class="lg:col-span-3">
                     <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
                         <span class="w-1.5 h-3 bg-orange-500 rounded-full inline-block"></span>
-                        Solusi Sistem DPMS
+                        <span data-i18n="foot_col2_title">Solusi Sistem DPMS</span>
                     </h5>
                     <ul class="space-y-2.5 text-xs text-slate-300">
-                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Yard Management System (YMS)</a></li>
-                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Transport & Shunting KA (TMS)</a></li>
-                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> CFS Warehouse & Konsolidasi (WMS)</a></li>
-                        <li><a href="#highlights" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Terminal Rantai Pendingin (Reefer Hub)</a></li>
-                        <li><a href="dashboard.php?page=simulator" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> 3D Digital Twin Engine Simulator</a></li>
-                        <li><a href="#network" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Gerbang Otomatis RFID & ANPR</a></li>
+                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_sol_yms">Yard Management System (YMS)</span></a></li>
+                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_sol_tms">Transport & Shunting KA (TMS)</span></a></li>
+                        <li><a href="#pillars" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_sol_wms">CFS Warehouse & Konsolidasi (WMS)</span></a></li>
+                        <li><a href="#highlights" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_sol_reefer">Terminal Rantai Pendingin (Reefer Hub)</span></a></li>
+                        <li><a href="dashboard.php?page=simulator" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_sol_3d">3D Digital Twin Engine Simulator</span></a></li>
+                        <li><a href="#network" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_sol_gate">Gerbang Otomatis RFID & ANPR</span></a></li>
                     </ul>
                 </div>
 
@@ -1522,14 +1731,14 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <div class="lg:col-span-2">
                     <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
                         <span class="w-1.5 h-3 bg-blue-500 rounded-full inline-block"></span>
-                        Tata Kelola & HSSE
+                        <span data-i18n="foot_col3_title">Tata Kelola & HSSE</span>
                     </h5>
                     <ul class="space-y-2.5 text-xs text-slate-300">
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> SOP Gate & CEISA 4.0</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Kebijakan K3 & HSSE Terminal</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Inisiatif Dekarbonisasi Green Port</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Pedoman Pengemudi Truk Logistik</a></li>
-                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> Whistleblowing System (WBS)</a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_gov_sop">SOP Gate & CEISA 4.0</span></a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_gov_k3">Kebijakan K3 & HSSE Terminal</span></a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_gov_green">Inisiatif Dekarbonisasi Green Port</span></a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_gov_driver">Pedoman Pengemudi Truk Logistik</span></a></li>
+                        <li><a href="#documents" class="hover:text-orange-400 transition-colors flex items-center gap-2"><i class="fa-solid fa-chevron-right text-[9px] text-slate-500"></i> <span data-i18n="foot_gov_wbs">Whistleblowing System (WBS)</span></a></li>
                     </ul>
                 </div>
 
@@ -1537,27 +1746,27 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <div class="lg:col-span-3 pr-4">
                     <h5 class="text-white font-bold uppercase tracking-wider text-xs mb-4 flex items-center gap-2">
                         <span class="w-1.5 h-3 bg-emerald-500 rounded-full inline-block"></span>
-                        Pusat Operasi & Komando
+                        <span data-i18n="foot_col4_title">Pusat Operasi & Komando</span>
                     </h5>
                     <div class="space-y-3 text-xs text-slate-300">
                         <div class="flex items-start gap-2.5">
                             <i class="fa-solid fa-location-dot text-orange-400 mt-0.5 text-xs shrink-0"></i>
                             <div>
-                                <span class="text-slate-400 text-[11px] block">Terminal & Kantor Pusat:</span>
-                                <span class="text-white font-medium">Kawasan Intermodal Pasoso, Km 32 Koridor Cikarang &ndash; Tanjung Priok</span>
+                                <span class="text-slate-400 text-[11px] block" data-i18n="foot_hq_label">Terminal & Kantor Pusat:</span>
+                                <span class="text-white font-medium" data-i18n-html="foot_hq_address">Kawasan Intermodal Pasoso, Km 32 Koridor Cikarang &ndash; Tanjung Priok</span>
                             </div>
                         </div>
                         <div class="flex items-start gap-2.5">
                             <i class="fa-solid fa-phone text-orange-400 mt-0.5 text-xs shrink-0"></i>
                             <div>
-                                <span class="text-slate-400 text-[11px] block">Layanan Informasi Korporat:</span>
+                                <span class="text-slate-400 text-[11px] block" data-i18n="foot_tel_label">Layanan Informasi Korporat:</span>
                                 <span class="text-white font-medium">(021) 893-7890 (Hunting)</span>
                             </div>
                         </div>
                         <div class="flex items-start gap-2.5">
                             <i class="fa-solid fa-tower-broadcast text-blue-400 mt-0.5 text-xs shrink-0"></i>
                             <div>
-                                <span class="text-slate-400 text-[11px] block">Pusat Kendali Operasi NOC:</span>
+                                <span class="text-slate-400 text-[11px] block" data-i18n="foot_noc_label">Pusat Kendali Operasi NOC:</span>
                                 <span class="text-white font-medium">noc-support@conclusion-dryport.com</span>
                             </div>
                         </div>
@@ -1569,9 +1778,9 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                                     <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
                                 </span>
-                                <span class="text-[11px] font-bold text-white tracking-wide uppercase">Kesiapan Operasional Penuh</span>
+                                <span class="text-[11px] font-bold text-white tracking-wide uppercase" data-i18n="foot_status_title">Kesiapan Operasional Penuh</span>
                             </div>
-                            <p class="text-[10px] text-slate-400 leading-relaxed">
+                            <p class="text-[10px] text-slate-400 leading-relaxed" data-i18n="foot_status_desc">
                                 Seluruh subsistem gerbang RFID, reach stacker, rel, dan telemetri IoT beroperasi berkesinambungan dengan siklus multi-shift non-stop.
                             </p>
                         </div>
@@ -1583,24 +1792,24 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             <!-- Petronas Governance & Policy Row -->
             <div class="pt-8 border-t border-white/10 flex flex-wrap items-center justify-between gap-4 text-xs text-slate-400">
                 <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-[11px]">
-                    <a href="#documents" class="hover:text-white transition-colors">Syarat &amp; Ketentuan Layanan</a>
+                    <a href="#documents" class="hover:text-white transition-colors" data-i18n="foot_pol1">Syarat &amp; Ketentuan Layanan</a>
                     <span class="text-white/20">&bull;</span>
-                    <a href="#documents" class="hover:text-white transition-colors">Kebijakan Privasi &amp; Data</a>
+                    <a href="#documents" class="hover:text-white transition-colors" data-i18n="foot_pol2">Kebijakan Privasi &amp; Data</a>
                     <span class="text-white/20">&bull;</span>
-                    <a href="#documents" class="hover:text-white transition-colors">Whistleblowing System (WBS)</a>
+                    <a href="#documents" class="hover:text-white transition-colors" data-i18n="foot_pol3">Whistleblowing System (WBS)</a>
                     <span class="text-white/20">&bull;</span>
-                    <a href="#documents" class="hover:text-white transition-colors">Kebijakan HSSE &amp; K3L</a>
+                    <a href="#documents" class="hover:text-white transition-colors" data-i18n="foot_pol4">Kebijakan HSSE &amp; K3L</a>
                     <span class="text-white/20">&bull;</span>
-                    <a href="#network" class="hover:text-white transition-colors">Peta Ekosistem Antarmoda</a>
+                    <a href="#network" class="hover:text-white transition-colors" data-i18n="foot_pol5">Peta Ekosistem Antarmoda</a>
                 </div>
-                <div class="text-[11px] text-slate-400 font-mono">
+                <div class="text-[11px] text-slate-400 font-mono" data-i18n-html="foot_security_std">
                     Sistem Manajemen Keamanan Informasi &bull; ISO/IEC 27001
                 </div>
             </div>
 
             <!-- Footer Bottom: Copyright & Social Media Links -->
             <div class="mt-6 pt-6 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div class="text-[11px] text-slate-400 text-center sm:text-left">
+                <div class="text-[11px] text-slate-400 text-center sm:text-left" data-i18n-html="foot_copy">
                     Hak Cipta &copy; <?= date('Y') ?> PT Conclusion Intermodal Dry Port Tbk. Seluruh hak cipta dilindungi undang-undang.
                 </div>
 
@@ -1627,25 +1836,25 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 
             <h3 class="text-xl font-bold mb-4 flex items-center gap-2 text-slate-900">
                 <i class="fa-solid fa-magnifying-glass text-orange-600"></i>
-                <span>Pencarian Cepat CIDP DPMS</span>
+                <span data-i18n="search_modal_title">Pencarian Cepat CIDP DPMS</span>
             </h3>
 
             <div class="relative mb-6">
-                <input type="text" id="quickSearchInput" oninput="handleQuickSearch(this.value)" placeholder="Ketik kata kunci: YMS, Reefer, CEISA, SOP, Shunting, atau Tarif..." class="w-full px-5 py-3.5 pl-12 rounded-2xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 font-medium text-sm">
+                <input type="text" id="quickSearchInput" oninput="handleQuickSearch(this.value)" data-i18n-placeholder="search_placeholder" placeholder="Ketik kata kunci: YMS, Reefer, CEISA, SOP, Shunting, atau Tarif..." class="w-full px-5 py-3.5 pl-12 rounded-2xl bg-slate-50 border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-orange-500 font-medium text-sm">
                 <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
             </div>
 
             <div class="flex flex-wrap items-center gap-2 mb-6 text-xs">
-                <span class="text-slate-500">Paling Sering Dicari:</span>
-                <button onclick="fillSearchKeyword('YMS')" class="px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 transition-colors">YMS Stacking</button>
-                <button onclick="fillSearchKeyword('Reefer')" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors">Reefer Plug</button>
-                <button onclick="fillSearchKeyword('CEISA')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors">CEISA 4.0</button>
-                <button onclick="fillSearchKeyword('Rail')" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors">Kereta Pasoso</button>
-                <button onclick="fillSearchKeyword('SOP')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors">Unduh SOP</button>
+                <span class="text-slate-500" data-i18n="search_popular_label">Paling Sering Dicari:</span>
+                <button onclick="fillSearchKeyword('YMS')" data-i18n="search_tag_yms" class="px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200 transition-colors">YMS Stacking</button>
+                <button onclick="fillSearchKeyword('Reefer')" data-i18n="search_tag_reefer" class="px-2.5 py-1 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 transition-colors">Reefer Plug</button>
+                <button onclick="fillSearchKeyword('CEISA')" data-i18n="search_tag_ceisa" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 transition-colors">CEISA 4.0</button>
+                <button onclick="fillSearchKeyword('Rail')" data-i18n="search_tag_rail" class="px-2.5 py-1 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 transition-colors">Kereta Pasoso</button>
+                <button onclick="fillSearchKeyword('SOP')" data-i18n="search_tag_sop" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 transition-colors">Unduh SOP</button>
             </div>
 
             <div id="searchResultsBox" class="space-y-2 max-h-60 overflow-y-auto pr-2">
-                <div class="text-xs text-slate-400 italic p-3 text-center">
+                <div class="text-xs text-slate-400 italic p-3 text-center" data-i18n="search_empty_hint">
                     Masukkan kata kunci di atas untuk mencari data fasilitas, modul, atau dokumen.
                 </div>
             </div>
@@ -1666,8 +1875,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-full h-full object-contain">
                     </div>
                     <div>
-                        <h3 class="font-bold text-base leading-tight">Masuk Portal DPMS</h3>
-                        <p class="text-[11px] text-blue-100 font-medium">Conclusion Intermodal Dry Port Hub 35 Ha</p>
+                        <h3 class="font-bold text-base leading-tight" data-i18n="login_modal_title">Masuk Portal DPMS</h3>
+                        <p class="text-[11px] text-blue-100 font-medium" data-i18n="login_modal_subtitle">Conclusion Intermodal Dry Port Hub 35 Ha</p>
                     </div>
                 </div>
                 <button type="button" onclick="closeLoginModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
@@ -1676,7 +1885,19 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             </div>
 
             <!-- Form Body -->
-            <div class="p-6 space-y-4">
+            <div class="p-6 space-y-4 relative overflow-hidden">
+                <!-- Subtle Luxury Batik Watermark for Login Modal -->
+                <div class="absolute -right-8 -bottom-8 w-44 h-44 pointer-events-none opacity-[0.05] z-0" aria-hidden="true">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+                        <ellipse cx="50" cy="22" rx="16" ry="24" />
+                        <ellipse cx="50" cy="78" rx="16" ry="24" />
+                        <ellipse cx="22" cy="50" rx="24" ry="16" />
+                        <ellipse cx="78" cy="50" rx="24" ry="16" />
+                        <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
+                        <circle cx="50" cy="50" r="14" stroke="#0170b9" stroke-width="1" stroke-dasharray="2 2" />
+                    </svg>
+                </div>
+                <div class="relative z-10 space-y-4">
                 
                 <?php if (!empty($error_message)): ?>
                     <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start space-x-2.5">
@@ -1687,7 +1908,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 
                 <form method="POST" action="landing.php" id="formLoginModal" class="space-y-4">
                     <div>
-                        <label for="modalEmail" class="block text-xs font-bold text-slate-700 mb-1.5">
+                        <label for="modalEmail" class="block text-xs font-bold text-slate-700 mb-1.5" data-i18n="login_email_label">
                             Alamat Email
                         </label>
                         <div class="relative">
@@ -1702,16 +1923,17 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
 
                     <div>
                         <div class="flex items-center justify-between mb-1.5">
-                            <label for="modalPassword" class="block text-xs font-bold text-slate-700">
+                            <label for="modalPassword" class="block text-xs font-bold text-slate-700" data-i18n="login_pass_label">
                                 Kata Sandi
                             </label>
-                            <span class="text-[10px] text-slate-500 font-mono">Default: admin123</span>
+                            <span class="text-[10px] text-slate-500 font-mono" data-i18n="login_default_pass">Default: admin123</span>
                         </div>
                         <div class="relative">
                             <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none text-xs">
                                 <i class="fa-solid fa-lock"></i>
                             </span>
                             <input type="password" id="modalPassword" name="password" value="admin123" required 
+                                   data-i18n-placeholder="login_pass_placeholder"
                                    placeholder="Kata Sandi Anda"
                                    class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium">
                             <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 text-xs focus:outline-none">
@@ -1723,7 +1945,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                     <div class="pt-1">
                         <button type="submit" name="btn_login" 
                                 class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-orange-500/25 transition-all flex items-center justify-center space-x-2">
-                            <span>Masuk ke Konsol DPMS</span>
+                            <span data-i18n="login_submit">Masuk ke Konsol DPMS</span>
                             <i class="fa-solid fa-arrow-right text-xs"></i>
                         </button>
                     </div>
@@ -1732,8 +1954,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                 <!-- AKUN DEMONSTRASI (1-Click Fill) -->
                 <div class="pt-3 border-t border-slate-200">
                     <div class="text-[11px] font-bold text-slate-700 mb-2 flex items-center justify-between">
-                        <span>Pilih Akun Demo Cepat:</span>
-                        <span class="text-[10px] text-orange-600 font-mono">1-Klik Terisi</span>
+                        <span data-i18n="login_demo_label">Pilih Akun Demo Cepat:</span>
+                        <span class="text-[10px] text-orange-600 font-mono" data-i18n="login_demo_hint">1-Klik Terisi</span>
                     </div>
 
                     <div class="grid grid-cols-2 gap-2 text-left">
@@ -1741,7 +1963,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/50 transition-all text-[11px] group">
                             <div class="font-bold text-slate-800 group-hover:text-orange-600 flex items-center gap-1.5">
                                 <i class="fa-solid fa-user-shield text-orange-500 text-[10px]"></i>
-                                <span>Super Admin</span>
+                                <span data-i18n="login_role_admin">Super Admin</span>
                             </div>
                             <div class="text-[9.5px] text-slate-500 font-mono truncate">admin@cidp.ac.id</div>
                         </button>
@@ -1750,7 +1972,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all text-[11px] group">
                             <div class="font-bold text-slate-800 group-hover:text-cdp-blue flex items-center gap-1.5">
                                 <i class="fa-solid fa-person-digging text-blue-500 text-[10px]"></i>
-                                <span>Operator Yard</span>
+                                <span data-i18n="login_role_operator">Operator Yard</span>
                             </div>
                             <div class="text-[9.5px] text-slate-500 font-mono truncate">operator@cidp.ac.id</div>
                         </button>
@@ -1759,7 +1981,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all text-[11px] group">
                             <div class="font-bold text-slate-800 group-hover:text-emerald-600 flex items-center gap-1.5">
                                 <i class="fa-solid fa-building text-emerald-500 text-[10px]"></i>
-                                <span>Shipper / Client</span>
+                                <span data-i18n="login_role_client">Shipper / Client</span>
                             </div>
                             <div class="text-[9.5px] text-slate-500 font-mono truncate">client@cidp.ac.id</div>
                         </button>
@@ -1768,7 +1990,7 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                                 class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-purple-500 hover:bg-purple-50/50 transition-all text-[11px] group">
                             <div class="font-bold text-slate-800 group-hover:text-purple-600 flex items-center gap-1.5">
                                 <i class="fa-solid fa-truck text-purple-500 text-[10px]"></i>
-                                <span>Supir Truk</span>
+                                <span data-i18n="login_role_driver">Supir Truk</span>
                             </div>
                             <div class="text-[9.5px] text-slate-500 font-mono truncate">driver@cidp.ac.id</div>
                         </button>
@@ -1779,11 +2001,12 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
                         <button type="button" onclick="quickDirectLogin()" 
                                 class="w-full py-2.5 px-3 rounded-xl bg-cdp-navy hover:bg-blue-900 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-xs">
                             <i class="fa-solid fa-bolt text-amber-300"></i>
-                            <span>Masuk Otomatis Instan (Super Admin)</span>
+                            <span data-i18n="login_instant_btn">Masuk Otomatis Instan (Super Admin)</span>
                         </button>
                     </div>
                 </div>
 
+                </div>
             </div>
         </div>
     </div>
@@ -1875,19 +2098,26 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         // 3. HIGHLIGHTS ACCORDION IMAGE SWAP ENGINE
         function selectHighlight(index, imagePath, badgeText, captionText, specs = []) {
             const imgDisplay = document.getElementById('highlightImageDisplay');
-            const badge = document.getElementById('highlightBadge');
-            const caption = document.getElementById('highlightCaption');
-            const specsEl = document.getElementById('highlightSpecs');
             const cards = document.querySelectorAll('.accordion-item-box');
 
-            if (imgDisplay) {
+            const fac = (typeof cidpFacilities !== 'undefined' && cidpFacilities[index]) ? cidpFacilities[index] : null;
+            const bgImg = imagePath || (fac ? fac.image : '');
+
+            if (imgDisplay && bgImg) {
                 imgDisplay.style.opacity = '0.3';
                 setTimeout(() => {
-                    imgDisplay.style.backgroundImage = `url('${imagePath}')`;
-                    if (badge) badge.innerText = badgeText;
-                    if (caption) caption.innerText = captionText;
-                    if (specsEl && specs.length) {
-                        specsEl.innerHTML = specs.map(s => `<span class="bg-white/15 px-2.5 py-0.5 rounded backdrop-blur-xs font-mono">${s}</span>`).join('');
+                    imgDisplay.style.backgroundImage = `url('${bgImg}')`;
+                    if (typeof updateHighlightDisplay === 'function') {
+                        updateHighlightDisplay(index);
+                    } else {
+                        const badge = document.getElementById('highlightBadge');
+                        const caption = document.getElementById('highlightCaption');
+                        const specsEl = document.getElementById('highlightSpecs');
+                        if (badge && badgeText) badge.innerText = badgeText;
+                        if (caption && captionText) caption.innerText = captionText;
+                        if (specsEl && specs && specs.length) {
+                            specsEl.innerHTML = specs.map(s => `<span class="bg-white/15 px-2.5 py-0.5 rounded backdrop-blur-xs font-mono">${s}</span>`).join('');
+                        }
                     }
                     imgDisplay.style.opacity = '1';
                 }, 150);
@@ -1964,13 +2194,41 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         });
 
         const searchDatabase = [
-            { title: 'Yard Management System (YMS)', desc: 'Penataan kontainer blok A-E, 4-tier stacking, dan alat berat Kalmar RS-01..03', action: 'openLoginModal()' },
-            { title: 'Rail Siding Pasoso (TMS)', desc: 'Konektivitas rangkaian 60 TEU kereta api logistik langsung ke Tanjung Priok', action: 'openLoginModal()' },
-            { title: 'CFS Warehouse (WMS)', desc: 'Gudang konsolidasi LCL/FCL, auto-dock leveller, dan pelacakan barcode palet GS1', action: 'openLoginModal()' },
-            { title: 'Reefer Cold Chain Terminal', desc: '120 soket plug points telemetri IoT real-time presisi untuk kargo dingin bernilai tinggi', link: '#highlights' },
-            { title: 'Integrasi Host-to-Host CEISA 4.0', desc: 'Otomasi validasi SPPB, PEB, PIB, dan gate in clearance Bea Cukai', link: '#documents' },
-            { title: 'SOP Gate & Panduan Pengemudi', desc: 'Dokumen panduan kartu RFID UHF dan standar keselamatan operasional', link: 'docs/CIDP_DPMS_Comprehensive_Tutorial_Guide.docx' },
-            { title: '3D Digital Twin Simulation', desc: 'Simulasi spasial visualisasi interaktif denah terminal Three.js 1:1 ISO scale', link: 'dashboard.php?page=simulator' }
+            {
+                title: { id: 'Yard Management System (YMS)', en: 'Yard Management System (YMS)' },
+                desc: { id: 'Penataan kontainer blok A-E, 4-tier stacking, dan alat berat Kalmar RS-01..03', en: 'Container stacking blocks A-E, 4-tier limits, and Kalmar reach stackers RS-01..03' },
+                action: 'openLoginModal()'
+            },
+            {
+                title: { id: 'Rail Siding Pasoso (TMS)', en: 'Pasoso Rail Siding (TMS)' },
+                desc: { id: 'Konektivitas rangkaian 60 TEU kereta api logistik langsung ke Tanjung Priok', en: '60-TEU dedicated freight train connectivity direct to Tanjung Priok seaport' },
+                action: 'openLoginModal()'
+            },
+            {
+                title: { id: 'CFS Warehouse (WMS)', en: 'CFS Warehouse (WMS)' },
+                desc: { id: 'Gudang konsolidasi LCL/FCL, auto-dock leveller, dan pelacakan barcode palet GS1', en: 'LCL/FCL consolidation warehouse, dock levellers, and GS1 barcode pallet tracking' },
+                action: 'openLoginModal()'
+            },
+            {
+                title: { id: 'Reefer Cold Chain Terminal', en: 'Reefer Cold Chain Terminal' },
+                desc: { id: '120 soket plug points telemetri IoT real-time presisi untuk kargo dingin bernilai tinggi', en: '120 precision real-time IoT telemetry plug points for high-value cold chain cargo' },
+                link: '#highlights'
+            },
+            {
+                title: { id: 'Integrasi Host-to-Host CEISA 4.0', en: 'Host-to-Host CEISA 4.0 Integration' },
+                desc: { id: 'Otomasi validasi SPPB, PEB, PIB, dan gate in clearance Bea Cukai', en: 'Automated SPPB, PEB, PIB validation and Customs clearance at gate' },
+                link: '#documents'
+            },
+            {
+                title: { id: 'SOP Gate & Panduan Pengemudi', en: 'Gate SOP & Truck Driver Guidelines' },
+                desc: { id: 'Dokumen panduan kartu RFID UHF dan standar keselamatan operasional', en: 'Official guide for UHF RFID cards and terminal operational safety standards' },
+                link: 'docs/CIDP_DPMS_Comprehensive_Tutorial_Guide.docx'
+            },
+            {
+                title: { id: '3D Digital Twin Simulation', en: '3D Digital Twin Simulation' },
+                desc: { id: 'Simulasi spasial visualisasi interaktif denah terminal Three.js 1:1 ISO scale', en: 'Interactive Three.js 1:1 ISO scale spatial terminal layout twin simulator' },
+                link: 'dashboard.php?page=simulator'
+            }
         ];
 
         function fillSearchKeyword(word) {
@@ -1982,40 +2240,66 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         function handleQuickSearch(query) {
             const resultsBox = document.getElementById('searchResultsBox');
             const q = query.trim().toLowerCase();
+            const lang = (typeof currentLanguage !== 'undefined' ? currentLanguage : 'id');
+            const trans = (typeof cidpTranslations !== 'undefined' && cidpTranslations[lang]) ? cidpTranslations[lang] : null;
 
             if (!q) {
+                const emptyHint = (trans && trans.search_empty_hint) ? trans.search_empty_hint : 'Masukkan kata kunci di atas untuk mencari data fasilitas, modul, atau dokumen.';
                 resultsBox.innerHTML = `
-                    <div class="text-xs text-slate-400 italic p-3 text-center">
-                        Masukkan kata kunci di atas untuk mencari data fasilitas, modul, atau dokumen.
+                    <div class="text-xs text-slate-400 italic p-3 text-center" data-i18n="search_empty_hint">
+                        ${emptyHint}
                     </div>
                 `;
                 return;
             }
 
-            const matched = searchDatabase.filter(item => 
-                item.title.toLowerCase().includes(q) || item.desc.toLowerCase().includes(q)
-            );
+            const matched = searchDatabase.filter(item => {
+                const tID = item.title.id.toLowerCase();
+                const tEN = item.title.en.toLowerCase();
+                const dID = item.desc.id.toLowerCase();
+                const dEN = item.desc.en.toLowerCase();
+                return tID.includes(q) || tEN.includes(q) || dID.includes(q) || dEN.includes(q);
+            });
 
             if (matched.length === 0) {
+                const notFoundPrefix = (trans && trans.search_not_found) ? trans.search_not_found : 'Tidak ditemukan hasil yang cocok dengan';
+                const notFoundHint = lang === 'en' ? 'Try other keywords like YMS, Reefer, or Rail.' : 'Coba kata kunci lain seperti YMS, Reefer, atau Kereta.';
                 resultsBox.innerHTML = `
                     <div class="text-xs text-slate-500 p-4 text-center">
-                        Tidak ditemukan hasil yang cocok dengan "<strong>${query}</strong>". Coba kata kunci lain seperti YMS, Reefer, atau Kereta.
+                        ${notFoundPrefix} "<strong>${query}</strong>". ${notFoundHint}
                     </div>
                 `;
             } else {
-                resultsBox.innerHTML = matched.map(item => `
+                resultsBox.innerHTML = matched.map(item => {
+                    const itemTitle = item.title[lang] || item.title.id;
+                    const itemDesc = item.desc[lang] || item.desc.id;
+                    return `
                     <div onclick="${item.action || "window.location.href='" + item.link + "'"}" class="block p-3 rounded-xl bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-400 transition-colors cursor-pointer">
                         <div class="font-bold text-slate-900 text-xs flex items-center justify-between">
-                            <span>${item.title}</span>
+                            <span>${itemTitle}</span>
                             <i class="fa-solid fa-arrow-right text-[10px] text-orange-600"></i>
                         </div>
-                        <div class="text-[11px] text-slate-500 mt-1">${item.desc}</div>
+                        <div class="text-[11px] text-slate-500 mt-1">${itemDesc}</div>
                     </div>
-                `).join('');
+                    `;
+                }).join('');
             }
         }
 
         // 6. LOGIN MODAL LOGIC
+        // Bersihkan parameter query ?login= jika ada, agar saat di-refresh tidak memicu modal
+        if (window.history && window.history.replaceState) {
+            try {
+                const currentUrl = new URL(window.location.href);
+                if (currentUrl.searchParams.has('login')) {
+                    currentUrl.searchParams.delete('login');
+                    const newQuery = currentUrl.searchParams.toString();
+                    const newUrl = currentUrl.pathname + (newQuery ? '?' + newQuery : '') + currentUrl.hash;
+                    window.history.replaceState({}, document.title, newUrl);
+                }
+            } catch (err) {}
+        }
+
         function openLoginModal() {
             document.getElementById('loginModal').classList.remove('hidden');
         }

@@ -25,7 +25,7 @@ require_once __DIR__ . '/layout_master.php';
 <div class="space-y-3.5">
     
     <!-- Top Header Banner (Executive, Clean & Modern) -->
-    <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] rounded-xl p-3.5 sm:p-4 text-white shadow-xs border border-blue-900/30">
+    <div class="bg-gradient-to-r from-[#0170b9] via-blue-600 to-blue-700 rounded-xl p-3.5 sm:p-4 text-white shadow-xs border border-blue-900/30">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
                 <div class="flex items-center space-x-2 mb-1">
@@ -42,14 +42,11 @@ require_once __DIR__ . '/layout_master.php';
                 <h1 class="text-base sm:text-lg font-bold tracking-tight">Virtual 3D Twin &amp; Konsol Sensor IoT</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <button onclick="runAutoInboundDemo()" id="btnAutoDemo" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center border border-emerald-400/40">
-                    <i class="fa-solid fa-play mr-1.5 text-xs"></i>Jalankan Alur Otomatis
-                </button>
                 <button onclick="openEndToEndGuideModal()" class="px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white font-bold text-xs rounded-lg border border-white/20 transition flex items-center">
                     <i class="fa-solid fa-diagram-project mr-1.5 text-xs text-blue-200"></i>Alur 11 Hardware &amp; Finansial
                 </button>
-                <button onclick="resetSimulation()" class="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 text-white text-xs rounded-lg border border-white/15 transition flex items-center" title="Reset Posisi Demo">
-                    <i class="fa-solid fa-rotate-left mr-1"></i>Reset
+                <button onclick="resetSimulation()" id="btnAutoDemo" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center border border-blue-400/40" title="Reset Posisi Simulasi">
+                    <i class="fa-solid fa-rotate-left mr-1.5 text-xs"></i>Reset Simulasi
                 </button>
             </div>
         </div>
@@ -124,7 +121,7 @@ require_once __DIR__ . '/layout_master.php';
                 <button onclick="setCameraView('iso')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition flex items-center gap-1.5" id="btnCamIso" title="Sudut Isometrik Axonometric 45° BIM">
                     <i class="fa-solid fa-cube text-purple-600 text-xs"></i><span>Isometrik 45°</span>
                 </button>
-                <button onclick="setCameraView('overview')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-bold bg-[#002f5e] text-white hover:bg-blue-800 transition flex items-center gap-1.5 shadow-xs" id="btnCamOverview" title="Drone 3D Bebas 35 Hektar">
+                <button onclick="setCameraView('overview')" class="cam-btn px-2.5 py-1.5 text-xs rounded-xl font-bold bg-[#0170b9] text-white hover:bg-blue-800 transition flex items-center gap-1.5 shadow-xs" id="btnCamOverview" title="Drone 3D Bebas 35 Hektar">
                     <i class="fa-solid fa-satellite text-xs"></i><span>Drone 35 Ha</span>
                 </button>
                 <div class="h-5 w-px bg-gray-200 mx-1 hidden sm:block"></div>
@@ -212,7 +209,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Floating Badge: Top Left Live Status & Proyeksi Aktif -->
         <div class="absolute top-3.5 left-3.5 pointer-events-auto flex items-center space-x-2 z-10">
-            <span class="bg-slate-900/90 backdrop-blur-md border border-slate-700/80 text-white text-[11px] font-mono px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2">
+            <span class="bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-md text-[11px] font-mono px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span class="font-bold text-cyan-300" id="cadProjectionLabel">PERSPEKTIF DRONE 3D</span>
             </span>
@@ -220,7 +217,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Floating HUD: Top Center - Live Operational Workflow Status -->
         <div id="opFlowHUD" class="absolute top-3.5 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 pointer-events-none z-30 max-w-lg w-[90vw]">
-            <div class="bg-slate-900/95 backdrop-blur-xl border border-cyan-500/60 rounded-2xl p-2.5 shadow-2xl text-white">
+            <div class="bg-white/95 backdrop-blur-xl border border-cyan-400 rounded-2xl p-2.5 shadow-md text-slate-800">
                 <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-xs">
                     <div class="flex items-center space-x-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
@@ -235,7 +232,7 @@ require_once __DIR__ . '/layout_master.php';
                     <div id="flowStep3" class="py-1 px-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700/50">3. Angkat RS</div>
                     <div id="flowStep4" class="py-1 px-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700/50">4. Gate-Out</div>
                 </div>
-                <div class="flex items-center justify-between text-[10.5px] text-slate-300 bg-slate-950/80 px-2 py-1 rounded-xl border border-slate-800 font-mono">
+                <div class="flex items-center justify-between text-[10.5px] text-slate-300 bg-slate-50 px-2 py-1 rounded-xl border border-slate-200 font-mono text-slate-700">
                     <span id="opFlowDetailText" class="truncate">Truk melintasi jembatan timbang 80T &amp; verifikasi sensor...</span>
                     <span id="opFlowSpeedText" class="text-amber-400 font-bold ml-2 shrink-0">1.25x</span>
                 </div>
@@ -243,7 +240,7 @@ require_once __DIR__ . '/layout_master.php';
         </div>
 
         <!-- Floating HUD: Top Left Dynamic 3D Azimuth Compass Rose (Di bawah badge status) -->
-        <div id="cadCompassRose" class="absolute top-14 left-3.5 pointer-events-auto bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-2 shadow-2xl text-center hidden md:flex flex-col items-center justify-center z-10 transition-all duration-300">
+        <div id="cadCompassRose" class="absolute top-14 left-3.5 pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl p-2 shadow-md text-center text-slate-800 hidden md:flex flex-col items-center justify-center z-10 transition-all duration-300">
             <div class="relative w-11 h-11 flex items-center justify-center">
                 <div id="compassDial" class="w-9 h-9 rounded-full border border-slate-600/80 flex items-center justify-center transition-transform duration-75">
                     <div class="w-1 h-7 bg-gradient-to-b from-rose-500 to-slate-400 rounded-full"></div>
@@ -257,7 +254,7 @@ require_once __DIR__ . '/layout_master.php';
         </div>
 
         <!-- Floating HUD: Top Right Dedicated Zoom & Screen Dock (Fitur Zoom Mirip Denah) -->
-        <div class="absolute top-3.5 right-3.5 pointer-events-auto flex items-center bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-xl p-1 shadow-2xl z-10 text-white divide-x divide-slate-700/80">
+        <div class="absolute top-3.5 right-3.5 pointer-events-auto flex items-center bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl p-1 shadow-md z-10 text-slate-700 divide-x divide-slate-200">
             <!-- Zoom In -->
             <button onclick="simZoom(1)" class="w-8 h-8 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Perbesar Tampilan / Zoom In (+)">
                 <i class="fa-solid fa-plus text-xs"></i>
@@ -281,7 +278,7 @@ require_once __DIR__ . '/layout_master.php';
         </div>
 
         <!-- Floating HUD: CAD Engineering Title Block (Etiket Gambar Teknik Sipil) -->
-        <div id="cadTitleBlock" class="absolute top-14 right-3.5 pointer-events-auto bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-xl p-3 shadow-2xl text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-10 transition-all duration-300">
+        <div id="cadTitleBlock" class="absolute top-14 right-3.5 pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-md rounded-xl p-3 shadow-2xl text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-10 transition-all duration-300">
             <div class="flex items-center justify-between pb-1 border-b border-slate-700 font-bold text-white">
                 <span class="text-blue-400 flex items-center gap-1"><i class="fa-solid fa-compass-drafting"></i>CIDP 35 HA TWIN</span>
                 <div class="flex items-center gap-1.5">
@@ -301,7 +298,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Floating HUD: Real-time 3D Navigation Target Indicator (Centered at Top) -->
         <div id="hudTargetPill" class="absolute top-3.5 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 hidden z-20">
-            <div class="bg-slate-900/95 backdrop-blur-md border border-cyan-500/70 text-white px-3.5 py-1.5 rounded-full shadow-2xl flex items-center space-x-2 text-xs font-mono">
+            <div class="bg-white/95 backdrop-blur-md border border-cyan-400 text-slate-800 px-3.5 py-1.5 rounded-full shadow-md flex items-center space-x-2 text-xs font-mono">
                 <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
                 <span class="text-cyan-300 font-bold uppercase text-[10px] shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i>Arah 3D:</span>
                 <span class="text-white font-bold truncate max-w-[200px] sm:max-w-xs" id="hudTargetText">Smart Gate Inbound Lane 1</span>
@@ -392,7 +389,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector (Only visible when a container is clicked) -->
         <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-30" id="inspectorCard">
-            <div class="bg-slate-900/95 backdrop-blur-lg border border-blue-500/50 rounded-xl p-3.5 shadow-2xl text-white relative overflow-hidden">
+            <div class="bg-white/95 backdrop-blur-lg border border-blue-200 rounded-xl p-3.5 shadow-md text-slate-800 relative overflow-hidden">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
                 <div class="flex items-center justify-between mb-2.5">
                     <div class="flex items-center space-x-2">
@@ -452,7 +449,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Notification Toast (Floating Top Center) -->
         <div id="simToast" class="absolute top-16 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 z-50">
-            <div class="bg-slate-900/95 backdrop-blur-md border border-emerald-500 text-white px-4 py-2.5 rounded-xl shadow-2xl flex items-center space-x-3">
+            <div class="bg-white/95 backdrop-blur-md border border-emerald-400 text-slate-800 px-4 py-2.5 rounded-xl shadow-md flex items-center space-x-3">
                 <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm shrink-0" id="toastIcon">
                     <i class="fa-solid fa-check"></i>
                 </div>
@@ -468,8 +465,8 @@ require_once __DIR__ . '/layout_master.php';
     <!-- ========================================================================= -->
     <!-- PANEL KONTROL CEPAT & TELEMETRI SCADA (DITEMPATKAN RAPI DI LUAR LAYAR 3D) -->
     <!-- ========================================================================= -->
-    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3 sm:p-4 shadow-xl text-white">
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-center">
+    <div class="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-xs text-slate-800">
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3.5 items-center">
             
             <!-- Kolom Kiri (7 Kolom): Tombol Aksi Cepat Operasional Lapangan -->
             <div class="lg:col-span-7 xl:col-span-7 flex flex-col space-y-2.5">
@@ -522,7 +519,7 @@ require_once __DIR__ . '/layout_master.php';
             </div>
 
             <!-- Kolom Kanan (5 Kolom): Live SCADA Telemetry Feed Terminal (Tertata Rapi & Modern) -->
-            <div class="lg:col-span-5 xl:col-span-5 bg-slate-950/90 rounded-xl p-3 border border-slate-800 shadow-inner">
+            <div class="lg:col-span-5 xl:col-span-5 bg-slate-50 rounded-xl p-3 border border-slate-200 shadow-inner text-slate-800">
                 <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-[10.5px]">
                     <div class="flex items-center space-x-2">
                         <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -553,977 +550,12 @@ require_once __DIR__ . '/layout_master.php';
 
         </div>
     </div>
-
-
-    <!-- ========================================================================= -->
-    <!-- KONSOL SIMULASI OPERASIONAL LAPANGAN (DUAL-WORKFLOW ENGINE & SCADA HUB)   -->
-    <!-- ========================================================================= -->
-    <div class="bg-gradient-to-r from-slate-900 via-slate-800 to-slate-900 text-white p-3.5 sm:p-4 rounded-xl border border-slate-700 shadow-md space-y-3">
-        
-        <!-- Baris 1: Judul & Tombol Eksekusi Alur Master -->
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-700/80">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-emerald-500 text-white flex items-center justify-center text-base shadow-sm shrink-0">
-                    <i class="fa-solid fa-tower-broadcast"></i>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2 flex-wrap">
-                        <h4 class="font-bold text-sm sm:text-base text-white tracking-tight">Konsol Simulasi Operasional Lapangan</h4>
-                        <span class="px-2 py-0.5 rounded text-[9px] font-mono font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">DUAL-WORKFLOW SCADA HUB</span>
-                    </div>
-                    <p class="text-[11px] text-slate-300 mt-0.5">Pilih alur simulasi otomatis terpisah antara armada truk dan kereta api, atau uji sensor mandiri</p>
-                </div>
-            </div>
-
-            <!-- Tombol Master Alur Otomatis (Truk vs Kereta Api) -->
-            <div class="flex flex-wrap items-center gap-2">
-                <button onclick="runAutoTruckDemo()" id="btnAutoTruck" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-truck-moving text-xs"></i>
-                    <span>1. Alur Otomatis Truk (6 Tahap)</span>
-                </button>
-                <button onclick="runAutoTrainDemo()" id="btnAutoTrain" class="px-3.5 py-2 bg-gradient-to-r from-purple-700 to-purple-600 hover:from-purple-600 hover:to-purple-500 text-white font-bold text-xs rounded-lg shadow-sm transition flex items-center gap-2">
-                    <i class="fa-solid fa-train-subway text-xs"></i>
-                    <span>2. Alur Otomatis KA (6 Tahap)</span>
-                </button>
-                <button onclick="resetSimulation()" class="px-3 py-2 bg-white/10 hover:bg-white/20 text-white text-xs font-semibold rounded-lg border border-white/20 transition flex items-center gap-1.5" title="Reset Simulasi ke Posisi Awal">
-                    <i class="fa-solid fa-rotate-left text-xs"></i><span>Reset</span>
-                </button>
-            </div>
-        </div>
-
-        <!-- Baris 2: Navigasi Tab Pengendalian Terpadu -->
-        <div class="flex items-center justify-between flex-wrap gap-2 pt-1">
-            <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0" id="simTabNav">
-                <button onclick="switchSimTab('truck')" id="tabBtnTruck" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-truck-ramp-box text-[11px]"></i>
-                    <span>Alur Truk (Road-to-Yard)</span>
-                </button>
-                <button onclick="switchSimTab('train')" id="tabBtnTrain" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-train text-[11px]"></i>
-                    <span>Alur Kereta Api (Rail-to-Yard)</span>
-                </button>
-                <button onclick="switchSimTab('scada')" id="tabBtnScada" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-sliders text-[11px]"></i>
-                    <span>11 Sensor SCADA Mandiri</span>
-                </button>
-                <button onclick="switchSimTab('scanner')" id="tabBtnScanner" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-barcode text-[11px]"></i>
-                    <span>Uji Scanner AIDC / GS1</span>
-                </button>
-                <button onclick="switchSimTab('catalog')" id="tabBtnCatalog" class="sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5">
-                    <i class="fa-solid fa-book-open text-[11px]"></i>
-                    <span>Katalog Hardware &amp; Tarif ERP</span>
-                </button>
-            </div>
-            
-            <div class="flex items-center space-x-2 text-xs">
-                <button onclick="openMoveModal()" class="px-2.5 py-1 bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 rounded-lg font-bold text-[11px] transition flex items-center gap-1">
-                    <i class="fa-solid fa-arrows-up-down-left-right text-[10px]"></i><span>Relokasi RS</span>
-                </button>
-                <button onclick="triggerRailDischarge()" class="px-2.5 py-1 bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 border border-purple-400/40 rounded-lg font-bold text-[11px] transition flex items-center gap-1">
-                    <i class="fa-solid fa-dolly text-[10px]"></i><span>Bongkar RTG</span>
-                </button>
-            </div>
-        </div>
-
-    </div>
-
-    <!-- ========================================================================= -->
-    <!-- WADAH KONTEN TABULASI SIMULASI OPERASIONAL                               -->
-    <!-- ========================================================================= -->
-    <div class="bg-white rounded-xl shadow-xs border border-gray-200/80 p-4 sm:p-5 space-y-4">
-
-        <!-- --------------------------------------------------------------------- -->
-        <!-- TAB 1: ALUR SIMULASI OPERASIONAL TRUK KONTAINER (ROAD-TO-YARD)         -->
-        <!-- --------------------------------------------------------------------- -->
-        <div id="tabContentTruck" class="space-y-4">
-            
-            <!-- Banner Penjelasan Konseptual Alur Truk -->
-            <div class="bg-gradient-to-r from-blue-50 via-slate-50 to-blue-50 border border-blue-200/80 rounded-xl p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div class="flex items-start space-x-3">
-                    <div class="w-9 h-9 rounded-lg bg-blue-600 text-white flex items-center justify-center text-sm shadow-xs shrink-0 mt-0.5">
-                        <i class="fa-solid fa-truck"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Alur Operasional Truk Kontainer (Road / Highway Inbound)</h4>
-                        <p class="text-[11.5px] text-gray-600 mt-0.5 leading-relaxed max-w-4xl">
-                            Truk tiba dari jalan tol/kawasan industri membawa muatan dry/reefer. Melewati gerbang otomatis berkecepatan tinggi, portal optik OCR, jembatan timbang SOLAS 80 Ton, penguncian spreader Reach Stacker dengan RTK DGPS, hingga plugging cold chain.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
-                    <button onclick="runAutoTruckDemo()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-play text-[10px]"></i><span>Jalankan Alur Truk Lengkap</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Stepper 6-Tahap Truk (Visual Card Grid) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                
-                <!-- Tahap 1 Truk -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-blue-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Tahap 01</span>
-                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">Gerbang Inbound</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Pindai Plat Truk &amp; Tag Supir</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Loop sensor aspal mendeteksi truk berhenti. Kamera ANPR membaca plat nomor truk dan antena UHF RFID membaca e-Pass supir dari jarak 20 meter.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-blue-300">HW-01 (ANPR) &amp; HW-04 (RFID)</strong></div>
-                            <div><span class="text-slate-400">Data Input:</span> B 9481 UEK &bull; RFID Tag 24-Hex</div>
-                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Pas Gerbang Truk (Rp 50.000)</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Otentikasi Supir &amp; Saldo</span>
-                        <button onclick="testTruckStep(1)" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 1</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 2 Truk -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-purple-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-purple-100 text-purple-800 uppercase font-mono">Tahap 02</span>
-                            <span class="text-[9.5px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">Portal Optik</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Identifikasi Box ISO 6346</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Portal kamera multi-sudut membaca nomor peti kemas ISO 6346 (4 huruf kode pemilik + 6 digit seri + 1 check digit) dan tipe ukuran (misal 42G1).
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-purple-300">HW-02 (Portal OCR ISO 6346)</strong></div>
-                            <div><span class="text-slate-400">Data Input:</span> MSKU9182374 &bull; 40ft High Cube</div>
-                            <div><span class="text-slate-400">Dampak YMS:</span> <strong class="text-amber-400">Demurrage Free Time Dimulai</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Meniadakan Typo Manual</span>
-                        <button onclick="testTruckStep(2)" class="px-2.5 py-1 bg-purple-600 hover:bg-purple-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 2</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 3 Truk -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-emerald-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 uppercase font-mono">Tahap 03</span>
-                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">SOLAS VGM</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Penimbangan Jembatan 80 Ton</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Truk melintas di timbangan baja 80T. Sensor strain gauge mencatat bobot Bruto, Tara, dan menerbitkan sertifikat Net VGM sesuai amandemen SOLAS IMO.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-emerald-300">HW-03 (Fangda Truck Scale 80T)</strong></div>
-                            <div><span class="text-slate-400">Data Output:</span> Net 26.450 kg (SOLAS PASS)</div>
-                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Jasa Sertifikasi VGM (Rp 120.000)</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Legalitas Maritim IMO</span>
-                        <button onclick="testTruckStep(3)" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 3</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 4 Truk -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-amber-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 uppercase font-mono">Tahap 04</span>
-                            <span class="text-[9.5px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">Interlock Palang</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Buka Palang &amp; Panduan Rute VMS</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Edge AI PC memvalidasi izin masuk dalam latensi 12ms, memicu pulsa relay palang terbuka. Display LED VMS memandu supir langsung ke blok yard tujuan.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-amber-300">HW-06 (Edge PC) &amp; HW-05 (VMS LED)</strong></div>
-                            <div><span class="text-slate-400">Instruksi:</span> "LANE 1: TRUK MENUJU BLOK B-08"</div>
-                            <div><span class="text-slate-400">Dampak TAT:</span> <strong class="text-blue-300">Pangkas Waktu Antre 60%</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Otomasi Tanpa Petugas</span>
-                        <button onclick="testTruckStep(4)" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 4</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 5 Truk -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-blue-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Tahap 05</span>
-                            <span class="text-[9.5px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">Penumpukan Yard</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Bongkar Box oleh Reach Stacker</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Reach Stacker (RS-02) menurunkan spreader Bromma, twistlock mengunci 4 pin corner casting. RTK GNSS memandu penempatan ke slot 3D B-08-03-02 akurasi &lt;2cm.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-blue-300">HW-07 (RTK GNSS) &amp; HW-08 (Spreader)</strong></div>
-                            <div><span class="text-slate-400">Koordinat:</span> Slot B-08-03-02 &bull; Beban 28.45T</div>
-                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Jasa Lo-Lo Lift-Off (Rp 250.000)</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Zero Misplacement Box</span>
-                        <button onclick="testTruckStep(5)" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 5</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 6 Truk -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-cyan-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-800 uppercase font-mono">Tahap 06</span>
-                            <span class="text-[9.5px] font-bold text-cyan-700 bg-cyan-50 px-1.5 py-0.2 rounded border border-cyan-200">Reefer Cold Chain</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Colok Daya &amp; Monitoring Suhu</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Jika muatan berpendingin, box ditaruh di rak reefer dan dicolokkan ke soket industri 380V. Sensor Modbus membaca arus, tegangan, dan suhu -20.2&deg;C secara live.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-cyan-300">HW-09 (Marechal Smart Socket)</strong></div>
-                            <div><span class="text-slate-400">Telemetri:</span> -20.2&deg;C &bull; 388.4V &bull; 18.2 kW</div>
-                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Reefer Electricity (Rp 35.000/jam)</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Perlindungan Kargo Ekspor</span>
-                        <button onclick="testTruckStep(6)" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 6</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Ringkasan Finansial Alur Truk -->
-            <div class="p-3 bg-blue-50/70 rounded-xl border border-blue-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
-                <div class="flex items-center space-x-2 text-blue-900 font-semibold">
-                    <i class="fa-solid fa-file-invoice-dollar text-blue-600 text-sm"></i>
-                    <span>Total Billing Terbentuk pada 1 Siklus Truk Masuk (Inbound):</span>
-                </div>
-                <div class="font-mono text-emerald-800 font-bold bg-white px-3 py-1 rounded-lg border border-blue-200 shadow-2xs">
-                    Pas Gerbang (Rp 50.000) + VGM (Rp 120.000) + Lo-Lo (Rp 250.000) = <span class="text-emerald-600 text-sm">Rp 420.000</span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- --------------------------------------------------------------------- -->
-        <!-- TAB 2: ALUR SIMULASI OPERASIONAL KERETA API INTERMODAL (RAIL-TO-YARD)    -->
-        <!-- --------------------------------------------------------------------- -->
-        <div id="tabContentTrain" class="space-y-4 hidden">
-            
-            <!-- Banner Penjelasan Konseptual Alur KA -->
-            <div class="bg-gradient-to-r from-purple-50 via-slate-50 to-purple-50 border border-purple-200/80 rounded-xl p-3.5 sm:p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-                <div class="flex items-start space-x-3">
-                    <div class="w-9 h-9 rounded-lg bg-purple-700 text-white flex items-center justify-center text-sm shadow-xs shrink-0 mt-0.5">
-                        <i class="fa-solid fa-train"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Alur Operasional Kereta Api Shuttle 2-Arah (Dual-Track Rail Siding)</h4>
-                        <p class="text-[11.5px] text-gray-600 mt-0.5 leading-relaxed max-w-4xl">
-                            <strong>Esensi Kereta Api Shuttle Dry Port 2-Arah:</strong> Menghubungkan Stasiun Pasoso (Tanjung Priok) &harr; CIDP secara kontinyu: rangkaian <em>Inbound</em> (Bongkar Impor &amp; PLP Pabean ex-kapal laut di Sepur Utara Track-01) dan rangkaian <em>Outbound</em> (Muat Ekspor terverifikasi SOLAS VGM &amp; NPE Bea Cukai di Sepur Selatan Track-02 langsung ke kapal laut). Diverifikasi sensor gandar Frauscher SIL 4 dan E-Seal CEISA 4.0.
-                        </p>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2 self-start md:self-auto shrink-0">
-                    <button onclick="runAutoTrainDemo()" class="px-3.5 py-1.5 bg-purple-700 hover:bg-purple-600 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-play text-[10px]"></i><span>Jalankan Alur Kereta Api Lengkap</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Stepper 6-Tahap Kereta Api (Visual Card Grid) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                
-                <!-- Tahap 1 KA -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-purple-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-purple-100 text-purple-800 uppercase font-mono">Tahap 01</span>
-                            <span class="text-[9.5px] font-bold text-purple-700 bg-purple-50 px-1.5 py-0.2 rounded border border-purple-200">Rel Siding</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Verifikasi Integritas Rangkaian KA</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            KA 2518 melintasi sensor roda di rel siding. Sensor mencacah tepat 126 gandar (1 Lok CC 206 [6 as] + 30 Gerbong PPCW [120 as]). Standar SIL 4 menjamin tidak ada gerbong terlepas.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-purple-300">HW-10 (Frauscher Axle Counter)</strong></div>
-                            <div><span class="text-slate-400">Hasil Cacah:</span> 126 As Roda (30 Gerbong Lengkap)</div>
-                            <div><span class="text-slate-400">Keselamatan:</span> <strong class="text-emerald-400">Safety Integrity SIL 4 PASS</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Pencegahan Kereta Anjlok</span>
-                        <button onclick="testTrainStep(1)" class="px-2.5 py-1 bg-purple-700 hover:bg-purple-600 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 1</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 2 KA -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-blue-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Tahap 02</span>
-                            <span class="text-[9.5px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">Smart E-Seal</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Pemeriksaan Segel Pabean Nirkabel</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Antena nirkabel membaca Smart E-Seal Jointech JT701 pada pintu peti kemas. Memastikan kawat segel berstatus INTACT (tidak pernah dibuka/dirusak selama transit Priok-Dry Port).
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-blue-300">HW-11 (Jointech JT701 GPS Seal)</strong></div>
-                            <div><span class="text-slate-400">Status Kawat:</span> INTACT &bull; Baterai 96%</div>
-                            <div><span class="text-slate-400">Audit Pabean:</span> <strong class="text-emerald-400">Zero Tamper Transit Verified</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Keamanan Kargo Tersegel</span>
-                        <button onclick="testTrainStep(2)" class="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 2</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 3 KA -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-emerald-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 uppercase font-mono">Tahap 03</span>
-                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">CEISA 4.0</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Klirens Pabean &amp; SPPB Jalur Hijau</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Data telemetri segel dikirim ke gateway Bea Cukai CEISA 4.0. Sistem pabean menerbitkan SPPB (Surat Persetujuan Pengeluaran Barang) Jalur Hijau dan membebaskan jaminan pabean.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Integrasi:</span> <strong class="text-emerald-300">API Gateway CEISA 4.0 DJBC</strong></div>
-                            <div><span class="text-slate-400">Nomor SPPB:</span> SPPB-86434/KPU.01/2026</div>
-                            <div><span class="text-slate-400">Finansial:</span> <strong class="text-emerald-400">Rilis Jaminan Pabean (Bond Free)</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Legalitas Pabean Kemenkeu</span>
-                        <button onclick="testTrainStep(3)" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 3</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 4 KA -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-indigo-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-indigo-100 text-indigo-800 uppercase font-mono">Tahap 04</span>
-                            <span class="text-[9.5px] font-bold text-indigo-700 bg-indigo-50 px-1.5 py-0.2 rounded border border-indigo-200">RTG Crane</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Bongkar Box dari Gerbong KA</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            RTG-01 Electric Crane bergerak di atas lintasan siding. Spreader Bromma menurunkan 4 pin twistlock mengunci corner casting kontainer dari atas gerbong datar PPCW.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-indigo-300">RTG-01 &amp; HW-08 (Bromma Spreader)</strong></div>
-                            <div><span class="text-slate-400">Beban Angkat:</span> 26.400 kg &bull; 4/4 Pin Terkunci</div>
-                            <div><span class="text-slate-400">Billing ERP:</span> <strong class="text-emerald-400">Jasa Bongkar KA (Rp 350.000)</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Alih Muat Intermodal Rel-Yard</span>
-                        <button onclick="testTrainStep(4)" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 4</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 5 KA -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-amber-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 uppercase font-mono">Tahap 05</span>
-                            <span class="text-[9.5px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">RTK Positioning</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Penempatan Slot Yard Presisi 3D</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            RTK GNSS Receiver memandu penempatan kontainer dari kereta ke slot penumpukan yard (Blok A) dengan akurasi sub-sentimeter (&lt;1.8 cm). Status box menjadi 'in_yard'.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Hardware:</span> <strong class="text-amber-300">HW-07 (CHCNAV CGI-610 RTK)</strong></div>
-                            <div><span class="text-slate-400">Koordinat:</span> Blok A-02-01-01 (18 Satelit FIX)</div>
-                            <div><span class="text-slate-400">Dampak YMS:</span> <strong class="text-blue-300">Sinkronisasi Database MySQL Live</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Meniadakan Biaya Shifting Ulang</span>
-                        <button onclick="testTrainStep(5)" class="px-2.5 py-1 bg-amber-600 hover:bg-amber-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 5</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Tahap 6 KA -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200 p-3.5 flex flex-col justify-between hover:border-emerald-300 transition group">
-                    <div class="space-y-2">
-                        <div class="flex items-center justify-between">
-                            <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-emerald-100 text-emerald-800 uppercase font-mono">Tahap 06</span>
-                            <span class="text-[9.5px] font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">Freight &amp; ESG</span>
-                        </div>
-                        <h5 class="font-bold text-gray-900 text-xs sm:text-sm">Penerbitan Tagihan Rel &amp; ESG</h5>
-                        <p class="text-[11px] text-gray-600 leading-relaxed">
-                            Dokumen Rail Interchange Manifest diverifikasi. Biaya pengangkutan kereta api (Rp 1.850.000/TEU) tercatat, dan reduksi emisi karbon 78% dibanding truk jalan raya tercatat.
-                        </p>
-                        <div class="p-2 bg-slate-900 text-white rounded-lg text-[10px] font-mono space-y-0.5">
-                            <div><span class="text-slate-400">Manifest KA:</span> KA-LOG-PRIOK-CIDP &bull; 48 TEU (Inbound) / 52 TEU (Outbound)</div>
-                            <div><span class="text-slate-400">Billing Freight:</span> <strong class="text-emerald-400">Tarif KA (Rp 1.850.000 / TEU)</strong></div>
-                            <div><span class="text-slate-400">Dampak Hijau:</span> <strong class="text-blue-300">Reduksi Karbon 78% (ESG)</strong></div>
-                        </div>
-                    </div>
-                    <div class="pt-2.5 mt-2 border-t border-gray-200/80 flex items-center justify-between">
-                        <span class="text-[10px] text-gray-500">Green Logistics Terminal</span>
-                        <button onclick="testTrainStep(6)" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-500 text-white rounded-md text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-play text-[9px]"></i><span>Uji Tahap 6</span>
-                        </button>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Ringkasan Finansial Alur Kereta Api -->
-            <div class="p-3 bg-purple-50/70 rounded-xl border border-purple-200 flex flex-col sm:flex-row sm:items-center justify-between text-xs gap-2">
-                <div class="flex items-center space-x-2 text-purple-900 font-semibold">
-                    <i class="fa-solid fa-file-invoice-dollar text-purple-600 text-sm"></i>
-                    <span>Total Billing Terbentuk pada 1 Siklus Alih Muat Kereta Api (Intermodal):</span>
-                </div>
-                <div class="font-mono text-emerald-800 font-bold bg-white px-3 py-1 rounded-lg border border-purple-200 shadow-2xs">
-                    Freight KA (Rp 1.850.000) + Jasa RTG (Rp 350.000) = <span class="text-emerald-600 text-sm">Rp 2.200.000 / TEU</span>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- --------------------------------------------------------------------- -->
-        <!-- TAB 3: SCADA 11 SENSOR MANDIRI (4 STASIUN TELEMETRI LAPANGAN)         -->
-        <!-- --------------------------------------------------------------------- -->
-        <div id="tabContentScada" class="space-y-4 hidden">
-            
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 border-b border-gray-100 gap-2">
-                <div>
-                    <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Uji Coba Mandiri 11 Sensor &amp; Perangkat Keras Lapangan</h4>
-                    <p class="text-[11px] text-gray-500">Setiap tombol di bawah memicu telemetri live, pembaruan database MySQL, dan simulasi tarif billing ERP</p>
-                </div>
-                <span class="px-2 py-0.5 rounded-full text-[9px] font-mono font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 self-start sm:self-auto">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1 animate-pulse"></span>11/11 SENSOR SIAP
-                </span>
-            </div>
-
-            <!-- SCADA 2x2 Grid Layout -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3.5">
-                
-                <!-- STASIUN 01: GATE OTOMASI & TIMBANGAN VGM (HW-01 s/d HW-06) -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-blue-300 transition group">
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-blue-100 text-blue-800 uppercase font-mono">Stasiun 01</span>
-                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Smart Gate &amp; Timbangan Inbound (6 Hardware)</h4>
-                            </div>
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="6 Perangkat Online"></span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mb-2.5">HW-01 (ANPR), HW-02 (OCR), HW-03 (Timbangan 80T), HW-04 (RFID), HW-05 (VMS), HW-06 (Edge PC)</p>
-
-                        <!-- SCADA Digital Readout Matrix -->
-                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
-                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-01 ANPR Truk:</span>
-                                    <span class="font-bold text-blue-400" id="sensorAnprVal">B 9481 UEK (99.4%)</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-02 Portal OCR:</span>
-                                    <span class="font-bold text-purple-400" id="sensorOcrVal">MSKU9182374 (42G1)</span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-03 Timbangan 80T:</span>
-                                    <span class="font-bold text-emerald-400" id="sensorVgmVal">Net 26.450 kg (PASS)</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-04 RFID Tag:</span>
-                                    <span class="font-bold text-indigo-300" id="sensorRfidVal">E280117000... (AUTH)</span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-05 VMS Display:</span>
-                                    <span class="font-bold text-amber-300 truncate block" id="sensorVmsVal">LANE 1 -> BLOK B-08</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-06 Edge Relay:</span>
-                                    <span class="font-bold text-emerald-300" id="sensorEdgeVal">INTERLOCK (12ms / 1.2s)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 6 Dedicated Sensor Test Buttons -->
-                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
-                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor Mandiri:</div>
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-1.5">
-                            <button onclick="testSensorAction('hw01_anpr')" class="py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-01</span>
-                                <span>ANPR Plat</span>
-                            </button>
-                            <button onclick="testSensorAction('hw02_ocr')" class="py-1.5 px-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-02</span>
-                                <span>OCR Box</span>
-                            </button>
-                            <button onclick="testSensorAction('hw03_vgm')" class="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-03</span>
-                                <span>Timbang 80T</span>
-                            </button>
-                            <button onclick="testSensorAction('hw04_rfid')" class="py-1.5 px-2 bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1">
-                                <span class="px-1 py-0.2 bg-indigo-100 rounded text-[9px] font-mono">HW-04</span>
-                                <span>RFID Tag</span>
-                            </button>
-                            <button onclick="testSensorAction('hw05_vms')" class="py-1.5 px-2 bg-white hover:bg-amber-50 text-amber-800 border border-amber-200 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1">
-                                <span class="px-1 py-0.2 bg-amber-100 rounded text-[9px] font-mono">HW-05</span>
-                                <span>VMS LED</span>
-                            </button>
-                            <button onclick="testSensorAction('hw06_edge')" class="py-1.5 px-2 bg-white hover:bg-emerald-50 text-emerald-800 border border-emerald-200 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1">
-                                <span class="px-1 py-0.2 bg-emerald-100 rounded text-[9px] font-mono">HW-06</span>
-                                <span>Relay Palang</span>
-                            </button>
-                        </div>
-                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
-                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Auto-Billing ERP:</span>
-                            <span class="font-bold text-emerald-900">Pas Masuk Truk (Rp 50.000) &bull; VGM SOLAS (Rp 120.000)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STASIUN 02: TELEMETRI RTK & SPREADER ALAT BERAT (HW-07 & HW-08) -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-amber-300 transition group">
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-amber-100 text-amber-800 uppercase font-mono">Stasiun 02</span>
-                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Telemetri RTK Lapangan &amp; Spreader RS (2 Hardware)</h4>
-                            </div>
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="2 Perangkat Online"></span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mb-2.5">HW-07 (CHCNAV RTK GNSS &lt;2cm), HW-08 (Bromma Twistlock &amp; Load Cell Kit)</p>
-
-                        <!-- SCADA Digital Readout Matrix -->
-                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
-                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-07 RTK DGPS:</span>
-                                    <span class="font-bold text-emerald-400" id="sensorRtkVal">FIX (&lt;1.8 cm, 18 Sat)</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">Koordinat Slot 3D:</span>
-                                    <span class="font-bold text-amber-400" id="sensorSlotVal">B-08-03-02</span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-08 Twistlock:</span>
-                                    <span class="font-bold text-blue-400" id="sensorTwistlockVal">LOCKED (Mengunci 4 Pin)</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">Load Cell Sensor:</span>
-                                    <span class="font-bold text-slate-200" id="sensorLoadVal">28.45 Ton</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dedicated Sensor Test Buttons + Operational Move Action -->
-                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
-                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor &amp; Aksi Fisik:</div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-                            <button onclick="testSensorAction('hw07_rtk')" class="py-1.5 px-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-07</span>
-                                <span>Kalibrasi RTK</span>
-                            </button>
-                            <button onclick="testSensorAction('hw08_twistlock')" class="py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-08</span>
-                                <span>Twistlock &amp; Load</span>
-                            </button>
-                            <button onclick="openMoveModal()" class="py-1.5 px-2 bg-amber-500 hover:bg-amber-400 text-gray-950 rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <i class="fa-solid fa-dolly text-[10px]"></i>
-                                <span>Relokasi 3D (RS)</span>
-                            </button>
-                        </div>
-                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
-                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Auto-Billing ERP:</span>
-                            <span class="font-bold text-emerald-900">Jasa Lo-Lo Lift-Off Stevedoring (Rp 250.000)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STASIUN 03: PEMANTAUAN RANTAI DINGIN REEFER IOT (HW-09) -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-cyan-300 transition group">
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-cyan-100 text-cyan-800 uppercase font-mono">Stasiun 03</span>
-                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Reefer Cold Chain &amp; Smart Socket (1 Hardware)</h4>
-                            </div>
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="Perangkat Online"></span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mb-2.5">HW-09 (Marechal Smart Socket 380V/32A Modbus RTU &bull; Daya, Voltase, &amp; Suhu)</p>
-
-                        <!-- SCADA Digital Readout Matrix -->
-                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
-                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-09 Colokan Rack:</span>
-                                    <span class="font-bold text-cyan-300">Rack R-02 Plug #14</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">Telemetri Suhu:</span>
-                                    <span class="font-bold text-cyan-400" id="sensorReeferTempVal">-20.2&deg;C (Optimal)</span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">Tegangan 3-Fasa:</span>
-                                    <span class="font-bold text-slate-200" id="sensorVoltVal">388.4 V (50 Hz)</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">Beban Konsumsi:</span>
-                                    <span class="font-bold text-slate-200" id="sensorKwVal">18.2 kW (28.6 A)</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dedicated Sensor Test Buttons -->
-                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
-                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor Modbus &amp; Skenario:</div>
-                        <div class="grid grid-cols-2 gap-2">
-                            <button onclick="testSensorAction('hw09_reefer')" class="py-1.5 px-2 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-09</span>
-                                <span>Baca Modbus Suhu &amp; Daya</span>
-                            </button>
-                            <button onclick="simulateReeferAlarm()" class="py-1.5 px-2 bg-white hover:bg-rose-50 text-rose-700 border border-rose-300 rounded-lg font-bold text-xs transition flex items-center justify-center gap-1.5">
-                                <i class="fa-solid fa-triangle-exclamation text-[11px]"></i>
-                                <span>Simulasi Overheat (+4.8&deg;C)</span>
-                            </button>
-                        </div>
-                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
-                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Auto-Billing ERP:</span>
-                            <span class="font-bold text-emerald-900">Pasokan Daya &amp; Monitoring (Rp 35.000 / jam)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- STASIUN 04: INTERMODAL KA & KEPABEANAN CEISA 4.0 (HW-10 & HW-11) -->
-                <div class="bg-slate-50/80 rounded-xl border border-gray-200/90 p-4 flex flex-col justify-between hover:border-purple-300 transition group">
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <div class="flex items-center space-x-2">
-                                <span class="px-2 py-0.5 rounded text-[9px] font-extrabold bg-purple-100 text-purple-800 uppercase font-mono">Stasiun 04</span>
-                                <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Intermodal Rel KA &amp; Pabean CEISA 4.0 (2 Hardware)</h4>
-                            </div>
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" title="2 Perangkat Online"></span>
-                        </div>
-                        <p class="text-[10px] text-gray-500 mb-2.5">HW-10 (Frauscher Axle Counter SIL 4), HW-11 (Jointech JT701 GPS Smart E-Seal)</p>
-
-                        <!-- SCADA Digital Readout Matrix -->
-                        <div class="bg-slate-900 rounded-lg p-3 text-white font-mono text-[11px] space-y-2 border border-slate-800 mb-3 shadow-inner">
-                            <div class="grid grid-cols-2 gap-2 pb-1.5 border-b border-slate-800">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-10 Gandar Rel KA:</span>
-                                    <span class="font-bold text-purple-300" id="sensorAxleVal">126 As Roda (KA 2518)</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">Integritas Rangkaian:</span>
-                                    <span class="font-bold text-emerald-400">30 PPCW (SIL 4 Valid)</span>
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-2 gap-2">
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">HW-11 Smart E-Seal:</span>
-                                    <span class="font-bold text-blue-300" id="sensorSealVal">INTACT (JT701 GPS)</span>
-                                </div>
-                                <div>
-                                    <span class="text-[9.5px] text-slate-400 block uppercase">Status Bea Cukai:</span>
-                                    <span class="font-bold text-emerald-400" id="sensorSppbVal">SPPB JALUR HIJAU</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Dedicated Sensor Test Buttons + Operational Rail Discharge Action -->
-                    <div class="space-y-2 pt-2 border-t border-gray-200/70">
-                        <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wide">Pemicu Sensor &amp; Aksi Intermodal:</div>
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-1.5">
-                            <button onclick="testSensorAction('hw10_axle')" class="py-1.5 px-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-10</span>
-                                <span>Cacah 126 Gandar</span>
-                            </button>
-                            <button onclick="testSensorAction('hw11_eseal')" class="py-1.5 px-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <span class="px-1 py-0.2 bg-white/20 rounded text-[9px] font-mono">HW-11</span>
-                                <span>E-Seal &amp; SPPB</span>
-                            </button>
-                            <button onclick="triggerRailDischarge()" class="py-1.5 px-2 bg-purple-700 hover:bg-purple-600 text-white rounded-lg font-bold text-[10.5px] transition flex items-center justify-center gap-1 shadow-2xs">
-                                <i class="fa-solid fa-train text-[10px]"></i>
-                                <span>Bongkar KA (RTG)</span>
-                            </button>
-                        </div>
-                        <div class="px-2.5 py-1 bg-emerald-50 rounded-md border border-emerald-200/80 text-[10px] text-emerald-800 font-semibold flex items-center justify-between">
-                            <span><i class="fa-solid fa-file-invoice mr-1 text-emerald-600"></i>Dampak Operasional:</span>
-                            <span class="font-bold text-emerald-900">Freight Rp 1.850.000/TEU &bull; Rilis Jaminan Pabean</span>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- --------------------------------------------------------------------- -->
-        <!-- TAB 4: UJI SCANNER OPTIK & VERIFIKASI MUTU AIDC (GS1 / SSCC-18 / ISO) -->
-        <!-- --------------------------------------------------------------------- -->
-        <div id="tabContentScanner" class="space-y-4 hidden">
-            
-            <div class="bg-gradient-to-r from-slate-900 to-indigo-950 text-white p-4 rounded-xl border border-indigo-900/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-300 flex items-center justify-center text-lg border border-purple-500/30 shrink-0">
-                        <i class="fa-solid fa-barcode"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-xs sm:text-sm text-white">Konsol Uji Scanner Optik &amp; Dekoder Mutu AIDC</h4>
-                        <p class="text-[11px] text-slate-300 mt-0.5">Uji verifikasi kode kontainer ISO 6346, Serial Shipping Container Code (SSCC-18), dan QR Pabean CEISA 4.0</p>
-                    </div>
-                </div>
-                <a href="dashboard.php?page=scanner" class="px-3 py-1.5 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-lg transition flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-xs">
-                    <i class="fa-solid fa-camera text-[11px]"></i><span>Buka Scanner Kamera Lengkap</span>
-                </a>
-            </div>
-
-            <!-- Interaktif Tester Barcode & Validasi ISO 6346 -->
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-                
-                <!-- Kolom Kiri: Input & 1-Click Tester -->
-                <div class="lg:col-span-6 bg-slate-50 rounded-xl border border-gray-200 p-4 space-y-3">
-                    <div class="text-xs font-bold text-gray-700 uppercase tracking-wide flex items-center justify-between">
-                        <span>Pilih Skenario Sampel Cepat:</span>
-                        <span class="text-[10px] text-purple-600 font-mono">Standar GS1 v23</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2">
-                        <button onclick="testScannerSample('dry')" class="p-2.5 bg-white hover:bg-blue-50 border border-gray-200 hover:border-blue-300 rounded-lg text-left transition group">
-                            <div class="text-[10px] font-bold text-blue-600 font-mono">ISO 6346 (Dry 40ft)</div>
-                            <div class="font-bold text-gray-800 text-xs group-hover:text-blue-700">MSKU9182374</div>
-                            <div class="text-[10px] text-gray-400 mt-0.5">Check Digit 4 &bull; Maersk Line</div>
-                        </button>
-                        <button onclick="testScannerSample('reefer')" class="p-2.5 bg-white hover:bg-cyan-50 border border-gray-200 hover:border-cyan-300 rounded-lg text-left transition group">
-                            <div class="text-[10px] font-bold text-cyan-600 font-mono">ISO 6346 (Reefer 40ft)</div>
-                            <div class="font-bold text-gray-800 text-xs group-hover:text-cyan-700">TEMU4819203</div>
-                            <div class="text-[10px] text-gray-400 mt-0.5">Check Digit 3 &bull; Cold Chain</div>
-                        </button>
-                        <button onclick="testScannerSample('sscc')" class="p-2.5 bg-white hover:bg-purple-50 border border-gray-200 hover:border-purple-300 rounded-lg text-left transition group">
-                            <div class="text-[10px] font-bold text-purple-600 font-mono">GS1-128 (SSCC-18)</div>
-                            <div class="font-bold text-gray-800 text-xs group-hover:text-purple-700">(00) 38991234500000018</div>
-                            <div class="text-[10px] text-gray-400 mt-0.5">Serial Shipping Pallet</div>
-                        </button>
-                        <button onclick="testScannerSample('customs')" class="p-2.5 bg-white hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 rounded-lg text-left transition group">
-                            <div class="text-[10px] font-bold text-emerald-600 font-mono">QR Code CEISA 4.0</div>
-                            <div class="font-bold text-gray-800 text-xs group-hover:text-emerald-700">SPPB-86434/KPU.01/2026</div>
-                            <div class="text-[10px] text-gray-400 mt-0.5">Klirens Pabean Jalur Hijau</div>
-                        </button>
-                    </div>
-
-                    <div class="pt-2 border-t border-gray-200">
-                        <label class="block text-[10px] font-bold text-gray-600 uppercase mb-1">Uji Nomor Kontainer Kustom:</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="customBoxInput" placeholder="Contoh: TCLU8827415" class="flex-1 px-3 py-1.5 text-xs font-mono uppercase bg-white border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-purple-500">
-                            <button onclick="validateCustomBoxNumber()" class="px-3 py-1.5 bg-purple-700 hover:bg-purple-600 text-white text-xs font-bold rounded-lg transition">
-                                Verifikasi
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Kolom Kanan: Hasil Dekoder & Penjelasan Logika AIDC -->
-                <div class="lg:col-span-6 bg-slate-900 text-white rounded-xl p-4 flex flex-col justify-between border border-slate-800 font-mono text-xs shadow-inner">
-                    <div>
-                        <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[10px]">
-                            <span class="text-purple-400 uppercase font-bold tracking-wider">AIDC Decoder Result</span>
-                            <span class="text-emerald-400" id="scanDecoderStatus"><i class="fa-solid fa-circle-check mr-1"></i>STANDBY</span>
-                        </div>
-
-                        <div class="space-y-1.5 text-[11px]" id="scanDecoderOutput">
-                            <div><span class="text-slate-400">Tipe Kode:</span> <span class="text-blue-300 font-bold" id="decType">ISO 6346 Container ID</span></div>
-                            <div><span class="text-slate-400">Payload Mentah:</span> <span class="text-amber-300 font-bold" id="decPayload">MSKU9182374</span></div>
-                            <div><span class="text-slate-400">Owner Prefix:</span> <span class="text-slate-200" id="decOwner">MSKU (Maersk A/S)</span></div>
-                            <div><span class="text-slate-400">Serial Number:</span> <span class="text-slate-200" id="decSerial">918237</span></div>
-                            <div><span class="text-slate-400">Check Digit Calc:</span> <span class="text-emerald-400 font-bold" id="decCheck">4 (VALID - Modulo 11 Match)</span></div>
-                            <div><span class="text-slate-400">Status YMS:</span> <span class="text-cyan-300 font-bold" id="decYms">Tersinkron di Blok B-08-03-02</span></div>
-                        </div>
-                    </div>
-
-                    <div class="mt-3 pt-2 border-t border-slate-800 text-[10px] text-slate-400 font-sans leading-relaxed">
-                        <strong class="text-slate-200">Mengapa AIDC Mutlak Dibutuhkan?</strong> Pemindaian optik otomatis mencegah salah catat nomor kontainer (angka 0 dan huruf O, angka 1 dan huruf I), sehingga demurrage, lokasi stack, dan penagihan billing selalu akurat 100%.
-                    </div>
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- --------------------------------------------------------------------- -->
-        <!-- TAB 5: KATALOG EDUKASI 11 HARDWARE & ALUR FINANSIAL ERP               -->
-        <!-- --------------------------------------------------------------------- -->
-        <div id="tabContentCatalog" class="space-y-3 hidden">
-            
-            <div class="flex items-center justify-between pb-2 border-b border-gray-100">
-                <div>
-                    <h4 class="font-bold text-gray-900 text-xs sm:text-sm">Matriks Pemetaan 11 Perangkat Keras, Software YMS &amp; Dampak Finansial</h4>
-                    <p class="text-[11px] text-gray-500">Katalog standar akademik untuk ujian Topik 7 Inland Container Depot &amp; Dry Port Management ITL Trisakti</p>
-                </div>
-                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                    Conclusion Consultant
-                </span>
-            </div>
-
-            <div class="overflow-x-auto border border-gray-200 rounded-xl">
-                <table class="w-full text-left border-collapse text-xs">
-                    <thead class="bg-slate-50 text-gray-700 font-bold border-b border-gray-200">
-                        <tr>
-                            <th class="p-2.5">Hardware &amp; Tipe</th>
-                            <th class="p-2.5">Model Terpasang</th>
-                            <th class="p-2.5">Pemicu Fisik Lapangan</th>
-                            <th class="p-2.5">Sinyal / Protokol</th>
-                            <th class="p-2.5">Logika Software YMS</th>
-                            <th class="p-2.5">Pemicu Finansial ERP</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 font-sans text-[11px]">
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-01: Kamera ANPR</td>
-                            <td class="p-2.5 text-gray-600">Hikvision DS-TCG406-E</td>
-                            <td class="p-2.5">Truk melintas loop magnetik gerbang</td>
-                            <td class="p-2.5 font-mono text-purple-700">String Plat Nomor via REST API</td>
-                            <td class="p-2.5">Validasi izin armada &amp; catat jam masuk</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Pas Gerbang Truk (Rp 50.000)</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-02: Portal OCR Box</td>
-                            <td class="p-2.5 text-gray-600">Hikvision iDS-TCV300-A6I</td>
-                            <td class="p-2.5">Kontainer melintasi portal multi-sudut</td>
-                            <td class="p-2.5 font-mono text-purple-700">ISO 6346 String via TCP/IP</td>
-                            <td class="p-2.5">Verifikasi Check Digit ISO Modulo 11</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Argo Demurrage Free Time Dimulai</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-03: Timbangan 80T</td>
-                            <td class="p-2.5 text-gray-600">Fangda Electronic Scale 80T</td>
-                            <td class="p-2.5">Gandar truk berhenti di platform baja</td>
-                            <td class="p-2.5 font-mono text-purple-700">Data Bobot via RS-232 / Modbus</td>
-                            <td class="p-2.5">Kalkulasi Net VGM sesuai IMO SOLAS</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Sertifikat VGM SOLAS (Rp 120.000)</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-04: RFID UHF 20m</td>
-                            <td class="p-2.5 text-gray-600">Hopeland Long-Range ISO 18000-6C</td>
-                            <td class="p-2.5">Transponder di kaca truk terbaca 20m</td>
-                            <td class="p-2.5 font-mono text-purple-700">Hex Tag ID via Wiegand-34</td>
-                            <td class="p-2.5">Otentikasi touchless supir &amp; saldo e-wallet</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Auto-debit saldo deposit trucking</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-05: VMS Gate LED</td>
-                            <td class="p-2.5 text-gray-600">Chipshow Outdoor P6/P8</td>
-                            <td class="p-2.5">Seluruh sensor gerbang berstatus VALID</td>
-                            <td class="p-2.5 font-mono text-purple-700">String Pesan Rute via IP UDP</td>
-                            <td class="p-2.5">Menampilkan blok tujuan supir di layar</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Pangkas Waktu Antre (TAT -60%)</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-06: Edge AI PC</td>
-                            <td class="p-2.5 text-gray-600">Advantech ARK-3532 Fanless</td>
-                            <td class="p-2.5">Verifikasi data gerbang tervalidasi</td>
-                            <td class="p-2.5 font-mono text-purple-700">Relay GPIO Dry-Contact 1.2 Detik</td>
-                            <td class="p-2.5">Local interlock buka palang pintu (12ms)</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Eliminasi downtime macet gerbang</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-07: RTK DGPS GNSS</td>
-                            <td class="p-2.5 text-gray-600">CHCNAV CGI-610 Centimeter</td>
-                            <td class="p-2.5">Alat berat bergerak di koridor yard</td>
-                            <td class="p-2.5 font-mono text-purple-700">NMEA-0183 ($GPGGA) Akurasi &lt;2 cm</td>
-                            <td class="p-2.5">Translasi GPS ke Blok, Bay, Row, Tier</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Zero Misplacement (Nol Biaya Shifting)</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-08: Spreader Twistlock</td>
-                            <td class="p-2.5 text-gray-600">Bromma Spreader &amp; Load Cell Kit</td>
-                            <td class="p-2.5">Spreader mendarat di corner casting</td>
-                            <td class="p-2.5 font-mono text-purple-700">4 Proximity Switch + Strain Gauge CAN</td>
-                            <td class="p-2.5">Izin hoist angkat &amp; validasi bobot box</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Jasa Lo-Lo Lift-Off (Rp 250.000)</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-09: Smart Reefer Socket</td>
-                            <td class="p-2.5 text-gray-600">Marechal 380V/32A Modbus RTU</td>
-                            <td class="p-2.5">Steker kontainer reefer dicolokkan ke rak</td>
-                            <td class="p-2.5 font-mono text-purple-700">Register Modbus RS-485 (V, A, kW, &deg;C)</td>
-                            <td class="p-2.5">Logging telemetri suhu &amp; alarm anomali</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Sewa Listrik Reefer (Rp 35.000 / jam)</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-10: Frauscher Axle Counter</td>
-                            <td class="p-2.5 text-gray-600">Frauscher RSR123 Wheel Sensor SIL 4</td>
-                            <td class="p-2.5">Roda kereta melintasi sensor rel</td>
-                            <td class="p-2.5 font-mono text-purple-700">Pulsa Induktif Gandar Kereta Api</td>
-                            <td class="p-2.5">Cacah 126 as roda gerbong KA utuh</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">Verifikasi Integritas Rangkaian KA</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20">
-                            <td class="p-2.5 font-bold text-cdp-navy">HW-11: Smart E-Seal Pabean</td>
-                            <td class="p-2.5 text-gray-600">Jointech JT701 GPS Smart Lock</td>
-                            <td class="p-2.5">Peti kemas transit KA Priok-Cikarang</td>
-                            <td class="p-2.5 font-mono text-purple-700">RFID Nirkabel &amp; GPS/GSM Telemetri</td>
-                            <td class="p-2.5">Verifikasi segel INTACT ke CEISA 4.0</td>
-                            <td class="p-2.5 font-semibold text-emerald-700">SPPB Terbit &amp; Rilis Jaminan Pabean</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-
-        </div>
-
-    </div>
-
 </div>
 
 <!-- MODAL AKSI: PEMINDAHAN KONTAINER OLEH REACH STACKER -->
 <div id="modalMoveBox" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 transform transition-all">
-        <div class="bg-gradient-to-r from-[#002f5e] to-[#0170b9] p-5 text-white flex items-center justify-between">
+        <div class="bg-gradient-to-r from-[#0170b9] to-blue-600 p-5 text-white flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 text-lg">
                     <i class="fa-solid fa-arrows-up-down-left-right"></i>
@@ -1611,7 +643,7 @@ require_once __DIR__ . '/layout_master.php';
     <div class="bg-white rounded-2xl shadow-2xl max-w-5xl w-full max-h-[92vh] flex flex-col overflow-hidden border border-gray-100 transform transition-all animate-fadeIn">
         
         <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-[#002f5e] via-[#004b87] to-[#0170b9] p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
+        <div class="bg-gradient-to-r from-[#0170b9] via-blue-600 to-blue-700 p-4 sm:p-5 text-white flex items-center justify-between shrink-0">
             <div class="flex items-center space-x-3">
                 <div class="w-10 h-10 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center text-emerald-300 text-lg shadow-inner">
                     <i class="fa-solid fa-network-wired"></i>
@@ -6677,7 +5709,7 @@ function refreshStateFromDB() {
 // =============================================================================
 function setCameraView(preset) {
     document.querySelectorAll('.cam-btn').forEach(btn => {
-        btn.classList.remove('bg-[#002f5e]', 'bg-blue-600', 'text-white', 'shadow-xs', 'border-[#002f5e]');
+        btn.classList.remove('bg-[#0170b9]', 'bg-blue-600', 'text-white', 'shadow-xs', 'border-[#0170b9]');
         btn.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
     });
 
@@ -6685,7 +5717,7 @@ function setCameraView(preset) {
         const b = document.getElementById(id);
         if (b) {
             b.classList.remove('bg-gray-100', 'text-gray-700', 'border-gray-200');
-            b.classList.add('bg-[#002f5e]', 'text-white', 'border-[#002f5e]', 'shadow-xs');
+            b.classList.add('bg-[#0170b9]', 'text-white', 'border-[#0170b9]', 'shadow-xs');
         }
     };
 
@@ -6852,7 +5884,7 @@ function toggleDynamicViewportHeight() {
         container.classList.add('h-[calc(100vh-140px)]', 'min-h-[680px]');
         if (textEl) textEl.innerText = 'Layar Normal';
         if (btnEl) {
-            btnEl.classList.add('bg-[#002f5e]', 'text-white', 'border-[#002f5e]');
+            btnEl.classList.add('bg-[#0170b9]', 'text-white', 'border-[#0170b9]');
             btnEl.classList.remove('bg-slate-100', 'text-slate-700', 'border-slate-200');
         }
         showToast('Mode Layar Dinamis', 'Layar 3D diperluas ke tinggi maksimal viewport kerja.', 'info');
@@ -6861,7 +5893,7 @@ function toggleDynamicViewportHeight() {
         container.classList.add('h-[560px]', 'sm:h-[620px]', 'lg:h-[680px]', 'xl:h-[740px]');
         if (textEl) textEl.innerText = 'Layar Tinggi';
         if (btnEl) {
-            btnEl.classList.remove('bg-[#002f5e]', 'text-white', 'border-[#002f5e]');
+            btnEl.classList.remove('bg-[#0170b9]', 'text-white', 'border-[#0170b9]');
             btnEl.classList.add('bg-slate-100', 'text-slate-700', 'border-slate-200');
         }
         showToast('Mode Layar Dinamis', 'Layar 3D dikembalikan ke rasio standar.', 'info');
@@ -7381,7 +6413,8 @@ function simulateReeferAlarm() {
 // TAB SWITCHER CONTROLLER
 // =========================================================================
 function switchSimTab(tabId) {
-    const tabs = ['truck', 'train', 'scada', 'scanner', 'catalog'];
+    const tabs = ['scada', 'scanner', 'catalog'];
+    if (!tabs.includes(tabId)) tabId = 'scada';
     tabs.forEach(t => {
         const contentEl = document.getElementById(`tabContent${t.charAt(0).toUpperCase() + t.slice(1)}`);
         const btnEl = document.getElementById(`tabBtn${t.charAt(0).toUpperCase() + t.slice(1)}`);
@@ -7394,7 +6427,8 @@ function switchSimTab(tabId) {
         }
         if (btnEl) {
             if (t === tabId) {
-                btnEl.className = 'sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white shadow-xs transition flex items-center gap-1.5';
+                const activeColor = 'bg-[#0170b9]';
+                btnEl.className = `sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-bold ${activeColor} text-white shadow-xs transition flex items-center gap-1.5`;
             } else {
                 btnEl.className = 'sim-tab-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5';
             }
@@ -7740,7 +6774,7 @@ function testTrainStep(step) {
 
 // Backward Compatibility
 function runAutoInboundDemo() {
-    runAutoTruckDemo();
+    runAutoTrainDemo();
 }
 
 // =========================================================================

@@ -75,8 +75,8 @@ const cidpTranslations = {
         hero_4_btn2: "Spesifikasi Terminal",
 
         hero_5_badge: "Otomasi Gerbang & CEISA 4.0",
-        hero_5_title: "Gerbang Otomatis RFID & <br><span class=\"text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-300 to-yellow-200\">Validasi Port Clearance Instan</span>",
-        hero_5_desc: "Kamera OCR pelat truk dan nomor kontainer ganda, jembatan timbang 80 ton, dan integrasi Host-to-Host CEISA 4.0 DJBC.",
+        hero_5_title: "Smart Gate Otomatis & <br><span class=\"text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-300 to-yellow-200\">Clearance Bea Cukai Instan</span>",
+        hero_5_desc: "Pembacaan RFID UHF ISO 18000-6C, kamera OCR pelat nomor, dan timbangan gantry 80 ton otomatis yang tersinkronisasi langsung dengan SPPB DJBC.",
         hero_5_btn1: "Buka Modul Gate",
         hero_5_btn2: "Standar Keselamatan Gate",
 
@@ -95,10 +95,14 @@ const cidpTranslations = {
         upd_f_cat: "KEPABEANAN & CEISA",
         upd_f_title: "CIDP Resmikan Integrasi API Host-to-Host CEISA 4.0 Bea Cukai untuk Otomasi SPPB Real-Time",
         upd_f_btn: "Buka Akses Konsol Sistem",
+        upd_date_1: "12 Oktober 2026",
+        upd_date_2: "8 Oktober 2026",
+        upd_date_3: "1 Oktober 2026",
+        upd_date_4: "24 September 2026",
         upd_c1_cat: "MAINTENANCE & REPAIR",
         upd_c1_title: "Workshop M&R Rampungkan Kalibrasi Berkala 3 Unit Reach Stacker Kalmar DRG450",
         upd_c1_desc: "Uji beban dinamis dan pemeriksaan sertifikasi twistlock memastikan kesiapan alat berat dalam melayani penumpukan 4-tier berstandar keselamatan internasional.",
-        upd_c2_cat: "INFRASTRUKTUR & IOT",
+        upd_c2_cat: "INFRASTRUKTUR NOC",
         upd_c2_title: "Peningkatan Data Center Tier-3 CIDP Mencapai Uptime 99.98% untuk Sistem Billing & IoT",
         upd_c2_desc: "Pemantauan telemetri terpadu 26 titik hardware IoT dan sistem redundansi cloud multi-zona menjamin kelancaran operasional gerbang dan penumpukan tanpa henti.",
         upd_c3_cat: "KEMITRAAN EKOSISTEM",
@@ -110,28 +114,28 @@ const cidpTranslations = {
         pil_title: "Pilar <span class=\"text-orange-600\">Ekosistem Digital</span> Terpadu",
         pil_desc: "Tiga sistem inti untuk melacak, menggerakkan, dan mengonsolidasi muatan kargo antarmoda secara presisi.",
         pil_all: "Buka Seluruh Modul Terpadu",
-        pil_card1_base_tag: "01 • MANAJEMEN LAPANGAN",
+        pil_card1_base_tag: "01 &bull; MANAJEMEN LAPANGAN",
         pil_card1_base_title: "Yard Management System",
-        pil_card1_hover_tag: "01 • YMS ENGINE",
+        pil_card1_hover_tag: "01 &bull; YMS ENGINE",
         pil_card1_hover_title: "Presisi Spasial & Zero Misplacement",
         pil_card1_hover_desc: "Otomasi penataan Blok A hingga E dengan batasan 4-tier stacking, kalkulasi dwell time otomatis, dan pelacakan GPS alat berat Kalmar Reach Stacker dalam visualisasi denah interaktif.",
         pil_card1_hover_stat: "100% Akurasi Slot",
         pil_card1_btn: "Buka Modul",
 
-        pil_card2_base_tag: "02 • LOGISTIK REL PASOSO",
-        pil_card2_base_title: "Transport & Shunting KA",
-        pil_card2_hover_tag: "02 • TMS ENGINE",
-        pil_card2_hover_title: "Jalur Kereta Kargo Langsung ke Priok",
-        pil_card2_hover_desc: "Sinkronisasi jadwal rangkaian 60 TEU kereta kargo Pasoso, manifes digital gerbong datar, dan optimasi dwell time intermodal.",
-        pil_card2_hover_stat: "1.8 Hari Dwell Time",
+        pil_card2_base_tag: "02 &bull; ANTARMODA KERETA & TRUK",
+        pil_card2_base_title: "Transport Management System",
+        pil_card2_hover_tag: "02 &bull; TMS ENGINE",
+        pil_card2_hover_title: "Sinkronisasi Shunting Pasoso",
+        pil_card2_hover_desc: "Manajemen jadwal rangkaian 60 TEU kereta api logistik rute Tanjung Priok &ndash; CIDP, serta pengaturan internal shunting Head Truck KTT-01/02/03 demi kelancaran gate dispatch.",
+        pil_card2_hover_stat: "Rangkaian 60 TEU",
         pil_card2_btn: "Buka Modul",
 
-        pil_card3_base_tag: "03 • PERGUDANGAN & LCL",
-        pil_card3_base_title: "CFS & Warehousing",
-        pil_card3_hover_tag: "03 • WMS ENGINE",
-        pil_card3_hover_title: "Konsolidasi Kargo & Cross-Docking",
-        pil_card3_hover_desc: "Pengelolaan kargo LCL/FCL cerdas, barcode palet GS1, pemindaian otomatis, dan integrasi faktur perpajakan kepabeanan.",
-        pil_card3_hover_stat: "GS1 Barcode Terpadu",
+        pil_card3_base_tag: "03 &bull; CFS & GUDANG KONSOLIDASI",
+        pil_card3_base_title: "Warehouse Management System",
+        pil_card3_hover_tag: "03 &bull; WMS & CFS ENGINE",
+        pil_card3_hover_title: "Stripping, Stuffing & Barcoding",
+        pil_card3_hover_desc: "Pengelolaan alur konsolidasi LCL/FCL, pelacakan barcode palet berstandar GS1, penataan racking gudang CFS, dan koneksi langsung dengan penagihan biaya storage ERP.",
+        pil_card3_hover_stat: "Barcode GS1 Ready",
         pil_card3_btn: "Buka Modul",
         pil_hover_hint: "Arahkan kursor untuk rincian",
 
@@ -149,12 +153,16 @@ const cidpTranslations = {
         perf_kpi3_unit: "CO₂",
         perf_kpi3_sub: "Pengalihan ke moda kereta logistik hijau",
         perf_doc_title: "Dokumen Regulasi, SOP & Laporan Resmi",
-        perf_doc1_title: "Buku Pedoman Operasional & Tutorial Lengkap DPMS 2026",
-        perf_doc1_desc: "Panduan arsitektur sistem, integrasi RFID UHF, dan protokol CEISA 4.0",
-        perf_doc2_title: "Kebijakan K3, Keberlanjutan Lingkungan & Dekarbonisasi Pelabuhan",
-        perf_doc2_desc: "Standar audit emisi gas buang dan kepatuhan ISPS Code",
-        perf_doc3_title: "Formulir Pendaftaran Armada Truk & Kartu Akses RFID Gate",
-        perf_doc3_desc: "Registrasi online transporter dan pengemudi",
+        perf_doc_format: "Format: Dokumen Resmi Terverifikasi",
+        perf_doc1_title: "Standar Operasional Prosedur (SOP) Gate In/Out & Pemeriksaan CEISA 4.0",
+        perf_doc1_desc: "Pedoman resmi pengemudi truk, kartu RFID, dan validasi SPPB Bea Cukai",
+        perf_doc1_date: "28 Feb 2026",
+        perf_doc2_title: "Laporan Kinerja Integrasi Antarmoda Dry Port FY2025/2026",
+        perf_doc2_desc: "Analisis statistik dwell time, penghematan bahan bakar, dan throughput kontainer",
+        perf_doc2_date: "15 Jan 2026",
+        perf_doc3_title: "Manual Kepatuhan HSSE & Tanggap Darurat Dangerous Goods (DG Yard)",
+        perf_doc3_desc: "Protokol keselamatan kerja zona penumpukan muatan B3 berstandar IMO",
+        perf_doc3_date: "10 Jan 2026",
         perf_doc_btn: "Unduh",
 
         // SECTION 7: HIGHLIGHTS
@@ -164,19 +172,31 @@ const cidpTranslations = {
         fac_item1_title: "Data Center Tier-3 & NOC CIDP",
         fac_item1_sub: "Pusat Komando Jaringan & Telemetri",
         fac_item1_desc: "Pusat kontrol 26 perangkat hardware IoT, server redundansi DPMS, dan pengawasan CCTV AI perimeter berkesinambungan.",
+        fac_item1_tag1: "Tier-3 Uptime 99.98%",
+        fac_item1_tag2: "26 Hardware IoT",
+        fac_item1_tag3: "AI Perimeter CCTV",
         fac_item2_title: "Workshop Maintenance & Repair (M&R)",
         fac_item2_sub: "Bengkel Kalmar & Rekondisi Kontainer",
         fac_item2_desc: "Pemeliharaan alat berat Kalmar Reach Stacker, pengelasan struktur kontainer, dan pencucian kimia standar IICL.",
+        fac_item2_tag1: "Standar IICL",
+        fac_item2_tag2: "Kalmar DRG450 Care",
+        fac_item2_tag3: "Uji Segel ISO",
         fac_item3_title: "Gatehouse Otomatis 4 Lajur & Timbangan",
         fac_item3_sub: "Otomasi Gerbang & Verifikasi Muatan",
         fac_item3_desc: "Empat lajur otomatis dengan kamera OCR nomor kontainer & pelat truk, scanner RFID UHF, dan timbangan 80 ton.",
+        fac_item3_tag1: "4 Lajur Cerdas",
+        fac_item3_tag2: "OCR & RFID UHF",
+        fac_item3_tag3: "Jembatan Timbang 80 Ton",
         fac_item4_title: "Gedung Kantor Utama & Bea Cukai",
         fac_item4_sub: "Pusat Pelayanan Terpadu & Perbankan",
         fac_item4_desc: "Pelayanan satu atap (One Stop Service) terpadu: perwakilan Hanggar Bea Cukai, perbankan, dan loket verifikasi dokumen.",
+        fac_item4_tag1: "Hanggar Bea Cukai",
+        fac_item4_tag2: "One Stop Service",
+        fac_item4_tag3: "Validasi CEISA 4.0",
 
         // SECTION 8: NETWORK
         net_tag: "JEJAK JARINGAN KAMI",
-        net_title: "Modul Sistem DPMS & Jaringan Mitra",
+        net_title: "Modul Sistem DPMS &amp; Jaringan Mitra",
         net_mod_title: "8 Modul Fungsional Conclusion DPMS",
         net_m1_title: "Gate Automation",
         net_m1_desc: "RFID UHF, kamera OCR, timbangan gantry otomatis & cetak e-Ticket SPK.",
@@ -208,12 +228,25 @@ const cidpTranslations = {
         cta_btn2: "Buka Simulasi 3D Real-Time",
 
         // SECTION 10: FOOTER
+        foot_platform: "Intermodal Dry Port &bull; DPMS Platform",
         foot_desc: "Konsorsium infrastruktur pelabuhan darat 35 Hektare berstandar kelas dunia yang menghubungkan multimoda kereta api logistik, terminal peti kemas digital, serta ekosistem kepabeanan CEISA 4.0 secara berkesinambungan.",
         foot_col1_title: "Standar & Kepatuhan Terakreditasi",
         foot_col2_title: "Solusi Sistem DPMS",
+        foot_sol_yms: "Yard Management System (YMS)",
+        foot_sol_tms: "Transport & Shunting KA (TMS)",
+        foot_sol_wms: "CFS Warehouse & Konsolidasi (WMS)",
+        foot_sol_reefer: "Terminal Rantai Pendingin (Reefer Hub)",
+        foot_sol_3d: "3D Digital Twin Engine Simulator",
+        foot_sol_gate: "Gerbang Otomatis RFID & ANPR",
         foot_col3_title: "Tata Kelola & HSSE",
+        foot_gov_sop: "SOP Gate & CEISA 4.0",
+        foot_gov_k3: "Kebijakan K3 & HSSE Terminal",
+        foot_gov_green: "Inisiatif Dekarbonisasi Green Port",
+        foot_gov_driver: "Pedoman Pengemudi Truk Logistik",
+        foot_gov_wbs: "Whistleblowing System (WBS)",
         foot_col4_title: "Pusat Operasi & Komando",
         foot_hq_label: "Terminal & Kantor Pusat:",
+        foot_hq_address: "Kawasan Intermodal Pasoso, Km 32 Koridor Cikarang &ndash; Tanjung Priok",
         foot_tel_label: "Layanan Informasi Korporat:",
         foot_noc_label: "Pusat Kendali Operasi NOC:",
         foot_status_title: "Kesiapan Operasional Penuh",
@@ -223,25 +256,43 @@ const cidpTranslations = {
         foot_pol3: "Whistleblowing System (WBS)",
         foot_pol4: "Kebijakan HSSE & K3L",
         foot_pol5: "Peta Ekosistem Antarmoda",
-        foot_security_std: "Sistem Manajemen Keamanan Informasi • ISO/IEC 27001",
+        foot_security_std: "Sistem Manajemen Keamanan Informasi &bull; ISO/IEC 27001",
         foot_copy: "Hak Cipta &copy; 2026 PT Conclusion Intermodal Dry Port Tbk. Seluruh hak cipta dilindungi undang-undang.",
 
         // SEARCH MODAL
         search_modal_title: "Pencarian Cepat CIDP DPMS",
         search_placeholder: "Ketik kata kunci: YMS, Reefer, CEISA, SOP, Shunting, atau Tarif...",
         search_popular_label: "Paling Sering Dicari:",
+        search_tag_yms: "YMS Stacking",
+        search_tag_reefer: "Reefer Plug",
+        search_tag_ceisa: "CEISA 4.0",
+        search_tag_rail: "Kereta Pasoso",
+        search_tag_sop: "Unduh SOP",
         search_empty_hint: "Masukkan kata kunci di atas untuk mencari data fasilitas, modul, atau dokumen.",
         search_not_found: "Tidak ditemukan hasil yang cocok dengan",
 
         // LOGIN MODAL
         login_modal_title: "Masuk Portal DPMS",
-        login_modal_subtitle: "Konsol Pengendali Logistik & Yard 35 Ha",
-        login_email_label: "Alamat Surel / ID Pengguna",
+        login_modal_subtitle: "Conclusion Intermodal Dry Port Hub 35 Ha",
+        login_email_label: "Alamat Email",
         login_pass_label: "Kata Sandi",
+        login_default_pass: "Default: admin123",
+        login_pass_placeholder: "Kata Sandi Anda",
         login_remember: "Ingat saya di perangkat ini",
         login_forgot: "Lupa kata sandi?",
         login_submit: "Masuk ke Konsol DPMS",
-        login_demo_label: "PILIH AKUN SIMULASI CEPAT (1-KLIK):"
+        login_demo_label: "Pilih Akun Demo Cepat:",
+        login_demo_hint: "1-Klik Terisi",
+        login_role_admin: "Super Admin",
+        login_role_operator: "Operator Yard",
+        login_role_client: "Shipper / Client",
+        login_role_driver: "Supir Truk",
+        login_instant_btn: "Masuk Otomatis Instan (Super Admin)",
+
+        // FLOATING NAV
+        float_updates: "Pembaruan Terkini",
+        float_search: "Cari di Situs",
+        float_social: "Bagikan & Media Sosial"
     },
 
     en: {
@@ -314,8 +365,8 @@ const cidpTranslations = {
         hero_4_btn2: "Terminal Specifications",
 
         hero_5_badge: "Gate Automation & CEISA 4.0",
-        hero_5_title: "Automated RFID Gate & <br><span class=\"text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-300 to-yellow-200\">Instant Port Clearance Validation</span>",
-        hero_5_desc: "Dual OCR cameras for container and license plate detection, 80-ton gantry weighbridges, and Host-to-Host CEISA 4.0 customs integration.",
+        hero_5_title: "Automated Smart Gate & <br><span class=\"text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-300 to-yellow-200\">Instant Customs Port Clearance</span>",
+        hero_5_desc: "ISO 18000-6C UHF RFID scanning, license plate OCR cameras, and 80-ton automated gantry weighbridge synchronized with Customs SPPB.",
         hero_5_btn1: "Open Gate Module",
         hero_5_btn2: "Gate Safety Standards",
 
@@ -334,10 +385,14 @@ const cidpTranslations = {
         upd_f_cat: "CUSTOMS & CEISA",
         upd_f_title: "CIDP Launches Host-to-Host CEISA 4.0 API Integration for Real-Time Customs SPPB Automation",
         upd_f_btn: "Open System Console Access",
+        upd_date_1: "October 12, 2026",
+        upd_date_2: "October 8, 2026",
+        upd_date_3: "October 1, 2026",
+        upd_date_4: "September 24, 2026",
         upd_c1_cat: "MAINTENANCE & REPAIR",
         upd_c1_title: "M&R Workshop Completes Periodic Calibration of 3 Kalmar DRG450 Reach Stackers",
         upd_c1_desc: "Dynamic load testing and twistlock safety certifications ensure heavy equipment readiness for ISO 4-tier stacking operations.",
-        upd_c2_cat: "INFRASTRUCTURE & IOT",
+        upd_c2_cat: "NOC INFRASTRUCTURE",
         upd_c2_title: "CIDP Tier-3 Data Center Upgrade Achieves 99.98% Uptime for Billing & IoT Ecosystem",
         upd_c2_desc: "Integrated telematics monitoring across 26 IoT hardware units and multi-zone cloud failover ensure non-stop gate and stacking operations.",
         upd_c3_cat: "ECOSYSTEM PARTNERSHIP",
@@ -349,28 +404,28 @@ const cidpTranslations = {
         pil_title: "Pillars of <span class=\"text-orange-600\">Integrated Digital</span> Ecosystem",
         pil_desc: "Three foundational systems designed to track, dispatch, and consolidate intermodal container cargo with precision.",
         pil_all: "Explore All DPMS Modules",
-        pil_card1_base_tag: "01 • YARD MANAGEMENT",
+        pil_card1_base_tag: "01 &bull; YARD MANAGEMENT",
         pil_card1_base_title: "Yard Management System",
-        pil_card1_hover_tag: "01 • YMS ENGINE",
+        pil_card1_hover_tag: "01 &bull; YMS ENGINE",
         pil_card1_hover_title: "Spatial Precision & Zero Misplacement",
         pil_card1_hover_desc: "Automated stacking for Blocks A through E with 4-tier limits, automated dwell time billing, and live GPS tracking of Kalmar reach stackers on an interactive yard map.",
         pil_card1_hover_stat: "100% Slot Accuracy",
         pil_card1_btn: "Open Module",
 
-        pil_card2_base_tag: "02 • PASOSO RAIL LOGISTICS",
-        pil_card2_base_title: "Transport & Rail Shunting",
-        pil_card2_hover_tag: "02 • TMS ENGINE",
-        pil_card2_hover_title: "Dedicated Freight Rail to Seaport",
-        pil_card2_hover_desc: "Synchronized schedules for 60-TEU Pasoso container train services, digital flat-car manifests, and intermodal dwell time optimization.",
-        pil_card2_hover_stat: "1.8-Day Dwell Time",
+        pil_card2_base_tag: "02 &bull; RAIL & TRUCK INTERMODAL",
+        pil_card2_base_title: "Transport Management System",
+        pil_card2_hover_tag: "02 &bull; TMS ENGINE",
+        pil_card2_hover_title: "Pasoso Train Shunting Synchronization",
+        pil_card2_hover_desc: "Schedule management for 60-TEU container freight train services on the Tanjung Priok &ndash; CIDP route, plus internal yard shunting dispatch for seamless gate turnover.",
+        pil_card2_hover_stat: "60-TEU Dedicated Train",
         pil_card2_btn: "Open Module",
 
-        pil_card3_base_tag: "03 • WAREHOUSING & LCL",
-        pil_card3_base_title: "CFS & Warehousing",
-        pil_card3_hover_tag: "03 • WMS ENGINE",
-        pil_card3_hover_title: "Cargo Consolidation & Cross-Docking",
-        pil_card3_hover_desc: "Smart LCL/FCL cargo management, GS1 pallet barcodes, automated inbound scanning, and seamless customs tax invoice integration.",
-        pil_card3_hover_stat: "Integrated GS1 Barcode",
+        pil_card3_base_tag: "03 &bull; CFS & CONSOLIDATION WAREHOUSE",
+        pil_card3_base_title: "Warehouse Management System",
+        pil_card3_hover_tag: "03 &bull; WMS & CFS ENGINE",
+        pil_card3_hover_title: "Stripping, Stuffing & Pallet Barcoding",
+        pil_card3_hover_desc: "Smart LCL/FCL consolidation workflow management, GS1-standard pallet barcode tracking, CFS warehouse racking, and direct integration with ERP storage billing.",
+        pil_card3_hover_stat: "GS1 Barcode Ready",
         pil_card3_btn: "Open Module",
         pil_hover_hint: "Hover cursor for details",
 
@@ -388,12 +443,16 @@ const cidpTranslations = {
         perf_kpi3_unit: "CO₂",
         perf_kpi3_sub: "Modal freight shift to green freight rail",
         perf_doc_title: "Regulatory Documents, SOPs & Official Reports",
-        perf_doc1_title: "DPMS 2026 Comprehensive Operational & Tutorial Guide",
-        perf_doc1_desc: "System architecture guide, UHF RFID integration, and CEISA 4.0 protocols",
-        perf_doc2_title: "HSSE, Environmental Sustainability & Port Decarbonization Policy",
-        perf_doc2_desc: "Green port emissions audit standards and ISPS Code compliance",
-        perf_doc3_title: "Truck Fleet Registration Form & RFID Gate Access Card",
-        perf_doc3_desc: "Online registration for transporters and container truck drivers",
+        perf_doc_format: "Format: Verified Official Documents",
+        perf_doc1_title: "Standard Operating Procedure (SOP) Gate In/Out & CEISA 4.0 Clearance",
+        perf_doc1_desc: "Official guide for truck drivers, UHF RFID cards, and Customs SPPB clearance validation",
+        perf_doc1_date: "28 Feb 2026",
+        perf_doc2_title: "Dry Port Intermodal Integration Performance Report FY2025/2026",
+        perf_doc2_desc: "Statistical analysis of dwell time, fuel savings, and container throughput metrics",
+        perf_doc2_date: "15 Jan 2026",
+        perf_doc3_title: "HSSE Compliance & Dangerous Goods Emergency Response Manual (DG Yard)",
+        perf_doc3_desc: "IMO-standard occupational safety protocols for hazardous goods stacking zones",
+        perf_doc3_date: "10 Jan 2026",
         perf_doc_btn: "Download",
 
         // SECTION 7: HIGHLIGHTS
@@ -403,19 +462,31 @@ const cidpTranslations = {
         fac_item1_title: "Tier-3 Data Center & CIDP NOC",
         fac_item1_sub: "Network & Telematics Command Center",
         fac_item1_desc: "Central command monitoring 26 IoT hardware units, DPMS high-availability servers, and continuous perimeter AI CCTV surveillance.",
+        fac_item1_tag1: "Tier-3 Uptime 99.98%",
+        fac_item1_tag2: "26 IoT Hardware Units",
+        fac_item1_tag3: "AI Perimeter CCTV",
         fac_item2_title: "Workshop Maintenance & Repair (M&R)",
         fac_item2_sub: "Kalmar Heavy Equipment & Container Care",
         fac_item2_desc: "Maintenance depot for Kalmar DRG450 Reach Stackers, container structural repairs, and IICL-standard chemical washing.",
+        fac_item2_tag1: "IICL Standard",
+        fac_item2_tag2: "Kalmar DRG450 Care",
+        fac_item2_tag3: "ISO Seal Testing",
         fac_item3_title: "4-Lane Automated Gatehouse & Weighbridge",
         fac_item3_sub: "Gate Automation & Payload Verification",
         fac_item3_desc: "Four automated lanes featuring container and plate OCR cameras, UHF RFID scanners, and an 80-ton gantry weighbridge.",
+        fac_item3_tag1: "4 Smart Lanes",
+        fac_item3_tag2: "OCR & UHF RFID",
+        fac_item3_tag3: "80-Ton Weighbridge",
         fac_item4_title: "Main Headquarters & Customs Building",
         fac_item4_sub: "Integrated One-Stop Administrative Center",
         fac_item4_desc: "One Stop Service administrative hub housing Customs hangar delegates, banking branches, and shipping document desks.",
+        fac_item4_tag1: "Customs Hangar",
+        fac_item4_tag2: "One Stop Service",
+        fac_item4_tag3: "CEISA 4.0 Validation",
 
         // SECTION 8: NETWORK
         net_tag: "OUR NETWORK FOOTPRINT",
-        net_title: "DPMS System Modules & Partner Network",
+        net_title: "DPMS System Modules &amp; Partner Network",
         net_mod_title: "8 Functional Modules of Conclusion DPMS",
         net_m1_title: "Gate Automation",
         net_m1_desc: "UHF RFID, OCR cameras, automated gantry weighbridge & SPK e-Ticket generation.",
@@ -447,12 +518,25 @@ const cidpTranslations = {
         cta_btn2: "Launch Real-Time 3D Simulation",
 
         // SECTION 10: FOOTER
+        foot_platform: "Intermodal Dry Port &bull; DPMS Platform",
         foot_desc: "A world-class 35-hectare dry port infrastructure consortium integrating multimodal freight rail, digital container terminals, and continuous CEISA 4.0 customs ecosystem compliance.",
         foot_col1_title: "Accredited Standards & Compliance",
         foot_col2_title: "DPMS System Solutions",
+        foot_sol_yms: "Yard Management System (YMS)",
+        foot_sol_tms: "Transport & Rail Shunting (TMS)",
+        foot_sol_wms: "CFS Warehouse & Consolidation (WMS)",
+        foot_sol_reefer: "Cold Chain Terminal (Reefer Hub)",
+        foot_sol_3d: "3D Digital Twin Engine Simulator",
+        foot_sol_gate: "Automated RFID & ANPR Gate",
         foot_col3_title: "Governance & HSSE",
+        foot_gov_sop: "Gate & CEISA 4.0 SOP",
+        foot_gov_k3: "Terminal HSSE & Safety Policy",
+        foot_gov_green: "Green Port Decarbonization Initiatives",
+        foot_gov_driver: "Freight Truck Driver Guidelines",
+        foot_gov_wbs: "Whistleblowing System (WBS)",
         foot_col4_title: "Operations & NOC Headquarters",
         foot_hq_label: "Terminal & Head Office:",
+        foot_hq_address: "Pasoso Intermodal Zone, Km 32 Cikarang &ndash; Tanjung Priok Corridor",
         foot_tel_label: "Corporate Information Services:",
         foot_noc_label: "NOC Operations Command Center:",
         foot_status_title: "Full Operational Readiness",
@@ -462,25 +546,43 @@ const cidpTranslations = {
         foot_pol3: "Whistleblowing System (WBS)",
         foot_pol4: "HSSE & Safety Policy",
         foot_pol5: "Intermodal Ecosystem Map",
-        foot_security_std: "Information Security Management System • ISO/IEC 27001",
+        foot_security_std: "Information Security Management System &bull; ISO/IEC 27001",
         foot_copy: "Copyright &copy; 2026 PT Conclusion Intermodal Dry Port Tbk. All rights reserved.",
 
         // SEARCH MODAL
         search_modal_title: "CIDP DPMS Quick Search",
         search_placeholder: "Enter keyword: YMS, Reefer, CEISA, SOP, Shunting, or Tariff...",
         search_popular_label: "Popular Searches:",
+        search_tag_yms: "YMS Stacking",
+        search_tag_reefer: "Reefer Plug",
+        search_tag_ceisa: "CEISA 4.0",
+        search_tag_rail: "Pasoso Freight Rail",
+        search_tag_sop: "Download SOP",
         search_empty_hint: "Enter keywords above to search terminal facilities, modules, or documents.",
         search_not_found: "No matching results found for",
 
         // LOGIN MODAL
         login_modal_title: "Access DPMS Portal",
-        login_modal_subtitle: "35-Ha Terminal & Yard Control Console",
-        login_email_label: "Email Address / User ID",
+        login_modal_subtitle: "Conclusion Intermodal Dry Port Hub 35 Ha",
+        login_email_label: "Email Address",
         login_pass_label: "Password",
+        login_default_pass: "Default: admin123",
+        login_pass_placeholder: "Your Password",
         login_remember: "Remember me on this device",
         login_forgot: "Forgot password?",
         login_submit: "Log in to DPMS Console",
-        login_demo_label: "SELECT QUICK DEMO ACCOUNT (1-CLICK):"
+        login_demo_label: "Select Quick Demo Account:",
+        login_demo_hint: "1-Click Auto Fill",
+        login_role_admin: "Super Admin",
+        login_role_operator: "Yard Operator",
+        login_role_client: "Shipper / Client",
+        login_role_driver: "Truck Driver",
+        login_instant_btn: "Instant Auto Login (Super Admin)",
+
+        // FLOATING NAV
+        float_updates: "Latest Updates",
+        float_search: "Search Site",
+        float_social: "Share & Social Media"
     }
 };
 
@@ -544,11 +646,11 @@ function setLanguage(lang) {
     const btnEN = document.getElementById('langBtnEN');
     if (btnID && btnEN) {
         if (lang === 'id') {
-            btnID.className = 'font-bold text-orange-600 transition-colors';
-            btnEN.className = 'text-slate-500 hover:text-slate-900 transition-colors font-normal';
+            btnID.className = 'font-bold text-orange-600 transition-colors focus:outline-none';
+            btnEN.className = 'text-slate-500 hover:text-slate-900 transition-colors font-normal focus:outline-none';
         } else {
-            btnID.className = 'text-slate-500 hover:text-slate-900 transition-colors font-normal';
-            btnEN.className = 'font-bold text-orange-600 transition-colors';
+            btnID.className = 'text-slate-500 hover:text-slate-900 transition-colors font-normal focus:outline-none';
+            btnEN.className = 'font-bold text-orange-600 transition-colors focus:outline-none';
         }
     }
 
@@ -557,11 +659,11 @@ function setLanguage(lang) {
     const mBtnEN = document.getElementById('mobileLangBtnEN');
     if (mBtnID && mBtnEN) {
         if (lang === 'id') {
-            mBtnID.className = 'font-bold text-orange-600';
-            mBtnEN.className = 'text-slate-500 hover:text-slate-900 font-normal';
+            mBtnID.className = 'font-bold text-orange-600 px-1';
+            mBtnEN.className = 'text-slate-500 hover:text-slate-900 font-normal px-1';
         } else {
-            mBtnID.className = 'text-slate-500 hover:text-slate-900 font-normal';
-            mBtnEN.className = 'font-bold text-orange-600';
+            mBtnID.className = 'text-slate-500 hover:text-slate-900 font-normal px-1';
+            mBtnEN.className = 'font-bold text-orange-600 px-1';
         }
     }
 
@@ -589,10 +691,26 @@ function setLanguage(lang) {
         }
     });
 
-    // 6. Refresh active facility highlight stage
+    // 6. Update Element Titles / Tooltips
+    document.querySelectorAll('[data-i18n-title]').forEach(el => {
+        const key = el.getAttribute('data-i18n-title');
+        if (cidpTranslations[lang][key] !== undefined) {
+            el.title = cidpTranslations[lang][key];
+        }
+    });
+
+    // 7. Refresh active facility highlight stage
     updateHighlightDisplay(activeHighlightIndex);
 
-    // 7. Dispatch custom event for custom components
+    // 8. Refresh quick search placeholder & results if active
+    if (typeof handleQuickSearch === 'function') {
+        const sInput = document.getElementById('quickSearchInput');
+        if (sInput && sInput.value) {
+            handleQuickSearch(sInput.value);
+        }
+    }
+
+    // 9. Dispatch custom event for custom components
     window.dispatchEvent(new CustomEvent('cidp-language-switched', { detail: { lang } }));
 }
 
@@ -607,8 +725,8 @@ function updateHighlightDisplay(index) {
     const caption = document.getElementById('highlightCaption');
     const specsEl = document.getElementById('highlightSpecs');
 
-    if (badge) badge.innerText = fac.badge[currentLanguage];
-    if (caption) caption.innerText = fac.caption[currentLanguage];
+    if (badge) badge.innerText = fac.badge[currentLanguage] || fac.badge.id;
+    if (caption) caption.innerText = fac.caption[currentLanguage] || fac.caption.id;
     if (specsEl && fac.specs[currentLanguage]) {
         specsEl.innerHTML = fac.specs[currentLanguage]
             .map(s => `<span class="bg-white/15 px-2.5 py-0.5 rounded backdrop-blur-xs font-mono">${s}</span>`)

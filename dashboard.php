@@ -5,9 +5,18 @@ if (session_status() === PHP_SESSION_NONE) {
 
 // Cek sesi login
 if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
-    header("Location: login.php");
+    header("Location: index.php");
     exit;
 }
+
+// Preferensi bahasa sistem (id / en)
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['id', 'en'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+    setcookie('cidp_lang', $_GET['lang'], time() + (86400 * 30), "/");
+} elseif (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = $_COOKIE['cidp_lang'] ?? 'id';
+}
+$current_lang = $_SESSION['lang'] ?? 'id';
 
 require_once __DIR__ . '/connection.php';
 $db_stats = [
@@ -82,6 +91,12 @@ try {
 } catch (Exception $e) {}
 
 
+$login_toast_data = null;
+if (isset($_SESSION['login_toast'])) {
+    $login_toast_data = $_SESSION['login_toast'];
+    unset($_SESSION['login_toast']); // Hanya tampil sekali saat login
+}
+
 $iduser = $_SESSION['iduser'] ?? 1;
 $nama   = (!empty($_SESSION['nama']) && $_SESSION['nama'] !== 'Guest') ? $_SESSION['nama'] : 'Zulfikar Jafarudin Fatah';
 $email  = $_SESSION['email'] ?? 'admin@cidp.ac.id';
@@ -127,7 +142,7 @@ $menu_clusters = [
         'reefer'    => ['icon' => 'fa-snowflake', 'label' => 'Reefer Cold Chain']
     ],
     'WMS (Warehouse / CFS)' => [
-        'cfs' => ['icon' => 'fa-warehouse', 'label' => 'CFS Rampa D1-D5']
+        'cfs' => ['icon' => 'fa-warehouse', 'label' => 'Container Freight Station']
     ],
     'Compliance & Finance' => [
         'customs'  => ['icon' => 'fa-shield-halved', 'label' => 'Bea Cukai CEISA 4.0'],
@@ -233,6 +248,9 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
     <script src="assets/vendor/jspdf.plugin.autotable.min.js"></script>
     <!-- CIDP Export Utilities -->
     <script src="assets/js/export-utils.js"></script>
+    <!-- CIDP Official Print Engine & Digital Stamp System -->
+    <link rel="stylesheet" href="assets/css/print-document.css">
+    <script src="assets/js/print-engine.js"></script>
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
@@ -245,9 +263,78 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
         <!-- Header & Top Navigation Component -->
         <?php include_once __DIR__ . '/components/header.php'; ?>
 
-        <!-- Main Content Scrollable Area (Symmetrical Container) -->
+        <?php if (!empty($login_toast_data)): ?>
+        <!-- ======================================================================= -->
+        <!-- TOAST NOTIFIKASI LOGIN BERHASIL (COMPACT EXECUTIVE TOAST)                -->
+        <!-- ======================================================================= -->
+        <div id="loginWelcomeToast" class="fixed top-16 sm:top-20 right-4 sm:right-6 z-[90] max-w-[320px] w-[calc(100%-2rem)] transition-all duration-300 transform translate-y-0 opacity-100 shadow-xl rounded-xl overflow-hidden bg-white/95 backdrop-blur-md border border-slate-200/90 animate-fadeIn" role="alert">
+            <!-- Top Accent Gradient Line -->
+            <div class="h-0.5 bg-gradient-to-r from-[#0170b9] via-emerald-500 to-[#ea580c] w-full"></div>
+            
+            <div class="p-2.5 sm:p-3 relative overflow-hidden flex items-center gap-2.5">
+                <!-- Subtle Batik Rosette Watermark -->
+                <div class="absolute -right-3 -bottom-3 w-16 h-16 pointer-events-none opacity-[0.05] z-0" aria-hidden="true">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+                        <ellipse cx="50" cy="22" rx="16" ry="24" />
+                        <ellipse cx="50" cy="78" rx="16" ry="24" />
+                        <ellipse cx="22" cy="50" rx="24" ry="16" />
+                        <ellipse cx="78" cy="50" rx="24" ry="16" />
+                        <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
+                    </svg>
+                </div>
+
+                <!-- Icon Badge -->
+                <div class="w-8 h-8 rounded-lg bg-emerald-500 text-white flex items-center justify-center shrink-0 shadow-xs text-xs relative z-10">
+                    <i class="fa-solid fa-check"></i>
+                </div>
+
+                <!-- Text Details -->
+                <div class="flex-1 min-w-0 relative z-10">
+                    <div class="flex items-center justify-between gap-1">
+                        <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-emerald-700 flex items-center gap-1">
+                            Login Berhasil
+                        </span>
+                        <button type="button" onclick="dismissLoginToast()" class="text-slate-400 hover:text-slate-600 p-0.5 transition-colors leading-none" title="Tutup">
+                            <i class="fa-solid fa-xmark text-xs"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs font-bold text-slate-800 truncate leading-snug mt-0.5">
+                        <?= htmlspecialchars($login_toast_data['nama'] ?? $display_nama) ?>
+                    </p>
+                    <div class="flex items-center gap-2 text-[9.5px] text-slate-500 mt-0.5">
+                        <span class="text-slate-600 font-medium"><i class="fa-regular fa-clock text-[9px] text-[#0170b9]"></i> <?= htmlspecialchars($login_toast_data['time'] ?? (date('H:i') . ' WIB')) ?></span>
+                        <span>&bull;</span>
+                        <span class="text-emerald-600 font-semibold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span> Sesi Aktif</span>
+                    </div>
+                </div>
+
+                <!-- Timer Progress Bar (2.4s) -->
+                <div class="absolute bottom-0 left-0 right-0 h-0.5 bg-slate-100 overflow-hidden">
+                    <div id="loginToastProgress" class="h-full bg-gradient-to-r from-emerald-500 via-[#0170b9] to-[#ea580c] w-full transition-all duration-[2400ms] ease-linear"></div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+        function dismissLoginToast() {
+            const toast = document.getElementById('loginWelcomeToast');
+            if (toast) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => toast.remove(), 250);
+            }
+        }
+        document.addEventListener('DOMContentLoaded', function() {
+            const bar = document.getElementById('loginToastProgress');
+            if (bar) setTimeout(() => bar.style.width = '0%', 40);
+            setTimeout(dismissLoginToast, 2400);
+        });
+        </script>
+        <?php endif; ?>
+
+        <!-- Main Content Scrollable Area (Fluid Edge-to-Edge Container) -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto bg-cdp-light relative">
-            <div class="p-3.5 sm:p-5 lg:p-8 w-full max-w-[1680px] mx-auto space-y-4 sm:space-y-5">
+            <div class="p-3 sm:p-4 lg:p-5 xl:p-6 w-full space-y-3.5 sm:space-y-4">
                 
                 <?php if ($page === 'beranda'): ?>
                     <?php include_once __DIR__ . '/pages/beranda.php'; ?>
