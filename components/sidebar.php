@@ -12,12 +12,12 @@
     <!-- ======================================================================= -->
     <!-- LAYER WATERMARK MOTIF BATIK NUSANTARA MARITIM (SUBTLE LUXURY VECTOR)  -->
     <!-- ======================================================================= -->
-    <div id="sidebarBatikWatermark" class="absolute inset-0 pointer-events-none opacity-[0.06] z-0 overflow-hidden transition-opacity duration-300" aria-hidden="true">
+    <div id="sidebarBatikWatermark" class="absolute inset-0 pointer-events-none opacity-[0.13] z-0 overflow-hidden transition-opacity duration-300" aria-hidden="true">
         <svg id="svgBatikPattern" width="100%" height="100%">
             <defs>
                 <!-- MOTIF 1: BATIK KAWUNG MARITIM (Filosofi 4 Penjuru Kargo & Keteraturan Logistik) -->
                 <pattern id="patBatikKawung" width="56" height="56" patternUnits="userSpaceOnUse">
-                    <g stroke="#0170b9" stroke-width="1.1" fill="none">
+                    <g stroke="#004b87" stroke-width="1.25" fill="none">
                         <!-- Petal Ellipses (Kelopak Utama 4 Sumbu) -->
                         <ellipse cx="28" cy="14" rx="8" ry="13" />
                         <ellipse cx="28" cy="42" rx="8" ry="13" />
@@ -45,22 +45,22 @@
                     <circle cx="0" cy="56" r="2.5" fill="#ea580c" />
                     <circle cx="56" cy="56" r="2.5" fill="#ea580c" />
                     <!-- Interlocking Mlinjon Diamonds -->
-                    <polygon points="28,2 30,5 28,8 26,5" fill="#0170b9" />
-                    <polygon points="28,48 30,51 28,54 26,51" fill="#0170b9" />
-                    <polygon points="2,28 5,30 8,28 5,26" fill="#0170b9" />
-                    <polygon points="48,28 51,30 54,28 51,26" fill="#0170b9" />
+                    <polygon points="28,2 30,5 28,8 26,5" fill="#004b87" />
+                    <polygon points="28,48 30,51 28,54 26,51" fill="#004b87" />
+                    <polygon points="2,28 5,30 8,28 5,26" fill="#004b87" />
+                    <polygon points="48,28 51,30 54,28 51,26" fill="#004b87" />
                 </pattern>
 
                 <!-- MOTIF 2: BATIK PARANG BAHARI (Filosofi Ombak Samudra & Ketangkasan Maritim) -->
                 <pattern id="patBatikParang" width="48" height="48" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                    <g stroke="#0170b9" stroke-width="1.1" fill="none">
+                    <g stroke="#004b87" stroke-width="1.25" fill="none">
                         <path d="M 0 12 Q 12 6, 24 12 T 48 12" />
                         <path d="M 0 24 Q 12 18, 24 24 T 48 24" />
                         <path d="M 0 36 Q 12 30, 24 36 T 48 36" />
                         <polygon points="12,12 15,9 18,12 15,15" fill="#ea580c" />
                         <polygon points="36,24 39,21 42,24 39,27" fill="#ea580c" />
-                        <circle cx="24" cy="18" r="1.5" fill="#0170b9" />
-                        <circle cx="12" cy="30" r="1.5" fill="#0170b9" />
+                        <circle cx="24" cy="18" r="1.5" fill="#004b87" />
+                        <circle cx="12" cy="30" r="1.5" fill="#004b87" />
                     </g>
                 </pattern>
             </defs>
@@ -93,7 +93,7 @@
     <nav class="flex-1 overflow-y-auto px-2.5 py-3 space-y-3.5 relative z-10">
         <?php foreach ($menu_clusters as $cluster_title => $items): ?>
             <div class="space-y-0.5">
-                <div class="text-[9px] font-bold text-slate-400 uppercase tracking-[0.16em] px-2.5 mb-1 logo-text flex items-center justify-between">
+                <div class="text-[9px] font-extrabold text-slate-500 uppercase tracking-[0.16em] px-2.5 mb-1 logo-text flex items-center justify-between">
                     <span><?= $cluster_title ?></span>
                 </div>
                 <div class="space-y-0.5">
@@ -102,10 +102,10 @@
                             $is_active = ($page === $key);
                     ?>
                         <a href="dashboard.php?page=<?= $key ?>" 
-                           class="relative flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all duration-150 group <?= $is_active ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold shadow-xs shadow-orange-500/25' : 'text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 font-medium' ?>"
+                           class="relative flex items-center justify-between px-2.5 py-1.5 rounded-lg transition-all duration-150 group <?= $is_active ? 'bg-gradient-to-r from-orange-500 to-orange-600 text-white font-bold shadow-xs shadow-orange-500/25' : 'text-slate-700 hover:text-orange-600 hover:bg-orange-50/80 bg-white/40 backdrop-blur-[0.5px] font-semibold' ?>"
                            title="<?= $item['label'] ?>">
                             <div class="flex items-center min-w-0 space-x-2.5">
-                                <span class="w-4 flex items-center justify-center text-[12px] flex-shrink-0 transition-colors <?= $is_active ? 'text-white' : 'text-slate-400 group-hover:text-orange-500' ?>">
+                                <span class="w-4 flex items-center justify-center text-[12px] flex-shrink-0 transition-colors <?= $is_active ? 'text-white' : 'text-slate-500 group-hover:text-orange-500' ?>">
                                     <i class="fa-solid <?= $item['icon'] ?>"></i>
                                 </span>
                                 <span class="text-[12px] logo-text truncate tracking-tight"><?= $item['label'] ?></span>

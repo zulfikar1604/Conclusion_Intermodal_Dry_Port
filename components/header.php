@@ -376,8 +376,8 @@
 <div id="logoutConfirmModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3.5">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-[360px] overflow-hidden text-slate-800 relative animate-fadeIn">
         <!-- Subtle Batik Kawung Rosette Watermark in Modal Background -->
-        <div class="absolute -right-6 -bottom-6 w-36 h-36 pointer-events-none opacity-[0.05] z-0" aria-hidden="true">
-            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+        <div class="absolute -right-6 -bottom-6 w-36 h-36 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
+            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
                 <ellipse cx="50" cy="22" rx="16" ry="24" />
                 <ellipse cx="50" cy="78" rx="16" ry="24" />
                 <ellipse cx="22" cy="50" rx="24" ry="16" />

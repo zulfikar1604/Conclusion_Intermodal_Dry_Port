@@ -35,10 +35,10 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
     <!-- ======================================================================= -->
     <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
         <!-- Full-Canvas Subtle Luxury Batik Kawung Maritim Watermark (Harmonized with Sidebar Heritage) -->
-        <svg class="absolute inset-0 w-full h-full opacity-[0.045]" xmlns="http://www.w3.org/2000/svg">
+        <svg class="absolute inset-0 w-full h-full opacity-[0.11]" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <pattern id="canvasBatikKawung" width="56" height="56" patternUnits="userSpaceOnUse">
-                    <g stroke="#0170b9" stroke-width="1.1" fill="none">
+                    <g stroke="#004b87" stroke-width="1.25" fill="none">
                         <ellipse cx="28" cy="14" rx="8" ry="13" />
                         <ellipse cx="28" cy="42" rx="8" ry="13" />
                         <ellipse cx="14" cy="28" rx="13" ry="8" />
@@ -57,6 +57,11 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                     <circle cx="56" cy="0" r="2" fill="#ea580c" />
                     <circle cx="0" cy="56" r="2" fill="#ea580c" />
                     <circle cx="56" cy="56" r="2" fill="#ea580c" />
+                    <!-- Interlocking Mlinjon Diamonds -->
+                    <polygon points="28,2 30,5 28,8 26,5" fill="#004b87" />
+                    <polygon points="28,48 30,51 28,54 26,51" fill="#004b87" />
+                    <polygon points="2,28 5,30 8,28 5,26" fill="#004b87" />
+                    <polygon points="48,28 51,30 54,28 51,26" fill="#004b87" />
                 </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#canvasBatikKawung)" />
@@ -76,14 +81,14 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
         <!-- ======================================================================= -->
         <div class="bg-white/95 backdrop-blur-md rounded-xl px-4 py-3 shadow-2xs border border-slate-200/90 relative overflow-hidden flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 transition-all">
             <!-- Subtle Luxury Batik Kawung Rosette Watermark (Harmonized with Sidebar) -->
-            <div class="absolute -right-6 -top-6 w-40 h-40 pointer-events-none opacity-[0.06] z-0" aria-hidden="true">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+            <div class="absolute -right-6 -top-6 w-40 h-40 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
                     <ellipse cx="50" cy="22" rx="16" ry="24" />
                     <ellipse cx="50" cy="78" rx="16" ry="24" />
                     <ellipse cx="22" cy="50" rx="24" ry="16" />
                     <ellipse cx="78" cy="50" rx="24" ry="16" />
                     <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
-                    <circle cx="50" cy="50" r="14" stroke="#0170b9" stroke-width="1" stroke-dasharray="2 2" />
+                    <circle cx="50" cy="50" r="14" stroke="#004b87" stroke-width="1" stroke-dasharray="2 2" />
                 </svg>
             </div>
 
@@ -349,8 +354,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
     <!-- ======================================================================= -->
     <div class="bg-white/95 backdrop-blur-xs rounded-xl p-3 sm:p-4 shadow-2xs border border-slate-200/90 relative overflow-hidden">
         <!-- Subtle Parang Bahari & Rail Pipeline Vector Watermark -->
-        <div class="absolute -right-8 -bottom-8 w-60 h-32 pointer-events-none opacity-[0.045] z-0" aria-hidden="true">
-            <svg width="100%" height="100%" viewBox="0 0 200 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+        <div class="absolute -right-8 -bottom-8 w-60 h-32 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
+            <svg width="100%" height="100%" viewBox="0 0 200 100" fill="none" stroke="#004b87" stroke-width="1.6">
                 <path d="M 0 25 Q 50 10, 100 25 T 200 25" />
                 <path d="M 0 55 Q 50 40, 100 55 T 200 55" />
                 <path d="M 0 85 Q 50 70, 100 85 T 200 85" stroke="#ea580c" />
@@ -939,8 +944,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
         <!-- Right: Shipper Consignment Tracking Table (7 Cols) -->
         <div class="xl:col-span-7 bg-white/95 backdrop-blur-xs rounded-xl shadow-2xs border border-slate-200/90 p-3 sm:p-3.5 flex flex-col justify-between relative overflow-hidden">
             <!-- Subtle Luxury Batik Kawung Corner Watermark -->
-            <div class="absolute -right-6 -top-6 w-32 h-32 pointer-events-none opacity-[0.04] z-0" aria-hidden="true">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+            <div class="absolute -right-6 -top-6 w-32 h-32 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
+                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
                     <ellipse cx="50" cy="25" rx="14" ry="22" />
                     <ellipse cx="50" cy="75" rx="14" ry="22" />
                     <ellipse cx="25" cy="50" rx="22" ry="14" />

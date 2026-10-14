@@ -273,8 +273,8 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
             
             <div class="p-2.5 sm:p-3 relative overflow-hidden flex items-center gap-2.5">
                 <!-- Subtle Batik Rosette Watermark -->
-                <div class="absolute -right-3 -bottom-3 w-16 h-16 pointer-events-none opacity-[0.05] z-0" aria-hidden="true">
-                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#0170b9" stroke-width="1.6">
+                <div class="absolute -right-3 -bottom-3 w-16 h-16 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
                         <ellipse cx="50" cy="22" rx="16" ry="24" />
                         <ellipse cx="50" cy="78" rx="16" ry="24" />
                         <ellipse cx="22" cy="50" rx="24" ry="16" />
