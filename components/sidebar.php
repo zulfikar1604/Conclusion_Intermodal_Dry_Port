@@ -130,22 +130,22 @@
             <div class="flex items-center justify-between mb-1">
                 <span class="flex items-center text-[8.5px] font-bold text-slate-400 uppercase tracking-widest gap-1">
                     <i class="fa-solid fa-gem text-orange-500 text-[8px]"></i>
-                    <span id="labelBatikActive">Kawung Maritim</span>
+                    <span id="labelBatikActive"><?= __('sidebar_pattern_kawung', 'Kawung Maritim') ?></span>
                 </span>
                 <!-- Tombol Ganti Motif Batik -->
                 <button type="button" onclick="toggleBatikPattern()" class="text-[8px] font-bold text-orange-600 hover:text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200/80 px-1.5 py-0.2 rounded transition cursor-pointer flex items-center gap-0.5 shadow-2xs" title="Ganti Motif Batik (Kawung / Parang)">
-                    <span>Ubah</span>
+                    <span><?= __('sidebar_switch_btn', 'Ubah') ?></span>
                     <i class="fa-solid fa-rotate text-[7px]"></i>
                 </button>
             </div>
             <div class="flex items-center justify-between mt-1">
                 <div>
-                    <p class="text-[11.5px] font-bold text-slate-900 truncate">Conclusion Consultant</p>
-                    <p class="text-[9px] text-slate-500 truncate mt-0.2">Dry Port 35 Ha Platform</p>
+                    <p class="text-[11.5px] font-bold text-slate-900 truncate"><?= __('sidebar_consultant', 'Conclusion Consultant') ?></p>
+                    <p class="text-[9px] text-slate-500 truncate mt-0.2"><?= __('sidebar_platform', 'Dry Port 35 Ha Platform') ?></p>
                 </div>
                 <span class="flex items-center text-[8.5px] text-emerald-600 font-bold uppercase tracking-wider flex-shrink-0">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse mr-1"></span>
-                    Online
+                    <?= __('sidebar_online', 'ONLINE') ?>
                 </span>
             </div>
         </div>

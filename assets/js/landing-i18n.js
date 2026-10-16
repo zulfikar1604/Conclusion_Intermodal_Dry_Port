@@ -638,6 +638,7 @@ function setLanguage(lang) {
     currentLanguage = lang;
     try {
         localStorage.setItem('cidp_lang', lang);
+        document.cookie = "cidp_lang=" + lang + "; path=/; max-age=" + (86400 * 30);
     } catch(e) {}
     document.documentElement.lang = lang;
 

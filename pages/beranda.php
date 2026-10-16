@@ -34,8 +34,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
     <!-- AMBIENT SPATIAL BACKGROUND LAYER (BATIK NUSANTARA & DRY PORT BLUEPRINT) -->
     <!-- ======================================================================= -->
     <div class="absolute inset-0 pointer-events-none z-0 overflow-hidden select-none" aria-hidden="true">
-        <!-- Full-Canvas Subtle Luxury Batik Kawung Maritim Watermark (Harmonized with Sidebar Heritage) -->
-        <svg class="absolute inset-0 w-full h-full opacity-[0.11]" xmlns="http://www.w3.org/2000/svg">
+        <!-- Full-Canvas Batik Kawung Maritim kini diterapkan global via .cdp-batik-canvas pada <main> (dashboard.php) -->
+        <svg class="hidden" xmlns="http://www.w3.org/2000/svg">
             <defs>
                 <pattern id="canvasBatikKawung" width="56" height="56" patternUnits="userSpaceOnUse">
                     <g stroke="#004b87" stroke-width="1.25" fill="none">
@@ -99,24 +99,24 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 <div>
                     <div class="flex items-center gap-2 flex-wrap">
                         <h1 class="text-sm sm:text-[15px] font-extrabold text-slate-900 tracking-tight leading-tight">
-                            Enterprise Executive Control Tower &bull; CIDP 35 Hectares
+                            <?= __('tower_title', 'Enterprise Executive Control Tower &bull; CIDP 35 Hectares') ?>
                         </h1>
                         <span class="text-[9px] font-extrabold tracking-wider uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-2xs">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            Live 35 Ha
+                            <?= __('badge_live_35ha', 'LIVE 35 HA') ?>
                         </span>
                         <span class="text-[9px] font-bold tracking-wider uppercase bg-blue-50 text-[#0170b9] border border-blue-200 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                             <i class="fa-solid fa-satellite-dish text-[8.5px]"></i>
-                            DPMS Operational Sync
+                            <?= __('badge_op_sync', 'DPMS OPERATIONAL SYNC') ?>
                         </span>
                         <span class="text-[9px] font-bold tracking-wider uppercase bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
                             <i class="fa-solid fa-network-wired text-[8.5px]"></i>
-                            SCADA 99.8%
+                            <?= __('badge_scada', 'SCADA 99.8%') ?>
                         </span>
                     </div>
                     <div class="text-[9.5px] font-semibold text-slate-500 mt-0.5 flex items-center gap-1.5">
                         <span class="text-orange-600 font-bold">Conclusion Intermodal DPMS</span> &bull; 
-                        <span>Orkestrasi Multimoda Yard 35 Ha &bull; Rel Siding Pasoso &bull; CFS Gudang &bull; CEISA 4.0</span>
+                        <span><?= ($current_lang === 'en') ? 'Multimodal Yard Orchestration 35 Ha &bull; Pasoso Rail Siding &bull; CFS Warehouse &bull; CEISA 4.0' : 'Orkestrasi Multimoda Yard 35 Ha &bull; Rel Siding Pasoso &bull; CFS Gudang &bull; CEISA 4.0' ?></span>
                     </div>
                 </div>
             </div>
@@ -135,27 +135,27 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 <!-- Siding KA Ready Pill -->
                 <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2 py-1 text-slate-700">
                     <i class="fa-solid fa-train-subway text-[#0170b9] text-[10px]"></i>
-                    <span class="text-slate-500 font-medium">Siding KA:</span>
-                    <span class="font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200 text-[9.5px]">Track S-01 Ready</span>
+                    <span class="text-slate-500 font-medium"><?= ($current_lang === 'en') ? 'Rail Siding:' : 'Siding KA:' ?></span>
+                    <span class="font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200 text-[9.5px]"><?= __('chip_siding_ready', 'Track S-01 Ready') ?></span>
                 </div>
 
                 <!-- Direct Quick-Launch Sensor Shortcuts -->
                 <div class="flex items-center gap-1.5">
-                    <a href="dashboard.php?page=gate" class="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0170b9] rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="Buka Modul Gate ANPR & Jembatan Timbang SOLAS">
+                    <a href="dashboard.php?page=gate" class="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-[#0170b9] rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="<?= __('chip_gate_anpr', 'Gate ANPR') ?>">
                         <i class="fa-solid fa-door-open text-[#0170b9] text-[9.5px]"></i>
-                        <span>Gate ANPR</span>
+                        <span><?= __('chip_gate_anpr', 'Gate ANPR') ?></span>
                     </a>
-                    <a href="dashboard.php?page=cfs" class="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-orange-600 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="Buka Gudang Konsolidasi CFS Rampa D1-D5">
+                    <a href="dashboard.php?page=cfs" class="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-orange-600 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="<?= __('chip_cfs_rampa', 'CFS Rampa') ?>">
                         <i class="fa-solid fa-warehouse text-orange-500 text-[9.5px]"></i>
-                        <span>CFS Rampa</span>
+                        <span><?= __('chip_cfs_rampa', 'CFS Rampa') ?></span>
                     </a>
-                    <a href="dashboard.php?page=reefer" class="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-cyan-600 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="Buka Modul Reefer Cold Chain 300 Plugs">
+                    <a href="dashboard.php?page=reefer" class="px-2 py-1 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 hover:text-cyan-600 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="<?= __('chip_reefer_plug', 'Reefer Plug') ?>">
                         <i class="fa-solid fa-snowflake text-cyan-500 text-[9.5px]"></i>
-                        <span>Reefer Plug</span>
+                        <span><?= __('chip_reefer_plug', 'Reefer Plug') ?></span>
                     </a>
-                    <a href="dashboard.php?page=denah" class="px-2 py-1 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="Buka Denah Spasial GIS Terminal 35 Ha">
+                    <a href="dashboard.php?page=denah" class="px-2 py-1 bg-orange-50 hover:bg-orange-100 border border-orange-200 text-orange-700 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs" title="<?= __('chip_gis_denah', 'GIS Denah') ?>">
                         <i class="fa-solid fa-map-location-dot text-orange-600 text-[9.5px]"></i>
-                        <span>GIS Denah</span>
+                        <span><?= __('chip_gis_denah', 'GIS Denah') ?></span>
                     </a>
                 </div>
             </div>
@@ -169,7 +169,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
             <!-- KPI 1: Yard Stacking (TEU + Circular Progress Ring + 24h Delta Sparkline) -->
             <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-blue-300 hover:shadow-xs transition flex flex-col justify-between group">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500">Yard Stacking</span>
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500"><?= __('kpi_yard_stacking', 'Yard Stacking') ?></span>
                     <span class="w-6 h-6 rounded-md bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-boxes-stacked"></i>
                     </span>
@@ -194,7 +194,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px]">
                     <div class="flex items-center gap-1 text-emerald-600 font-bold">
                         <i class="fa-solid fa-arrow-trend-up text-[8px]"></i>
-                        <span>+4.2% (24h)</span>
+                        <span><?= __('kpi_yard_trend', '+4.2% (24h)') ?></span>
                     </div>
                     <svg class="w-12 h-3.5" viewBox="0 0 48 14" fill="none">
                         <path d="M2 11 L10 9 L18 10 L26 5 L34 7 L42 3 L46 4" stroke="#0170b9" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
@@ -205,7 +205,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
             <!-- KPI 2: Gate Turnaround Time (Radial Symmetrical Gauge 18.2 min + Throughput) -->
             <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-orange-300 hover:shadow-xs transition flex flex-col justify-between group">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500">Gate Turnaround</span>
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500"><?= __('kpi_gate_turnaround', 'Gate Turnaround') ?></span>
                     <span class="w-6 h-6 rounded-md bg-orange-50 text-[#ea580c] border border-orange-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-truck-fast"></i>
                     </span>
@@ -213,8 +213,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
 
                 <div class="my-1.5 flex items-baseline justify-between">
                     <div>
-                        <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none">18.2 <span class="text-[10px] font-semibold text-slate-400">mnt</span></h3>
-                        <span class="text-[9px] text-emerald-600 font-bold">&le; 20m Target INSA</span>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none">18.2 <span class="text-[10px] font-semibold text-slate-400"><?= ($current_lang === 'en') ? 'min' : 'mnt' ?></span></h3>
+                        <span class="text-[9px] text-emerald-600 font-bold"><?= __('kpi_gate_target', '&le; 20m Target INSA') ?></span>
                     </div>
                     <div class="relative w-11 h-9 flex-shrink-0 flex flex-col items-center justify-end">
                         <svg class="w-11 h-7" viewBox="0 0 36 20">
@@ -226,15 +226,15 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 </div>
 
                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-500">
-                    <span class="font-semibold text-slate-700"><?= $total_trucks ?> Truk Aktif</span>
-                    <span class="text-emerald-600 font-bold">VBS 98% On-Time</span>
+                    <span class="font-semibold text-slate-700"><?= $total_trucks ?> <?= __('kpi_gate_trucks', 'Truk Aktif') ?></span>
+                    <span class="text-emerald-600 font-bold"><?= __('kpi_gate_vbs', 'VBS 98% On-Time') ?></span>
                 </div>
             </div>
 
             <!-- KPI 3: Siding KA Intermodal (24/30 TEU + Departure ETA) -->
             <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-sky-300 hover:shadow-xs transition flex flex-col justify-between group">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500">Siding KA Intermodal</span>
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500"><?= __('kpi_rail_siding', 'Siding KA Intermodal') ?></span>
                     <span class="w-6 h-6 rounded-md bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-train"></i>
                     </span>
@@ -243,7 +243,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 <div class="my-1.5 flex items-baseline justify-between">
                     <div>
                         <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none"><?= $loaded_w ?>/<?= $total_w ?> <span class="text-[10px] font-semibold text-slate-400">TEU</span></h3>
-                        <span class="text-[9px] text-[#0170b9] font-bold">KA 2518 ke Priok</span>
+                        <span class="text-[9px] text-[#0170b9] font-bold"><?= __('kpi_rail_sub', 'KA 2518 ke Priok') ?></span>
                     </div>
                     <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                         <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
@@ -255,15 +255,15 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 </div>
 
                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-500">
-                    <span class="font-medium text-slate-600">Track S-01 (600m)</span>
-                    <span class="font-bold text-orange-600">ETA 16:45 WIB</span>
+                    <span class="font-medium text-slate-600"><?= __('kpi_rail_track', 'Track S-01 (600m)') ?></span>
+                    <span class="font-bold text-orange-600"><?= __('kpi_rail_eta', 'ETA 16:45 WIB') ?></span>
                 </div>
             </div>
 
             <!-- KPI 4: Reefer Cold Chain (Cyan Telemetry -20.2°C + 300 Plugs) -->
             <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-cyan-300 hover:shadow-xs transition flex flex-col justify-between group">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500">Reefer Cold Chain</span>
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500"><?= __('kpi_reefer_chain', 'Reefer Cold Chain') ?></span>
                     <span class="w-6 h-6 rounded-md bg-cyan-50 text-[#06b6d4] border border-cyan-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-snowflake"></i>
                     </span>
@@ -272,7 +272,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 <div class="my-1.5 flex items-baseline justify-between">
                     <div>
                         <h3 class="text-lg sm:text-xl font-black text-cyan-600 font-mono tracking-tight leading-none">-20.2&deg;C</h3>
-                        <span class="text-[9px] text-cyan-700 font-bold"><?= $reefer_plugs ?> / 300 Plugs</span>
+                        <span class="text-[9px] text-cyan-700 font-bold"><?= $reefer_plugs ?> / 300 <?= __('kpi_reefer_plugs', 'Plugs') ?></span>
                     </div>
                     <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                         <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
@@ -284,15 +284,15 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 </div>
 
                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px]">
-                    <span class="font-bold text-slate-600">LoRa 868MHz</span>
-                    <span class="text-emerald-600 font-bold">HACCP 98.8% OK</span>
+                    <span class="font-bold text-slate-600"><?= __('kpi_reefer_lora', 'LoRa 868MHz') ?></span>
+                    <span class="text-emerald-600 font-bold"><?= __('kpi_reefer_haccp', 'HACCP 98.8% OK') ?></span>
                 </div>
             </div>
 
             <!-- KPI 5: Bea Cukai CEISA 4.0 (Clearance Pct + SPPB Counter) -->
             <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-emerald-300 hover:shadow-xs transition flex flex-col justify-between group">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500">Bea Cukai CEISA 4.0</span>
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500"><?= __('kpi_customs_ceisa', 'Bea Cukai CEISA 4.0') ?></span>
                     <span class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-shield-halved"></i>
                     </span>
@@ -301,7 +301,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 <div class="my-1.5 flex items-baseline justify-between">
                     <div>
                         <h3 class="text-lg sm:text-xl font-black text-emerald-700 tracking-tight leading-none"><?= number_format($customs_percent, 1) ?>%</h3>
-                        <span class="text-[9px] text-emerald-600 font-bold"><?= $customs_cleared ?>/<?= $customs_total ?> Box Cleared</span>
+                        <span class="text-[9px] text-emerald-600 font-bold"><?= $customs_cleared ?>/<?= $customs_total ?> <?= __('kpi_customs_cleared', 'Box Cleared') ?></span>
                     </div>
                     <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                         <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
@@ -313,15 +313,15 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 </div>
 
                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-500">
-                    <span class="font-semibold text-slate-700">SPPB Auto Release</span>
-                    <span class="text-emerald-600 font-bold">Hi-Co X-Ray OK</span>
+                    <span class="font-semibold text-slate-700"><?= __('kpi_customs_release', 'SPPB Auto Release') ?></span>
+                    <span class="text-emerald-600 font-bold"><?= __('kpi_customs_xray', 'Hi-Co X-Ray OK') ?></span>
                 </div>
             </div>
 
             <!-- KPI 6: CFS & Terminal Billing (Active Jobs + Paid Revenue) -->
             <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-amber-300 hover:shadow-xs transition flex flex-col justify-between group">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500">CFS &amp; Billing</span>
+                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500"><?= __('kpi_cfs_billing', 'CFS &amp; Billing') ?></span>
                     <span class="w-6 h-6 rounded-md bg-amber-50 text-[#f59e0b] border border-amber-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
                     </span>
@@ -329,8 +329,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
 
                 <div class="my-1.5 flex items-baseline justify-between">
                     <div>
-                        <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none"><?= $cfs_jobs ?> <span class="text-[10px] font-normal text-slate-400">Jobs</span></h3>
-                        <span class="text-[9px] text-amber-600 font-bold">Rampa D1-D5 Aktif</span>
+                        <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none"><?= $cfs_jobs ?> <span class="text-[10px] font-normal text-slate-400"><?= __('kpi_cfs_jobs', 'Jobs') ?></span></h3>
+                        <span class="text-[9px] text-amber-600 font-bold"><?= __('kpi_cfs_ramps', 'Rampa D1-D5 Aktif') ?></span>
                     </div>
                     <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
                         <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
@@ -342,8 +342,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : date('d M Y')
                 </div>
 
                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px]">
-                    <span class="font-medium text-slate-500">Omzet 7 Hari</span>
-                    <span class="text-emerald-700 font-extrabold">Rp <?= number_format($paid_rev / 1000000, 1) ?>Jt Paid</span>
+                    <span class="font-medium text-slate-500"><?= __('kpi_cfs_omzet', 'Omzet 7 Hari') ?></span>
+                    <span class="text-emerald-700 font-extrabold"><?= ($current_lang === 'en') ? 'Rp ' . number_format($paid_rev / 1000000, 1) . 'M Paid' : 'Rp ' . number_format($paid_rev / 1000000, 1) . 'Jt Paid' ?></span>
                 </div>
             </div>
 

@@ -9,14 +9,8 @@ if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
     exit;
 }
 
-// Preferensi bahasa sistem (id / en)
-if (isset($_GET['lang']) && in_array($_GET['lang'], ['id', 'en'])) {
-    $_SESSION['lang'] = $_GET['lang'];
-    setcookie('cidp_lang', $_GET['lang'], time() + (86400 * 30), "/");
-} elseif (!isset($_SESSION['lang'])) {
-    $_SESSION['lang'] = $_COOKIE['cidp_lang'] ?? 'id';
-}
-$current_lang = $_SESSION['lang'] ?? 'id';
+// Preferensi bahasa sistem (id / en) & Mesin Lokalisasi
+require_once __DIR__ . '/config/i18n.php';
 
 require_once __DIR__ . '/connection.php';
 $db_stats = [
@@ -113,8 +107,13 @@ if (empty($avatar_initials)) {
 $page = $_GET['page'] ?? 'beranda';
 
 // Badge & Deskripsi Akses Satu Pintu
-$current_badge = ['label' => 'Konsultan (Akses Penuh)', 'color' => 'bg-emerald-100 text-emerald-800 border-emerald-200'];
-$current_desc  = 'Mode Simulasi Satu Pintu Aktif. Anda memiliki hak akses penuh ke seluruh modul operasional YMS.';
+$current_badge = ($current_lang === 'en')
+    ? ['label' => 'Consultant (Full Access)', 'color' => 'bg-emerald-100 text-emerald-800 border-emerald-200']
+    : ['label' => 'Konsultan (Akses Penuh)', 'color' => 'bg-emerald-100 text-emerald-800 border-emerald-200'];
+
+$current_desc  = ($current_lang === 'en')
+    ? 'Single Portal Simulation Mode Active. You have full access to all DPMS operational modules.'
+    : 'Mode Simulasi Satu Pintu Aktif. Anda memiliki hak akses penuh ke seluruh modul operasional YMS.';
 
 // Menu Visibility Logic: Seluruh modul terbuka penuh untuk kemudahan evaluasi & demonstrasi
 if (!function_exists('can_view')) {
@@ -123,35 +122,8 @@ if (!function_exists('can_view')) {
     }
 }
 
-// Navigation Clusters: 5 Kluster Resmi DPMS (Executive, TMS, YMS, WMS, Compliance & Finance)
-$menu_clusters = [
-    'Executive & Map' => [
-        'beranda'   => ['icon' => 'fa-house', 'label' => 'Cockpit Eksekutif'],
-        'twin'      => ['icon' => 'fa-satellite-dish', 'label' => 'Digital Twin 2D (Live)'],
-        'denah'     => ['icon' => 'fa-map-location-dot', 'label' => 'Denah Master 35 Ha'],
-        'simulator' => ['icon' => 'fa-cube', 'label' => 'Simulator 3D Hub']
-    ],
-    'TMS (Transport)' => [
-        'gate'       => ['icon' => 'fa-door-open', 'label' => 'Gate & Timbangan VGM'],
-        'trucking'   => ['icon' => 'fa-truck-front', 'label' => 'Trucking & Shunting'],
-        'intermodal' => ['icon' => 'fa-train-subway', 'label' => 'Rail Siding KA Pasoso']
-    ],
-    'YMS (Yard)' => [
-        'yard'      => ['icon' => 'fa-cubes', 'label' => 'Yard & Stacking Block'],
-        'alat'      => ['icon' => 'fa-dolly', 'label' => 'Alat Berat & RTG GPS'],
-        'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => 'Inventori Kontainer'],
-        'reefer'    => ['icon' => 'fa-snowflake', 'label' => 'Reefer Cold Chain']
-    ],
-    'WMS (Warehouse / CFS)' => [
-        'cfs' => ['icon' => 'fa-warehouse', 'label' => 'Container Freight Station']
-    ],
-    'Compliance & Finance' => [
-        'customs'  => ['icon' => 'fa-shield-halved', 'label' => 'Bea Cukai CEISA 4.0'],
-        'billing'  => ['icon' => 'fa-file-invoice-dollar', 'label' => 'Billing & ERP Odoo'],
-        'scanner'  => ['icon' => 'fa-barcode', 'label' => 'Scanner Optik AIDC'],
-        'settings' => ['icon' => 'fa-sliders', 'label' => 'Pengaturan Global']
-    ]
-];
+// Navigation Clusters: 5 Kluster Resmi DPMS (Bilingual via get_localized_menu_clusters)
+$menu_clusters = get_localized_menu_clusters($current_lang);
 
 // Flatten for routing and header titles
 $menu_items = [];
@@ -162,7 +134,7 @@ foreach ($menu_clusters as $c_name => $items) {
 }
 
 // Active cluster for breadcrumb navigation
-$current_cluster = 'YMS (Yard)';
+$current_cluster = __('cluster_yms');
 foreach ($menu_clusters as $c_name => $c_items) {
     if (isset($c_items[$page])) {
         $current_cluster = $c_name;
@@ -170,21 +142,20 @@ foreach ($menu_clusters as $c_name => $c_items) {
     }
 }
 
-// Helper untuk format tanggal Indonesia
-$bulan = [
-    1 => 'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 
-    'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
-];
-$tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
+// Helper untuk format tanggal sesuai bahasa aktif
+$tanggal_sekarang = get_localized_date($current_lang);
 ?>
 <!DOCTYPE html>
-<html lang="id">
+<html lang="<?= htmlspecialchars($current_lang) ?>">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CIDP DPMS — Conclusion Intermodal Dry Port Management System</title>
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/logo.png">
+    
+    <!-- Dashboard i18n Synchronization Engine -->
+    <script src="assets/js/dashboard-i18n.js"></script>
     
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -231,8 +202,42 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        #sidebar nav::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
-        #sidebar nav::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
+        #sidebar nav { scrollbar-width: thin; scrollbar-color: rgba(148,163,184,.35) transparent; }
+        #sidebar nav::-webkit-scrollbar { width: 3px; }
+        #sidebar nav::-webkit-scrollbar-thumb { background: rgba(148,163,184,.35); border-radius: 10px; }
+        #sidebar nav::-webkit-scrollbar-thumb:hover { background: rgba(100,116,139,.55); }
+        /* Motif Batik Kawung Maritim global: menempel di container scroll <main>,
+           sehingga menutupi seluruh area (termasuk gutter/padding) tanpa celah polos. */
+        .cdp-batik-canvas {
+            background-color: #f4f8fc;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg opacity='0.11'%3E%3Cg stroke='%23004b87' stroke-width='1.25' fill='none'%3E%3Cellipse cx='28' cy='14' rx='8' ry='13'/%3E%3Cellipse cx='28' cy='42' rx='8' ry='13'/%3E%3Cellipse cx='14' cy='28' rx='13' ry='8'/%3E%3Cellipse cx='42' cy='28' rx='13' ry='8'/%3E%3Cellipse cx='28' cy='14' rx='4.5' ry='8' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='28' cy='42' rx='4.5' ry='8' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='14' cy='28' rx='8' ry='4.5' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='42' cy='28' rx='8' ry='4.5' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='0' cy='0' rx='8' ry='13'/%3E%3Cellipse cx='56' cy='0' rx='8' ry='13'/%3E%3Cellipse cx='0' cy='56' rx='8' ry='13'/%3E%3Cellipse cx='56' cy='56' rx='8' ry='13'/%3E%3C/g%3E%3Cg fill='%23ea580c'%3E%3Ccircle cx='28' cy='28' r='2.5'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='56' cy='0' r='2'/%3E%3Ccircle cx='0' cy='56' r='2'/%3E%3Ccircle cx='56' cy='56' r='2'/%3E%3C/g%3E%3Cg fill='%23004b87'%3E%3Cpolygon points='28,2 30,5 28,8 26,5'/%3E%3Cpolygon points='28,48 30,51 28,54 26,51'/%3E%3Cpolygon points='2,28 5,30 8,28 5,26'/%3E%3Cpolygon points='48,28 51,30 54,28 51,26'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            background-repeat: repeat;
+            background-attachment: local;
+        }
+        /* ================================================================
+           INSET CANVAS FRAME — Sidebar + Header menyatu sebagai satu bingkai
+           putih; area kerja tampil sebagai lembaran tertanam bersudut halus.
+           Batas jelas namun tenang (tanpa garis warna mencolok).
+           ================================================================ */
+        #sidebar {
+            border-right: 0 !important;
+            box-shadow: none !important;
+            background-color: #ffffff;
+        }
+        #sidebar > .h-14 { border-bottom-color: transparent !important; }
+        #appFrame { background-color: #ffffff; }
+        #appFrame > header { border-bottom-color: transparent !important; background-color: #ffffff; }
+        #appFrame > main {
+            border-top: 1px solid #e3e9f1;
+            box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+        @media (min-width: 768px) {
+            #appFrame > main {
+                border-left: 1px solid #e3e9f1;
+                border-top-left-radius: 14px;
+                box-shadow: inset 1px 1px 3px rgba(15, 23, 42, 0.05);
+            }
+        }
         .timeline-dot { position: absolute; left: -5px; top: 5px; width: 10px; height: 10px; border-radius: 50%; }
         @keyframes fadeInScale {
             from { opacity: 0; transform: translateY(-8px) scale(0.98); }
@@ -252,6 +257,8 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
     <!-- CIDP Official Print Engine & Digital Stamp System -->
     <link rel="stylesheet" href="assets/css/print-document.css">
     <script src="assets/js/print-engine.js"></script>
+    <!-- Silent Online Auto-Translator Engine (Google Cloud Translation) -->
+    <script src="assets/js/auto-translator.js"></script>
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
@@ -259,7 +266,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
     <?php include_once __DIR__ . '/components/sidebar.php'; ?>
 
     <!-- Main Wrapper -->
-    <div class="flex-1 flex flex-col h-full overflow-hidden relative">
+    <div id="appFrame" class="flex-1 flex flex-col h-full overflow-hidden relative">
         
         <!-- Header & Top Navigation Component -->
         <?php include_once __DIR__ . '/components/header.php'; ?>
@@ -334,7 +341,7 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
         <?php endif; ?>
 
         <!-- Main Content Scrollable Area (Fluid Edge-to-Edge Container) -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto bg-cdp-light relative">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto cdp-batik-canvas relative">
             <div class="p-3 sm:p-4 lg:p-5 xl:p-6 w-full space-y-3.5 sm:space-y-4">
                 
                 <?php if ($page === 'beranda'): ?>

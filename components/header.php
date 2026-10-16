@@ -49,7 +49,7 @@
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </div>
                 <input type="text" name="search" id="globalQuickSearch" 
-                       placeholder="Cari kontainer (Ctrl+K)..." 
+                       placeholder="<?= __('search_placeholder', 'Cari kontainer (Ctrl+K)...') ?>" 
                        autocomplete="off"
                        onfocus="showSearchSuggestions()"
                        class="w-full pl-8 pr-12 py-1.5 bg-slate-100/70 hover:bg-slate-100 focus:bg-white text-xs text-slate-800 placeholder-slate-400 rounded-lg border border-slate-200/70 focus:border-[#0170b9] focus:ring-2 focus:ring-[#0170b9]/15 transition-all outline-none">
@@ -61,8 +61,8 @@
             <!-- Quick Suggestions Flyout -->
             <div id="searchSuggestionsFlyout" class="hidden absolute top-10 left-0 right-0 bg-white rounded-xl shadow-2xl border border-slate-200/90 p-3 z-50 animate-fadeIn text-xs">
                 <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-100 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                    <span><i class="fa-solid fa-bolt text-orange-500 mr-1"></i> Pintasan Akses Cepat</span>
-                    <span class="text-slate-400 font-mono">Esc untuk tutup</span>
+                    <span><i class="fa-solid fa-bolt text-orange-500 mr-1"></i> <?= __('search_quick_title', 'Pintasan Akses Cepat') ?></span>
+                    <span class="text-slate-400 font-mono"><?= __('search_esc', 'Esc untuk tutup') ?></span>
                 </div>
                 <div class="space-y-1">
                     <a href="dashboard.php?page=kontainer&search=MSKU9182374" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-50 transition group">
@@ -75,7 +75,7 @@
                         <span class="flex items-center text-slate-700 font-mono text-[11px] group-hover:text-[#0170b9]">
                             <i class="fa-solid fa-truck text-emerald-500 mr-2 text-[10px]"></i> B 9481 UEK
                         </span>
-                        <span class="text-[9.5px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-bold">Gate-In Sukses</span>
+                        <span class="text-[9.5px] text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-bold"><?= ($current_lang === 'en') ? 'Gate-In Cleared' : 'Gate-In Sukses' ?></span>
                     </a>
                     <a href="dashboard.php?page=intermodal" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-50 transition group">
                         <span class="flex items-center text-slate-700 font-mono text-[11px] group-hover:text-[#0170b9]">
@@ -87,13 +87,13 @@
                         <span class="flex items-center text-slate-700 font-mono text-[11px] group-hover:text-[#0170b9]">
                             <i class="fa-solid fa-snowflake text-cyan-500 mr-2 text-[10px]"></i> Plug #04 Marechal
                         </span>
-                        <span class="text-[9.5px] text-cyan-600 bg-cyan-50 px-1.5 py-0.5 rounded font-mono">-20.2°C Stabil</span>
+                        <span class="text-[9.5px] text-cyan-600 bg-cyan-50 px-1.5 py-0.5 rounded font-mono">-20.2°C <?= ($current_lang === 'en') ? 'Stable' : 'Stabil' ?></span>
                     </a>
                     <a href="dashboard.php?page=customs" class="flex items-center justify-between p-1.5 rounded-lg hover:bg-slate-50 transition group">
                         <span class="flex items-center text-slate-700 font-mono text-[11px] group-hover:text-[#0170b9]">
                             <i class="fa-solid fa-shield-halved text-indigo-500 mr-2 text-[10px]"></i> SPPB CEISA 4.0
                         </span>
-                        <span class="text-[9.5px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-bold">Jalur Hijau</span>
+                        <span class="text-[9.5px] text-indigo-600 bg-indigo-50 px-1.5 py-0.5 rounded font-bold"><?= ($current_lang === 'en') ? 'Green Channel' : 'Jalur Hijau' ?></span>
                     </a>
                 </div>
             </div>
@@ -103,29 +103,29 @@
         <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
             
             <!-- Mobile Search Icon Trigger -->
-            <button onclick="toggleMobileSearch()" class="p-2 text-slate-500 hover:text-slate-800 focus:outline-none md:hidden transition-colors rounded-lg hover:bg-slate-100 cursor-pointer" title="Cari Kontainer / Truk">
+            <button onclick="toggleMobileSearch()" class="p-2 text-slate-500 hover:text-slate-800 focus:outline-none md:hidden transition-colors rounded-lg hover:bg-slate-100 cursor-pointer" title="<?= __('search_placeholder', 'Cari Kontainer / Truk') ?>">
                 <i class="fa-solid fa-magnifying-glass text-sm"></i>
             </button>
 
             <!-- Fullscreen Toggle Button -->
-            <button onclick="toggleFullScreen()" class="w-8 h-8 hidden sm:flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors rounded-lg hover:bg-slate-100 focus:outline-none cursor-pointer" title="Layar Penuh (F11)">
+            <button onclick="toggleFullScreen()" class="w-8 h-8 hidden sm:flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors rounded-lg hover:bg-slate-100 focus:outline-none cursor-pointer" title="<?= __('fullscreen_title', 'Layar Penuh (F11)') ?>">
                 <i class="fa-solid fa-expand text-xs" id="fullscreenIcon"></i>
             </button>
 
             <!-- Real-Time Operational Clock (Clean subtle monospace) - Hidden on laptop < xl -->
-            <div class="hidden xl:flex items-center space-x-1.5 text-xs text-slate-500 font-mono font-medium px-2 py-1 rounded-md" title="Waktu Nyata Operasional Terminal CIDP (WIB)">
+            <div class="hidden xl:flex items-center space-x-1.5 text-xs text-slate-500 font-mono font-medium px-2 py-1 rounded-md" title="<?= __('live_clock_title', 'Waktu Nyata Operasional Terminal CIDP (WIB)') ?>">
                 <span class="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse"></span>
                 <span id="navLiveClock">--:--:-- WIB</span>
             </div>
 
-            <!-- Language Switcher (Clean minimal toggle) -->
-            <div class="flex items-center bg-slate-100/80 rounded-lg p-0.5 text-[11px] font-bold" title="Pilihan Bahasa Sistem">
-                <a href="dashboard.php?page=<?= htmlspecialchars($page) ?>&lang=id" onclick="localStorage.setItem('cidp_lang', 'id')" class="px-2 py-0.5 rounded-md transition-all <?= ($current_lang === 'id') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
+            <!-- Language Switcher (Clean minimal toggle with instant auto-translator) -->
+            <div class="flex items-center bg-slate-100/80 rounded-lg p-0.5 text-[11px] font-bold" title="<?= __('lang_choice_title', 'Pilihan Bahasa Sistem (ID / EN)') ?>">
+                <button type="button" id="dashLangBtnID" onclick="setCIDPLanguage('id')" class="px-2 py-0.5 rounded-md transition-all cursor-pointer <?= ($current_lang === 'id') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
                     ID
-                </a>
-                <a href="dashboard.php?page=<?= htmlspecialchars($page) ?>&lang=en" onclick="localStorage.setItem('cidp_lang', 'en')" class="px-2 py-0.5 rounded-md transition-all <?= ($current_lang === 'en') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
+                </button>
+                <button type="button" id="dashLangBtnEN" onclick="setCIDPLanguage('en')" class="px-2 py-0.5 rounded-md transition-all cursor-pointer <?= ($current_lang === 'en') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
                     EN
-                </a>
+                </button>
             </div>
 
             <!-- Notification Bell & Categorized Dropdown Card -->
@@ -141,25 +141,25 @@
                     <div class="bg-gradient-to-r from-[#0170b9] via-[#0284c7] to-orange-600 p-3.5 text-white flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <i class="fa-solid fa-bell text-orange-200 text-xs"></i>
-                            <span class="font-bold text-sm">Notifikasi Sistem Yard</span>
-                            <span id="notifCountPill" class="px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-[10px] font-bold font-mono shadow-xs">4 Baru</span>
+                            <span class="font-bold text-sm"><?= __('notif_title', 'Notifikasi Sistem Yard') ?></span>
+                            <span id="notifCountPill" class="px-2 py-0.5 rounded-full bg-gradient-to-r from-orange-500 to-orange-600 text-white text-[10px] font-bold font-mono shadow-xs"><?= __('notif_new_badge', '4 Baru') ?></span>
                         </div>
                         <button onclick="markAllNotificationsRead()" class="text-[11px] text-blue-100 hover:text-white transition font-medium flex items-center space-x-1 cursor-pointer">
                             <i class="fa-solid fa-check-double text-[10px]"></i>
-                            <span>Tandai Dibaca</span>
+                            <span><?= __('notif_mark_read', 'Tandai Dibaca') ?></span>
                         </button>
                     </div>
 
                     <!-- Category Filter Tabs -->
                     <div class="px-3 py-1.5 bg-slate-50 border-b border-gray-100 flex items-center space-x-1">
                         <button onclick="filterNotifCategory('all')" data-category="all" class="notif-filter-tab px-2 py-0.5 rounded-md text-[10px] font-bold bg-white text-orange-600 shadow-2xs border border-orange-200/60 transition cursor-pointer">
-                            Semua (4)
+                            <?= __('notif_tab_all', 'Semua') ?> (4)
                         </button>
                         <button onclick="filterNotifCategory('logistics')" data-category="logistics" class="notif-filter-tab px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer">
-                            Logistik (2)
+                            <?= __('notif_tab_logistics', 'Logistik') ?> (2)
                         </button>
                         <button onclick="filterNotifCategory('customs')" data-category="customs" class="notif-filter-tab px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer">
-                            Bea Cukai (1)
+                            <?= __('notif_tab_customs', 'Bea Cukai') ?> (1)
                         </button>
                         <button onclick="filterNotifCategory('iot')" data-category="iot" class="notif-filter-tab px-2 py-0.5 rounded-md text-[10px] font-semibold text-slate-500 hover:text-slate-800 transition cursor-pointer">
                             IoT (1)
@@ -295,7 +295,7 @@
                     <!-- Quick Role Switcher (Simulasi Evaluator ITL Trisakti) -->
                     <div class="p-3 bg-slate-50 border-b border-gray-100">
                         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
-                            <i class="fa-solid fa-users-gear mr-1 text-orange-500"></i> Mode Simulasi Hak Akses
+                            <i class="fa-solid fa-users-gear mr-1 text-orange-500"></i> <?= __('profile_eval_mode', 'Mode Simulasi Hak Akses') ?>
                         </span>
                         <div class="grid grid-cols-2 gap-1.5 text-[11px]">
                             <div class="bg-white border-2 border-orange-500 text-orange-700 bg-orange-50/40 font-bold p-1.5 rounded-lg flex items-center space-x-1.5 shadow-2xs">
@@ -304,15 +304,15 @@
                             </div>
                             <a href="dashboard.php?page=alat" class="bg-white hover:bg-orange-50/60 border border-gray-200 text-gray-600 hover:text-orange-700 p-1.5 rounded-lg flex items-center space-x-1.5 transition">
                                 <i class="fa-solid fa-dolly text-[10px] text-orange-500"></i>
-                                <span class="truncate">Operator RS</span>
+                                <span class="truncate"><?= __('profile_role_rs', 'Operator RS') ?></span>
                             </a>
                             <a href="dashboard.php?page=trucking" class="bg-white hover:bg-orange-50/60 border border-gray-200 text-gray-600 hover:text-orange-700 p-1.5 rounded-lg flex items-center space-x-1.5 transition">
                                 <i class="fa-solid fa-truck-moving text-[10px] text-emerald-500"></i>
-                                <span class="truncate">Supir Armada</span>
+                                <span class="truncate"><?= __('profile_role_driver', 'Supir Armada') ?></span>
                             </a>
                             <a href="dashboard.php?page=billing" class="bg-white hover:bg-orange-50/60 border border-gray-200 text-gray-600 hover:text-orange-700 p-1.5 rounded-lg flex items-center space-x-1.5 transition">
                                 <i class="fa-solid fa-building text-[10px] text-purple-500"></i>
-                                <span class="truncate">Klien Shipper</span>
+                                <span class="truncate"><?= __('profile_role_shipper', 'Klien Shipper') ?></span>
                             </a>
                         </div>
                     </div>
@@ -321,28 +321,28 @@
                     <div class="p-2 space-y-0.5">
                         <a href="dashboard.php?page=settings" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors group">
                             <i class="fa-solid fa-gear text-xs text-gray-400 group-hover:text-orange-600 transition-colors w-4 text-center"></i>
-                            <span class="font-medium">Pengaturan Akun &amp; Sistem</span>
+                            <span class="font-medium"><?= __('profile_settings', 'Pengaturan Akun & Sistem') ?></span>
                         </a>
                         <a href="dashboard.php?page=simulator" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors group">
                             <i class="fa-solid fa-tower-broadcast text-xs text-gray-400 group-hover:text-orange-600 transition-colors w-4 text-center"></i>
-                            <span class="font-medium">Panel Simulasi IoT &amp; Sensor</span>
+                            <span class="font-medium"><?= __('profile_sim_panel', 'Panel Simulasi IoT & Sensor') ?></span>
                         </a>
                         <a href="dashboard.php?page=denah" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors group">
                             <i class="fa-solid fa-map-location-dot text-xs text-gray-400 group-hover:text-orange-600 transition-colors w-4 text-center"></i>
-                            <span class="font-medium">Site Plan Denah Terminal 35 Ha</span>
+                            <span class="font-medium"><?= __('profile_site_plan', 'Site Plan Denah Terminal 35 Ha') ?></span>
                         </a>
 
                         <div class="my-1.5 border-t border-gray-100"></div>
 
                         <!-- System Diagnostics Quick Info -->
                         <div class="px-3 py-1.5 bg-slate-50/80 rounded-lg text-[10px] text-slate-500 flex items-center justify-between font-mono">
-                            <span class="flex items-center gap-1"><i class="fa-solid fa-database text-emerald-500"></i> DB Connected</span>
+                            <span class="flex items-center gap-1"><i class="fa-solid fa-database text-emerald-500"></i> <?= __('profile_db_status', 'DB Connected') ?></span>
                             <span class="text-slate-400">Ping 12ms</span>
                         </div>
 
                         <button type="button" onclick="openLogoutConfirmModal()" class="w-full text-left flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-red-50 text-red-600 transition-colors group cursor-pointer">
                             <i class="fa-solid fa-right-from-bracket text-xs text-red-400 group-hover:text-red-600 transition-colors w-4 text-center"></i>
-                            <span class="font-bold">Keluar dari Sistem</span>
+                            <span class="font-bold"><?= __('profile_logout', 'Keluar dari Sistem') ?></span>
                         </button>
                     </div>
 
@@ -409,9 +409,9 @@
                     <i class="fa-solid fa-right-from-bracket"></i>
                 </div>
                 <div>
-                    <h4 class="text-sm font-extrabold text-slate-900 tracking-tight">Akhiri Sesi Operasional?</h4>
+                    <h4 class="text-sm font-extrabold text-slate-900 tracking-tight"><?= __('logout_modal_title', 'Akhiri Sesi Operasional?') ?></h4>
                     <p class="text-[11px] text-slate-500 mt-0.5 leading-relaxed">
-                        Log kontainer dan konfigurasi SCADA Anda telah tersimpan aman di database.
+                        <?= __('logout_modal_desc', 'Log kontainer dan konfigurasi SCADA Anda telah tersimpan aman di database.') ?>
                     </p>
                 </div>
             </div>
@@ -424,18 +424,18 @@
                 </div>
                 <div class="flex items-center justify-between text-slate-600">
                     <span class="font-medium">Status:</span>
-                    <span class="text-emerald-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-check text-[8.5px]"></i> Data Aman &amp; Tersinkron</span>
+                    <span class="text-emerald-600 font-semibold flex items-center gap-1"><i class="fa-solid fa-check text-[8.5px]"></i> <?= ($current_lang === 'en') ? 'Data Secure & Synchronized' : 'Data Aman & Tersinkron' ?></span>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="flex items-center justify-end gap-2">
                 <button type="button" onclick="closeLogoutConfirmModal()" class="px-3.5 py-2 rounded-lg border border-slate-200 hover:bg-slate-50 text-slate-700 font-semibold text-xs transition-colors shadow-2xs">
-                    Batal
+                    <?= __('logout_cancel', 'Batal') ?>
                 </button>
                 <a href="logout.php" class="px-4 py-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-600 hover:from-orange-600 hover:to-red-700 text-white font-bold text-xs shadow-md shadow-orange-500/20 transition-all flex items-center gap-1.5">
                     <i class="fa-solid fa-right-from-bracket text-[11px]"></i>
-                    <span>Ya, Keluar</span>
+                    <span><?= __('logout_confirm', 'Ya, Keluar') ?></span>
                 </a>
             </div>
         </div>
