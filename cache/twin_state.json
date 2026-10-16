@@ -2,8 +2,8 @@
     "system": {
         "app": "CIDP Digital Twin Monitoring Engine",
         "version": "2.0-Live",
-        "server_time": "2026-10-16T10:41:45+02:00",
-        "timestamp": 1792140105.103195,
+        "server_time": "2026-10-16T10:43:00+02:00",
+        "timestamp": 1792140180.107753,
         "status": "ONLINE"
     },
     "physical": {
@@ -679,7 +679,7 @@
             "sppb_cleared": 18,
             "red_line_inspection": 0,
             "clearance_rate_pct": 90,
-            "last_ceisa_sync": "2026-10-16T10:41:45+02:00"
+            "last_ceisa_sync": "2026-10-16T10:43:00+02:00"
         },
         "reefer": {
             "active_plugs": 2,
