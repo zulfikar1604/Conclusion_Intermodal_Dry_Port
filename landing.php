@@ -308,9 +308,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
             transform: translateX(4px);
         }
     </style>
-    <!-- Multilingual Engine & Silent Online Auto-Translator -->
+    <!-- Multilingual Engine (Indonesian / English - 100% Local Offline Fast) -->
     <script src="assets/js/landing-i18n.js"></script>
-    <script src="assets/js/auto-translator.js"></script>
 </head>
 <body class="bg-white text-slate-800 antialiased selection:bg-orange-500 selection:text-white">
 

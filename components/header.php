@@ -118,14 +118,14 @@
                 <span id="navLiveClock">--:--:-- WIB</span>
             </div>
 
-            <!-- Language Switcher (Clean minimal toggle with instant auto-translator) -->
+            <!-- Language Switcher (Clean minimal toggle) -->
             <div class="flex items-center bg-slate-100/80 rounded-lg p-0.5 text-[11px] font-bold" title="<?= __('lang_choice_title', 'Pilihan Bahasa Sistem (ID / EN)') ?>">
-                <button type="button" id="dashLangBtnID" onclick="setCIDPLanguage('id')" class="px-2 py-0.5 rounded-md transition-all cursor-pointer <?= ($current_lang === 'id') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
+                <a href="dashboard.php?page=<?= htmlspecialchars($page) ?>&lang=id" onclick="localStorage.setItem('cidp_lang', 'id')" class="px-2 py-0.5 rounded-md transition-all cursor-pointer <?= ($current_lang === 'id') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
                     ID
-                </button>
-                <button type="button" id="dashLangBtnEN" onclick="setCIDPLanguage('en')" class="px-2 py-0.5 rounded-md transition-all cursor-pointer <?= ($current_lang === 'en') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
+                </a>
+                <a href="dashboard.php?page=<?= htmlspecialchars($page) ?>&lang=en" onclick="localStorage.setItem('cidp_lang', 'en')" class="px-2 py-0.5 rounded-md transition-all cursor-pointer <?= ($current_lang === 'en') ? 'bg-white text-slate-800 shadow-2xs font-extrabold' : 'text-slate-500 hover:text-slate-800' ?>">
                     EN
-                </button>
+                </a>
             </div>
 
             <!-- Notification Bell & Categorized Dropdown Card -->

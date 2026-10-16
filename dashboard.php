@@ -154,9 +154,6 @@ $tanggal_sekarang = get_localized_date($current_lang);
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="assets/img/logo.png">
     
-    <!-- Dashboard i18n Synchronization Engine -->
-    <script src="assets/js/dashboard-i18n.js"></script>
-    
     <!-- Google Fonts: Plus Jakarta Sans -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -257,8 +254,6 @@ $tanggal_sekarang = get_localized_date($current_lang);
     <!-- CIDP Official Print Engine & Digital Stamp System -->
     <link rel="stylesheet" href="assets/css/print-document.css">
     <script src="assets/js/print-engine.js"></script>
-    <!-- Silent Online Auto-Translator Engine (Google Cloud Translation) -->
-    <script src="assets/js/auto-translator.js"></script>
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
