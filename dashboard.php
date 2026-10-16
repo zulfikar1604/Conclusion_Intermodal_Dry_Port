@@ -127,6 +127,7 @@ if (!function_exists('can_view')) {
 $menu_clusters = [
     'Executive & Map' => [
         'beranda'   => ['icon' => 'fa-house', 'label' => 'Cockpit Eksekutif'],
+        'twin'      => ['icon' => 'fa-satellite-dish', 'label' => 'Digital Twin 2D (Live)'],
         'denah'     => ['icon' => 'fa-map-location-dot', 'label' => 'Denah Master 35 Ha'],
         'simulator' => ['icon' => 'fa-cube', 'label' => 'Simulator 3D Hub']
     ],
@@ -338,6 +339,8 @@ $tanggal_sekarang = date('j') . ' ' . $bulan[(int)date('n')] . ' ' . date('Y');
                 
                 <?php if ($page === 'beranda'): ?>
                     <?php include_once __DIR__ . '/pages/beranda.php'; ?>
+                <?php elseif ($page === 'twin'): ?>
+                    <?php include_once __DIR__ . '/pages/digital_twin.php'; ?>
                 <?php elseif ($page === 'kontainer'): ?>
                     <?php include_once __DIR__ . '/pages/kontainer.php'; ?>
                 <?php elseif ($page === 'trucking'): ?>

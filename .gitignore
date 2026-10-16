@@ -20,6 +20,7 @@ ehthumbs_vista.db
 *.log
 *.tmp
 tmp/
+cache/*.tmp*
 cookie*.txt
 hardware/images
 
