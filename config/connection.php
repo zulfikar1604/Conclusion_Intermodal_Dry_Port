@@ -23,11 +23,15 @@ try {
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
         ]);
     } catch (PDOException $e2) {
-        die("<div style='font-family:sans-serif; padding:20px; color:#b91c1c; background:#fee2e2; border-radius:8px; margin:20px;'>
-            <strong>Koneksi Database Gagal!</strong><br>
-            Pastikan MySQL di XAMPP sudah aktif dan database <code>cidp_yms</code> tersedia di phpMyAdmin.<br>
-            <small style='color:#666;'>Detail Error: " . htmlspecialchars($e2->getMessage()) . "</small>
-        </div>");
+        if (defined('CIDP_SILENT_DB_FALLBACK') && CIDP_SILENT_DB_FALLBACK === true) {
+            $pdo = null;
+        } else {
+            die("<div style='font-family:sans-serif; padding:20px; color:#b91c1c; background:#fee2e2; border-radius:8px; margin:20px;'>
+                <strong>Koneksi Database Gagal!</strong><br>
+                Pastikan MySQL di XAMPP sudah aktif dan database <code>cidp_yms</code> tersedia di phpMyAdmin.<br>
+                <small style='color:#666;'>Detail Error: " . htmlspecialchars($e2->getMessage()) . "</small>
+            </div>");
+        }
     }
 }
 
