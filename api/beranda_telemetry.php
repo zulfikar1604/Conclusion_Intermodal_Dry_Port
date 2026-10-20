@@ -10,8 +10,8 @@
 // 4. Tabel Konsinyasi Interaktif & Live SCADA Event Stream
 // =============================================================================
 
-header('Content-Type: application/json; charset=utf-8');
-header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+// Headers sent only when invoked directly as API endpoint (see bottom of file)
+
 
 if (!defined('CIDP_SILENT_DB_FALLBACK')) {
     define('CIDP_SILENT_DB_FALLBACK', true);
@@ -530,6 +530,7 @@ function build_beranda_telemetry(?PDO $pdo = null, bool $with_jitter = false): a
 
 // Jika di-request langsung sebagai endpoint AJAX
 if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'beranda_telemetry.php') {
+    if (!headers_sent()) { header('Content-Type: application/json; charset=utf-8'); header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0'); }
     $jitter = isset($_GET['jitter']) || isset($_GET['pulse']);
     echo json_encode(build_beranda_telemetry($pdo ?? null, $jitter), JSON_UNESCAPED_SLASHES);
     exit;
