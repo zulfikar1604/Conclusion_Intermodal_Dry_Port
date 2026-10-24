@@ -45,7 +45,7 @@ function build_beranda_telemetry(?PDO $pdo = null, bool $with_jitter = false): a
                 $db_total_wagons  = (int)$w_row[1];
             }
 
-            $db_reefer_count = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE cargo_type LIKE '%reefer%' OR size_type LIKE '%R%' OR block IN ('R','REEFER')")->fetchColumn();
+            $db_reefer_count = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE LOWER(cargo_type) = 'reefer' OR UPPER(block) IN ('R','REEFER')")->fetchColumn();
             $db_customs_cleared = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE customs_status = 'SPPB_CLEARED'")->fetchColumn();
             $db_cfs_jobs = (int)$pdo->query("SELECT COUNT(*) FROM cfs_jobs WHERE status != 'COMPLETED'")->fetchColumn();
         } catch (Exception $e) {}
@@ -61,7 +61,7 @@ function build_beranda_telemetry(?PDO $pdo = null, bool $with_jitter = false): a
     $total_wagons    = $db_total_wagons > 0 ? $db_total_wagons : 30;
     $siding_pct      = round(($loaded_wagons / max(1, $total_wagons)) * 100);
 
-    $reefer_plugs    = $db_reefer_count > 10 ? $db_reefer_count : (182 + $db_reefer_count);
+    $reefer_plugs    = $db_reefer_count > 50 ? $db_reefer_count : (182 + $db_reefer_count);
     $reefer_cap      = 300;
     $reefer_pct      = round(($reefer_plugs / $reefer_cap) * 100, 1);
 
@@ -72,7 +72,7 @@ function build_beranda_telemetry(?PDO $pdo = null, bool $with_jitter = false): a
     }
     $customs_pct     = round(($customs_cleared / max(1, $customs_total)) * 100, 1);
 
-    $cfs_jobs        = $db_cfs_jobs > 0 ? $db_cfs_jobs : 18;
+    $cfs_jobs        = $db_cfs_jobs > 10 ? $db_cfs_jobs : (17 + $db_cfs_jobs);
     $cfs_pct         = min(100, round(($cfs_jobs / 24) * 100));
 
     // Jitter Telemetri Sensor Real-Time (Jika dipanggil via Live Polling)

@@ -307,6 +307,39 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
         .link-arrow-circle:hover i {
             transform: translateX(4px);
         }
+
+        /* ===================================================================
+           UNIFIED & PHASE-SYNCHRONIZED BATIK KAWUNG MARITIM WATERMARK SYSTEM
+           =================================================================== */
+        .cidp-batik-layer {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+            opacity: 0.055;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23004b87' stroke-width='1.15'%3E%3Cellipse cx='32' cy='16' rx='8.5' ry='14'/%3E%3Cellipse cx='32' cy='48' rx='8.5' ry='14'/%3E%3Cellipse cx='16' cy='32' rx='14' ry='8.5'/%3E%3Cellipse cx='48' cy='32' rx='14' ry='8.5'/%3E%3Cellipse cx='0' cy='0' rx='8.5' ry='14'/%3E%3Cellipse cx='64' cy='0' rx='8.5' ry='14'/%3E%3Cellipse cx='0' cy='64' rx='8.5' ry='14'/%3E%3Cellipse cx='64' cy='64' rx='8.5' ry='14'/%3E%3Cellipse cx='0' cy='0' rx='14' ry='8.5'/%3E%3Cellipse cx='64' cy='0' rx='14' ry='8.5'/%3E%3Cellipse cx='0' cy='64' rx='14' ry='8.5'/%3E%3Cellipse cx='64' cy='64' rx='14' ry='8.5'/%3E%3C/g%3E%3Ccircle cx='32' cy='32' r='2.2' fill='%23ea580c'/%3E%3Ccircle cx='0' cy='0' r='2' fill='%23ea580c'/%3E%3Ccircle cx='64' cy='0' r='2' fill='%23ea580c'/%3E%3Ccircle cx='0' cy='64' r='2' fill='%23ea580c'/%3E%3Ccircle cx='64' cy='64' r='2' fill='%23ea580c'/%3E%3Cpolygon points='32,0 34,3 32,6 30,3' fill='%23004b87' opacity='0.65'/%3E%3Cpolygon points='32,58 34,61 32,64 30,61' fill='%23004b87' opacity='0.65'/%3E%3Cpolygon points='0,32 3,34 6,32 3,30' fill='%23004b87' opacity='0.65'/%3E%3Cpolygon points='58,32 61,34 64,32 61,30' fill='%23004b87' opacity='0.65'/%3E%3C/svg%3E");
+            background-size: 64px 64px;
+            background-position: center top;
+            background-attachment: fixed;
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.9) 14%, rgba(0, 0, 0, 0.9) 86%, transparent 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.9) 14%, rgba(0, 0, 0, 0.9) 86%, transparent 100%);
+        }
+
+        .cidp-batik-layer-dark {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            user-select: none;
+            z-index: 0;
+            opacity: 0.075;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64' viewBox='0 0 64 64'%3E%3Cg fill='none' stroke='%23ffffff' stroke-width='1.15'%3E%3Cellipse cx='32' cy='16' rx='8.5' ry='14'/%3E%3Cellipse cx='32' cy='48' rx='8.5' ry='14'/%3E%3Cellipse cx='16' cy='32' rx='14' ry='8.5'/%3E%3Cellipse cx='48' cy='32' rx='14' ry='8.5'/%3E%3Cellipse cx='0' cy='0' rx='8.5' ry='14'/%3E%3Cellipse cx='64' cy='0' rx='8.5' ry='14'/%3E%3Cellipse cx='0' cy='64' rx='8.5' ry='14'/%3E%3Cellipse cx='64' cy='64' rx='8.5' ry='14'/%3E%3Cellipse cx='0' cy='0' rx='14' ry='8.5'/%3E%3Cellipse cx='64' cy='0' rx='14' ry='8.5'/%3E%3Cellipse cx='0' cy='64' rx='14' ry='8.5'/%3E%3Cellipse cx='64' cy='64' rx='14' ry='8.5'/%3E%3C/g%3E%3Ccircle cx='32' cy='32' r='2.2' fill='%23fcd34d'/%3E%3Ccircle cx='0' cy='0' r='2' fill='%23fcd34d'/%3E%3Ccircle cx='64' cy='0' r='2' fill='%23fcd34d'/%3E%3Ccircle cx='0' cy='64' r='2' fill='%23fcd34d'/%3E%3Ccircle cx='64' cy='64' r='2' fill='%23fcd34d'/%3E%3C/svg%3E");
+            background-size: 64px 64px;
+            background-position: center top;
+            background-attachment: fixed;
+            -webkit-mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.9) 14%, rgba(0, 0, 0, 0.9) 86%, transparent 100%);
+            mask-image: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.9) 14%, rgba(0, 0, 0, 0.9) 86%, transparent 100%);
+        }
     </style>
     <!-- Multilingual Engine (Indonesian / English - 100% Local Offline Fast) -->
     <script src="assets/js/landing-i18n.js"></script>
@@ -811,51 +844,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- 4. LATEST UPDATES (Petronas Media Releases / News Section - CERAH)  -->
     <!-- =================================================================== -->
     <section id="updates" class="py-14 sm:py-16 bg-white text-slate-800 relative overflow-hidden">
-        <!-- Subtle Luxury Batik Kawung Maritim Watermark Background -->
-        <div class="absolute inset-0 pointer-events-none opacity-[0.10] z-0 overflow-hidden select-none" aria-hidden="true">
-            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="patUpdatesKawung" width="56" height="56" patternUnits="userSpaceOnUse">
-                        <g stroke="#004b87" stroke-width="1.25" fill="none">
-                            <ellipse cx="28" cy="14" rx="8" ry="13" />
-                            <ellipse cx="28" cy="42" rx="8" ry="13" />
-                            <ellipse cx="14" cy="28" rx="13" ry="8" />
-                            <ellipse cx="42" cy="28" rx="13" ry="8" />
-                            <ellipse cx="28" cy="14" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
-                            <ellipse cx="28" cy="42" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
-                            <ellipse cx="14" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
-                            <ellipse cx="42" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
-                            <ellipse cx="0" cy="0" rx="8" ry="13" />
-                            <ellipse cx="56" cy="0" rx="8" ry="13" />
-                            <ellipse cx="0" cy="56" rx="8" ry="13" />
-                            <ellipse cx="56" cy="56" rx="8" ry="13" />
-                        </g>
-                        <circle cx="28" cy="28" r="2.5" fill="#ea580c" />
-                        <circle cx="0" cy="0" r="2" fill="#ea580c" />
-                        <circle cx="56" cy="0" r="2" fill="#ea580c" />
-                        <circle cx="0" cy="56" r="2" fill="#ea580c" />
-                        <circle cx="56" cy="56" r="2" fill="#ea580c" />
-                        <!-- Interlocking Mlinjon Diamonds -->
-                        <polygon points="28,2 30,5 28,8 26,5" fill="#004b87" />
-                        <polygon points="28,48 30,51 28,54 26,51" fill="#004b87" />
-                        <polygon points="2,28 5,30 8,28 5,26" fill="#004b87" />
-                        <polygon points="48,28 51,30 54,28 51,26" fill="#004b87" />
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#patUpdatesKawung)" />
-            </svg>
-        </div>
-        <!-- Decorative Ambient Corner Rosette Watermark -->
-        <div class="absolute -right-16 -top-16 w-80 h-80 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
-            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
-                <ellipse cx="50" cy="22" rx="16" ry="24" />
-                <ellipse cx="50" cy="78" rx="16" ry="24" />
-                <ellipse cx="22" cy="50" rx="24" ry="16" />
-                <ellipse cx="78" cy="50" rx="24" ry="16" />
-                <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
-                <circle cx="50" cy="50" r="14" stroke="#004b87" stroke-width="1" stroke-dasharray="2 2" />
-            </svg>
-        </div>
+        <!-- Unified Phase-Synchronized Batik Kawung Maritim Layer -->
+        <div class="cidp-batik-layer" aria-hidden="true"></div>
 
         <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
@@ -972,26 +962,9 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 5. OUR INTERMODAL JOURNEY (Petronas 3-Card Transition Journey)       -->
     <!-- =================================================================== -->
-    <section id="pillars" class="py-14 sm:py-16 bg-slate-50 border-y border-slate-200 relative overflow-hidden">
-        <!-- Subtle Batik Parang Bahari Watermark Background -->
-        <div class="absolute inset-0 pointer-events-none opacity-[0.10] z-0 overflow-hidden select-none" aria-hidden="true">
-            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="patPillarsParang" width="48" height="48" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                        <g stroke="#004b87" stroke-width="1.25" fill="none">
-                            <path d="M 0 12 Q 12 6, 24 12 T 48 12" />
-                            <path d="M 0 24 Q 12 18, 24 24 T 48 24" />
-                            <path d="M 0 36 Q 12 30, 24 36 T 48 36" />
-                            <polygon points="12,12 15,9 18,12 15,15" fill="#ea580c" />
-                            <polygon points="36,24 39,21 42,24 39,27" fill="#ea580c" />
-                            <circle cx="24" cy="18" r="1.5" fill="#004b87" />
-                            <circle cx="12" cy="30" r="1.5" fill="#004b87" />
-                        </g>
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#patPillarsParang)" />
-            </svg>
-        </div>
+    <section id="pillars" class="py-14 sm:py-16 bg-slate-50/90 border-y border-slate-200/60 relative overflow-hidden">
+        <!-- Unified Phase-Synchronized Batik Kawung Maritim Layer -->
+        <div class="cidp-batik-layer" aria-hidden="true"></div>
 
         <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
@@ -1120,8 +1093,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- 6. OPERATIONAL & FINANCIAL RESULTS (Bright Blue Corporate Section)  -->
     <!-- =================================================================== -->
     <section id="performance" class="relative py-14 sm:py-16 bg-gradient-to-br from-[#004b87] via-[#0170b9] to-[#002f5e] text-white overflow-hidden">
-        <!-- Subtle Pattern Overlay -->
-        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:20px_20px]"></div>
+        <!-- Unified Phase-Synchronized Batik Kawung Maritim Layer (Dark Theme) -->
+        <div class="cidp-batik-layer-dark" aria-hidden="true"></div>
 
         <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
@@ -1250,51 +1223,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- 7. HIGHLIGHTS (Petronas Accordion + Dynamic Image Swap - CERAH)      -->
     <!-- =================================================================== -->
     <section id="highlights" class="py-14 sm:py-16 bg-white text-slate-800 relative overflow-hidden">
-        <!-- Subtle Luxury Batik Kawung Maritim Watermark Background -->
-        <div class="absolute inset-0 pointer-events-none opacity-[0.10] z-0 overflow-hidden select-none" aria-hidden="true">
-            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="patHighlightsKawung" width="56" height="56" patternUnits="userSpaceOnUse">
-                        <g stroke="#004b87" stroke-width="1.25" fill="none">
-                            <ellipse cx="28" cy="14" rx="8" ry="13" />
-                            <ellipse cx="28" cy="42" rx="8" ry="13" />
-                            <ellipse cx="14" cy="28" rx="13" ry="8" />
-                            <ellipse cx="42" cy="28" rx="13" ry="8" />
-                            <ellipse cx="28" cy="14" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
-                            <ellipse cx="28" cy="42" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
-                            <ellipse cx="14" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
-                            <ellipse cx="42" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
-                            <ellipse cx="0" cy="0" rx="8" ry="13" />
-                            <ellipse cx="56" cy="0" rx="8" ry="13" />
-                            <ellipse cx="0" cy="56" rx="8" ry="13" />
-                            <ellipse cx="56" cy="56" rx="8" ry="13" />
-                        </g>
-                        <circle cx="28" cy="28" r="2.5" fill="#ea580c" />
-                        <circle cx="0" cy="0" r="2" fill="#ea580c" />
-                        <circle cx="56" cy="0" r="2" fill="#ea580c" />
-                        <circle cx="0" cy="56" r="2" fill="#ea580c" />
-                        <circle cx="56" cy="56" r="2" fill="#ea580c" />
-                        <!-- Interlocking Mlinjon Diamonds -->
-                        <polygon points="28,2 30,5 28,8 26,5" fill="#004b87" />
-                        <polygon points="28,48 30,51 28,54 26,51" fill="#004b87" />
-                        <polygon points="2,28 5,30 8,28 5,26" fill="#004b87" />
-                        <polygon points="48,28 51,30 54,28 51,26" fill="#004b87" />
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#patHighlightsKawung)" />
-            </svg>
-        </div>
-        <!-- Decorative Ambient Corner Rosette Watermark -->
-        <div class="absolute -left-16 -bottom-16 w-80 h-80 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
-            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
-                <ellipse cx="50" cy="22" rx="16" ry="24" />
-                <ellipse cx="50" cy="78" rx="16" ry="24" />
-                <ellipse cx="22" cy="50" rx="24" ry="16" />
-                <ellipse cx="78" cy="50" rx="24" ry="16" />
-                <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
-                <circle cx="50" cy="50" r="14" stroke="#004b87" stroke-width="1" stroke-dasharray="2 2" />
-            </svg>
-        </div>
+        <!-- Unified Phase-Synchronized Batik Kawung Maritim Layer -->
+        <div class="cidp-batik-layer" aria-hidden="true"></div>
 
         <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
@@ -1448,41 +1378,9 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 8. OUR NETWORK (Petronas Collapsible Discover More Section - CERAH) -->
     <!-- =================================================================== -->
-    <section id="network" class="py-14 sm:py-16 bg-slate-50 text-slate-800 border-t border-slate-200 relative overflow-hidden">
-        <!-- Subtle Luxury Batik Kawung Maritim Watermark Background -->
-        <div class="absolute inset-0 pointer-events-none opacity-[0.10] z-0 overflow-hidden select-none" aria-hidden="true">
-            <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                <defs>
-                    <pattern id="patNetworkKawung" width="56" height="56" patternUnits="userSpaceOnUse">
-                        <g stroke="#004b87" stroke-width="1.25" fill="none">
-                            <ellipse cx="28" cy="14" rx="8" ry="13" />
-                            <ellipse cx="28" cy="42" rx="8" ry="13" />
-                            <ellipse cx="14" cy="28" rx="13" ry="8" />
-                            <ellipse cx="42" cy="28" rx="13" ry="8" />
-                            <ellipse cx="28" cy="14" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
-                            <ellipse cx="28" cy="42" rx="4.5" ry="8" stroke-dasharray="2 1.5" />
-                            <ellipse cx="14" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
-                            <ellipse cx="42" cy="28" rx="8" ry="4.5" stroke-dasharray="2 1.5" />
-                            <ellipse cx="0" cy="0" rx="8" ry="13" />
-                            <ellipse cx="56" cy="0" rx="8" ry="13" />
-                            <ellipse cx="0" cy="56" rx="8" ry="13" />
-                            <ellipse cx="56" cy="56" rx="8" ry="13" />
-                        </g>
-                        <circle cx="28" cy="28" r="2.5" fill="#ea580c" />
-                        <circle cx="0" cy="0" r="2" fill="#ea580c" />
-                        <circle cx="56" cy="0" r="2" fill="#ea580c" />
-                        <circle cx="0" cy="56" r="2" fill="#ea580c" />
-                        <circle cx="56" cy="56" r="2" fill="#ea580c" />
-                        <!-- Interlocking Mlinjon Diamonds -->
-                        <polygon points="28,2 30,5 28,8 26,5" fill="#004b87" />
-                        <polygon points="28,48 30,51 28,54 26,51" fill="#004b87" />
-                        <polygon points="2,28 5,30 8,28 5,26" fill="#004b87" />
-                        <polygon points="48,28 51,30 54,28 51,26" fill="#004b87" />
-                    </pattern>
-                </defs>
-                <rect width="100%" height="100%" fill="url(#patNetworkKawung)" />
-            </svg>
-        </div>
+    <section id="network" class="py-14 sm:py-16 bg-slate-50/90 text-slate-800 border-t border-slate-200/60 relative overflow-hidden">
+        <!-- Unified Phase-Synchronized Batik Kawung Maritim Layer -->
+        <div class="cidp-batik-layer" aria-hidden="true"></div>
 
         <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14">
             
@@ -1662,7 +1560,8 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- 9. ABOUT / CALL TO ACTION (Vibrant Orange & Blue Corporate Banner)  -->
     <!-- =================================================================== -->
     <section id="about" class="py-12 sm:py-14 bg-gradient-to-r from-orange-600 via-orange-500 to-[#0170b9] text-white relative overflow-hidden shadow-inner">
-        <div class="absolute inset-0 opacity-10 bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <!-- Unified Phase-Synchronized Batik Kawung Maritim Layer (Dark Theme) -->
+        <div class="cidp-batik-layer-dark" aria-hidden="true"></div>
         
         <div class="relative z-10 w-full max-w-[1840px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 2xl:px-14 text-center">
             <span class="inline-flex items-center gap-2 bg-white/20 text-white text-[10px] font-bold uppercase tracking-widest px-3.5 py-1 rounded-full mb-4 backdrop-blur-sm">

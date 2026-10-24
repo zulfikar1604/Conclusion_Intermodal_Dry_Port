@@ -15,13 +15,9 @@
         
         <!-- LEFT: Toggles & Clean Unified Breadcrumbs -->
         <div class="flex items-center min-w-0 mr-2 sm:mr-3 xl:mr-4 flex-shrink">
-            <!-- Mobile Toggle -->
+            <!-- Mobile Toggle (Hanya tampil di layar kecil; di desktop cukup 1 tombol collapse di dalam Sidebar) -->
             <button onclick="toggleSidebar()" class="mr-2 sm:mr-3 p-1.5 text-slate-500 hover:text-orange-600 focus:outline-none md:hidden transition-colors rounded-lg hover:bg-slate-100 cursor-pointer flex-shrink-0" title="Buka Menu Navigasi">
                 <i class="fa-solid fa-bars text-base"></i>
-            </button>
-            <!-- Desktop Toggle -->
-            <button onclick="toggleDesktopSidebar()" class="mr-2 sm:mr-2.5 p-1.5 text-slate-500 hover:text-orange-600 focus:outline-none hidden md:block transition-colors rounded-lg hover:bg-slate-100 cursor-pointer flex-shrink-0" title="Kecilkan / Perbesar Sidebar">
-                <i class="fa-solid fa-bars-staggered text-sm" id="desktopToggleIcon"></i>
             </button>
             
             <!-- Clean Unified Breadcrumbs -->
@@ -168,7 +164,6 @@
 
                     <!-- Notification Feed List -->
                     <div id="notifFeedList" class="max-h-80 overflow-y-auto divide-y divide-gray-100">
-                        <!-- Item 1: Intermodal -->
                         <a href="dashboard.php?page=intermodal" data-category="logistics" class="notif-item notif-feed-item p-3.5 flex items-start space-x-3 hover:bg-blue-50/40 transition group bg-blue-50/20">
                             <div class="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-train text-xs"></i>
@@ -185,7 +180,6 @@
                             </div>
                         </a>
 
-                        <!-- Item 2: Gate Management -->
                         <a href="dashboard.php?page=gate" data-category="logistics" class="notif-item notif-feed-item p-3.5 flex items-start space-x-3 hover:bg-orange-50/40 transition group bg-orange-50/20">
                             <div class="w-8 h-8 rounded-xl bg-orange-100 text-orange-700 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-truck text-xs"></i>
@@ -196,13 +190,12 @@
                                     <span class="w-1.5 h-1.5 rounded-full bg-orange-500 notif-unread-dot flex-shrink-0"></span>
                                 </div>
                                 <p class="text-gray-600 text-[11px] mt-0.5 leading-relaxed">
-                                    Peti kemas MSKU9182374 lolos timbangan VGM 28,4 Ton & diverifikasi RFID UHF.
+                                    Peti kemas MSKU9182374 lolos timbangan VGM 28,4 Ton &amp; diverifikasi RFID UHF.
                                 </p>
                                 <span class="text-[10px] text-gray-400 mt-1 block font-mono">14 menit lalu &bull; Gate In 02</span>
                             </div>
                         </a>
 
-                        <!-- Item 3: Reefer Monitor -->
                         <a href="dashboard.php?page=reefer" data-category="iot" class="notif-item notif-feed-item p-3.5 flex items-start space-x-3 hover:bg-orange-50/40 transition group">
                             <div class="w-8 h-8 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-snowflake text-xs"></i>
@@ -219,7 +212,6 @@
                             </div>
                         </a>
 
-                        <!-- Item 4: Customs SPPB -->
                         <a href="dashboard.php?page=customs" data-category="customs" class="notif-item notif-feed-item p-3.5 flex items-start space-x-3 hover:bg-orange-50/40 transition group">
                             <div class="w-8 h-8 rounded-xl bg-indigo-100 text-indigo-700 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover:scale-105 transition-transform">
                                 <i class="fa-solid fa-shield-halved text-xs"></i>
@@ -292,7 +284,7 @@
                         </div>
                     </div>
 
-                    <!-- Quick Role Switcher (Simulasi Evaluator ITL Trisakti) -->
+                    <!-- Quick Role Switcher -->
                     <div class="p-3 bg-slate-50 border-b border-gray-100">
                         <span class="text-[10px] font-bold text-gray-500 uppercase tracking-wider block mb-1.5">
                             <i class="fa-solid fa-users-gear mr-1 text-orange-500"></i> <?= __('profile_eval_mode', 'Mode Simulasi Hak Akses') ?>
@@ -375,17 +367,6 @@
 <!-- ======================================================================= -->
 <div id="logoutConfirmModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3.5">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-[360px] overflow-hidden text-slate-800 relative animate-fadeIn">
-        <!-- Subtle Batik Kawung Rosette Watermark in Modal Background -->
-        <div class="absolute -right-6 -bottom-6 w-36 h-36 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
-            <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
-                <ellipse cx="50" cy="22" rx="16" ry="24" />
-                <ellipse cx="50" cy="78" rx="16" ry="24" />
-                <ellipse cx="22" cy="50" rx="24" ry="16" />
-                <ellipse cx="78" cy="50" rx="24" ry="16" />
-                <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
-            </svg>
-        </div>
-
         <!-- Top Header Band -->
         <div class="bg-gradient-to-r from-[#002f5e] via-[#0170b9] to-orange-600 px-4.5 py-3 text-white flex items-center justify-between">
             <div class="flex items-center space-x-2">

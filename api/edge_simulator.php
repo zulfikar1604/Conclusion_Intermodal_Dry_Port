@@ -14,17 +14,7 @@ $action = $_GET['action'] ?? ($_POST['action'] ?? 'status');
 $step_id = (int)($_GET['step_id'] ?? ($_POST['step_id'] ?? 1));
 
 function post_local_event($event_type, $payload, $source = 'EDGE-SIMULATOR') {
-    $ch = curl_init();
-    $url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . ($_SERVER['HTTP_HOST'] ?? 'localhost') . dirname($_SERVER['PHP_SELF']) . '/ingest_event.php';
-    
-    $post_data = json_encode([
-        'event_id' => 'SIM-' . date('YmdHis') . '-' . substr(uniqid(), -4),
-        'source_device' => $source,
-        'event_type' => $event_type,
-        'payload' => $payload
-    ]);
-
-    // Internal direct dispatch if cURL is avoided
+    // Internal direct dispatch
     $_POST = [
         'event_id' => 'SIM-' . date('YmdHis') . '-' . substr(uniqid(), -4),
         'source_device' => $source,
@@ -72,11 +62,11 @@ switch ($action) {
                 ], 'WEIGHBRIDGE-80T');
                 break;
             case 3:
-                // Move RS-02 to truck area first
+                // Move RS-02 to Truck Transfer Lane at North of Block B
                 post_local_event('EQUIPMENT_MOVE', [
                     'equipment_id' => 'RS-02',
-                    'gps_x' => 120.0,
-                    'gps_y' => 90.0,
+                    'gps_x' => 480.0,
+                    'gps_y' => 172.0,
                     'fuel_percent' => 74,
                     'status' => 'operating'
                 ], 'KALMAR-CANBUS-RS02');
@@ -88,11 +78,11 @@ switch ($action) {
                 ], 'KALMAR-DRG450-RS02');
                 break;
             case 4:
-                // Move RS-02 to Block B
+                // Move RS-02 into Block B (B-08-03-02) to stack the container
                 post_local_event('EQUIPMENT_MOVE', [
                     'equipment_id' => 'RS-02',
-                    'gps_x' => 350.0,
-                    'gps_y' => 300.0,
+                    'gps_x' => 490.0,
+                    'gps_y' => 250.0,
                     'fuel_percent' => 73,
                     'status' => 'operating'
                 ], 'KALMAR-CANBUS-RS02');
@@ -131,10 +121,31 @@ switch ($action) {
         ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         break;
 
+    case 'move_equipment':
+        $eq_id = $_GET['equipment_id'] ?? ($_POST['equipment_id'] ?? 'RS-02');
+        $gx = (float)($_GET['gps_x'] ?? ($_POST['gps_x'] ?? 350.0));
+        $gy = (float)($_GET['gps_y'] ?? ($_POST['gps_y'] ?? 300.0));
+        $status = $_GET['status'] ?? ($_POST['status'] ?? 'operating');
+        $res = post_local_event('EQUIPMENT_MOVE', [
+            'equipment_id' => $eq_id,
+            'gps_x' => $gx,
+            'gps_y' => $gy,
+            'fuel_percent' => 78,
+            'status' => $status
+        ], 'KALMAR-CANBUS-' . $eq_id);
+        echo json_encode([
+            'success' => true,
+            'action' => 'move_equipment',
+            'equipment_id' => $eq_id,
+            'gps_x' => $gx,
+            'gps_y' => $gy,
+            'result' => $res
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        break;
+
     case 'auto_cycle':
         $results = [];
         for ($i = 1; $i <= 6; $i++) {
-            // trigger step
             $_GET['step_id'] = $i;
             ob_start();
             $action = 'step';
@@ -153,8 +164,9 @@ switch ($action) {
         try {
             $pdo->exec("UPDATE equipment SET gps_x = 350.0, gps_y = 300.0, status = 'idle', current_container = NULL WHERE equipment_id = 'RS-02'");
             $pdo->exec("UPDATE equipment SET gps_x = 150.0, gps_y = 200.0, status = 'idle', current_container = NULL WHERE equipment_id = 'RS-01'");
-            $pdo->exec("UPDATE equipment SET gps_x = 500.0, gps_y = 150.0, status = 'idle', current_container = NULL WHERE equipment_id = 'RS-03'");
-            $pdo->exec("UPDATE trucks SET status = 'gate_out' WHERE license_plate = 'B 9812 UIX'");
+            $pdo->exec("UPDATE equipment SET gps_x = 720.0, gps_y = 240.0, status = 'idle', current_container = NULL WHERE equipment_id = 'RS-03'");
+            $pdo->exec("UPDATE equipment SET gps_x = 600.0, gps_y = 600.0, status = 'idle', current_container = NULL WHERE equipment_id = 'RTG-01'");
+            $pdo->exec("UPDATE trucks SET status = 'gate_out', weight_gross = 0 WHERE license_plate = 'B 9812 UIX'");
             get_live_twin_state($pdo, true);
             echo json_encode(['success' => true, 'message' => 'Simulation state reset to default benchmark.']);
         } catch (Exception $e) {
@@ -164,6 +176,6 @@ switch ($action) {
 
     default:
         http_response_code(400);
-        echo json_encode(['error' => 'Unknown action. Use "status", "step", "auto_cycle", or "reset".']);
+        echo json_encode(['error' => 'Unknown action. Use "status", "step", "move_equipment", "auto_cycle", or "reset".']);
         break;
 }

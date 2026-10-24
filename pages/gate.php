@@ -848,7 +848,7 @@ foreach ($hardware_list as $item) {
                 <i class="fa-solid fa-diagram-project text-[#0170b9] mr-2"></i>
                 Alur Otomasi Gerbang Masuk (Inbound Lane 1)
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
+            <div class="cidp-flow grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
                 <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
                     <span class="text-[10px] font-extrabold text-blue-600 bg-blue-100/70 px-2 py-0.5 rounded-md inline-block mb-2">TAHAP 1</span>
                     <h3 class="text-xs font-bold text-gray-900">Kamera ANPR</h3>

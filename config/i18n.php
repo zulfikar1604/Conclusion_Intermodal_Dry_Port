@@ -28,11 +28,13 @@ if (!isset($current_lang)) {
 $GLOBALS['cidp_lang_dict'] = [
     'id' => [
         // Clusters
-        'cluster_executive' => 'Executive & Map',
-        'cluster_tms'       => 'TMS (Transport)',
-        'cluster_yms'       => 'YMS (Yard)',
-        'cluster_wms'       => 'WMS (Warehouse / CFS)',
-        'cluster_finance'   => 'Compliance & Finance',
+        'cluster_executive' => 'Ringkasan & Telemetri',
+        'cluster_spatial'   => 'Peta & Simulasi Spasial',
+        'cluster_tms'       => 'TMS • Transportasi',
+        'cluster_yms'       => 'YMS • Lapangan Yard',
+        'cluster_wms'       => 'WMS • Gudang CFS',
+        'cluster_finance'   => 'Regulasi & Finansial',
+        'cluster_system'    => 'Sistem & Konfigurasi',
 
         // Menu Items
         'menu_beranda'   => 'Cockpit Eksekutif',
@@ -179,11 +181,13 @@ $GLOBALS['cidp_lang_dict'] = [
 
     'en' => [
         // Clusters
-        'cluster_executive' => 'Executive & Map',
-        'cluster_tms'       => 'TMS (Transport)',
-        'cluster_yms'       => 'YMS (Yard)',
-        'cluster_wms'       => 'WMS (Warehouse / CFS)',
+        'cluster_executive' => 'Executive & Telemetry',
+        'cluster_spatial'   => 'Spatial Map & 3D Sim',
+        'cluster_tms'       => 'TMS • Transport',
+        'cluster_yms'       => 'YMS • Container Yard',
+        'cluster_wms'       => 'WMS • CFS Warehouse',
         'cluster_finance'   => 'Compliance & Finance',
+        'cluster_system'    => 'System & Settings',
 
         // Menu Items
         'menu_beranda'   => 'Executive Cockpit',
@@ -363,30 +367,32 @@ function get_localized_menu_clusters($lang = null): array {
 
     return [
         __('cluster_executive') => [
-            'beranda'   => ['icon' => 'fa-house', 'label' => __('menu_beranda')],
-            'twin'      => ['icon' => 'fa-satellite-dish', 'label' => __('menu_twin')],
-            'denah'     => ['icon' => 'fa-map-location-dot', 'label' => __('menu_denah')],
-            'simulator' => ['icon' => 'fa-cube', 'label' => __('menu_simulator')]
+            'beranda'   => ['icon' => 'fa-gauge-high', 'label' => __('menu_beranda'), 'zone' => 'EXEC'],
+            'twin'      => ['icon' => 'fa-tower-broadcast', 'label' => __('menu_twin'), 'zone' => 'EXEC']
+        ],
+        __('cluster_spatial') => [
+            'denah'     => ['icon' => 'fa-map-location-dot', 'label' => __('menu_denah'), 'zone' => 'GIS'],
+            'simulator' => ['icon' => 'fa-vr-cardboard', 'label' => __('menu_simulator'), 'zone' => 'GIS']
         ],
         __('cluster_tms') => [
-            'gate'       => ['icon' => 'fa-door-open', 'label' => __('menu_gate')],
-            'trucking'   => ['icon' => 'fa-truck-front', 'label' => __('menu_trucking')],
-            'intermodal' => ['icon' => 'fa-train-subway', 'label' => __('menu_intermodal')]
+            'gate'       => ['icon' => 'fa-archway', 'label' => __('menu_gate'), 'zone' => 'TMS'],
+            'trucking'   => ['icon' => 'fa-truck-front', 'label' => __('menu_trucking'), 'zone' => 'TMS'],
+            'intermodal' => ['icon' => 'fa-train-subway', 'label' => __('menu_intermodal'), 'zone' => 'TMS']
         ],
         __('cluster_yms') => [
-            'yard'      => ['icon' => 'fa-cubes', 'label' => __('menu_yard')],
-            'alat'      => ['icon' => 'fa-dolly', 'label' => __('menu_alat')],
-            'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => __('menu_kontainer')],
-            'reefer'    => ['icon' => 'fa-snowflake', 'label' => __('menu_reefer')]
+            'yard'      => ['icon' => 'fa-layer-group', 'label' => __('menu_yard'), 'zone' => 'YMS'],
+            'alat'      => ['icon' => 'fa-dolly', 'label' => __('menu_alat'), 'zone' => 'YMS'],
+            'kontainer' => ['icon' => 'fa-boxes-stacked', 'label' => __('menu_kontainer'), 'zone' => 'YMS'],
+            'reefer'    => ['icon' => 'fa-snowflake', 'label' => __('menu_reefer'), 'zone' => 'YMS']
         ],
         __('cluster_wms') => [
-            'cfs' => ['icon' => 'fa-warehouse', 'label' => __('menu_cfs')]
+            'cfs'     => ['icon' => 'fa-warehouse', 'label' => __('menu_cfs'), 'zone' => 'WMS'],
+            'scanner' => ['icon' => 'fa-qrcode', 'label' => __('menu_scanner'), 'zone' => 'WMS']
         ],
         __('cluster_finance') => [
-            'customs'  => ['icon' => 'fa-shield-halved', 'label' => __('menu_customs')],
-            'billing'  => ['icon' => 'fa-file-invoice-dollar', 'label' => __('menu_billing')],
-            'scanner'  => ['icon' => 'fa-barcode', 'label' => __('menu_scanner')],
-            'settings' => ['icon' => 'fa-sliders', 'label' => __('menu_settings')]
+            'customs'  => ['icon' => 'fa-shield-halved', 'label' => __('menu_customs'), 'zone' => 'ERP'],
+            'billing'  => ['icon' => 'fa-file-invoice-dollar', 'label' => __('menu_billing'), 'zone' => 'ERP'],
+            'settings' => ['icon' => 'fa-sliders', 'label' => __('menu_settings'), 'zone' => 'SYS']
         ]
     ];
 }

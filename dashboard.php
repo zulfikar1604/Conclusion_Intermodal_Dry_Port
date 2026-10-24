@@ -47,7 +47,7 @@ try {
     }
 
     // Reefer containers count
-    $rf_stmt = $pdo->query("SELECT COUNT(*) FROM containers WHERE cargo_type LIKE '%reefer%' OR size_type LIKE '%R%' OR block = 'R' OR block = 'REEFER'");
+    $rf_stmt = $pdo->query("SELECT COUNT(*) FROM containers WHERE LOWER(cargo_type) LIKE '%reefer%' OR UPPER(block) IN ('R', 'REEFER')");
     $db_stats['reefer_count'] = (int)$rf_stmt->fetchColumn();
 
     // Customs clearance stats
@@ -206,9 +206,8 @@ $tanggal_sekarang = get_localized_date($current_lang);
         /* Motif Batik Kawung Maritim global: menempel di container scroll <main>,
            sehingga menutupi seluruh area (termasuk gutter/padding) tanpa celah polos. */
         .cdp-batik-canvas {
-            background-color: #f4f8fc;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg opacity='0.11'%3E%3Cg stroke='%23004b87' stroke-width='1.25' fill='none'%3E%3Cellipse cx='28' cy='14' rx='8' ry='13'/%3E%3Cellipse cx='28' cy='42' rx='8' ry='13'/%3E%3Cellipse cx='14' cy='28' rx='13' ry='8'/%3E%3Cellipse cx='42' cy='28' rx='13' ry='8'/%3E%3Cellipse cx='28' cy='14' rx='4.5' ry='8' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='28' cy='42' rx='4.5' ry='8' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='14' cy='28' rx='8' ry='4.5' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='42' cy='28' rx='8' ry='4.5' stroke-dasharray='2 1.5'/%3E%3Cellipse cx='0' cy='0' rx='8' ry='13'/%3E%3Cellipse cx='56' cy='0' rx='8' ry='13'/%3E%3Cellipse cx='0' cy='56' rx='8' ry='13'/%3E%3Cellipse cx='56' cy='56' rx='8' ry='13'/%3E%3C/g%3E%3Cg fill='%23ea580c'%3E%3Ccircle cx='28' cy='28' r='2.5'/%3E%3Ccircle cx='0' cy='0' r='2'/%3E%3Ccircle cx='56' cy='0' r='2'/%3E%3Ccircle cx='0' cy='56' r='2'/%3E%3Ccircle cx='56' cy='56' r='2'/%3E%3C/g%3E%3Cg fill='%23004b87'%3E%3Cpolygon points='28,2 30,5 28,8 26,5'/%3E%3Cpolygon points='28,48 30,51 28,54 26,51'/%3E%3Cpolygon points='2,28 5,30 8,28 5,26'/%3E%3Cpolygon points='48,28 51,30 54,28 51,26'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            background-repeat: repeat;
+            background-color: #f8fafc;
+            background-image: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
             background-attachment: local;
         }
         /* ================================================================
@@ -254,6 +253,9 @@ $tanggal_sekarang = get_localized_date($current_lang);
     <!-- CIDP Official Print Engine & Digital Stamp System -->
     <link rel="stylesheet" href="assets/css/print-document.css">
     <script src="assets/js/print-engine.js"></script>
+    <!-- CIDP Executive UX Layer (global: keterbacaan, kontras, tema grafik, ringkasan status) -->
+    <link rel="stylesheet" href="assets/css/executive-ux.css?v=20261020c">
+    <script src="assets/js/executive-ux.js?v=20261020b"></script>
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
@@ -338,7 +340,10 @@ $tanggal_sekarang = get_localized_date($current_lang);
         <!-- Main Content Scrollable Area (Fluid Edge-to-Edge Container) -->
         <main class="flex-1 overflow-x-hidden overflow-y-auto cdp-batik-canvas relative">
             <div class="p-3 sm:p-4 lg:p-5 xl:p-6 w-full space-y-3.5 sm:space-y-4">
-                
+
+                <!-- Strip Status Eksekutif: "Apakah operasi sehat?" (tampil di semua halaman) -->
+                <?php include_once __DIR__ . '/components/exec_status.php'; ?>
+
                 <?php if ($page === 'beranda'): ?>
                     <?php include_once __DIR__ . '/pages/beranda.php'; ?>
                 <?php elseif ($page === 'twin'): ?>
@@ -394,6 +399,6 @@ $tanggal_sekarang = get_localized_date($current_lang);
     </div>
 
     <!-- Dashboard UI & Live Clock Scripts -->
-    <script src="assets/js/dashboard.js"></script>
+    <script src="assets/js/dashboard.js?v=20261020b"></script>
 </body>
 </html>

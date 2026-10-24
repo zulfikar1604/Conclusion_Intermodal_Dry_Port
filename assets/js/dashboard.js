@@ -26,24 +26,14 @@ function toggleSidebar() {
 
 function toggleDesktopSidebar() {
     const sidebar = document.getElementById('sidebar');
-    const desktopToggleIcon = document.getElementById('desktopToggleIcon');
-    const logoTexts = document.querySelectorAll('.logo-text');
     if (!sidebar) return;
-
-    isSidebarCollapsedDesktop = !isSidebarCollapsedDesktop;
-    if (isSidebarCollapsedDesktop) {
-        sidebar.classList.remove('w-64', 'md:w-56', 'w-56');
-        sidebar.classList.add('w-16');
-        logoTexts.forEach(el => el.classList.add('hidden'));
-        if (desktopToggleIcon) desktopToggleIcon.classList.replace('fa-bars-staggered', 'fa-bars');
-    } else {
-        sidebar.classList.remove('w-16');
-        sidebar.classList.add('w-64', 'md:w-56');
-        if (desktopToggleIcon) desktopToggleIcon.classList.replace('fa-bars', 'fa-bars-staggered');
-        setTimeout(() => {
-            logoTexts.forEach(el => el.classList.remove('hidden'));
-        }, 200);
+    const nextState = !sidebar.classList.contains('is-collapsed');
+    if (typeof window.applySidebarCollapsedState === 'function') {
+        window.applySidebarCollapsedState(nextState);
+        return;
     }
+    isSidebarCollapsedDesktop = nextState;
+    sidebar.classList.toggle('is-collapsed', nextState);
 }
 
 // =============================================================================

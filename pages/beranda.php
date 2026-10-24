@@ -58,451 +58,431 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
     <div class="relative z-10 space-y-4">
 
         <!-- ======================================================================= -->
-        <!-- 1. TOP EXECUTIVE COCKPIT BAR (UNIFIED BOARDROOM HEADER + OPSI A & D)   -->
+        <!-- 1. TOP EXECUTIVE COCKPIT BAR (DECLUTTERED & FOCUSED BOARDROOM HEADER)  -->
         <!-- ======================================================================= -->
-        <div class="bg-white/95 backdrop-blur-md rounded-xl px-4 py-3 shadow-2xs border border-slate-200/90 relative overflow-hidden flex flex-col xl:flex-row items-start xl:items-center justify-between gap-3 transition-all">
-            <!-- Subtle Luxury Batik Kawung Rosette Watermark -->
-            <div class="absolute -right-6 -top-6 w-40 h-40 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
-                <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
-                    <ellipse cx="50" cy="22" rx="16" ry="24" />
-                    <ellipse cx="50" cy="78" rx="16" ry="24" />
-                    <ellipse cx="22" cy="50" rx="24" ry="16" />
-                    <ellipse cx="78" cy="50" rx="24" ry="16" />
-                    <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
-                    <circle cx="50" cy="50" r="14" stroke="#004b87" stroke-width="1" stroke-dasharray="2 2" />
-                </svg>
-            </div>
-
-            <div class="flex items-center gap-3 relative z-10">
-                <div class="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200/80 text-orange-600 flex items-center justify-center text-sm flex-shrink-0 shadow-2xs">
+        <div class="bg-white rounded-xl px-4 py-3 shadow-2xs border border-slate-200 relative flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center text-base flex-shrink-0">
                     <i class="fa-solid fa-tower-observation"></i>
                 </div>
-                <div>
-                    <div class="flex items-center gap-2 flex-wrap">
-                        <h1 class="text-sm sm:text-[15px] font-extrabold text-slate-900 tracking-tight leading-tight">
-                            <?= __('tower_title', 'Enterprise Executive Control Tower &bull; CIDP 35 Hectares') ?>
+                <div class="min-w-0">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <h1 class="text-base sm:text-[17px] font-extrabold text-slate-900 tracking-tight leading-tight">
+                            <?= ($current_lang === 'en') ? 'Executive Control Tower — CIDP 35 Ha' : 'Control Tower Eksekutif — CIDP 35 Ha' ?>
                         </h1>
-                        <span class="text-[9px] font-extrabold tracking-wider uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full flex items-center gap-1.5 shadow-2xs">
-                            <span id="livePulseIndicator" class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                            <?= __('badge_live_35ha', 'LIVE 35 HA') ?>
-                        </span>
-                        <span class="text-[9px] font-bold tracking-wider uppercase bg-blue-50 text-[#0170b9] border border-blue-200 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-satellite-dish text-[8.5px]"></i>
-                            <?= __('badge_op_sync', 'DPMS 3-FLOW SYNC') ?>
-                        </span>
-                        <span class="text-[9px] font-bold tracking-wider uppercase bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-2xs">
-                            <i class="fa-solid fa-network-wired text-[8.5px]"></i>
+                        <span class="text-[11px] font-extrabold tracking-wide uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-0.5 rounded-full inline-flex items-center gap-1.5">
+                            <span id="livePulseIndicator" class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
                             <span id="badgeScadaUptime">SCADA <?= $kpi['scada_uptime'] ?>%</span>
                         </span>
                     </div>
-                    <div class="text-[9.5px] font-semibold text-slate-500 mt-0.5 flex items-center gap-1.5 flex-wrap">
-                        <span class="text-orange-600 font-bold">Conclusion Intermodal DPMS</span> &bull; 
-                        <span><?= ($current_lang === 'en') ? 'Physical, Information & Financial Flow Orchestration &bull; Pasoso Rail Siding &bull; CEISA 4.0 &bull; Odoo 17 ERP' : 'Orkestrasi 3 Aliran (Fisik, Informasi, Finansial) &bull; Rel Siding Pasoso &bull; CEISA 4.0 &bull; Odoo 17 ERP' ?></span>
-                    </div>
+                    <p class="text-xs font-medium text-slate-600 mt-0.5 truncate">
+                        <?= ($current_lang === 'en')
+                            ? 'Real-time physical, customs (CEISA 4.0), and financial (Odoo ERP) terminal operations'
+                            : 'Pemantauan terpadu operasional lapangan, kepabeanan CEISA 4.0, dan finansial terminal' ?>
+                    </p>
                 </div>
             </div>
 
-            <!-- Cockpit Telemetry Strip, Live Auto-Sync Toggle & Executive Briefing Actions -->
-            <div class="flex items-center gap-2 flex-wrap text-[10.5px] text-slate-600 w-full xl:w-auto justify-between xl:justify-end relative z-10">
-                
-                <!-- Clock Pill -->
-                <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-slate-700">
-                    <i class="fa-regular fa-calendar text-slate-400 text-[10px]"></i>
-                    <span class="font-semibold text-slate-700"><?= $date_display ?></span>
-                    <span class="text-slate-300">&bull;</span>
-                    <i class="fa-solid fa-clock text-orange-500 text-[9.5px]"></i>
+            <!-- Right: Calm Time/Sync Pill + 1 Primary Button + Secondary Export Menu -->
+            <div class="flex items-center gap-2.5 flex-wrap w-full lg:w-auto justify-between lg:justify-end">
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-xs text-slate-700">
+                    <span class="font-semibold text-slate-600 hidden sm:inline"><?= $date_display ?> &bull;</span>
                     <span id="berandaLiveClock" class="font-extrabold text-slate-900 font-mono">--:--:-- WIB</span>
-                </div>
-
-                <!-- OPSI A: Live Auto-Sync Polling Control Pill -->
-                <div class="flex items-center gap-1.5 bg-emerald-50/70 border border-emerald-200 rounded-lg px-2 py-1">
-                    <button type="button" id="btnToggleAutoSync" onclick="toggleBerandaAutoSync()" class="flex items-center gap-1.5 text-[10px] font-extrabold text-emerald-800 cursor-pointer" title="Aktifkan/Matikan Sinkronisasi Real-Time Otomatis (15 Detik)">
+                    <span class="text-slate-300">|</span>
+                    <button type="button" id="btnToggleAutoSync" onclick="toggleBerandaAutoSync()" class="inline-flex items-center gap-1.5 font-bold text-emerald-700 cursor-pointer" title="Aktifkan/Matikan Sinkronisasi Otomatis (15 Detik)">
                         <span id="autoSyncDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span>Auto-Sync:</span>
-                        <span id="autoSyncCountdown" class="font-mono bg-white px-1.5 py-0.2 rounded border border-emerald-200 text-emerald-700">15s</span>
+                        <span id="autoSyncCountdown" class="font-mono text-[11px]">15s</span>
                     </button>
-                    <span class="text-emerald-300">|</span>
-                    <button type="button" onclick="fetchLiveBerandaTelemetry(true)" class="text-emerald-700 hover:text-[#0170b9] transition cursor-pointer px-1" title="Sinkronisasi Telemetri Sekarang">
-                        <i id="syncSpinnerIcon" class="fa-solid fa-arrows-rotate text-[10px]"></i>
+                    <button type="button" onclick="fetchLiveBerandaTelemetry(true)" class="text-slate-500 hover:text-[#0170b9] transition cursor-pointer" title="Sinkronisasi Sekarang">
+                        <i id="syncSpinnerIcon" class="fa-solid fa-arrows-rotate text-[11px]"></i>
                     </button>
                 </div>
 
-                <!-- OPSI D: Dedicated Executive Briefing & Export Actions (Standalone Page Design) -->
-                <div class="flex items-center gap-1.5">
-                    <a href="report_executive.php" target="_blank" class="px-2.5 py-1 bg-[#002f5e] hover:bg-[#0170b9] text-white rounded-lg text-[10.5px] font-extrabold transition flex items-center gap-1.5 shadow-2xs" title="Buka Halaman Dedikasi Laporan Eksekutif Resmi A4 (Bukan Screenshot)">
-                        <i class="fa-solid fa-file-shield text-orange-400 text-[10px]"></i>
-                        <span><?= ($current_lang === 'en') ? 'Executive Briefing (A4)' : 'Executive Briefing (A4)' ?></span>
+                <div class="flex items-center gap-2">
+                    <a href="report_executive.php?autoprint=1" target="_blank" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-xs font-extrabold transition inline-flex items-center gap-1.5 shadow-2xs" title="Cetak / Unduh PDF Format Resmi Direksi">
+                        <i class="fa-solid fa-print"></i>
+                        <span><?= ($current_lang === 'en') ? 'Print Official PDF' : 'Cetak Laporan PDF' ?></span>
                     </a>
-                    <a href="report_executive.php?autoprint=1" target="_blank" class="px-2.5 py-1 bg-orange-600 hover:bg-orange-500 text-white rounded-lg text-[10.5px] font-extrabold transition flex items-center gap-1 shadow-2xs" title="Cetak / Unduh PDF Format Resmi Direksi dengan Kop & Stempel Basah">
-                        <i class="fa-solid fa-print text-[9.5px]"></i>
-                        <span><?= ($current_lang === 'en') ? 'Print Official PDF' : 'Cetak PDF Resmi' ?></span>
-                    </a>
-                    <button type="button" onclick="exportBerandaToExcel()" class="px-2 py-1 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 rounded-lg text-[10.5px] font-extrabold transition flex items-center gap-1 shadow-2xs cursor-pointer" title="Unduh Data Konsinyasi & Finansial ke Excel (.XLSX)">
-                        <i class="fa-solid fa-file-excel text-emerald-600 text-[10px]"></i>
-                        <span>XLSX</span>
-                    </button>
+                    <details class="cidp-menu">
+                        <summary class="px-3 py-1.5 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 rounded-lg text-xs font-bold inline-flex items-center gap-1.5 shadow-2xs">
+                            <i class="fa-solid fa-download text-slate-500"></i>
+                            <span><?= ($current_lang === 'en') ? 'Export' : 'Ekspor' ?></span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
+                        </summary>
+                        <div class="cidp-menu__panel">
+                            <a href="report_executive.php" target="_blank">
+                                <i class="fa-solid fa-file-shield text-[#0170b9]"></i>
+                                <div>
+                                    <div>Executive Briefing (A4)</div>
+                                    <span class="hint"><?= ($current_lang === 'en') ? 'Standalone boardroom dossier' : 'Dokumen laporan direksi A4' ?></span>
+                                </div>
+                            </a>
+                            <button type="button" onclick="exportBerandaToExcel(); this.closest('details').removeAttribute('open');">
+                                <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                                <div>
+                                    <div><?= ($current_lang === 'en') ? 'Download Excel (.XLSX)' : 'Unduh Data Excel (.XLSX)' ?></div>
+                                    <span class="hint"><?= ($current_lang === 'en') ? 'Consignment & billing table' : 'Tabel konsinyasi & tagihan' ?></span>
+                                </div>
+                            </button>
+                        </div>
+                    </details>
                 </div>
             </div>
         </div>
 
         <!-- ======================================================================= -->
-        <!-- 2. TOP METRIC ROW (6 UNIFIED KPI CARDS - CLICKABLE DYNAMIC INSTRUMENT) -->
+        <!-- 2. TOP METRIC ROW (6 UNIFIED KPI CARDS - BALANCED & HIGH-CONTRAST)     -->
         <!-- ======================================================================= -->
         <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
             
-            <!-- KPI 1: Yard Stacking -->
-            <div onclick="setBerandaCategoryFilter('dry_yard')" class="cursor-pointer bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-blue-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter kontainer di Stacking Yard Blok A-C">
+            <!-- KPI 1: Yard Stacking (Tahap 3 Alur Multimoda) -->
+            <div id="kpiCard_yard" onclick="setBerandaStageFilter('stage_3')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-blue-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter Tahap 3 (Stacking Yard Blok A-C)">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-[#0170b9] transition"><?= __('kpi_yard_stacking', 'Yard Stacking') ?></span>
-                    <span class="w-6 h-6 rounded-md bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-[#0170b9] transition"><?= __('kpi_yard_stacking', 'Yard Stacking') ?></span>
+                    <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-boxes-stacked"></i>
                     </span>
                 </div>
                 
-                <div class="my-1.5 flex items-baseline justify-between">
+                <div class="my-2 flex items-center justify-between gap-2">
                     <div>
-                        <h3 id="kpiYardVal" class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none"><?= number_format($containers_yard) ?></h3>
-                        <span class="text-[9px] text-slate-400 font-semibold">/ <?= number_format($yard_cap_max) ?> TEU</span>
+                        <h3 id="kpiYardVal" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><?= number_format($containers_yard) ?></h3>
+                        <span class="text-xs text-slate-600 font-semibold mt-1 block">/ <?= number_format($yard_cap_max) ?> TEU</span>
                     </div>
-                    <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="kpiYardRing" class="text-[#0170b9] transition-all duration-500" stroke-dasharray="<?= min(100, (int)$yard_occupancy) ?>, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="kpiYardRing" class="text-[#0170b9] transition-all duration-500" stroke-dasharray="<?= max(10, min(100, (int)$yard_occupancy)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <span id="kpiYardPct" class="absolute text-[8.5px] font-black text-slate-800 font-mono"><?= $yard_occupancy ?>%</span>
+                        <span id="kpiYardPct" class="absolute text-xs font-extrabold text-slate-800 font-mono"><?= $yard_occupancy ?>%</span>
                     </div>
                 </div>
 
-                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px]">
-                    <div class="flex items-center gap-1 text-emerald-600 font-bold">
-                        <i class="fa-solid fa-arrow-trend-up text-[8px]"></i>
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span class="text-emerald-700 font-bold flex items-center gap-1">
+                        <i class="fa-solid fa-arrow-trend-up text-[10px]"></i>
                         <span><?= __('kpi_yard_trend', '+4.2% (24h)') ?></span>
-                    </div>
-                    <span class="text-[8.5px] font-bold text-[#0170b9] opacity-0 group-hover:opacity-100 transition">Filter &rarr;</span>
+                    </span>
+                    <span class="font-semibold text-slate-600">Blok A–C Siaga</span>
                 </div>
             </div>
 
             <!-- KPI 2: Gate Turnaround Time -->
-            <div onclick="setBerandaStageFilter('stage_1')" class="cursor-pointer bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-orange-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter antrean & aktivitas Gerbang ANPR / Timbangan VGM">
+            <div id="kpiCard_gate" onclick="setBerandaStageFilter('stage_1')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-orange-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter antrean & aktivitas Gerbang ANPR / Timbangan VGM">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-[#ea580c] transition"><?= __('kpi_gate_turnaround', 'Gate Turnaround') ?></span>
-                    <span class="w-6 h-6 rounded-md bg-orange-50 text-[#ea580c] border border-orange-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-[#ea580c] transition"><?= __('kpi_gate_turnaround', 'Gate Turnaround') ?></span>
+                    <span class="w-7 h-7 rounded-lg bg-orange-50 text-[#ea580c] border border-orange-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-truck-fast"></i>
                     </span>
                 </div>
 
-                <div class="my-1.5 flex items-baseline justify-between">
+                <div class="my-2 flex items-center justify-between gap-2">
                     <div>
-                        <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiGateVal"><?= $gate_turnaround ?></span> <span class="text-[10px] font-semibold text-slate-400"><?= ($current_lang === 'en') ? 'min' : 'mnt' ?></span></h3>
-                        <span class="text-[9px] text-emerald-600 font-bold"><?= __('kpi_gate_target', '&le; 20m Target INSA') ?></span>
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiGateVal"><?= $gate_turnaround ?></span> <span class="text-xs font-bold text-slate-500"><?= ($current_lang === 'en') ? 'min' : 'mnt' ?></span></h3>
+                        <span class="text-xs text-emerald-700 font-semibold mt-1 block"><?= __('kpi_gate_target', 'Target &le; 20 mnt') ?></span>
                     </div>
-                    <div class="relative w-11 h-9 flex-shrink-0 flex flex-col items-center justify-end">
-                        <svg class="w-11 h-7" viewBox="0 0 36 20">
-                            <path d="M 4 18 A 14 14 0 0 1 32 18" fill="none" stroke="#f1f5f9" stroke-width="4" stroke-linecap="round"/>
-                            <path d="M 4 18 A 14 14 0 0 1 32 18" fill="none" stroke="#ea580c" stroke-width="4" stroke-dasharray="32, 44" stroke-linecap="round"/>
+                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="text-[#ea580c] transition-all duration-500" stroke-dasharray="91, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <span id="kpiGateGaugeTxt" class="absolute bottom-0 text-[8px] font-black text-orange-600 font-mono"><?= $gate_turnaround ?>m</span>
+                        <span id="kpiGateGaugeTxt" class="absolute text-xs font-extrabold text-orange-700 font-mono"><?= $gate_turnaround ?>m</span>
                     </div>
                 </div>
 
-                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-500">
-                    <span class="font-semibold text-slate-700"><span id="kpiTrucksCount"><?= $total_trucks ?></span> <?= __('kpi_gate_trucks', 'Truk Aktif') ?></span>
-                    <span class="text-emerald-600 font-bold"><?= __('kpi_gate_vbs', 'VBS 98% On-Time') ?></span>
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span class="font-bold text-slate-700"><span id="kpiTrucksCount"><?= $total_trucks ?></span> <?= __('kpi_gate_trucks', 'Truk Aktif') ?></span>
+                    <span class="text-emerald-700 font-bold"><?= __('kpi_gate_vbs', 'VBS 98% Tepat') ?></span>
                 </div>
             </div>
 
             <!-- KPI 3: Siding KA Intermodal -->
-            <div onclick="setBerandaStageFilter('stage_6')" class="cursor-pointer bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-sky-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter kontainer di Jalur Rel Siding KA 2518">
+            <div id="kpiCard_rail" onclick="setBerandaStageFilter('stage_6')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-sky-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter kontainer di Jalur Rel Siding KA 2518">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-[#0170b9] transition"><?= __('kpi_rail_siding', 'Siding KA Intermodal') ?></span>
-                    <span class="w-6 h-6 rounded-md bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-[#0170b9] transition"><?= __('kpi_rail_siding', 'Siding KA Intermodal') ?></span>
+                    <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-train"></i>
                     </span>
                 </div>
 
-                <div class="my-1.5 flex items-baseline justify-between">
+                <div class="my-2 flex items-center justify-between gap-2">
                     <div>
-                        <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiRailVal"><?= $loaded_w ?>/<?= $total_w ?></span> <span class="text-[10px] font-semibold text-slate-400">TEU</span></h3>
-                        <span class="text-[9px] text-[#0170b9] font-bold"><?= __('kpi_rail_sub', 'KA 2518 ke Priok') ?></span>
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiRailVal"><?= $loaded_w ?>/<?= $total_w ?></span> <span class="text-xs font-bold text-slate-500">TEU</span></h3>
+                        <span class="text-xs text-[#0170b9] font-semibold mt-1 block"><?= __('kpi_rail_sub', 'KA 2518 ke Priok') ?></span>
                     </div>
-                    <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="kpiRailRing" class="text-[#0170b9] transition-all duration-500" stroke-dasharray="<?= $siding_pct ?>, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="kpiRailRing" class="text-[#0170b9] transition-all duration-500" stroke-dasharray="<?= max(10, (int)$siding_pct) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <span id="kpiRailPct" class="absolute text-[8.5px] font-black text-slate-800 font-mono"><?= $siding_pct ?>%</span>
+                        <span id="kpiRailPct" class="absolute text-xs font-extrabold text-slate-800 font-mono"><?= $siding_pct ?>%</span>
                     </div>
                 </div>
 
-                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-500">
-                    <span class="font-medium text-slate-600"><?= __('kpi_rail_track', 'Track S-01 (600m)') ?></span>
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span class="font-semibold text-slate-600"><?= __('kpi_rail_track', 'Track S-01 (600m)') ?></span>
                     <span class="font-bold text-orange-600"><?= __('kpi_rail_eta', 'ETA 16:45 WIB') ?></span>
                 </div>
             </div>
 
             <!-- KPI 4: Reefer Cold Chain -->
-            <div onclick="setBerandaStageFilter('stage_5')" class="cursor-pointer bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-cyan-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter kontainer berpendingin Reefer 380V">
+            <div id="kpiCard_reefer" onclick="setBerandaStageFilter('stage_5')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-cyan-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter kontainer berpendingin Reefer 380V">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-cyan-600 transition"><?= __('kpi_reefer_chain', 'Reefer Cold Chain') ?></span>
-                    <span class="w-6 h-6 rounded-md bg-cyan-50 text-[#06b6d4] border border-cyan-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-cyan-700 transition"><?= __('kpi_reefer_chain', 'Reefer Cold Chain') ?></span>
+                    <span class="w-7 h-7 rounded-lg bg-cyan-50 text-cyan-600 border border-cyan-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-snowflake"></i>
                     </span>
                 </div>
 
-                <div class="my-1.5 flex items-baseline justify-between">
+                <div class="my-2 flex items-center justify-between gap-2">
                     <div>
-                        <h3 id="kpiReeferTemp" class="text-lg sm:text-xl font-black text-cyan-600 font-mono tracking-tight leading-none"><?= $reefer_temp ?>&deg;C</h3>
-                        <span class="text-[9px] text-cyan-700 font-bold"><span id="kpiReeferPlugs"><?= $reefer_plugs ?></span> / 300 <?= __('kpi_reefer_plugs', 'Plugs') ?></span>
+                        <h3 id="kpiReeferTemp" class="text-xl sm:text-2xl font-black text-cyan-700 font-mono tracking-tight leading-none"><?= $reefer_temp ?>&deg;C</h3>
+                        <span class="text-xs text-slate-600 font-semibold mt-1 block"><span id="kpiReeferPlugs" class="font-bold text-cyan-800"><?= $reefer_plugs ?></span> / 300 <?= __('kpi_reefer_plugs', 'Steker') ?></span>
                     </div>
-                    <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path id="kpiReeferRing" class="text-cyan-500 transition-all duration-500" stroke-dasharray="<?= min(100, (int)$reefer_pct) ?>, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="kpiReeferRing" class="text-cyan-600 transition-all duration-500" stroke-dasharray="<?= max(12, min(100, (int)$reefer_pct)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <span id="kpiReeferPct" class="absolute text-[8.5px] font-black text-cyan-800 font-mono"><?= $reefer_pct ?>%</span>
+                        <span id="kpiReeferPct" class="absolute text-xs font-extrabold text-cyan-900 font-mono"><?= round($reefer_pct) ?>%</span>
                     </div>
                 </div>
 
-                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px]">
-                    <span class="font-bold text-slate-600"><?= __('kpi_reefer_lora', 'LoRa 868MHz') ?></span>
-                    <span class="text-emerald-600 font-bold"><?= __('kpi_reefer_haccp', 'HACCP 98.8% OK') ?></span>
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span class="font-semibold text-slate-600">Daya 380V Stabil</span>
+                    <span class="text-emerald-700 font-bold"><?= __('kpi_reefer_haccp', 'HACCP 98.8% OK') ?></span>
                 </div>
             </div>
 
             <!-- KPI 5: Bea Cukai CEISA 4.0 -->
-            <div onclick="setBerandaCategoryFilter('customs_hold')" class="cursor-pointer bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-emerald-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter status kepabeanan CEISA 4.0">
+            <div id="kpiCard_customs" onclick="setBerandaCategoryFilter('customs_hold')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-emerald-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter status kepabeanan CEISA 4.0">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-emerald-700 transition"><?= __('kpi_customs_ceisa', 'Bea Cukai CEISA 4.0') ?></span>
-                    <span class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-emerald-700 transition"><?= __('kpi_customs_ceisa', 'Bea Cukai CEISA 4.0') ?></span>
+                    <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-shield-halved"></i>
                     </span>
                 </div>
 
-                <div class="my-1.5 flex items-baseline justify-between">
+                <div class="my-2 flex items-center justify-between gap-2">
                     <div>
-                        <h3 id="kpiCustomsVal" class="text-lg sm:text-xl font-black text-emerald-700 tracking-tight leading-none"><?= number_format($customs_percent, 1) ?>%</h3>
-                        <span class="text-[9px] text-emerald-600 font-bold"><span id="kpiCustomsBox"><?= $customs_cleared ?>/<?= $customs_total ?></span> <?= __('kpi_customs_cleared', 'Box Cleared') ?></span>
+                        <h3 id="kpiCustomsVal" class="text-xl sm:text-2xl font-black text-emerald-700 tracking-tight leading-none"><?= number_format($customs_percent, 1) ?>%</h3>
+                        <span class="text-xs text-slate-600 font-semibold mt-1 block"><span id="kpiCustomsBox" class="font-bold text-emerald-800"><?= $customs_cleared ?>/<?= $customs_total ?></span> <?= __('kpi_customs_cleared', 'Box Rilis') ?></span>
                     </div>
-                    <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path class="text-emerald-500 transition-all duration-500" stroke-dasharray="<?= min(100, (int)$customs_percent) ?>, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path class="text-emerald-500 transition-all duration-500" stroke-dasharray="<?= max(12, min(100, (int)$customs_percent)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <span class="absolute text-[8.5px] font-black text-emerald-800 font-mono"><?= round($customs_percent) ?>%</span>
+                        <span class="absolute text-xs font-extrabold text-emerald-900 font-mono"><?= round($customs_percent) ?>%</span>
                     </div>
                 </div>
 
-                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-500">
-                    <span class="font-semibold text-slate-700"><?= __('kpi_customs_release', 'SPPB Auto Release') ?></span>
-                    <span class="text-emerald-600 font-bold"><?= __('kpi_customs_xray', 'Hi-Co X-Ray OK') ?></span>
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span class="font-semibold text-slate-600"><?= __('kpi_customs_release', 'SPPB Otomatis') ?></span>
+                    <span class="text-emerald-700 font-bold"><?= __('kpi_customs_xray', 'X-Ray 6MeV OK') ?></span>
                 </div>
             </div>
 
             <!-- KPI 6: CFS & Terminal Billing -->
-            <div onclick="setBerandaStageFilter('stage_4')" class="cursor-pointer bg-white rounded-xl p-3 shadow-2xs border border-slate-200/90 hover:border-amber-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter pekerjaan CFS Stripping/Stuffing & Billing">
+            <div id="kpiCard_cfs" onclick="setBerandaStageFilter('stage_4')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-amber-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter pekerjaan CFS Stripping/Stuffing & Billing">
                 <div class="flex items-center justify-between">
-                    <span class="text-[9.5px] font-extrabold uppercase tracking-wider text-slate-500 group-hover:text-amber-600 transition"><?= __('kpi_cfs_billing', 'CFS &amp; Billing') ?></span>
-                    <span class="w-6 h-6 rounded-md bg-amber-50 text-[#f59e0b] border border-amber-100 flex items-center justify-center text-[10px] group-hover:scale-105 transition-transform flex-shrink-0">
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-amber-700 transition"><?= __('kpi_cfs_billing', 'CFS &amp; Billing') ?></span>
+                    <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
                         <i class="fa-solid fa-file-invoice-dollar"></i>
                     </span>
                 </div>
 
-                <div class="my-1.5 flex items-baseline justify-between">
+                <div class="my-2 flex items-center justify-between gap-2">
                     <div>
-                        <h3 class="text-lg sm:text-xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiCfsJobs"><?= $cfs_jobs ?></span> <span class="text-[10px] font-normal text-slate-400"><?= __('kpi_cfs_jobs', 'Jobs') ?></span></h3>
-                        <span class="text-[9px] text-amber-600 font-bold"><?= __('kpi_cfs_ramps', 'Rampa D1-D5 Aktif') ?></span>
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiCfsJobs"><?= $cfs_jobs ?></span><span class="text-sm font-bold text-slate-500">/24 <?= __('kpi_cfs_jobs', 'Job') ?></span></h3>
+                        <span class="text-xs text-amber-700 font-semibold mt-1 block"><?= __('kpi_cfs_ramps', '5 Rampa LCL Aktif') ?></span>
                     </div>
-                    <div class="relative w-10 h-10 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
-                            <path class="text-slate-100" stroke-width="3.5" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
-                            <path class="text-amber-500 transition-all duration-500" stroke-dasharray="<?= $cfs_pct ?>, 100" stroke-width="3.5" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                            <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                            <path id="kpiCfsRing" class="text-amber-500 transition-all duration-500" stroke-dasharray="<?= max(12, min(100, (int)$cfs_pct)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
-                        <span class="absolute text-[8.5px] font-black text-amber-700 font-mono"><?= $cfs_pct ?>%</span>
+                        <span id="kpiCfsPct" class="absolute text-xs font-extrabold text-amber-900 font-mono"><?= $cfs_pct ?>%</span>
                     </div>
                 </div>
 
-                <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px]">
-                    <span class="font-medium text-slate-500"><?= __('kpi_cfs_omzet', 'Omzet Lunas') ?></span>
-                    <span id="kpiBillingPaid" class="text-emerald-700 font-extrabold"><?= ($current_lang === 'en') ? 'Rp ' . number_format($paid_rev / 1000000, 1) . 'M Paid' : 'Rp ' . number_format($paid_rev / 1000000, 1) . 'Jt Paid' ?></span>
+                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                    <span class="font-semibold text-slate-600"><?= __('kpi_cfs_omzet', 'Omzet Lunas') ?></span>
+                    <span id="kpiBillingPaid" class="text-emerald-700 font-extrabold"><?= ($current_lang === 'en') ? 'Rp ' . number_format($paid_rev / 1000000, 1) . 'M Paid' : 'Rp ' . number_format($paid_rev / 1000000, 1) . 'Jt Lunas' ?></span>
                 </div>
             </div>
 
         </div>
 
         <!-- ======================================================================= -->
-        <!-- 3. MULTIMODAL LOGISTICS PIPELINE CONVEYOR RIBBON (INTERACTIVE FILTER)   -->
+        <!-- 3. ALUR LOGISTIK MULTIMODA (6-STAGE CONNECTED FLOW)                     -->
         <!-- ======================================================================= -->
-        <div class="bg-white/95 backdrop-blur-xs rounded-xl p-3 sm:p-4 shadow-2xs border border-slate-200/90 relative overflow-hidden">
-            <div class="absolute -right-8 -bottom-8 w-60 h-32 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
-                <svg width="100%" height="100%" viewBox="0 0 200 100" fill="none" stroke="#004b87" stroke-width="1.6">
-                    <path d="M 0 25 Q 50 10, 100 25 T 200 25" />
-                    <path d="M 0 55 Q 50 40, 100 55 T 200 55" />
-                    <path d="M 0 85 Q 50 70, 100 85 T 200 85" stroke="#ea580c" />
-                    <circle cx="25" cy="25" r="3" fill="#ea580c" />
-                    <circle cx="125" cy="25" r="3" fill="#ea580c" />
-                </svg>
-            </div>
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 mb-2.5 pb-2 border-b border-slate-100 relative z-10">
+        <div class="bg-white rounded-xl p-4 shadow-2xs border border-slate-200 relative">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100">
                 <div>
-                    <h3 class="font-bold text-slate-900 text-xs sm:text-sm flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-[#0170b9] animate-pulse"></span>
-                        <i class="fa-solid fa-arrows-split-up-and-left text-[#0170b9] text-sm"></i>
-                        <span>Multimodal Logistics Pipeline Conveyor Ribbon (Interactive 6-Stage Cross-Filter)</span>
+                    <h3 class="font-extrabold text-slate-900 text-sm sm:text-[15px] flex items-center gap-2">
+                        <i class="fa-solid fa-route text-[#ea580c]"></i>
+                        <span><?= ($current_lang === 'en') ? 'Multimodal Logistics Flow' : 'Alur Logistik Multimoda' ?></span>
                     </h3>
-                    <p class="text-[10.5px] text-slate-400 mt-0.5">Klik tahapan mana saja untuk memfilter log telemetri SCADA dan daftar konsinyasi peti kemas di bawah secara langsung.</p>
+                    <p class="text-xs text-slate-600 mt-0.5">
+                        <?= ($current_lang === 'en')
+                            ? '6-stage operational flow from Gate-In to Rail Siding. Click any stage to filter containers below.'
+                            : 'Urutan 6 tahap operasional dari Gerbang Masuk hingga Siding Kereta Api. Klik tahap untuk memfilter data.' ?>
+                    </p>
                 </div>
                 <div class="flex items-center gap-2">
-                    <button type="button" id="btnResetPipelineFilter" onclick="resetBerandaFilters()" class="hidden text-[9.5px] font-extrabold text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-0.5 rounded-full border border-orange-300 transition cursor-pointer">
-                        <i class="fa-solid fa-filter-circle-xmark mr-1"></i>Reset Filter Tahapan
+                    <button type="button" id="btnResetPipelineFilter" onclick="resetBerandaFilters()" class="hidden text-xs font-extrabold text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1 rounded-full border border-orange-300 transition cursor-pointer">
+                        <i class="fa-solid fa-filter-circle-xmark mr-1"></i>Reset Filter
                     </button>
-                    <span class="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200 flex items-center gap-1 shadow-2xs">
-                        <i class="fa-solid fa-circle-check text-[9px]"></i> Pipeline 100% Active
+                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 inline-flex items-center gap-1.5">
+                        <i class="fa-solid fa-circle-check text-[10px]"></i>
+                        <span><?= ($current_lang === 'en') ? 'All 6 Stages Active' : '6 Tahap Berjalan Normal' ?></span>
                     </span>
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 xl:gap-2.5 relative z-10">
+            <div class="cidp-flow grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 relative z-10">
                 <!-- Stage 1: Gate-In ANPR OCR -->
-                <div id="ribbon_stage_1" onclick="setBerandaStageFilter('stage_1')" class="pipeline-stage-card cursor-pointer group p-2.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative overflow-hidden shadow-2xs">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="w-5 h-5 rounded-md bg-[#0170b9] text-white flex items-center justify-center text-[10px] font-black font-mono">1</span>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-extrabold text-[#0170b9] bg-blue-50 px-1 py-0.2 rounded border border-blue-200 uppercase">Stage 1</span>
-                            <a href="dashboard.php?page=gate" onclick="event.stopPropagation()" class="w-4 h-4 rounded bg-white border border-slate-200 text-slate-400 hover:text-[#0170b9] flex items-center justify-center text-[8px]" title="Buka Modul Gate Automation">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            </a>
-                        </div>
+                <div id="ribbon_stage_1" onclick="setBerandaStageFilter('stage_1')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#0170b9]">
+                            <span class="w-5 h-5 rounded-md bg-[#0170b9] text-white inline-flex items-center justify-center text-[11px] font-black font-mono">1</span>
+                            <span>Tahap 1</span>
+                        </span>
+                        <a href="dashboard.php?page=gate" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-[#0170b9] flex items-center justify-center text-[10px]" title="Buka Modul Gate Automation">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
                     </div>
-                    <div class="space-y-0.5">
-                        <div class="text-[11px] font-bold text-slate-800 group-hover:text-orange-600 transition flex items-center gap-1 truncate">
-                            <i class="fa-solid fa-camera text-[#0170b9] text-[10px]"></i>
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-camera text-[#0170b9]"></i>
                             <span>Gate-In ANPR OCR</span>
                         </div>
-                        <p class="text-[9.5px] text-slate-500">Scan plat &amp; RFID box otomatis</p>
+                        <p class="text-xs text-slate-600 font-medium mt-0.5">Scan plat &amp; RFID box otomatis</p>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-600 font-semibold">
-                        <span>Akurasi: 99.4%</span>
-                        <span class="text-[8px] font-bold text-[#0170b9] group-hover:text-orange-600">Klik Filter</span>
+                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span class="text-slate-700 font-bold">Akurasi 99.4%</span>
+                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
                     </div>
                 </div>
 
                 <!-- Stage 2: Weighbridge SOLAS VGM 80T -->
-                <div id="ribbon_stage_2" onclick="setBerandaStageFilter('stage_2')" class="pipeline-stage-card cursor-pointer group p-2.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative overflow-hidden shadow-2xs">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="w-5 h-5 rounded-md bg-orange-600 text-white flex items-center justify-center text-[10px] font-black font-mono">2</span>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-extrabold text-orange-700 bg-orange-50 px-1 py-0.2 rounded border border-orange-200 uppercase">Stage 2</span>
-                            <a href="dashboard.php?page=gate" onclick="event.stopPropagation()" class="w-4 h-4 rounded bg-white border border-slate-200 text-slate-400 hover:text-orange-600 flex items-center justify-center text-[8px]" title="Buka Modul Timbangan VGM">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            </a>
-                        </div>
+                <div id="ribbon_stage_2" onclick="setBerandaStageFilter('stage_2')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-orange-700">
+                            <span class="w-5 h-5 rounded-md bg-orange-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">2</span>
+                            <span>Tahap 2</span>
+                        </span>
+                        <a href="dashboard.php?page=gate" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 flex items-center justify-center text-[10px]" title="Buka Modul Timbangan VGM">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
                     </div>
-                    <div class="space-y-0.5">
-                        <div class="text-[11px] font-bold text-slate-800 group-hover:text-orange-600 transition flex items-center gap-1 truncate">
-                            <i class="fa-solid fa-weight-scale text-orange-600 text-[10px]"></i>
-                            <span>Weighbridge 80T VGM</span>
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-weight-scale text-orange-600"></i>
+                            <span>Timbangan VGM 80T</span>
                         </div>
-                        <p class="text-[9.5px] text-slate-500">Verifikasi SOLAS IMO Rule</p>
+                        <p class="text-xs text-slate-600 font-medium mt-0.5">Verifikasi berat SOLAS IMO</p>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-600 font-semibold">
-                        <span>Toleransi &plusmn;0.2%</span>
-                        <span class="text-[8px] font-bold text-[#0170b9] group-hover:text-orange-600">Klik Filter</span>
+                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span class="text-slate-700 font-bold">Presisi &plusmn;0.2%</span>
+                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
                     </div>
                 </div>
 
                 <!-- Stage 3: Yard Stacking Blocks A/B/C -->
-                <div id="ribbon_stage_3" onclick="setBerandaStageFilter('stage_3')" class="pipeline-stage-card cursor-pointer group p-2.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative overflow-hidden shadow-2xs">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="w-5 h-5 rounded-md bg-[#0170b9] text-white flex items-center justify-center text-[10px] font-black font-mono">3</span>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-extrabold text-blue-700 bg-blue-50 px-1 py-0.2 rounded border border-blue-200 uppercase">Stage 3</span>
-                            <a href="dashboard.php?page=yard" onclick="event.stopPropagation()" class="w-4 h-4 rounded bg-white border border-slate-200 text-slate-400 hover:text-[#0170b9] flex items-center justify-center text-[8px]" title="Buka Modul Yard Stacking">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            </a>
-                        </div>
+                <div id="ribbon_stage_3" onclick="setBerandaStageFilter('stage_3')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#0170b9]">
+                            <span class="w-5 h-5 rounded-md bg-[#0170b9] text-white inline-flex items-center justify-center text-[11px] font-black font-mono">3</span>
+                            <span>Tahap 3</span>
+                        </span>
+                        <a href="dashboard.php?page=yard" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-[#0170b9] flex items-center justify-center text-[10px]" title="Buka Modul Yard Stacking">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
                     </div>
-                    <div class="space-y-0.5">
-                        <div class="text-[11px] font-bold text-slate-800 group-hover:text-orange-600 transition flex items-center gap-1 truncate">
-                            <i class="fa-solid fa-cubes-stacked text-[#0170b9] text-[10px]"></i>
-                            <span>Yard Stacking A/B/C</span>
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-cubes-stacked text-[#0170b9]"></i>
+                            <span>Stacking Yard A–C</span>
                         </div>
-                        <p class="text-[9.5px] text-slate-500">Reach Stacker Kalmar 45T</p>
+                        <p class="text-xs text-slate-600 font-medium mt-0.5">Reach Stacker Kalmar 45T</p>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-600 font-semibold">
-                        <span><?= number_format($containers_yard) ?> Box Stack</span>
-                        <span class="text-[8px] font-bold text-[#0170b9] group-hover:text-orange-600">Klik Filter</span>
+                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span class="text-slate-700 font-bold"><?= number_format($containers_yard) ?> TEU</span>
+                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
                     </div>
                 </div>
 
                 <!-- Stage 4: CFS Rampa D1-D5 -->
-                <div id="ribbon_stage_4" onclick="setBerandaStageFilter('stage_4')" class="pipeline-stage-card cursor-pointer group p-2.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative overflow-hidden shadow-2xs">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="w-5 h-5 rounded-md bg-orange-600 text-white flex items-center justify-center text-[10px] font-black font-mono">4</span>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-extrabold text-orange-700 bg-orange-50 px-1 py-0.2 rounded border border-orange-200 uppercase">Stage 4</span>
-                            <a href="dashboard.php?page=cfs" onclick="event.stopPropagation()" class="w-4 h-4 rounded bg-white border border-slate-200 text-slate-400 hover:text-orange-600 flex items-center justify-center text-[8px]" title="Buka Modul Gudang CFS">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            </a>
-                        </div>
+                <div id="ribbon_stage_4" onclick="setBerandaStageFilter('stage_4')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-orange-700">
+                            <span class="w-5 h-5 rounded-md bg-orange-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">4</span>
+                            <span>Tahap 4</span>
+                        </span>
+                        <a href="dashboard.php?page=cfs" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 flex items-center justify-center text-[10px]" title="Buka Modul Gudang CFS">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
                     </div>
-                    <div class="space-y-0.5">
-                        <div class="text-[11px] font-bold text-slate-800 group-hover:text-orange-600 transition flex items-center gap-1 truncate">
-                            <i class="fa-solid fa-warehouse text-orange-600 text-[10px]"></i>
-                            <span>CFS Rampa D1-D5</span>
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-warehouse text-orange-600"></i>
+                            <span>Gudang CFS D1–D5</span>
                         </div>
-                        <p class="text-[9.5px] text-slate-500">Stuffing &amp; Stripping LCL</p>
+                        <p class="text-xs text-slate-600 font-medium mt-0.5">Stuffing &amp; stripping LCL</p>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-600 font-semibold">
-                        <span><?= $cfs_jobs ?> Jobs Aktif</span>
-                        <span class="text-[8px] font-bold text-[#0170b9] group-hover:text-orange-600">Klik Filter</span>
+                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span class="text-slate-700 font-bold"><?= $cfs_jobs ?> Job Aktif</span>
+                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
                     </div>
                 </div>
 
                 <!-- Stage 5: Reefer Cold Chain Hub -->
-                <div id="ribbon_stage_5" onclick="setBerandaStageFilter('stage_5')" class="pipeline-stage-card cursor-pointer group p-2.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-cyan-50/40 hover:border-cyan-300 transition flex flex-col justify-between relative overflow-hidden shadow-2xs">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="w-5 h-5 rounded-md bg-cyan-600 text-white flex items-center justify-center text-[10px] font-black font-mono">5</span>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-extrabold text-cyan-700 bg-cyan-50 px-1 py-0.2 rounded border border-cyan-200 uppercase">Stage 5</span>
-                            <a href="dashboard.php?page=reefer" onclick="event.stopPropagation()" class="w-4 h-4 rounded bg-white border border-slate-200 text-slate-400 hover:text-cyan-600 flex items-center justify-center text-[8px]" title="Buka Modul Reefer Cold Chain">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            </a>
-                        </div>
+                <div id="ribbon_stage_5" onclick="setBerandaStageFilter('stage_5')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-cyan-50/40 hover:border-cyan-300 transition flex flex-col justify-between relative shadow-2xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-cyan-700">
+                            <span class="w-5 h-5 rounded-md bg-cyan-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">5</span>
+                            <span>Tahap 5</span>
+                        </span>
+                        <a href="dashboard.php?page=reefer" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-cyan-600 flex items-center justify-center text-[10px]" title="Buka Modul Reefer Cold Chain">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
                     </div>
-                    <div class="space-y-0.5">
-                        <div class="text-[11px] font-bold text-slate-800 group-hover:text-cyan-700 transition flex items-center gap-1 truncate">
-                            <i class="fa-solid fa-snowflake text-cyan-600 text-[10px]"></i>
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-cyan-700 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-snowflake text-cyan-600"></i>
                             <span>Reefer Cold Chain</span>
                         </div>
-                        <p class="text-[9.5px] text-slate-500">300 Marechal Steker 380V</p>
+                        <p class="text-xs text-slate-600 font-medium mt-0.5">300 steker daya 380V</p>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-cyan-800 font-semibold">
-                        <span><?= $reefer_temp ?>&deg;C &bull; SHT40</span>
-                        <span class="text-[8px] font-bold text-cyan-700">Klik Filter</span>
+                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span class="text-cyan-800 font-bold"><?= $reefer_temp ?>&deg;C Stabil</span>
+                        <span class="font-bold text-cyan-700">Filter &rarr;</span>
                     </div>
                 </div>
 
                 <!-- Stage 6: Rail Siding KA 2518 ke Tanjung Priok -->
-                <div id="ribbon_stage_6" onclick="setBerandaStageFilter('stage_6')" class="pipeline-stage-card cursor-pointer group p-2.5 rounded-lg border border-slate-200 bg-slate-50/60 hover:bg-blue-50/40 hover:border-blue-300 transition flex flex-col justify-between relative overflow-hidden shadow-2xs">
-                    <div class="flex items-center justify-between mb-1.5">
-                        <span class="w-5 h-5 rounded-md bg-emerald-600 text-white flex items-center justify-center text-[10px] font-black font-mono">6</span>
-                        <div class="flex items-center gap-1">
-                            <span class="text-[8px] font-extrabold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200 uppercase">Stage 6</span>
-                            <a href="dashboard.php?page=intermodal" onclick="event.stopPropagation()" class="w-4 h-4 rounded bg-white border border-slate-200 text-slate-400 hover:text-emerald-600 flex items-center justify-center text-[8px]" title="Buka Modul Siding Kereta Api">
-                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                            </a>
-                        </div>
+                <div id="ribbon_stage_6" onclick="setBerandaStageFilter('stage_6')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50/40 hover:border-emerald-300 transition flex flex-col justify-between relative shadow-2xs">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-emerald-700">
+                            <span class="w-5 h-5 rounded-md bg-emerald-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">6</span>
+                            <span>Tahap 6</span>
+                        </span>
+                        <a href="dashboard.php?page=intermodal" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-emerald-600 flex items-center justify-center text-[10px]" title="Buka Modul Siding Kereta Api">
+                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        </a>
                     </div>
-                    <div class="space-y-0.5">
-                        <div class="text-[11px] font-bold text-slate-800 group-hover:text-[#0170b9] transition flex items-center gap-1 truncate">
-                            <i class="fa-solid fa-train-subway text-emerald-600 text-[10px]"></i>
-                            <span>Rail Siding KA 2518</span>
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-emerald-700 transition flex items-center gap-1.5">
+                            <i class="fa-solid fa-train-subway text-emerald-600"></i>
+                            <span>Siding Rel KA 2518</span>
                         </div>
-                        <p class="text-[9.5px] text-slate-500">54.8 km ke Pel. Tj. Priok</p>
+                        <p class="text-xs text-slate-600 font-medium mt-0.5">54,8 km ke Pel. Tj. Priok</p>
                     </div>
-                    <div class="mt-2 pt-1 border-t border-slate-200/60 flex items-center justify-between text-[9px] text-slate-600 font-semibold">
-                        <span><?= $loaded_w ?>/<?= $total_w ?> Gerbong</span>
-                        <span class="text-[8px] font-bold text-emerald-700">Klik Filter</span>
+                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                        <span class="text-slate-700 font-bold"><?= $loaded_w ?>/<?= $total_w ?> Gerbong</span>
+                        <span class="font-bold text-emerald-700">Filter &rarr;</span>
                     </div>
                 </div>
             </div>
@@ -619,7 +599,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 
                 <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9.5px]">
                     <span class="text-[#0170b9] font-bold">68% Kereta Api</span>
-                    <span class="text-slate-500 font-semibold">32% Truk Jalan</span>
+                    <span class="text-[#ea580c] font-bold">32% Truk Jalan</span>
                     <span class="text-emerald-700 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">
                         48 Truk Offset
                     </span>
@@ -640,7 +620,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
                 <div class="flex items-center justify-between pb-1.5 border-b border-slate-100 mb-2 relative z-10">
                     <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
-                        <i class="fa-solid fa-map-location-dot mr-1.5 text-[#0170b9] text-xs"></i>Radar 4 Zona Spasial (Klik Filter)
+                        <i class="fa-solid fa-map-location-dot mr-1.5 text-[#0170b9] text-xs"></i>Distribusi 4 Zona Terminal
                     </h3>
                     <a href="dashboard.php?page=denah" class="text-[9.5px] font-bold text-[#0170b9] hover:underline flex items-center gap-1">
                         <span>GIS Denah &rarr;</span>
@@ -847,7 +827,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     <div>
                         <div class="flex items-center gap-2 flex-wrap">
                             <h3 class="font-extrabold text-slate-900 text-xs sm:text-sm">
-                                Pilar Aliran Finansial Terpadu, Eksposur Demurrage &amp; Integrasi Billing Odoo 17 ERP
+                                Ringkasan Finansial &amp; Billing ERP
                             </h3>
                             <span class="text-[8.5px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full font-mono">
                                 <i class="fa-solid fa-plug-circle-check mr-0.5"></i>XML-RPC CONNECTED (<span id="odooLatencyTxt"><?= $latencies['odoo_erp'] ?></span>ms)
@@ -1040,7 +1020,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 <div class="flex flex-col gap-2 mb-2.5 pb-2 border-b border-slate-100 relative z-10">
                     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5">
                         <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
-                            <i class="fa-solid fa-list-check mr-1.5 text-[#0170b9] text-xs"></i>Pelacakan Konsinyasi Peti Kemas Interaktif (Shipper Consignments)
+                            <i class="fa-solid fa-list-check mr-1.5 text-[#0170b9] text-xs"></i>Pelacakan Konsinyasi Peti Kemas
                         </h3>
                         <div class="flex items-center gap-1.5">
                             <span id="consignmentCountBadge" class="text-[8.5px] font-extrabold text-[#0170b9] bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-mono">
@@ -1108,7 +1088,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2 pb-1.5 border-b border-slate-100">
                 <div class="flex items-center gap-2">
                     <i class="fa-solid fa-network-wired text-[#0170b9] text-xs"></i>
-                    <h4 class="font-extrabold text-slate-900 text-xs">Matriks Konektivitas Host-to-Host &amp; API Integrasi Real-Time</h4>
+                    <h4 class="font-extrabold text-slate-900 text-xs">Konektivitas Sistem &amp; API</h4>
                 </div>
                 <div class="flex items-center gap-2 text-[9.5px]">
                     <span class="text-emerald-700 font-bold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 flex items-center gap-1">
@@ -1554,6 +1534,25 @@ function updateCrossFilterUI() {
         }
     }
 
+    // Highlight Top KPI Cards selaras dengan stage yang aktif
+    const kpiStageMap = {
+        'stage_3': { id: 'kpiCard_yard', cls: ['ring-2', 'ring-[#0170b9]', 'bg-blue-50/40'] },
+        'stage_1': { id: 'kpiCard_gate', cls: ['ring-2', 'ring-[#ea580c]', 'bg-orange-50/40'] },
+        'stage_6': { id: 'kpiCard_rail', cls: ['ring-2', 'ring-[#0170b9]', 'bg-blue-50/40'] },
+        'stage_5': { id: 'kpiCard_reefer', cls: ['ring-2', 'ring-cyan-500', 'bg-cyan-50/40'] },
+        'stage_4': { id: 'kpiCard_cfs', cls: ['ring-2', 'ring-amber-500', 'bg-amber-50/40'] },
+    };
+    Object.keys(kpiStageMap).forEach(stg => {
+        const def = kpiStageMap[stg];
+        const el = document.getElementById(def.id);
+        if (!el) return;
+        if (berandaState.activeStage === stg) {
+            el.classList.add(...def.cls);
+        } else {
+            el.classList.remove(...def.cls);
+        }
+    });
+
     // Highlight Spatial Zone Cards
     ['Z1', 'Z2', 'Z3', 'Z4'].forEach(z => {
         const zCard = document.getElementById('zoneCard_' + z);
@@ -1711,22 +1710,33 @@ async function fetchLiveBerandaTelemetry(manual = false) {
                 berandaState.invoices = data.financial.invoices;
             }
 
-            // Update KPI DOM
+            // Update KPI DOM & Progress Rings
             const k = data.kpi;
             const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+            const setRing = (id, pct) => {
+                const el = document.getElementById(id);
+                if (el) el.setAttribute('stroke-dasharray', Math.min(100, Math.max(0, Math.round(pct))) + ', 100');
+            };
             setTxt('kpiYardVal', Number(k.containers_yard).toLocaleString('id-ID'));
-            setTxt('kpiYardPct', k.yard_occupancy + '%');
+            setTxt('kpiYardPct', Math.round(k.yard_occupancy) + '%');
+            setRing('kpiYardRing', k.yard_occupancy);
             setTxt('kpiGateVal', k.gate_turnaround);
             setTxt('kpiGateGaugeTxt', k.gate_turnaround + 'm');
             setTxt('kpiTrucksCount', k.total_trucks);
             setTxt('kpiRailVal', k.loaded_wagons + '/' + k.total_wagons);
-            setTxt('kpiRailPct', k.siding_pct + '%');
+            setTxt('kpiRailPct', Math.round(k.siding_pct) + '%');
+            setRing('kpiRailRing', k.siding_pct);
             setTxt('kpiReeferTemp', k.reefer_temp + '°C');
             setTxt('kpiReeferPlugs', k.reefer_plugs);
-            setTxt('kpiReeferPct', k.reefer_pct + '%');
+            setTxt('kpiReeferPct', Math.round(k.reefer_pct) + '%');
+            setRing('kpiReeferRing', k.reefer_pct);
             setTxt('kpiCustomsVal', Number(k.customs_pct).toFixed(1) + '%');
             setTxt('kpiCustomsBox', k.customs_cleared + '/' + k.customs_total);
             setTxt('kpiCfsJobs', k.cfs_jobs);
+            if (typeof k.cfs_pct !== 'undefined') {
+                setTxt('kpiCfsPct', Math.round(k.cfs_pct) + '%');
+                setRing('kpiCfsRing', k.cfs_pct);
+            }
             setTxt('badgeScadaUptime', 'SCADA ' + k.scada_uptime + '%');
             setTxt('ceisaSppbSec', k.sppb_sec + ' Detik');
 
@@ -1834,15 +1844,15 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
 
-    // Konfigurasi Global Chart.js
+    // Konfigurasi Global Chart.js (Keterbacaan Eksekutif)
     Chart.defaults.font.family = '"Plus Jakarta Sans", sans-serif';
-    Chart.defaults.font.size = 9.5;
-    Chart.defaults.color = '#64748b';
+    Chart.defaults.font.size = 11.5;
+    Chart.defaults.color = '#475569';
     Chart.defaults.plugins.tooltip.backgroundColor = '#0f172a';
-    Chart.defaults.plugins.tooltip.padding = 7;
-    Chart.defaults.plugins.tooltip.cornerRadius = 6;
-    Chart.defaults.plugins.tooltip.titleFont = { size: 10.5, weight: 'bold' };
-    Chart.defaults.plugins.tooltip.bodyFont = { size: 9.5 };
+    Chart.defaults.plugins.tooltip.padding = 10;
+    Chart.defaults.plugins.tooltip.cornerRadius = 8;
+    Chart.defaults.plugins.tooltip.titleFont = { size: 12, weight: 'bold' };
+    Chart.defaults.plugins.tooltip.bodyFont = { size: 11.5 };
 
     // 1. Dual Smooth Area Chart: Gate Throughput vs VBS Hourly Demand
     const gateVbsCanvas = document.getElementById('gateVbsAreaChart');
@@ -1856,30 +1866,30 @@ document.addEventListener('DOMContentLoaded', function() {
                         label: 'Aktual Gate-In',
                         data: [14, 28, 42, 35, 48, 52, 38, 22, 16],
                         borderColor: '#0170b9',
-                        backgroundColor: 'rgba(1, 112, 185, 0.12)',
+                        backgroundColor: 'rgba(1, 112, 185, 0.10)',
                         fill: true,
-                        tension: 0.38,
-                        borderWidth: 2,
+                        tension: 0.35,
+                        borderWidth: 2.5,
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#0170b9',
-                        pointBorderWidth: 1.5,
-                        pointRadius: 2.5,
-                        pointHoverRadius: 4.5
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     },
                     {
-                        label: 'VBS Booked Truk',
-                        data: [16, 25, 40, 38, 50, 48, 32, 20, 12],
+                        label: 'Kuota VBS',
+                        data: [18, 32, 38, 42, 44, 46, 34, 24, 18],
                         borderColor: '#ea580c',
-                        backgroundColor: 'rgba(234, 88, 12, 0.08)',
-                        fill: true,
-                        tension: 0.38,
-                        borderWidth: 1.75,
-                        borderDash: [4, 4],
+                        backgroundColor: 'transparent',
+                        fill: false,
+                        tension: 0.35,
+                        borderWidth: 2,
+                        borderDash: [5, 4],
                         pointBackgroundColor: '#ffffff',
                         pointBorderColor: '#ea580c',
-                        pointBorderWidth: 1.5,
-                        pointRadius: 2.5,
-                        pointHoverRadius: 4.5
+                        pointBorderWidth: 2,
+                        pointRadius: 3,
+                        pointHoverRadius: 5
                     }
                 ]
             },
@@ -1890,18 +1900,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { usePointStyle: true, boxWidth: 6, padding: 5, font: { size: 9 } }
+                        labels: { usePointStyle: true, boxWidth: 9, padding: 12, font: { size: 11.5, weight: '600' }, color: '#334155' }
                     }
                 },
                 scales: {
                     y: {
                         beginAtZero: true,
-                        grid: { borderDash: [2, 4], color: '#f1f5f9' },
-                        ticks: { font: { size: 8.5 } }
+                        grid: { borderDash: [2, 4], color: '#e2e8f0' },
+                        ticks: { font: { size: 10.5 }, color: '#475569' }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 8.5 } }
+                        ticks: { font: { size: 10.5 }, color: '#475569' }
                     }
                 }
             }
@@ -1920,19 +1930,19 @@ document.addEventListener('DOMContentLoaded', function() {
                         label: 'Kalmar RS-01',
                         data: [92, 85, 96, 88, 95],
                         borderColor: '#0170b9',
-                        backgroundColor: 'rgba(1, 112, 185, 0.22)',
-                        borderWidth: 1.75,
+                        backgroundColor: 'rgba(1, 112, 185, 0.10)',
+                        borderWidth: 2.2,
                         pointBackgroundColor: '#0170b9',
-                        pointRadius: 2.5
+                        pointRadius: 3
                     },
                     {
                         label: 'RTG Konecranes',
                         data: [88, 92, 94, 80, 98],
                         borderColor: '#ea580c',
-                        backgroundColor: 'rgba(234, 88, 12, 0.20)',
-                        borderWidth: 1.75,
+                        backgroundColor: 'rgba(234, 88, 12, 0.09)',
+                        borderWidth: 2.2,
                         pointBackgroundColor: '#ea580c',
-                        pointRadius: 2.5
+                        pointRadius: 3
                     }
                 ]
             },
@@ -1942,7 +1952,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { usePointStyle: true, boxWidth: 6, padding: 4, font: { size: 8.5 } }
+                        labels: { usePointStyle: true, boxWidth: 9, padding: 12, font: { size: 11.5, weight: '600' }, color: '#334155' }
                     }
                 },
                 scales: {
@@ -1953,8 +1963,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         grid: { color: '#e2e8f0' },
                         angleLines: { color: '#e2e8f0' },
                         pointLabels: {
-                            font: { size: 8.5, weight: '700' },
-                            color: '#475569'
+                            font: { size: 11, weight: '700' },
+                            color: '#334155'
                         }
                     }
                 }
@@ -1973,8 +1983,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     label: 'Porsi Peti Kemas (%)',
                     data: [68, 22, 7, 3],
                     backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
-                    borderRadius: 4,
-                    barThickness: 22
+                    borderRadius: 6,
+                    barThickness: 26
                 }]
             },
             options: {
@@ -2002,22 +2012,23 @@ document.addEventListener('DOMContentLoaded', function() {
                     y: {
                         beginAtZero: true,
                         max: 80,
-                        grid: { borderDash: [2, 4], color: '#f1f5f9' },
+                        grid: { borderDash: [2, 4], color: '#e2e8f0' },
                         ticks: {
-                            font: { size: 8.5 },
+                            font: { size: 10.5 },
+                            color: '#475569',
                             callback: function(v) { return v + '%'; }
                         }
                     },
                     x: {
                         grid: { display: false },
-                        ticks: { font: { size: 8.5 } }
+                        ticks: { font: { size: 11, weight: '600' }, color: '#334155' }
                     }
                 }
             }
         });
     }
 
-    // 4. Multimodal Modal-Split & ESG: Segmented Donut Chart
+    // 4. Multimodal Modal-Split & ESG: Segmented Donut Chart (Thick Ring & High Contrast)
     const modalSplitCanvas = document.getElementById('modalSplitDonutChart');
     if (modalSplitCanvas) {
         new Chart(modalSplitCanvas, {
@@ -2026,15 +2037,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: ['Kereta Api (68%)', 'Truk Jalan (32%)'],
                 datasets: [{
                     data: [68, 32],
-                    backgroundColor: ['#0170b9', '#94a3b8'],
-                    borderWidth: 0,
-                    hoverOffset: 4
+                    backgroundColor: ['#0170b9', '#ea580c'],
+                    borderColor: '#ffffff',
+                    borderWidth: 2.5,
+                    hoverOffset: 5
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                cutout: '74%',
+                cutout: '58%',
                 onClick: function(evt, elements) {
                     if (elements.length > 0 && elements[0].index === 0) {
                         setBerandaStageFilter('stage_6');
@@ -2043,7 +2055,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { usePointStyle: true, boxWidth: 6, padding: 4, font: { size: 8.5 } }
+                        labels: { usePointStyle: true, boxWidth: 10, padding: 12, font: { size: 11.5, weight: '700' }, color: '#334155' }
                     }
                 }
             },

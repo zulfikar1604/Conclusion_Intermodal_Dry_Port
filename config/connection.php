@@ -49,3 +49,51 @@ if (!isset($conn) || !$conn) {
         $conn = false;
     }
 }
+
+
+/**
+ * Mengembalikan objek koneksi database PDO utama CIDP
+ * @return PDO
+ */
+if (!function_exists('getDb')) {
+    function getDb(): PDO {
+        global $pdo;
+        return $pdo;
+    }
+}
+
+/**
+ * Mengembalikan data operator/pengguna aktif dari sesi login
+ * @return array
+ */
+if (!function_exists('getCurrentUser')) {
+    function getCurrentUser(): array {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        return [
+            'id'       => $_SESSION['iduser'] ?? 1,
+            'name'     => $_SESSION['nama'] ?? 'Operator YMS',
+            'username' => $_SESSION['nama'] ?? 'admin',
+            'role'     => $_SESSION['role'] ?? 'Dispatcher',
+            'email'    => $_SESSION['email'] ?? 'admin@cidp.co.id'
+        ];
+    }
+}
+
+/**
+ * Validasi otentikasi sesi pengguna, redirect ke login jika belum login
+ * @param string $redirectUrl
+ * @return void
+ */
+if (!function_exists('requireAuth')) {
+    function requireAuth(string $redirectUrl = 'index.php'): void {
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        if (!isset($_SESSION['login']) || $_SESSION['login'] !== true) {
+            header("Location: " . $redirectUrl);
+            exit;
+        }
+    }
+}
