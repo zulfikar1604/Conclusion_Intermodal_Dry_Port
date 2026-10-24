@@ -1,0 +1,35 @@
+# =============================================================================
+# CIDP ENTERPRISE SECURITY HARDENING (.htaccess)
+# Proteksi terhadap CVE-2024-4577 (PHP-CGI Argument Injection) & Hardening HTTP
+# =============================================================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # 1. Mitigasi CVE-2024-4577: Blokir injeksi argumen CGI (-d, -n, -s, %AD / Soft Hyphen)
+    RewriteCond %{QUERY_STRING} ^(%2d|\-|[a-z0-9_]*=%ad) [NC,OR]
+    RewriteCond %{QUERY_STRING} (%ad|%2d)allow_url_include [NC,OR]
+    RewriteCond %{QUERY_STRING} (%ad|%2d)auto_prepend_file [NC]
+    RewriteRule .* - [F,L]
+</IfModule>
+
+# 2. Matikan Directory Listing agar struktur folder tidak terekspos
+Options -Indexes
+
+# 3. Sembunyikan Tanda Tangan Server
+ServerSignature Off
+
+# 4. Lindungi file konfigurasi, SQL, dan log sensitif dari akses langsung browser
+<FilesMatch "^(\.gitignore|composer\.(json|lock)|.*\.sql|.*\.log)$">
+    <IfModule mod_authz_core.c>
+        Require all denied
+    </IfModule>
+</FilesMatch>
+
+# 5. Header Keamanan Standar Enterprise
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+    Header unset X-Powered-By
+</IfModule>
