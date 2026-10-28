@@ -7,6 +7,40 @@
 // Standar: Frauscher Axle Counter RSR180 + UN/EDIFACT BAPLIE D.95B Standard SMDG
 // =============================================================================
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
+
+$rail_alert = null;
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['rail_action']) && isset($pdo)) {
+    $r_act = $_POST['rail_action'];
+    $ctr_num = strtoupper(trim($_POST['container_number'] ?? ''));
+    $train_c = trim($_POST['train_code'] ?? 'KA 2519');
+    if ($r_act === 'manual_load_wagon' && $ctr_num !== '') {
+        try {
+            $pdo->prepare("UPDATE containers SET status = 'on_rail', block = 'RAIL', gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?")->execute([$ctr_num]);
+            $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ?")->execute([$ctr_num]);
+            $exTr = $pdo->prepare("SELECT id FROM trains WHERE train_code = ? LIMIT 1");
+            $exTr->execute([$train_c]);
+            if ($exTr->fetchColumn()) {
+                $pdo->prepare("UPDATE trains SET loaded_wagons = LEAST(total_wagons, loaded_wagons + 1), status = 'loading' WHERE train_code = ?")->execute([$train_c]);
+            } else {
+                $pdo->prepare("INSERT INTO trains (train_code, origin, destination, total_wagons, loaded_wagons, status, estimated_arrival, estimated_departure) VALUES (?, 'CIDP Cikarang Hub', 'Pelabuhan Tanjung Priok (Pasoso)', 30, 1, 'loading', NOW(), DATE_ADD(NOW(), INTERVAL 2 HOUR))")->execute([$train_c]);
+            }
+            accrue_billing($pdo, $ctr_num, 'L', "Intermodal Rail Loading ($train_c)", 850000);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, billable_amount, notes, created_at) VALUES ('RAIL_LOADING', ?, 'RAIL', 'Operator Siding KA', 850000, ?, NOW())")->execute([$ctr_num, "Pemuatan kontainer $ctr_num ke gerbong datar $train_c (Aksi Manual Operator / RMGC)."]);
+            $rail_alert = ['type' => 'success', 'title' => "Muat Kontainer ke Gerbong KA Berhasil ($train_c)", 'msg' => "Kontainer <strong>$ctr_num</strong> telah dimuat ke rangkaian <strong>$train_c</strong> berstatus <strong>on_rail</strong> dan tagihan intermodal Rp 850.000 tercatat di Billing."];
+        } catch (Exception $e) {
+            $rail_alert = ['type' => 'warning', 'title' => 'Muat Gerbong Diproses', 'msg' => "Kontainer $ctr_num dialokasikan ke gerbong KA."];
+        }
+    } elseif ($r_act === 'manual_unload_wagon' && $ctr_num !== '') {
+        try {
+            $pdo->prepare("UPDATE containers SET status = 'in_yard', block = 'D', bay = 1, `row` = 1, tier = 1 WHERE container_number = ?")->execute([$ctr_num]);
+            $pdo->prepare("UPDATE trains SET loaded_wagons = GREATEST(0, loaded_wagons - 1) WHERE train_code = ?")->execute([$train_c]);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, operator_name, notes, created_at) VALUES ('RAIL_UNLOADING', ?, 'RAIL', 'D', 'Operator Siding KA', ?, NOW())")->execute([$ctr_num, "Bongkar kontainer $ctr_num dari gerbong $train_c ke Buffer Yard Blok D."]);
+            $rail_alert = ['type' => 'success', 'title' => "Bongkar Gerbong ke Buffer Yard Blok D Berhasil", 'msg' => "Kontainer <strong>$ctr_num</strong> telah diturunkan dari rangkaian <strong>$train_c</strong> ke <strong>Yard Blok D</strong>."];
+        } catch (Exception $e) {}
+    }
+}
 
 $trains_list = [];
 try {
@@ -18,7 +52,14 @@ try {
 $train_inbound = null;
 $train_outbound = null;
 foreach ($trains_list as $t) {
-    if (strtoupper($t['direction'] ?? '') === 'INBOUND' && !$train_inbound) {
+    if ((strtoupper($t['direction'] ?? '') === 'INBOUND' || stripos($t['origin'] ?? '', 'Priok') !== false || ($t['train_code'] ?? '') === 'KA 2518') && !$train_inbound) {
+        $t['direction'] = 'INBOUND';
+        $train_inbound = $t;
+    } elseif (!$train_outbound) {
+        $t['direction'] = 'OUTBOUND';
+        $train_outbound = $t;
+    }
+    if (false) {
         $train_inbound = $t;
     } elseif (strtoupper($t['direction'] ?? '') === 'OUTBOUND' && !$train_outbound) {
         $train_outbound = $t;
@@ -33,7 +74,7 @@ if (!$train_inbound) {
         'destination' => 'CIDP Cikarang Hub',
         'direction' => 'INBOUND',
         'total_wagons' => 30,
-        'loaded_wagons' => 24,
+        'loaded_wagons' => 0,
         'status' => 'unloading',
         'estimated_arrival' => '10:05 WIB',
         'estimated_departure' => '08:15 WIB'
@@ -46,7 +87,7 @@ if (!$train_outbound) {
         'destination' => 'Pelabuhan Tanjung Priok (Pasoso/JICT)',
         'direction' => 'OUTBOUND',
         'total_wagons' => 30,
-        'loaded_wagons' => 26,
+        'loaded_wagons' => 0,
         'status' => 'loading',
         'estimated_arrival' => '15:20 WIB',
         'estimated_departure' => '13:30 WIB'
@@ -56,9 +97,9 @@ if (!$train_outbound) {
 // Perhitungan Agregat 2-Arah Siding
 $total_active_wagons = (int)($train_inbound['total_wagons'] ?? 30) + (int)($train_outbound['total_wagons'] ?? 30);
 $total_active_teu_cap = $total_active_wagons * 2; // 120 TEU
-$total_loaded_wagons = (int)($train_inbound['loaded_wagons'] ?? 24) + (int)($train_outbound['loaded_wagons'] ?? 26);
+$total_loaded_wagons = (int)($train_inbound['loaded_wagons'] ?? 0) + (int)($train_outbound['loaded_wagons'] ?? 0);
 $total_loaded_teu = $total_loaded_wagons * 2; // 100 TEU
-$combined_load_factor = $total_active_teu_cap > 0 ? round(($total_loaded_teu / $total_active_teu_cap) * 100, 1) : 83.3;
+$combined_load_factor = $total_active_teu_cap > 0 ? round(($total_loaded_teu / $total_active_teu_cap) * 100, 1) : 0.0;
 
 $siding_tracks = [
     [
@@ -310,7 +351,41 @@ $wagons_outbound = [
 ];
 
 // Active wagons default to Track-01 (Inbound)
-$wagons = $wagons_inbound;
+// Sinkronisasi gerbong dengan kontainer aktual berstatus on_rail di database
+$db_rail_containers = [];
+if (isset($pdo)) {
+    try {
+        $db_rail_containers = $pdo->query("SELECT * FROM containers WHERE status = 'on_rail' ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) { $db_rail_containers = []; }
+}
+if (empty($db_rail_containers) && ((int)($train_inbound['loaded_wagons'] ?? 0) === 0) && ((int)($train_outbound['loaded_wagons'] ?? 0) === 0)) {
+    $wagons_inbound = [];
+    $wagons_outbound = [];
+} else {
+    $wagons_outbound = [];
+    foreach ($db_rail_containers as $rIdx => $rc) {
+        $wagons_outbound[] = [
+            'wagon_no'  => 'GD 42 14 ' . str_pad($rIdx + 1, 2, '0', STR_PAD_LEFT),
+            'type'      => 'PPCW 42t',
+            'direction' => 'OUTBOUND',
+            'slot_a'    => [
+                'container' => $rc['container_number'],
+                'iso'       => $rc['iso_code'] ?? '45G1',
+                'type'      => 'Laden Intermodal (' . ($rc['size_type'] ?? '40FT') . ')',
+                'weight'    => number_format((float)($rc['gross_weight_kg'] ?? 24000), 0, ',', '.') . ' kg',
+                'pod'       => 'IDTPP (Pelabuhan Tanjung Priok)',
+                'bg'        => 'bg-emerald-600',
+                'shipper'   => ($rc['owner_company'] ?? 'Shipper CIDP') . ' (SPPB Cleared)'
+            ],
+            'slot_b'    => null,
+            'is_40ft'   => strpos($rc['size_type'] ?? '40', '20') === false,
+            'status'    => 'LOADED & LASHED (LIVE)',
+            'status_bg' => 'bg-emerald-100 text-emerald-800'
+        ];
+    }
+    $wagons_inbound = $wagons_outbound;
+}
+$wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
 ?>
 
 <!-- Open Source Leaflet.js GIS Engine (Lokal & Offline Ready) -->
@@ -352,6 +427,42 @@ $wagons = $wagons_inbound;
 
 <div class="space-y-3">
     <!-- Header Modul: Executive Compact -->
+    <?php if (!empty($rail_alert)): ?>
+    <div class="p-3.5 rounded-xl border flex items-start space-x-3 bg-emerald-50 border-emerald-200 text-emerald-900 shadow-2xs">
+        <div class="w-7 h-7 rounded-lg bg-emerald-200 text-emerald-800 flex items-center justify-center text-xs font-bold flex-shrink-0"><i class="fa-solid fa-check"></i></div>
+        <div class="flex-1 text-xs"><h4 class="font-bold"><?= $rail_alert['title'] ?></h4><p class="mt-0.5"><?= $rail_alert['msg'] ?></p></div>
+    </div>
+    <?php endif; ?>
+    <!-- Form Aksi Operator Siding KA (Berjalan Tanpa Bergantung Hardware Sensor) -->
+    <div class="bg-white rounded-xl p-3 border border-slate-200/80 shadow-2xs flex flex-col lg:flex-row lg:items-center justify-between gap-2.5">
+        <div class="flex items-center space-x-2">
+            <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase">Eksekusi Manual Operator Siding</span>
+            <span class="text-[11px] text-slate-600">Muat / bongkar kontainer ke gerbong datar KA secara langsung bila tanpa pemicu sensor gandar otomatis:</span>
+        </div>
+        <form method="POST" class="flex flex-wrap items-center gap-2">
+            <select name="container_number" required class="px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-slate-50">
+                <?php
+                $avail_rail_ctrs = [];
+                if (isset($pdo)) {
+                    try { $avail_rail_ctrs = $pdo->query("SELECT container_number, status, block, customs_status FROM containers ORDER BY (status='in_yard') DESC, id ASC LIMIT 30")->fetchAll(PDO::FETCH_ASSOC); } catch (Exception $e) {}
+                }
+                foreach ($avail_rail_ctrs as $arc):
+                ?>
+                <option value="<?= htmlspecialchars($arc['container_number']) ?>"><?= htmlspecialchars($arc['container_number']) ?> [<?= strtoupper($arc['status']) ?> • Blok <?= htmlspecialchars($arc['block']) ?> • <?= htmlspecialchars($arc['customs_status']) ?>]</option>
+                <?php endforeach; ?>
+            </select>
+            <select name="train_code" class="px-2.5 py-1.5 text-xs font-bold border border-slate-300 rounded-lg bg-slate-50">
+                <option value="KA 2519">KA 2519 (Outbound -> Priok)</option>
+                <option value="KA 2518">KA 2518 (Inbound -> CIDP)</option>
+            </select>
+            <button type="submit" name="rail_action" value="manual_load_wagon" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-lg shadow-2xs transition cursor-pointer">
+                <i class="fa-solid fa-train mr-1"></i> Muat ke Gerbong (Load)
+            </button>
+            <button type="submit" name="rail_action" value="manual_unload_wagon" class="px-3 py-1.5 bg-slate-700 hover:bg-slate-800 text-white text-xs font-bold rounded-lg shadow-2xs transition cursor-pointer">
+                <i class="fa-solid fa-boxes-packing mr-1"></i> Bongkar ke Yard (Unload)
+            </button>
+        </form>
+    </div>
     <div class="bg-white rounded-xl px-3.5 py-2.5 shadow-2xs border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
         <div class="flex items-center space-x-2.5">
             <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-orange-500 to-orange-600 text-white flex items-center justify-center text-xs shadow-xs flex-shrink-0">
@@ -774,7 +885,7 @@ $wagons = $wagons_inbound;
 
             <div class="bg-slate-50/80 rounded-2xl p-6 overflow-x-auto shadow-xs border border-slate-200/80">
                 <!-- Legend Indicators -->
-                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-300 border-b border-slate-800 pb-3">
+                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-600 border-b border-slate-200 pb-3">
                     <div class="flex items-center space-x-4">
                         <div class="flex items-center space-x-1.5">
                             <span class="w-3 h-3 rounded bg-sky-600"></span>
@@ -883,7 +994,7 @@ $wagons = $wagons_inbound;
 
             <div class="bg-slate-50/80 rounded-2xl p-6 overflow-x-auto shadow-xs border border-slate-200/80">
                 <!-- Legend Indicators Track 2 -->
-                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-300 border-b border-slate-800 pb-3">
+                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-600 border-b border-slate-200 pb-3">
                     <div class="flex items-center space-x-4">
                         <div class="flex items-center space-x-1.5">
                             <span class="w-3 h-3 rounded bg-emerald-600"></span>
@@ -1015,19 +1126,19 @@ $wagons = $wagons_inbound;
                     </div>
 
                     <div class="grid grid-cols-3 gap-3 text-center">
-                        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 block uppercase font-mono">Total Gandar</span>
-                            <span id="axle-count-val" class="text-2xl font-bold font-mono text-emerald-400">252</span>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-500 block uppercase font-mono font-bold">Total Gandar</span>
+                            <span id="axle-count-val" class="text-2xl font-bold font-mono text-emerald-700">252</span>
                             <span class="text-[9px] text-slate-500 block">60 GD + 2 Loco</span>
                         </div>
-                        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 block uppercase font-mono">Kecepatan Langsir</span>
-                            <span class="text-2xl font-bold font-mono text-white">12.4</span>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-500 block uppercase font-mono font-bold">Kecepatan Langsir</span>
+                            <span class="text-2xl font-bold font-mono text-slate-900">12.4</span>
                             <span class="text-[9px] text-slate-500 block">km/jam (Siding)</span>
                         </div>
-                        <div class="bg-slate-800/80 p-3 rounded-xl border border-slate-700/60">
-                            <span class="text-[10px] text-slate-400 block uppercase font-mono">Arah Gerak</span>
-                            <span class="text-sm font-bold font-mono text-cyan-300 mt-1 block">DUAL LOOP &harr;</span>
+                        <div class="bg-white p-3 rounded-xl border border-slate-200 shadow-2xs">
+                            <span class="text-[10px] text-slate-500 block uppercase font-mono font-bold">Arah Gerak</span>
+                            <span class="text-sm font-bold font-mono text-orange-600 mt-1 block">DUAL LOOP &harr;</span>
                             <span class="text-[9px] text-slate-500 block">In &amp; Outbound</span>
                         </div>
                     </div>

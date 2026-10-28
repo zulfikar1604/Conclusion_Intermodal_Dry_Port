@@ -4,14 +4,16 @@
 // File: pages/cfs.php
 // Proyek: Conclusion Intermodal Dry Port (CIDP) 35 Ha — Yard Management System
 // Standar: FIATA LCL Conventions, WCO SAFE Framework, GS1-128 SSCC-18 Logistics Label
-// PIC : Eko Prasetyo (Head of CFS & Warehouse Operations / Certified Tally Master)
+// PIC : Juan Gamaliel (Yard Planning, CFS & Multimodal Specialist)
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 $cfs_info = [
-    'pic'      => 'Eko Prasetyo',
-    'role'     => 'Head of CFS & Warehouse Operations',
+    'pic'      => 'Juan Gamaliel',
+    'role'     => 'Yard Planning, CFS & Multimodal Specialist',
     'desc'     => 'Layanan konsolidasi LCL/FCL, otomasi 5 rampa loading dock hidrolik (D1–D5), pelabelan palet GS1 SSCC-18, dan tally sheet digital.',
     'icon'     => 'fa-warehouse',
     'status'   => '5 Rampa Dock Hidrolik Aktif & MHE Siaga',
@@ -33,7 +35,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
         $total_wt    = floatval($_POST['total_weight_kg'] ?? 10000.0);
         $total_cbm   = floatval($_POST['total_cbm'] ?? 30.0);
         $tally_notes = trim($_POST['tally_notes'] ?? 'Job order terdaftar.');
-        $operator    = trim($_POST['operator_name'] ?? 'Eko Prasetyo');
+        $operator    = trim($_POST['operator_name'] ?? 'Juan Gamaliel');
         $job_num     = 'JO-' . ($job_type === 'STRIPPING' ? 'STP' : 'STF') . '-' . date('Y') . '-' . rand(100, 999);
 
         try {
@@ -45,7 +47,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                 $stmt->execute([$job_num, $job_type, $ctr_num, $dock_ramp, $consignee, $bl_number, $total_pkgs, $total_wt, $total_cbm, $operator, $tally_notes]);
 
                 // Update container block to CFS if in database
-                $stmtUpCtr = $pdo->prepare("UPDATE containers SET block = 'CFS' WHERE container_number = ?");
+                $stmtUpCtr = $pdo->prepare("UPDATE containers SET block = 'CFS', status = 'in_yard', gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?");
+                $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ?")->execute([$ctr_num]);
+                accrue_billing($pdo, $ctr_num, 'C', "CFS $job_type ($job_num)", 650000);
                 $stmtUpCtr->execute([$ctr_num]);
 
                 // Catat ke yard_events
@@ -118,6 +122,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'IN_RACK', NOW())
                 ");
                 $stmt->execute([$sscc, $ctr_orig, $commodity, $consignee, $category, $cartons, $weight, $cbm, $rack]);
+                $pdo->prepare("UPDATE cfs_jobs SET total_packages = total_packages + 1, total_weight_kg = total_weight_kg + ?, total_cbm = total_cbm + ? WHERE container_number = ? AND status = 'IN_PROGRESS'")->execute([$weight, $cbm, $ctr_orig]);
+                accrue_billing($pdo, $ctr_orig, 'C', "CFS LCL Pallet Handling ($sscc)", 35000);
             }
             $action_alert = [
                 'type' => 'success',
@@ -214,6 +220,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'IN_RACK', NOW())
                 ");
                 $stmt->execute([$sscc, $ctr_orig, $commodity, $consignee, $category, $cartons, $weight, $cbm, $rack]);
+                $pdo->prepare("UPDATE cfs_jobs SET total_packages = total_packages + 1, total_weight_kg = total_weight_kg + ?, total_cbm = total_cbm + ? WHERE container_number = ? AND status = 'IN_PROGRESS'")->execute([$weight, $cbm, $ctr_orig]);
+                accrue_billing($pdo, $ctr_orig, 'C', "CFS LCL Pallet Handling ($sscc)", 35000);
 
                 $stmtLog = $pdo->prepare("
                     INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at)
@@ -368,7 +376,7 @@ $emptySlot = $totalSlot - $filledSlot;
 $occupancy = $totalSlot > 0 ? round(($filledSlot / $totalSlot) * 100, 1) : 0;
 
 // Fallback Data Demo jika database masih kosong
-if (empty($cfs_jobs)) {
+if (false && empty($cfs_jobs)) {
     $cfs_jobs = [
         [
             'id' => 1,
@@ -383,7 +391,7 @@ if (empty($cfs_jobs)) {
             'total_cbm' => 52.40,
             'customs_status' => 'SPPB_CLEARED',
             'status' => 'IN_PROGRESS',
-            'operator_name' => 'Eko Prasetyo',
+            'operator_name' => 'Juan Gamaliel',
             'start_time' => date('Y-m-d H:i', strtotime('-2 hours')),
             'completed_time' => null,
             'tally_notes' => 'Stripping 40 palet CKD komponen transmisi motor. 33 palet sudah masuk Aisle E. Kondisi kemasan utuh, segel ML-ID882109 sesuai.'
@@ -437,7 +445,7 @@ if (empty($cfs_jobs)) {
             'total_cbm' => 28.50,
             'customs_status' => 'SPPB_CLEARED',
             'status' => 'IN_PROGRESS',
-            'operator_name' => 'Eko Prasetyo',
+            'operator_name' => 'Juan Gamaliel',
             'start_time' => date('Y-m-d H:i', strtotime('-45 minutes')),
             'completed_time' => null,
             'tally_notes' => 'Konsolidasi bumbu instan & mie untuk distribusi feeder rute Tanjung Perak Surabaya.'
@@ -445,7 +453,7 @@ if (empty($cfs_jobs)) {
     ];
 }
 
-if (empty($cfs_pallets)) {
+if (false && empty($cfs_pallets)) {
     $cfs_pallets = [
         [
             'id' => 1,
@@ -3811,22 +3819,11 @@ function exportCfsExcel() {
     }
 }
 
-// Print Tally Sheet Modal / Quick Document Resmi Berstempel Digital
+// Print Tally Sheet Format Kertas A4 Resmi Berstempel Digital
 function printTallySheet(jobNum, ctrNum, jobType, consignee, dock, pkgs, weight, notes) {
-    if (typeof CIDPPrint !== 'undefined') {
-        CIDPPrint.printTallySheet({
-            jobNum: jobNum,
-            ctrNum: ctrNum,
-            jobType: jobType,
-            consignee: consignee,
-            dock: dock,
-            pkgs: pkgs,
-            weight: weight,
-            notes: notes
-        });
-        return;
-    }
-    window.print();
+    const j = encodeURIComponent(jobNum || '');
+    const c = encodeURIComponent(ctrNum || '');
+    window.open(`document.php?type=cfs_tally&job=${j}&container=${c}&autoprint=1`, '_blank');
 }
 
 // Cetak Label Logistik Palet GS1-128 Standar Internasional

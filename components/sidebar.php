@@ -13,8 +13,9 @@ $sb_badges = [
     'pending_inv'  => 0,
     'gate_trucks'  => (int)($db_stats['total_gate_trucks'] ?? 0),
     'total_box'    => (int)($db_stats['total_containers'] ?? 0),
-    'cfs_jobs'     => max(18, (int)($db_stats['cfs_active_jobs'] ?? 0) + 17),
-    'reefer_alert' => 1, // 1 kontainer reefer (MNBU9920194) dalam pantauan fluktuasi suhu
+    'cfs_jobs'     => (int)($db_stats['cfs_active_jobs'] ?? 0),
+    'reefer_alert' => 0,
+    'dlq_open'     => 0,
 ];
 
 if (isset($pdo) && $pdo instanceof PDO) {
@@ -25,6 +26,8 @@ if (isset($pdo) && $pdo instanceof PDO) {
         $sb_badges['demurrage'] = (int)$pdo->query(
             "SELECT COUNT(*) FROM containers WHERE status='in_yard' AND gate_in_time IS NOT NULL AND DATEDIFF(NOW(), gate_in_time) > 5"
         )->fetchColumn();
+        $sb_badges['dlq_open'] = (int)$pdo->query("SELECT COUNT(*) FROM integration_dlq WHERE status='QUARANTINED'")->fetchColumn();
+        $sb_badges['reefer_alert'] = (int)$pdo->query("SELECT COUNT(DISTINCT container_number) FROM reefer_telemetry WHERE status='ALARM'")->fetchColumn();
         $sb_badges['pending_inv'] = (int)$pdo->query(
             "SELECT COUNT(*) FROM billing_invoices WHERE payment_status IN ('PENDING','OVERDUE','UNPAID')"
         )->fetchColumn();
@@ -34,26 +37,32 @@ if (isset($pdo) && $pdo instanceof PDO) {
 // Konfigurasi tema warna per zona grup agar ikon tidak monoton abu-abu
 $zone_themes = [
     'EXEC' => [
+        'group_accent' => 'border-orange-400',
         'pill_bg'   => 'bg-orange-100/90 text-orange-700 border-orange-200',
         'icon_idle' => 'bg-orange-50 text-orange-600 border-orange-200/70 group-hover:bg-orange-100',
     ],
     'GIS' => [
+        'group_accent' => 'border-indigo-400',
         'pill_bg'   => 'bg-indigo-100/90 text-indigo-700 border-indigo-200',
         'icon_idle' => 'bg-indigo-50 text-indigo-600 border-indigo-200/70 group-hover:bg-indigo-100',
     ],
     'TMS' => [
+        'group_accent' => 'border-sky-400',
         'pill_bg'   => 'bg-sky-100/90 text-[#0170b9] border-sky-200',
         'icon_idle' => 'bg-sky-50 text-[#0170b9] border-sky-200/70 group-hover:bg-sky-100',
     ],
     'YMS' => [
+        'group_accent' => 'border-teal-400',
         'pill_bg'   => 'bg-teal-100/90 text-teal-800 border-teal-200',
         'icon_idle' => 'bg-teal-50 text-teal-700 border-teal-200/70 group-hover:bg-teal-100',
     ],
     'WMS' => [
+        'group_accent' => 'border-amber-400',
         'pill_bg'   => 'bg-amber-100/90 text-amber-800 border-amber-200',
         'icon_idle' => 'bg-amber-50 text-amber-700 border-amber-200/70 group-hover:bg-amber-100',
     ],
     'ERP' => [
+        'group_accent' => 'border-emerald-400',
         'pill_bg'   => 'bg-emerald-100/90 text-emerald-800 border-emerald-200',
         'icon_idle' => 'bg-emerald-50 text-emerald-700 border-emerald-200/70 group-hover:bg-emerald-100',
     ],
@@ -61,6 +70,15 @@ $zone_themes = [
 
 // Pemetaan badge operasional per item menu
 $menu_status_badges = [
+    'integration' => $sb_badges['dlq_open'] > 0 ? [
+        'text' => $sb_badges['dlq_open'] . ' DLQ',
+        'class' => 'bg-rose-50 text-rose-700 border-rose-200',
+        'dot' => 'bg-rose-500 animate-pulse',
+    ] : [
+        'text' => 'OAUTH 2.0',
+        'class' => 'bg-indigo-50 text-indigo-700 border-indigo-200',
+        'dot' => 'bg-indigo-500',
+    ],
     'beranda' => [
         'text' => 'LIVE',
         'class' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -81,16 +99,16 @@ $menu_status_badges = [
         'class' => 'bg-slate-100 text-slate-700 border-slate-200',
         'dot' => '',
     ] : null,
-    'reefer' => [
+    'reefer' => $sb_badges['reefer_alert'] > 0 ? [
         'text' => $sb_badges['reefer_alert'] . ' Suhu',
         'class' => 'bg-amber-50 text-amber-800 border-amber-300',
         'dot' => 'bg-amber-500 animate-pulse',
-    ],
-    'cfs' => [
+    ] : null,
+    'cfs' => $sb_badges['cfs_jobs'] > 0 ? [
         'text' => $sb_badges['cfs_jobs'] . ' Job',
         'class' => 'bg-amber-50/80 text-amber-800 border-amber-200',
         'dot' => '',
-    ],
+    ] : null,
     'customs' => $sb_badges['customs_hold'] > 0 ? [
         'text' => $sb_badges['customs_hold'] . ' Hold',
         'class' => 'bg-rose-50 text-rose-700 border-rose-200',
@@ -214,14 +232,17 @@ $menu_status_badges = [
             $group_idx++;
         ?>
             <div class="<?= $group_spacing ?>">
-                <!-- Judul Grup: Ukuran Jelas (11px), Kontras Tinggi, dengan Penanda Zona Berwarna -->
-                <div class="px-2 mb-1.5 logo-text flex items-center gap-1.5">
-                    <span class="px-1.5 py-0.2 rounded text-[9.5px] font-black uppercase tracking-normal border <?= $theme['pill_bg'] ?>">
+                <!-- Judul Grup = LABEL KATEGORI (bukan tombol): pita abu datar, tanpa hover/pointer,
+                     garis aksen kiri & garis pemisah memanjang, agar jelas beda dari menu yang bisa diklik -->
+                <div class="sidebar-group-title logo-text select-none cursor-default flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-md bg-slate-100/90 border-l-[3px] <?= $theme['group_accent'] ?? 'border-slate-400' ?>" role="heading" aria-level="3">
+                    <span class="px-1.5 py-0.5 rounded text-[9px] leading-none font-black uppercase tracking-wide border <?= $theme['pill_bg'] ?>">
                         <?= htmlspecialchars($zone_code) ?>
                     </span>
-                    <span class="text-[11px] font-extrabold text-slate-700 uppercase tracking-wider truncate">
+                    <span class="text-[10.5px] font-extrabold text-slate-500 uppercase tracking-[0.08em] truncate">
                         <?= htmlspecialchars($cluster_title) ?>
                     </span>
+                    <span class="flex-1 h-px bg-slate-300/70 ml-1"></span>
+                    <span class="text-[9px] font-bold text-slate-400 font-mono flex-shrink-0"><?= count($filtered_items) ?></span>
                 </div>
 
                 <!-- Daftar Item Menu dalam Zona -->

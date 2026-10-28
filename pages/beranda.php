@@ -75,7 +75,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             <span id="badgeScadaUptime">SCADA <?= $kpi['scada_uptime'] ?>%</span>
                         </span>
                     </div>
-                    <p class="text-xs font-medium text-slate-600 mt-0.5 truncate">
+                    <p class="text-xs font-medium text-slate-600 mt-0.5 leading-snug">
                         <?= ($current_lang === 'en')
                             ? 'Real-time physical, customs (CEISA 4.0), and financial (Odoo ERP) terminal operations'
                             : 'Pemantauan terpadu operasional lapangan, kepabeanan CEISA 4.0, dan finansial terminal' ?>
@@ -89,9 +89,10 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     <span class="font-semibold text-slate-600 hidden sm:inline"><?= $date_display ?> &bull;</span>
                     <span id="berandaLiveClock" class="font-extrabold text-slate-900 font-mono">--:--:-- WIB</span>
                     <span class="text-slate-300">|</span>
-                    <button type="button" id="btnToggleAutoSync" onclick="toggleBerandaAutoSync()" class="inline-flex items-center gap-1.5 font-bold text-emerald-700 cursor-pointer" title="Aktifkan/Matikan Sinkronisasi Otomatis (15 Detik)">
+                    <button type="button" id="btnToggleSyncSpeed" onclick="cycleSyncSpeed()" class="text-[10px] font-black px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-300 hover:bg-emerald-200 transition cursor-pointer" title="Mode Pembaruan Demo Realtime">⚡ 5s (Live)</button>
+                    <button type="button" id="btnToggleAutoSync" onclick="toggleBerandaAutoSync()" class="inline-flex items-center gap-1.5 font-bold text-emerald-700 cursor-pointer" title="Aktifkan/Matikan Sinkronisasi Otomatis">
                         <span id="autoSyncDot" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                        <span id="autoSyncCountdown" class="font-mono text-[11px]">15s</span>
+                        <span id="autoSyncCountdown" class="font-mono text-[11px]">5s</span>
                     </button>
                     <button type="button" onclick="fetchLiveBerandaTelemetry(true)" class="text-slate-500 hover:text-[#0170b9] transition cursor-pointer" title="Sinkronisasi Sekarang">
                         <i id="syncSpinnerIcon" class="fa-solid fa-arrows-rotate text-[11px]"></i>
@@ -110,6 +111,20 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             <i class="fa-solid fa-chevron-down text-[10px] text-slate-400"></i>
                         </summary>
                         <div class="cidp-menu__panel">
+                            <a href="docs/KATALOG_50_KEGIATAN_OPERASIONAL_CIDP.md" target="_blank">
+                                <i class="fa-solid fa-list-check text-cyan-600"></i>
+                                <div>
+                                    <div>Katalog 50 Kegiatan (ACT-01..50)</div>
+                                    <span class="hint">Matriks skenario operasional sistem</span>
+                                </div>
+                            </a>
+                            <a href="docs/PRD_CONCLUSION_INTERMODAL_DRY_PORT.md" target="_blank">
+                                <i class="fa-solid fa-file-contract text-amber-500"></i>
+                                <div>
+                                    <div>PRD v2.0 (Dokumen Patokan Tim)</div>
+                                    <span class="hint">Spesifikasi kebutuhan & arsitektur</span>
+                                </div>
+                            </a>
                             <a href="report_executive.php" target="_blank">
                                 <i class="fa-solid fa-file-shield text-[#0170b9]"></i>
                                 <div>
@@ -131,12 +146,139 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         </div>
 
         <!-- ======================================================================= -->
+        <!-- 1.5 TOC COMMAND CENTER: UNIVERSAL ASSET & CARGO LIVE LOCATOR (RADAR)   -->
+        <!-- ======================================================================= -->
+        <div class="bg-white text-slate-800 rounded-xl p-4 shadow-2xs border border-slate-200 border-l-4 border-l-orange-500 relative overflow-hidden">
+            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center text-sm relative flex-shrink-0">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 absolute -top-0.5 -right-0.5 ring-2 ring-white"></span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h2 class="text-sm font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
+                                <span>Pusat Kendali TOC: Pelacak Posisi Kargo &amp; Armada Real-Time</span>
+                            </h2>
+                            <span class="text-[9.5px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> SCADA &amp; IoT Live
+                            </span>
+                        </div>
+                        <p class="text-[11px] text-slate-500 mt-0.5">
+                            Ketik nomor kontainer atau plat truk untuk mendeteksi posisi fisik di kawasan 35 Ha saat pergerakan multi-perangkat berlangsung
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Search Input Bar & Fast Action Button -->
+                <div class="flex items-center gap-2 w-full lg:w-auto">
+                    <div class="relative flex-1 lg:w-72">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="tocAssetSearchInput" onkeydown="if(event.key==='Enter') executeTocSearch();" placeholder="Ketik No. Kontainer / Plat Truk..." class="w-full pl-8 pr-8 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition">
+                        <button type="button" id="btnTocClearSearch" onclick="clearTocSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs">
+                            <i class="fa-solid fa-xmark"></i>
+                        </button>
+                    </div>
+                    <button type="button" onclick="executeTocSearch()" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer flex-shrink-0">
+                        <i class="fa-solid fa-crosshairs text-[11px]"></i>
+                        <span>Lacak</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Quick Suggestion Pills (Instant 1-Click for Presentation) -->
+            <div class="relative z-10 flex items-center gap-1.5 py-2 overflow-x-auto text-[10px] text-slate-600 no-scrollbar">
+                <span class="font-bold text-slate-500 uppercase tracking-wider text-[9px] flex items-center gap-1 flex-shrink-0">
+                    <i class="fa-solid fa-bolt text-orange-500"></i> Sampel Cepat:
+                </span>
+                <div id="tocQuickPills" class="flex items-center gap-1.5 flex-nowrap">
+                    <button type="button" onclick="trackSampleAsset('MSCU9180379')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">MSCU9180379 (Siding KA)</button>
+                    <button type="button" onclick="trackSampleAsset('MAEU9185181')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">MAEU9185181 (Reefer 380V)</button>
+                    <button type="button" onclick="trackSampleAsset('B 2918 CKR')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">B 2918 CKR (Truk)</button>
+                    <button type="button" onclick="trackSampleAsset('TGHU9182222')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">TGHU9182222 (Antrean Luar)</button>
+                </div>
+            </div>
+
+            <!-- Live Track Result Card (Populated by JS) -->
+            <div id="tocLiveResultPanel" class="relative z-10 mt-1 bg-slate-50/90 rounded-xl p-3.5 border border-slate-200">
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
+                    <!-- Left: Position & Location Title (5 Cols) -->
+                    <div class="md:col-span-5 border-b md:border-b-0 md:border-r border-slate-200 pb-2.5 md:pb-0 md:pr-3">
+                        <div class="flex items-center gap-2 mb-1 flex-wrap">
+                            <span id="tocResBadge" class="px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider bg-sky-50 text-sky-800 border border-sky-200">IN YARD STACKING</span>
+                            <span id="tocResZone" class="text-[10px] text-slate-700 font-bold bg-white border border-slate-200 px-1.5 py-0.5 rounded">Zona Z2</span>
+                            <span id="tocResCargo" class="text-[10px] text-orange-700 font-bold font-mono">DRY 40FT HC</span>
+                        </div>
+                        <h3 id="tocResLocationTitle" class="text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                            <i class="fa-solid fa-location-dot text-orange-600"></i>
+                            <span id="tocResLocationText">Memuat Posisi Terkini...</span>
+                        </h3>
+                        <p id="tocResLocationDetail" class="text-[11px] text-slate-600 mt-0.5 leading-snug">
+                            Sinkronisasi telemetri sensor SCADA &amp; IoT Dry Port 35 Ha
+                        </p>
+                    </div>
+
+                    <!-- Middle: Fleet, Equipment, Customs & Billing (4 Cols) -->
+                    <div class="md:col-span-4 border-b md:border-b-0 md:border-r border-slate-200 pb-2.5 md:pb-0 md:pr-3 text-[11px] space-y-1">
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Armada Truk:</span>
+                            <strong id="tocResTruck" class="font-mono text-slate-900">-</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Alat Berat (VMT):</span>
+                            <strong id="tocResEquip" class="text-slate-800">-</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Pabean CEISA:</span>
+                            <strong id="tocResCustoms" class="text-emerald-700">-</strong>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-500">Faktur Billing:</span>
+                            <strong id="tocResBilling" class="text-slate-900">-</strong>
+                        </div>
+                    </div>
+
+                    <!-- Right: Journey Flow Status & Action Buttons (3 Cols) -->
+                    <div class="md:col-span-3 flex flex-col justify-between h-full gap-2 text-right">
+                        <div>
+                            <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-500 mb-1">Status Alur 6-Tahap</div>
+                            <!-- Mini Step Flow Ribbon -->
+                            <div class="flex items-center justify-end gap-1">
+                                <span id="flowStep_OUTSIDE" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Pre-Gate Outside"></span>
+                                <span class="w-2 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z1" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Gate In / Scale"></span>
+                                <span class="w-2 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z2" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Yard Stacking"></span>
+                                <span class="w-2 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z3" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="CFS Warehouse"></span>
+                                <span class="w-2 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z4" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Reefer / Rail"></span>
+                                <span class="w-2 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_GATE_OUT" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Gate Out"></span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-end gap-1.5 flex-wrap">
+                            <button type="button" id="btnTocInspectDetail" onclick="inspectCurrentTocAsset()" class="px-2.5 py-1 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-[10.5px] font-bold transition flex items-center gap-1 cursor-pointer shadow-2xs">
+                                <i class="fa-solid fa-eye text-[9.5px]"></i>
+                                <span>Detail 3-Aliran</span>
+                            </button>
+                            <a id="btnTocYardLink" href="dashboard.php?page=yard" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[10.5px] font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-boxes-stacked text-[9.5px]"></i>
+                                <span>Yard 2D</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ======================================================================= -->
         <!-- 2. TOP METRIC ROW (6 UNIFIED KPI CARDS - BALANCED & HIGH-CONTRAST)     -->
         <!-- ======================================================================= -->
-        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
+        <div class="cidp-kpi-6-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3">
             
             <!-- KPI 1: Yard Stacking (Tahap 3 Alur Multimoda) -->
-            <div id="kpiCard_yard" onclick="setBerandaStageFilter('stage_3')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-blue-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter Tahap 3 (Stacking Yard Blok A-C)">
+            <div id="kpiCard_yard" onclick="setBerandaStageFilter('stage_3')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-blue-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter Tahap 3 (Stacking Yard Blok A-C)">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-[#0170b9] transition"><?= __('kpi_yard_stacking', 'Yard Stacking') ?></span>
                     <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
@@ -149,8 +291,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <h3 id="kpiYardVal" class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><?= number_format($containers_yard) ?></h3>
                         <span class="text-xs text-slate-600 font-semibold mt-1 block">/ <?= number_format($yard_cap_max) ?> TEU</span>
                     </div>
-                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                    <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
                             <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="kpiYardRing" class="text-[#0170b9] transition-all duration-500" stroke-dasharray="<?= max(10, min(100, (int)$yard_occupancy)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
@@ -158,7 +300,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
                     <span class="text-emerald-700 font-bold flex items-center gap-1">
                         <i class="fa-solid fa-arrow-trend-up text-[10px]"></i>
                         <span><?= __('kpi_yard_trend', '+4.2% (24h)') ?></span>
@@ -168,7 +310,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
             </div>
 
             <!-- KPI 2: Gate Turnaround Time -->
-            <div id="kpiCard_gate" onclick="setBerandaStageFilter('stage_1')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-orange-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter antrean & aktivitas Gerbang ANPR / Timbangan VGM">
+            <div id="kpiCard_gate" onclick="setBerandaStageFilter('stage_1')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-orange-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter antrean & aktivitas Gerbang ANPR / Timbangan VGM">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-[#ea580c] transition"><?= __('kpi_gate_turnaround', 'Gate Turnaround') ?></span>
                     <span class="w-7 h-7 rounded-lg bg-orange-50 text-[#ea580c] border border-orange-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
@@ -181,8 +323,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiGateVal"><?= $gate_turnaround ?></span> <span class="text-xs font-bold text-slate-500"><?= ($current_lang === 'en') ? 'min' : 'mnt' ?></span></h3>
                         <span class="text-xs text-emerald-700 font-semibold mt-1 block"><?= __('kpi_gate_target', 'Target &le; 20 mnt') ?></span>
                     </div>
-                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                    <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
                             <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path class="text-[#ea580c] transition-all duration-500" stroke-dasharray="91, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
@@ -190,14 +332,14 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
                     <span class="font-bold text-slate-700"><span id="kpiTrucksCount"><?= $total_trucks ?></span> <?= __('kpi_gate_trucks', 'Truk Aktif') ?></span>
                     <span class="text-emerald-700 font-bold"><?= __('kpi_gate_vbs', 'VBS 98% Tepat') ?></span>
                 </div>
             </div>
 
             <!-- KPI 3: Siding KA Intermodal -->
-            <div id="kpiCard_rail" onclick="setBerandaStageFilter('stage_6')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-sky-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter kontainer di Jalur Rel Siding KA 2518">
+            <div id="kpiCard_rail" onclick="setBerandaStageFilter('stage_6')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-sky-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter kontainer di Jalur Rel Siding KA 2518">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-[#0170b9] transition"><?= __('kpi_rail_siding', 'Siding KA Intermodal') ?></span>
                     <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
@@ -210,8 +352,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiRailVal"><?= $loaded_w ?>/<?= $total_w ?></span> <span class="text-xs font-bold text-slate-500">TEU</span></h3>
                         <span class="text-xs text-[#0170b9] font-semibold mt-1 block"><?= __('kpi_rail_sub', 'KA 2518 ke Priok') ?></span>
                     </div>
-                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                    <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
                             <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="kpiRailRing" class="text-[#0170b9] transition-all duration-500" stroke-dasharray="<?= max(10, (int)$siding_pct) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
@@ -219,14 +361,14 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
                     <span class="font-semibold text-slate-600"><?= __('kpi_rail_track', 'Track S-01 (600m)') ?></span>
                     <span class="font-bold text-orange-600"><?= __('kpi_rail_eta', 'ETA 16:45 WIB') ?></span>
                 </div>
             </div>
 
             <!-- KPI 4: Reefer Cold Chain -->
-            <div id="kpiCard_reefer" onclick="setBerandaStageFilter('stage_5')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-cyan-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter kontainer berpendingin Reefer 380V">
+            <div id="kpiCard_reefer" onclick="setBerandaStageFilter('stage_5')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-cyan-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter kontainer berpendingin Reefer 380V">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-cyan-700 transition"><?= __('kpi_reefer_chain', 'Reefer Cold Chain') ?></span>
                     <span class="w-7 h-7 rounded-lg bg-cyan-50 text-cyan-600 border border-cyan-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
@@ -239,8 +381,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <h3 id="kpiReeferTemp" class="text-xl sm:text-2xl font-black text-cyan-700 font-mono tracking-tight leading-none"><?= $reefer_temp ?>&deg;C</h3>
                         <span class="text-xs text-slate-600 font-semibold mt-1 block"><span id="kpiReeferPlugs" class="font-bold text-cyan-800"><?= $reefer_plugs ?></span> / 300 <?= __('kpi_reefer_plugs', 'Steker') ?></span>
                     </div>
-                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                    <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
                             <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="kpiReeferRing" class="text-cyan-600 transition-all duration-500" stroke-dasharray="<?= max(12, min(100, (int)$reefer_pct)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
@@ -248,14 +390,14 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
                     <span class="font-semibold text-slate-600">Daya 380V Stabil</span>
                     <span class="text-emerald-700 font-bold"><?= __('kpi_reefer_haccp', 'HACCP 98.8% OK') ?></span>
                 </div>
             </div>
 
             <!-- KPI 5: Bea Cukai CEISA 4.0 -->
-            <div id="kpiCard_customs" onclick="setBerandaCategoryFilter('customs_hold')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-emerald-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter status kepabeanan CEISA 4.0">
+            <div id="kpiCard_customs" onclick="setBerandaCategoryFilter('customs_hold')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-emerald-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter status kepabeanan CEISA 4.0">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-emerald-700 transition"><?= __('kpi_customs_ceisa', 'Bea Cukai CEISA 4.0') ?></span>
                     <span class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
@@ -268,8 +410,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <h3 id="kpiCustomsVal" class="text-xl sm:text-2xl font-black text-emerald-700 tracking-tight leading-none"><?= number_format($customs_percent, 1) ?>%</h3>
                         <span class="text-xs text-slate-600 font-semibold mt-1 block"><span id="kpiCustomsBox" class="font-bold text-emerald-800"><?= $customs_cleared ?>/<?= $customs_total ?></span> <?= __('kpi_customs_cleared', 'Box Rilis') ?></span>
                     </div>
-                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                    <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
                             <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path class="text-emerald-500 transition-all duration-500" stroke-dasharray="<?= max(12, min(100, (int)$customs_percent)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
@@ -277,14 +419,14 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
                     <span class="font-semibold text-slate-600"><?= __('kpi_customs_release', 'SPPB Otomatis') ?></span>
                     <span class="text-emerald-700 font-bold"><?= __('kpi_customs_xray', 'X-Ray 6MeV OK') ?></span>
                 </div>
             </div>
 
             <!-- KPI 6: CFS & Terminal Billing -->
-            <div id="kpiCard_cfs" onclick="setBerandaStageFilter('stage_4')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-amber-400 hover:shadow-sm transition flex flex-col justify-between group" title="Klik untuk memfilter pekerjaan CFS Stripping/Stuffing & Billing">
+            <div id="kpiCard_cfs" onclick="setBerandaStageFilter('stage_4')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-amber-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter pekerjaan CFS Stripping/Stuffing & Billing">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-amber-700 transition"><?= __('kpi_cfs_billing', 'CFS &amp; Billing') ?></span>
                     <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
@@ -297,8 +439,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiCfsJobs"><?= $cfs_jobs ?></span><span class="text-sm font-bold text-slate-500">/24 <?= __('kpi_cfs_jobs', 'Job') ?></span></h3>
                         <span class="text-xs text-amber-700 font-semibold mt-1 block"><?= __('kpi_cfs_ramps', '5 Rampa LCL Aktif') ?></span>
                     </div>
-                    <div class="relative w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <svg class="w-14 h-14 transform -rotate-90" viewBox="0 0 36 36">
+                    <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
+                        <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
                             <path class="text-slate-100" stroke-width="3.8" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                             <path id="kpiCfsRing" class="text-amber-500 transition-all duration-500" stroke-dasharray="<?= max(12, min(100, (int)$cfs_pct)) ?>, 100" stroke-width="3.8" stroke-linecap="round" stroke="currentColor" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
                         </svg>
@@ -306,7 +448,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     </div>
                 </div>
 
-                <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px]">
+                <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
                     <span class="font-semibold text-slate-600"><?= __('kpi_cfs_omzet', 'Omzet Lunas') ?></span>
                     <span id="kpiBillingPaid" class="text-emerald-700 font-extrabold"><?= ($current_lang === 'en') ? 'Rp ' . number_format($paid_rev / 1000000, 1) . 'M Paid' : 'Rp ' . number_format($paid_rev / 1000000, 1) . 'Jt Lunas' ?></span>
                 </div>
@@ -341,7 +483,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
             </div>
 
-            <div class="cidp-flow grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-3 relative z-10">
+            <div class="cidp-flow cidp-flow-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 relative z-10">
                 <!-- Stage 1: Gate-In ANPR OCR -->
                 <div id="ribbon_stage_1" onclick="setBerandaStageFilter('stage_1')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
                     <div class="flex items-center justify-between mb-2">
@@ -491,7 +633,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         <!-- ======================================================================= -->
         <!-- 4. MID ANALYTICAL VISUAL GRID (CHARTS & DIAGRAMS - 4 COLUMNS)          -->
         <!-- ======================================================================= -->
-        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+        <div class="cidp-chart-4-grid grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-3.5">
             
             <!-- Col 1: Gate Throughput vs VBS Hourly Demand -->
             <div class="bg-white rounded-xl shadow-2xs border border-slate-200 p-3 sm:p-3.5 flex flex-col justify-between">
@@ -611,7 +753,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         <!-- ======================================================================= -->
         <!-- 5. FACILITY SPATIAL RADAR & CUSTOMS INSPECTION HUB (INTERACTIVE ZONES) -->
         <!-- ======================================================================= -->
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+        <div class="cidp-tri-panel-grid grid grid-cols-1 xl:grid-cols-12 gap-3">
             
             <!-- Left: 4-Zone Spatial Terminal Distribution Grid (Clickable Cross-Filter) (4 Cols) -->
             <div class="xl:col-span-4 bg-white/95 backdrop-blur-xs rounded-xl shadow-2xs border border-slate-200/90 p-3 sm:p-3.5 flex flex-col justify-between relative overflow-hidden">
@@ -841,7 +983,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <i class="fa-solid fa-print text-[#0170b9]"></i>
                         <span>Cetak Audit Finansial</span>
                     </a>
-                    <a href="dashboard.php?page=billing" class="px-2.5 py-1 rounded-lg bg-[#0170b9] hover:bg-[#004b87] text-white text-[10px] font-bold flex items-center gap-1 transition">
+                    <a href="dashboard.php?page=billing" class="px-2.5 py-1 rounded-lg bg-[#0170b9] hover:bg-blue-700 text-white text-[10px] font-bold flex items-center gap-1 transition">
                         <span>Buka Modul Billing ERP</span>
                         <i class="fa-solid fa-arrow-right text-[9px]"></i>
                     </a>
@@ -851,7 +993,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
             <div class="grid grid-cols-1 xl:grid-cols-12 gap-3.5 items-stretch">
                 <!-- Left (5 Cols): 4 Financial Telemetry Cards & Demurrage Exposure Alert -->
                 <div class="xl:col-span-5 flex flex-col justify-between gap-2.5">
-                    <div class="grid grid-cols-2 gap-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <!-- Fin Card 1: Total Invoiced -->
                         <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/70">
                             <div class="flex items-center justify-between text-[9px] font-bold text-slate-500 uppercase">
@@ -905,17 +1047,17 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                     </div>
 
                     <!-- Commercial Gate-Out Interlock Bar -->
-                    <div class="p-2.5 rounded-xl bg-gradient-to-r from-[#002f5e] to-[#0170b9] text-white flex items-center justify-between gap-2">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 border-l-4 border-l-emerald-500 text-slate-800 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5">
-                            <div class="w-7 h-7 rounded-lg bg-white/15 flex items-center justify-center text-orange-300 text-xs flex-shrink-0">
-                                <i class="fa-solid fa-lock-open"></i>
+                            <div class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-600 text-xs flex-shrink-0">
+                                <i class="fa-solid fa-shield-check"></i>
                             </div>
                             <div>
-                                <div class="text-[10.5px] font-extrabold">Interlock Komersial Gate-Out &amp; Palang ANPR</div>
-                                <div class="text-[9px] text-blue-100">Palang gerbang keluar hanya terbuka otomatis jika Faktur Odoo berstatus <strong>PAID</strong> &amp; SPPB <strong>CLEARED</strong>.</div>
+                                <div class="text-[10.5px] font-extrabold text-slate-900">Interlock Komersial Gate-Out &amp; Palang ANPR</div>
+                                <div class="text-[9px] text-slate-600">Palang gerbang keluar hanya terbuka otomatis jika Faktur Odoo berstatus <strong class="text-emerald-700">PAID</strong> &amp; SPPB <strong class="text-emerald-700">CLEARED</strong>.</div>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded bg-emerald-400/20 border border-emerald-300/40 text-emerald-200 font-mono font-bold text-[8.5px] flex-shrink-0">
+                        <span class="px-2 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-emerald-700 font-mono font-bold text-[8.5px] flex-shrink-0">
                             ACTIVE LOCK
                         </span>
                     </div>
@@ -963,23 +1105,23 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         <!-- ======================================================================= -->
         
         <!-- Banner Status Filter Lintas-Elemen (Tampil saat filter Stage / Zona aktif) -->
-        <div id="activeCrossFilterBanner" class="hidden bg-gradient-to-r from-[#002f5e] via-[#0170b9] to-[#004b87] text-white rounded-xl px-4 py-2.5 shadow-sm flex flex-wrap items-center justify-between gap-2 animate-fadeIn">
+        <div id="activeCrossFilterBanner" class="hidden bg-orange-50 border border-orange-200 text-slate-900 rounded-xl px-4 py-2.5 shadow-2xs flex flex-wrap items-center justify-between gap-2 animate-fadeIn">
             <div class="flex items-center gap-2.5 text-xs">
-                <span class="w-6 h-6 rounded-lg bg-white/15 flex items-center justify-center text-orange-300">
+                <span class="w-6 h-6 rounded-lg bg-white border border-orange-200 flex items-center justify-center text-orange-600">
                     <i class="fa-solid fa-filter"></i>
                 </span>
                 <div>
-                    <span class="text-[10px] uppercase tracking-wider text-blue-200 font-bold block">Mode Filter Lintas-Elemen Aktif:</span>
-                    <strong id="activeCrossFilterTitle" class="text-xs sm:text-sm font-extrabold text-white">Menampilkan Semua Tahapan &amp; Zona</strong>
+                    <span class="text-[10px] uppercase tracking-wider text-orange-700 font-bold block">Mode Filter Lintas-Elemen Aktif:</span>
+                    <strong id="activeCrossFilterTitle" class="text-xs sm:text-sm font-extrabold text-slate-900">Menampilkan Semua Tahapan &amp; Zona</strong>
                 </div>
             </div>
-            <button type="button" onclick="resetBerandaFilters()" class="px-3 py-1 rounded-lg bg-orange-500 hover:bg-orange-600 text-white text-[10.5px] font-extrabold flex items-center gap-1.5 shadow-xs transition cursor-pointer">
+            <button type="button" onclick="resetBerandaFilters()" class="px-3 py-1 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-[10.5px] font-extrabold flex items-center gap-1.5 shadow-2xs transition cursor-pointer">
                 <i class="fa-solid fa-rotate-left"></i>
                 <span>Tampilkan Semua Data (Reset)</span>
             </button>
         </div>
 
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3">
+        <div class="cidp-tri-panel-grid grid grid-cols-1 xl:grid-cols-12 gap-3">
             
             <!-- Left: Live SCADA Field Telemetry Feed (5 Cols) -->
             <div class="xl:col-span-5 bg-white rounded-xl shadow-2xs border border-slate-200 p-3 sm:p-3.5 flex flex-col justify-between">
@@ -1099,7 +1241,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
             </div>
 
-            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2 xl:gap-2.5 text-[10.5px]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-2.5 text-[10.5px]">
                 <div class="p-2 rounded-lg border border-slate-200 bg-slate-50 flex items-center justify-between">
                     <div class="flex items-center gap-2 min-w-0">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
@@ -1166,17 +1308,17 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 <div id="berandaInspectModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4">
     <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-200 overflow-hidden animate-fadeIn">
         <!-- Modal Header -->
-        <div class="bg-gradient-to-r from-[#002f5e] to-[#0170b9] px-5 py-3.5 text-white flex items-center justify-between">
+        <div class="bg-slate-50 border-b border-slate-200 px-5 py-3.5 text-slate-900 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center text-orange-300">
+                <div class="w-8 h-8 rounded-lg bg-orange-50 border border-orange-200 flex items-center justify-center text-orange-600">
                     <i class="fa-solid fa-box-open"></i>
                 </div>
                 <div>
-                    <span class="text-[9px] font-extrabold uppercase tracking-wider text-blue-200 block">Inspeksi Terpadu 3-Aliran Logistik</span>
-                    <h3 id="mdlCtrNumber" class="text-base font-black font-mono tracking-tight">MSKU9920194</h3>
+                    <span class="text-[9px] font-extrabold uppercase tracking-wider text-slate-500 block">Inspeksi Terpadu 3-Aliran Logistik</span>
+                    <h3 id="mdlCtrNumber" class="text-base font-black font-mono tracking-tight text-slate-900">MSKU9920194</h3>
                 </div>
             </div>
-            <button type="button" onclick="closeBerandaInspectModal()" class="w-7 h-7 rounded-lg bg-white/10 hover:bg-white/20 flex items-center justify-center text-white cursor-pointer">
+            <button type="button" onclick="closeBerandaInspectModal()" class="w-7 h-7 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-600 cursor-pointer">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
@@ -1197,7 +1339,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                 <!-- 1. Aliran Fisik -->
                 <div class="p-3 rounded-xl border border-blue-200 bg-blue-50/30 space-y-1.5">
-                    <div class="font-extrabold text-[#002f5e] text-[10.5px] uppercase flex items-center gap-1.5 border-b border-blue-200 pb-1">
+                    <div class="font-extrabold text-slate-900 text-[10.5px] uppercase flex items-center gap-1.5 border-b border-blue-200 pb-1">
                         <i class="fa-solid fa-cubes-stacked text-[#0170b9]"></i> 1. Aliran Fisik
                     </div>
                     <div class="text-[10.5px] space-y-1">
@@ -1243,8 +1385,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 <i class="fa-solid fa-arrow-up-right-from-square text-[10px]"></i>
             </a>
             <div class="flex items-center gap-2">
-                <button type="button" onclick="printInspectedContainerInvoice()" class="px-3 py-1.5 rounded-lg bg-[#002f5e] hover:bg-[#0170b9] text-white text-xs font-extrabold flex items-center gap-1.5 cursor-pointer transition">
-                    <i class="fa-solid fa-print text-orange-300"></i>
+                <button type="button" onclick="printInspectedContainerInvoice()" class="px-3 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-xs font-extrabold flex items-center gap-1.5 cursor-pointer transition">
+                    <i class="fa-solid fa-print"></i>
                     <span>Cetak Faktur &amp; Dossier Resmi (A4)</span>
                 </button>
                 <button type="button" onclick="closeBerandaInspectModal()" class="px-3 py-1.5 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-xs font-bold cursor-pointer transition">
@@ -1269,7 +1411,8 @@ let berandaState = {
     activeCategory: 'all', // 'all', 'dry_yard', 'reefer', 'rail', 'demurrage', 'customs_hold'
     activeInvoiceTab: 'ALL',
     autoSyncEnabled: true,
-    countdown: 15,
+    syncInterval: 5,
+    countdown: 5,
     inspectedContainer: null
 };
 
@@ -1319,7 +1462,7 @@ function renderBerandaInvoices() {
         const safeInv = encodeURIComponent(JSON.stringify(inv));
         return `
         <tr class="hover:bg-blue-50/30 transition">
-            <td class="py-1.5 px-2 font-mono font-bold text-[#002f5e]">${inv.invoice_number}</td>
+            <td class="py-1.5 px-2 font-mono font-bold text-slate-900">${inv.invoice_number}</td>
             <td class="py-1.5 px-2 font-mono font-bold text-[#0170b9]">${inv.container_number}</td>
             <td class="py-1.5 px-2 font-semibold text-slate-800 truncate max-w-[150px]">${inv.customer_name}</td>
             <td class="py-1.5 px-2 text-slate-600 truncate max-w-[140px]">${inv.service_type}</td>
@@ -1594,6 +1737,9 @@ function updateCrossFilterUI() {
 
     renderBerandaScadaFeed();
     renderBerandaConsignments();
+            if (typeof currentTrackedAsset === 'string' && currentTrackedAsset) {
+                executeTocSearch(currentTrackedAsset, true);
+            }
 }
 
 function setBerandaStageFilter(stageKey) {
@@ -1772,7 +1918,7 @@ async function fetchLiveBerandaTelemetry(manual = false) {
             if (spinner) spinner.classList.remove('fa-spin');
             if (feedBadge) feedBadge.innerHTML = `<i class="fa-solid fa-bolt mr-0.5 text-[8px]"></i>Synced ${new Date().toLocaleTimeString('id-ID')} WIB`;
         }, 300);
-        berandaState.countdown = 15;
+        berandaState.countdown = berandaState.syncInterval || 5;
     }
 }
 
@@ -1781,7 +1927,7 @@ function toggleBerandaAutoSync() {
     const dot = document.getElementById('autoSyncDot');
     const cd = document.getElementById('autoSyncCountdown');
     if (berandaState.autoSyncEnabled) {
-        berandaState.countdown = 15;
+        berandaState.countdown = berandaState.syncInterval || 5;
         if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
         if (cd) cd.innerText = '15s';
     } else {
@@ -2148,4 +2294,138 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// =============================================================================
+// TOC UNIVERSAL ASSET & CARGO LIVE LOCATOR CONTROLLER
+// =============================================================================
+let currentTrackedAsset = 'MSCU9180379';
+
+function cycleSyncSpeed() {
+    const speeds = [5, 15, 30];
+    const current = berandaState.syncInterval || 5;
+    const nextIdx = (speeds.indexOf(current) + 1) % speeds.length;
+    berandaState.syncInterval = speeds[nextIdx];
+    berandaState.countdown = berandaState.syncInterval;
+    const btn = document.getElementById('btnToggleSyncSpeed');
+    const cd = document.getElementById('autoSyncCountdown');
+    if (btn) btn.innerText = '⚡ ' + berandaState.syncInterval + 's' + (berandaState.syncInterval === 5 ? ' (Live)' : '');
+    if (cd) cd.innerText = berandaState.syncInterval + 's';
+}
+
+function clearTocSearch() {
+    const inp = document.getElementById('tocAssetSearchInput');
+    const btn = document.getElementById('btnTocClearSearch');
+    if (inp) { inp.value = ''; inp.focus(); }
+    if (btn) btn.classList.add('hidden');
+}
+
+function trackSampleAsset(q) {
+    const inp = document.getElementById('tocAssetSearchInput');
+    if (inp) inp.value = q;
+    executeTocSearch(q);
+}
+
+function executeTocSearch(queryOverride, silent = false) {
+    const inp = document.getElementById('tocAssetSearchInput');
+    const clearBtn = document.getElementById('btnTocClearSearch');
+    const q = (queryOverride || (inp ? inp.value : '')).trim();
+    if (clearBtn) {
+        if (q) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+    }
+    if (!q) return;
+
+    currentTrackedAsset = q;
+    fetch('api/track_asset.php?q=' + encodeURIComponent(q))
+        .then(r => r.json())
+        .then(data => {
+            if (data.success && data.found) {
+                renderTocResult(data);
+            } else {
+                if (!silent) alert(data.message || 'Aset tidak ditemukan');
+            }
+        })
+        .catch(err => {
+            console.error('Error tracking asset:', err);
+        });
+}
+
+function renderTocResult(data) {
+    const a = data.asset;
+    const p = data.position;
+    const b = data.billing;
+
+    const locText = document.getElementById('tocResLocationText');
+    const locDetail = document.getElementById('tocResLocationDetail');
+    const badge = document.getElementById('tocResBadge');
+    const zone = document.getElementById('tocResZone');
+    const cargo = document.getElementById('tocResCargo');
+    const truck = document.getElementById('tocResTruck');
+    const equip = document.getElementById('tocResEquip');
+    const customs = document.getElementById('tocResCustoms');
+    const billing = document.getElementById('tocResBilling');
+    const yardLink = document.getElementById('btnTocYardLink');
+
+    if (locText) locText.innerText = p.location_title;
+    if (locDetail) locDetail.innerText = p.location_detail;
+    if (badge) {
+        badge.innerText = p.badge_label;
+        if (p.badge_color === 'cyan') badge.className = 'px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider bg-cyan-50 text-cyan-800 border border-cyan-200';
+        else if (p.badge_color === 'emerald') badge.className = 'px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-800 border border-emerald-200';
+        else if (p.badge_color === 'amber') badge.className = 'px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider bg-amber-50 text-amber-800 border border-amber-200';
+        else if (p.badge_color === 'slate') badge.className = 'px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider bg-slate-100 text-slate-700 border border-slate-300';
+        else badge.className = 'px-2 py-0.5 rounded-md text-[9.5px] font-extrabold uppercase tracking-wider bg-sky-50 text-sky-800 border border-sky-200';
+    }
+    if (zone) zone.innerText = p.zone_name;
+    if (cargo) cargo.innerText = (a.cargo_type || 'DRY') + ' ' + (a.size_type || '40FT HC');
+    if (truck) truck.innerText = (a.license_plate !== '-' ? a.license_plate : 'N/A') + (a.driver_name ? ' (' + a.driver_name + ')' : '');
+    if (equip) equip.innerText = a.handling_equipment || 'Reach Stacker RS-02';
+    if (customs) {
+        customs.innerText = a.customs_status === 'SPPB_CLEARED' ? 'SPPB Cleared (Jalur Hijau)' : (a.customs_status === 'RED_HOLD' ? 'Tahanan Jalur Merah' : 'Menunggu Kliring CEISA 4.0');
+        customs.className = a.customs_status === 'SPPB_CLEARED' ? 'text-emerald-700' : 'text-amber-700';
+    }
+    if (billing) {
+        billing.innerText = (b.amount_formatted !== '-' ? b.amount_formatted : 'Rp 0') + ' (' + b.payment_status + ' • ' + (b.odoo_status.includes('SYNCED') ? 'Odoo Synced' : 'Ready') + ')';
+    }
+    if (yardLink) {
+        if (p.block && p.block !== 'OUTSIDE') {
+            yardLink.href = 'dashboard.php?page=yard&block=' + encodeURIComponent(p.block);
+        } else {
+            yardLink.href = 'dashboard.php?page=gate';
+        }
+    }
+
+    // Update Mini Step Flow Ribbon
+    ['OUTSIDE', 'Z1', 'Z2', 'Z3', 'Z4', 'GATE_OUT'].forEach(st => {
+        const dot = document.getElementById('flowStep_' + st);
+        if (dot) {
+            dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300 transition';
+        }
+    });
+
+    const activeStepDot = document.getElementById('flowStep_' + p.zone_code);
+    if (activeStepDot) {
+        activeStepDot.className = 'w-2.5 h-2.5 rounded-full bg-orange-600 ring-2 ring-orange-200 animate-pulse';
+    }
+}
+
+function inspectCurrentTocAsset() {
+    if (!currentTrackedAsset) return;
+    const found = (berandaState.containers || []).find(c => c.container_number.toUpperCase() === currentTrackedAsset.toUpperCase());
+    if (found) {
+        openBerandaInspectModal(found);
+    } else {
+        window.location.href = 'dashboard.php?page=kontainer&search=' + encodeURIComponent(currentTrackedAsset);
+    }
+}
+
+// Inisialisasi pelacakan default saat DOM selesai
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(function() {
+        if (typeof executeTocSearch === 'function') {
+            executeTocSearch('MSCU9180379');
+        }
+    }, 400);
+});
+
 </script>

@@ -60,37 +60,89 @@ function toggleMobileSearch() {
 }
 
 // =============================================================================
-// CONTROL TOWER FULLSCREEN DISPLAY MODE (F11 / WALL DISPLAY)
+// CONTROL TOWER FULLSCREEN (sederhana, tanpa iframe, tanpa loop)
+// Aturan: browser selalu keluar dari Fullscreen API saat halaman di-reload.
+// Maka bila user sedang fullscreen lalu klik link internal, kita simpan penanda
+// SEMENTARA (sessionStorage, kedaluwarsa 20 dtk) dan masuk fullscreen lagi pada
+// interaksi pertama di halaman baru. Esc / tombol Exit menghapus penanda.
 // =============================================================================
-function toggleFullScreen() {
-    const fsIcon = document.getElementById('fullscreenIcon');
-    if (!document.fullscreenElement) {
-        if (document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen();
-        } else if (document.documentElement.webkitRequestFullscreen) {
-            document.documentElement.webkitRequestFullscreen();
-        }
-        if (fsIcon) fsIcon.classList.replace('fa-expand', 'fa-compress');
-    } else {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        }
-        if (fsIcon) fsIcon.classList.replace('fa-compress', 'fa-expand');
+const CIDP_FS_RESUME = 'cidp_fs_resume_ts';
+
+function isFsActive() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+}
+
+function enterFs() {
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) { try { const p = req.call(el); if (p && p.catch) p.catch(function(){}); } catch (e) {} }
+}
+
+function exitFs() {
+    try {
+        if (document.fullscreenElement && document.exitFullscreen) document.exitFullscreen();
+        else if (document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
+    } catch (e) {}
+}
+
+function clearFsResume() { try { sessionStorage.removeItem(CIDP_FS_RESUME); } catch (e) {} }
+
+function syncFullscreenUI() {
+    const active = isFsActive();
+    const icon = document.getElementById('fullscreenIcon');
+    const btn = document.getElementById('fullscreenToggleBtn');
+    if (icon) {
+        icon.classList.toggle('fa-compress', active);
+        icon.classList.toggle('fa-expand', !active);
+    }
+    if (btn) {
+        ['bg-orange-50', 'text-orange-600'].forEach(function(c) { btn.classList.toggle(c, active); });
+        btn.title = active ? 'Keluar dari Layar Penuh' : 'Layar Penuh (F11)';
     }
 }
 
-document.addEventListener('fullscreenchange', function() {
-    const fsIcon = document.getElementById('fullscreenIcon');
-    if (!fsIcon) return;
-    if (document.fullscreenElement) {
-        fsIcon.classList.replace('fa-expand', 'fa-compress');
-    } else {
-        fsIcon.classList.replace('fa-compress', 'fa-expand');
-    }
-});
+function toggleFullScreen() {
+    clearFsResume();
+    if (isFsActive()) exitFs(); else enterFs();
+}
 
+document.addEventListener('fullscreenchange', function() {
+    // Keluar karena Esc / tombol Exit: batalkan penanda agar tidak masuk fullscreen sendiri
+    if (!isFsActive()) {
+        // Jika sedang berpindah halaman (penanda baru dibuat < 1 dtk lalu) jangan dihapus
+        let ts = 0;
+        try { ts = parseInt(sessionStorage.getItem(CIDP_FS_RESUME) || '0', 10); } catch (e) {}
+        if (!ts || Date.now() - ts > 1000) clearFsResume();
+    }
+    syncFullscreenUI();
+});
+document.addEventListener('webkitfullscreenchange', syncFullscreenUI);
+
+// Saat klik link internal ketika fullscreen: tandai agar dilanjutkan di halaman berikutnya
+document.addEventListener('click', function(event) {
+    if (!isFsActive()) return;
+    const link = event.target.closest && event.target.closest('a[href]');
+    if (!link || event.ctrlKey || event.metaKey || event.shiftKey || link.target === '_blank') return;
+    const href = link.getAttribute('href') || '';
+    if (!href || href.charAt(0) === '#' || href.indexOf('javascript:') === 0) return;
+    try { sessionStorage.setItem(CIDP_FS_RESUME, String(Date.now())); } catch (e) {}
+}, true);
+
+// Interaksi pertama di halaman baru (klik/tombol) => lanjutkan fullscreen sekali saja
+function resumeFsOnFirstGesture() {
+    let ts = 0;
+    try { ts = parseInt(sessionStorage.getItem(CIDP_FS_RESUME) || '0', 10); } catch (e) {}
+    if (!ts) return;
+    if (Date.now() - ts > 20000) { clearFsResume(); return; }
+    const once = function() {
+        document.removeEventListener('pointerdown', once, true);
+        document.removeEventListener('keydown', once, true);
+        clearFsResume();
+        if (!isFsActive()) enterFs();
+    };
+    document.addEventListener('pointerdown', once, true);
+    document.addEventListener('keydown', once, true);
+}
 // =============================================================================
 // INDONESIAN BATIK WATERMARK MOTIF ENGINE (SYNCHRONIZED SIDEBAR & HEADER)
 // =============================================================================
@@ -290,4 +342,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateRealTimeClock();
     setInterval(updateRealTimeClock, 1000);
     syncBatikOnLoad();
+    syncFullscreenUI();
+    resumeFsOnFirstGesture();
+
 });

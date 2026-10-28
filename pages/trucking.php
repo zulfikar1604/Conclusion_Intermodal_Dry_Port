@@ -11,7 +11,7 @@ require_once __DIR__ . '/../connection.php';
 // Ambil data truk dari database
 $raw_trucks = [];
 try {
-    $stmt = $pdo->query("SELECT * FROM trucks ORDER BY id ASC");
+    $stmt = $pdo->query("SELECT * FROM trucks WHERE status != 'scheduled' ORDER BY id ASC");
     $raw_trucks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $raw_trucks = [];
@@ -865,22 +865,9 @@ let currentGatePassData = null;
 
 function printTruckGatePass() {
     if (!currentGatePassData) return;
-    if (typeof CIDPPrint !== 'undefined') {
-        const passNo = document.getElementById('p_ticket_no')?.innerText || 'E-PASS-2026';
-        CIDPPrint.printGatePass({
-            passNo: passNo,
-            plate: currentGatePassData.license_plate,
-            driver: currentGatePassData.driver_name,
-            sim: currentGatePassData.driver_sim,
-            transporter: currentGatePassData.company,
-            ctrNum: currentGatePassData.container_number,
-            gross: currentGatePassData.weight_gross,
-            tare: currentGatePassData.weight_tare,
-            net: currentGatePassData.weight_net
-        });
-    } else {
-        window.print();
-    }
+    const plate = encodeURIComponent(currentGatePassData.license_plate || '');
+    const ctr = encodeURIComponent(currentGatePassData.container_number || '');
+    window.open(`document.php?type=gate_pass&plate=${plate}&container=${ctr}&autoprint=1`, '_blank');
 }
 
 function showGatePassModal(data) {

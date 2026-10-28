@@ -38,9 +38,10 @@ $GLOBALS['cidp_lang_dict'] = [
 
         // Menu Items
         'menu_beranda'   => 'Cockpit Eksekutif',
-        'menu_twin'      => 'Digital Twin 2D (Live)',
+        'menu_twin'        => 'Digital Twin (Data Nyata)',
+        'menu_integration' => 'Integrasi Data & OAuth',
         'menu_denah'     => 'Denah Master 35 Ha',
-        'menu_simulator' => 'Simulator 3D Hub',
+        'menu_simulator' => 'Simulator 3D (Eksplorasi Fasilitas)',
         'menu_gate'      => 'Gate & Timbangan VGM',
         'menu_trucking'  => 'Trucking & Shunting',
         'menu_intermodal'=> 'Rail Siding KA Pasoso',
@@ -191,9 +192,10 @@ $GLOBALS['cidp_lang_dict'] = [
 
         // Menu Items
         'menu_beranda'   => 'Executive Cockpit',
-        'menu_twin'      => 'Digital Twin 2D (Live)',
+        'menu_twin'        => 'Digital Twin (Real Data)',
+        'menu_integration' => 'Integrasi Data & OAuth',
         'menu_denah'     => '35 Ha Master Plan',
-        'menu_simulator' => '3D Simulator Hub',
+        'menu_simulator' => '3D Simulator (Facility Tour)',
         'menu_gate'      => 'Gate & VGM Weighbridge',
         'menu_trucking'  => 'Trucking & Shunting',
         'menu_intermodal'=> 'Pasoso Rail Siding',
@@ -368,7 +370,8 @@ function get_localized_menu_clusters($lang = null): array {
     return [
         __('cluster_executive') => [
             'beranda'   => ['icon' => 'fa-gauge-high', 'label' => __('menu_beranda'), 'zone' => 'EXEC'],
-            'twin'      => ['icon' => 'fa-tower-broadcast', 'label' => __('menu_twin'), 'zone' => 'EXEC']
+            'twin'        => ['icon' => 'fa-tower-broadcast', 'label' => __('menu_twin'), 'zone' => 'EXEC'],
+            'integration' => ['icon' => 'fa-network-wired', 'label' => __('menu_integration'), 'zone' => 'EXEC']
         ],
         __('cluster_spatial') => [
             'denah'     => ['icon' => 'fa-map-location-dot', 'label' => __('menu_denah'), 'zone' => 'GIS'],

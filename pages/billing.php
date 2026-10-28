@@ -67,7 +67,7 @@ if (isset($pdo)) {
     try {
         $stmtInv = $pdo->query("SELECT * FROM billing_invoices ORDER BY id DESC");
         $dbInvs = $stmtInv->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($dbInvs)) {
+        if (true || !empty($dbInvs)) {
             $live_invoices = [];
             $kpi_total = 0;
             $kpi_paid = 0;
@@ -98,7 +98,7 @@ if (isset($pdo)) {
                 ];
             }
 
-            if (!empty($live_invoices)) {
+            if (true || !empty($live_invoices)) {
                 $invoices = $live_invoices;
                 $pctPaid = $kpi_total > 0 ? round(($kpi_paid / $kpi_total) * 100, 1) : 0;
                 $pctPending = $kpi_total > 0 ? round(($kpi_pending / $kpi_total) * 100, 1) : 0;
@@ -268,6 +268,9 @@ $billing_info = [
                                     <button onclick="openInvoiceModal('<?= $inv['no'] ?>', '<?= htmlspecialchars(addslashes($inv['pelanggan'])) ?>', <?= $inv['nilai'] ?>, '<?= $inv['status'] ?>')" class="w-6 h-6 rounded-md bg-blue-50 text-blue-600 hover:bg-[#0170b9] hover:text-white transition-colors flex items-center justify-center shadow-2xs cursor-pointer" title="Lihat Rincian Faktur ERP">
                                         <i class="fa-solid fa-eye text-[10px]"></i>
                                     </button>
+                                    <a href="document.php?type=invoice&no=<?= urlencode($inv['no']) ?>&autoprint=1" target="_blank" class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors flex items-center justify-center shadow-2xs" title="Cetak Dokumen Kertas A4 Resmi (Kop Pelindo MTI & Stempel Basah)">
+                                        <i class="fa-solid fa-print text-[10px]"></i>
+                                    </a>
                                     <?php if (!empty($inv['ctr'])): ?>
                                     <a href="dashboard.php?page=kontainer&search=<?= urlencode($inv['ctr']) ?>" class="w-6 h-6 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-800 hover:text-white transition-colors flex items-center justify-center shadow-2xs" title="Lacak Kontainer di Tracking Box">
                                         <i class="fa-solid fa-boxes-stacked text-[10px]"></i>
@@ -954,11 +957,9 @@ $billing_info = [
 
     function printCurrentInvoice() {
         if (!currentInvoiceData) return;
-        if (typeof CIDPPrint !== 'undefined') {
-            CIDPPrint.printInvoice(currentInvoiceData);
-        } else {
-            window.print();
-        }
+        const invNo = encodeURIComponent(currentInvoiceData.number || currentInvoiceData.invoiceNumber || '');
+        const ctr = encodeURIComponent(currentInvoiceData.containerNumber || '');
+        window.open(`document.php?type=invoice&no=${invNo}&container=${ctr}&autoprint=1`, '_blank');
     }
 
     function closeInvoiceModal() {

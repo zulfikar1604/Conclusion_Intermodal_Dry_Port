@@ -59,6 +59,8 @@ $yard_kpis = [
 ];
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 // Handle Form Aksi POST (Relokasi Kontainer / VMT Dispatch)
 $yard_alert = null;
@@ -94,6 +96,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['yard_actio
                 // Update equipment status
                 $stmtEq = $pdo->prepare("UPDATE equipment SET current_container = ?, last_block = ?, status = 'operating', last_updated = NOW() WHERE equipment_id = ?");
                 $stmtEq->execute([$ctr_num, $to_block, $equip_id]);
+                accrue_billing($pdo, $ctr_num, 'L', "Relokasi Yard ($from_block -> $to_block)", 200000);
 
                 $yard_alert = [
                     'type' => 'success',
@@ -145,7 +148,8 @@ if (isset($pdo)) {
         $stmtC = $pdo->query("SELECT * FROM containers WHERE status IN ('in_yard', 'in_transit') ORDER BY id ASC");
         $rawYard = $stmtC->fetchAll(PDO::FETCH_ASSOC);
         $db_all_containers = $rawYard;
-        if (!empty($rawYard)) {
+        if (true || !empty($rawYard)) {
+            $yard_containers = [];
             $live_mapped = [];
             foreach ($rawYard as $c) {
                 $blkRaw = !empty($c['block']) ? strtoupper(trim($c['block'])) : 'A';
@@ -202,7 +206,12 @@ if (isset($pdo)) {
                     'is_live_db'       => true
                 ];
             }
-            if (!empty($live_mapped)) {
+            if (true || !empty($live_mapped)) {
+                $yard_containers = $live_mapped;
+                $__teu = 0; foreach ($yard_containers as $__yc) { $__teu += (strpos($__yc['iso'] ?? '', '22') === 0 ? 1 : 2); }
+                $yard_kpis[1]['val'] = round(($__teu / 15000) * 100, 2) . '%';
+                $yard_kpis[1]['unit'] = '(' . $__teu . ' TEUs)';
+
                 $yard_containers = $live_mapped;
             }
         }
@@ -430,15 +439,15 @@ $vmt_job_orders = [
             </div>
 
             <!-- Visual Nomor Kontainer & Tipe ISO -->
-            <div class="bg-gradient-to-br from-[#0170b9] to-blue-700 rounded-xl p-3.5 text-white space-y-1 relative overflow-hidden shadow-xs">
+            <div class="bg-slate-50 border border-slate-200 border-l-4 border-l-orange-500 rounded-xl p-3.5 text-slate-800 space-y-1 relative overflow-hidden">
                 <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-mono text-blue-100 uppercase tracking-widest">ISO 6346 CONTAINER ID</span>
-                    <span id="yardBoxLine" class="text-[10px] font-bold text-white bg-white/20 px-2 py-0.5 rounded">Maersk Line</span>
+                    <span class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">ISO 6346 CONTAINER ID</span>
+                    <span id="yardBoxLine" class="text-[10px] font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded">Maersk Line</span>
                 </div>
-                <h3 id="yardBoxNumber" class="text-base font-mono font-black tracking-wider text-white">MSKU 982145-8</h3>
-                <div class="flex items-center justify-between text-[11px] text-blue-100 pt-1 border-t border-white/20 mt-2">
+                <h3 id="yardBoxNumber" class="text-base font-mono font-black tracking-wider text-slate-900">MSKU 982145-8</h3>
+                <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-200 mt-2">
                     <span id="yardBoxType">45G1 (40ft High Cube)</span>
-                    <span id="yardBoxWeight" class="font-mono text-amber-300 font-bold">VGM: 28.450 kg</span>
+                    <span id="yardBoxWeight" class="font-mono text-emerald-700 font-bold">VGM: 28.450 kg</span>
                 </div>
             </div>
 

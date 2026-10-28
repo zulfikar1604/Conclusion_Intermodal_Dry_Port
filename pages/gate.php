@@ -7,6 +7,8 @@
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 // Handle Form Aksi POST (Dual-Clearance Gate Out Release)
 $gate_alert = null;
@@ -38,6 +40,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                 if (!empty($ctr_num)) {
                     $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ?");
                     $stmtUpC->execute([$ctr_num]);
+                    $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
+                    accrue_billing($pdo, $ctr_num, 'L', 'Lift-Off & Gate-In Handling', 525000);
+                    accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage)', 275000);
+                    $pdo->prepare("UPDATE preadvice SET status = 'COMPLETED' WHERE container_number = ?")->execute([$ctr_num]);
                 }
 
                 // Log audit event
@@ -77,12 +83,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
 
                 // 2. Update status kontainer
                 if (!empty($ctr_num)) {
-                    $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = 'A', gate_in_time = NOW() WHERE container_number = ?");
+                    $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = 'A', bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gate_in_time = NOW() WHERE container_number = ?");
                     $stmtUpC->execute([$ctr_num]);
+                    $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
+                    accrue_billing($pdo, $ctr_num, 'L', 'Lift-Off & Gate-In Handling', 525000);
+                    accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage)', 275000);
+                    $pdo->prepare("UPDATE preadvice SET status = 'COMPLETED' WHERE container_number = ?")->execute([$ctr_num]);
                 }
 
                 // 3. Catat ke yard_events
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, 'HW-01 ANPR & OCR', ?, NOW())");
+                if (!empty($ctr_num)) { $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]); }
                 $stmtLog->execute([$ctr_num, "Deteksi loop induksi & ANPR $lane. Plat: $plate, Box: $ctr_num. Barrier gate terbuka otomatis."]);
 
                 $gate_alert = [
@@ -142,11 +153,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     if ($exC) {
                         $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, gate_in_time = NOW() WHERE container_number = ?");
                         $stmtUpC->execute([$target_block, $ctr_num]);
+                        $pdo->prepare("UPDATE containers SET bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gross_weight_kg = ? WHERE container_number = ?")->execute([$net > 0 ? $net : $gross, $ctr_num]);
+                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
+                        accrue_billing($pdo, $ctr_num, 'L', 'Weighbridge VGM & Lift-Off Handling', 525000);
+                        accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage Blok ' . $target_block . ')', 275000);
                     } else {
                         $type = ($gross > 20000) ? '40HC' : '20GP';
                         $customs = ($mission === 'drop_export') ? 'EXPORT_READY' : 'SPPB_CLEARED';
-                        $stmtInsC = $pdo->prepare("INSERT INTO containers (container_number, size_type, status, block, bay, row_num, tier, iso_code, weight_gross, customs_status, gate_in_time) VALUES (?, ?, 'in_yard', ?, '04', '02', 1, '45G1', ?, ?, NOW())");
+                        $stmtInsC = $pdo->prepare("INSERT INTO containers (container_number, size_type, status, block, bay, `row`, tier, iso_code, gross_weight_kg, customs_status, gate_in_time) VALUES (?, ?, 'in_yard', ?, 4, 2, 1, '45G1', ?, ?, NOW())");
                         $stmtInsC->execute([$ctr_num, $type, $target_block, $gross, $customs]);
+                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
+                        accrue_billing($pdo, $ctr_num, 'L', 'Weighbridge VGM & Lift-Off Handling', 525000);
+                        accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage Blok ' . $target_block . ')', 275000);
                     }
                 }
 
@@ -180,14 +198,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
     } elseif ($_POST['gate_action'] === 'batch_gate_in') {
         if (isset($pdo)) {
             try {
-                $stmtGetQ = $pdo->query("SELECT * FROM trucks WHERE status = 'queuing'");
+                $stmtGetQ = $pdo->query("SELECT * FROM trucks WHERE status IN ('scheduled', 'queuing')");
                 $batch_list = $stmtGetQ->fetchAll(PDO::FETCH_ASSOC);
                 $count = 0;
                 foreach ($batch_list as $bt) {
                     $b_dest = "Yard Blok " . ($bt['target_block'] ?: 'B');
                     $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = ? WHERE id = ?")->execute([$b_dest, $bt['id']]);
                     if (!empty($bt['container_number'])) {
-                        $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, gate_in_time = NOW() WHERE container_number = ?")->execute([$bt['target_block'] ?: 'B', $bt['container_number']]);
+                        $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gate_in_time = NOW() WHERE container_number = ?")->execute([$bt['target_block'] ?: 'B', $bt['container_number']]);
+                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$bt['container_number'], $bt['license_plate']]);
+                        accrue_billing($pdo, $bt['container_number'], 'L', 'Batch Gate-In & Lift-Off Handling', 525000);
+                        accrue_billing($pdo, $bt['container_number'], 'S', 'Penumpukan Yard (Storage)', 275000);
                     }
                     $count++;
                 }
@@ -209,7 +230,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     ['B 9120 KLP', 'PT Dunex Express Indonesia', 'Bambang Supriyadi', 'pick_import', 'pick_up', NULL, 'A', 'Pabrik MM2100 Cibitung', 14200.00, 14200.00],
                     ['B 9833 TRK', 'PT Cipta Krida Logistik', 'Dedi Suryanto', 'empty_return', 'drop_off', 'TEMU6543210', 'C', 'Pabrik KIIC Karawang', 16500.00, 14100.00],
                     ['B 9502 PQR', 'PT Puninar Jaya', 'Hendra Setiawan', 'empty_release', 'pick_up', NULL, 'C', 'Pabrik EJIP Cikarang', 14100.00, 14100.00],
-                    ['B 9044 XZW', 'PT Kamadjaja Logistics', 'Eko Prasetyo', 'dual_cycle', 'drop_off', 'SUDU5544332', 'B', 'Pabrik GIIC Deltamas', 33100.00, 14300.00]
+                    ['B 9044 XZW', 'PT Kamadjaja Logistics', 'Wahyu Pratama', 'dual_cycle', 'drop_off', 'SUDU5544332', 'B', 'Pabrik GIIC Deltamas', 33100.00, 14300.00]
                 ];
                 $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, company, driver_name, mission_type, job_type, container_number, target_block, destination, weight_gross, weight_tare, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queuing', NOW())");
                 foreach ($demo_queuing as $row) {
@@ -230,7 +251,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
 // Ambil antrian truk terjadwal (Pre-Advised / Queuing) untuk Gate In
 $queuing_trucks = [];
 try {
-    $stmtQ = $pdo->query("SELECT * FROM trucks WHERE status = 'queuing' ORDER BY id ASC");
+    $stmtQ = $pdo->query("SELECT * FROM trucks WHERE status IN ('scheduled', 'queuing') ORDER BY id ASC");
     $queuing_trucks = $stmtQ->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $queuing_trucks = [];
@@ -248,7 +269,7 @@ $ctr_customs_map = [];
 $ctr_billing_map = [];
 
 try {
-    $stmt = $pdo->query("SELECT * FROM trucks ORDER BY COALESCE(gate_out_time, gate_in_time, created_at) DESC LIMIT 20");
+    $stmt = $pdo->query("SELECT * FROM trucks WHERE status != 'scheduled' ORDER BY COALESCE(gate_out_time, gate_in_time, created_at) DESC LIMIT 20");
     $gate_trucks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     foreach ($gate_trucks as $gt) {
@@ -1514,19 +1535,19 @@ foreach ($hardware_list as $item) {
     <!-- ======================================================================= -->
     <div id="tab-ocr-iso" class="tab-content hidden space-y-6">
         <!-- Banner Intro -->
-        <div class="bg-gradient-to-r from-[#0170b9] via-blue-600 to-blue-700 rounded-2xl p-6 text-white shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div class="bg-white rounded-2xl p-5 text-slate-800 shadow-2xs border border-slate-200 border-l-4 border-l-orange-500 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
             <div class="space-y-1.5">
-                <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-blue-400/20 border border-blue-300/30 text-xs font-mono text-blue-200">
+                <div class="inline-flex items-center space-x-2 px-2.5 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-xs font-mono font-bold text-orange-700">
                     <i class="fa-solid fa-microchip"></i>
                     <span>ISO 6346:1995 / BIC Standard Modulo 11</span>
                 </div>
-                <h2 class="text-xl font-bold tracking-tight">Portal Optical Character Recognition (OCR) & Check Digit Engine</h2>
-                <p class="text-xs text-blue-100 max-w-2xl">
+                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">Portal Optical Character Recognition (OCR) & Check Digit Engine</h2>
+                <p class="text-xs text-slate-600 max-w-2xl">
                     Simulasi 4-Camera OCR Gantry (Hikvision iDS-TCV300) yang membaca nomor kontainer, kode ukuran/tipe ISO, serta memvalidasi check digit secara matematis sebelum verifikasi Gate-In dry port.
                 </p>
             </div>
             <div class="flex items-center space-x-2 flex-shrink-0">
-                <button type="button" onclick="triggerOcrDoorScan()" class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-xl text-xs transition-all shadow-md flex items-center space-x-2">
+                <button type="button" onclick="triggerOcrDoorScan()" class="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl text-xs transition-all shadow-2xs flex items-center space-x-2 cursor-pointer">
                     <i class="fa-solid fa-barcode"></i>
                     <span>Scan OCR Otomatis</span>
                 </button>
@@ -1582,7 +1603,7 @@ foreach ($hardware_list as $item) {
                     <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-3">
                         <div class="flex items-center space-x-2">
                             <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                            <span class="text-xs font-mono font-bold text-slate-300">CAM-02: REAR DOOR OCR GANTRY</span>
+                            <span class="text-xs font-mono font-bold text-slate-700">CAM-02: REAR DOOR OCR GANTRY</span>
                         </div>
                         <span id="ocr-fps-tag" class="text-[10px] font-mono text-slate-400">1080P @ 30 FPS • HDR ON</span>
                     </div>
@@ -1641,14 +1662,14 @@ foreach ($hardware_list as $item) {
 
                     <!-- OCR Engine Status Footer -->
                     <div class="mt-4 grid grid-cols-2 gap-3 text-xs font-mono">
-                        <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
-                            <span class="text-slate-400 block text-[10px]">RECOGNITION LATENCY</span>
-                            <span id="ocr-latency-val" class="font-bold text-emerald-400 text-sm">184 ms</span>
+                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-slate-500 block text-[10px] font-bold">RECOGNITION LATENCY</span>
+                            <span id="ocr-latency-val" class="font-bold text-emerald-700 text-sm">184 ms</span>
                             <span class="text-[10px] text-slate-500 block">TensorRT Inference</span>
                         </div>
-                        <div class="bg-slate-800/80 p-2.5 rounded-lg border border-slate-700/60">
-                            <span class="text-slate-400 block text-[10px]">OVERALL CONFIDENCE</span>
-                            <span id="ocr-overall-conf" class="font-bold text-emerald-400 text-sm">99.4%</span>
+                        <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-200">
+                            <span class="text-slate-500 block text-[10px] font-bold">OVERALL CONFIDENCE</span>
+                            <span id="ocr-overall-conf" class="font-bold text-emerald-700 text-sm">99.4%</span>
                             <span class="text-[10px] text-slate-500 block">4/4 Cameras Voted</span>
                         </div>
                     </div>
@@ -1777,10 +1798,10 @@ foreach ($hardware_list as $item) {
     <div id="tab-katalog" class="tab-content hidden space-y-6">
         <!-- Ringkasan CAPEX & Quick Stats -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="bg-gradient-to-br from-[#0170b9] to-blue-600 text-white rounded-2xl p-5 shadow-sm">
-                <span class="text-[11px] font-bold uppercase tracking-wider text-blue-200">Total Nilai Investasi (CAPEX)</span>
-                <p class="text-2xl sm:text-3xl font-bold mt-1">Rp <?= number_format($total_capex, 0, ',', '.') ?></p>
-                <p class="text-xs text-blue-100 mt-2">Mencakup 26 jenis hardware untuk lahan operasional 35 Ha</p>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 border-l-4 border-l-orange-500 shadow-2xs">
+                <span class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Total Nilai Investasi (CAPEX)</span>
+                <p class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">Rp <?= number_format($total_capex, 0, ',', '.') ?></p>
+                <p class="text-xs text-slate-500 mt-2">Mencakup 26 jenis hardware untuk lahan operasional 35 Ha</p>
             </div>
 
             <div class="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -2637,29 +2658,9 @@ function submitGatePass(e) {
 }
 
 function viewGatePassDetail(plate, contOrDo, driver) {
-    if (typeof CIDPPrint !== 'undefined' && typeof CIDPPrint.printGatePass === 'function') {
-        CIDPPrint.printGatePass({
-            passNo: 'GP-' + (plate.replace(/[^A-Za-z0-9]/g, '')) + '-' + Math.floor(1000 + Math.random() * 9000),
-            plate: plate,
-            driver: driver || 'Agus Suprianto (Mitra Angkutan)',
-            sim: 'SIM B2 Umum: 8901239102',
-            transporter: 'PT Samudera Logistik Nusantara',
-            ctrNum: contOrDo || 'MSKU7829104',
-            ctrSize: "40' High Cube (40HC)",
-            gross: 34500,
-            tare: 12200,
-            net: 22300,
-            yardSlot: 'Blok B-02',
-            status: 'Gate-In Terverifikasi (VGM SOLAS)'
-        });
-    } else {
-        alert("=== E-GATE PASS RESMI CIDP ===\n" +
-              "Plat Truk: " + plate + "\n" +
-              "Pengemudi: " + (driver || 'Driver CIDP') + "\n" +
-              "Muatan / DO: " + contOrDo + "\n" +
-              "Status: Terverifikasi Digital Gate System\n" +
-              "Sertifikasi: VGM SOLAS Compliant (Fangda 80T)");
-    }
+    const p = encodeURIComponent(plate || '');
+    const c = encodeURIComponent(contOrDo || '');
+    window.open(`document.php?type=gate_pass&plate=${p}&container=${c}&autoprint=1`, '_blank');
 }
 
 function copyDcsaJsonPayload() {

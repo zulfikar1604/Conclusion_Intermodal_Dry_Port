@@ -25,27 +25,27 @@ require_once __DIR__ . '/layout_master.php';
 <div class="space-y-3.5">
     
     <!-- Top Header Banner (Executive, Clean & Modern) -->
-    <div class="bg-gradient-to-r from-[#0170b9] via-blue-600 to-blue-700 rounded-xl p-3.5 sm:p-4 text-white shadow-xs border border-blue-900/30">
+    <div class="bg-white rounded-xl p-3.5 sm:p-4 text-slate-800 shadow-2xs border border-slate-200 border-l-4 border-l-orange-500">
         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
             <div>
                 <div class="flex items-center space-x-2 mb-1">
-                    <span class="bg-emerald-500 text-white text-[10px] font-extrabold uppercase px-2 py-0.5 rounded flex items-center tracking-wide shadow-2xs">
-                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-ping mr-1.5"></span> LIVE 3D TWIN
+                    <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded flex items-center tracking-wide">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping mr-1.5"></span> EKSPLORASI 3D SANDBOX
                     </span>
-                    <span class="bg-white/10 text-blue-100 text-[10px] px-2 py-0.5 rounded font-mono border border-white/15">
+                    <span class="bg-slate-100 text-slate-700 text-[10px] px-2 py-0.5 rounded font-mono font-bold border border-slate-200">
                         CIDP 35 Ha Terminal Hub
                     </span>
-                    <span class="bg-amber-400/20 text-amber-200 text-[10px] px-2 py-0.5 rounded font-semibold border border-amber-300/30 hidden sm:inline-flex items-center">
-                        <i class="fa-solid fa-bolt mr-1 text-[9px]"></i>Real-Time IoT Interlock
+                    <span class="bg-orange-50 text-orange-700 text-[10px] px-2 py-0.5 rounded font-bold border border-orange-200 hidden sm:inline-flex items-center">
+                        <i class="fa-solid fa-cube mr-1 text-[9px]"></i>Simulasi Non-Destruktif (Read-Only)
                     </span>
                 </div>
-                <h1 class="text-base sm:text-lg font-bold tracking-tight">Virtual 3D Twin &amp; Konsol Sensor IoT</h1>
+                <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Simulator 3D (Eksplorasi Fasilitas &amp; Pergerakan Visual)</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <button onclick="openEndToEndGuideModal()" class="px-3 py-1.5 bg-white/15 hover:bg-white/25 text-white font-bold text-xs rounded-lg border border-white/20 transition flex items-center">
-                    <i class="fa-solid fa-diagram-project mr-1.5 text-xs text-blue-200"></i>Alur 11 Hardware &amp; Finansial
+                <button onclick="openEndToEndGuideModal()" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-lg border border-slate-200 transition flex items-center cursor-pointer">
+                    <i class="fa-solid fa-diagram-project mr-1.5 text-xs text-orange-600"></i>Alur 11 Hardware &amp; Finansial
                 </button>
-                <button onclick="resetSimulation()" id="btnAutoDemo" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs rounded-lg shadow-xs transition flex items-center border border-blue-400/40" title="Reset Posisi Simulasi">
+                <button onclick="resetSimulation()" id="btnAutoDemo" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-lg shadow-2xs transition flex items-center cursor-pointer" title="Reset Posisi Simulasi">
                     <i class="fa-solid fa-rotate-left mr-1.5 text-xs"></i>Reset Simulasi
                 </button>
             </div>

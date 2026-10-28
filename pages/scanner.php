@@ -21,7 +21,7 @@ $scanner_info = [
 $known_containers = [];
 if (isset($pdo)) {
     try {
-        $stmt = $pdo->query("SELECT id, container_number, iso_code, size_type, cargo_type, rfid_tag, sscc_code, owner_company, block, bay, row, tier, customs_status, gross_weight_kg, status FROM containers ORDER BY id ASC");
+        $stmt = $pdo->query("SELECT id, container_number, iso_code, size_type, cargo_type, rfid_tag, sscc_code, owner_company, block, bay, `row`, tier, customs_status, gross_weight_kg, status FROM containers ORDER BY id ASC");
         $known_containers = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
         $known_containers = [];

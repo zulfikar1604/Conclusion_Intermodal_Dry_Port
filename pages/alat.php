@@ -261,57 +261,57 @@ foreach ($equipment_list as $eq) {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-2.5">
                 
                 <!-- Blok A (RS-01) -->
-                <div class="bg-slate-800/60 border <?= $rs01_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-lg p-2.5">
+                <div class="bg-white border <?= $rs01_op ? 'border-orange-300' : 'border-slate-200' ?> rounded-xl p-2.5 shadow-2xs">
                     <div class="flex justify-between items-center mb-1.5">
-                        <span class="text-[11px] font-bold text-blue-400">BLOK A (Dry 40ft)</span>
-                        <span class="w-2 h-2 rounded-full <?= $rs01_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
+                        <span class="text-[11px] font-extrabold text-slate-700">BLOK A (Dry 40ft)</span>
+                        <span class="w-2 h-2 rounded-full <?= $rs01_op ? 'bg-orange-500 animate-ping' : 'bg-emerald-500' ?>"></span>
                     </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs <?= $rs01_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
-                        <span class="font-mono font-bold <?= $rs01_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-xs px-1.5 py-0.5 rounded">RS-01</span>
+                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center space-x-2.5">
+                        <span class="font-mono font-bold <?= $rs01_op ? 'text-orange-700 bg-orange-50 border border-orange-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200' ?> text-xs px-1.5 py-0.5 rounded">RS-01</span>
                         <div class="text-xs">
-                            <strong class="text-slate-200 block text-[11px]"><?= htmlspecialchars($rs01['operator_name']) ?></strong>
+                            <strong class="text-slate-900 block text-[11px]"><?= htmlspecialchars($rs01['operator_name']) ?></strong>
                             <?php if ($rs01_op && !empty($rs01['current_container'])): ?>
-                                <span class="text-purple-300 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs01['current_container']) ?></span>
+                                <span class="text-orange-700 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs01['current_container']) ?></span>
                             <?php else: ?>
-                                <span class="text-slate-400 text-[9px]">Standby Blok <?= htmlspecialchars($rs01['last_block'] ?? 'A') ?> (BBM <?= $rs01['fuel_percent'] ?>%)</span>
+                                <span class="text-slate-500 text-[9px]">Standby Blok <?= htmlspecialchars($rs01['last_block'] ?? 'A') ?> (BBM <?= $rs01['fuel_percent'] ?>%)</span>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Blok B (RS-02) -->
-                <div class="bg-slate-800/60 border <?= $rs02_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-lg p-2.5">
+                <div class="bg-white border <?= $rs02_op ? 'border-orange-300' : 'border-slate-200' ?> rounded-xl p-2.5 shadow-2xs">
                     <div class="flex justify-between items-center mb-1.5">
-                        <span class="text-[11px] font-bold text-purple-400">BLOK B (Dry 20ft)</span>
-                        <span class="w-2 h-2 rounded-full <?= $rs02_op ? 'bg-purple-500 animate-ping' : 'bg-emerald-500' ?>"></span>
+                        <span class="text-[11px] font-extrabold text-slate-700">BLOK B (Dry 20ft)</span>
+                        <span class="w-2 h-2 rounded-full <?= $rs02_op ? 'bg-orange-500 animate-ping' : 'bg-emerald-500' ?>"></span>
                     </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs <?= $rs02_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
-                        <span class="font-mono font-bold <?= $rs02_op ? 'text-purple-300 bg-purple-950' : 'text-emerald-400 bg-emerald-950' ?> text-xs px-1.5 py-0.5 rounded">RS-02</span>
+                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center space-x-2.5">
+                        <span class="font-mono font-bold <?= $rs02_op ? 'text-orange-700 bg-orange-50 border border-orange-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200' ?> text-xs px-1.5 py-0.5 rounded">RS-02</span>
                         <div class="text-xs">
-                            <strong class="text-slate-100 block text-[11px]"><?= htmlspecialchars($rs02['operator_name']) ?></strong>
+                            <strong class="text-slate-900 block text-[11px]"><?= htmlspecialchars($rs02['operator_name']) ?></strong>
                             <?php if ($rs02_op && !empty($rs02['current_container'])): ?>
-                                <span class="text-purple-300 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs02['current_container']) ?></span>
+                                <span class="text-orange-700 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs02['current_container']) ?></span>
                             <?php else: ?>
-                                <span class="text-slate-400 text-[9px]">Standby Blok <?= htmlspecialchars($rs02['last_block'] ?? 'B') ?> (BBM <?= $rs02['fuel_percent'] ?>%)</span>
+                                <span class="text-slate-500 text-[9px]">Standby Blok <?= htmlspecialchars($rs02['last_block'] ?? 'B') ?> (BBM <?= $rs02['fuel_percent'] ?>%)</span>
                             <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Reefer (RS-03) -->
-                <div class="bg-slate-800/60 border <?= $rs03_op ? 'border-purple-500/60' : 'border-slate-700/80' ?> rounded-lg p-2.5">
+                <div class="bg-white border <?= $rs03_op ? 'border-orange-300' : 'border-slate-200' ?> rounded-xl p-2.5 shadow-2xs">
                     <div class="flex justify-between items-center mb-1.5">
-                        <span class="text-[11px] font-bold text-cyan-400">ZONA REEFER &amp; DG</span>
-                        <span class="w-2 h-2 rounded-full <?= $rs03_op ? 'bg-purple-500 animate-ping' : 'bg-cyan-400' ?>"></span>
+                        <span class="text-[11px] font-extrabold text-cyan-700">ZONA REEFER &amp; DG</span>
+                        <span class="w-2 h-2 rounded-full <?= $rs03_op ? 'bg-orange-500 animate-ping' : 'bg-cyan-500' ?>"></span>
                     </div>
-                    <div class="bg-white p-2 rounded-lg border border-slate-200 shadow-2xs <?= $rs03_op ? 'border-purple-500/40' : 'border-slate-700' ?> flex items-center space-x-2.5">
-                        <span class="font-mono font-bold <?= $rs03_op ? 'text-purple-300 bg-purple-950' : 'text-cyan-400 bg-cyan-950' ?> text-xs px-1.5 py-0.5 rounded">RS-03</span>
+                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center space-x-2.5">
+                        <span class="font-mono font-bold <?= $rs03_op ? 'text-orange-700 bg-orange-50 border border-orange-200' : 'text-cyan-700 bg-cyan-50 border border-cyan-200' ?> text-xs px-1.5 py-0.5 rounded">RS-03</span>
                         <div class="text-xs">
-                            <strong class="text-slate-200 block text-[11px]"><?= htmlspecialchars($rs03['operator_name']) ?></strong>
+                            <strong class="text-slate-900 block text-[11px]"><?= htmlspecialchars($rs03['operator_name']) ?></strong>
                             <?php if ($rs03_op && !empty($rs03['current_container'])): ?>
-                                <span class="text-purple-300 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs03['current_container']) ?></span>
+                                <span class="text-orange-700 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs03['current_container']) ?></span>
                             <?php else: ?>
-                                <span class="text-slate-400 text-[9px]">Siaga Steker Reefer (BBM <?= $rs03['fuel_percent'] ?>%)</span>
+                                <span class="text-slate-500 text-[9px]">Siaga Steker Reefer (BBM <?= $rs03['fuel_percent'] ?>%)</span>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -320,19 +320,19 @@ foreach ($equipment_list as $eq) {
             </div>
 
             <!-- Rail Siding (RTG-01) -->
-            <div class="bg-slate-800/80 border <?= $rtg01_op ? 'border-amber-500/50' : 'border-blue-500/30' ?> rounded-lg p-2.5 flex items-center justify-between">
+            <div class="bg-white border <?= $rtg01_op ? 'border-amber-300' : 'border-slate-200' ?> rounded-xl p-2.5 flex items-center justify-between shadow-2xs">
                 <div class="flex items-center space-x-2.5 text-xs">
-                    <span class="font-mono font-bold text-amber-400 bg-amber-950 px-1.5 py-0.5 rounded text-[11px]">RTG-01</span>
+                    <span class="font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[11px]">RTG-01</span>
                     <div>
-                        <strong class="text-slate-200 text-xs"><?= htmlspecialchars($rtg01['operator_name']) ?> (RTG Electric)</strong>
+                        <strong class="text-slate-900 text-xs"><?= htmlspecialchars($rtg01['operator_name']) ?> (RTG Electric)</strong>
                         <?php if ($rtg01_op && !empty($rtg01['current_container'])): ?>
-                            <span class="text-amber-300 block text-[9px] font-mono">Memuat KA: <strong><?= htmlspecialchars($rtg01['current_container']) ?></strong> • Daya Grid 100%</span>
+                            <span class="text-amber-700 block text-[9px] font-mono">Memuat KA: <strong><?= htmlspecialchars($rtg01['current_container']) ?></strong> • Daya Grid 100%</span>
                         <?php else: ?>
-                            <span class="text-slate-400 block text-[9px]">Jalur Rel Siding KA Logistik (Siaga di Rel Siding • Daya Grid 100%)</span>
+                            <span class="text-slate-500 block text-[9px]">Jalur Rel Siding KA Logistik (Siaga di Rel Siding • Daya Grid 100%)</span>
                         <?php endif; ?>
                     </div>
                 </div>
-                <span class="px-2 py-0.5 rounded text-[9px] font-bold <?= $rtg01_op ? 'bg-amber-900 text-amber-200' : 'bg-emerald-900 text-emerald-200' ?>">
+                <span class="px-2 py-0.5 rounded text-[9px] font-bold border <?= $rtg01_op ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' ?>">
                     <?= $rtg01_op ? 'AKTIF MEMUAT KA' : 'STANDBY SIDING' ?>
                 </span>
             </div>

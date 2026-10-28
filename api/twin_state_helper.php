@@ -54,7 +54,7 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
     if (empty($equipment)) {
         $equipment = [
             'RS-01' => ['id' => 'RS-01', 'type' => 'REACH_STACKER', 'brand' => 'Kalmar DRG450', 'operator' => 'Budi Santoso', 'status' => 'idle', 'gps_x' => 150.0, 'gps_y' => 200.0, 'carried_container' => null, 'last_block' => 'A', 'fuel_percent' => 88, 'hours_today' => 3.5, 'spreader_locked' => false, 'last_updated' => $time_iso],
-            'RS-02' => ['id' => 'RS-02', 'type' => 'REACH_STACKER', 'brand' => 'Kalmar DRG450', 'operator' => 'Agus Prayitno', 'status' => 'operating', 'gps_x' => 350.0, 'gps_y' => 300.0, 'carried_container' => 'MSKU9182374', 'last_block' => 'B', 'fuel_percent' => 74, 'hours_today' => 5.2, 'spreader_locked' => true, 'last_updated' => $time_iso],
+            'RS-02' => ['id' => 'RS-02', 'type' => 'REACH_STACKER', 'brand' => 'Kalmar DRG450', 'operator' => 'Agus Prayitno', 'status' => 'operating', 'gps_x' => 350.0, 'gps_y' => 300.0, 'carried_container' => null, 'last_block' => 'B', 'fuel_percent' => 74, 'hours_today' => 5.2, 'spreader_locked' => false, 'last_updated' => $time_iso],
             'RS-03' => ['id' => 'RS-03', 'type' => 'REACH_STACKER', 'brand' => 'Kalmar DRG450', 'operator' => 'Dedi Suryadi', 'status' => 'idle', 'gps_x' => 500.0, 'gps_y' => 150.0, 'carried_container' => null, 'last_block' => 'REEFER', 'fuel_percent' => 92, 'hours_today' => 2.1, 'spreader_locked' => false, 'last_updated' => $time_iso],
             'RTG-01' => ['id' => 'RTG-01', 'type' => 'RTG_CRANE', 'brand' => 'Kalmar Zero-Emission RTG', 'operator' => 'Hendro Wijaya', 'status' => 'operating', 'gps_x' => 100.0, 'gps_y' => 450.0, 'carried_container' => null, 'last_block' => 'RAIL', 'fuel_percent' => 95, 'hours_today' => 6.0, 'spreader_locked' => false, 'last_updated' => $time_iso],
         ];
@@ -63,7 +63,7 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
     // Active Trucks
     $trucks = [];
     try {
-        $tr_stmt = $pdo->query("SELECT * FROM trucks WHERE status != 'gate_out' ORDER BY id DESC LIMIT 10");
+        $tr_stmt = $pdo->query("SELECT * FROM trucks WHERE status NOT IN ('gate_out', 'scheduled') ORDER BY id DESC LIMIT 10");
         $trucks = $tr_stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
@@ -141,8 +141,8 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         'last_ceisa_sync' => $time_iso
     ];
     try {
-        $c_clr = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE customs_status = 'SPPB_CLEARED'")->fetchColumn();
-        $c_red = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE customs_status = 'INSPECTION' OR customs_status = 'RED_LINE'")->fetchColumn();
+        $c_clr = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status != 'expected' AND customs_status = 'SPPB_CLEARED'")->fetchColumn();
+        $c_red = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status != 'expected' AND customs_status IN ('INSPECTION', 'RED_LINE', 'RED_LANE_CHECK')")->fetchColumn();
         $customs_summary['sppb_cleared'] = $c_clr;
         $customs_summary['red_line_inspection'] = $c_red;
         if ($customs_summary['total_audited'] > 0) {

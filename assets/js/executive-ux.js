@@ -9,6 +9,8 @@
    2. Perangkum badge header   : header modul cukup 1 badge status; badge
                                  teknis lainnya dirangkum ke chip "+N" (tooltip).
    3. Strip status eksekutif   : buka/tutup diingat per browser (localStorage).
+   4. ResizeObserver <main>    : otomatis me-resize seluruh grafik Chart.js saat
+                                 sidebar diciutkan/diperluas atau ukuran layar berubah.
    ============================================================================= */
 (function () {
     'use strict';
@@ -263,11 +265,38 @@
         if (collapsed && el.dataset.level !== 'kritis') window.toggleExecStatus();
     }
 
+    /* ---------------------------------------------------------------------
+       4. RESIZE OBSERVER KANVAS <main>:
+          Menjamin seluruh grafik Chart.js & kanvas interaktif otomatis
+          menyesuaikan ulang ukuran saat Sidebar diciutkan/diperluas atau
+          ketika layar berpindah antara HP, Tablet, Laptop, dan Monitor.
+       ------------------------------------------------------------------ */
+    function installContainerResizeSync() {
+        var main = document.querySelector('main');
+        if (!main || typeof ResizeObserver === 'undefined') return;
+        var resizeTimer = null;
+        var ro = new ResizeObserver(function () {
+            if (resizeTimer) clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(function () {
+                if (typeof Chart !== 'undefined' && Chart.instances) {
+                    Object.keys(Chart.instances).forEach(function (key) {
+                        var inst = Chart.instances[key];
+                        if (inst && typeof inst.resize === 'function') {
+                            try { inst.resize(); } catch (e) {}
+                        }
+                    });
+                }
+            }, 60);
+        });
+        ro.observe(main);
+    }
+
     installChartTheme();
     document.addEventListener('DOMContentLoaded', function () {
         installChartTheme();
         declutterHeaderBadges();
         declutterHeaderActions();
         restoreExecStatus();
+        installContainerResizeSync();
     });
 })();

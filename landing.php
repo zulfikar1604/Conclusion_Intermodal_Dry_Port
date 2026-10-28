@@ -1779,148 +1779,46 @@ $userRole   = $_SESSION['role'] ?? 'Tamu';
     <!-- =================================================================== -->
     <!-- 12. MODAL MASUK SISTEM DPMS (Satu-satunya Pintu Masuk Terpadu)      -->
     <!-- =================================================================== -->
-    <div id="loginModal" class="fixed inset-0 z-[60] bg-slate-900/60 backdrop-blur-sm <?= $showLoginModal ? '' : 'hidden' ?> flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl shadow-2xl border border-slate-200 w-full max-w-md overflow-hidden text-slate-800 relative animate-fadeIn">
-            
-            <!-- Kepala Modal -->
-            <div class="bg-gradient-to-r from-[#002f5e] via-[#0170b9] to-orange-600 px-6 py-5 text-white flex items-center justify-between">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 p-1">
-                        <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-full h-full object-contain">
-                    </div>
-                    <div>
-                        <h3 class="font-bold text-base leading-tight" data-i18n="login_modal_title">Masuk Portal DPMS</h3>
-                        <p class="text-[11px] text-blue-100 font-medium" data-i18n="login_modal_subtitle">Conclusion Intermodal Dry Port Hub 35 Ha</p>
-                    </div>
-                </div>
-                <button type="button" onclick="closeLoginModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition-colors">
-                    <i class="fa-solid fa-xmark text-sm"></i>
-                </button>
+    <div id="loginModal" class="fixed inset-0 z-[60] bg-slate-900/50 backdrop-blur-sm <?= $showLoginModal ? '' : 'hidden' ?> flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-xs text-slate-800 relative animate-fadeIn">
+            <button type="button" onclick="closeLoginModal()" class="absolute top-3 right-3 w-7 h-7 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 flex items-center justify-center transition-colors" aria-label="Tutup">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+
+            <div class="px-6 pt-6 pb-2 text-center">
+                <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-10 h-10 object-contain mx-auto mb-2">
+                <h3 class="font-bold text-sm text-slate-900" data-i18n="login_modal_title">Masuk Portal DPMS</h3>
             </div>
 
-            <!-- Form Body -->
-            <div class="p-6 space-y-4 relative overflow-hidden">
-                <!-- Subtle Luxury Batik Watermark for Login Modal -->
-                <div class="absolute -right-8 -bottom-8 w-44 h-44 pointer-events-none opacity-[0.09] z-0" aria-hidden="true">
-                    <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#004b87" stroke-width="1.6">
-                        <ellipse cx="50" cy="22" rx="16" ry="24" />
-                        <ellipse cx="50" cy="78" rx="16" ry="24" />
-                        <ellipse cx="22" cy="50" rx="24" ry="16" />
-                        <ellipse cx="78" cy="50" rx="24" ry="16" />
-                        <circle cx="50" cy="50" r="4.5" fill="#ea580c" />
-                        <circle cx="50" cy="50" r="14" stroke="#004b87" stroke-width="1" stroke-dasharray="2 2" />
-                    </svg>
-                </div>
-                <div class="relative z-10 space-y-4">
-                
+            <div class="px-6 pb-6 pt-2">
                 <?php if (!empty($error_message)): ?>
-                    <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start space-x-2.5">
-                        <i class="fa-solid fa-circle-exclamation text-red-500 text-sm mt-0.5 shrink-0"></i>
-                        <span class="font-medium leading-relaxed"><?= htmlspecialchars($error_message); ?></span>
+                    <div class="mb-3 p-2.5 rounded-lg bg-red-50 border border-red-200 text-[11px] text-red-700 flex items-start gap-2">
+                        <i class="fa-solid fa-circle-exclamation text-red-500 mt-0.5 shrink-0"></i>
+                        <span class="font-medium leading-snug"><?= htmlspecialchars($error_message); ?></span>
                     </div>
                 <?php endif; ?>
 
-                <form method="POST" action="landing.php" id="formLoginModal" class="space-y-4">
-                    <div>
-                        <label for="modalEmail" class="block text-xs font-bold text-slate-700 mb-1.5" data-i18n="login_email_label">
-                            Alamat Email
-                        </label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none text-xs">
-                                <i class="fa-regular fa-envelope"></i>
-                            </span>
-                            <input type="email" id="modalEmail" name="email" value="admin@cidp.ac.id" required 
-                                   placeholder="admin@cidp.ac.id"
-                                   class="w-full pl-9 pr-3.5 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium">
-                        </div>
-                    </div>
+                <form method="POST" action="landing.php" id="formLoginModal" class="space-y-3">
+                    <input type="email" id="modalEmail" name="email" value="admin@cidp.ac.id" required
+                           placeholder="Email" autocomplete="username"
+                           class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/60 focus:border-orange-500 transition-all">
 
-                    <div>
-                        <div class="flex items-center justify-between mb-1.5">
-                            <label for="modalPassword" class="block text-xs font-bold text-slate-700" data-i18n="login_pass_label">
-                                Kata Sandi
-                            </label>
-                            <span class="text-[10px] text-slate-500 font-mono" data-i18n="login_default_pass">Default: admin123</span>
-                        </div>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 pointer-events-none text-xs">
-                                <i class="fa-solid fa-lock"></i>
-                            </span>
-                            <input type="password" id="modalPassword" name="password" value="admin123" required 
-                                   data-i18n-placeholder="login_pass_placeholder"
-                                   placeholder="Kata Sandi Anda"
-                                   class="w-full pl-9 pr-10 py-2.5 rounded-xl border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 transition-all font-medium">
-                            <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 text-xs focus:outline-none">
-                                <i class="fa-regular fa-eye" id="iconEye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="pt-1">
-                        <button type="submit" name="btn_login" 
-                                class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold text-xs uppercase tracking-wider shadow-md shadow-orange-500/25 transition-all flex items-center justify-center space-x-2">
-                            <span data-i18n="login_submit">Masuk ke Konsol DPMS</span>
-                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                    <div class="relative">
+                        <input type="password" id="modalPassword" name="password" value="admin123" required
+                               data-i18n-placeholder="login_pass_placeholder" placeholder="Kata Sandi" autocomplete="current-password"
+                               class="w-full pl-3 pr-9 py-2 rounded-lg border border-slate-300 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-orange-500/60 focus:border-orange-500 transition-all">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 text-xs focus:outline-none" aria-label="Tampilkan sandi">
+                            <i class="fa-regular fa-eye" id="iconEye"></i>
                         </button>
                     </div>
+
+                    <button type="submit" name="btn_login"
+                            class="w-full py-2.5 rounded-lg bg-orange-600 hover:bg-orange-700 text-white font-bold text-xs transition-colors">
+                        <span data-i18n="login_submit">Masuk</span>
+                    </button>
                 </form>
 
-                <!-- AKUN DEMONSTRASI (1-Click Fill) -->
-                <div class="pt-3 border-t border-slate-200">
-                    <div class="text-[11px] font-bold text-slate-700 mb-2 flex items-center justify-between">
-                        <span data-i18n="login_demo_label">Pilih Akun Demo Cepat:</span>
-                        <span class="text-[10px] text-orange-600 font-mono" data-i18n="login_demo_hint">1-Klik Terisi</span>
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-2 text-left">
-                        <button type="button" onclick="setDemoCredentials('admin@cidp.ac.id', 'admin123')"
-                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-orange-500 hover:bg-orange-50/50 transition-all text-[11px] group">
-                            <div class="font-bold text-slate-800 group-hover:text-orange-600 flex items-center gap-1.5">
-                                <i class="fa-solid fa-user-shield text-orange-500 text-[10px]"></i>
-                                <span data-i18n="login_role_admin">Super Admin</span>
-                            </div>
-                            <div class="text-[9.5px] text-slate-500 font-mono truncate">admin@cidp.ac.id</div>
-                        </button>
-
-                        <button type="button" onclick="setDemoCredentials('operator@cidp.ac.id', 'admin123')"
-                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 transition-all text-[11px] group">
-                            <div class="font-bold text-slate-800 group-hover:text-cdp-blue flex items-center gap-1.5">
-                                <i class="fa-solid fa-person-digging text-blue-500 text-[10px]"></i>
-                                <span data-i18n="login_role_operator">Operator Yard</span>
-                            </div>
-                            <div class="text-[9.5px] text-slate-500 font-mono truncate">operator@cidp.ac.id</div>
-                        </button>
-
-                        <button type="button" onclick="setDemoCredentials('client@cidp.ac.id', 'admin123')"
-                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-emerald-500 hover:bg-emerald-50/50 transition-all text-[11px] group">
-                            <div class="font-bold text-slate-800 group-hover:text-emerald-600 flex items-center gap-1.5">
-                                <i class="fa-solid fa-building text-emerald-500 text-[10px]"></i>
-                                <span data-i18n="login_role_client">Shipper / Client</span>
-                            </div>
-                            <div class="text-[9.5px] text-slate-500 font-mono truncate">client@cidp.ac.id</div>
-                        </button>
-
-                        <button type="button" onclick="setDemoCredentials('driver@cidp.ac.id', 'admin123')"
-                                class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 hover:border-purple-500 hover:bg-purple-50/50 transition-all text-[11px] group">
-                            <div class="font-bold text-slate-800 group-hover:text-purple-600 flex items-center gap-1.5">
-                                <i class="fa-solid fa-truck text-purple-500 text-[10px]"></i>
-                                <span data-i18n="login_role_driver">Supir Truk</span>
-                            </div>
-                            <div class="text-[9.5px] text-slate-500 font-mono truncate">driver@cidp.ac.id</div>
-                        </button>
-                    </div>
-
-                    <!-- 1-Click Instant Direct Enter -->
-                    <div class="mt-3">
-                        <button type="button" onclick="quickDirectLogin()" 
-                                class="w-full py-2.5 px-3 rounded-xl bg-cdp-navy hover:bg-blue-900 text-white font-bold text-xs transition-all flex items-center justify-center gap-2 shadow-xs">
-                            <i class="fa-solid fa-bolt text-amber-300"></i>
-                            <span data-i18n="login_instant_btn">Masuk Otomatis Instan (Super Admin)</span>
-                        </button>
-                    </div>
-                </div>
-
-                </div>
+                <p class="mt-3 text-center text-[10px] text-slate-400">Mode demo &middot; terisi otomatis <span class="font-mono">admin@cidp.ac.id</span></p>
             </div>
         </div>
     </div>

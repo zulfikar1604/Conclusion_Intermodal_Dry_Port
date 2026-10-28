@@ -853,12 +853,12 @@ const CIDPPrint = {
                         ${stamp}
                     </div>
                     <div class="sig-cursive" style="position:relative; z-index:2;">
-                        Eko Prasetyo
+                        JUAN GAMALIEL
                     </div>
                 </div>
                 <div>
-                    <div class="sig-person-name">EKO PRASETYO, S.T.</div>
-                    <div class="sig-person-nip">Certified Tally Master &bull; FIATA</div>
+                    <div class="sig-person-name">JUAN GAMALIEL</div>
+                    <div class="sig-person-nip">Yard Planning, CFS &amp; Multimodal Specialist</div>
                 </div>
             </div>
 

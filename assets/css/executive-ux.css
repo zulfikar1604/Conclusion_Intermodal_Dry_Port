@@ -1,23 +1,31 @@
 /* =============================================================================
    FILE: assets/css/executive-ux.css
-   FUNGSI: Lapisan keterbacaan & kejelasan eksekutif GLOBAL untuk seluruh modul
-           DPMS (dimuat sekali di dashboard.php, otomatis berlaku di semua halaman).
+   FUNGSI: Lapisan keterbacaan, kejelasan eksekutif & ADAPTIVE CONTAINER ENGINE
+           GLOBAL untuk seluruh modul DPMS (dimuat sekali di dashboard.php,
+           otomatis berlaku di semua halaman & ukuran layar: HP, Tablet,
+           Laptop 13"-15" dengan skala DPI 125%-150%, hingga Monitor Desktop).
 
-   Mengatasi temuan review UI:
+   Mengatasi temuan review UI & Responsivitas Multi-Device:
    1. Latar bermotif mengganggu keterbacaan      -> kanvas polos gradasi halus
-   2. Teks sekunder terlalu kecil & pucat         -> ukuran minimum + kontras naik
-   3. Ring progress KPI terlalu kecil             -> ring diperbesar, label terbaca
-   4. Kartu pipeline tidak terasa sebagai "alur"  -> konektor panah antar tahap
-   5. Kepadatan header                            -> dibantu executive-ux.js
+   2. Teks sekunder terlalu kecil & pucat         -> ukuran proporsional + kontras WCAG
+   3. Ring progress KPI keluar dari batas card    -> ukuran proporsional, flex min-w-0,
+                                                     overflow-hidden, tidak pernah clip
+   4. Grid 4/5/6 kolom gepeng di layar laptop     -> CSS Container Queries (@container)
+                                                     berdasarkan lebar nyata <main>
+                                                     (bukan sekadar lebar window)
+   5. Kartu pipeline sebagai alur responsif       -> konektor panah adaptif per baris
+   6. Kepadatan header & tabel                    -> wrapping halus & scroll responsif
    ============================================================================= */
 
 /* -----------------------------------------------------------------------------
-   1. KANVAS KERJA BERSIH (tanpa motif batik di area baca)
+   1. KANVAS KERJA BERSIH & CSS CONTAINER QUERY ROOT (<main>)
    -------------------------------------------------------------------------- */
 .cdp-batik-canvas {
     background-color: #f5f8fb !important;
     background-image: linear-gradient(180deg, #f7fafd 0%, #f1f5f9 100%) !important;
     background-attachment: fixed !important;
+    container-type: inline-size;
+    container-name: cidp-main;
 }
 
 /* Watermark dekoratif (SVG/foto transparan) di dalam kartu ikut menambah
@@ -29,21 +37,21 @@ main [aria-hidden="true"].pointer-events-none > [class*="opacity-[0.0"] {
 }
 
 /* -----------------------------------------------------------------------------
-   2. TIPOGRAFI MINIMUM (layar biasa & proyektor ruang rapat)
-   Skala lama 7–10px dinaikkan ke ambang baca minimum 10–11.5px.
+   2. TIPOGRAFI FLUIDA & PROPORSIONAL (HP, Laptop, & Monitor Ruang Rapat)
+   Tidak memaksa ukuran terlalu besar di layar sempit agar teks tidak bertabrakan.
    -------------------------------------------------------------------------- */
 main .text-\[7px\],
 main .text-\[7\.5px\],
 main .text-\[8px\],
-main .text-\[8\.5px\] { font-size: 10px !important; line-height: 1.35 !important; }
+main .text-\[8\.5px\] { font-size: clamp(9.5px, 0.72vw, 10.5px) !important; line-height: 1.35 !important; }
 
 main .text-\[9px\],
-main .text-\[9\.5px\] { font-size: 10.5px !important; line-height: 1.4 !important; }
+main .text-\[9\.5px\] { font-size: clamp(10px, 0.76vw, 11px) !important; line-height: 1.4 !important; }
 
 main .text-\[10px\],
-main .text-\[10\.5px\] { font-size: 11.5px !important; line-height: 1.45 !important; }
+main .text-\[10\.5px\] { font-size: clamp(10.5px, 0.8vw, 11.5px) !important; line-height: 1.45 !important; }
 
-main .text-\[11px\] { font-size: 12px !important; }
+main .text-\[11px\] { font-size: clamp(11px, 0.84vw, 12px) !important; }
 
 /* Ikon kecil tidak perlu ikut membesar sebanyak teks */
 main i.text-\[7px\], main i.text-\[7\.5px\], main i.text-\[8px\], main i.text-\[8\.5px\] { font-size: 9px !important; }
@@ -73,59 +81,277 @@ main :is([class*="bg-slate-9"], [class*="bg-slate-8"], [class*="bg-gray-9"], [cl
          [class*="bg-blue-9"], [class*="bg-cdp-dark"], [class*="bg-cdp-navy"], [class*="bg-ink"]) .text-gray-500 { color: #94a3b8 !important; }
 
 /* -----------------------------------------------------------------------------
-   4. RING PROGRESS KPI LEBIH BESAR & TERBACA
-   Pola ring standar: div.relative.w-10.h-10 > svg[viewBox="0 0 36 36"] + span
+   4. PROTEKSI CARD GLOBAL & RING PROGRESS KPI ANTI-CLIPPING
+   Memastikan tidak ada elemen SVG ring atau angka besar yang keluar dari card.
    -------------------------------------------------------------------------- */
-main .relative.w-10.h-10:has(> svg[viewBox="0 0 36 36"]),
-main .relative.w-9.h-9:has(> svg[viewBox="0 0 36 36"]),
-main .relative.w-8.h-8:has(> svg[viewBox="0 0 36 36"]) {
-    width: 3.5rem !important;
-    height: 3.5rem !important;
+main .grid > div {
+    min-width: 0;
+}
+
+/* Semua kartu putih di dalam grid otomatis aman dari overflow horizontal */
+main .grid > div[class*="rounded-xl"],
+main .grid > div[class*="rounded-2xl"] {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ring progress KPI proporsional (44px-48px) dan tidak pernah meluber keluar card */
+main .relative:has(> svg[viewBox="0 0 36 36"]) {
+    width: clamp(2.65rem, 3.2vw, 3.1rem) !important;
+    height: clamp(2.65rem, 3.2vw, 3.1rem) !important;
+    min-width: 2.65rem !important;
+    flex-shrink: 0 !important;
 }
 main .relative:has(> svg[viewBox="0 0 36 36"]) > svg {
     width: 100% !important;
     height: 100% !important;
 }
 main .relative:has(> svg[viewBox="0 0 36 36"]) > span {
-    font-size: 12px !important;
+    font-size: 11px !important;
     font-weight: 800 !important;
-    letter-spacing: -0.02em;
+    letter-spacing: -0.03em;
+}
+
+/* Baris angka + ring di dalam KPI card: pastikan kolom teks fleksibel (min-w-0) */
+main .relative:has(> svg[viewBox="0 0 36 36"]) {
+    margin-left: auto;
+}
+main div:has(> .relative > svg[viewBox="0 0 36 36"]) {
+    min-width: 0 !important;
+    gap: 0.5rem !important;
+}
+main div:has(> .relative > svg[viewBox="0 0 36 36"]) > div:first-child {
+    min-width: 0 !important;
+    flex: 1 1 0% !important;
+}
+main div:has(> .relative > svg[viewBox="0 0 36 36"]) > div:first-child h3 {
+    font-size: clamp(1.1rem, 1.45vw, 1.35rem) !important;
+    line-height: 1.15 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 /* -----------------------------------------------------------------------------
-   5. PIPELINE SEBAGAI ALUR (konektor panah antar tahap)
-   Aktif pada wadah ber-kelas .cidp-flow (grid 6 kolom di layar lebar)
+   5. ADAPTIVE CONTAINER QUERY GRIDS (@container cidp-main)
+   Mengatur ulang kolom grid berdasarkan LEBAR AKTUAL <main> (setelah dikurangi
+   lebar sidebar), sehingga di layar Laptop 13"-15" (1280px-1440px) dengan
+   sidebar terbuka, kartu tetap lebar, proporsional, dan estetik!
+   -------------------------------------------------------------------------- */
+
+/* A. Grid 6 Kolom (KPI Utama & 6-Stage Alur Multimoda):
+      - < 420px (HP Kecil)         : 1 kolom
+      - 420px - 679px (HP Besar)   : 2 kolom (3 baris)
+      - 680px - 1339px (Tablet & Laptop 13"-15"): 3 kolom (2 baris x 3 kartu lega!)
+      - >= 1340px (Monitor Lebar)  : 6 kolom (1 baris x 6 kartu) */
+@container cidp-main (max-width: 419px) {
+    .cidp-kpi-6-grid,
+    .cidp-flow.xl\:grid-cols-6,
+    .cidp-flow.2xl\:grid-cols-6,
+    main .grid.xl\:grid-cols-6,
+    main .grid.2xl\:grid-cols-6 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 420px) and (max-width: 679px) {
+    .cidp-kpi-6-grid,
+    .cidp-flow.xl\:grid-cols-6,
+    .cidp-flow.2xl\:grid-cols-6,
+    main .grid.xl\:grid-cols-6,
+    main .grid.2xl\:grid-cols-6 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 680px) and (max-width: 1339px) {
+    .cidp-kpi-6-grid,
+    .cidp-flow.xl\:grid-cols-6,
+    .cidp-flow.2xl\:grid-cols-6,
+    main .grid.xl\:grid-cols-6,
+    main .grid.2xl\:grid-cols-6 {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 1340px) {
+    .cidp-kpi-6-grid,
+    .cidp-flow.xl\:grid-cols-6,
+    .cidp-flow.2xl\:grid-cols-6,
+    main .grid.xl\:grid-cols-6,
+    main .grid.2xl\:grid-cols-6 {
+        grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+    }
+}
+
+/* B. Grid 5 Kolom (KPI Yard, CFS, Reefer, Denah, Settings, Gate Flow, API Bar):
+      Menggunakan auto-fit cerdas atau tahapan 1 -> 2 -> 3 -> 5 kolom agar tidak
+      pernah terhimpit di bawah 195px per kartu. */
+@container cidp-main (max-width: 419px) {
+    main .grid.lg\:grid-cols-5,
+    main .grid.xl\:grid-cols-5,
+    main .grid.2xl\:grid-cols-5 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 420px) and (max-width: 699px) {
+    main .grid.lg\:grid-cols-5,
+    main .grid.xl\:grid-cols-5,
+    main .grid.2xl\:grid-cols-5 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 700px) and (max-width: 1139px) {
+    main .grid.lg\:grid-cols-5,
+    main .grid.xl\:grid-cols-5,
+    main .grid.2xl\:grid-cols-5 {
+        grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 1140px) {
+    main .grid.lg\:grid-cols-5,
+    main .grid.xl\:grid-cols-5,
+    main .grid.2xl\:grid-cols-5 {
+        grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    }
+}
+
+/* C. Grid 4 Kolom Grafik Analitik & KPI (Beranda Charts, Gate, Customs, Billing, dll.):
+      - < 480px (HP)                : 1 kolom
+      - 480px - 1159px (Tablet & Laptop): 2 kolom (2x2 simetris & lega!)
+      - >= 1160px (Desktop Lebar)   : 4 kolom */
+@container cidp-main (max-width: 479px) {
+    .cidp-chart-4-grid,
+    main .grid.xl\:grid-cols-4:not(.xl\:items-start),
+    main .grid.2xl\:grid-cols-4 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 480px) and (max-width: 1159px) {
+    .cidp-chart-4-grid,
+    main .grid.xl\:grid-cols-4:not(.items-start),
+    main .grid.2xl\:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 1160px) {
+    .cidp-chart-4-grid,
+    main .grid.xl\:grid-cols-4:not(.items-start),
+    main .grid.2xl\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+/* Micro-KPI 4 Kolom (lg:grid-cols-4): di HP < 400px jadi 1 kolom, 400-860px jadi 2 kolom, >= 860px jadi 4 kolom */
+@container cidp-main (max-width: 399px) {
+    main .grid.lg\:grid-cols-4 {
+        grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 400px) and (max-width: 859px) {
+    main .grid.lg\:grid-cols-4 {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 860px) {
+    main .grid.lg\:grid-cols-4 {
+        grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    }
+}
+
+/* D. Grid 12 Kolom (Panel Split Beranda, Customs, Gate, Intermodal, Scanner):
+      Jika lebar <main> masih di bawah 1080px (mis. laptop 1280px/1366px dengan
+      sidebar terbuka), tumpuk atau bagi proporsional agar tabel & grafik tidak sempit. */
+@container cidp-main (max-width: 1079px) {
+    main .grid.xl\:grid-cols-12 > [class*="xl:col-span-"] {
+        grid-column: span 12 / span 12 !important;
+    }
+    /* Khusus baris 3-panel (masing-masing xl:col-span-4) di layar menengah (680px-1079px):
+       2 panel pertama berdampingan (6+6), panel ke-3 (grafik pendapatan) full-width (12) */
+    main .cidp-tri-panel-grid {
+        grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    }
+}
+@container cidp-main (min-width: 680px) and (max-width: 1079px) {
+    main .cidp-tri-panel-grid > [class*="xl:col-span-4"]:nth-child(1),
+    main .cidp-tri-panel-grid > [class*="xl:col-span-4"]:nth-child(2) {
+        grid-column: span 6 / span 6 !important;
+    }
+    main .cidp-tri-panel-grid > [class*="xl:col-span-4"]:nth-child(3) {
+        grid-column: span 12 / span 12 !important;
+    }
+}
+@container cidp-main (min-width: 1080px) {
+    main .grid.xl\:grid-cols-12 {
+        grid-template-columns: repeat(12, minmax(0, 1fr)) !important;
+    }
+    main .grid.xl\:grid-cols-12 > .xl\:col-span-3 { grid-column: span 3 / span 3 !important; }
+    main .grid.xl\:grid-cols-12 > .xl\:col-span-4 { grid-column: span 4 / span 4 !important; }
+    main .grid.xl\:grid-cols-12 > .xl\:col-span-5 { grid-column: span 5 / span 5 !important; }
+    main .grid.xl\:grid-cols-12 > .xl\:col-span-6 { grid-column: span 6 / span 6 !important; }
+    main .grid.xl\:grid-cols-12 > .xl\:col-span-7 { grid-column: span 7 / span 7 !important; }
+    main .grid.xl\:grid-cols-12 > .xl\:col-span-8 { grid-column: span 8 / span 8 !important; }
+    main .grid.xl\:grid-cols-12 > .xl\:col-span-9 { grid-column: span 9 / span 9 !important; }
+}
+
+/* -----------------------------------------------------------------------------
+   6. PIPELINE SEBAGAI ALUR (konektor panah antar tahap yang sadar jumlah kolom)
+   Aktif pada wadah ber-kelas .cidp-flow
    -------------------------------------------------------------------------- */
 .cidp-flow { position: relative; }
-.cidp-flow > * { overflow: visible !important; position: relative; }
+.cidp-flow > * { overflow: visible !important; position: relative; min-width: 0; }
 
-@media (min-width: 1280px) {
-    .cidp-flow { column-gap: 1.75rem !important; }
-    /* Panah chevron di antara tahap (garis putus-putus di belakang dihapus) */
+/* Saat 3 kolom (Laptop / Tablet Lanskap: 680px - 1339px container):
+   Panah tampil di kartu 1, 2, 4, 5 (tidak tampil di ujung kanan baris: kartu 3 & 6) */
+@container cidp-main (min-width: 680px) and (max-width: 1339px) {
+    .cidp-flow.cidp-flow-6 { column-gap: 1.15rem !important; row-gap: 0.85rem !important; }
+    .cidp-flow.cidp-flow-6 > *:not(:nth-child(3n)):not(:last-child)::after {
+        content: '\f054';
+        font-family: 'Font Awesome 6 Free';
+        font-weight: 900;
+        position: absolute;
+        right: -0.95rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1rem;
+        height: 1rem;
+        border-radius: 999px;
+        background: #ea580c;
+        color: #ffffff;
+        font-size: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0 0 2.5px #ffffff, 0 2px 5px rgba(234, 88, 12, 0.3);
+        z-index: 2;
+    }
+}
+
+/* Saat 6 kolom penuh (Monitor Lebar >= 1340px container):
+   Panah tampil di kartu 1..5 */
+@container cidp-main (min-width: 1340px) {
+    .cidp-flow { column-gap: 1.25rem !important; }
     .cidp-flow > *:not(:last-child)::after {
         content: '\f054';
         font-family: 'Font Awesome 6 Free';
         font-weight: 900;
         position: absolute;
-        right: -1.4rem;
+        right: -1.02rem;
         top: 50%;
         transform: translateY(-50%);
-        width: 1.1rem;
-        height: 1.1rem;
+        width: 1.05rem;
+        height: 1.05rem;
         border-radius: 999px;
         background: #ea580c;
         color: #ffffff;
-        font-size: 9px;
+        font-size: 8.5px;
         display: flex;
         align-items: center;
         justify-content: center;
-        box-shadow: 0 0 0 3px #ffffff, 0 2px 6px rgba(234, 88, 12, 0.35);
+        box-shadow: 0 0 0 2.5px #ffffff, 0 2px 5px rgba(234, 88, 12, 0.32);
         z-index: 2;
     }
 }
 
 /* -----------------------------------------------------------------------------
-   6. HEADER MODUL: badge sekunder yang dirangkum oleh executive-ux.js
+   7. HEADER MODUL: badge sekunder yang dirangkum oleh executive-ux.js
    -------------------------------------------------------------------------- */
 .cidp-badge-collapsed { display: none !important; }
 .cidp-badge-more {
@@ -146,49 +372,50 @@ main .relative:has(> svg[viewBox="0 0 36 36"]) > span {
 }
 
 /* -----------------------------------------------------------------------------
-   7. STRIP STATUS EKSEKUTIF (components/exec_status.php)
+   8. STRIP STATUS EKSEKUTIF (components/exec_status.php) - RESPONSIF PENUH
    -------------------------------------------------------------------------- */
 .exec-status {
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.65rem;
     flex-wrap: wrap;
     background: #ffffff;
     border: 1px solid #e2e8f0;
     border-left-width: 5px;
     border-radius: 0.85rem;
-    padding: 0.6rem 0.9rem;
+    padding: 0.6rem 0.85rem;
     box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
 }
 .exec-status[data-level="sehat"]     { border-left-color: #10b981; }
 .exec-status[data-level="perhatian"] { border-left-color: #f59e0b; }
 .exec-status[data-level="kritis"]    { border-left-color: #ef4444; }
 
-.exec-status__verdict { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+.exec-status__verdict { display: flex; align-items: center; gap: 0.6rem; min-width: 0; flex: 1 1 240px; }
 .exec-status__icon {
-    width: 2.25rem; height: 2.25rem; border-radius: 0.65rem;
+    width: 2.15rem; height: 2.15rem; border-radius: 0.65rem;
     display: flex; align-items: center; justify-content: center;
-    font-size: 1rem; flex-shrink: 0;
+    font-size: 0.95rem; flex-shrink: 0;
 }
 .exec-status[data-level="sehat"] .exec-status__icon     { background: #ecfdf5; color: #059669; }
 .exec-status[data-level="perhatian"] .exec-status__icon { background: #fffbeb; color: #d97706; }
 .exec-status[data-level="kritis"] .exec-status__icon    { background: #fef2f2; color: #dc2626; }
 
-.exec-status__title { font-size: 14px; font-weight: 800; color: #0f172a; line-height: 1.2; }
-.exec-status__sub   { font-size: 12px; font-weight: 500; color: #475569; line-height: 1.3; }
+.exec-status__title { font-size: clamp(12.5px, 1vw, 14px); font-weight: 800; color: #0f172a; line-height: 1.25; }
+.exec-status__sub   { font-size: clamp(11px, 0.85vw, 12px); font-weight: 500; color: #475569; line-height: 1.35; }
 
-.exec-status__items { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-left: auto; }
+.exec-status__items { display: flex; flex-wrap: wrap; gap: 0.45rem; margin-left: auto; align-items: center; }
 .exec-status__item {
-    display: inline-flex; align-items: center; gap: 0.45rem;
-    font-size: 12.5px; font-weight: 700; line-height: 1.2;
-    padding: 0.4rem 0.7rem; border-radius: 0.6rem;
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    font-size: clamp(11px, 0.85vw, 12.2px); font-weight: 700; line-height: 1.2;
+    padding: 0.35rem 0.65rem; border-radius: 0.6rem;
     border: 1px solid transparent; transition: transform .15s ease, box-shadow .15s ease;
-    text-decoration: none; white-space: nowrap;
+    text-decoration: none; white-space: nowrap; max-width: 100%;
 }
 .exec-status__item:hover { transform: translateY(-1px); box-shadow: 0 3px 10px rgba(15, 23, 42, 0.08); }
 .exec-status__item .count {
-    font-size: 13px; font-weight: 900; min-width: 1.4rem; height: 1.4rem;
+    font-size: 12px; font-weight: 900; min-width: 1.35rem; height: 1.35rem;
     border-radius: 999px; display: inline-flex; align-items: center; justify-content: center; padding: 0 0.35rem;
+    flex-shrink: 0;
 }
 .exec-status__item[data-sev="critical"] { background: #fef2f2; border-color: #fecaca; color: #991b1b; }
 .exec-status__item[data-sev="critical"] .count { background: #dc2626; color: #fff; }
@@ -199,9 +426,20 @@ main .relative:has(> svg[viewBox="0 0 36 36"]) > span {
 .exec-status__item[data-sev="ok"]       { background: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
 .exec-status__rest.hidden               { display: none !important; }
 
+@container cidp-main (max-width: 640px) {
+    .exec-status__items {
+        width: 100%;
+        margin-left: 0;
+        padding-top: 0.25rem;
+    }
+    .exec-status__item {
+        white-space: normal;
+    }
+}
+
 .exec-status__toggle {
     font-size: 11px; font-weight: 700; color: #64748b; background: transparent; border: 0;
-    cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 0.4rem;
+    cursor: pointer; padding: 0.25rem 0.4rem; border-radius: 0.4rem; margin-left: auto;
 }
 .exec-status__toggle:hover { background: #f1f5f9; color: #0f172a; }
 .exec-status.is-collapsed .exec-status__items,
@@ -210,7 +448,7 @@ main .relative:has(> svg[viewBox="0 0 36 36"]) > span {
 .exec-status.is-collapsed .exec-status__icon { width: 1.75rem; height: 1.75rem; font-size: .85rem; }
 
 /* -----------------------------------------------------------------------------
-   8. DROPDOWN AKSI RINGKAS (<details>) untuk merangkum tombol sekunder
+   9. DROPDOWN AKSI RINGKAS (<details>) & TABEL RESPONSIF
    -------------------------------------------------------------------------- */
 .cidp-menu { position: relative; }
 .cidp-menu > summary { list-style: none; cursor: pointer; }
@@ -227,6 +465,12 @@ main .relative:has(> svg[viewBox="0 0 36 36"]) > span {
 }
 .cidp-menu__panel a:hover, .cidp-menu__panel button:hover { background: #f1f5f9; }
 .cidp-menu__panel .hint { display: block; font-size: 11px; font-weight: 500; color: #64748b; }
+
+/* Smooth touch scrolling untuk seluruh wrapper tabel di HP & Tablet */
+main .overflow-x-auto {
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
 
 @media print {
     .exec-status, .cidp-menu { display: none !important; }

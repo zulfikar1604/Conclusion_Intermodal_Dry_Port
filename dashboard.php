@@ -33,10 +33,10 @@ try {
     $c_stmt = $pdo->query("SELECT COUNT(*) FROM containers WHERE status = 'in_yard'");
     $db_stats['containers_in_yard'] = (int)$c_stmt->fetchColumn();
 
-    $tot_c_stmt = $pdo->query("SELECT COUNT(*) FROM containers");
+    $tot_c_stmt = $pdo->query("SELECT COUNT(*) FROM containers WHERE status != 'expected'");
     $db_stats['total_containers'] = (int)$tot_c_stmt->fetchColumn();
 
-    $t_stmt = $pdo->query("SELECT COUNT(*) FROM trucks WHERE status != 'gate_out'");
+    $t_stmt = $pdo->query("SELECT COUNT(*) FROM trucks WHERE status NOT IN ('gate_out', 'scheduled')");
     $db_stats['total_gate_trucks'] = (int)$t_stmt->fetchColumn();
 
     $w_stmt = $pdo->query("SELECT SUM(loaded_wagons), SUM(total_wagons) FROM trains");
@@ -254,8 +254,8 @@ $tanggal_sekarang = get_localized_date($current_lang);
     <link rel="stylesheet" href="assets/css/print-document.css">
     <script src="assets/js/print-engine.js"></script>
     <!-- CIDP Executive UX Layer (global: keterbacaan, kontras, tema grafik, ringkasan status) -->
-    <link rel="stylesheet" href="assets/css/executive-ux.css?v=20261020c">
-    <script src="assets/js/executive-ux.js?v=20261020b"></script>
+    <link rel="stylesheet" href="assets/css/executive-ux.css?v=20261025a">
+    <script src="assets/js/executive-ux.js?v=20261025a"></script>
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
 
@@ -338,7 +338,7 @@ $tanggal_sekarang = get_localized_date($current_lang);
         <?php endif; ?>
 
         <!-- Main Content Scrollable Area (Fluid Edge-to-Edge Container) -->
-        <main class="flex-1 overflow-x-hidden overflow-y-auto cdp-batik-canvas relative">
+        <main class="flex-1 overflow-x-hidden overflow-y-auto cdp-batik-canvas relative" style="container-type: inline-size; container-name: cidp-main;">
             <div class="p-3 sm:p-4 lg:p-5 xl:p-6 w-full space-y-3.5 sm:space-y-4">
 
                 <!-- Strip Status Eksekutif: "Apakah operasi sehat?" (tampil di semua halaman) -->
@@ -348,6 +348,8 @@ $tanggal_sekarang = get_localized_date($current_lang);
                     <?php include_once __DIR__ . '/pages/beranda.php'; ?>
                 <?php elseif ($page === 'twin'): ?>
                     <?php include_once __DIR__ . '/pages/digital_twin.php'; ?>
+                <?php elseif ($page === 'integration'): ?>
+                    <?php include_once __DIR__ . '/pages/integration.php'; ?>
                 <?php elseif ($page === 'kontainer'): ?>
                     <?php include_once __DIR__ . '/pages/kontainer.php'; ?>
                 <?php elseif ($page === 'trucking'): ?>
@@ -399,6 +401,6 @@ $tanggal_sekarang = get_localized_date($current_lang);
     </div>
 
     <!-- Dashboard UI & Live Clock Scripts -->
-    <script src="assets/js/dashboard.js?v=20261020b"></script>
+    <script src="assets/js/dashboard.js?v=20261025c"></script>
 </body>
 </html>

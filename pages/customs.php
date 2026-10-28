@@ -16,6 +16,8 @@ $customs_info = [
 ];
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 // Handle Form Aksi POST (Rilis SPPB Jalur Hijau / Tahan Jalur Merah Behandle)
 $customs_alert = null;
@@ -31,6 +33,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['customs_ac
                 $sppb_code = 'SPPB-' . rand(100000, 999999) . '/KPU.01/' . date('Y');
                 $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = 'SPPB_CLEARED' WHERE container_number = ?");
                 $stmtUp->execute([$ctr_num]);
+                $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'SPPB_CLEARED' WHERE container_number = ?")->execute([$ctr_num]);
+                $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'CLEARED' WHERE container_origin = ?")->execute([$ctr_num]);
 
                 $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('CUSTOMS_SPPB_RELEASE', ?, ?, ?, NOW())");
                 $stmtEv->execute([$ctr_num, $officer, "Penerbitan $sppb_code CEISA 4.0 Jalur Hijau. Kargo dinyatakan cleared dan siap untuk pengeluaran di Gate Out."]);
@@ -41,10 +45,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['customs_ac
                     'msg' => "Peti kemas <strong>$ctr_num</strong> telah memperoleh status <strong>SPPB_CLEARED</strong> ($sppb_code). Pengeluaran gerbang di Gate Out kini telah diizinkan."
                 ];
             } elseif ($c_action === 'hold_red_lane') {
-                $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE', block = 'E' WHERE container_number = ?");
+                $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK', block = 'E' WHERE container_number = ?");
+                $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'HOLD' WHERE container_number = ?")->execute([$ctr_num]);
+                $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'HOLD' WHERE container_origin = ?")->execute([$ctr_num]);
+                accrue_billing($pdo, $ctr_num, 'L', 'Behandle / Physical Inspection Blok E', 350000);
                 $stmtUp->execute([$ctr_num]);
+                $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'SPPB_CLEARED' WHERE container_number = ?")->execute([$ctr_num]);
+                $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'CLEARED' WHERE container_origin = ?")->execute([$ctr_num]);
 
                 $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('CUSTOMS_RED_LANE_HOLD', ?, 'E', ?, ?, NOW())");
+                $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'HOLD' WHERE container_number = ?")->execute([$ctr_num]);
+                $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'HOLD' WHERE container_origin = ?")->execute([$ctr_num]);
                 $stmtEv->execute([$ctr_num, $officer, "Penetapan Jalur Merah & Instruksi Pemeriksaan Fisik Terminal Behandle Blok E / X-Ray 6 MeV. Catatan: $notes"]);
 
                 $customs_alert = [
@@ -474,7 +485,55 @@ $customs_docs = [
 // Sinkronisasi Status Dokumen Pabean dengan Basis Data Nyata (containers)
 if (isset($pdo)) {
     try {
-        $stmtSync = $pdo->query("SELECT container_number, customs_status, block FROM containers");
+        $stmtSync = $pdo->query("SELECT * FROM containers WHERE status != 'expected' ORDER BY id DESC");
+        $customs_docs = [];
+        $idxDoc = 1;
+        while ($r = $stmtSync->fetch(PDO::FETCH_ASSOC)) {
+            $cStat = $r['customs_status'] ?? 'BC23_TRANSIT';
+            $isCleared = ($cStat === 'SPPB_CLEARED');
+            $isHold    = ($cStat === 'RED_LANE_CHECK' || $cStat === 'DOC_HOLD');
+            $cifUsd    = 45000 + (($r['id'] % 7) * 12500);
+            $cifIdr    = $cifUsd * 15800;
+            $bm        = round($cifIdr * 0.05);
+            $ppn       = round(($cifIdr + $bm) * 0.11);
+            $pph       = round(($cifIdr + $bm) * 0.025);
+            $customs_docs[] = [
+                'id'             => $idxDoc,
+                'no_aju'         => '000020-001234-' . date('Ymd') . '-' . str_pad($idxDoc, 6, '0', STR_PAD_LEFT),
+                'no_daftar'      => str_pad(42800 + (int)$r['id'], 6, '0', STR_PAD_LEFT) . '/KPU.01/2026',
+                'tgl_daftar'     => $r['gate_in_time'] ?? date('Y-m-d H:i'),
+                'jenis_dok'      => $cStat === 'BC23_TRANSIT' ? 'BC 2.3 (PLP/TPB)' : 'PIB (BC 2.0)',
+                'importir'       => $r['owner_company'] ?? 'Importir Terdaftar CIDP',
+                'npwp'           => '01.000.' . str_pad((int)$r['id'], 3, '0', STR_PAD_LEFT) . '.8-054.000',
+                'kategori_mitra' => $isHold ? ' Importir Umum (Pemeriksaan Fisik)' : 'AEO / MITA Pabean',
+                'no_kontainer'   => $r['container_number'],
+                'ukuran'         => strpos($r['size_type'] ?? '', '20') !== false ? "20' GP" : "40' HC",
+                'tipe_box'       => strtoupper($r['cargo_type'] ?? 'DRY') === 'REEFER' ? 'Reefer High Cube' : 'Dry High Cube',
+                'hs_code'        => '8708.99.80',
+                'uraian_barang'  => 'Kargo Kontainer ' . ($r['size_type'] ?? '40FT') . ' — ' . ($r['owner_company'] ?? 'CIDP'),
+                'negara_asal'    => 'Singapura / Jepang (Transit Priok)',
+                'cif_usd'        => $cifUsd,
+                'cif_idr'        => $cifIdr,
+                'bea_masuk'      => $bm,
+                'ppn'            => $ppn,
+                'pph'            => $pph,
+                'total_pungutan' => $bm + $ppn + $pph,
+                'ntpn'           => $isCleared ? strtoupper(substr(md5($r['container_number']), 0, 16)) : '-',
+                'jalur'          => $isHold ? 'MERAH' : 'HIJAU',
+                'status'         => $isCleared ? 'SPPB_TERBIT' : ($cStat === 'RED_LANE_CHECK' ? 'DALAM_BEHANDLE' : ($cStat === 'DOC_HOLD' ? 'SPJM_TERBIT' : 'PROSES_VERIFIKASI')),
+                'alasan_jalur'   => $isHold ? 'Anomali Pemindaian Gantry X-Ray 6 MeV / Pemeriksaan Fisik' : 'Validasi Dokumen & Manifest CEISA 4.0 Sesuai',
+                'no_sppb'        => $isCleared ? ('SPPB-' . str_pad(42800 + (int)$r['id'], 6, '0', STR_PAD_LEFT) . '/KPU.01/2026') : '-',
+                'tgl_sppb'       => $isCleared ? (date('Y-m-d H:i') . ' WIB') : '-',
+                'petugas_pfpb'   => $isHold ? 'Pemeriksa Bea Cukai Blok E' : 'Sistem Otomatis CEISA 4.0',
+                'e_seal_id'      => 'JT701-ID-' . str_pad((int)$r['id'], 4, '0', STR_PAD_LEFT),
+                'e_seal_status'  => $isCleared ? 'UNLOCKED' : 'LOCKED',
+                'lokasi_yard'    => 'Blok ' . ($r['block'] ?? 'A') . '-0' . ($r['bay'] ?? 1) . '-0' . ($r['row'] ?? 1) . '-' . ($r['tier'] ?? 1),
+                'scan_xray'      => $isHold ? 'ANOMALI_TERDETEKSI' : 'SESUAI_MANIFEST',
+                'behandle_bay'   => $isHold ? 'Bay 01 (Blok E Behandle)' : null
+            ];
+            $idxDoc++;
+        }
+        $stmtSync = $pdo->query("SELECT container_number, customs_status, block FROM containers WHERE 1=0");
         $dbStatusMap = [];
         while ($r = $stmtSync->fetch(PDO::FETCH_ASSOC)) {
             $dbStatusMap[$r['container_number']] = $r;
@@ -823,10 +882,10 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                         </a>
 
                                         <?php if ($doc['status'] === 'SPPB_TERBIT'): ?>
-                                            <!-- Tombol Cetak SPPB Resmi -->
-                                            <button onclick="printOfficialSPPB(<?= $doc['id'] ?>)" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded flex items-center justify-center transition" title="Cetak Surat Persetujuan Pengeluaran Barang (SPPB)">
-                                                <i class="fa-solid fa-stamp text-xs"></i>
-                                            </button>
+                                            <!-- Tombol Cetak SPPB Kertas Resmi A4 -->
+                                            <a href="document.php?type=sppb&container=<?= urlencode($doc['no_kontainer']) ?>&autoprint=1" target="_blank" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded flex items-center justify-center transition shadow-2xs" title="Cetak Dokumen Kertas Resmi SPPB A4 (Kop Bea Cukai & Garuda)">
+                                                <i class="fa-solid fa-print text-xs"></i>
+                                            </a>
                                             <!-- Quick Action: Tahan Jalur Merah -->
                                             <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin MENAHAN kontainer <?= $doc['no_kontainer'] ?> ke Jalur Merah (Behandle / Hold)?');" class="inline">
                                                 <input type="hidden" name="customs_action" value="hold_red_lane">
@@ -1070,27 +1129,27 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
     <!-- ================================================================= -->
     <div id="tab-behandle" class="customs-tab-content space-y-6 hidden">
         <!-- Banner Zona 5 Lapangan & Hardware Overview -->
-        <div class="bg-gradient-to-r from-[#0170b9] via-blue-600 to-indigo-600 rounded-2xl p-6 text-white shadow-md flex flex-col lg:flex-row items-center justify-between gap-6">
+        <div class="bg-white rounded-2xl p-5 text-slate-800 shadow-2xs border border-slate-200 border-l-4 border-l-orange-500 flex flex-col lg:flex-row items-center justify-between gap-6">
             <div class="space-y-2">
                 <div class="flex items-center space-x-2">
-                    <span class="px-2.5 py-0.5 bg-rose-500/20 text-rose-300 border border-rose-500/40 rounded-full text-xs font-bold uppercase tracking-wider flex items-center">
-                        <i class="fa-solid fa-radiation mr-1.5 text-xs text-rose-400"></i>Zona 5 Lapangan (35 Ha)
+                    <span class="px-2.5 py-0.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-full text-xs font-bold uppercase tracking-wider flex items-center">
+                        <i class="fa-solid fa-radiation mr-1.5 text-xs text-rose-600"></i>Zona 5 Lapangan (35 Ha)
                     </span>
-                    <span class="px-2.5 py-0.5 bg-blue-500/20 text-blue-300 rounded-full text-xs font-mono">4 Bay Behandle + 1 Gantry 6 MeV</span>
+                    <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-full text-xs font-mono font-bold">4 Bay Behandle + 1 Gantry 6 MeV</span>
                 </div>
-                <h2 class="text-xl sm:text-2xl font-bold tracking-tight">Zona Pemeriksaan Fisik Terpadu &amp; Pemindai Gantry X-Ray 6 MeV</h2>
-                <p class="text-xs sm:text-sm text-slate-300 max-w-2xl leading-relaxed">
-                    Fasilitas pemeriksaan pabean terstandar internasional di Zona 5 CIDP dilengkapi <strong>Gantry X-Ray Nuctech MB1215DE berdaya tembus baja >300 mm</strong> (Hardware #19) dan 4 Bay kanopi behandle untuk verifikasi fisik kargo Jalur Merah &amp; Karantina.
+                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">Zona Pemeriksaan Fisik Terpadu &amp; Pemindai Gantry X-Ray 6 MeV</h2>
+                <p class="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
+                    Fasilitas pemeriksaan pabean terstandar internasional di Zona 5 CIDP dilengkapi <strong class="text-slate-900">Gantry X-Ray Nuctech MB1215DE berdaya tembus baja &gt;300 mm</strong> (Hardware #19) dan 4 Bay kanopi behandle untuk verifikasi fisik kargo Jalur Merah &amp; Karantina.
                 </p>
             </div>
 
             <!-- Thumbnail Produk Hardware #19 -->
-            <div class="bg-white/10 backdrop-blur-md rounded-xl p-3 border border-white/20 flex items-center space-x-3.5 flex-shrink-0">
-                <img src="assets/img/hardware/converted/item_19.png" alt="Gantry Container X-Ray" class="w-16 h-16 object-contain bg-white rounded-lg p-1 shadow-sm" />
+            <div class="bg-slate-50 rounded-xl p-3 border border-slate-200 flex items-center space-x-3.5 flex-shrink-0">
+                <img src="assets/img/hardware/converted/item_19.png" alt="Gantry Container X-Ray" class="w-16 h-16 object-contain bg-white rounded-lg p-1 border border-slate-200 shadow-2xs" />
                 <div class="text-left">
-                    <span class="text-[10px] text-amber-300 font-bold block uppercase">Hardware #19 &bull; CAPEX Rp 12,5 M</span>
-                    <strong class="text-xs font-bold text-white block">Nuctech MB1215DE 6 MeV</strong>
-                    <span class="text-[11px] text-slate-300 block">Throughput: 20-25 Truk / Jam</span>
+                    <span class="text-[10px] text-orange-600 font-bold block uppercase">Hardware #19 &bull; CAPEX Rp 12,5 M</span>
+                    <strong class="text-xs font-bold text-slate-900 block">Nuctech MB1215DE 6 MeV</strong>
+                    <span class="text-[11px] text-slate-500 block">Throughput: 20-25 Truk / Jam</span>
                 </div>
             </div>
         </div>
@@ -1922,16 +1981,11 @@ UNZ+1+042819'</pre>
 let customsData = <?= json_encode($customs_docs) ?>;
 let activeBehandleId = 5;
 
-// Cetak Dokumen SPPB Resmi via CIDP Print Engine (Format A4 Resmi & Bebas Layar Web)
+// Cetak Dokumen SPPB Resmi (Format Kertas A4 Resmi Bea Cukai & Bebas Layar Web)
 function printCustomsSPPB() {
-    const el = document.getElementById('sppbPrintArea');
-    if (!el) return;
-    if (typeof CIDPPrint !== 'undefined') {
-        const docNo = document.getElementById('sppbDocNumber')?.textContent || 'SPPB-CEISA';
-        CIDPPrint.openPrintWindow(docNo, el.innerHTML);
-    } else {
-        window.print();
-    }
+    const ctrText = document.getElementById('sppbDocContainer')?.textContent || '';
+    const ctr = ctrText.split(' ')[0] || '';
+    window.open(`document.php?type=sppb&container=${encodeURIComponent(ctr)}&autoprint=1`, '_blank');
 }
 
 // Tab Switcher

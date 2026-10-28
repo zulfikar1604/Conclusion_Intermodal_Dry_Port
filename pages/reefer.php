@@ -8,6 +8,8 @@
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 $reefer_info = [
     'pic'      => 'Armansyah Muchtarrom',
@@ -39,6 +41,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     if ($existing) {
                         $stmtUp = $pdo->prepare("UPDATE containers SET block = 'REEFER', status = 'in_yard', customs_status = 'SPPB_CLEARED' WHERE id = ?");
                         $stmtUp->execute([$existing['id']]);
+                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ?")->execute([$ctr_num]);
+                        $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, return_temp_c, humidity_pct, power_kw, kwh_consumed, status, recorded_at) VALUES (?, ?, ?, ?, ?, 88.0, 5.80, 5.80, 'NORMAL', NOW())")->execute([$ctr_num, $slot_id, $setpoint, $setpoint, $setpoint + 0.8]);
+                        accrue_billing($pdo, $ctr_num, 'R', "Reefer Plug-In & Monitoring ($slot_id)", 350000);
                     }
 
                     // Catat ke log yard_events
@@ -68,6 +73,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('REEFER_UNPLUG', ?, 'Petugas Reefer', ?, ?, NOW())");
                 $bill_amount = $kwh * 2850; // Tarif listrik industri Rp 2.850 / kWh
                 $stmtLog->execute([$ctr_num, $bill_amount, "Pelepasan steker $slot_id. Total konsumsi: $kwh kWh"]);
+                accrue_billing($pdo, $ctr_num, 'R', "Reefer Electricity ($kwh kWh)", $bill_amount);
             } catch (Exception $e) {}
         }
 
@@ -90,6 +96,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 // Update / touch container
                 $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = COALESCE(customs_status, 'SPPB_CLEARED') WHERE container_number = ?");
                 $stmtUp->execute([$ctr_num]);
+                $isAlm = abs($temp_actual - $setpoint) > 2.0 ? 'ALARM' : 'NORMAL';
+                $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, return_temp_c, humidity_pct, power_kw, kwh_consumed, status, recorded_at) VALUES (?, ?, ?, ?, ?, ?, 6.10, 12.20, ?, NOW())")->execute([$ctr_num, $slot_id, $setpoint, $temp_actual, $temp_actual + 0.7, $humidity, $isAlm]);
 
                 // Catat ke yard_events
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('REEFER_TELEMETRY_PING', ?, 'REEFER', 'LoRaWAN SHT40 Gateway', ?, NOW())");
@@ -144,7 +152,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 $db_reefers = [];
 if (isset($pdo)) {
     try {
-        $stmtR = $pdo->query("SELECT * FROM containers WHERE cargo_type = 'reefer' OR block = 'REEFER' ORDER BY id DESC");
+        $stmtR = $pdo->query("SELECT * FROM containers WHERE status != 'expected' AND (cargo_type = 'reefer' OR block = 'REEFER') ORDER BY id DESC");
         $db_reefers = $stmtR->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {
         $db_reefers = [];
@@ -372,7 +380,50 @@ $active_reefers = [
 ];
 
 // Integrasi kontainer dari database ke tabel tampilan jika belum ada di list
+$active_reefers = [];
+$stmtTelLatest = isset($pdo) ? $pdo->prepare("SELECT * FROM reefer_telemetry WHERE container_number = ? ORDER BY id DESC LIMIT 1") : null;
 foreach ($db_reefers as $dbr) {
+    $telRow = null;
+    if ($stmtTelLatest) {
+        try { $stmtTelLatest->execute([$dbr['container_number']]); $telRow = $stmtTelLatest->fetch(PDO::FETCH_ASSOC); } catch (Exception $e) { $telRow = null; }
+    }
+    $setpoint = isset($telRow['set_temp_c']) ? (float)$telRow['set_temp_c'] : -18.0;
+    $tSupply  = isset($telRow['supply_temp_c']) ? (float)$telRow['supply_temp_c'] : -18.2;
+    $tReturn  = isset($telRow['return_temp_c']) ? (float)$telRow['return_temp_c'] : ($tSupply + 0.9);
+    $pKw      = isset($telRow['power_kw']) ? (float)$telRow['power_kw'] : 6.20;
+    $kwhTot   = isset($telRow['kwh_consumed']) ? (float)$telRow['kwh_consumed'] : 18.5;
+    $rStat    = ($telRow && strtoupper($telRow['status'] ?? '') === 'ALARM') ? 'alarm' : (abs($tSupply - $setpoint) > 1.5 ? 'warning' : 'normal');
+    $rStatTxt = $rStat === 'alarm' ? 'ALARM DEVIASI SUHU (>2°C)' : ($rStat === 'warning' ? 'Fluktuasi Suhu' : 'Daya 380V & Suhu Stabil');
+    $sockId   = $telRow['socket_id'] ?? ('R0' . (($dbr['id'] % 4) + 1) . '-S0' . (($dbr['id'] % 8) + 1));
+    $active_reefers[] = [
+        'id'              => $dbr['container_number'],
+        'iso'             => ($dbr['iso_code'] ?? '45R1') . ' (' . ($dbr['size_type'] ?? '40ft High Cube Reefer') . ')',
+        'line'            => $dbr['owner_company'] ?? 'Mitra Cold Chain CIDP',
+        'line_badge'      => $rStat === 'alarm' ? 'bg-red-600' : 'bg-cyan-700',
+        'commodity'       => 'Komoditas Rantai Dingin Terdaftar (' . ($dbr['owner_company'] ?? 'Cold Chain') . ')',
+        'category'        => 'pharma',
+        'setpoint'        => $setpoint,
+        'temp_actual'     => $tSupply,
+        'temp_supply'     => $tSupply,
+        'temp_return'     => $tReturn,
+        'humidity'        => isset($telRow['humidity_pct']) ? (float)$telRow['humidity_pct'] : 88.0,
+        'rack'            => 'Rack 0' . (($dbr['id'] % 4) + 1),
+        'slot'            => $sockId,
+        'voltage'         => 380.4,
+        'amperage'        => round(($pKw * 1000) / (380.4 * 1.732), 1),
+        'power_kw'        => $pKw,
+        'kwh_total'       => $kwhTot,
+        'status'          => $rStat,
+        'status_text'     => $rStatTxt,
+        'plug_time'       => $dbr['gate_in_time'] ?? date('Y-m-d H:i'),
+        'duration'        => 'Live Sensor Telemetry',
+        'pti_status'      => $rStat === 'alarm' ? 'ALERT' : 'PASSED',
+        'haccp_cert'      => 'HACCP-CIDP/' . $dbr['id'],
+        'destination'     => 'Yard Blok ' . ($dbr['block'] ?? 'REEFER'),
+        'compressor_temp' => $rStat === 'alarm' ? 74.5 : 48.0
+    ];
+}
+foreach ([] as $dbr) {
     $exists = false;
     foreach ($active_reefers as $ar) {
         if ($ar['id'] === $dbr['container_number']) {
@@ -413,7 +464,7 @@ foreach ($db_reefers as $dbr) {
 
 // Perhitungan Statistik Metrik Ringkasan
 $total_plugs_capacity = 300;
-$connected_plugs_count = 184; // Rata-rata operasional live terminal
+$connected_plugs_count = count($active_reefers); // Aktual kontainer reefer terhubung di database
 $empty_plugs_count = $total_plugs_capacity - $connected_plugs_count;
 $occupancy_rate = round(($connected_plugs_count / $total_plugs_capacity) * 100, 1);
 
@@ -436,7 +487,7 @@ foreach ($active_reefers as $ar) {
 
 // Variabel Agregat Cold Chain untuk Laporan & JS
 $total_kw_demand = $estimated_total_load_kw;
-$haccp_compliant_rate = 98.8;
+$haccp_compliant_rate = count($active_reefers) > 0 ? round(($normal_count / count($active_reefers)) * 100, 1) : 100.0;
 $alarm_count = $warning_count + $critical_count;
 ?>
 
@@ -1799,7 +1850,7 @@ function closeDetailModal() {
     modal.classList.remove('flex');
 }
 
-// Cetak Berita Acara Suhu Resmi Format A4 Berstempel Digital
+// Cetak Berita Acara Suhu Resmi Format Kertas A4 Berstempel Digital
 function printReeferMonitoringSheet() {
     if (!currentReeferData && window.activeReefersData && window.activeReefersData.length > 0) {
         currentReeferData = window.activeReefersData[0];
@@ -1808,11 +1859,8 @@ function printReeferMonitoringSheet() {
         alert("Pilih kontainer reefer terlebih dahulu untuk mencetak dokumen monitoring.");
         return;
     }
-    if (typeof CIDPPrint !== 'undefined' && typeof CIDPPrint.printReeferCertificate === 'function') {
-        CIDPPrint.printReeferCertificate(currentReeferData);
-    } else {
-        window.print();
-    }
+    const ctr = encodeURIComponent(currentReeferData.container_number || '');
+    window.open(`document.php?type=reefer_cert&container=${ctr}&autoprint=1`, '_blank');
 }
 
 // Chart.js Telemetri Suhu 24 Jam
@@ -2053,16 +2101,13 @@ function printReeferRekap() {
     );
 }
 
-// Cetak Sertifikat Berita Acara Suhu Resmi dari Grafik / HACCP
+// Cetak Sertifikat Berita Acara Suhu Resmi dari Grafik / HACCP (Format Kertas A4)
 function downloadChartPDF() {
     const sel = document.getElementById('selectReeferGraphBox');
     const selectedId = sel ? sel.value : null;
     const found = window.activeReefersData?.find(r => r.id === selectedId) || window.activeReefersData?.[0];
-    if (found && typeof CIDPPrint !== 'undefined' && typeof CIDPPrint.printReeferCertificate === 'function') {
-        CIDPPrint.printReeferCertificate(found);
-    } else {
-        window.print();
-    }
+    const ctr = encodeURIComponent(found?.container_number || '');
+    window.open(`document.php?type=reefer_cert&container=${ctr}&autoprint=1`, '_blank');
 }
 
 // =========================================================================

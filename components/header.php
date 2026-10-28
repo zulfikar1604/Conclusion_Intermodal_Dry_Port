@@ -38,18 +38,18 @@
         </div>
 
         <!-- CENTER: Clean Universal Quick Search Bar (Ctrl+K Command Palette) -->
-        <div class="hidden md:flex items-center flex-1 max-w-[180px] lg:max-w-[240px] xl:max-w-sm 2xl:max-w-md mx-2 lg:mx-3 xl:mx-4 relative min-w-0" id="globalSearchWrapper">
+        <div class="hidden md:flex items-center flex-1 min-w-[140px] max-w-[220px] lg:max-w-[280px] xl:max-w-sm 2xl:max-w-md mx-2 lg:mx-3 xl:mx-4 relative" id="globalSearchWrapper">
             <form action="dashboard.php" method="GET" class="w-full relative flex items-center" id="globalSearchForm">
                 <input type="hidden" name="page" value="kontainer">
                 <div class="absolute left-2.5 text-slate-400 pointer-events-none flex items-center">
                     <i class="fa-solid fa-magnifying-glass text-xs"></i>
                 </div>
-                <input type="text" name="search" id="globalQuickSearch" 
+                <input type="text" name="search" id="globalQuickSearch" data-ph-long="Cari kontainer, truk, dokumen..." data-ph-mid="Cari kontainer..." data-ph-short="Cari..." 
                        placeholder="<?= __('search_placeholder', 'Cari kontainer (Ctrl+K)...') ?>" 
                        autocomplete="off"
                        onfocus="showSearchSuggestions()"
-                       class="w-full pl-8 pr-12 py-1.5 bg-slate-100/70 hover:bg-slate-100 focus:bg-white text-xs text-slate-800 placeholder-slate-400 rounded-lg border border-slate-200/70 focus:border-[#0170b9] focus:ring-2 focus:ring-[#0170b9]/15 transition-all outline-none">
-                <div class="absolute right-2 flex items-center space-x-1 pointer-events-none">
+                       class="w-full pl-8 pr-3 py-1.5 text-ellipsis bg-slate-100/70 hover:bg-slate-100 focus:bg-white text-xs text-slate-800 placeholder-slate-400 rounded-lg border border-slate-200/70 focus:border-[#0170b9] focus:ring-2 focus:ring-[#0170b9]/15 transition-all outline-none">
+                <div id="searchKbdHint" class="absolute right-2 flex items-center space-x-1 pointer-events-none">
                     <kbd class="px-1.5 py-0.5 text-[9px] font-bold font-mono text-slate-400 bg-white border border-slate-200/80 rounded shadow-2xs">Ctrl+K</kbd>
                 </div>
             </form>
@@ -104,7 +104,7 @@
             </button>
 
             <!-- Fullscreen Toggle Button -->
-            <button onclick="toggleFullScreen()" class="w-8 h-8 hidden sm:flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors rounded-lg hover:bg-slate-100 focus:outline-none cursor-pointer" title="<?= __('fullscreen_title', 'Layar Penuh (F11)') ?>">
+            <button id="fullscreenToggleBtn" onclick="toggleFullScreen()" class="w-8 h-8 flex items-center justify-center text-slate-500 hover:text-slate-800 transition-colors rounded-lg hover:bg-slate-100 focus:outline-none cursor-pointer" title="<?= __('fullscreen_title', 'Layar Penuh (F11)') ?>">
                 <i class="fa-solid fa-expand text-xs" id="fullscreenIcon"></i>
             </button>
 
@@ -123,6 +123,12 @@
                     EN
                 </a>
             </div>
+
+            <!-- Pusat Dokumen Kertas Resmi A4 (Invoice, Gate Pass, SPPB, CFS, HACCP) -->
+            <a href="document.php?type=invoice" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200/90 text-xs font-bold transition shadow-2xs group" title="Buka Pusat Cetak Dokumen Kertas Resmi A4 (Kop Pelindo MTI / Bea Cukai & Stempel Digital)">
+                <i class="fa-solid fa-stamp text-orange-600 group-hover:rotate-12 transition-transform"></i>
+                <span class="hidden md:inline">Dokumen A4</span>
+            </a>
 
             <!-- Notification Bell & Categorized Dropdown Card -->
             <div class="relative" id="notifDropdownWrapper">
@@ -368,7 +374,7 @@
 <div id="logoutConfirmModal" class="fixed inset-0 z-[100] bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-3.5">
     <div class="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-[360px] overflow-hidden text-slate-800 relative animate-fadeIn">
         <!-- Top Header Band -->
-        <div class="bg-gradient-to-r from-[#002f5e] via-[#0170b9] to-orange-600 px-4.5 py-3 text-white flex items-center justify-between">
+        <div class="bg-slate-50 border-b border-slate-200 px-4.5 py-3 text-slate-900 flex items-center justify-between">
             <div class="flex items-center space-x-2">
                 <div class="w-6 h-6 rounded-md bg-white/10 backdrop-blur-xs flex items-center justify-center border border-white/20 p-0.5">
                     <img src="assets/img/logo.png" alt="Conclusion Logo" class="w-full h-full object-contain">
@@ -439,4 +445,27 @@ function closeLogoutConfirmModal() {
 window.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') closeLogoutConfirmModal();
 });
+</script>
+<script>
+// Placeholder & hint Ctrl+K menyesuaikan lebar kolom pencarian agar tidak terpotong
+(function () {
+    function fit() {
+        var i = document.getElementById('globalQuickSearch'), k = document.getElementById('searchKbdHint');
+        if (!i) return;
+        var w = i.clientWidth, showK = w >= 230;
+        if (k) k.style.display = showK ? '' : 'none';
+        i.style.paddingRight = showK ? '3.4rem' : '0.75rem';
+        var avail = w - 32 - (showK ? 56 : 12);
+        var txt = i.dataset.phLong;
+        if (avail < txt.length * 6.4) txt = i.dataset.phMid;
+        if (avail < txt.length * 6.4) txt = i.dataset.phShort;
+        if (i.placeholder !== txt) i.placeholder = txt;
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        fit();
+        var w = document.getElementById('globalSearchWrapper');
+        if (w && window.ResizeObserver) new ResizeObserver(fit).observe(w);
+        window.addEventListener('resize', fit);
+    });
+})();
 </script>

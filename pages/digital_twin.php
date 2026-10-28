@@ -558,67 +558,67 @@ $twin_initial = get_live_twin_state($pdo, false);
             </div>
 
             <!-- PANEL 2: ALIRAN FINANSIAL & BILLING ENGINE LIVE -->
-            <div class="bg-gradient-to-br from-slate-900 to-slate-950 text-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-800 relative overflow-hidden">
-                <div class="flex items-center justify-between mb-3 border-b border-slate-800 pb-2">
-                    <h3 class="text-xs font-bold text-slate-200 uppercase tracking-wider flex items-center gap-2">
-                        <i class="fa-solid fa-file-invoice-dollar text-amber-400"></i>
+            <div class="bg-white text-slate-800 rounded-2xl p-4 sm:p-5 shadow-2xs border border-slate-200 relative overflow-hidden">
+                <div class="flex items-center justify-between mb-3 border-b border-slate-100 pb-2">
+                    <h3 class="text-xs font-extrabold text-slate-900 uppercase tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-file-invoice-dollar text-orange-600"></i>
                         <span>Aliran Finansial &amp; Billing</span>
                     </h3>
-                    <span class="text-[10px] font-mono text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded border border-amber-800/60 font-bold">PILAR 3</span>
+                    <span class="text-[10px] font-mono text-orange-700 bg-orange-50 px-2 py-0.5 rounded border border-orange-200 font-bold">PILAR 3</span>
                 </div>
 
                 <!-- Grand Total Accrued Revenue Today -->
-                <div class="mb-4">
-                    <div class="text-[11px] font-mono text-slate-400 uppercase tracking-wider">Total Akrual Pendapatan Berjalan:</div>
-                    <div id="financialTotalRevenue" class="text-2xl sm:text-3xl font-black text-amber-300 font-mono tracking-tight my-1">
+                <div class="mb-4 p-3 rounded-xl bg-emerald-50/60 border border-emerald-200">
+                    <div class="text-[10.5px] font-bold text-emerald-800 uppercase tracking-wider">Total Akrual Pendapatan Berjalan:</div>
+                    <div id="financialTotalRevenue" class="text-2xl sm:text-3xl font-black text-emerald-700 font-mono tracking-tight my-0.5">
                         Rp <?= number_format($twin_initial['financial']['total_revenue_accrued_idr'], 0, ',', '.') ?>
                     </div>
-                    <div class="text-[10px] text-slate-400 flex items-center gap-1.5">
-                        <i class="fa-solid fa-bolt text-amber-400"></i>
+                    <div class="text-[10px] text-emerald-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt text-orange-500"></i>
                         <span>Terhitung otomatis per pergerakan sensor fisik</span>
                     </div>
                 </div>
 
                 <!-- 4 Tariff Breakdown Chips -->
                 <div class="grid grid-cols-2 gap-2 text-xs mb-4">
-                    <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                        <div class="text-[10px] text-slate-400 font-mono">Jasa Timbang 80T:</div>
-                        <div id="finWeighFee" class="text-sm font-bold font-mono text-white mt-0.5">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] text-slate-500 font-semibold">Jasa Timbang 80T:</div>
+                        <div id="finWeighFee" class="text-sm font-bold font-mono text-slate-900 mt-0.5">
                             Rp <?= number_format($twin_initial['financial']['weighbridge_fee_idr'], 0, ',', '.') ?>
                         </div>
                     </div>
-                    <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                        <div class="text-[10px] text-slate-400 font-mono">Lift-Off / Lift-On:</div>
-                        <div id="finLoLoFee" class="text-sm font-bold font-mono text-white mt-0.5">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] text-slate-500 font-semibold">Lift-Off / Lift-On:</div>
+                        <div id="finLoLoFee" class="text-sm font-bold font-mono text-slate-900 mt-0.5">
                             Rp <?= number_format($twin_initial['financial']['liftoff_fee_idr'], 0, ',', '.') ?>
                         </div>
                     </div>
-                    <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                        <div class="text-[10px] text-slate-400 font-mono">Dwell Time Yard:</div>
-                        <div id="finStorageFee" class="text-sm font-bold font-mono text-white mt-0.5">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] text-slate-500 font-semibold">Dwell Time Yard:</div>
+                        <div id="finStorageFee" class="text-sm font-bold font-mono text-slate-900 mt-0.5">
                             Rp <?= number_format($twin_initial['financial']['storage_dwell_fee_idr'], 0, ',', '.') ?>
                         </div>
                     </div>
-                    <div class="p-2.5 rounded-xl bg-white/5 border border-white/10">
-                        <div class="text-[10px] text-slate-400 font-mono">Daya Reefer 380V:</div>
-                        <div id="finReeferFee" class="text-sm font-bold font-mono text-white mt-0.5">
+                    <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] text-slate-500 font-semibold">Daya Reefer 380V:</div>
+                        <div id="finReeferFee" class="text-sm font-bold font-mono text-slate-900 mt-0.5">
                             Rp <?= number_format($twin_initial['financial']['reefer_power_fee_idr'], 0, ',', '.') ?>
                         </div>
                     </div>
                 </div>
 
                 <!-- Settlement Status Progress -->
-                <div class="pt-2 border-t border-white/10">
-                    <div class="flex items-center justify-between text-[11px] font-mono text-slate-400 mb-1.5">
+                <div class="pt-2 border-t border-slate-100">
+                    <div class="flex items-center justify-between text-[11px] font-semibold text-slate-600 mb-1.5">
                         <span>Status Pelunasan Kasir / Bank:</span>
-                        <span id="settlementPctDisplay" class="font-bold text-emerald-400"><?= $twin_initial['financial']['settlement_ratio_pct'] ?>% Lunas</span>
+                        <span id="settlementPctDisplay" class="font-bold text-emerald-700 font-mono"><?= $twin_initial['financial']['settlement_ratio_pct'] ?>% Lunas</span>
                     </div>
-                    <div class="w-full bg-white/10 h-2 rounded-full overflow-hidden">
-                        <div id="settlementBar" class="h-full bg-gradient-to-r from-emerald-500 to-amber-400 transition-all duration-500" style="width: <?= $twin_initial['financial']['settlement_ratio_pct'] ?>%;"></div>
+                    <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden border border-slate-200">
+                        <div id="settlementBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: <?= $twin_initial['financial']['settlement_ratio_pct'] ?>%;"></div>
                     </div>
-                    <div class="flex items-center justify-between text-[10px] font-mono text-slate-400 mt-2">
-                        <span>Lunas: <strong id="paidAmountDisplay" class="text-white">Rp <?= number_format($twin_initial['financial']['paid_amount_idr'], 0, ',', '.') ?></strong></span>
-                        <span>Piutang: <strong id="pendingAmountDisplay" class="text-amber-300">Rp <?= number_format($twin_initial['financial']['pending_amount_idr'], 0, ',', '.') ?></strong></span>
+                    <div class="flex items-center justify-between text-[10px] font-mono text-slate-500 mt-2">
+                        <span>Lunas: <strong id="paidAmountDisplay" class="text-emerald-700">Rp <?= number_format($twin_initial['financial']['paid_amount_idr'], 0, ',', '.') ?></strong></span>
+                        <span>Piutang: <strong id="pendingAmountDisplay" class="text-amber-700">Rp <?= number_format($twin_initial['financial']['pending_amount_idr'], 0, ',', '.') ?></strong></span>
                     </div>
                 </div>
 

@@ -15,7 +15,7 @@ $total_dg = 0;
 $total_empty = 0;
 
 try {
-    $stmt = $pdo->query("SELECT * FROM containers ORDER BY id ASC");
+    $stmt = $pdo->query("SELECT * FROM containers WHERE status != 'expected' ORDER BY id ASC");
     $containers = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $containers = [];

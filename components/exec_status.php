@@ -21,7 +21,7 @@ $__yard_cap = 12500; // Kapasitas desain stacking yard (TEU) — sama dengan api
 if (isset($pdo) && $pdo instanceof PDO) {
     try {
         // 1) Hold Bea Cukai
-        $n = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status != 'gate_out' AND customs_status IN ('DOC_HOLD','RED_LANE_CHECK')")->fetchColumn();
+        $n = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status NOT IN ('gate_out','expected') AND customs_status IN ('DOC_HOLD','RED_LANE_CHECK')")->fetchColumn();
         if ($n > 0) {
             $__alerts[] = [
                 'sev'   => $n >= 5 ? 'critical' : 'high',

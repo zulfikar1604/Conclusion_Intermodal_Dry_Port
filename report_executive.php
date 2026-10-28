@@ -111,8 +111,12 @@ $filter_mode = $_GET['scope'] ?? 'all';
             display: flex;
             align-items: center;
             justify-content: space-between;
-            background: linear-gradient(90deg, #002f5e 0%, #0170b9 100%);
-            color: #ffffff;
+            background: #f8fafc;
+            color: #0f172a;
+            border-left: 4px solid #ea580c;
+            border-top: 1px solid #cbd5e1;
+            border-right: 1px solid #cbd5e1;
+            border-bottom: 1.5px solid #94a3b8;
             padding: 5px 10px;
             border-radius: 4px;
             font-size: 10.5px;
@@ -149,35 +153,35 @@ $filter_mode = $_GET['scope'] ?? 'all';
     <!-- =================================================================== -->
     <!-- FLOATING INTERACTIVE REPORT TOOLBAR (HIDDEN ON PRINT)               -->
     <!-- =================================================================== -->
-    <header class="no-print sticky top-0 z-50 bg-[#002f5e] text-white border-b border-blue-800 shadow-lg">
+    <header class="no-print sticky top-0 z-50 bg-white text-slate-800 border-b border-slate-200 shadow-2xs">
         <div class="max-w-[1150px] mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3">
-                <a href="dashboard.php?page=beranda" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-bold flex items-center gap-1.5 transition border border-white/15">
+                <a href="dashboard.php?page=beranda" class="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition border border-slate-200">
                     <i class="fa-solid fa-arrow-left text-[10px]"></i>
                     <span><?= ($current_lang === 'en') ? 'Back to Control Tower' : 'Kembali ke Beranda' ?></span>
                 </a>
-                <div class="h-5 w-px bg-white/20 hidden sm:block"></div>
+                <div class="h-5 w-px bg-slate-200 hidden sm:block"></div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <span class="text-xs font-extrabold tracking-tight text-white">HALAMAN DESAIN DOKUMEN EKSEKUTIF RESMI (A4)</span>
-                        <span class="text-[9px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/40 px-2 py-0.5 rounded-full">
+                        <span class="text-xs font-extrabold tracking-tight text-slate-900">HALAMAN DESAIN DOKUMEN EKSEKUTIF RESMI (A4)</span>
+                        <span class="text-[9px] font-extrabold uppercase bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full">
                             Live DB Connected
                         </span>
                     </div>
-                    <p class="text-[10px] text-blue-200">Desain laporan terstruktur mandiri (bukan tangkapan layar) • Dilengkapi Kop Surat, Audit 3-Aliran &amp; Stempel Digital Vektor</p>
+                    <p class="text-[10px] text-slate-500">Desain laporan terstruktur mandiri (bukan tangkapan layar) • Dilengkapi Kop Surat, Audit 3-Aliran &amp; Stempel Digital Vektor</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2 flex-wrap">
                 <!-- Filter Scope Section -->
-                <div class="flex items-center bg-slate-900/50 p-1 rounded-lg border border-white/15 text-[10.5px]">
-                    <button type="button" onclick="setReportSectionView('all')" id="btnScopeAll" class="px-2.5 py-1 rounded font-bold bg-[#0170b9] text-white transition">
+                <div class="flex items-center bg-slate-100 p-1 rounded-lg border border-slate-200 text-[10.5px]">
+                    <button type="button" onclick="setReportSectionView('all')" id="btnScopeAll" class="px-2.5 py-1 rounded font-bold bg-orange-600 text-white transition">
                         Lengkap (Semua Seksi)
                     </button>
-                    <button type="button" onclick="setReportSectionView('summary')" id="btnScopeSummary" class="px-2.5 py-1 rounded font-semibold text-blue-200 hover:text-white transition">
+                    <button type="button" onclick="setReportSectionView('summary')" id="btnScopeSummary" class="px-2.5 py-1 rounded font-semibold text-slate-600 hover:text-slate-900 transition">
                         Ringkasan Direksi
                     </button>
-                    <button type="button" onclick="setReportSectionView('financial')" id="btnScopeFinancial" class="px-2.5 py-1 rounded font-semibold text-blue-200 hover:text-white transition">
+                    <button type="button" onclick="setReportSectionView('financial')" id="btnScopeFinancial" class="px-2.5 py-1 rounded font-semibold text-slate-600 hover:text-slate-900 transition">
                         Fokus Finansial &amp; Demurrage
                     </button>
                 </div>
@@ -215,16 +219,16 @@ $filter_mode = $_GET['scope'] ?? 'all';
         </div>
 
         <!-- 1. KOP SURAT RESMI PERUSAHAAN (OFFICIAL CORPORATE LETTERHEAD) -->
-        <div class="relative z-10 border-b-[3px] border-[#002f5e] pb-3 mb-3">
+        <div class="relative z-10 border-b-[3px] border-slate-900 pb-3 mb-3">
             <div class="flex justify-between items-start gap-4">
                 <div class="flex items-start gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#002f5e] to-[#0170b9] text-white flex flex-col items-center justify-center font-black shadow-sm flex-shrink-0 border border-blue-900">
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-orange-600 to-orange-500 text-white flex flex-col items-center justify-center font-black shadow-sm flex-shrink-0 border border-blue-900">
                         <span class="text-lg leading-none">CIDP</span>
                         <span class="text-[7px] tracking-widest font-mono text-orange-300">35 HA</span>
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-[16px] font-black text-[#002f5e] tracking-tight uppercase leading-none">
+                            <h1 class="text-[16px] font-black text-slate-900 tracking-tight uppercase leading-none">
                                 CONCLUSION INTERMODAL DRY PORT
                             </h1>
                             <span class="text-[8px] font-extrabold bg-orange-50 text-orange-700 border border-orange-300 px-1.5 py-0.5 rounded uppercase">
@@ -242,10 +246,10 @@ $filter_mode = $_GET['scope'] ?? 'all';
                 </div>
 
                 <div class="text-right min-w-[215px]">
-                    <div class="inline-block px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-[#002f5e] font-extrabold text-[8.5px] uppercase tracking-wider">
+                    <div class="inline-block px-2.5 py-0.5 rounded-full bg-blue-50 border border-blue-200 text-slate-900 font-extrabold text-[8.5px] uppercase tracking-wider">
                         EXECUTIVE BRIEFING &amp; 3-FLOW AUDIT
                     </div>
-                    <div class="text-[13px] font-black text-[#002f5e] uppercase mt-1">
+                    <div class="text-[13px] font-black text-slate-900 uppercase mt-1">
                         LAPORAN KINERJA TERMINAL
                     </div>
                     <div class="font-mono-code text-[10px] font-bold text-slate-800 mt-0.5">
@@ -275,7 +279,7 @@ $filter_mode = $_GET['scope'] ?? 'all';
             </div>
             <div>
                 <span class="text-slate-400 font-semibold block uppercase">Hash Keamanan Dokumen:</span>
-                <strong class="font-mono-code text-[#002f5e]"><?= htmlspecialchars($sec_hash) ?></strong>
+                <strong class="font-mono-code text-slate-900"><?= htmlspecialchars($sec_hash) ?></strong>
             </div>
         </div>
 
@@ -303,7 +307,7 @@ $filter_mode = $_GET['scope'] ?? 'all';
                     <tr>
                         <td class="font-mono-code font-bold text-center">01</td>
                         <td><strong>Yard Stacking Occupancy</strong> (Blok A–C)</td>
-                        <td class="font-mono-code font-bold text-[#002f5e]"><?= number_format($kpi['containers_yard']) ?> TEU</td>
+                        <td class="font-mono-code font-bold text-slate-900"><?= number_format($kpi['containers_yard']) ?> TEU</td>
                         <td><?= number_format($kpi['yard_cap_max']) ?> TEU (16.5 Ha)</td>
                         <td class="font-mono-code font-bold"><?= $kpi['yard_occupancy'] ?>%</td>
                         <td><span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-300 font-bold text-[8.5px]">OPTIMAL (&lt; 75% YOR)</span></td>
@@ -364,9 +368,9 @@ $filter_mode = $_GET['scope'] ?? 'all';
             <div class="grid grid-cols-3 gap-2.5 text-[9.5px]">
                 <!-- Pilar 1: Fisik -->
                 <div class="border border-slate-300 rounded-md p-2.5 bg-slate-50/60">
-                    <div class="font-extrabold text-[#002f5e] uppercase border-b border-slate-200 pb-1 mb-1.5 flex items-center justify-between">
+                    <div class="font-extrabold text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1.5 flex items-center justify-between">
                         <span>1. Aliran Fisik (35 Ha)</span>
-                        <span class="text-[8px] bg-blue-100 text-[#002f5e] px-1.5 py-0.2 rounded font-mono-code">4 ZONA</span>
+                        <span class="text-[8px] bg-blue-100 text-slate-900 px-1.5 py-0.2 rounded font-mono-code">4 ZONA</span>
                     </div>
                     <ul class="space-y-1 text-slate-700">
                         <li class="flex justify-between"><span>&bull; Z1 Gerbang &amp; VGM 80T:</span><strong>4.2 Ha (Lancar)</strong></li>
@@ -379,7 +383,7 @@ $filter_mode = $_GET['scope'] ?? 'all';
 
                 <!-- Pilar 2: Informasi -->
                 <div class="border border-slate-300 rounded-md p-2.5 bg-slate-50/60">
-                    <div class="font-extrabold text-[#002f5e] uppercase border-b border-slate-200 pb-1 mb-1.5 flex items-center justify-between">
+                    <div class="font-extrabold text-slate-900 uppercase border-b border-slate-200 pb-1 mb-1.5 flex items-center justify-between">
                         <span>2. Aliran Informasi &amp; IoT</span>
                         <span class="text-[8px] bg-emerald-100 text-emerald-800 px-1.5 py-0.2 rounded font-mono-code">5 GATEWAY</span>
                     </div>
@@ -443,7 +447,7 @@ $filter_mode = $_GET['scope'] ?? 'all';
                         }
                     ?>
                     <tr>
-                        <td class="font-mono-code font-bold text-[#002f5e]"><?= htmlspecialchars($inv['invoice_number']) ?></td>
+                        <td class="font-mono-code font-bold text-slate-900"><?= htmlspecialchars($inv['invoice_number']) ?></td>
                         <td class="font-mono-code font-bold text-[#0170b9]"><?= htmlspecialchars($inv['container_number']) ?></td>
                         <td class="font-semibold"><?= htmlspecialchars($inv['customer_name']) ?></td>
                         <td><?= htmlspecialchars($inv['service_type']) ?></td>
@@ -484,7 +488,7 @@ $filter_mode = $_GET['scope'] ?? 'all';
                         $tot_accrual = (float)$c['storage_rp'] + (float)$c['demurrage_rp'];
                     ?>
                     <tr>
-                        <td class="font-mono-code font-bold text-[#002f5e]"><?= htmlspecialchars($c['container_number']) ?></td>
+                        <td class="font-mono-code font-bold text-slate-900"><?= htmlspecialchars($c['container_number']) ?></td>
                         <td class="font-medium"><?= htmlspecialchars($c['owner_company']) ?></td>
                         <td class="font-mono-code text-[9px]"><?= htmlspecialchars($c['size_type']) ?> (<?= htmlspecialchars($c['iso_code']) ?>)</td>
                         <td class="font-mono-code text-[9px] text-purple-800"><?= htmlspecialchars($c['rfid_tag']) ?></td>
@@ -504,12 +508,12 @@ $filter_mode = $_GET['scope'] ?? 'all';
         <!-- =============================================================== -->
         <!-- SEKSI V: PENGESAHAN RESMI, QR VERIFIKASI & STEMPEL DIGITAL      -->
         <!-- =============================================================== -->
-        <div class="mt-4 pt-3 border-t-2 border-[#002f5e] page-break-inside-avoid">
+        <div class="mt-4 pt-3 border-t-2 border-slate-900 page-break-inside-avoid">
             <div class="grid grid-cols-12 gap-3 items-end">
                 
                 <!-- QR Code & Pernyataan Keabsahan (4 Cols) -->
                 <div class="col-span-4 bg-slate-50 border border-slate-200 rounded-md p-2.5 flex items-center gap-2.5">
-                    <div class="w-16 h-16 bg-white border border-[#002f5e] p-1 rounded flex items-center justify-center flex-shrink-0">
+                    <div class="w-16 h-16 bg-white border border-slate-900 p-1 rounded flex items-center justify-center flex-shrink-0">
                         <svg viewBox="0 0 45 45" width="54" height="54" fill="#002f5e">
                             <rect x="0" y="0" width="13" height="13" />
                             <rect x="2" y="2" width="9" height="9" fill="#fff" />
@@ -528,7 +532,7 @@ $filter_mode = $_GET['scope'] ?? 'all';
                         </svg>
                     </div>
                     <div class="text-[8.5px] leading-snug text-slate-600">
-                        <div class="font-extrabold text-[#002f5e] text-[9px] uppercase">Keabsahan Elektronik</div>
+                        <div class="font-extrabold text-slate-900 text-[9px] uppercase">Keabsahan Elektronik</div>
                         <p class="mt-0.5">Dokumen ini diterbitkan resmi dari basis data <strong>CIDP Control Tower</strong> sesuai UU ITE &amp; PMK 190/2022.</p>
                         <div class="font-mono-code font-bold text-slate-900 mt-1 text-[8px]"><?= htmlspecialchars($sec_hash) ?></div>
                     </div>
