@@ -1494,23 +1494,9 @@ function filterBerandaInvoices(tab) {
 function printBerandaSingleInvoice(encodedInv) {
     try {
         const inv = JSON.parse(decodeURIComponent(encodedInv));
-        if (typeof CIDPPrint !== 'undefined') {
-            const sub = Math.round(inv.total_amount / 1.11);
-            const ppn = inv.total_amount - sub;
-            CIDPPrint.printInvoice({
-                no: inv.invoice_number,
-                date: inv.date_str,
-                dueDate: inv.date_str,
-                customer: inv.customer_name,
-                status: inv.payment_status,
-                subtotal: sub,
-                ppn: ppn,
-                total: inv.total_amount,
-                items: [
-                    { desc: inv.service_type + ' — Kontainer ' + inv.container_number, qty: '1 Paket', rate: sub, total: sub }
-                ]
-            });
-        }
+        const no = encodeURIComponent(inv.invoice_number || '');
+        const ctr = encodeURIComponent(inv.container_number || '');
+        window.open(`document.php?type=invoice&no=${no}&container=${ctr}&autoprint=1`, '_blank');
     } catch (e) {
         console.error(e);
     }
@@ -1816,27 +1802,9 @@ function closeBerandaInspectModal() {
 
 function printInspectedContainerInvoice() {
     const c = berandaState.inspectedContainer;
-    if (!c || typeof CIDPPrint === 'undefined') return;
-    const sub = Number(c.storage_rp || 900000) + Number(c.demurrage_rp || 0) + 500000;
-    const ppn = Math.round(sub * 0.11);
-    const items = [
-        { desc: `Lift-On / Lift-Off (Lo-Lo) Reach Stacker Kalmar — ${c.container_number}`, qty: '2 Moves', rate: 250000, total: 500000 },
-        { desc: `Jasa Penumpukan Yard (${c.position_label})`, qty: `${c.dwell_days} Hari`, rate: Math.round(c.storage_rp / Math.max(1, c.dwell_days)), total: c.storage_rp }
-    ];
-    if (c.demurrage_rp > 0) {
-        items.push({ desc: `Biaya Demurrage Kelebihan Inap (>3 Hari)`, qty: `${c.dwell_days - 3} Hari`, rate: Math.round(c.demurrage_rp / Math.max(1, c.dwell_days - 3)), total: c.demurrage_rp });
-    }
-    CIDPPrint.printInvoice({
-        no: 'INV/2026/CTR-' + c.container_number.slice(-4),
-        date: new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }),
-        dueDate: new Date().toLocaleDateString('id-ID', { day:'numeric', month:'long', year:'numeric' }),
-        customer: c.owner_company,
-        status: c.is_demurrage ? 'PENDING' : 'PAID',
-        subtotal: sub,
-        ppn: ppn,
-        total: sub + ppn,
-        items: items
-    });
+    if (!c || !c.container_number) return;
+    const ctr = encodeURIComponent(c.container_number);
+    window.open(`document.php?type=invoice&container=${ctr}&autoprint=1`, '_blank');
 }
 
 // 6. OPSI A: Live Auto-Sync Telemetry Polling Engine

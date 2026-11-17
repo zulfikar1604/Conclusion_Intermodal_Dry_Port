@@ -6,6 +6,9 @@
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 // Handle POST Aksi Dispatcher Alat Berat (VMT Live Binding)
 $alat_alert = null;
@@ -23,7 +26,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['alat_actio
                 $notes = trim($_POST['operator_notes'] ?? '');
 
                 // Ambil info koordinat kontainer saat ini
-                $stmtC = $pdo->prepare("SELECT block, bay, row, tier FROM containers WHERE container_number = ? LIMIT 1");
+                $stmtC = $pdo->prepare("SELECT block, bay, `row`, tier FROM containers WHERE container_number = ? LIMIT 1");
                 $stmtC->execute([$ctr_num]);
                 $cData = $stmtC->fetch(PDO::FETCH_ASSOC);
                 $from_b = $cData['block'] ?? 'A';
@@ -45,18 +48,22 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['alat_actio
                 $stmtUpEq = $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = ?, last_updated = NOW() WHERE equipment_id = ?");
                 $stmtUpEq->execute([$ctr_num, $t_block, $eq_id]);
 
-                // 2. Update koordinat fisik kontainer di database
-                $stmtUpCtr = $pdo->prepare("UPDATE containers SET block = ?, bay = ?, row = ?, tier = ?, status = 'stacked', last_moved = NOW() WHERE container_number = ?");
-                $stmtUpCtr->execute([$t_block, $t_bay, $t_row, $t_tier, $ctr_num]);
+                // 2. Update koordinat fisik kontainer di database (status ENUM valid: in_yard / on_rail)
+                $newStatus = ($job_type === 'RAIL_LOAD' || $t_block === 'RAIL') ? 'on_rail' : 'in_yard';
+                $stmtUpCtr = $pdo->prepare("UPDATE containers SET block = ?, bay = ?, `row` = ?, tier = ?, status = ? WHERE container_number = ?");
+                $stmtUpCtr->execute([$t_block, $t_bay, $t_row, $t_tier, $newStatus, $ctr_num]);
 
-                // 3. Catat audit pemindahan ke yard_events
+                // 3. Catat audit pemindahan ke yard_events & akrual biaya LoLo ke Billing
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, container_number, from_block, from_bay, to_block, to_bay, notes, billable_amount, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
                 $stmtLog->execute([$job_type, $eq_id, $op_name, $ctr_num, $from_b, $from_by, $t_block, $t_bay, $notes, $fee]);
+                accrue_billing($pdo, $ctr_num, "Alat Berat $job_type ($eq_id)", 'lolo_amount', $fee);
+
+                get_live_twin_state($pdo, true);
 
                 $alat_alert = [
                     'type' => 'success',
                     'title' => "Job Order VMT Terkirim ke $eq_id",
-                    'msg' => "Unit <strong>$eq_id</strong> (Operator: $op_name) ditugaskan untuk $job_type kontainer <strong>$ctr_num</strong> ke Blok $t_block (Bay $t_bay / Row $t_row / Tier $t_tier). Posisi fisik kontainer di database telah diperbarui."
+                    'msg' => "Unit <strong>$eq_id</strong> (Operator: $op_name) ditugaskan untuk $job_type kontainer <strong>$ctr_num</strong> ke Blok $t_block (Bay $t_bay / Row $t_row / Tier $t_tier). Posisi fisik & tagihan telah diperbarui."
                 ];
             } elseif ($_POST['alat_action'] === 'release_spreader') {
                 $eq_id = trim($_POST['equipment_id'] ?? '');
@@ -72,6 +79,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['alat_actio
 
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, container_number, notes, billable_amount, created_at) VALUES ('RELEASE', ?, ?, ?, 'Twistlock spreader dilepas, pekerjaan selesai. Unit Standby.', 0, NOW())");
                 $stmtLog->execute([$eq_id, $op_name, $cur_c]);
+
+                get_live_twin_state($pdo, true);
 
                 $alat_alert = [
                     'type' => 'success',
@@ -116,7 +125,7 @@ try {
 // Ambil daftar kontainer aktif di lapangan untuk modal penugasan
 $active_containers = [];
 try {
-    $stmtC = $pdo->query("SELECT container_number, iso_code, size, status, block, bay, row, tier, commodity FROM containers WHERE status IN ('stacked', 'gate_in') ORDER BY block ASC, bay ASC, container_number ASC");
+    $stmtC = $pdo->query("SELECT container_number, iso_code, size_type, status, block, bay, `row`, tier, cargo_type FROM containers WHERE status IN ('in_yard', 'in_transit') ORDER BY block ASC, bay ASC, container_number ASC");
     $active_containers = $stmtC->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $active_containers = [];
@@ -642,7 +651,7 @@ foreach ($equipment_list as $eq) {
                     <?php else: ?>
                         <?php foreach ($active_containers as $act_c): ?>
                             <option value="<?= htmlspecialchars($act_c['container_number']) ?>">
-                                <?= htmlspecialchars($act_c['container_number']) ?> (<?= $act_c['size'] ?>' - Blok <?= $act_c['block'] ?? '-' ?> Bay <?= $act_c['bay'] ?? '-' ?> - <?= htmlspecialchars($act_c['commodity'] ?? 'General Cargo') ?>)
+                                <?= htmlspecialchars($act_c['container_number']) ?> (<?= htmlspecialchars($act_c['size_type'] ?? '40HC') ?> - Blok <?= htmlspecialchars($act_c['block'] ?? '-') ?> Bay <?= htmlspecialchars($act_c['bay'] ?? '-') ?> - <?= htmlspecialchars(strtoupper($act_c['cargo_type'] ?? 'General')) ?>)
                             </option>
                         <?php endforeach; ?>
                     <?php endif; ?>

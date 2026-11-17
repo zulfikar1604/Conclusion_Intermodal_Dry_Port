@@ -2,8 +2,8 @@
     "system": {
         "app": "CIDP Digital Twin Monitoring Engine",
         "version": "2.0-Live",
-        "server_time": "2026-10-25T12:35:36+07:00",
-        "timestamp": 1792906536.627508,
+        "server_time": "2026-11-16T10:56:09+07:00",
+        "timestamp": 1794801369.212469,
         "status": "ONLINE"
     },
     "physical": {
@@ -14,14 +14,14 @@
                 "brand": "Kalmar DRG450-65S5",
                 "operator": "Budi Santoso",
                 "status": "idle",
-                "gps_x": 160,
-                "gps_y": 210,
+                "gps_x": 270,
+                "gps_y": 175,
                 "carried_container": null,
-                "last_block": "C",
+                "last_block": "A",
                 "fuel_percent": 86,
                 "hours_today": 0,
                 "spreader_locked": false,
-                "last_updated": "2026-10-25 12:35:29"
+                "last_updated": "2026-11-16 10:56:09"
             },
             "RS-02": {
                 "id": "RS-02",
@@ -30,13 +30,13 @@
                 "operator": "Agus Setiawan",
                 "status": "idle",
                 "gps_x": 490,
-                "gps_y": 250,
+                "gps_y": 175,
                 "carried_container": null,
-                "last_block": "REEFER",
+                "last_block": "B",
                 "fuel_percent": 73,
                 "hours_today": 0,
                 "spreader_locked": false,
-                "last_updated": "2026-10-25 12:35:35"
+                "last_updated": "2026-11-16 10:56:09"
             },
             "RS-03": {
                 "id": "RS-03",
@@ -44,14 +44,14 @@
                 "brand": "Sany SRSC45H2",
                 "operator": "Rudi Hermawan",
                 "status": "idle",
-                "gps_x": 0,
-                "gps_y": 0,
+                "gps_x": 770,
+                "gps_y": 175,
                 "carried_container": null,
                 "last_block": "REEFER",
                 "fuel_percent": 78,
                 "hours_today": 0,
                 "spreader_locked": false,
-                "last_updated": "2026-10-25 12:12:18"
+                "last_updated": "2026-11-16 10:56:09"
             },
             "RTG-01": {
                 "id": "RTG-01",
@@ -59,243 +59,185 @@
                 "brand": "ZPMC RTG 16-Wheel",
                 "operator": "Joko Susilo",
                 "status": "idle",
-                "gps_x": 0,
-                "gps_y": 0,
+                "gps_x": 600,
+                "gps_y": 625,
                 "carried_container": null,
                 "last_block": "RAIL",
                 "fuel_percent": 95,
                 "hours_today": 0,
                 "spreader_locked": false,
-                "last_updated": "2026-10-25 12:12:18"
+                "last_updated": "2026-11-16 10:56:09"
             }
         },
-        "trucks": [
-            {
-                "id": 14,
-                "license_plate": "B 2918 CKR",
-                "rfid_tag": "E28011700000020489110014",
-                "driver_name": "Rudi Hartono",
-                "company": "PT Mitra Kontainer Nusantara",
-                "job_type": "drop_off",
-                "mission_type": "DROP_EXPORT",
-                "container_number": "MAEU9185181",
-                "destination": "Yard Blok A",
-                "target_block": "REEFER",
-                "do_number": "DO-2026-7014",
-                "weight_gross": "0.00",
-                "weight_tare": "0.00",
-                "status": "loading",
-                "gate_in_time": "2026-10-25 12:35:35",
-                "gate_out_time": null,
-                "created_at": "2026-10-25 12:12:18"
+        "equipment_queues": {
+            "RS-01": {
+                "id": "RS-01",
+                "zone": "Blok A \u2022 Ekspor",
+                "color": "sky",
+                "jobs": [
+                    {
+                        "container": "MSCU9180379",
+                        "slot": "PRE-A",
+                        "mode": "QUEUED",
+                        "label": "A ETA (MSCU)"
+                    },
+                    {
+                        "container": "CMAU9181115",
+                        "slot": "PRE-C",
+                        "mode": "QUEUED",
+                        "label": "C ETA (CMAU)"
+                    },
+                    {
+                        "container": "TGHU9182222",
+                        "slot": "PRE-A",
+                        "mode": "QUEUED",
+                        "label": "A ETA (TGHU)"
+                    }
+                ]
             },
-            {
-                "id": 9,
-                "license_plate": "B 2233 CKR",
-                "rfid_tag": "E28011700000020489110009",
-                "driver_name": "Gunawan Saputra",
-                "company": "PT Mitra Kontainer Nusantara",
-                "job_type": "drop_off",
-                "mission_type": "DROP_EXPORT",
-                "container_number": "CMAU9183334",
-                "destination": "Yard Blok A",
-                "target_block": "REEFER",
-                "do_number": "DO-2026-7009",
-                "weight_gross": "0.00",
-                "weight_tare": "0.00",
-                "status": "loading",
-                "gate_in_time": "2026-10-25 12:35:34",
-                "gate_out_time": null,
-                "created_at": "2026-10-25 12:12:18"
+            "RS-02": {
+                "id": "RS-02",
+                "zone": "Blok B \u2022 Gate Hub",
+                "color": "orange",
+                "jobs": [
+                    {
+                        "container": "MAEU9180744",
+                        "slot": "PRE-B",
+                        "mode": "QUEUED",
+                        "label": "B ETA (MAEU)"
+                    }
+                ]
             },
-            {
-                "id": 5,
-                "license_plate": "B 1685 UIX",
-                "rfid_tag": "E28011700000020489110005",
-                "driver_name": "Bambang Hermawan",
-                "company": "PT Jababeka Lintas Raya",
-                "job_type": "drop_off",
-                "mission_type": "DROP_EXPORT",
-                "container_number": "HLCU9181850",
-                "destination": "Yard Blok A",
-                "target_block": "E",
-                "do_number": "DO-2026-7005",
-                "weight_gross": "0.00",
-                "weight_tare": "0.00",
-                "status": "loading",
-                "gate_in_time": "2026-10-25 12:35:29",
-                "gate_out_time": null,
-                "created_at": "2026-10-25 12:12:18"
+            "RS-03": {
+                "id": "RS-03",
+                "zone": "Reefer 380V & DG",
+                "color": "cyan",
+                "jobs": [
+                    {
+                        "container": "ONEU9181483",
+                        "slot": "PRE-REEFER",
+                        "mode": "QUEUED",
+                        "label": "REEFER ETA (ONEU)"
+                    },
+                    {
+                        "container": "HLCU9181850",
+                        "slot": "PRE-E",
+                        "mode": "QUEUED",
+                        "label": "E ETA (HLCU)"
+                    }
+                ]
             },
-            {
-                "id": 4,
-                "license_plate": "B 1548 CKR",
-                "rfid_tag": "E28011700000020489110004",
-                "driver_name": "Anton Wijaya",
-                "company": "PT Mitra Kontainer Nusantara",
-                "job_type": "drop_off",
-                "mission_type": "DROP_EXPORT",
-                "container_number": "ONEU9181483",
-                "destination": "Yard Blok A",
-                "target_block": "REEFER",
-                "do_number": "DO-2026-7004",
-                "weight_gross": "0.00",
-                "weight_tare": "0.00",
-                "status": "loading",
-                "gate_in_time": "2026-10-25 12:35:27",
-                "gate_out_time": null,
-                "created_at": "2026-10-25 12:12:18"
-            },
-            {
-                "id": 3,
-                "license_plate": "B 1411 DPL",
-                "rfid_tag": "E28011700000020489110003",
-                "driver_name": "Joko Susilo",
-                "company": "PT Bekasi Karya Angkut",
-                "job_type": "drop_off",
-                "mission_type": "DROP_EXPORT",
-                "container_number": "CMAU9181115",
-                "destination": "Yard Blok A",
-                "target_block": "C",
-                "do_number": "DO-2026-7003",
-                "weight_gross": "0.00",
-                "weight_tare": "0.00",
-                "status": "loading",
-                "gate_in_time": "2026-10-25 12:35:14",
-                "gate_out_time": null,
-                "created_at": "2026-10-25 12:12:18"
-            },
-            {
-                "id": 2,
-                "license_plate": "B 1274 TRB",
-                "rfid_tag": "E28011700000020489110002",
-                "driver_name": "Slamet Riyadi",
-                "company": "PT Cikarang Trans Logistik",
-                "job_type": "drop_off",
-                "mission_type": "DROP_EXPORT",
-                "container_number": "MAEU9180744",
-                "destination": "Yard Blok A",
-                "target_block": "B",
-                "do_number": "DO-2026-7002",
-                "weight_gross": "0.00",
-                "weight_tare": "0.00",
-                "status": "loading",
-                "gate_in_time": "2026-10-25 12:35:13",
-                "gate_out_time": null,
-                "created_at": "2026-10-25 12:12:18"
-            },
-            {
-                "id": 1,
-                "license_plate": "B 1137 KFA",
-                "rfid_tag": "E28011700000020489110001",
-                "driver_name": "Rahmat Hidayat",
-                "company": "PT Samudera Logistik Prima",
-                "job_type": "drop_off",
-                "mission_type": "DROP_EXPORT",
-                "container_number": "MSCU9180379",
-                "destination": "Yard Blok A",
-                "target_block": "A",
-                "do_number": "DO-2026-7001",
-                "weight_gross": "0.00",
-                "weight_tare": "0.00",
-                "status": "loading",
-                "gate_in_time": "2026-10-25 12:35:10",
-                "gate_out_time": null,
-                "created_at": "2026-10-25 12:12:18"
+            "RTG-01": {
+                "id": "RTG-01",
+                "zone": "Rail Siding Pasoso",
+                "color": "emerald",
+                "jobs": [
+                    {
+                        "container": "KA 2518",
+                        "slot": "12/30 Gerbong",
+                        "mode": "QUEUED",
+                        "label": "KA 2518 DISCH"
+                    },
+                    {
+                        "container": "KA 2519",
+                        "slot": "0/30 Gerbong",
+                        "mode": "ACTIVE",
+                        "label": "KA 2519 LOAD"
+                    }
+                ]
             }
-        ],
-        "containers_in_yard": 6,
+        },
+        "total_moves_logged": 0,
+        "trucks": [],
+        "containers_in_yard": 0,
+        "expected_count": 30,
         "blocks_distribution": {
             "A": 0,
             "B": 0,
             "C": 0,
             "D": 0,
             "E": 0,
-            "REEFER": 3,
+            "REEFER": 0,
             "DG": 0,
-            "EMPTY": 0,
-            "CFS": 3
+            "EMPTY": 0
         },
-        "active_slots": [
-            {
-                "id": 2,
-                "container_number": "MAEU9180744",
-                "type": "empty",
-                "block": "CFS",
-                "bay": null,
-                "row": null,
-                "tier": null,
-                "customs": "AWAITING_CLEARANCE",
-                "weight": 0
-            },
-            {
-                "id": 3,
-                "container_number": "CMAU9181115",
-                "type": "empty",
-                "block": "CFS",
-                "bay": null,
-                "row": null,
-                "tier": null,
-                "customs": "AWAITING_CLEARANCE",
-                "weight": 0
-            },
-            {
-                "id": 4,
-                "container_number": "ONEU9181483",
-                "type": "reefer",
-                "block": "REEFER",
-                "bay": "01",
-                "row": "01",
-                "tier": "01",
-                "customs": "AWAITING_CLEARANCE",
-                "weight": 0
-            },
-            {
-                "id": 5,
-                "container_number": "HLCU9181850",
-                "type": "empty",
-                "block": "CFS",
-                "bay": null,
-                "row": null,
-                "tier": null,
-                "customs": "AWAITING_CLEARANCE",
-                "weight": 0
-            },
-            {
-                "id": 9,
-                "container_number": "CMAU9183334",
-                "type": "reefer",
-                "block": "REEFER",
-                "bay": "01",
-                "row": "02",
-                "tier": "01",
-                "customs": "AWAITING_CLEARANCE",
-                "weight": 0
-            },
-            {
-                "id": 14,
-                "container_number": "MAEU9185181",
-                "type": "reefer",
-                "block": "REEFER",
-                "bay": "01",
-                "row": "03",
-                "tier": "01",
-                "customs": "AWAITING_CLEARANCE",
-                "weight": 0
-            }
-        ],
+        "active_slots": [],
+        "in_transit_containers": [],
+        "on_rail_containers": [],
         "trains": [
             {
-                "id": 1,
-                "train_code": "KA-PASOSO-1025",
-                "origin": "Cikarang Dry Port",
-                "destination": "Pasoso (Tanjung Priok)",
-                "total_wagons": 20,
-                "loaded_wagons": 1,
-                "status": "loading",
-                "arrival_time": "2026-10-25 12:35:36",
+                "id": 9,
+                "train_code": "KA 2518",
+                "origin": "Pelabuhan Tanjung Priok (Pasoso)",
+                "destination": "CIDP Cikarang Hub",
+                "total_wagons": 30,
+                "loaded_wagons": 12,
+                "status": "arrived",
+                "arrival_time": "2026-11-16 10:56:09",
                 "departure_time": null,
-                "created_at": "2026-10-25 12:35:36"
+                "created_at": "2026-11-16 10:56:09"
+            },
+            {
+                "id": 10,
+                "train_code": "KA 2519",
+                "origin": "CIDP Cikarang Hub",
+                "destination": "Pelabuhan Tanjung Priok (Pasoso)",
+                "total_wagons": 30,
+                "loaded_wagons": 0,
+                "status": "loading",
+                "arrival_time": null,
+                "departure_time": "2026-11-16 12:56:09",
+                "created_at": "2026-11-16 10:56:09"
+            }
+        ],
+        "preadvice_queue": [
+            {
+                "pre_gate_code": "PG-261116-001",
+                "truck_plate": "B 1137 KFA",
+                "container_number": "MSCU9180379",
+                "cargo_type": "dry",
+                "target_block": "A",
+                "status": "SCHEDULED"
+            },
+            {
+                "pre_gate_code": "PG-261116-002",
+                "truck_plate": "B 1274 TRB",
+                "container_number": "MAEU9180744",
+                "cargo_type": "dry",
+                "target_block": "B",
+                "status": "SCHEDULED"
+            },
+            {
+                "pre_gate_code": "PG-261116-003",
+                "truck_plate": "B 1411 DPL",
+                "container_number": "CMAU9181115",
+                "cargo_type": "dry",
+                "target_block": "C",
+                "status": "SCHEDULED"
+            },
+            {
+                "pre_gate_code": "PG-261116-004",
+                "truck_plate": "B 1548 CKR",
+                "container_number": "ONEU9181483",
+                "cargo_type": "reefer",
+                "target_block": "REEFER",
+                "status": "SCHEDULED"
+            },
+            {
+                "pre_gate_code": "PG-261116-005",
+                "truck_plate": "B 1685 UIX",
+                "container_number": "HLCU9181850",
+                "cargo_type": "dry",
+                "target_block": "E",
+                "status": "SCHEDULED"
+            },
+            {
+                "pre_gate_code": "PG-261116-006",
+                "truck_plate": "B 1822 KFA",
+                "container_number": "TGHU9182222",
+                "cargo_type": "dry",
+                "target_block": "A",
+                "status": "SCHEDULED"
             }
         ],
         "gate": {
@@ -308,218 +250,33 @@
         }
     },
     "information": {
-        "recent_events": [
-            {
-                "id": 58,
-                "event_type": "RAIL_LOADING",
-                "container_number": "MSCU9180379",
-                "equipment_id": null,
-                "from_block": "YARD",
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": "RAIL",
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "325000.00",
-                "notes": "Dimuat ke kereta KA-PASOSO-1025, gerbong GD-01",
-                "created_at": "2026-10-25 12:35:36"
-            },
-            {
-                "id": 57,
-                "event_type": "CUSTOMS_CEISA",
-                "container_number": "MSCU9180379",
-                "equipment_id": null,
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": null,
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "0.00",
-                "notes": "Status CEISA 4.0 DJBC: SPPB_CLEARED (SPPB-202610259180/KPU.01/2026)",
-                "created_at": "2026-10-25 12:35:36"
-            },
-            {
-                "id": 56,
-                "event_type": "REEFER_PLUGIN",
-                "container_number": "MAEU9185181",
-                "equipment_id": null,
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": null,
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "0.00",
-                "notes": "Reefer terhubung ke soket RF-003, set point -18 C",
-                "created_at": "2026-10-25 12:35:35"
-            },
-            {
-                "id": 55,
-                "event_type": "STACKING",
-                "container_number": "MAEU9185181",
-                "equipment_id": "RS-02",
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": "REEFER",
-                "to_bay": "01",
-                "to_row": "03",
-                "to_tier": "01",
-                "operator_name": null,
-                "billable_amount": "0.00",
-                "notes": "Kontainer berhasil ditumpuk di REEFER-01-03-01",
-                "created_at": "2026-10-25 12:35:35"
-            },
-            {
-                "id": 54,
-                "event_type": "LIFT_OFF",
-                "container_number": "MAEU9185181",
-                "equipment_id": "RS-02",
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": null,
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "325000.00",
-                "notes": "Pengangkatan kontainer dari truk B 2918 CKR oleh RS-02",
-                "created_at": "2026-10-25 12:35:35"
-            },
-            {
-                "id": 53,
-                "event_type": "WEIGHBRIDGE_VGM",
-                "container_number": "MAEU9185181",
-                "equipment_id": null,
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": null,
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "75000.00",
-                "notes": "Penimbangan SOLAS VGM: 0 kg",
-                "created_at": "2026-10-25 12:35:35"
-            },
-            {
-                "id": 52,
-                "event_type": "GATE_IN",
-                "container_number": "MAEU9185181",
-                "equipment_id": null,
-                "from_block": "OUTSIDE",
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": "GATE",
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "0.00",
-                "notes": "Truk B 2918 CKR terdeteksi di Gate Inbound oleh OCR & RFID (pre-gate PG-261025-014)",
-                "created_at": "2026-10-25 12:35:35"
-            },
-            {
-                "id": 51,
-                "event_type": "REEFER_PLUGIN",
-                "container_number": "CMAU9183334",
-                "equipment_id": null,
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": null,
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "0.00",
-                "notes": "Reefer terhubung ke soket RF-002, set point -18 C",
-                "created_at": "2026-10-25 12:35:34"
-            },
-            {
-                "id": 50,
-                "event_type": "STACKING",
-                "container_number": "CMAU9183334",
-                "equipment_id": "RS-02",
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": "REEFER",
-                "to_bay": "01",
-                "to_row": "02",
-                "to_tier": "01",
-                "operator_name": null,
-                "billable_amount": "0.00",
-                "notes": "Kontainer berhasil ditumpuk di REEFER-01-02-01",
-                "created_at": "2026-10-25 12:35:34"
-            },
-            {
-                "id": 49,
-                "event_type": "LIFT_OFF",
-                "container_number": "CMAU9183334",
-                "equipment_id": "RS-02",
-                "from_block": null,
-                "from_bay": null,
-                "from_row": null,
-                "from_tier": null,
-                "to_block": null,
-                "to_bay": null,
-                "to_row": null,
-                "to_tier": null,
-                "operator_name": null,
-                "billable_amount": "325000.00",
-                "notes": "Pengangkatan kontainer dari truk B 2233 CKR oleh RS-02",
-                "created_at": "2026-10-25 12:35:34"
-            }
-        ],
+        "recent_events": [],
+        "cfs_jobs": [],
         "customs": {
-            "total_audited": 6,
-            "sppb_cleared": 1,
+            "total_audited": 1,
+            "sppb_cleared": 0,
             "red_line_inspection": 0,
-            "clearance_rate_pct": 16.7,
-            "last_ceisa_sync": "2026-10-25T12:35:36+07:00"
+            "clearance_rate_pct": 0,
+            "last_ceisa_sync": "2026-11-16T10:56:09+07:00"
         },
         "reefer": {
-            "active_plugs": 3,
+            "active_plugs": 0,
             "total_capacity": 120,
             "avg_temp_celsius": -18.4,
             "status": "OPTIMAL",
-            "alerts": 0
+            "alerts": 0,
+            "units": []
         }
     },
     "financial": {
-        "total_revenue_accrued_idr": 6039000,
-        "weighbridge_fee_idr": 0,
-        "liftoff_fee_idr": 3400000,
-        "storage_dwell_fee_idr": 0,
-        "reefer_power_fee_idr": 14000,
-        "paid_amount_idr": 0,
-        "pending_amount_idr": 6039000,
-        "settlement_ratio_pct": 0,
-        "last_invoice_generated": {
-            "invoice_number": "INV-L-20261025-82df",
-            "container_number": "MSCU9180379",
-            "total_amount": "325000.00",
-            "payment_status": "PENDING",
-            "created_at": "2026-10-25 12:35:36"
-        }
+        "total_revenue_accrued_idr": 48750000,
+        "weighbridge_fee_idr": 2250000,
+        "liftoff_fee_idr": 18500000,
+        "storage_dwell_fee_idr": 24750000,
+        "reefer_power_fee_idr": 3250000,
+        "paid_amount_idr": 46500000,
+        "pending_amount_idr": 2250000,
+        "settlement_ratio_pct": 95.4,
+        "last_invoice_generated": null
     }
 }

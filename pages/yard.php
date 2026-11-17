@@ -60,6 +60,7 @@ $yard_kpis = [
 
 require_once __DIR__ . '/../connection.php';
 require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
 if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 // Handle Form Aksi POST (Relokasi Kontainer / VMT Dispatch)
@@ -72,12 +73,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['yard_actio
         $to_row    = intval($_POST['to_row'] ?? 1);
         $to_tier   = intval($_POST['to_tier'] ?? 1);
         $equip_id  = trim($_POST['equipment_id'] ?? 'RS-01');
-        $operator  = trim($_POST['operator_name'] ?? 'Budi Santoso');
+        $operator  = trim($_POST['operator_name'] ?? 'Juan Gamaliel');
 
         if (!empty($ctr_num) && isset($pdo)) {
             try {
                 // Ambil posisi lama
-                $stmtOld = $pdo->prepare("SELECT block, bay, row, tier FROM containers WHERE container_number = ? LIMIT 1");
+                $stmtOld = $pdo->prepare("SELECT block, bay, `row`, tier FROM containers WHERE container_number = ? LIMIT 1");
                 $stmtOld->execute([$ctr_num]);
                 $oldPos = $stmtOld->fetch(PDO::FETCH_ASSOC);
                 $from_block = $oldPos['block'] ?? 'A';
@@ -86,17 +87,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['yard_actio
                 $from_tier  = $oldPos['tier'] ?? '1';
 
                 // Update posisi baru di containers
-                $stmtUp = $pdo->prepare("UPDATE containers SET block = ?, bay = ?, row = ?, tier = ?, status = 'in_yard' WHERE container_number = ?");
+                $stmtUp = $pdo->prepare("UPDATE containers SET block = ?, bay = ?, `row` = ?, tier = ?, status = 'in_yard' WHERE container_number = ?");
                 $stmtUp->execute([$to_block, $to_bay, $to_row, $to_tier, $ctr_num]);
 
                 // Catat ke yard_events
                 $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, from_bay, from_row, from_tier, to_block, to_bay, to_row, to_tier, operator_name, notes, created_at) VALUES ('RELOCATION', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
                 $stmtEv->execute([$ctr_num, $equip_id, $from_block, $from_bay, $from_row, $from_tier, $to_block, $to_bay, $to_row, $to_tier, $operator, "Relokasi VMT oleh $equip_id ke Blok $to_block-$to_bay-$to_row-$to_tier"]);
 
-                // Update equipment status
+                // Update equipment status & billing
                 $stmtEq = $pdo->prepare("UPDATE equipment SET current_container = ?, last_block = ?, status = 'operating', last_updated = NOW() WHERE equipment_id = ?");
                 $stmtEq->execute([$ctr_num, $to_block, $equip_id]);
-                accrue_billing($pdo, $ctr_num, 'L', "Relokasi Yard ($from_block -> $to_block)", 200000);
+                accrue_billing($pdo, $ctr_num, "Relokasi Yard ($from_block -> $to_block)", 'lolo_amount', 200000);
+
+                get_live_twin_state($pdo, true);
 
                 $yard_alert = [
                     'type' => 'success',
@@ -104,7 +107,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['yard_actio
                     'msg' => "Peti kemas <strong>$ctr_num</strong> berhasil dipindahkan oleh <strong>$equip_id</strong> ke <strong>Blok $to_block (Bay $to_bay &bull; Row $to_row &bull; Tier $to_tier)</strong>. Data tersinkronisasi di seluruh modul."
                 ];
             } catch (Exception $e) {
-                $yard_alert = ['type' => 'warning', 'title' => 'Relokasi Tersimpan (Mode Demo)', 'msg' => "Kontainer $ctr_num dipindahkan ke Blok $to_block."];
+                $yard_alert = ['type' => 'error', 'title' => 'Gagal Relokasi Yard', 'msg' => $e->getMessage()];
             }
         }
     }

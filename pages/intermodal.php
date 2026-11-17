@@ -8,6 +8,7 @@
 // =============================================================================
 require_once __DIR__ . '/../connection.php';
 require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
 if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 $rail_alert = null;
@@ -18,27 +19,31 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['rail_actio
     if ($r_act === 'manual_load_wagon' && $ctr_num !== '') {
         try {
             $pdo->prepare("UPDATE containers SET status = 'on_rail', block = 'RAIL', gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?")->execute([$ctr_num]);
-            $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ?")->execute([$ctr_num]);
+            $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ?")->execute([$ctr_num]);
             $exTr = $pdo->prepare("SELECT id FROM trains WHERE train_code = ? LIMIT 1");
             $exTr->execute([$train_c]);
             if ($exTr->fetchColumn()) {
                 $pdo->prepare("UPDATE trains SET loaded_wagons = LEAST(total_wagons, loaded_wagons + 1), status = 'loading' WHERE train_code = ?")->execute([$train_c]);
             } else {
-                $pdo->prepare("INSERT INTO trains (train_code, origin, destination, total_wagons, loaded_wagons, status, estimated_arrival, estimated_departure) VALUES (?, 'CIDP Cikarang Hub', 'Pelabuhan Tanjung Priok (Pasoso)', 30, 1, 'loading', NOW(), DATE_ADD(NOW(), INTERVAL 2 HOUR))")->execute([$train_c]);
+                $pdo->prepare("INSERT INTO trains (train_code, origin, destination, total_wagons, loaded_wagons, status, arrival_time, departure_time) VALUES (?, 'CIDP Cikarang Hub', 'Pelabuhan Tanjung Priok (Pasoso)', 30, 1, 'loading', NOW(), DATE_ADD(NOW(), INTERVAL 2 HOUR))")->execute([$train_c]);
             }
-            accrue_billing($pdo, $ctr_num, 'L', "Intermodal Rail Loading ($train_c)", 850000);
+            accrue_billing($pdo, $ctr_num, "Intermodal Rail Loading ($train_c)", 'lolo_amount', 850000);
             $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, billable_amount, notes, created_at) VALUES ('RAIL_LOADING', ?, 'RAIL', 'Operator Siding KA', 850000, ?, NOW())")->execute([$ctr_num, "Pemuatan kontainer $ctr_num ke gerbong datar $train_c (Aksi Manual Operator / RMGC)."]);
+            get_live_twin_state($pdo, true);
             $rail_alert = ['type' => 'success', 'title' => "Muat Kontainer ke Gerbong KA Berhasil ($train_c)", 'msg' => "Kontainer <strong>$ctr_num</strong> telah dimuat ke rangkaian <strong>$train_c</strong> berstatus <strong>on_rail</strong> dan tagihan intermodal Rp 850.000 tercatat di Billing."];
         } catch (Exception $e) {
-            $rail_alert = ['type' => 'warning', 'title' => 'Muat Gerbong Diproses', 'msg' => "Kontainer $ctr_num dialokasikan ke gerbong KA."];
+            $rail_alert = ['type' => 'error', 'title' => 'Gagal Muat Gerbong KA', 'msg' => $e->getMessage()];
         }
     } elseif ($r_act === 'manual_unload_wagon' && $ctr_num !== '') {
         try {
             $pdo->prepare("UPDATE containers SET status = 'in_yard', block = 'D', bay = 1, `row` = 1, tier = 1 WHERE container_number = ?")->execute([$ctr_num]);
             $pdo->prepare("UPDATE trains SET loaded_wagons = GREATEST(0, loaded_wagons - 1) WHERE train_code = ?")->execute([$train_c]);
             $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, operator_name, notes, created_at) VALUES ('RAIL_UNLOADING', ?, 'RAIL', 'D', 'Operator Siding KA', ?, NOW())")->execute([$ctr_num, "Bongkar kontainer $ctr_num dari gerbong $train_c ke Buffer Yard Blok D."]);
+            get_live_twin_state($pdo, true);
             $rail_alert = ['type' => 'success', 'title' => "Bongkar Gerbong ke Buffer Yard Blok D Berhasil", 'msg' => "Kontainer <strong>$ctr_num</strong> telah diturunkan dari rangkaian <strong>$train_c</strong> ke <strong>Yard Blok D</strong>."];
-        } catch (Exception $e) {}
+        } catch (Exception $e) {
+            $rail_alert = ['type' => 'error', 'title' => 'Gagal Bongkar Gerbong KA', 'msg' => $e->getMessage()];
+        }
     }
 }
 

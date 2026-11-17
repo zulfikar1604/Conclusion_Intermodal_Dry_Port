@@ -17,6 +17,7 @@ $customs_info = [
 
 require_once __DIR__ . '/../connection.php';
 require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
 if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 // Handle Form Aksi POST (Rilis SPPB Jalur Hijau / Tahan Jalur Merah Behandle)
@@ -39,24 +40,23 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['customs_ac
                 $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('CUSTOMS_SPPB_RELEASE', ?, ?, ?, NOW())");
                 $stmtEv->execute([$ctr_num, $officer, "Penerbitan $sppb_code CEISA 4.0 Jalur Hijau. Kargo dinyatakan cleared dan siap untuk pengeluaran di Gate Out."]);
 
+                get_live_twin_state($pdo, true);
+
                 $customs_alert = [
                     'type' => 'success',
                     'title' => 'SPPB Berhasil Diterbitkan (Jalur Hijau CEISA 4.0)',
                     'msg' => "Peti kemas <strong>$ctr_num</strong> telah memperoleh status <strong>SPPB_CLEARED</strong> ($sppb_code). Pengeluaran gerbang di Gate Out kini telah diizinkan."
                 ];
             } elseif ($c_action === 'hold_red_lane') {
-                $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK', block = 'E' WHERE container_number = ?");
+                $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK', block = 'E' WHERE container_number = ?")->execute([$ctr_num]);
                 $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'HOLD' WHERE container_number = ?")->execute([$ctr_num]);
                 $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'HOLD' WHERE container_origin = ?")->execute([$ctr_num]);
-                accrue_billing($pdo, $ctr_num, 'L', 'Behandle / Physical Inspection Blok E', 350000);
-                $stmtUp->execute([$ctr_num]);
-                $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'SPPB_CLEARED' WHERE container_number = ?")->execute([$ctr_num]);
-                $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'CLEARED' WHERE container_origin = ?")->execute([$ctr_num]);
+                accrue_billing($pdo, $ctr_num, 'Behandle / Physical Inspection Blok E', 'lolo_amount', 350000);
 
-                $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('CUSTOMS_RED_LANE_HOLD', ?, 'E', ?, ?, NOW())");
-                $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'HOLD' WHERE container_number = ?")->execute([$ctr_num]);
-                $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'HOLD' WHERE container_origin = ?")->execute([$ctr_num]);
+                $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, billable_amount, notes, created_at) VALUES ('CUSTOMS_RED_LANE_HOLD', ?, 'E', ?, 350000, ?, NOW())");
                 $stmtEv->execute([$ctr_num, $officer, "Penetapan Jalur Merah & Instruksi Pemeriksaan Fisik Terminal Behandle Blok E / X-Ray 6 MeV. Catatan: $notes"]);
+
+                get_live_twin_state($pdo, true);
 
                 $customs_alert = [
                     'type' => 'warning',
@@ -65,7 +65,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['customs_ac
                 ];
             }
         } catch (Exception $e) {
-            $customs_alert = ['type' => 'info', 'title' => 'Pembaruan Pabean Tersimpan', 'msg' => "Status pabean untuk $ctr_num telah diperbarui."];
+            $customs_alert = ['type' => 'error', 'title' => 'Gagal Pembaruan Pabean', 'msg' => $e->getMessage()];
         }
     }
 }

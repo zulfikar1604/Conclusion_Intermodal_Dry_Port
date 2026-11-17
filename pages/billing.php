@@ -7,6 +7,9 @@
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 function formatRupiah($angka){
     return "Rp " . number_format($angka,0,',','.');
@@ -35,13 +38,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['billing_ac
             $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, billable_amount, operator_name, notes, created_at) VALUES ('BILLING_PAID', ?, ?, 'Kasir Keuangan ERP', ?, NOW())");
             $stmtEv->execute([$ctrRef, $totVal, "Pelunasan faktur $inv_num sebesar " . formatRupiah($totVal) . " via $method. Syarat komersial pengeluaran gerbang telah terpenuhi."]);
 
+            get_live_twin_state($pdo, true);
+
             $billing_alert = [
                 'type' => 'success',
                 'title' => 'Pembayaran Faktur Dikonfirmasi (LUNAS / PAID)',
                 'msg' => "Faktur <strong>$inv_num</strong> untuk kontainer <strong>$ctrRef</strong> telah lunas. Gate Out kini diizinkan merilis armada pengangkut."
             ];
         } catch (Exception $e) {
-            $billing_alert = ['type' => 'info', 'title' => 'Status Faktur Diperbarui', 'msg' => "Faktur $inv_num telah ditandai lunas."];
+            $billing_alert = ['type' => 'error', 'title' => 'Gagal Pembayaran Faktur', 'msg' => $e->getMessage()];
         }
     }
 }

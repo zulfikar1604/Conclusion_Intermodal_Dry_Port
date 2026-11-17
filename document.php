@@ -59,13 +59,37 @@ if ($type === 'invoice') {
     $cust = $inv['customer_name'] ?? 'PT Samudera Logistik Prima';
     $inv_no = $inv['invoice_number'] ?? ('INV-L-' . date('Ymd') . '-82df');
     $status = strtoupper($inv['payment_status'] ?? 'PENDING');
-    $tot = (float)($inv['total_amount'] ?? 600000);
     $lolo = (float)($inv['lolo_amount'] ?? 200000);
     $storage = (float)($inv['storage_amount'] ?? 275000);
     $cfs = (float)($inv['cfs_amount'] ?? 0);
     $reefer = (float)($inv['reefer_power_amount'] ?? 0);
-    $weigh = 75000.0;
-    if ($tot <= 0) $tot = $lolo + $storage + $weigh;
+    $tot = (float)($inv['total_amount'] ?? ($lolo + $storage + $cfs + $reefer));
+
+    $items = [];
+    if ($lolo > 0) {
+        $items[] = ['desc' => 'Jasa Lift-On / Lift-Off & Penanganan Terminal / Gate (HW-08)', 'qty' => 1, 'unit' => 'Paket', 'rate' => $lolo, 'amount' => $lolo];
+    }
+    if ($storage > 0) {
+        $items[] = ['desc' => 'Jasa Penumpukan Lapangan Container Yard (Storage)', 'qty' => 1, 'unit' => 'Periode', 'rate' => $storage, 'amount' => $storage];
+    }
+    if ($cfs > 0) {
+        $items[] = ['desc' => 'Jasa Gudang CFS Stripping/Stuffing & Manajemen Palet SSCC-18', 'qty' => 1, 'unit' => 'Paket', 'rate' => $cfs, 'amount' => $cfs];
+    }
+    if ($reefer > 0) {
+        $items[] = ['desc' => 'Jasa Kelistrikan & Pemantauan Reefer 380V (IoT LoRaWAN)', 'qty' => 1, 'unit' => 'Sesi', 'rate' => $reefer, 'amount' => $reefer];
+    }
+    $sum_items = $lolo + $storage + $cfs + $reefer;
+    if ($tot <= 0) {
+        $weigh = 75000.0;
+        $tot = $sum_items + $weigh;
+        $items[] = ['desc' => 'Jasa Penimbangan Kendaraan & SOLAS VGM 80 Ton (Load Cell HW-03)', 'qty' => 1, 'unit' => 'Truk', 'rate' => $weigh, 'amount' => $weigh];
+    } elseif ($tot > $sum_items) {
+        $extra = $tot - $sum_items;
+        $items[] = ['desc' => 'Biaya Penimbangan VGM 80T / Administrasi EDI / Lainnya', 'qty' => 1, 'unit' => 'Dokumen', 'rate' => $extra, 'amount' => $extra];
+    }
+    if (empty($items)) {
+        $items[] = ['desc' => ($inv['service_type'] ?? 'Terminal Handling & Storage Service'), 'qty' => 1, 'unit' => 'Paket', 'rate' => $tot, 'amount' => $tot];
+    }
 
     $ppn = round($tot * 0.11);
     $grand_total = $tot + $ppn + 10000; // Bea Meterai Digital Rp 10.000
@@ -82,12 +106,7 @@ if ($type === 'invoice') {
         'service_type' => $inv['service_type'] ?? 'Terminal Handling & Storage Service',
         'status' => $status,
         'due_date' => date('d F Y', strtotime('+14 days')),
-        'items' => [
-            ['desc' => 'Jasa Penimbangan Kendaraan & SOLAS VGM 80 Ton (Load Cell HW-03)', 'qty' => 1, 'unit' => 'Truk', 'rate' => $weigh, 'amount' => $weigh],
-            ['desc' => 'Jasa Lift-Off / Penanganan Alat Berat Reach Stacker (HW-08)', 'qty' => 1, 'unit' => 'Box', 'rate' => $lolo, 'amount' => $lolo],
-            ['desc' => 'Jasa Penumpukan Lapangan Container Yard (Storage Blok B)', 'qty' => 2, 'unit' => 'Hari', 'rate' => $storage / 2, 'amount' => $storage],
-            ['desc' => 'Administrasi Gerbang & Integrasi EDI Inaportnet', 'qty' => 1, 'unit' => 'Dokumen', 'rate' => 50000, 'amount' => 50000]
-        ],
+        'items' => $items,
         'subtotal' => $tot,
         'ppn' => $ppn,
         'meterai' => 10000,
@@ -116,7 +135,7 @@ if ($type === 'invoice') {
 
     $c_num = $truk['container_number'] ?? 'MAEU9185181';
     $t_plate = $truk['license_plate'] ?? ($plate ?: 'B 2918 CKR');
-    $driver = $truk['driver_name'] ?? 'Rudi Hartono';
+    $driver = !empty($truk['driver_name']) ? $truk['driver_name'] : 'Zulfikar Jafarudin Fatah';
     $gross = (float)($truk['weight_gross'] ?? 34850);
     $tare = (float)($truk['weight_tare'] ?? 12500);
     $net = max(0, $gross - $tare);
@@ -833,7 +852,7 @@ function terbilangRupiah($n) {
                     <div class="text-center w-36">
                         <div class="text-[8.5px] font-bold text-slate-500 uppercase">Diterima Oleh Pengemudi:</div>
                         <div class="h-14 flex items-center justify-center">
-                            <span class="font-signature text-xl text-slate-900">Rudi Hartono</span>
+                            <span class="font-signature text-xl text-slate-900"><?= htmlspecialchars($doc_data['driver_name']) ?></span>
                         </div>
                         <div class="border-t border-slate-400 pt-0.5">
                             <div class="text-[9px] font-black text-slate-900"><?= htmlspecialchars($doc_data['driver_name']) ?></div>
@@ -846,7 +865,7 @@ function terbilangRupiah($n) {
                     <div class="text-center relative w-48">
                         <div class="text-[8.5px] font-bold text-slate-500 uppercase">Cikarang, <?= $doc_date ?></div>
                         <div class="text-[9px] font-extrabold text-slate-900">
-                            <?= ($type === 'invoice') ? 'Head of Commercial & Billing' : (($type === 'cfs_tally') ? 'Head of CFS & Warehousing' : 'Kepala Operasional Gerbang') ?>
+                            <?= ($type === 'invoice') ? 'Head of Commercial & Billing' : (($type === 'cfs_tally') ? 'Head of CFS & Warehousing' : (($type === 'gate_pass') ? 'Kepala Operasional Gerbang' : 'QA & Cold Chain Compliance')) ?>
                         </div>
                         <div class="h-14 flex items-center justify-center relative my-0.5">
                             <!-- Stempel Basah Vektor Biru Pelindo / MTI -->
@@ -859,12 +878,12 @@ function terbilangRupiah($n) {
                                 <text x="60" y="88" font-size="6" font-weight="700" fill="#002f5e" text-anchor="middle">PT MULTI TERMINAL</text>
                             </svg>
                             <span class="font-signature text-2xl text-slate-900 relative z-10">
-                                <?= ($type === 'invoice') ? 'Zulfi Fachrurrozi' : (($type === 'cfs_tally') ? 'Juan Gamaliel' : (($type === 'gate_pass') ? 'Ahmad Baihaqi' : 'Armansyah M.')) ?>
+                                <?= ($type === 'invoice') ? 'Afriansayah Ayubi' : (($type === 'cfs_tally') ? 'Juan Gamaliel' : (($type === 'gate_pass') ? 'Armansyah M.' : 'Naufal Andika H.')) ?>
                             </span>
                         </div>
                         <div class="border-t border-slate-700 pt-0.5">
                             <div class="text-[9.5px] font-black text-slate-900">
-                                <?= ($type === 'invoice') ? 'ZULFI FACHRURROZI, S.Log.' : (($type === 'cfs_tally') ? 'JUAN GAMALIEL, S.Log.' : (($type === 'gate_pass') ? 'AHMAD BAIHAQI, S.Log.' : 'ARMANSYAH MUCHTARROM, S.T.')) ?>
+                                <?= ($type === 'invoice') ? 'AFRIANSAYAH AYUBI, S.Log.' : (($type === 'cfs_tally') ? 'JUAN GAMALIEL, S.Log.' : (($type === 'gate_pass') ? 'ARMANSYAH MUCHTARROM, S.T.' : 'NAUFAL ANDIKA HEDITYA, S.Log.')) ?>
                             </div>
                             <div class="text-[7.5px] text-slate-500">PT Multi Terminal Indonesia</div>
                         </div>

@@ -9,6 +9,7 @@
 
 require_once __DIR__ . '/../connection.php';
 require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
 if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 $cfs_info = [
@@ -48,16 +49,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
 
                 // Update container block to CFS if in database
                 $stmtUpCtr = $pdo->prepare("UPDATE containers SET block = 'CFS', status = 'in_yard', gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?");
-                $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ?")->execute([$ctr_num]);
-                accrue_billing($pdo, $ctr_num, 'C', "CFS $job_type ($job_num)", 650000);
                 $stmtUpCtr->execute([$ctr_num]);
+                $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ?")->execute([$ctr_num]);
+                accrue_billing($pdo, $ctr_num, "CFS $job_type ($job_num)", 'cfs_amount', 650000);
 
                 // Catat ke yard_events
                 $stmtLog = $pdo->prepare("
-                    INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at)
-                    VALUES (?, ?, 'CFS', ?, ?, NOW())
+                    INSERT INTO yard_events (event_type, container_number, to_block, operator_name, billable_amount, notes, created_at)
+                    VALUES (?, ?, 'CFS', ?, 650000, ?, NOW())
                 ");
                 $stmtLog->execute(['CFS_' . $job_type, $ctr_num, $operator, "Job Order $job_num di Rampa $dock_ramp ($total_pkgs palet/koli)"]);
+                get_live_twin_state($pdo, true);
             }
             $action_alert = [
                 'type' => 'success',
@@ -66,9 +68,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             ];
         } catch (Exception $e) {
             $action_alert = [
-                'type' => 'warning',
-                'title' => 'Job Order Tersimpan (Mode Demo)',
-                'msg' => "Job order $job_num untuk kontainer $ctr_num telah aktif pada Rampa $dock_ramp."
+                'type' => 'error',
+                'title' => 'Gagal Menerbitkan Job Order CFS',
+                'msg' => $e->getMessage()
             ];
         }
     } elseif ($cfs_action === 'update_tally') {
@@ -80,6 +82,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             if (isset($pdo) && $job_id > 0) {
                 $stmt = $pdo->prepare("UPDATE cfs_jobs SET tally_notes = CONCAT(IFNULL(tally_notes,''), '\n[', NOW(), '] ', ?) WHERE id = ?");
                 $stmt->execute(["Update tally: Ditambahkan $add_pallets palet. Catatan: $notes", $job_id]);
+                get_live_twin_state($pdo, true);
             }
             $action_alert = [
                 'type' => 'success',
@@ -87,7 +90,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                 'msg' => "Catatan progres pembongkaran/pemuatan kargo rampa berhasil disimpan."
             ];
         } catch (Exception $e) {
-            $action_alert = ['type' => 'info', 'title' => 'Update Tally Tersimpan', 'msg' => 'Data tally progres telah diperbarui.'];
+            $action_alert = ['type' => 'error', 'title' => 'Gagal Update Tally', 'msg' => $e->getMessage()];
         }
     } elseif ($cfs_action === 'complete_job') {
         $job_id = intval($_POST['job_id'] ?? 0);
@@ -95,6 +98,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             if (isset($pdo) && $job_id > 0) {
                 $stmt = $pdo->prepare("UPDATE cfs_jobs SET status = 'COMPLETED', completed_time = NOW() WHERE id = ?");
                 $stmt->execute([$job_id]);
+                get_live_twin_state($pdo, true);
             }
             $action_alert = [
                 'type' => 'success',
@@ -102,7 +106,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                 'msg' => "Aktivitas rampa telah ditutup dan Berita Acara Tally Sheet siap dicetak."
             ];
         } catch (Exception $e) {
-            $action_alert = ['type' => 'success', 'title' => 'Job Order Ditutup', 'msg' => 'Status rampa kini kembali bersih dan siap untuk kontainer berikutnya.'];
+            $action_alert = ['type' => 'error', 'title' => 'Gagal Menutup Job Order', 'msg' => $e->getMessage()];
         }
     } elseif ($cfs_action === 'add_pallet') {
         $sscc      = trim($_POST['pallet_sscc'] ?? '00189912001' . rand(100000000, 999999999));
@@ -113,7 +117,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
         $weight    = floatval($_POST['gross_weight_kg'] ?? 400.0);
         $cbm       = floatval($_POST['cbm'] ?? 1.2);
         $rack      = trim($_POST['rack_location'] ?? 'AISLE-A-01-L1');
-        $ctr_orig  = trim($_POST['container_origin'] ?? 'MSKU8821940');
+        $ctr_orig  = strtoupper(trim($_POST['container_origin'] ?? 'MSKU8821940'));
 
         try {
             if (isset($pdo)) {
@@ -123,7 +127,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                 ");
                 $stmt->execute([$sscc, $ctr_orig, $commodity, $consignee, $category, $cartons, $weight, $cbm, $rack]);
                 $pdo->prepare("UPDATE cfs_jobs SET total_packages = total_packages + 1, total_weight_kg = total_weight_kg + ?, total_cbm = total_cbm + ? WHERE container_number = ? AND status = 'IN_PROGRESS'")->execute([$weight, $cbm, $ctr_orig]);
-                accrue_billing($pdo, $ctr_orig, 'C', "CFS LCL Pallet Handling ($sscc)", 35000);
+                accrue_billing($pdo, $ctr_orig, "CFS LCL Pallet Handling ($sscc)", 'cfs_amount', 35000);
+                get_live_twin_state($pdo, true);
             }
             $action_alert = [
                 'type' => 'success',
@@ -132,9 +137,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             ];
         } catch (Exception $e) {
             $action_alert = [
-                'type' => 'info',
-                'title' => 'Palet Tersimpan (Mode Demo)',
-                'msg' => "Palet $sscc berhasil dialokasikan pada lokasi rak $rack."
+                'type' => 'error',
+                'title' => 'Gagal Registrasi Palet',
+                'msg' => $e->getMessage()
             ];
         }
     } elseif ($cfs_action === 'trigger_dock_sensor') {
@@ -165,15 +170,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                     // 2. Update status kontainer
                     $stmtUpCtr = $pdo->prepare("UPDATE containers SET block = 'CFS', status = 'in_yard' WHERE container_number = ?");
                     $stmtUpCtr->execute([$ctr_num]);
+                    $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ?")->execute([$ctr_num]);
 
-                    // 3. Buat Job Order baru di Rampa
+                    // 3. Buat Job Order baru di Rampa & akrual billing
                     $job_num = 'JO-' . ($job_type === 'STRIPPING' ? 'STP' : 'STF') . '-' . date('Y') . '-' . rand(200, 999);
                     $stmtJob = $pdo->prepare("INSERT INTO cfs_jobs (job_number, job_type, container_number, dock_ramp, shipper_consignee, bl_number, total_packages, total_weight_kg, total_cbm, status, operator_name, start_time, tally_notes) VALUES (?, ?, ?, ?, ?, CONCAT('BL-', LPAD(FLOOR(RAND()*999999), 6, '0')), ?, ?, ?, 'IN_PROGRESS', 'Sensor Ultrasonik HW-06', NOW(), ?)");
                     $stmtJob->execute([$job_num, $job_type, $ctr_num, $dock_id, $consignee, $pkgs, $weight, round($weight/320, 2), "Trigger Sensor Ultrasonik HW-06: Truk $plate terdeteksi merapat di Rampa $dock_id. Leveler hidrolik 15T dinaikkan otomatis."]);
+                    accrue_billing($pdo, $ctr_num, "CFS $job_type Rampa $dock_id ($job_num)", 'cfs_amount', 650000);
 
                     // 4. Catat event log
-                    $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('CFS_DOCK_IN', ?, 'CFS', 'Sensor Ultrasonik HW-06', ?, NOW())");
+                    $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, billable_amount, notes, created_at) VALUES ('CFS_DOCK_IN', ?, 'CFS', 'Sensor Ultrasonik HW-06', 650000, ?, NOW())");
                     $stmtLog->execute([$ctr_num, "Deteksi kehadiran armada $plate di Rampa $dock_id ($job_type - $consignee)"]);
+                    get_live_twin_state($pdo, true);
 
                     $action_alert = [
                         'type' => 'success',
@@ -187,6 +195,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
 
                     $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, operator_name, notes, created_at) VALUES ('CFS_DOCK_OUT', 'Sensor Ultrasonik HW-06', ?, NOW())");
                     $stmtLog->execute(["Armada meninggalkan Rampa $dock_id. Sinyal lampu hijau (Ready). Job order ditutup."]);
+                    get_live_twin_state($pdo, true);
 
                     $action_alert = [
                         'type' => 'success',
@@ -197,9 +206,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             }
         } catch (Exception $e) {
             $action_alert = [
-                'type' => 'warning',
-                'title' => "Sensor Rampa $dock_id Terpicu",
-                'msg' => "Event sensor rampa $dock_id berhasil dieksekusi."
+                'type' => 'error',
+                'title' => "Gagal Trigger Sensor Rampa $dock_id",
+                'msg' => $e->getMessage()
             ];
         }
     } elseif ($cfs_action === 'trigger_floor_scale') {
@@ -221,13 +230,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
                 ");
                 $stmt->execute([$sscc, $ctr_orig, $commodity, $consignee, $category, $cartons, $weight, $cbm, $rack]);
                 $pdo->prepare("UPDATE cfs_jobs SET total_packages = total_packages + 1, total_weight_kg = total_weight_kg + ?, total_cbm = total_cbm + ? WHERE container_number = ? AND status = 'IN_PROGRESS'")->execute([$weight, $cbm, $ctr_orig]);
-                accrue_billing($pdo, $ctr_orig, 'C', "CFS LCL Pallet Handling ($sscc)", 35000);
+                accrue_billing($pdo, $ctr_orig, "CFS LCL Pallet Handling ($sscc)", 'cfs_amount', 35000);
 
                 $stmtLog = $pdo->prepare("
                     INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at)
-                    VALUES ('PALLET_WEIGHED', ?, 'HW-21 Floor Scale 3T', 25000, ?, NOW())
+                    VALUES ('PALLET_WEIGHED', ?, 'HW-21 Floor Scale 3T', 35000, ?, NOW())
                 ");
                 $stmtLog->execute([$ctr_orig, "Penimbangan & pengukuran CBM palet SSCC $sscc ($weight kg / $cbm CBM)"]);
+                get_live_twin_state($pdo, true);
             }
             $action_alert = [
                 'type' => 'success',
@@ -236,9 +246,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             ];
         } catch (Exception $e) {
             $action_alert = [
-                'type' => 'info',
-                'title' => 'Palet Tertimbang & Terdaftar',
-                'msg' => "Data palet $sscc seberat {$weight} kg telah disimpan."
+                'type' => 'error',
+                'title' => 'Gagal Timbang Floor Scale',
+                'msg' => $e->getMessage()
             ];
         }
     } elseif ($cfs_action === 'trigger_hht_scan') {
@@ -252,6 +262,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
 
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, operator_name, notes, created_at) VALUES ('HHT_TALLY_SCAN', 'HW-19 Zebra TC26', ?, NOW())");
                 $stmtLog->execute(["Pemindaian barcode SSCC $sscc oleh HHT Zebra TC26. Palet diverifikasi masuk rak $target_rk."]);
+                get_live_twin_state($pdo, true);
             }
             $action_alert = [
                 'type' => 'success',
@@ -260,9 +271,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             ];
         } catch (Exception $e) {
             $action_alert = [
-                'type' => 'info',
-                'title' => 'Barcode SSCC Dipindai',
-                'msg' => "Palet $sscc berhasil diverifikasi masuk rak $target_rk."
+                'type' => 'error',
+                'title' => 'Gagal Scan Barcode SSCC',
+                'msg' => $e->getMessage()
             ];
         }
     } elseif ($cfs_action === 'trigger_cfs_env') {
@@ -273,6 +284,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             if (isset($pdo)) {
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, operator_name, notes, created_at) VALUES ('CFS_ENV_TELEMETRY', 'LoRaWAN SHT40 Sensor', ?, NOW())");
                 $stmtLog->execute(["Telemetri Suhu Gudang CFS: {$temp}°C, Kelembaban Relatif: {$hum}% RH. Status: AMAN (Standar Kargo Kering & Farmasi Normal)"]);
+                get_live_twin_state($pdo, true);
             }
             $action_alert = [
                 'type' => 'success',
@@ -281,9 +293,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             ];
         } catch (Exception $e) {
             $action_alert = [
-                'type' => 'info',
-                'title' => 'Telemetri Lingkungan CFS Diterima',
-                'msg' => "Suhu {$temp}°C dan Kelembaban {$hum}% RH telah dicatat."
+                'type' => 'error',
+                'title' => 'Gagal Telemetri Lingkungan CFS',
+                'msg' => $e->getMessage()
             ];
         }
     }

@@ -42,7 +42,7 @@ function build_preadvice_seed(): array {
         ['HLCU', 'Hapag-Lloyd', '45G1', '40FT HIGH CUBE'],
         ['TGHU', 'PT Samudera Logistik Prima', '22G1', '20FT STANDARD'],
     ];
-    $drivers = ['Rahmat Hidayat','Slamet Riyadi','Joko Susilo','Anton Wijaya','Bambang Hermawan','Dedi Kurniawan','Wahyu Pratama','Fajar Nugroho','Gunawan Saputra','Hendra Setiawan','Irwan Maulana','Yusuf Hakim','Taufik Hidayat','Rudi Hartono','Agus Salim'];
+    $drivers = ['Rahmat Hidayat','Slamet Riyadi','Joko Susilo','Anton Wijaya','Bambang Hermawan','Dedi Kurniawan','Wahyu Pratama','Fajar Nugroho','Gunawan Saputra','Hendra Setiawan','Irwan Maulana','Yusuf Hakim','Taufik Hidayat','Bambang Supriyadi','Agus Salim'];
     $trucking = ['PT Samudera Logistik Prima','PT Cikarang Trans Logistik','PT Bekasi Karya Angkut','PT Mitra Kontainer Nusantara','PT Jababeka Lintas Raya'];
     $blocks = ['A','B','C','D','E'];
     $rows = [];
@@ -203,19 +203,32 @@ try {
 
         case 'reset':
             // 1) Kosongkan semua data TRANSAKSI & master yang akan dibangun ulang
+            // Gunakan DELETE FROM (bukan TRUNCATE) agar aman dari crash tablespace .ibd InnoDB di Windows XAMPP saat reset beruntun
             $pdo->exec("SET FOREIGN_KEY_CHECKS = 0");
             foreach (['yard_events', 'billing_invoices', 'cfs_pallets', 'cfs_jobs', 'reefer_telemetry', 'trains', 'integration_dlq', 'processed_events', 'preadvice', 'trucks', 'containers'] as $t) {
-                $pdo->exec("TRUNCATE TABLE `$t`");
+                $pdo->exec("DELETE FROM `$t`");
             }
             $pdo->exec("SET FOREIGN_KEY_CHECKS = 1");
 
-            // 2) Alat berat (aset terminal) kembali idle tanpa muatan
+            // 2) Alat berat (aset terminal) kembali idle di posisi zona operasionalnya
             $pdo->exec("UPDATE equipment SET status='idle', current_container=NULL, last_updated=NOW()");
+            $pdo->exec("UPDATE equipment SET gps_x=270.00, gps_y=175.00, last_block='A' WHERE equipment_id='RS-01'");
+            $pdo->exec("UPDATE equipment SET gps_x=490.00, gps_y=175.00, last_block='B' WHERE equipment_id='RS-02'");
+            $pdo->exec("UPDATE equipment SET gps_x=770.00, gps_y=175.00, last_block='REEFER' WHERE equipment_id='RS-03'");
+            $pdo->exec("UPDATE equipment SET gps_x=600.00, gps_y=625.00, last_block='RAIL' WHERE equipment_id='RTG-01'");
 
             // 3) Pre-advice + truk & kontainer berstatus DI LUAR
             $pdo->beginTransaction();
             $seed = build_preadvice_seed();
             foreach ($seed as $r) { insert_preadvice($pdo, $r); register_outside($pdo, $r); }
+
+            // 4) Seed Rangkaian Kereta Api Logistik Inbound (KA 2518) & Outbound (KA 2519)
+            $stmtTrSeed = $pdo->prepare("INSERT INTO trains (train_code, origin, destination, total_wagons, loaded_wagons, status, arrival_time, departure_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?)");
+            $nowStr = date('Y-m-d H:i:s');
+            $depStr = date('Y-m-d H:i:s', strtotime('+2 hours'));
+            $stmtTrSeed->execute(['KA 2518', 'Pelabuhan Tanjung Priok (Pasoso)', 'CIDP Cikarang Hub', 30, 12, 'arrived', $nowStr, null]);
+            $stmtTrSeed->execute(['KA 2519', 'CIDP Cikarang Hub', 'Pelabuhan Tanjung Priok (Pasoso)', 30, 0, 'loading', null, $depStr]);
+
             $pdo->commit();
 
             get_live_twin_state($pdo, true);

@@ -6,6 +6,7 @@
 
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/connection.php';
+require_once __DIR__ . '/twin_state_helper.php';
 
 api_init_headers();
 
@@ -15,6 +16,13 @@ $action = $input['action'] ?? '';
 // Backward-compatible response bridge
 if (!function_exists('response')) {
     function response($success, $data, $message, $count = null) {
+        global $pdo, $action;
+        $readActions = ['get_containers', 'get_trucks', 'get_equipment', 'get_trains', 'get_events', 'get_dashboard_stats'];
+        if ($success === true && isset($pdo) && $pdo instanceof PDO && !in_array($action, $readActions, true)) {
+            if (function_exists('get_live_twin_state')) {
+                try { get_live_twin_state($pdo, true); } catch (Exception $e) {}
+            }
+        }
         $extra = ($count !== null) ? ['count' => $count] : [];
         json_response($success, $data, $message, $success ? 200 : 400, $extra);
     }
@@ -57,7 +65,7 @@ try {
             $row = $_POST['row'] ?? $input['row'] ?? null;
             $tier = $_POST['tier'] ?? $input['tier'] ?? null;
             
-            $stmt = $pdo->prepare("INSERT INTO containers (container_number, size_type, iso_code, cargo_type, rfid_tag, sscc_code, gross_weight_kg, owner_company, seal_number, customs_status, block, bay, row, tier, status, gate_in_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_yard', NOW())");
+            $stmt = $pdo->prepare("INSERT INTO containers (container_number, size_type, iso_code, cargo_type, rfid_tag, sscc_code, gross_weight_kg, owner_company, seal_number, customs_status, block, bay, `row`, tier, status, gate_in_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_yard', NOW())");
             $stmt->execute([$container_number, $size_type, $iso_code, $cargo_type, $rfid_tag, $sscc_code, $gross_weight_kg, $owner_company, $seal_number, $customs_status, $block, $bay, $row, $tier]);
             
             response(true, ["id" => $pdo->lastInsertId()], "Container added successfully");
@@ -252,19 +260,20 @@ try {
             break;
             
         case 'add_train':
-            $train_number = $_POST['train_number'] ?? $input['train_number'] ?? null;
+            $train_code = $_POST['train_code'] ?? $input['train_code'] ?? $_POST['train_number'] ?? $input['train_number'] ?? null;
             $origin = $_POST['origin'] ?? $input['origin'] ?? null;
             $destination = $_POST['destination'] ?? $input['destination'] ?? null;
             $status = $_POST['status'] ?? $input['status'] ?? 'scheduled';
+            $total_wagons = intval($_POST['total_wagons'] ?? $input['total_wagons'] ?? 30);
             
-            if (!$train_number || !$origin || !$destination) {
-                response(false, null, "train_number, origin, and destination are required");
+            if (!$train_code || !$origin || !$destination) {
+                response(false, null, "train_code, origin, and destination are required");
             }
             
-            $stmt = $pdo->prepare("INSERT INTO trains (train_number, origin, destination, status) VALUES (?, ?, ?, ?)");
-            $stmt->execute([$train_number, $origin, $destination, $status]);
+            $stmt = $pdo->prepare("INSERT INTO trains (train_code, origin, destination, total_wagons, loaded_wagons, status) VALUES (?, ?, ?, ?, 0, ?)");
+            $stmt->execute([$train_code, $origin, $destination, $total_wagons, $status]);
             
-            response(true, ["id" => $pdo->lastInsertId()], "Train added successfully");
+            response(true, ["id" => $pdo->lastInsertId(), "train_code" => $train_code], "Train added successfully");
             break;
             
         case 'update_train':
@@ -360,7 +369,7 @@ try {
                 $size = $is_reefer ? '20FT REEFER' : '40FT HIGH CUBE';
                 $iso = $is_reefer ? '22R1' : '45G1';
 
-                $insCtr = $pdo->prepare("INSERT INTO containers (container_number, iso_code, size_type, cargo_type, rfid_tag, sscc_code, gross_weight_kg, owner_company, seal_number, customs_status, block, bay, row, tier, gate_in_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'SPPB_CLEARED', ?, '01', '01', '01', NOW(), 'in_yard')");
+                $insCtr = $pdo->prepare("INSERT INTO containers (container_number, iso_code, size_type, cargo_type, rfid_tag, sscc_code, gross_weight_kg, owner_company, seal_number, customs_status, block, bay, `row`, tier, gate_in_time, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'SPPB_CLEARED', ?, '01', '01', '01', NOW(), 'in_yard')");
                 $insCtr->execute([$container_no, $iso, $size, $cargo, $rfid_ctr, $sscc, $gross_weight, $company, $seal, $block]);
                 $container_id = $pdo->lastInsertId();
             }

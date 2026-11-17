@@ -272,7 +272,9 @@ switch ($action) {
             $blk = $pre['target_block'] ?: ($pre['cargo_type'] === 'reefer' ? 'A' : 'B');
             [$bay, $row, $tier] = sim_next_free_slot($pdo, $blk);
             $run('TRUCK_GATE_ARRIVAL', ['truck_plate' => $plate, 'container_number' => $cn, 'driver_name' => $pre['driver_name'], 'company' => $pre['company']], 'GATE-IN-LANE-01');
-            $run('TRUCK_WEIGHBRIDGE', ['truck_plate' => $plate, 'container_number' => $cn, 'weight_gross' => (float)$pre['weight_gross'], 'weight_tare' => (float)$pre['weight_tare']], 'METTLER-WB-01');
+            $wGross = (float)($pre['weight_gross'] ?? round(mt_rand(26500, 34500) + mt_rand(0, 99) / 100, 2));
+            $wTare  = (float)($pre['weight_tare'] ?? 14200.0);
+            $run('TRUCK_WEIGHBRIDGE', ['truck_plate' => $plate, 'container_number' => $cn, 'weight_gross' => $wGross, 'weight_tare' => $wTare], 'METTLER-WB-01');
             $run('CONTAINER_LIFT', ['equipment_id' => 'RS-02', 'container_number' => $cn], 'KALMAR-DRG450-RS02');
             $run('CONTAINER_STACK', ['equipment_id' => 'RS-02', 'container_number' => $cn, 'block' => $blk, 'bay' => $bay, 'row' => $row, 'tier' => $tier], 'KALMAR-DRG450-RS02');
             return sim_pick_container($pdo, "status = 'in_yard'", $cn);

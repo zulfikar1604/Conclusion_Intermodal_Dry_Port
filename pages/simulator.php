@@ -4018,6 +4018,39 @@ function fetchSimulationState() {
         });
 }
 
+function refreshSandboxUI() {
+    const boxes = Object.values(containerMeshes)
+        .filter(m => m && m.userData && m.userData.container_number)
+        .map(m => m.userData);
+    const total = boxes.length;
+    const occPct = Math.min(100, Math.round((total / 40) * 100));
+    updateStatsUI({ in_yard: total, occupancy_pct: occPct });
+    populateMoveSelect(boxes);
+}
+
+function findOpenSandboxSlot(blockKey) {
+    const occupied = new Set();
+    Object.values(containerMeshes).forEach(m => {
+        if (m && m.userData) {
+            const k = `${m.userData.block || 'A'}-${String(m.userData.bay || '01').padStart(2, '0')}-${String(m.userData.row || '01').padStart(2, '0')}-${String(m.userData.tier || '01').padStart(2, '0')}`;
+            occupied.add(k);
+        }
+    });
+    for (let t = 1; t <= 3; t++) {
+        for (let r = 1; r <= 4; r++) {
+            for (let b = 1; b <= 5; b++) {
+                const bay = String(b).padStart(2, '0');
+                const row = String(r).padStart(2, '0');
+                const tier = String(t).padStart(2, '0');
+                if (!occupied.has(`${blockKey}-${bay}-${row}-${tier}`)) {
+                    return { block: blockKey, bay, row, tier };
+                }
+            }
+        }
+    }
+    return { block: blockKey, bay: '02', row: '02', tier: '01' };
+}
+
 // =============================================================================
 // CONTAINER SLOT COORDINATE ENGINE & PROCEDURAL BASELINE GENERATOR
 // =============================================================================
@@ -4621,52 +4654,19 @@ function handleMoveSubmit(e) {
     const fromTier  = (tMesh && tMesh.userData) ? (tMesh.userData.tier || '01') : '01';
     const ownerComp = (tMesh && tMesh.userData && tMesh.userData.owner_company) ? tMesh.userData.owner_company : 'Ocean Carrier';
 
-    const btn = document.getElementById('btnSubmitMove');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Memproses...';
+    const targetSlotKey = `${toBlock}-${String(toBay).padStart(2, '0')}-${String(toRow).padStart(2, '0')}-${String(toTier).padStart(2, '0')}`;
+    const conflict = Object.values(containerMeshes).find(m => m && m.userData && m.userData.container_number !== boxNumber && `${m.userData.block}-${String(m.userData.bay).padStart(2, '0')}-${String(m.userData.row).padStart(2, '0')}-${String(m.userData.tier).padStart(2, '0')}` === targetSlotKey);
 
-    // Call REST API
-    fetch('api/simulator_action.php', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            action: 'move_container',
-            container_id: containerId,
-            container_number: boxNumber,
-            equipment_id: equipmentId,
-            from_block: fromBlock,
-            from_bay: fromBay,
-            from_row: fromRow,
-            from_tier: fromTier,
-            owner_company: ownerComp,
-            to_block: toBlock,
-            to_bay: toBay,
-            to_row: toRow,
-            to_tier: toTier
-        })
-    })
-    .then(res => res.json())
-    .then(data => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> Jalankan Relokasi Box';
+    if (conflict) {
+        showToast('Slot Penuh (Sandbox 3D)', `Slot ${targetSlotKey} sudah terisi kontainer ${conflict.userData.container_number}.`, 'error');
+        return;
+    }
 
-        if (data.success) {
-            closeMoveModal();
-            closeInspector();
-            showToast('Relokasi Berhasil', data.message, 'success');
-            logTicker(`[LIFT-OFF] ${data.equipment.equipment_id} mengangkat ${data.container.container_number} -> ${data.container.to}`);
-            
-            // Trigger 3D Reach Stacker Animation with physical attachment!
-            animateReachStackerMove(data.container.container_number, data.container.from, data.container.to, equipmentId);
-        } else {
-            showToast('Slot Penuh / Gagal', data.message, 'error');
-        }
-    })
-    .catch(err => {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> Jalankan Relokasi Box';
-        showToast('Error Sistem', err.message, 'error');
-    });
+    closeMoveModal();
+    closeInspector();
+    showToast('Relokasi Sandbox 3D', `[SANDBOX READ-ONLY] ${equipmentId} memindahkan ${boxNumber} -> ${targetSlotKey} tanpa mengubah DB MySQL.`, 'success');
+    logTicker(`[SANDBOX LIFT-OFF] ${equipmentId} mengangkat ${boxNumber} -> ${targetSlotKey} (Mode Read-Only)`);
+    animateReachStackerMove(boxNumber, `${fromBlock}-${fromBay}-${fromRow}-${fromTier}`, targetSlotKey, equipmentId);
 }
 
 // Reach Stacker Moving & Stacking Animation with REAL-WORLD Physical Attachment
@@ -4711,7 +4711,7 @@ function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
 
     const rsMesh = equipmentMeshes[equipmentId] || equipmentMeshes['RS-02'] || equipmentMeshes['RS-01'];
     if (!rsMesh) {
-        fetchSimulationState();
+        refreshSandboxUI();
         return;
     }
 
@@ -4803,8 +4803,8 @@ function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
                                                         targetMesh.userData.tier = String(toTier).padStart(2, '0');
                                                         containerMeshes[boxNumber] = targetMesh;
 
-                                                        logTicker(`[STACKED SUKSES] Kontainer ${boxNumber} resmi ditumpuk fisik di ${toBlock}-${toBay}-${toRow}-${toTier}.`);
-                                                        showToast('Relokasi Berhasil', `Kontainer ${boxNumber} sukses ditumpuk di ${toBlock}-${toBay}-${toRow}-${toTier} (Tier ${toTier})!`, 'success');
+                                                        logTicker(`[STACKED SUKSES] Kontainer ${boxNumber} resmi ditumpuk fisik di ${toBlock}-${toBay}-${toRow}-${toTier} (Sandbox 3D).`);
+                                                        showToast('Relokasi Sandbox 3D', `Kontainer ${boxNumber} berhasil ditumpuk di ${toBlock}-${toBay}-${toRow}-${toTier} (Tier ${toTier}) tanpa mengubah DB.`, 'success');
 
                                                         // Step 8: RS disengages and returns to standby
                                                         if (boom) new TWEEN.Tween(boom.rotation).to({ z: Math.PI / 10 }, dur(400)).start();
@@ -4813,7 +4813,7 @@ function animateReachStackerMove(boxNumber, fromSlot, toSlot, equipmentId) {
                                                             .easing(TWEEN.Easing.Quadratic.InOut)
                                                             .onComplete(() => {
                                                                 isAnimating = false;
-                                                                fetchSimulationState();
+                                                                refreshSandboxUI();
                                                                 setTimeout(() => hideOpFlowHUD(), 3000);
                                                             })
                                                             .start();
@@ -5047,60 +5047,55 @@ function triggerGateIn(type = 'drop_off') {
         .easing(TWEEN.Easing.Quadratic.Out)
         .onComplete(() => {
             playSimSound('brake'); // Suara rem angin psssh
-            logTicker(`[WEIGHBRIDGE 80T] Truk berhenti di atas timbangan SOLAS bersertifikasi...`);
+            logTicker(`[WEIGHBRIDGE 80T] Truk berhenti di atas timbangan SOLAS (Sandbox Read-Only)...`);
 
-            // Panggil API Gate-In & Simpan ke MySQL
-            fetch(`api/simulator_action.php?action=gate_in&type=${type}`)
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        playSimSound('beep'); // Beep konfirmasi penimbangan
-                        const trk = data.truck;
-                        trk.allocated_slot = data.allocated_slot;
-                        trk.target_container = data.target_container;
-                        const desc = isPickup 
-                            ? `${trk.license_plate}: Sasis Kosong (Tare ${trk.tare_weight.toLocaleString()} kg). Izin Pick-Up Kontainer Valid!`
-                            : `${trk.license_plate} (${trk.company}): Gross ${trk.gross_weight.toLocaleString()} kg, VGM Net ${trk.vgm_net.toLocaleString()} kg - SOLAS PASS!`;
-                        showToast(`Gate-In ${misiText} Sukses`, desc, 'success');
-                        logTicker(`[GATE-IN SUKSES] Plat ${trk.license_plate}: Gross ${trk.gross_weight}kg, Status: ${trk.vgm_status}.`);
+            setTimeout(() => {
+                playSimSound('beep'); // Beep konfirmasi penimbangan
+                const freeSlot = findOpenSandboxSlot(isPickup ? 'B' : 'A');
+                const bContainer = Object.values(containerMeshes).find(m => m && m.userData && m.userData.block === 'B');
+                const sampleBox = 'MSKU' + Math.floor(1000000 + Math.random() * 8999999);
+                const trk = {
+                    license_plate: isPickup ? 'B 9120 KLP' : 'B 9481 UIX',
+                    company: isPickup ? 'PT Dunex Express Indonesia' : 'PT Samudera Pratama Logistik',
+                    container_number: sampleBox,
+                    tare_weight: 14200,
+                    gross_weight: isPickup ? 14200 : 32450,
+                    vgm_net: isPickup ? 0 : 18250,
+                    vgm_status: 'SOLAS PASS (SANDBOX)',
+                    allocated_slot: freeSlot,
+                    target_container: bContainer ? bContainer.userData : { container_number: 'MSKU4952240' }
+                };
 
-                        // 1B. Angkat Palang Pintu Gerbang Masuk (Boom Barrier Inbound)
+                const desc = isPickup
+                    ? `${trk.license_plate}: Sasis Kosong (Tare ${trk.tare_weight.toLocaleString()} kg). Izin Pick-Up Sandbox Valid!`
+                    : `${trk.license_plate} (${trk.company}): Gross ${trk.gross_weight.toLocaleString()} kg, VGM Net ${trk.vgm_net.toLocaleString()} kg - SOLAS PASS!`;
+                showToast(`Gate-In Sandbox ${misiText}`, desc, 'success');
+                logTicker(`[SANDBOX GATE-IN] Plat ${trk.license_plate}: Gross ${trk.gross_weight}kg, Status: ${trk.vgm_status} (Data DB asli aman).`);
+
+                // 1B. Angkat Palang Pintu Gerbang Masuk (Boom Barrier Inbound)
+                if (boomBarrierMesh) {
+                    playSimSound('barrier');
+                    new TWEEN.Tween(boomBarrierMesh.rotation)
+                        .to({ x: -Math.PI / 2.5 }, dur(600))
+                        .easing(TWEEN.Easing.Quadratic.Out)
+                        .start();
+                }
+
+                // 1C. Truk melaju melintasi palang masuk (Z = 52 -> 43 -> 28) ke jalan sirkulasi internal
+                new TWEEN.Tween(truckMesh.position)
+                    .to({ z: 28 }, dur(1500))
+                    .easing(TWEEN.Easing.Quadratic.InOut)
+                    .onComplete(() => {
                         if (boomBarrierMesh) {
-                            playSimSound('barrier');
                             new TWEEN.Tween(boomBarrierMesh.rotation)
-                                .to({ x: -Math.PI / 2.5 }, dur(600))
-                                .easing(TWEEN.Easing.Quadratic.Out)
+                                .to({ x: 0 }, dur(500))
+                                .easing(TWEEN.Easing.Quadratic.In)
                                 .start();
                         }
-
-                        // 1C. Truk melaju melintasi palang masuk (Z = 52 -> 43 -> 28) ke jalan sirkulasi internal
-                        new TWEEN.Tween(truckMesh.position)
-                            .to({ z: 28 }, dur(1500))
-                            .easing(TWEEN.Easing.Quadratic.InOut)
-                            .onComplete(() => {
-                                // Tutup kembali palang pintu masuk
-                                if (boomBarrierMesh) {
-                                    new TWEEN.Tween(boomBarrierMesh.rotation)
-                                        .to({ x: 0 }, dur(500))
-                                        .easing(TWEEN.Easing.Quadratic.In)
-                                        .start();
-                                }
-
-                                // Lanjut ke Tahap 2: Sirkulasi Yard
-                                runStage2_DriveToYard(type, trk);
-                            })
-                            .start();
-                    } else {
-                        showToast('Gate-In Gagal', data.message || 'Terjadi kesalahan sistem', 'error');
-                        isAnimating = false;
-                        hideOpFlowHUD();
-                    }
-                })
-                .catch(err => {
-                    console.error('Error gate_in API:', err);
-                    isAnimating = false;
-                    hideOpFlowHUD();
-                });
+                        runStage2_DriveToYard(type, trk);
+                    })
+                    .start();
+            }, dur(400));
         })
         .start();
 }
@@ -5399,57 +5394,45 @@ function runStage4_DriveToGateOut(type, truckData) {
                                 .easing(TWEEN.Easing.Quadratic.Out)
                                 .onComplete(() => {
                                     playSimSound('brake');
-                                    logTicker(`[OUTBOUND GATE] Memindai e-Pass keluar & verifikasi surat jalan elektronik...`);
+                                    logTicker(`[OUTBOUND GATE] Memindai e-Pass keluar & verifikasi surat jalan elektronik (Sandbox)...`);
 
-                                    // Eksekusi API Gate-Out & sinkronisasi MySQL
-                                    fetch('api/simulator_action.php?action=gate_out')
-                                        .then(res => res.json())
-                                        .then(outData => {
-                                            playSimSound('beep');
-                                            // 4E. Angkat Palang Gerbang Keluar (Lane 2)
-                                            if (outboundBarrierMesh) {
-                                                playSimSound('barrier');
-                                                new TWEEN.Tween(outboundBarrierMesh.rotation)
-                                                    .to({ x: -Math.PI / 2.5 }, dur(600))
-                                                    .easing(TWEEN.Easing.Quadratic.Out)
-                                                    .start();
-                                            }
-
-                                            // 4F. Truk melaju melintasi gerbang keluar menuju jalan raya (Z: 43 -> 85)
-                                            new TWEEN.Tween(truckMesh.position)
-                                                .to({ z: 85 }, dur(2000))
-                                                .easing(TWEEN.Easing.Quadratic.In)
-                                                .onComplete(() => {
-                                                    // Tutup kembali palang gerbang keluar
-                                                    if (outboundBarrierMesh) {
-                                                        new TWEEN.Tween(outboundBarrierMesh.rotation)
-                                                            .to({ x: 0 }, dur(500))
-                                                            .easing(TWEEN.Easing.Quadratic.In)
-                                                            .start();
-                                                    }
-
-                                                    showToast(`Misi ${misiText} 100% Selesai!`, `Alur operasional lapangan tuntas dan tersinkronisasi di MySQL.`, 'success');
-                                                    logTicker(`[OPERASIONAL SUKSES] Truk ${truckData.license_plate} resmi Gate-Out. Status armada diselesaikan di database.`);
-
-                                                    // Kembalikan posisi standby truk di highway untuk demo berikutnya (Lane 1 Approach: X = -49, Z = 75)
-                                                    truckMesh.position.set(-49, 0, 75);
-                                                    truckMesh.rotation.set(0, Math.PI / 2, 0);
-                                                    if (truckBoxMesh) truckBoxMesh.visible = true;
-
-                                                    isAnimating = false;
-                                                    fetchSimulationState();
-
-                                                    setTimeout(() => {
-                                                        hideOpFlowHUD();
-                                                    }, 3000);
-                                                })
+                                    setTimeout(() => {
+                                        playSimSound('beep');
+                                        if (outboundBarrierMesh) {
+                                            playSimSound('barrier');
+                                            new TWEEN.Tween(outboundBarrierMesh.rotation)
+                                                .to({ x: -Math.PI / 2.5 }, dur(600))
+                                                .easing(TWEEN.Easing.Quadratic.Out)
                                                 .start();
-                                        })
-                                        .catch(err => {
-                                            console.error('Error gate_out API:', err);
-                                            isAnimating = false;
-                                            hideOpFlowHUD();
-                                        });
+                                        }
+
+                                        new TWEEN.Tween(truckMesh.position)
+                                            .to({ z: 85 }, dur(2000))
+                                            .easing(TWEEN.Easing.Quadratic.In)
+                                            .onComplete(() => {
+                                                if (outboundBarrierMesh) {
+                                                    new TWEEN.Tween(outboundBarrierMesh.rotation)
+                                                        .to({ x: 0 }, dur(500))
+                                                        .easing(TWEEN.Easing.Quadratic.In)
+                                                        .start();
+                                                }
+
+                                                showToast(`Misi Sandbox ${misiText} Selesai!`, `Visualisasi 3D selesai (Mode Read-Only, data DB nyata tidak diubah).`, 'success');
+                                                logTicker(`[SANDBOX SELESAI] Truk ${truckData.license_plate} melewati Gate-Out 3D.`);
+
+                                                truckMesh.position.set(-49, 0, 75);
+                                                truckMesh.rotation.set(0, Math.PI / 2, 0);
+                                                if (truckBoxMesh) truckBoxMesh.visible = true;
+
+                                                isAnimating = false;
+                                                refreshSandboxUI();
+
+                                                setTimeout(() => {
+                                                    hideOpFlowHUD();
+                                                }, 3000);
+                                            })
+                                            .start();
+                                    }, dur(300));
                                 })
                                 .start();
                         })
@@ -5461,17 +5444,16 @@ function runStage4_DriveToGateOut(type, truckData) {
 }
 
 // =============================================================================
-// AKSI 2B: SIMULASI GATE-OUT TRUK MANDIRI (JIKA TRUK SUDAH DI DALAM YARD)
+// AKSI 2B: SIMULASI GATE-OUT TRUK MANDIRI (SANDBOX READ-ONLY)
 // =============================================================================
 function triggerGateOut() {
     if (!truckMesh || isAnimating) return;
     isAnimating = true;
 
-    showOpFlowHUD(4, '4. GATE-OUT ARMADA MANDIRI', 'Truk di dalam terminal menuju Outbound Gate untuk proses checkout...');
+    showOpFlowHUD(4, '4. GATE-OUT ARMADA MANDIRI', 'Truk di dalam terminal menuju Outbound Gate (Sandbox Read-Only)...');
     focusLocation('vgm', 'Gate Outbound: Pemeriksaan Akhir & Barrier Keluar', { x: -41, y: 0, z: 43 }, 'GATE-OUT TERMINAL');
     logTicker(`[GATE-OUT] Truk menyelesaikan operasional dan menuju gerbang keluar Lane 2...`);
 
-    // Posisikan truk di jalur keluar menuju barrier Lane 2 (X = -41)
     truckMesh.position.set(-41, 0, 28);
     truckMesh.rotation.set(0, -Math.PI / 2, 0);
 
@@ -5480,52 +5462,39 @@ function triggerGateOut() {
         .easing(TWEEN.Easing.Quadratic.InOut)
         .onComplete(() => {
             playSimSound('brake');
-            fetch('api/simulator_action.php?action=gate_out')
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        playSimSound('beep');
-                        const trk = data.truck;
-                        showToast('Gate-Out Selesai', data.message, 'success');
-                        logTicker(`[GATE-OUT] Truk ${trk.license_plate} sukses Gate-Out. Meninggalkan area pelabuhan kering.`);
+            setTimeout(() => {
+                playSimSound('beep');
+                const simPlate = 'B 9481 UIX';
+                showToast('Gate-Out Sandbox Selesai', `Truk ${simPlate} disimulasikan keluar (Mode Read-Only).`, 'success');
+                logTicker(`[SANDBOX GATE-OUT] Truk ${simPlate} melewati Outbound Gate 3D tanpa mengubah database.`);
 
+                if (outboundBarrierMesh) {
+                    playSimSound('barrier');
+                    new TWEEN.Tween(outboundBarrierMesh.rotation)
+                        .to({ x: -Math.PI / 2.5 }, dur(600))
+                        .easing(TWEEN.Easing.Quadratic.Out)
+                        .start();
+                }
+
+                new TWEEN.Tween(truckMesh.position)
+                    .to({ z: 85 }, dur(2000))
+                    .easing(TWEEN.Easing.Quadratic.In)
+                    .onComplete(() => {
                         if (outboundBarrierMesh) {
-                            playSimSound('barrier');
                             new TWEEN.Tween(outboundBarrierMesh.rotation)
-                                .to({ x: -Math.PI / 2.5 }, dur(600))
-                                .easing(TWEEN.Easing.Quadratic.Out)
+                                .to({ x: 0 }, dur(500))
                                 .start();
                         }
+                        truckMesh.position.set(-49, 0, 75);
+                        truckMesh.rotation.set(0, Math.PI / 2, 0);
+                        if (truckBoxMesh) truckBoxMesh.visible = true;
 
-                        new TWEEN.Tween(truckMesh.position)
-                            .to({ z: 85 }, dur(2000))
-                            .easing(TWEEN.Easing.Quadratic.In)
-                            .onComplete(() => {
-                                if (outboundBarrierMesh) {
-                                    new TWEEN.Tween(outboundBarrierMesh.rotation)
-                                        .to({ x: 0 }, dur(500))
-                                        .start();
-                                }
-                                truckMesh.position.set(-49, 0, 75);
-                                truckMesh.rotation.set(0, Math.PI / 2, 0);
-                                if (truckBoxMesh) truckBoxMesh.visible = true;
-
-                                isAnimating = false;
-                                fetchSimulationState();
-                                setTimeout(() => hideOpFlowHUD(), 2500);
-                            })
-                            .start();
-                    } else {
-                        showToast('Info Gate-Out', data.message || 'Tidak ada armada truk yang siap keluar.', 'info');
                         isAnimating = false;
-                        hideOpFlowHUD();
-                    }
-                })
-                .catch(e => {
-                    console.error(e);
-                    isAnimating = false;
-                    hideOpFlowHUD();
-                });
+                        refreshSandboxUI();
+                        setTimeout(() => hideOpFlowHUD(), 2500);
+                    })
+                    .start();
+            }, dur(300));
         })
         .start();
 }
@@ -5598,73 +5567,65 @@ function triggerRailDischarge() {
                                                     playSimSound('thud');
                                                     playSimSound('twistlock');
 
-                                                    // Panggil API Rail Discharge & update MySQL
-                                                    fetch('api/simulator_action.php?action=rail_discharge')
-                                                        .then(res => res.json())
-                                                        .then(data => {
-                                                            if (data.success) {
-                                                                showToast('Alih Muat KA Berhasil', data.message, 'success');
-                                                                const cNum = data.container.container_number;
-                                                                const toBlk = data.container.block || 'D';
-                                                                const toBay = data.container.bay || '02';
-                                                                const toRow = data.container.row || '01';
-                                                                const toTier = data.container.tier || '01';
+                                                    // Sandbox 3D Rail Discharge (Read-Only, tanpa mutasi MySQL)
+                                                    setTimeout(() => {
+                                                        const cNum = 'KAIU' + Math.floor(1000000 + Math.random() * 8999999);
+                                                        const slotD = findOpenSandboxSlot('D');
+                                                        const toBlk = slotD.block;
+                                                        const toBay = slotD.bay;
+                                                        const toRow = slotD.row;
+                                                        const toTier = slotD.tier;
 
-                                                                // --- SECARA FISIK DITAMBAHKAN KE LAPANGAN BUFFER YARD ---
-                                                                const bPos = getSlotWorldPosition(toBlk, toBay, toRow, toTier, false);
-                                                                
-                                                                // Lepas dari spreader RTG dan tempatkan di koordinat slot dunia!
-                                                                spreader.remove(carriedRailBox);
-                                                                carriedRailBox.position.set(bPos.x, bPos.y, bPos.z);
-                                                                carriedRailBox.rotation.set(0, 0, 0);
-                                                                scene.add(carriedRailBox);
+                                                        showToast('Alih Muat KA Sandbox 3D', `Kontainer ${cNum} diturunkan RTG-01 ke ${toBlk}-${toBay}-${toRow}-${toTier} (Sandbox Read-Only).`, 'success');
 
-                                                                carriedRailBox.userData = {
-                                                                    container_number: cNum,
-                                                                    size_type: '40FT HIGH CUBE',
-                                                                    cargo_type: 'dry',
-                                                                    block: toBlk,
-                                                                    bay: String(toBay).padStart(2, '0'),
-                                                                    row: String(toRow).padStart(2, '0'),
-                                                                    tier: String(toTier).padStart(2, '0'),
-                                                                    owner_company: 'PT Kereta Api Logistik',
-                                                                    gross_weight_kg: 26400,
-                                                                    rfid_tag: 'RFID-CTR-' + cNum.slice(-3),
-                                                                    customs_status: 'SPPB_CLEARED',
-                                                                    status: 'in_yard'
-                                                                };
-                                                                containerMeshes[cNum] = carriedRailBox;
+                                                        // --- SECARA FISIK DITAMBAHKAN KE LAPANGAN BUFFER YARD ---
+                                                        const bPos = getSlotWorldPosition(toBlk, toBay, toRow, toTier, false);
 
-                                                                logTicker(`[FISIK BUFFER] Peti kemas ${cNum} resmi ditempatkan fisik di ${toBlk}-${toBay}-${toRow}-${toTier}.`);
+                                                        // Lepas dari spreader RTG dan tempatkan di koordinat slot dunia!
+                                                        spreader.remove(carriedRailBox);
+                                                        carriedRailBox.position.set(bPos.x, bPos.y, bPos.z);
+                                                        carriedRailBox.rotation.set(0, 0, 0);
+                                                        scene.add(carriedRailBox);
 
-                                                                // 6. Angkat spreader kembali & pulihkan posisi RTG
-                                                                new TWEEN.Tween(spreader.position)
-                                                                    .to({ y: 12 }, dur(800))
+                                                        carriedRailBox.userData = {
+                                                            container_number: cNum,
+                                                            size_type: '40FT HIGH CUBE',
+                                                            cargo_type: 'dry',
+                                                            block: toBlk,
+                                                            bay: toBay,
+                                                            row: toRow,
+                                                            tier: toTier,
+                                                            owner_company: 'PT Kereta Api Logistik',
+                                                            gross_weight_kg: 26400,
+                                                            rfid_tag: 'RFID-CTR-' + cNum.slice(-3),
+                                                            customs_status: 'SPPB_CLEARED',
+                                                            status: 'in_yard'
+                                                        };
+                                                        containerMeshes[cNum] = carriedRailBox;
+
+                                                        logTicker(`[SANDBOX BUFFER] Peti kemas ${cNum} ditempatkan di ${toBlk}-${toBay}-${toRow}-${toTier} (Read-Only).`);
+
+                                                        // 6. Angkat spreader kembali & pulihkan posisi RTG
+                                                        new TWEEN.Tween(spreader.position)
+                                                            .to({ y: 12 }, dur(800))
+                                                            .easing(TWEEN.Easing.Quadratic.InOut)
+                                                            .onComplete(() => {
+                                                                if (trolley) {
+                                                                    new TWEEN.Tween(trolley.position).to({ z: 0 }, dur(900)).start();
+                                                                }
+                                                                new TWEEN.Tween(spreader.position).to({ z: 0 }, dur(900)).start();
+
+                                                                new TWEEN.Tween(rtg.position)
+                                                                    .to({ x: 0 }, dur(1000))
                                                                     .easing(TWEEN.Easing.Quadratic.InOut)
                                                                     .onComplete(() => {
-                                                                        if (trolley) {
-                                                                            new TWEEN.Tween(trolley.position).to({ z: 0 }, dur(900)).start();
-                                                                        }
-                                                                        new TWEEN.Tween(spreader.position).to({ z: 0 }, dur(900)).start();
-
-                                                                        new TWEEN.Tween(rtg.position)
-                                                                            .to({ x: 0 }, dur(1000))
-                                                                            .easing(TWEEN.Easing.Quadratic.InOut)
-                                                                            .onComplete(() => {
-                                                                                isAnimating = false;
-                                                                                fetchSimulationState();
-                                                                            })
-                                                                            .start();
+                                                                        isAnimating = false;
+                                                                        refreshSandboxUI();
                                                                     })
                                                                     .start();
-                                                            } else {
-                                                                isAnimating = false;
-                                                            }
-                                                        })
-                                                        .catch(err => {
-                                                            console.error(err);
-                                                            isAnimating = false;
-                                                        });
+                                                            })
+                                                            .start();
+                                                    }, dur(250));
                                                 })
                                                 .start();
                                         })
@@ -5685,17 +5646,16 @@ function triggerRailDischarge() {
 // RESET SIMULATION
 // =============================================================================
 function resetSimulation() {
-    if (!confirm('Apakah Anda ingin mereset seluruh posisi kontainer dan alat berat kembali ke konfigurasi awal demo?')) return;
+    if (!confirm('Muat ulang snapshot 3D Sandbox dari database MySQL saat ini? (Tidak mengubah atau menghapus data nyata)')) return;
 
-    fetch('api/simulator_action.php?action=reset_simulation')
-        .then(res => res.json())
-        .then(data => {
-            focusLocation('overview', 'Master Plan CIDP 35 Hektar (Konfigurasi Awal)', { x: 0, y: 0, z: 0 }, 'TERMINAL OVERVIEW');
-            showToast('Reset Berhasil', data.message, 'info');
-            logTicker(`[RESET] Seluruh posisi terminal dikembalikan ke konfigurasi awal demo.`);
-            closeInspector();
-            fetchSimulationState();
-        });
+    if (window.trainContainerBoxes) {
+        Object.values(window.trainContainerBoxes).forEach(b => { if (b) b.visible = true; });
+    }
+    focusLocation('overview', 'Master Plan CIDP 35 Hektar (Snapshot MySQL)', { x: 0, y: 0, z: 0 }, 'TERMINAL OVERVIEW');
+    showToast('Reset Sandbox 3D', 'Tampilan 3D dikembalikan ke snapshot terbaru MySQL tanpa mengubah database.', 'info');
+    logTicker(`[SANDBOX RESET] Posisi 3D dikembalikan sesuai snapshot database terkini.`);
+    closeInspector();
+    fetchSimulationState();
 }
 
 function refreshStateFromDB() {
@@ -6235,63 +6195,84 @@ function animate(time) {
 let twistlockState = true; // true = LOCKED, false = UNLOCKED
 
 function testSensorAction(type) {
-    const apiEndpoint = `api/simulator_action.php?action=test_${type}`;
-    
-    fetch(apiEndpoint)
-        .then(res => res.json())
-        .then(data => {
-            if (!data.success) {
-                showToast('Gagal Simulasi Sensor', data.message || 'Terjadi kesalahan sistem', 'error');
-                return;
-            }
+    const data = {
+        success: true,
+        plate: 'B 9481 UIX',
+        confidence: '99.4%',
+        container_number: 'MSKU9180379',
+        iso_code: '45G1 (40ft HC)',
+        vgm: { gross_weight: 32450, tare_weight: 14200, net_vgm: 18250, certificate_no: 'VGM-SANDBOX-2026' },
+        rfid_tag: 'E28011700000020489110014',
+        driver: 'Armansyah Muchtarrom',
+        e_wallet_status: 'Saldo & Izin Masuk Valid',
+        display_text: 'LANJUT -> BLOK A BAY 02',
+        tat_impact: 'Turnaround Time < 12 Menit',
+        latency: '11.4 ms',
+        accuracy: '±1.2 cm (RTK Fixed)',
+        satellites: '19 GNSS/BeiDou Sat',
+        slot_3d: 'B-04-02-01',
+        twistlock_state: 'LOCKED (4 Pin Engaged)',
+        load_tonnage: '26.80 Ton',
+        reefer: { temperature: '-20.2°C', voltage: '382.4 V', power: '5.85 kW', current: '10.4 A' },
+        axle: { axle_count: 126, train: 'KA 2518 Inbound' },
+        eseal: { wire_status: 'INTACT (TERSEGEL)', seal_id: 'JT701-889241', channel: 'JALUR HIJAU (SPPB)', sppb_number: 'SPPB-991042/KPU.01' },
+        anpr: { plate: 'B 9481 UIX', confidence: '99.4%' },
+        ocr: { container_number: 'MSKU9180379', check_digit: 'Check Digit 9 VALID' }
+    };
+
+    {
+        if (!data.success) {
+            showToast('Gagal Simulasi Sensor', data.message || 'Terjadi kesalahan sistem', 'error');
+            return;
+        }
 
             // HW-01 ANPR
             if (type === 'hw01_anpr' || type === 'anpr') {
                 focusLocation('gate', 'Kamera ANPR Lane 1 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-01 ANPR');
                 const anprEl = document.getElementById('sensorAnprVal');
                 if (anprEl) anprEl.innerText = `${data.plate} (${data.confidence})`;
-                logTicker(`[HW-01 ANPR] Kamera memindai plat truk ${data.plate} di Gate Lane 1 -> Auto-Billing: Rp 50.000 (Pas Gerbang)`);
-                showToast('HW-01 ANPR Berhasil', `Plat ${data.plate} terdeteksi (${data.confidence})`, 'success');
+                logTicker(`[SANDBOX HW-01 ANPR] Kamera memindai plat truk ${data.plate} di Gate Lane 1 (Mode Read-Only)`);
+                showToast('HW-01 ANPR (Sandbox)', `Plat ${data.plate} terdeteksi (${data.confidence})`, 'success');
             }
             // HW-02 OCR
             else if (type === 'hw02_ocr' || type === 'ocr') {
                 focusLocation('gate', 'Portal Optik OCR ISO 6346 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-02 OCR');
                 const ocrEl = document.getElementById('sensorOcrVal');
                 if (ocrEl) ocrEl.innerText = `${data.container_number} (${data.iso_code.split(' ')[0]})`;
-                logTicker(`[HW-02 OCR] Portal membaca kontainer ${data.container_number} | ISO ${data.iso_code} | Check Digit: VALID -> Demurrage Timer Dimulai`);
-                showToast('HW-02 OCR Berhasil', `Kontainer ${data.container_number} ISO 6346 Valid`, 'success');
+                logTicker(`[SANDBOX HW-02 OCR] Portal membaca kontainer ${data.container_number} | ISO ${data.iso_code} | Check Digit: VALID`);
+                showToast('HW-02 OCR (Sandbox)', `Kontainer ${data.container_number} ISO 6346 Valid`, 'success');
             }
             // HW-03 VGM
             else if (type === 'hw03_vgm' || type === 'vgm') {
                 focusLocation('vgm', 'Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: -49, y: 0, z: 52 }, 'HW-03 TIMBANGAN');
                 const vgmEl = document.getElementById('sensorVgmVal');
                 if (vgmEl) vgmEl.innerText = `Net ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg (PASS)`;
-                logTicker(`[HW-03 Timbangan 80T] Bruto ${Number(data.vgm.gross_weight).toLocaleString('id-ID')} kg, Tara ${Number(data.vgm.tare_weight).toLocaleString('id-ID')} kg, Net ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg -> Sertifikat #${data.vgm.certificate_no} (Billing Rp 120.000)`);
-                showToast('HW-03 Timbangan 80T (VGM)', `Net: ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg (Sertifikat SOLAS Terbit)`, 'success');
+                logTicker(`[SANDBOX HW-03 VGM] Bruto ${Number(data.vgm.gross_weight).toLocaleString('id-ID')} kg, Net ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg -> #${data.vgm.certificate_no}`);
+                showToast('HW-03 Timbangan 80T (Sandbox)', `Net: ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg (SOLAS VGM OK)`, 'success');
             }
             // HW-04 RFID
             else if (type === 'hw04_rfid' || type === 'rfid') {
                 focusLocation('gate', 'Antena UHF RFID Hopeland 20m (Gate Lane 1)', { x: -45, y: 0, z: 52 }, 'HW-04 RFID');
                 const rfidEl = document.getElementById('sensorRfidVal');
                 if (rfidEl) rfidEl.innerText = `${data.rfid_tag.slice(0, 12)}... (AUTH)`;
-                logTicker(`[HW-04 UHF RFID] Hopeland 20m mendeteksi tag armada ${data.rfid_tag} (${data.driver}) -> ${data.e_wallet_status}`);
-                showToast('HW-04 UHF RFID Terbaca', `${data.driver} | e-Wallet Terverifikasi`, 'success');
+                logTicker(`[SANDBOX HW-04 RFID] Hopeland 20m mendeteksi tag armada ${data.rfid_tag} (${data.driver}) -> ${data.e_wallet_status}`);
+                showToast('HW-04 UHF RFID (Sandbox)', `${data.driver} | e-Wallet Terverifikasi`, 'success');
             }
             // HW-05 VMS
             else if (type === 'hw05_vms' || type === 'vms') {
                 focusLocation('gate', 'VMS LED Variable Message Sign (Gate Display)', { x: -45, y: 0, z: 52 }, 'HW-05 VMS');
                 const vmsEl = document.getElementById('sensorVmsVal');
                 if (vmsEl) vmsEl.innerText = data.display_text;
-                logTicker(`[HW-05 VMS Display] LED Gate menampilkan instruksi: "${data.display_text}" -> ${data.tat_impact}`);
-                showToast('HW-05 VMS Display Aktif', data.display_text, 'info');
+                logTicker(`[SANDBOX HW-05 VMS] LED Gate menampilkan: "${data.display_text}" -> ${data.tat_impact}`);
+                showToast('HW-05 VMS Display (Sandbox)', data.display_text, 'info');
             }
             // HW-06 Edge AI PC
             else if (type === 'hw06_edge' || type === 'edge') {
                 focusLocation('gate', 'Advantech Edge AI PC & Palang Otomatis (12ms)', { x: -45, y: 0, z: 52 }, 'HW-06 EDGE PC');
                 const edgeEl = document.getElementById('sensorEdgeVal');
                 if (edgeEl) edgeEl.innerText = `OPEN (${data.latency} / 1.2s)`;
-                logTicker(`[HW-06 Edge PC] Advantech ARK-3532 memproses interlock gerbang dalam ${data.latency}. Relay GPIO membuka palang pintu.`);
-                showToast('HW-06 Edge AI PC Interlock', `Palang Pintu Terbuka (Latency ${data.latency})`, 'success');
+                logTicker(`[SANDBOX HW-06 EDGE] Advantech ARK-3532 memproses interlock gerbang dalam ${data.latency}.`);
+                showToast('HW-06 Edge AI PC (Sandbox)', `Palang Pintu Terbuka (Latency ${data.latency})`, 'success');
             }
             // HW-07 RTK GNSS
             else if (type === 'hw07_rtk' || type === 'rtk') {
@@ -6300,8 +6281,8 @@ function testSensorAction(type) {
                 const slotEl = document.getElementById('sensorSlotVal');
                 if (rtkEl) rtkEl.innerText = `FIX (${data.accuracy}, ${data.satellites.split(' ')[0]} Sat)`;
                 if (slotEl) slotEl.innerText = data.slot_3d;
-                logTicker(`[HW-07 RTK DGPS] CHCNAV CGI-610 mengunci koordinat akurasi ${data.accuracy} (${data.satellites}) -> Slot 3D: ${data.slot_3d}`);
-                showToast('HW-07 RTK GNSS Terkunci', `Akurasi ${data.accuracy} | Slot 3D: ${data.slot_3d}`, 'success');
+                logTicker(`[SANDBOX HW-07 RTK] CHCNAV CGI-610 mengunci koordinat ${data.accuracy} -> Slot 3D: ${data.slot_3d}`);
+                showToast('HW-07 RTK GNSS (Sandbox)', `Akurasi ${data.accuracy} | Slot 3D: ${data.slot_3d}`, 'success');
             }
             // HW-08 Spreader Twistlock & Load Cell
             else if (type === 'hw08_twistlock' || type === 'twistlock') {
@@ -6310,8 +6291,8 @@ function testSensorAction(type) {
                 const loadEl = document.getElementById('sensorLoadVal');
                 if (twistEl) twistEl.innerText = data.twistlock_state;
                 if (loadEl) loadEl.innerText = data.load_tonnage;
-                logTicker(`[HW-08 Bromma Spreader] Twistlock: ${data.twistlock_state} | Load Cell: ${data.load_tonnage} -> Auto-Billing: Rp 250.000 (Lo-Lo Lift-Off)`);
-                showToast('HW-08 Spreader & Load Cell', `${data.twistlock_state} | Beban: ${data.load_tonnage}`, 'success');
+                logTicker(`[SANDBOX HW-08 SPREADER] Twistlock: ${data.twistlock_state} | Load Cell: ${data.load_tonnage}`);
+                showToast('HW-08 Spreader (Sandbox)', `${data.twistlock_state} | Beban: ${data.load_tonnage}`, 'success');
             }
             // HW-09 Reefer Socket Modbus
             else if (type === 'hw09_reefer' || type === 'reefer') {
@@ -6325,16 +6306,16 @@ function testSensorAction(type) {
                 }
                 if (voltEl) voltEl.innerText = `${data.reefer.voltage} (50 Hz)`;
                 if (kwEl) kwEl.innerText = `${data.reefer.power} (${data.reefer.current})`;
-                logTicker(`[HW-09 Smart Socket] Marechal Modbus RTU: Rack R-02 Plug #14 telemetri ${data.reefer.temperature}, ${data.reefer.power} -> Billing Rp 35.000/jam`);
-                showToast('HW-09 Smart Reefer Socket', `Suhu ${data.reefer.temperature} | Daya ${data.reefer.power}`, 'success');
+                logTicker(`[SANDBOX HW-09 REEFER] Marechal Modbus RTU: Rack R-02 Plug #14 ${data.reefer.temperature}, ${data.reefer.power}`);
+                showToast('HW-09 Smart Reefer (Sandbox)', `Suhu ${data.reefer.temperature} | Daya ${data.reefer.power}`, 'success');
             }
             // HW-10 Rail Axle Counter
             else if (type === 'hw10_axle' || type === 'axle') {
                 focusLocation('rail', 'Frauscher Axle Counter SIL 4 (Jalur Rel Siding)', { x: 0, y: 0, z: -46 }, 'HW-10 AXLE COUNTER');
                 const axleEl = document.getElementById('sensorAxleVal');
                 if (axleEl) axleEl.innerText = `${data.axle.axle_count} As Roda (${data.axle.train.split(' ')[0]} ${data.axle.train.split(' ')[1]})`;
-                logTicker(`[HW-10 Frauscher Axle Counter] RSR123 mendeteksi 126 gandar KA 2518 (1 Lokomotif + 30 Gerbong PPCW utuh). Sertifikasi SIL 4 verified.`);
-                showToast('HW-10 Axle Counter SIL 4', `126 Gandar KA 2518 Terverifikasi Utuh`, 'success');
+                logTicker(`[SANDBOX HW-10 AXLE] Frauscher RSR123 mendeteksi 126 gandar KA 2518 (SIL 4 verified).`);
+                showToast('HW-10 Axle Counter (Sandbox)', `126 Gandar KA 2518 Terverifikasi Utuh`, 'success');
             }
             // HW-11 Smart E-Seal CEISA 4.0
             else if (type === 'hw11_eseal' || type === 'eseal') {
@@ -6343,8 +6324,8 @@ function testSensorAction(type) {
                 const sppbEl = document.getElementById('sensorSppbVal');
                 if (sealEl) sealEl.innerText = `${data.eseal.wire_status} (#${data.eseal.seal_id})`;
                 if (sppbEl) sppbEl.innerText = `${data.eseal.channel}`;
-                logTicker(`[HW-11 Smart E-Seal] Jointech JT701 GPS/GSM: Kawat segel utuh (INTACT). Bea Cukai CEISA 4.0 menerbitkan ${data.eseal.sppb_number}`);
-                showToast('HW-11 Smart E-Seal & SPPB', `Segel #${data.eseal.seal_id} INTACT -> SPPB Terbit`, 'success');
+                logTicker(`[SANDBOX HW-11 E-SEAL] Jointech JT701: Kawat segel INTACT -> CEISA ${data.eseal.sppb_number}`);
+                showToast('HW-11 Smart E-Seal (Sandbox)', `Segel #${data.eseal.seal_id} INTACT -> SPPB Terbit`, 'success');
             }
             // Kombinasi ANPR + OCR
             else if (type === 'anpr_ocr') {
@@ -6353,14 +6334,10 @@ function testSensorAction(type) {
                 const ocrEl = document.getElementById('sensorOcrVal');
                 if (anprEl) anprEl.innerText = `${data.anpr.plate} (${data.anpr.confidence})`;
                 if (ocrEl) ocrEl.innerText = `${data.ocr.container_number} (${data.ocr.check_digit})`;
-                logTicker(`[HW-01 & HW-02] ANPR & Portal OCR memindai truk ${data.anpr.plate} membawa ${data.ocr.container_number} -> Auto-Billing: Rp 50.000`);
-                showToast('Pindai Plat & OCR Berhasil', `Truk ${data.anpr.plate} | Kontainer ${data.ocr.container_number}`, 'success');
+                logTicker(`[SANDBOX HW-01 & HW-02] ANPR & OCR memindai truk ${data.anpr.plate} + ${data.ocr.container_number}`);
+                showToast('Pindai Plat & OCR (Sandbox)', `Truk ${data.anpr.plate} | Kontainer ${data.ocr.container_number}`, 'success');
             }
-        })
-        .catch(err => {
-            console.error('Sensor action error:', err);
-            showToast('Error Sensor', 'Gagal menghubungi service telemetri', 'error');
-        });
+    }
 }
 
 function toggleTwistlockSim() {

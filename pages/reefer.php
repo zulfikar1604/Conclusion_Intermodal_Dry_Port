@@ -9,6 +9,7 @@
 
 require_once __DIR__ . '/../connection.php';
 require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
 if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 $reefer_info = [
@@ -28,7 +29,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $slot_id   = trim($_POST['slot_id'] ?? '');
         $setpoint  = floatval($_POST['setpoint_temp'] ?? -20.0);
         $commodity = trim($_POST['commodity'] ?? 'General Perishables');
-        $operator  = trim($_POST['operator_name'] ?? 'Petugas Reefer');
+        $operator  = trim($_POST['operator_name'] ?? 'Armansyah Muchtarrom');
 
         if (!empty($ctr_num) && !empty($slot_id)) {
             try {
@@ -39,27 +40,31 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     $existing = $stmtCheck->fetch();
 
                     if ($existing) {
-                        $stmtUp = $pdo->prepare("UPDATE containers SET block = 'REEFER', status = 'in_yard', customs_status = 'SPPB_CLEARED' WHERE id = ?");
+                        $stmtUp = $pdo->prepare("UPDATE containers SET block = 'REEFER', status = 'in_yard', customs_status = COALESCE(customs_status, 'SPPB_CLEARED') WHERE id = ?");
                         $stmtUp->execute([$existing['id']]);
-                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ?")->execute([$ctr_num]);
-                        $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, return_temp_c, humidity_pct, power_kw, kwh_consumed, status, recorded_at) VALUES (?, ?, ?, ?, ?, 88.0, 5.80, 5.80, 'NORMAL', NOW())")->execute([$ctr_num, $slot_id, $setpoint, $setpoint, $setpoint + 0.8]);
-                        accrue_billing($pdo, $ctr_num, 'R', "Reefer Plug-In & Monitoring ($slot_id)", 350000);
+                    } else {
+                        $pdo->prepare("INSERT INTO containers (container_number, iso_code, size_type, cargo_type, block, bay, `row`, tier, status, customs_status, gate_in_time) VALUES (?, '45R1', '40HC', 'reefer', 'REEFER', 1, 1, 1, 'in_yard', 'SPPB_CLEARED', NOW())")->execute([$ctr_num]);
                     }
+                    $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ?")->execute([$ctr_num]);
+                    $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, power_kw, status, created_at) VALUES (?, ?, ?, ?, 5.80, 'NORMAL', NOW())")->execute([$ctr_num, $slot_id, $setpoint, $setpoint]);
+                    accrue_billing($pdo, $ctr_num, "Reefer Plug-In & Monitoring ($slot_id)", 'reefer_power_amount', 350000);
 
                     // Catat ke log yard_events
-                    $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('REEFER_PLUG_IN', ?, 'REEFER', ?, ?, NOW())");
+                    $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, billable_amount, notes, created_at) VALUES ('REEFER_PLUG_IN', ?, 'REEFER', ?, 350000, ?, NOW())");
                     $stmtLog->execute([$ctr_num, $operator, "Plug-in steker $slot_id pada setpoint $setpoint °C ($commodity)"]);
+
+                    get_live_twin_state($pdo, true);
                 }
                 $action_alert = [
                     'type' => 'success',
                     'title' => 'Steker Berhasil Terhubung (Plug-In Confirmed)',
-                    'msg' => "Peti kemas <strong>$ctr_num</strong> berhasil dicolokkan ke soket <strong>$slot_id</strong> dengan setpoint suhu <strong>{$setpoint}°C</strong>. Telemetri daya 380V aktif."
+                    'msg' => "Peti kemas <strong>$ctr_num</strong> berhasil dicolokkan ke soket <strong>$slot_id</strong> dengan setpoint suhu <strong>{$setpoint}°C</strong>. Telemetri daya 380V aktif & biaya masuk Billing ERP."
                 ];
             } catch (Exception $e) {
                 $action_alert = [
-                    'type' => 'warning',
-                    'title' => 'Steker Terhubung (Mode Demo)',
-                    'msg' => "Koneksi steker $slot_id untuk $ctr_num telah aktif pada setpoint {$setpoint}°C."
+                    'type' => 'error',
+                    'title' => 'Gagal Plug-In Reefer',
+                    'msg' => $e->getMessage()
                 ];
             }
         }
@@ -70,10 +75,11 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
         if (isset($pdo) && !empty($ctr_num)) {
             try {
-                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('REEFER_UNPLUG', ?, 'Petugas Reefer', ?, ?, NOW())");
-                $bill_amount = $kwh * 2850; // Tarif listrik industri Rp 2.850 / kWh
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('REEFER_UNPLUG', ?, 'Armansyah Muchtarrom', ?, ?, NOW())");
+                $bill_amount = round($kwh * 2850); // Tarif listrik industri Rp 2.850 / kWh
                 $stmtLog->execute([$ctr_num, $bill_amount, "Pelepasan steker $slot_id. Total konsumsi: $kwh kWh"]);
-                accrue_billing($pdo, $ctr_num, 'R', "Reefer Electricity ($kwh kWh)", $bill_amount);
+                accrue_billing($pdo, $ctr_num, "Reefer Electricity ($kwh kWh)", 'reefer_power_amount', $bill_amount);
+                get_live_twin_state($pdo, true);
             } catch (Exception $e) {}
         }
 
@@ -93,15 +99,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
         if (isset($pdo) && !empty($ctr_num)) {
             try {
-                // Update / touch container
                 $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = COALESCE(customs_status, 'SPPB_CLEARED') WHERE container_number = ?");
                 $stmtUp->execute([$ctr_num]);
                 $isAlm = abs($temp_actual - $setpoint) > 2.0 ? 'ALARM' : 'NORMAL';
-                $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, return_temp_c, humidity_pct, power_kw, kwh_consumed, status, recorded_at) VALUES (?, ?, ?, ?, ?, ?, 6.10, 12.20, ?, NOW())")->execute([$ctr_num, $slot_id, $setpoint, $temp_actual, $temp_actual + 0.7, $humidity, $isAlm]);
+                $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, power_kw, status, created_at) VALUES (?, ?, ?, ?, 6.10, ?, NOW())")->execute([$ctr_num, $slot_id, $setpoint, $temp_actual, $isAlm]);
 
                 // Catat ke yard_events
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('REEFER_TELEMETRY_PING', ?, 'REEFER', 'LoRaWAN SHT40 Gateway', ?, NOW())");
                 $stmtLog->execute([$ctr_num, "Paket Telemetri LoRaWAN 868MHz: Slot $slot_id, Temp {$temp_actual}°C (SP {$setpoint}°C), Tegangan {$voltage}V, Kelembaban {$humidity}% RH, Sinyal RSSI $rssi"]);
+                get_live_twin_state($pdo, true);
             } catch (Exception $e) {}
         }
 
@@ -121,6 +127,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 $event_name = $is_alarm ? 'K3_THERMAL_ALARM' : 'K3_THERMAL_SCAN';
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, to_block, operator_name, notes, created_at) VALUES (?, 'REEFER', 'AI Thermal Cam HW-16', ?, NOW())");
                 $stmtLog->execute([$event_name, "Pemindaian Termal HW-16: $rack_id Kompresor {$max_temp}°C (Ambang batas trip 85.0°C - Status: " . ($is_alarm ? 'ALARM OVERHEAT' : 'NORMAL') . ")"]);
+                get_live_twin_state($pdo, true);
             } catch (Exception $e) {}
         }
 
@@ -137,6 +144,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             try {
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, to_block, operator_name, notes, created_at) VALUES ('ATS_GENSET_PULSE', 'REEFER', 'Cummins 1500kVA ATS', ?, NOW())");
                 $stmtLog->execute(["Simulasi Alih Daya ATS Genset: Waktu alih $switch_time detik, beban $load_kw kW, frekuensi 50.1 Hz, tegangan 384V stabil"]);
+                get_live_twin_state($pdo, true);
             } catch (Exception $e) {}
         }
 

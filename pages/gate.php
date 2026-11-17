@@ -8,6 +8,7 @@
 
 require_once __DIR__ . '/../connection.php';
 require_once __DIR__ . '/../api/preadvice_helper.php';
+require_once __DIR__ . '/../api/twin_state_helper.php';
 if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
 
 // Handle Form Aksi POST (Dual-Clearance Gate Out Release)
@@ -20,43 +21,68 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
 
         if (isset($pdo)) {
             try {
-                // 1. Validasi Pabean
-                $stmtCheckC = $pdo->prepare("SELECT customs_status FROM containers WHERE container_number = ? LIMIT 1");
-                $stmtCheckC->execute([$ctr_num]);
-                $cData = $stmtCheckC->fetch(PDO::FETCH_ASSOC);
-                $customsCleared = ($cData && $cData['customs_status'] === 'SPPB_CLEARED');
-
-                // 2. Validasi Billing
-                $stmtCheckB = $pdo->prepare("SELECT payment_status FROM billing_invoices WHERE container_number = ? ORDER BY id DESC LIMIT 1");
-                $stmtCheckB->execute([$ctr_num]);
-                $bData = $stmtCheckB->fetch(PDO::FETCH_ASSOC);
-                $billingPaid = ($bData && $bData['payment_status'] === 'PAID');
-
-                // Update trucks status to gate_out
-                $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE id = ? OR license_plate = ?");
-                $stmtUpT->execute([$truck_id, $plate]);
-
-                // Update container status if present
+                // 1. Validasi Pabean (SPPB_CLEARED)
+                $customsCleared = true;
+                $customsStatus = 'SPPB_CLEARED';
                 if (!empty($ctr_num)) {
-                    $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ?");
-                    $stmtUpC->execute([$ctr_num]);
-                    $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
-                    accrue_billing($pdo, $ctr_num, 'L', 'Lift-Off & Gate-In Handling', 525000);
-                    accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage)', 275000);
-                    $pdo->prepare("UPDATE preadvice SET status = 'COMPLETED' WHERE container_number = ?")->execute([$ctr_num]);
+                    $stmtCheckC = $pdo->prepare("SELECT customs_status FROM containers WHERE container_number = ? LIMIT 1");
+                    $stmtCheckC->execute([$ctr_num]);
+                    $cData = $stmtCheckC->fetch(PDO::FETCH_ASSOC);
+                    $customsStatus = $cData['customs_status'] ?? 'PENDING';
+                    $customsCleared = ($cData && $customsStatus === 'SPPB_CLEARED');
                 }
 
-                // Log audit event
-                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_OUT', ?, 'Petugas Gate Outbound', ?, NOW())");
-                $stmtLog->execute([$ctr_num, "Rilis Gate Out armada $plate membawa kontainer $ctr_num. Validasi Pabean: " . ($customsCleared ? 'SPPB Lolos' : 'Dispensasi') . ", Billing: " . ($billingPaid ? 'Lunas' : 'Dispensasi')]);
+                // 2. Validasi Billing (Tidak boleh ada satupun faktur PENDING / UNPAID untuk kontainer ini)
+                $billingPaid = true;
+                $billingStatus = 'NO_INVOICE';
+                if (!empty($ctr_num)) {
+                    $stmtCheckB = $pdo->prepare("SELECT COUNT(*) FROM billing_invoices WHERE container_number = ? AND payment_status <> 'PAID'");
+                    $stmtCheckB->execute([$ctr_num]);
+                    $unpaidCnt = (int)$stmtCheckB->fetchColumn();
+                    if ($unpaidCnt > 0) {
+                        $billingPaid = false;
+                        $billingStatus = "PENDING ({$unpaidCnt} faktur belum lunas)";
+                    } else {
+                        $billingPaid = true;
+                        $billingStatus = 'PAID';
+                    }
+                }
 
-                $gate_alert = [
-                    'type' => 'success',
-                    'title' => 'Rilis Gate Out Sukses — Barrier Gate Terbuka',
-                    'msg' => "Armada truk <strong>$plate</strong> dengan kontainer <strong>$ctr_num</strong> berhasil diproses keluar dari Dry Port. Palang keluar Lane 3 terbuka otomatis."
-                ];
+                if (!empty($ctr_num) && (!$customsCleared || !$billingPaid)) {
+                    $reasons = [];
+                    if (!$customsCleared) $reasons[] = "Bea Cukai belum SPPB_CLEARED (Status: $customsStatus)";
+                    if (!$billingPaid) $reasons[] = "Faktur Billing ERP belum lunas (Status: $billingStatus)";
+                    $gate_alert = [
+                        'type' => 'error',
+                        'title' => 'Gate-Out Terkunci (Dual-Clearance Interlock)',
+                        'msg' => "Armada <strong>$plate</strong> ($ctr_num) ditahan di gerbang keluar: " . implode(' &amp; ', $reasons) . ". Selesaikan validasi di modul Bea Cukai dan/atau Billing terlebih dahulu."
+                    ];
+                } else {
+                    // Update trucks status to gate_out
+                    $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE id = ? OR license_plate = ?");
+                    $stmtUpT->execute([$truck_id, $plate]);
+
+                    // Update container status if present
+                    if (!empty($ctr_num)) {
+                        $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ?");
+                        $stmtUpC->execute([$ctr_num]);
+                        $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
+                    }
+
+                    // Log audit event
+                    $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_OUT', ?, 'Petugas Gate Outbound', ?, NOW())");
+                    $stmtLog->execute([$ctr_num ?: '-', "Rilis Gate Out armada $plate membawa kontainer $ctr_num. Validasi Pabean: SPPB Lolos, Billing: Lunas."]);
+
+                    get_live_twin_state($pdo, true);
+
+                    $gate_alert = [
+                        'type' => 'success',
+                        'title' => 'Rilis Gate Out Sukses — Barrier Gate Terbuka',
+                        'msg' => "Armada truk <strong>$plate</strong> dengan kontainer <strong>$ctr_num</strong> berhasil diproses keluar dari Dry Port. Palang keluar Lane 3 terbuka otomatis."
+                    ];
+                }
             } catch (Exception $e) {
-                $gate_alert = ['type' => 'info', 'title' => 'Gate Out Diproses', 'msg' => "Armada $plate telah tercatat keluar."];
+                $gate_alert = ['type' => 'error', 'title' => 'Gagal Rilis Gate Out', 'msg' => $e->getMessage()];
             }
         }
     } elseif ($_POST['gate_action'] === 'trigger_anpr_gate_in') {
@@ -77,24 +103,31 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     $stmtUp = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = 'Yard Blok A' WHERE id = ?");
                     $stmtUp->execute([$exTruck['id']]);
                 } else {
-                    $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, driver_name, company, status, job_type, destination, gate_in_time) VALUES (?, ?, ?, 'in_yard', 'drop_off', 'Yard Blok A', NOW())");
-                    $stmtIns->execute([$plate, $driver, $company]);
+                    $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, driver_name, company, container_number, target_block, status, job_type, destination, gate_in_time) VALUES (?, ?, ?, ?, 'A', 'in_yard', 'drop_off', 'Yard Blok A', NOW())");
+                    $stmtIns->execute([$plate, $driver, $company, $ctr_num ?: null]);
                 }
 
-                // 2. Update status kontainer
+                // 2. Update atau masukkan status kontainer & akrual biaya
                 if (!empty($ctr_num)) {
-                    $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = 'A', bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gate_in_time = NOW() WHERE container_number = ?");
-                    $stmtUpC->execute([$ctr_num]);
-                    $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
-                    accrue_billing($pdo, $ctr_num, 'L', 'Lift-Off & Gate-In Handling', 525000);
-                    accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage)', 275000);
-                    $pdo->prepare("UPDATE preadvice SET status = 'COMPLETED' WHERE container_number = ?")->execute([$ctr_num]);
+                    $stmtExC = $pdo->prepare("SELECT id FROM containers WHERE container_number = ? LIMIT 1");
+                    $stmtExC->execute([$ctr_num]);
+                    if ($stmtExC->fetchColumn()) {
+                        $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = COALESCE(block, 'A'), bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?");
+                        $stmtUpC->execute([$ctr_num]);
+                    } else {
+                        $stmtInC = $pdo->prepare("INSERT INTO containers (container_number, iso_code, size_type, cargo_type, owner_company, status, block, bay, `row`, tier, customs_status, gate_in_time) VALUES (?, '45G1', '40HC', 'general', ?, 'in_yard', 'A', 1, 1, 1, 'PENDING', NOW())");
+                        $stmtInC->execute([$ctr_num, $company]);
+                    }
+                    $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
+                    accrue_billing($pdo, $ctr_num, 'Lift-Off & Gate-In Handling', 'lolo_amount', 525000);
+                    accrue_billing($pdo, $ctr_num, 'Penumpukan Yard (Storage)', 'storage_amount', 275000);
                 }
 
                 // 3. Catat ke yard_events
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, 'HW-01 ANPR & OCR', ?, NOW())");
-                if (!empty($ctr_num)) { $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]); }
-                $stmtLog->execute([$ctr_num, "Deteksi loop induksi & ANPR $lane. Plat: $plate, Box: $ctr_num. Barrier gate terbuka otomatis."]);
+                $stmtLog->execute([$ctr_num ?: '-', "Deteksi loop induksi & ANPR $lane. Plat: $plate, Box: $ctr_num. Barrier gate terbuka otomatis."]);
+
+                get_live_twin_state($pdo, true);
 
                 $gate_alert = [
                     'type' => 'success',
@@ -102,7 +135,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     'msg' => "Sensor mendeteksi armada <strong>$plate</strong> melintasi induction loop. Kamera ANPR & OCR membaca nomor peti kemas <strong>$ctr_num</strong>. Palang gerbang masuk otomatis terangkat dan data armada tercatat <strong>in_yard</strong> di basis data!"
                 ];
             } catch (Exception $e) {
-                $gate_alert = ['type' => 'info', 'title' => 'Sensor ANPR Terpicu', 'msg' => "Deteksi armada $plate berhasil dieksekusi."];
+                $gate_alert = ['type' => 'error', 'title' => 'Gagal Proses ANPR', 'msg' => $e->getMessage()];
             }
         }
     } elseif ($_POST['gate_action'] === 'trigger_weighbridge') {
@@ -110,20 +143,30 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
         $ctr_num = strtoupper(trim($_POST['container_number'] ?? 'MSKU9821450'));
         $gross = floatval($_POST['gross_weight_kg'] ?? 32450.0);
         $tare = floatval($_POST['tare_weight_kg'] ?? 4200.0);
-        $net = $gross - $tare;
+        $net = max(0, $gross - $tare);
 
         if (isset($pdo)) {
             try {
+                if (!empty($ctr_num)) {
+                    $pdo->prepare("UPDATE containers SET gross_weight_kg = ? WHERE container_number = ?")->execute([$net > 0 ? $net : $gross, $ctr_num]);
+                    accrue_billing($pdo, $ctr_num, 'Penimbangan Jembatan Timbang 80T SOLAS VGM', 'lolo_amount', 75000);
+                }
+                if (!empty($plate)) {
+                    $pdo->prepare("UPDATE trucks SET weight_gross = ?, weight_tare = ? WHERE license_plate = ?")->execute([$gross, $tare, $plate]);
+                }
+
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
-                $stmtLog->execute([$ctr_num, "Penimbangan jembatan timbang Fangda 80T untuk $plate: Bruto {$gross} kg, Tara {$tare} kg, Netto {$net} kg. Status: SOLAS VGM Compliant."]);
+                $stmtLog->execute([$ctr_num ?: '-', "Penimbangan jembatan timbang Fangda 80T untuk $plate: Bruto {$gross} kg, Tara {$tare} kg, Netto {$net} kg. Status: SOLAS VGM Compliant."]);
+
+                get_live_twin_state($pdo, true);
 
                 $gate_alert = [
                     'type' => 'success',
                     'title' => "⚡ Sensor Jembatan Timbang 80T (HW-04) Terpicu",
-                    'msg' => "Sensor loadcell Fangda 80 Ton membaca bobot bruto: <strong>" . number_format($gross, 0) . " kg</strong> (Netto: <strong>" . number_format($net, 0) . " kg</strong>). Sertifikat digital <strong>SOLAS VGM Chapter VI</strong> berhasil diterbitkan dan dicatat ke audit log!"
+                    'msg' => "Sensor loadcell Fangda 80 Ton membaca bobot bruto: <strong>" . number_format($gross, 0) . " kg</strong> (Netto: <strong>" . number_format($net, 0) . " kg</strong>). Sertifikat digital <strong>SOLAS VGM Chapter VI</strong> berhasil diterbitkan, biaya VGM masuk Billing ERP!"
                 ];
             } catch (Exception $e) {
-                $gate_alert = ['type' => 'info', 'title' => 'Penimbangan Selesai', 'msg' => "Data timbangan untuk $plate berhasil dicatat."];
+                $gate_alert = ['type' => 'error', 'title' => 'Gagal Penimbangan', 'msg' => $e->getMessage()];
             }
         }
     } elseif ($_POST['gate_action'] === 'quick_gate_in') {
@@ -151,21 +194,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     $exC = $stmtCheckC->fetch(PDO::FETCH_ASSOC);
 
                     if ($exC) {
-                        $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, gate_in_time = NOW() WHERE container_number = ?");
-                        $stmtUpC->execute([$target_block, $ctr_num]);
-                        $pdo->prepare("UPDATE containers SET bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gross_weight_kg = ? WHERE container_number = ?")->execute([$net > 0 ? $net : $gross, $ctr_num]);
-                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
-                        accrue_billing($pdo, $ctr_num, 'L', 'Weighbridge VGM & Lift-Off Handling', 525000);
-                        accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage Blok ' . $target_block . ')', 275000);
+                        $stmtUpC = $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gross_weight_kg = ?, gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?");
+                        $stmtUpC->execute([$target_block, $net > 0 ? $net : $gross, $ctr_num]);
                     } else {
                         $type = ($gross > 20000) ? '40HC' : '20GP';
                         $customs = ($mission === 'drop_export') ? 'EXPORT_READY' : 'SPPB_CLEARED';
                         $stmtInsC = $pdo->prepare("INSERT INTO containers (container_number, size_type, status, block, bay, `row`, tier, iso_code, gross_weight_kg, customs_status, gate_in_time) VALUES (?, ?, 'in_yard', ?, 4, 2, 1, '45G1', ?, ?, NOW())");
-                        $stmtInsC->execute([$ctr_num, $type, $target_block, $gross, $customs]);
-                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
-                        accrue_billing($pdo, $ctr_num, 'L', 'Weighbridge VGM & Lift-Off Handling', 525000);
-                        accrue_billing($pdo, $ctr_num, 'S', 'Penumpukan Yard (Storage Blok ' . $target_block . ')', 275000);
+                        $stmtInsC->execute([$ctr_num, $type, $target_block, $net > 0 ? $net : $gross, $customs]);
                     }
+                    $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
+                    accrue_billing($pdo, $ctr_num, 'Weighbridge VGM & Lift-Off Handling', 'lolo_amount', 525000);
+                    accrue_billing($pdo, $ctr_num, 'Penumpukan Yard (Storage Blok ' . $target_block . ')', 'storage_amount', 275000);
                 }
 
                 // 3. Catat audit event ke yard_events (ANPR Gate-In & SOLAS VGM)
@@ -176,6 +215,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     $stmtLog2 = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
                     $stmtLog2->execute([$ctr_num, "SOLAS VGM Verified: Bruto " . number_format($gross, 0, ',', '.') . " kg, Tara " . number_format($tare, 0, ',', '.') . " kg, Netto " . number_format($net, 0, ',', '.') . " kg untuk $plate ke Blok $target_block."]);
                 }
+
+                get_live_twin_state($pdo, true);
 
                 $mission_labels = [
                     'drop_export' => 'Skenario 1: Drop-Off Ekspor (Laden In)',
@@ -192,7 +233,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     'msg' => "Armada <strong>$plate</strong> berhasil diproses masuk gerbang melalui <strong>$lane</strong>.<br>Kamera ANPR membaca plat nomor, jembatan timbang merekam bobot <strong>" . number_format($gross, 0, ',', '.') . " kg</strong> (SOLAS VGM Sah), dan tiket yard diterbitkan menuju <strong>Blok $target_block</strong>. Palang gerbang otomatis terangkat!"
                 ];
             } catch (Exception $e) {
-                $gate_alert = ['type' => 'info', 'title' => 'Gate-In Diproses', 'msg' => "Data armada $plate telah diperbarui ke sistem."];
+                $gate_alert = ['type' => 'error', 'title' => 'Gagal Gate-In', 'msg' => $e->getMessage()];
             }
         }
     } elseif ($_POST['gate_action'] === 'batch_gate_in') {
@@ -205,20 +246,28 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     $b_dest = "Yard Blok " . ($bt['target_block'] ?: 'B');
                     $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = ? WHERE id = ?")->execute([$b_dest, $bt['id']]);
                     if (!empty($bt['container_number'])) {
-                        $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gate_in_time = NOW() WHERE container_number = ?")->execute([$bt['target_block'] ?: 'B', $bt['container_number']]);
-                        $pdo->prepare("UPDATE preadvice SET status = 'IN_YARD' WHERE container_number = ? OR truck_plate = ?")->execute([$bt['container_number'], $bt['license_plate']]);
-                        accrue_billing($pdo, $bt['container_number'], 'L', 'Batch Gate-In & Lift-Off Handling', 525000);
-                        accrue_billing($pdo, $bt['container_number'], 'S', 'Penumpukan Yard (Storage)', 275000);
+                        $t_blk = $bt['target_block'] ?: 'B';
+                        $stmtExC = $pdo->prepare("SELECT id FROM containers WHERE container_number = ? LIMIT 1");
+                        $stmtExC->execute([$bt['container_number']]);
+                        if ($stmtExC->fetchColumn()) {
+                            $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, bay = COALESCE(bay, 1), `row` = COALESCE(`row`, 1), tier = COALESCE(tier, 1), gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?")->execute([$t_blk, $bt['container_number']]);
+                        } else {
+                            $pdo->prepare("INSERT INTO containers (container_number, size_type, status, block, bay, `row`, tier, iso_code, gross_weight_kg, customs_status, gate_in_time) VALUES (?, '40HC', 'in_yard', ?, 1, 1, 1, '45G1', 26000, 'SPPB_CLEARED', NOW())")->execute([$bt['container_number'], $t_blk]);
+                        }
+                        $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ? OR truck_plate = ?")->execute([$bt['container_number'], $bt['license_plate']]);
+                        accrue_billing($pdo, $bt['container_number'], 'Batch Gate-In & Lift-Off Handling', 'lolo_amount', 525000);
+                        accrue_billing($pdo, $bt['container_number'], 'Penumpukan Yard (Storage)', 'storage_amount', 275000);
                     }
                     $count++;
                 }
+                get_live_twin_state($pdo, true);
                 $gate_alert = [
                     'type' => 'success',
                     'title' => "⚡ Batch Gate-In Selesai ($count Armada)",
                     'msg' => "Seluruh $count armada antrean terjadwal (Pre-Advice Queue) telah berhasil diproses masuk ke terminal yard sekaligus!"
                 ];
             } catch (Exception $e) {
-                $gate_alert = ['type' => 'info', 'title' => 'Batch Gate-In', 'msg' => 'Proses batch selesai.'];
+                $gate_alert = ['type' => 'error', 'title' => 'Gagal Batch Gate-In', 'msg' => $e->getMessage()];
             }
         }
     } elseif ($_POST['gate_action'] === 'reset_demo_queue') {
@@ -236,13 +285,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                 foreach ($demo_queuing as $row) {
                     $stmtIns->execute($row);
                 }
+                get_live_twin_state($pdo, true);
                 $gate_alert = [
                     'type' => 'success',
                     'title' => 'Antrean Pra-Gate Berhasil Direset',
                     'msg' => '5 Skenario Truk Terjadwal (Pre-Advice Queue) siap diuji kembali!'
                 ];
             } catch (Exception $e) {
-                $gate_alert = ['type' => 'info', 'title' => 'Reset Antrean', 'msg' => 'Data antrean diperbarui.'];
+                $gate_alert = ['type' => 'error', 'title' => 'Gagal Reset Antrean', 'msg' => $e->getMessage()];
             }
         }
     }
@@ -287,8 +337,8 @@ try {
         $ctr_customs_map[$rc['container_number']] = $rc['customs_status'];
     }
 
-    // Ambil data status billing
-    $stmtB = $pdo->query("SELECT container_number, payment_status FROM billing_invoices");
+    // Ambil data status billing (PENDING jika ada minimal 1 faktur belum PAID)
+    $stmtB = $pdo->query("SELECT container_number, CASE WHEN SUM(CASE WHEN payment_status <> 'PAID' THEN 1 ELSE 0 END) > 0 THEN 'PENDING' ELSE 'PAID' END AS payment_status FROM billing_invoices GROUP BY container_number");
     while ($rb = $stmtB->fetch(PDO::FETCH_ASSOC)) {
         $ctr_billing_map[$rb['container_number']] = $rb['payment_status'];
     }
@@ -1495,7 +1545,7 @@ foreach ($hardware_list as $item) {
                                     
                                     <?php if ($isIn && !empty($t['container_number'])): 
                                         $cRef = $t['container_number'];
-                                        $cStat = $ctr_customs_map[$cRef] ?? 'SPPB_CLEARED';
+                                        $cStat = $ctr_customs_map[$cRef] ?? 'PENDING';
                                         $bStat = $ctr_billing_map[$cRef] ?? 'PAID';
                                         $isCleared = ($cStat === 'SPPB_CLEARED' && $bStat === 'PAID');
                                     ?>
