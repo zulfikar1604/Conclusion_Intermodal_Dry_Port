@@ -14,14 +14,19 @@ require_once __DIR__ . '/oauth_helper.php';
 global $pdo;
 ensure_integration_schema($pdo);
 
-// Accept JSON payload or POST
-$raw_input = file_get_contents('php://input');
+// Accept internal $_POST (when included by edge_simulator / demo_control) or JSON payload
+$raw_input = '';
 $data = [];
-if (!empty($raw_input)) {
-    $data = @json_decode($raw_input, true) ?: [];
-}
-if (empty($data)) {
+if (!empty($_POST['event_type'])) {
     $data = $_POST;
+} else {
+    $raw_input = file_get_contents('php://input');
+    if (!empty($raw_input)) {
+        $data = @json_decode($raw_input, true) ?: [];
+    }
+    if (empty($data)) {
+        $data = $_POST;
+    }
 }
 
 if (empty($data) || empty($data['event_type'])) {
@@ -67,7 +72,8 @@ if ($dup_resp !== false) {
     $prev['duplicate'] = true;
     $prev['message'] = 'Event sudah diproses sebelumnya (idempotent) - tidak diproses ulang.';
     echo json_encode($prev, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
-    exit;
+    if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'ingest_event.php') exit;
+    return;
 }
 
 // Event selain EQUIPMENT_MOVE wajib membawa identitas dari sensor (tidak ada nilai default/dummy)
@@ -138,6 +144,43 @@ try {
         'token_jti'       => $token_info['jti']
     ];
 
+    // =========================================================================
+    // 0B. SURGE RATE-LIMITER & BCP STORE-AND-FORWARD FAILOVER GUARD
+    // =========================================================================
+    $is_replay = !empty($data['bcp_replay']);
+    $bcp_state = cidp_get_bcp_state($pdo);
+    $rate_limit_max = isset($data['rate_limit_max']) ? max(1, (int)$data['rate_limit_max']) : 20;
+    $rate_check = cidp_check_rate_limit($token_info['client_id'], $rate_limit_max, 5, $is_replay);
+
+    if (!$is_replay && (!empty($data['simulate_surge']) || !$rate_check['allowed'] || !empty($bcp_state['failover_active']))) {
+        $reason_code = !empty($bcp_state['failover_active']) ? 'BCP_EDGE_BUFFER' : 'SURGE_BACKPRESSURE';
+        $buf_reason = !empty($bcp_state['failover_active'])
+            ? "[BCP_EDGE_BUFFER] Mode Kontingensi aktif ({$bcp_state['mode']}): event {$event_type} disimpan aman ke Store-and-Forward lokal (RPO=0)."
+            : "[SURGE_BACKPRESSURE] Lonjakan trafik ({$rate_check['count']}/{$rate_check['limit']} req/5dtk) untuk {$token_info['client_id']}: dialihkan aman ke Edge Buffer (Zero Data Loss).";
+        dlq_push($pdo, $event_id, $event_type, $source_device, $buf_reason, $data, 'BUFFERED');
+        http_response_code(202);
+        echo json_encode([
+            'success' => true,
+            'buffered' => true,
+            'reason_code' => $reason_code,
+            'event_id' => $event_id,
+            'event_type' => $event_type,
+            'source_device' => $source_device,
+            'oauth_verified' => $oauth_verified,
+            'rate_limit' => $rate_check,
+            'bcp_mode' => $bcp_state['mode'],
+            'routed_to' => 'EDGE_BACKPRESSURE_BUFFER',
+            'message' => $buf_reason,
+            'tri_flow' => [
+                'physical' => 'Operasi lapangan tetap berjalan tanpa henti (Non-Blocking Gate/Yard)',
+                'information' => "Payload diamankan ke Edge Store-and-Forward Buffer ({$reason_code})",
+                'financial' => 'Tagihan tidak hilang; akan tersinkron otomatis saat buffer di-flush (RPO=0)'
+            ]
+        ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (basename($_SERVER['SCRIPT_FILENAME'] ?? '') === 'ingest_event.php') exit;
+        return;
+    }
+
     $pdo->beginTransaction();
 
     // CONTRACT-FIRST: validasi identitas sebelum menyentuh data operasional
@@ -181,23 +224,88 @@ try {
             if ($plate === '' && $rfid === '' && $code === '') {
                 throw new IngestRejection('Sensor gate tidak mengirim identitas (plat / RFID / kode pre-gate).');
             }
-            if ($container_no !== '' && !iso6346_valid($container_no)) {
-                throw new IngestRejection("Check digit ISO 6346 tidak valid untuk kontainer {$container_no}.");
-            }
 
-            $q = $pdo->prepare("SELECT * FROM preadvice WHERE status IN ('SCHEDULED','ARRIVED')
+            $q = $pdo->prepare("SELECT * FROM preadvice WHERE status IN ('SCHEDULED','HOLD_ANOMALY','ARRIVED','REJECTED')
                 AND ((? <> '' AND pre_gate_code = ?) OR (? <> '' AND truck_plate = ?) OR (? <> '' AND rfid_tag = ?))
-                ORDER BY (status = 'SCHEDULED') DESC, id ASC LIMIT 1");
+                ORDER BY (status IN ('SCHEDULED','HOLD_ANOMALY')) DESC, id ASC LIMIT 1");
             $q->execute([$code, $code, $plate, $plate, $rfid, $rfid]);
             $pre = $q->fetch(PDO::FETCH_ASSOC);
             if (!$pre) {
-                throw new IngestRejection("Tidak ada pre-advice/booking untuk truk " . ($plate ?: $rfid ?: $code) . " - akses gate ditolak (unregistered).");
+                $catMeta = cidp_get_anomaly_meta('UNREGISTERED_TRUCK_REJECT') ?: [];
+                throw new IngestRejection(
+                    "Tidak ada pre-advice/booking untuk truk " . ($plate ?: $rfid ?: $code) . " - akses gate ditolak (unregistered).",
+                    array_merge($catMeta, [
+                        'anomaly_code'     => 'UNREGISTERED_TRUCK_REJECT',
+                        'truck_plate'      => $plate ?: 'UNKNOWN',
+                        'container_number' => $container_no ?: 'UNKNOWN',
+                        'interlock_state'  => 'BARRIER_GATE_LOCKED_RED'
+                    ])
+                );
+            }
+            if ($pre['status'] === 'REJECTED') {
+                throw new IngestRejection(
+                    "Truk {$pre['truck_plate']} ({$pre['pre_gate_code']}) telah ditolak & diperintahkan putar balik (BA: " . ($pre['ba_number'] ?: '-') . ").",
+                    ['pre_gate_code' => $pre['pre_gate_code'], 'anomaly_code' => $pre['anomaly_code'] ?: 'REJECTED', 'truck_plate' => $pre['truck_plate'], 'container_number' => $pre['container_number']]
+                );
             }
             if ($pre['status'] === 'ARRIVED') {
                 throw new IngestRejection("Truk {$pre['truck_plate']} sudah tercatat masuk (pre-gate {$pre['pre_gate_code']}).");
             }
+
+            // Deteksi Anomali Gate In dari data Pre-Advice / Sensor Fisik (sebelum palang dibuka)
+            $isResolved = (($pre['resolution_status'] ?? 'NONE') === 'OVERRIDDEN_APPROVED');
+            if (!$isResolved && !empty($pre['anomaly_code']) && in_array($pre['anomaly_code'], ['DOC_DO_EXPIRED', 'CONTAINER_MISMATCH', 'SEAL_TAMPERED', 'OCR_CHECKDIGIT_ERROR'], true)) {
+                $catMeta = cidp_get_anomaly_meta($pre['anomaly_code']) ?: [];
+                $anomMeta = array_merge($catMeta, [
+                    'pre_gate_code'        => $pre['pre_gate_code'],
+                    'anomaly_code'         => $pre['anomaly_code'],
+                    'anomaly_title'        => $pre['anomaly_title'] ?: ($catMeta['anomaly_title'] ?? $pre['anomaly_code']),
+                    'anomaly_stage'        => 'GATE_IN',
+                    'anomaly_notes'        => $pre['anomaly_notes'] ?: ($catMeta['anomaly_notes'] ?? ''),
+                    'truck_plate'          => $pre['truck_plate'],
+                    'container_number'     => $pre['container_number'],
+                    'actual_container_ocr' => $pre['actual_container_ocr'] ?: $container_no,
+                    'seal_number'          => $pre['seal_number'],
+                    'actual_seal_ocr'      => $pre['actual_seal_ocr'],
+                    'driver_name'          => $pre['driver_name'],
+                    'company'              => $pre['company'],
+                    'owner_company'        => $pre['owner_company'],
+                    'do_number'            => $pre['do_number'],
+                    'interlock_state'      => 'BARRIER_GATE_LOCKED_RED'
+                ]);
+                throw new IngestRejection(
+                    "[INTERLOCK GATE IN — {$pre['anomaly_code']}] {$anomMeta['anomaly_title']}: {$anomMeta['anomaly_notes']}",
+                    $anomMeta
+                );
+            }
+
+            if ($container_no !== '' && !iso6346_valid($container_no)) {
+                $catMeta = cidp_get_anomaly_meta('OCR_CHECKDIGIT_ERROR') ?: [];
+                throw new IngestRejection(
+                    "Check digit ISO 6346 tidak valid untuk kontainer {$container_no}.",
+                    array_merge($catMeta, [
+                        'pre_gate_code'        => $pre['pre_gate_code'],
+                        'anomaly_code'         => 'OCR_CHECKDIGIT_ERROR',
+                        'truck_plate'          => $pre['truck_plate'],
+                        'container_number'     => $pre['container_number'],
+                        'actual_container_ocr' => $container_no,
+                        'interlock_state'      => 'BARRIER_GATE_LOCKED_RED'
+                    ])
+                );
+            }
             if ($container_no !== '' && $container_no !== $pre['container_number']) {
-                throw new IngestRejection("Kontainer {$container_no} tidak sesuai dengan booking ({$pre['container_number']}).");
+                $catMeta = cidp_get_anomaly_meta('CONTAINER_MISMATCH') ?: [];
+                throw new IngestRejection(
+                    "Kontainer fisik OCR ({$container_no}) tidak sesuai dengan dokumen booking Pre-Advice ({$pre['container_number']}).",
+                    array_merge($catMeta, [
+                        'pre_gate_code'        => $pre['pre_gate_code'],
+                        'anomaly_code'         => 'CONTAINER_MISMATCH',
+                        'truck_plate'          => $pre['truck_plate'],
+                        'container_number'     => $pre['container_number'],
+                        'actual_container_ocr' => $container_no,
+                        'interlock_state'      => 'BARRIER_GATE_LOCKED_RED'
+                    ])
+                );
             }
             $plate = $pre['truck_plate'];
             $container_no = $pre['container_number'];
@@ -245,6 +353,40 @@ try {
             $container_no = $p['container_number'] ?? '';
             $weight_gross = (float)($p['weight_gross'] ?? 34850.0);
             $weigh_fee = 75000.0;
+
+            // Cek apakah ada anomali selisih berat SOLAS VGM (> 5%) atau Overload (> 35 Ton) yang belum di-override
+            $paWb = $pdo->prepare("SELECT * FROM preadvice WHERE container_number = ? OR (truck_plate = ? AND ? <> '') ORDER BY id DESC LIMIT 1");
+            $paWb->execute([$container_no, $plate, $plate]);
+            $preWb = $paWb->fetch(PDO::FETCH_ASSOC);
+            if ($preWb) {
+                $isWbResolved = (($preWb['resolution_status'] ?? 'NONE') === 'OVERRIDDEN_APPROVED');
+                if (!$isWbResolved && ($preWb['anomaly_code'] ?? '') === 'VGM_OVERWEIGHT') {
+                    $weight_gross = (float)($preWb['actual_weight_kg'] ?: 39250.0);
+                    $declW = (float)($preWb['declared_weight_kg'] ?: 26000.0);
+                    $diffPct = round((($weight_gross - $declW) / max(1.0, $declW)) * 100, 1);
+                    $catMeta = cidp_get_anomaly_meta('VGM_OVERWEIGHT') ?: [];
+                    $anomMeta = array_merge($catMeta, [
+                        'pre_gate_code'      => $preWb['pre_gate_code'],
+                        'anomaly_code'       => 'VGM_OVERWEIGHT',
+                        'anomaly_title'      => $preWb['anomaly_title'] ?: ($catMeta['anomaly_title'] ?? 'Selisih Berat Timbangan SOLAS VGM > 5%'),
+                        'anomaly_stage'      => 'WEIGHBRIDGE',
+                        'anomaly_notes'      => $preWb['anomaly_notes'] ?: "Berat aktual Jembatan Timbang 80T tercatat " . number_format($weight_gross, 0, ',', '.') . " kg vs deklarasi manifest " . number_format($declW, 0, ',', '.') . " kg (Selisih +{$diffPct}%).",
+                        'truck_plate'        => $preWb['truck_plate'] ?: $plate,
+                        'container_number'   => $container_no,
+                        'declared_weight_kg' => $declW,
+                        'actual_weight_kg'   => $weight_gross,
+                        'discrepancy_pct'    => $diffPct,
+                        'driver_name'        => $preWb['driver_name'],
+                        'company'            => $preWb['company'],
+                        'owner_company'      => $preWb['owner_company'],
+                        'interlock_state'    => 'WEIGHBRIDGE_HOLD_RS02_LOCKED'
+                    ]);
+                    throw new IngestRejection(
+                        "[INTERLOCK TIMBANGAN 80T — VGM_OVERWEIGHT] Berat aktual " . number_format($weight_gross, 0, ',', '.') . " kg melampaui deklarasi B/L " . number_format($declW, 0, ',', '.') . " kg (+{$diffPct}% > batas SOLAS ±5%). Work Order Reach Stacker RS-02 diblokir!",
+                        $anomMeta
+                    );
+                }
+            }
 
             $stmt = $pdo->prepare("UPDATE trucks SET weight_gross = ?, status = 'in_yard' WHERE license_plate = ?");
             $stmt->execute([$weight_gross, $plate]);
@@ -357,6 +499,31 @@ try {
             $status = $p['customs_status'] ?? 'SPPB_CLEARED';
             $sppb_no = $p['sppb_number'] ?? ('SPPB-' . date('Ymd') . '/KPU.01/2026');
 
+            // Cek apakah ada anomali ketidakcocokan dokumen pabean BC 2.3 / HS Code yang belum diselesaikan
+            $paCust = $pdo->prepare("SELECT * FROM preadvice WHERE container_number = ? ORDER BY id DESC LIMIT 1");
+            $paCust->execute([$container_no]);
+            $preCust = $paCust->fetch(PDO::FETCH_ASSOC);
+            if ($preCust && ($preCust['anomaly_code'] ?? '') === 'CUSTOMS_DOC_MISMATCH' && (($preCust['resolution_status'] ?? 'NONE') !== 'OVERRIDDEN_APPROVED') && $status === 'SPPB_CLEARED' && empty($p['force_sppb_override'])) {
+                $catMeta = cidp_get_anomaly_meta('CUSTOMS_DOC_MISMATCH') ?: [];
+                $anomMeta = array_merge($catMeta, [
+                    'pre_gate_code'    => $preCust['pre_gate_code'],
+                    'anomaly_code'     => 'CUSTOMS_DOC_MISMATCH',
+                    'anomaly_title'    => $preCust['anomaly_title'] ?: ($catMeta['anomaly_title'] ?? 'Dokumen BC 2.3 Tidak Sinkron CEISA 4.0'),
+                    'anomaly_stage'    => 'CUSTOMS',
+                    'anomaly_notes'    => $preCust['anomaly_notes'] ?: ($catMeta['anomaly_notes'] ?? ''),
+                    'truck_plate'      => $preCust['truck_plate'],
+                    'container_number' => $container_no,
+                    'driver_name'      => $preCust['driver_name'],
+                    'company'          => $preCust['company'],
+                    'owner_company'    => $preCust['owner_company'],
+                    'interlock_state'  => 'CUSTOMS_RED_LINE_LOCKED'
+                ]);
+                throw new IngestRejection(
+                    "[INTERLOCK CEISA 4.0 — CUSTOMS_DOC_MISMATCH] {$anomMeta['anomaly_title']}: {$anomMeta['anomaly_notes']}",
+                    $anomMeta
+                );
+            }
+
             $stmt = $pdo->prepare("UPDATE containers SET customs_status = ? WHERE container_number = ?");
             $stmt->execute([$status, $container_no]);
 
@@ -415,7 +582,20 @@ try {
                 throw new IngestRejection("Slot tujuan {$tb}-{$tbay}-{$trow}-{$ttier} sudah terisi oleh {$o}.");
             }
             $pdo->prepare("UPDATE containers SET block = ?, bay = ?, row = ?, tier = ? WHERE container_number = ?")->execute([$tb, $tbay, $trow, $ttier, $container_no]);
-            $pdo->prepare("UPDATE equipment SET status = 'idle', current_container = NULL, last_block = ?, last_updated = NOW() WHERE equipment_id = ?")->execute([$tb, $eq_id]);
+            $blkCenterMap = [
+                'A' => [270.0, 250.0, 'RTG-02'], 'B' => [490.0, 250.0, 'RTG-03'],
+                'C' => [270.0, 470.0, 'RTG-04'], 'D' => [490.0, 470.0, 'RTG-05'],
+                'E' => [770.0, 470.0, null],     'REEFER' => [770.0, 250.0, null]
+            ];
+            $bcInfo = $blkCenterMap[$tb] ?? [350.0, 300.0, null];
+            $relX = $bcInfo[0] + ((((int)$tbay - 1) % 3) - 1) * 26.0;
+            $relY = $bcInfo[1] + ((((int)$trow - 1) % 4) - 1.5) * 16.0;
+            $pdo->prepare("UPDATE equipment SET status = 'idle', current_container = NULL, last_block = ?, gps_x = ?, gps_y = ?, last_updated = NOW() WHERE equipment_id = ?")
+                ->execute([$tb, $relX, $relY, $eq_id]);
+            if (!empty($bcInfo[2]) && $bcInfo[2] !== $eq_id) {
+                $pdo->prepare("UPDATE equipment SET status = 'operating', last_block = ?, gps_x = ?, gps_y = ?, last_updated = NOW() WHERE equipment_id = ?")
+                    ->execute([$tb, $relX, $bcInfo[1], $bcInfo[2]]);
+            }
             $reloc_fee = 200000.0;
             $inv_no = accrue_billing($pdo, $container_no, 'Relokasi / Shifting Yard', 'lolo_amount', $reloc_fee);
             $from = "{$cr['block']}-{$cr['bay']}-{$cr['row']}-{$cr['tier']}";
@@ -443,9 +623,15 @@ try {
             $job_no = 'CFS-' . date('ymd') . '-' . strtoupper(substr(uniqid(), -4));
             $pdo->prepare("INSERT INTO cfs_jobs (job_number, job_type, container_number, dock_ramp, shipper_consignee, bl_number, customs_status, status, operator_name, start_time) VALUES (?, 'STRIPPING', ?, ?, ?, ?, ?, 'IN_PROGRESS', ?, NOW())")
                 ->execute([$job_no, $container_no, $ramp, $p['consignee'] ?? $crow['owner_company'], $p['bl_number'] ?? null, $crow['customs_status'], $p['operator_name'] ?? null]);
-            $pdo->prepare("UPDATE containers SET block = 'CFS', bay = NULL, row = NULL, tier = NULL WHERE container_number = ?")->execute([$container_no]);
-            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes, billable_amount) VALUES ('CFS_STRIP_START', ?, 'YARD', 'CFS', ?, 0)")
-                ->execute([$container_no, "Mulai stripping di rampa {$ramp} (job {$job_no})"]);
+            $pdo->prepare("UPDATE containers SET block = 'CFS', bay = ?, row = NULL, tier = NULL WHERE container_number = ?")->execute([$ramp, $container_no]);
+            $rampYMap = ['D1' => 218.0, 'D2' => 262.0, 'D3' => 308.0, 'D4' => 352.0, 'D5' => 396.0];
+            $ry = $rampYMap[$ramp] ?? 308.0;
+            $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'CFS', gps_x = 148.0, gps_y = ?, last_updated = NOW() WHERE equipment_id = 'FL-03'")
+                ->execute([$container_no, $ry]);
+            $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'CFS', gps_x = 172.0, gps_y = ?, last_updated = NOW() WHERE equipment_id = 'CDP-TT-01'")
+                ->execute([$container_no, $ry]);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, to_block, notes, billable_amount) VALUES ('CFS_STRIP_START', ?, 'FL-03', 'YARD', 'CFS', ?, 0)")
+                ->execute([$container_no, "Mulai stripping di rampa {$ramp} (job {$job_no}, Forklift FL-03 & Shuttle CDP-TT-01)"]);
             $tri_flow_log['physical'] = "Kontainer {$container_no} didorong ke rampa {$ramp}; pintu dibuka, bongkar dimulai";
             $tri_flow_log['information'] = "Job CFS {$job_no} dibuat otomatis dari data kontainer (tanpa input ulang)";
             $tri_flow_log['financial'] = "Argo & tarif CFS akan diakrual saat stripping selesai";
@@ -474,8 +660,21 @@ try {
                 ->execute([$job['id'], $sscc, $container_no, $p['commodity_name'] ?? null, $p['consignee'] ?? null, $cat, (int)($p['carton_count'] ?? 0), $kg, (float)($p['cbm'] ?? 0), $p['rack_location'] ?? null, $cust]);
             $pdo->prepare("UPDATE cfs_jobs SET total_packages = COALESCE(total_packages,0) + ?, total_weight_kg = COALESCE(total_weight_kg,0) + ?, total_cbm = COALESCE(total_cbm,0) + ? WHERE id = ?")
                 ->execute([(int)($p['carton_count'] ?? 0), $kg, (float)($p['cbm'] ?? 0), $job['id']]);
-            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes, billable_amount) VALUES ('CFS_PALLET_IN', ?, ?, 0)")
-                ->execute([$container_no, "Palet SSCC {$sscc} (" . number_format($kg, 0) . " kg) masuk rak " . ($p['rack_location'] ?? '-')]);
+            $rackLoc = strtoupper(trim($p['rack_location'] ?? 'AISLE-B-02-L1'));
+            $aisleCoords = [
+                'AISLE-A' => [75.0, 232.0], 'AISLE-B' => [115.0, 232.0],
+                'AISLE-C' => [75.0, 308.0], 'AISLE-D' => [115.0, 308.0],
+                'AISLE-E' => [75.0, 384.0], 'AISLE-F' => [115.0, 384.0]
+            ];
+            $rkPrefix = substr($rackLoc, 0, 7);
+            $rkXY = $aisleCoords[$rkPrefix] ?? [92.0, 308.0];
+            $shortPal = 'SSCC-' . substr($sscc, -4);
+            $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'CFS', gps_x = 136.0, gps_y = 236.0, last_updated = NOW() WHERE equipment_id = 'FL-01'")
+                ->execute([$shortPal]);
+            $pdo->prepare("UPDATE equipment SET status = 'carrying', current_container = ?, last_block = 'CFS', gps_x = ?, gps_y = ?, last_updated = NOW() WHERE equipment_id = 'FL-04'")
+                ->execute([$shortPal, $rkXY[0], $rkXY[1]]);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('CFS_PALLET_IN', ?, 'FL-04', ?, 0)")
+                ->execute([$container_no, "Palet SSCC {$sscc} (" . number_format($kg, 0) . " kg) ditimbang FL-01 & disusun FL-04 ke rak " . ($p['rack_location'] ?? '-')]);
             $tri_flow_log['physical'] = "Palet {$sscc} ditimbang (" . number_format($kg, 0) . " kg) dan ditempatkan di rak " . ($p['rack_location'] ?? '-');
             $tri_flow_log['information'] = "Scanner GS1-128 membaca SSCC-18 valid; stok cfs_pallets & job {$job['job_number']} bertambah otomatis";
             $tri_flow_log['financial'] = "Palet tercatat untuk penagihan CFS saat job selesai (status pabean: {$cust})";
@@ -496,6 +695,7 @@ try {
             if ($pallets === 0) throw new IngestRejection("Job {$job['job_number']} belum memiliki palet ter-scan; tidak dapat diselesaikan.");
             $pdo->prepare("UPDATE cfs_jobs SET status = 'COMPLETED', completed_time = NOW() WHERE id = ?")->execute([$job['id']]);
             $pdo->prepare("UPDATE containers SET cargo_type = 'empty' WHERE container_number = ?")->execute([$container_no]);
+            $pdo->exec("UPDATE equipment SET status = 'idle', current_container = NULL, last_updated = NOW() WHERE equipment_id IN ('FL-01','FL-03','FL-04','CDP-TT-01')");
             $cfs_fee = 450000.0 + 25000.0 * $pallets;
             $inv_no = accrue_billing($pdo, $container_no, 'Jasa CFS Stripping & Penumpukan Palet', 'cfs_amount', $cfs_fee);
             $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes, billable_amount) VALUES ('CFS_STRIP_DONE', ?, ?, ?)")
@@ -519,8 +719,10 @@ try {
             if ($pal['customs_status'] !== 'CLEARED') throw new IngestRejection("Palet {$sscc} belum CLEARED bea cukai ({$pal['customs_status']}); keluar gudang ditolak (interlock).");
             $pdo->prepare("UPDATE cfs_pallets SET status = 'DISPATCHED' WHERE id = ?")->execute([$pal['id']]);
             $container_no = $pal['container_origin'];
-            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes, billable_amount) VALUES ('CFS_PALLET_OUT', ?, ?, 0)")
-                ->execute([$container_no, "Palet {$sscc} dikeluarkan dari rak CFS ke truk pengambil"]);
+            $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'CFS', gps_x = 148.0, gps_y = 392.0, last_updated = NOW() WHERE equipment_id = 'FL-04'")
+                ->execute(['OUT-' . substr($sscc, -4)]);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('CFS_PALLET_OUT', ?, 'FL-04', ?, 0)")
+                ->execute([$container_no, "Palet {$sscc} dikeluarkan FL-04 dari rak CFS ke rampa distribusi"]);
             $tri_flow_log['physical'] = "Palet {$sscc} diangkat forklift keluar rak menuju truk";
             $tri_flow_log['information'] = "Stok CFS berkurang; surat jalan terbit otomatis";
             $tri_flow_log['financial'] = "Tidak ada biaya tambahan (dasar tagihan sudah diakrual saat stripping)";
@@ -535,17 +737,20 @@ try {
             $result = strtoupper($p['result'] ?? '');
             if (!in_array($result, ['ANOMALY', 'CLEAR'], true)) throw new IngestRejection("Hasil inspeksi harus 'ANOMALY' atau 'CLEAR'.");
             if ($result === 'ANOMALY') {
-                $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK' WHERE container_number = ?")->execute([$container_no]);
+                $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK', block = 'E' WHERE container_number = ?")->execute([$container_no]);
                 $pdo->prepare("UPDATE cfs_jobs SET status = 'HOLD', customs_status = 'RED_LANE_CHECK' WHERE container_number = ? AND status IN ('IN_PROGRESS','PENDING')")->execute([$container_no]);
                 $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'RED_LANE', status = 'HOLD' WHERE container_origin = ? AND status = 'IN_RACK'")->execute([$container_no]);
-                $note = "Inspeksi {$itype}: ANOMALI - kontainer ditahan (jalur merah)";
-                $tri_flow_log['physical'] = "Kontainer {$container_no} dialihkan ke area pemeriksaan fisik jalur merah";
+                $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'E', gps_x = 805.0, gps_y = 468.0, last_updated = NOW() WHERE equipment_id = 'FL-02'")->execute([$container_no]);
+                $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'E', gps_x = 695.0, gps_y = 470.0, last_updated = NOW() WHERE equipment_id = 'CDP-TT-02'")->execute([$container_no]);
+                $note = "Inspeksi {$itype}: ANOMALI - kontainer ditahan (jalur merah Behandle Blok E)";
+                $tri_flow_log['physical'] = "Kontainer {$container_no} dialihkan CDP-TT-02 & FL-02 ke area pemeriksaan fisik jalur merah Blok E";
                 $tri_flow_log['information'] = "Status pabean RED_LANE_CHECK; job & palet CFS terkait otomatis HOLD";
                 $tri_flow_log['financial'] = "Gate-out terkunci; biaya penumpukan tetap berjalan selama HOLD";
             } else {
                 $pdo->prepare("UPDATE containers SET customs_status = 'SPPB_PENDING' WHERE container_number = ? AND customs_status IN ('RED_LANE_CHECK','AWAITING_CLEARANCE')")->execute([$container_no]);
                 $pdo->prepare("UPDATE cfs_jobs SET status = 'IN_PROGRESS', customs_status = 'SPPB_PENDING' WHERE container_number = ? AND status = 'HOLD'")->execute([$container_no]);
                 $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'HOLD', status = 'IN_RACK' WHERE container_origin = ? AND status = 'HOLD'")->execute([$container_no]);
+                $pdo->exec("UPDATE equipment SET status = 'idle', current_container = NULL, last_updated = NOW() WHERE equipment_id IN ('FL-02','CDP-TT-02')");
                 $note = "Inspeksi {$itype}: BERSIH - menunggu SPPB";
                 $tri_flow_log['physical'] = "Pemeriksaan selesai, kontainer {$container_no} dikembalikan ke posisi";
                 $tri_flow_log['information'] = "Hasil inspeksi bersih; status SPPB_PENDING (menunggu webhook CEISA)";
@@ -572,7 +777,8 @@ try {
                 if ($socket === '' || $set_t === null) throw new IngestRejection('Plug-in reefer wajib membawa socket_id dan set_temp_c.');
                 $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, power_kw, status) VALUES (?,?,?,?,?, 'NORMAL')")
                     ->execute([$container_no, $socket, $set_t, $set_t, 0]);
-                $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes, billable_amount) VALUES ('REEFER_PLUGIN', ?, ?, 0)")
+                $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = NULL, last_block = 'REEFER', gps_x = 755.0, gps_y = 225.0, last_updated = NOW() WHERE equipment_id = 'RS-03'")->execute();
+                $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('REEFER_PLUGIN', ?, 'RS-03', ?, 0)")
                     ->execute([$container_no, "Reefer terhubung ke soket {$socket}, set point {$set_t} C"]);
                 $tri_flow_log['physical'] = "Kabel daya 380V reefer dicolok ke soket {$socket}";
                 $tri_flow_log['information'] = "Pemantauan suhu aktif; set point {$set_t} C tercatat";
@@ -625,9 +831,12 @@ try {
             }
             $pdo->prepare("UPDATE trains SET loaded_wagons = loaded_wagons + 1, status = 'loading' WHERE id = ?")->execute([$tr['id']]);
             $pdo->prepare("UPDATE containers SET status = 'on_rail', block = 'RAIL', bay = ?, row = NULL, tier = NULL WHERE container_number = ?")->execute([$p['wagon_no'] ?? null, $container_no]);
+            $rtgX = 480.0 + ((int)crc32($container_no) % 5) * 45.0;
+            $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = NULL, last_block = 'RAIL', gps_x = ?, gps_y = 625.0, last_updated = NOW() WHERE equipment_id = 'RTG-01'")->execute([$rtgX]);
+            $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = NULL, last_block = 'RAIL', gps_x = ?, gps_y = 585.0, last_updated = NOW() WHERE equipment_id = 'CDP-TT-01'")->execute([$rtgX - 25.0]);
             $inv_no = accrue_billing($pdo, $container_no, 'Lift-On Gerbong KA Intermodal', 'lolo_amount', 325000.0);
-            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes, billable_amount) VALUES ('RAIL_LOADING', ?, 'YARD', 'RAIL', ?, 325000)")
-                ->execute([$container_no, "Dimuat ke kereta {$train_code}, gerbong " . ($p['wagon_no'] ?? '-')]);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, to_block, notes, billable_amount) VALUES ('RAIL_LOADING', ?, 'RTG-01', 'YARD', 'RAIL', ?, 325000)")
+                ->execute([$container_no, "Dimuat oleh RTG-01 & CDP-TT-01 ke kereta {$train_code}, gerbong " . ($p['wagon_no'] ?? '-')]);
             $tri_flow_log['physical'] = "Kontainer {$container_no} dimuat ke gerbong " . ($p['wagon_no'] ?? '-') . " kereta {$train_code}";
             $tri_flow_log['information'] = "Manifest kereta {$train_code} diperbarui otomatis; slot yard dilepas";
             $tri_flow_log['financial'] = "Lift-on KA Rp 325.000 terakrual pada {$inv_no}";
@@ -638,13 +847,42 @@ try {
         // =====================================================================
         case 'TRUCK_GATE_OUT':
             $container_no = $p['container_number'];
-            $gs = $pdo->prepare("SELECT customs_status, status FROM containers WHERE container_number = ?");
+            $gs = $pdo->prepare("SELECT customs_status, status, owner_company FROM containers WHERE container_number = ?");
             $gs->execute([$container_no]);
             $crow = $gs->fetch(PDO::FETCH_ASSOC);
-            if ($crow['customs_status'] !== 'SPPB_CLEARED') throw new IngestRejection("Gate-out ditolak: {$container_no} belum SPPB_CLEARED ({$crow['customs_status']}).");
-            $pend = $pdo->prepare("SELECT COUNT(*) FROM billing_invoices WHERE container_number = ? AND payment_status <> 'PAID'");
+            $pend = $pdo->prepare("SELECT COUNT(*), COALESCE(SUM(total_amount),0) FROM billing_invoices WHERE container_number = ? AND payment_status <> 'PAID'");
             $pend->execute([$container_no]);
-            if ($pend->fetchColumn() > 0) throw new IngestRejection("Gate-out ditolak: masih ada tagihan belum lunas untuk {$container_no}.");
+            [$unpaidCnt, $unpaidSum] = $pend->fetch(PDO::FETCH_NUM);
+
+            if ($crow['customs_status'] !== 'SPPB_CLEARED' || (int)$unpaidCnt > 0) {
+                $catMeta = cidp_get_anomaly_meta('GATE_OUT_INTERLOCK_BLOCK') ?: [];
+                $paGo = $pdo->prepare("SELECT pre_gate_code, truck_plate, driver_name, company FROM preadvice WHERE container_number = ? ORDER BY id DESC LIMIT 1");
+                $paGo->execute([$container_no]);
+                $preGo = $paGo->fetch(PDO::FETCH_ASSOC) ?: [];
+                $reasons = [];
+                if ($crow['customs_status'] !== 'SPPB_CLEARED') $reasons[] = "status pabean masih {$crow['customs_status']} (belum SPPB_CLEARED)";
+                if ((int)$unpaidCnt > 0) $reasons[] = "terdapat {$unpaidCnt} faktur belum lunas senilai Rp " . number_format((float)$unpaidSum, 0, ',', '.');
+                $reasonStr = implode(' & ', $reasons);
+
+                $anomMeta = array_merge($catMeta, [
+                    'pre_gate_code'    => $preGo['pre_gate_code'] ?? null,
+                    'anomaly_code'     => 'GATE_OUT_INTERLOCK_BLOCK',
+                    'anomaly_title'    => 'Interlock Gate-Out Terkunci: ' . ($crow['customs_status'] !== 'SPPB_CLEARED' ? 'SPPB Belum Rilis' : 'Faktur Belum Lunas'),
+                    'anomaly_stage'    => 'GATE_OUT',
+                    'anomaly_notes'    => "Palang Gate-Out menolak terbuka untuk {$container_no} karena {$reasonStr}.",
+                    'truck_plate'      => $preGo['truck_plate'] ?? ($p['truck_plate'] ?? ''),
+                    'container_number' => $container_no,
+                    'driver_name'      => $preGo['driver_name'] ?? '',
+                    'company'          => $preGo['company'] ?? '',
+                    'owner_company'    => $crow['owner_company'] ?? '',
+                    'unpaid_invoices'  => (int)$unpaidCnt,
+                    'unpaid_amount_idr'=> (float)$unpaidSum,
+                    'customs_status'   => $crow['customs_status'],
+                    'interlock_state'  => 'GATE_OUT_BARRIER_LOCKED_RED'
+                ]);
+                throw new IngestRejection("[INTERLOCK GATE-OUT] Gate-out ditolak untuk {$container_no}: {$reasonStr}.", $anomMeta);
+            }
+
             $pdo->prepare("UPDATE containers SET status = 'gate_out', block = 'OUTSIDE', bay = NULL, row = NULL, tier = NULL, gate_out_time = NOW() WHERE container_number = ?")->execute([$container_no]);
             $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ? AND status <> 'gate_out'")->execute([$container_no]);
             $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes, billable_amount) VALUES ('GATE_OUT', ?, 'YARD', 'OUTSIDE', 'Gate-out terotorisasi: SPPB cleared & tagihan lunas', 0)")
@@ -690,15 +928,44 @@ try {
     // Error dipisahkan ke Dead Letter Queue; alur event sehat lain tidak terganggu
     $is_oauth_err = ($e instanceof OAuthSecurityException);
     $rejected = ($e instanceof IngestRejection) || $is_oauth_err;
+    $anomMeta = ($e instanceof IngestRejection && !empty($e->anomalyMeta)) ? $e->anomalyMeta : [];
     $dlq_reason = $is_oauth_err ? ("[OAUTH_SECURITY:{$e->errorCode}] " . $e->getMessage()) : $e->getMessage();
-    dlq_push($pdo, $event_id, $event_type, $source_device, $dlq_reason, $data);
+
+    // Catat status HOLD_ANOMALY di preadvice & log intersepsi di yard_events agar terlihat real-time di Digital Twin & Dashboard
+    try {
+        if (!empty($anomMeta['pre_gate_code'])) {
+            $pdo->prepare("UPDATE preadvice SET status = IF(status = 'SCHEDULED', 'HOLD_ANOMALY', status), resolution_status = 'HOLD_AT_GATE' WHERE pre_gate_code = ?")
+                ->execute([$anomMeta['pre_gate_code']]);
+        }
+        if (($anomMeta['anomaly_code'] ?? '') === 'CUSTOMS_DOC_MISMATCH' && !empty($anomMeta['container_number'])) {
+            $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK', block = 'E' WHERE container_number = ?")
+                ->execute([$anomMeta['container_number']]);
+        }
+        $evCno = $anomMeta['container_number'] ?? ($p['container_number'] ?? null);
+        if ($evCno) {
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes, billable_amount) VALUES ('ANOMALY_HOLD', ?, 'GATE', 'HOLD', ?, 0)")
+                ->execute([$evCno, mb_substr($dlq_reason, 0, 240)]);
+        }
+        get_live_twin_state($pdo, true);
+    } catch (Throwable $ignore) {}
+
+    $dlq_id = dlq_push($pdo, $event_id, $event_type, $source_device, $dlq_reason, $data, 'QUARANTINED', $anomMeta);
     http_response_code($is_oauth_err ? $e->httpCode : ($rejected ? 422 : 500));
     echo json_encode([
-        'success' => false,
-        'event_id' => $event_id,
-        'event_type' => $event_type,
+        'success'     => false,
+        'event_id'    => $event_id,
+        'event_type'  => $event_type,
+        'dlq_id'      => $dlq_id,
         'oauth_error' => $is_oauth_err ? $e->errorCode : null,
-        'error' => $e->getMessage(),
-        'routed_to' => 'DEAD_LETTER_QUEUE'
-    ], JSON_PRETTY_PRINT);
+        'error'       => $e->getMessage(),
+        'routed_to'   => 'DEAD_LETTER_QUEUE',
+        'anomaly'     => !empty($anomMeta) ? $anomMeta : null,
+        'tri_flow'    => [
+            'physical'    => !empty($anomMeta['interlock_state'])
+                ? "INTERLOCK AKTIF ({$anomMeta['interlock_state']}): Palang / Alat Berat dikunci otomatis; truk diarahkan ke Holding Bay."
+                : 'Akses fisik diblokir oleh Interlock Gate / Yard.',
+            'information' => $e->getMessage(),
+            'financial'   => 'Transaksi ditahan di Antrean Resolusi Masalah (DLQ); pilih SOP Tolak (Turn-Back) atau Override/Koreksi.'
+        ]
+    ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 }

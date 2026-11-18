@@ -9,18 +9,23 @@ let isSidebarCollapsedDesktop = false;
 // =============================================================================
 // SIDEBAR TOGGLES (MOBILE & DESKTOP COLLAPSE)
 // =============================================================================
-function toggleSidebar() {
+function toggleSidebar(forceOpen) {
     const sidebar = document.getElementById('sidebar');
     const overlay = document.getElementById('sidebarOverlay');
     if (!sidebar || !overlay) return;
 
-    isSidebarOpenMobile = !isSidebarOpenMobile;
-    if (isSidebarOpenMobile) {
+    const currentlyHidden = sidebar.classList.contains('-translate-x-full');
+    const nextOpen = typeof forceOpen === 'boolean' ? forceOpen : currentlyHidden;
+    isSidebarOpenMobile = nextOpen;
+
+    if (nextOpen) {
         sidebar.classList.remove('-translate-x-full');
         overlay.classList.remove('hidden');
+        document.body.classList.add('cidp-mobile-nav-open');
     } else {
         sidebar.classList.add('-translate-x-full');
         overlay.classList.add('hidden');
+        document.body.classList.remove('cidp-mobile-nav-open');
     }
 }
 
@@ -35,6 +40,33 @@ function toggleDesktopSidebar() {
     isSidebarCollapsedDesktop = nextState;
     sidebar.classList.toggle('is-collapsed', nextState);
 }
+
+// Sinkronisasi state sidebar saat rotasi layar / DevTools Responsive resize
+window.addEventListener('resize', () => {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    if (!sidebar || !overlay) return;
+    if (window.innerWidth >= 768) {
+        overlay.classList.add('hidden');
+        document.body.classList.remove('cidp-mobile-nav-open');
+        isSidebarOpenMobile = false;
+    } else if (!isSidebarOpenMobile) {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+    }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+    const sidebar = document.getElementById('sidebar');
+    if (!sidebar) return;
+    sidebar.querySelectorAll('a[href]').forEach((link) => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                toggleSidebar(false);
+            }
+        });
+    });
+});
 
 // =============================================================================
 // GLOBAL UNIVERSAL SEARCH (COMMAND PALETTE CTRL+K & MOBILE DRAWER)

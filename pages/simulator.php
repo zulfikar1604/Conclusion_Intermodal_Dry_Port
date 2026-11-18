@@ -79,9 +79,9 @@ require_once __DIR__ . '/layout_master.php';
 
         <div class="bg-white rounded-xl p-3 shadow-2xs border border-gray-200/80 flex items-center justify-between">
             <div class="min-w-0">
-                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Armada SCADA</p>
-                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none">4 <span class="text-xs font-normal text-gray-400">unit</span></h4>
-                <p class="text-[10px] text-gray-500 mt-1 truncate">3 RS + 1 RTG Crane</p>
+                <p class="text-[10.5px] font-semibold text-gray-500 uppercase tracking-wide truncate">Armada &amp; MHE 3D</p>
+                <h4 class="text-xl font-bold text-gray-800 mt-0.5 leading-none">15 <span class="text-xs font-normal text-gray-400">unit</span></h4>
+                <p class="text-[10px] text-gray-500 mt-1 truncate">4 RS &bull; 5 RTG &bull; 4 FL &bull; 2 Shuttle</p>
             </div>
             <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center text-sm shrink-0 ml-2">
                 <i class="fa-solid fa-dolly"></i>
@@ -596,9 +596,10 @@ require_once __DIR__ . '/layout_master.php';
             <div>
                 <label class="block text-xs font-bold text-gray-700 uppercase mb-1">2. Alokasikan Unit Reach Stacker</label>
                 <select id="moveEquipmentSelect" class="w-full bg-gray-50 border border-gray-200 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-gray-800 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
-                    <option value="RS-02">🚜 RS-02 (Operator: Agus Setiawan - Block B Area)</option>
-                    <option value="RS-01">🚜 RS-01 (Operator: Budi Santoso - Block A Area)</option>
-                    <option value="RS-03">🚜 RS-03 (Operator: Rudi Hermawan - Reefer Area)</option>
+                    <option value="RS-01">🚜 RS-01 (Budi Santoso — Empty Depot / Blok A)</option>
+                    <option value="RS-02">🚜 RS-02 (Agus Setiawan — Koridor Blok B / E)</option>
+                    <option value="RS-03">🚜 RS-03 (Rudi Hermawan — Zona Reefer &amp; DG)</option>
+                    <option value="RS-04">🚜 RS-04 (Slamet Riyadi — Koridor Selatan Blok C/D)</option>
                 </select>
             </div>
 

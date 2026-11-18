@@ -7,7 +7,7 @@
 // =============================================================================
 ?>
 <!-- Overlay for mobile sidebar -->
-<div id="sidebarOverlay" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-30 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
+<div id="sidebarOverlay" class="fixed inset-0 bg-gray-900/60 backdrop-blur-xs z-40 hidden md:hidden transition-opacity" onclick="toggleSidebar()"></div>
 
 <!-- Top Header (Aligned with sidebar header: h-14 / 56px, Seamless Background & Border) -->
 <header class="h-14 bg-white/95 backdrop-blur-md border-b border-slate-200/80 z-20 flex-shrink-0 sticky top-0 font-sans relative">
@@ -155,7 +155,7 @@
                 </button>
 
                 <!-- Notification Dropdown Card -->
-                <div id="notifDropdownCard" class="hidden absolute right-0 sm:right-[-40px] md:right-0 top-11 w-80 sm:w-96 bg-white rounded-2xl shadow-2xl border border-gray-200/90 overflow-hidden z-50 animate-fadeIn text-xs">
+                <div id="notifDropdownCard" class="hidden fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-14 sm:top-11 w-auto sm:w-96 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-gray-200/90 overflow-hidden z-50 animate-fadeIn text-xs">
                     <!-- Header -->
                     <div class="bg-gradient-to-r from-[#0170b9] via-[#0284c7] to-orange-600 p-3.5 text-white flex items-center justify-between">
                         <div class="flex items-center space-x-2">
@@ -287,7 +287,7 @@
                 </button>
 
                 <!-- Profile Dropdown Card -->
-                <div id="profileDropdownCard" class="hidden absolute right-0 top-12 w-72 sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-200/90 overflow-hidden z-50 animate-fadeIn text-xs">
+                <div id="profileDropdownCard" class="hidden fixed sm:absolute left-3 right-3 sm:left-auto sm:right-0 top-14 sm:top-12 w-auto sm:w-80 max-w-[calc(100vw-1.5rem)] bg-white rounded-2xl shadow-2xl border border-gray-200/90 overflow-hidden z-50 animate-fadeIn text-xs">
                     <!-- Card Header -->
                     <div class="bg-gradient-to-br from-[#0170b9] via-[#0284c7] to-[#0369a1] p-4 text-white">
                         <div class="flex items-center space-x-3">

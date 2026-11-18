@@ -369,20 +369,15 @@ Seluruh endpoint menerima request berformat JSON atau parameter POST/GET dan men
 ## 9. 🎮 Digital Twin 3D Virtual Terminal Engine (Three.js WebGL)
 
 Modul `pages/simulator.php` membangun replika digital interaktif (*Digital Twin*) terminal 35 Ha:
-1. **WebGL Canvas Pipeline:** Merender 35 Hektar lanskap, 5 blok lapangan penumpukan kontainer, 2 lajur rel sepur simpan, stasiun gerbang masuk, dan gedung manajemen.
-2. **Standar Pewarnaan Mesh 3D ISO Maritim:**
+1. **WebGL Canvas Pipeline:** Merender lanskap proporsional **480m × 230m** (kawasan lapangan penumpukan Blok A–E & Reefer dominan bertipikal matriks **Bay × Row 8×8** beserta koridor jalan angkut eksternal, 2 lajur rel sepur simpan, stasiun Gate In/Out terpisah, gedung manajemen, serta **RTG Crane & Reach Stacker otomatis**).
+2. **Simulasi Arus Truk Kontinu 2 Arah:** Armada truk eksternal bergerak kontinu masuk dari gerbang masuk ke jembatan timbang & blok tujuan serta keluar melalui jalan perimeter ke Gate-Out tanpa memotong lapangan tumpukan kontainer, disertai bantuan visual alat berat (RTG / Reach Stacker).
+3. **Standar Pewarnaan Mesh 3D ISO Maritim:**
    - `0x0170b9` (Biru): Peti kemas kargo umum (*Dry Container 40HC/20ft*).
    - `0xffffff` / `0x06b6d4` (Putih / Cyan): Peti kemas rantai dingin (*Reefer Container*).
    - `0xdc2626` / `0xf59e0b` (Merah / Kuning): Peti kemas bahan kimia berbahaya (*Dangerous Goods*).
    - `0x94a3b8` (Abu-abu): Peti kemas kosong (*Empty Container Depot*).
-3. **5 Preset Sudut Kamera Sinematik:**
-   - `overview`: Drone 35 Ha Makro (posisi ketinggian $Y=250$, pandangan seluruh terminal).
-   - `gate`: Posisi gerbang timbangan VGM dan kamera OCR/ANPR.
-   - `yard`: Sudut pandang tumpukan kontainer Bay-Row-Tier Blok A-E.
-   - `rail`: Sudut pandang sepur simpan alih muat rangkaian kereta api.
-   - `cockpit`: Sudut pandang orang pertama (*First-Person View*) dari kabin operator Reach Stacker!
-4. **3D Raycasting Metadata Inspector:**  
-   Pengguna dapat mengeklik objek kontainer 3D di layar monitor. Three.js Raycaster memancarkan sinar optik matematis dari kursor kamera, mendeteksi mesh kontainer yang terpotong, dan memunculkan pop-up inspeksi berisi rincian: Nomor Kontainer, Tag RFID, Berat VGM, Pemilik Barang, Nomor Segel, dan Slot Yard.
+4. **Preset Sudut Kamera Sinematik & 3D Raycasting Metadata Inspector:**
+   Mendukung navigasi `overview`, `gate`, `yard`, `rail`, `cockpit` serta inspeksi objek kontainer 3D real-time via Three.js Raycaster.
 
 ---
 
@@ -422,6 +417,48 @@ Modul `pages/simulator.php` membangun replika digital interaktif (*Digital Twin*
 | **Kepatuhan Bea Cukai**| Terhubung spesifikasi CEISA 4.0 DJBC | Memerlukan bridging EDI kustom | Memerlukan pihak ketiga |
 | **Integrasi ERP Odoo** | Event-Driven Webhook langsung ke Odoo | Terhubung ke SAP via middleware IBM MQ | Konektor kustom akuntansi lokal |
 | **Biaya Kepemilikan (TCO)**| Sangat Efisien, Bebas Royalti Asing | Sangat Mahal ($500k - $2M+ per terminal) | Tinggi ($250k - $800k per terminal) |
+
+---
+
+## 11B. 🔄 Arsitektur SSoT Zero Re-Entry & Sinkronisasi Digital WMS/WCS ↔ MHE
+
+Seluruh 17 modul CIDP beroperasi pada satu **Single Source of Truth (SSoT)** basis data `cidp_yms` (14 tabel relasional utama: `preadvice`, `trucks`, `containers`, `equipment`, `cfs_jobs`, `cfs_pallets`, `reefer_telemetry`, `trains`, `billing_invoices`, `yard_events`, `integration_dlq`, `processed_events`, `master_lokasi`, `login`). Data hanya diinput **satu kali di hulu** (Manifest EDI-940 Pre-Advice / Scanner Gate) lalu mengalir otomatis tanpa input ulang manual ke seluruh hilir operasional hingga pencetakan **Context-Aware Dokumen A4 (`document.php`)**.
+
+```mermaid
+flowchart LR
+    PA["1. EDI-940 Pre-Advice\n(preadvice)"] -->|"ANPR + RFID\n(Zero Re-Entry)"| GT["2. Smart Gate & VGM 80T\n(trucks + containers)"]
+    GT -->|"Auto-Assign\nBlok-Bay-Row-Tier"| WCS["3. WCS Dispatcher\n(equipment GPS Sync)"]
+    WCS -->|"Work Order VMT"| MHE["4. MHE Lapangan (15 Unit Terpetakan)\nRS-01..04 | RTG-01..05 | FL-01..04 | CDP-TT-01..02"]
+    MHE -->|"Status & Telemetry"| MOD["5. CFS / Reefer / Rail / CEISA 4.0\n(cfs_pallets, reefer_telemetry, trains)"]
+    GT -->|"Auto-Accrual Tarif"| ERP["6. Billing & Odoo ERP\n(billing_invoices)"]
+    MOD -->|"Event Jasa / Listrik / LoLo"| ERP
+    MOD -->|"Dual Clearance Interlock\nSPPB_CLEARED + 0 Unpaid"| OUT["7. Gate-Out + Cetak A4\n(document.php)"]
+    ERP -->|"PAID Check"| OUT
+```
+
+---
+
+## 11C. 🛡️ Strategi Manajemen Pengecualian, Surge Protection & BCP
+
+Endpoint ingest utama (`api/ingest_event.php`) dan pusat kendali integrasi (`pages/integration.php` / `api/demo_control.php`) menerapkan proteksi berlapis standar industri misi-kritis:
+1. **Idempotency & Anti-Double Billing (`processed_events`):** Setiap event membawa `event_id` / header `X-Idempotency-Key`. Permintaan duplikat mengembalikan respons awal tanpa mengeksekusi transaksi DB atau tagihan ulang.
+2. **Keamanan Kriptografi & Isolasi Eror (`QUARANTINED` DLQ):** Permintaan gagal OAuth 2.0 scope (HTTP 403), manipulasi HMAC-SHA256 (HTTP 401), check-digit ISO 6346 salah, atau truk tanpa Pre-Advice (HTTP 422) dikarantina ke `integration_dlq` agar jalur transaksi sehat tetap lancar.
+3. **Penanganan Lonjakan Transaksi (`cidp_check_rate_limit` → `EDGE_BACKPRESSURE_BUFFER`):** Sliding-window rate limiter mendeteksi lonjakan trafik ekstrem (diuji via `api/edge_simulator.php?action=surge_test`) dan mengalihkan payload berlebih ke status `'BUFFERED'` (`HTTP 202`) dengan jaminan **0 data hilang (Zero Data Loss)**.
+4. **Business Continuity Plan (BCP Failover & Auto-Recovery):**
+   - **BCP Store-and-Forward (`bcp_toggle` / `bcp_flush`):** Saat link Cloud ERP Odoo/CEISA terganggu, edge lokal menampung seluruh event ke buffer terenkripsi lalu me-*replay* penuh saat koneksi pulih (**RPO = 0 data, RTO < 10 detik**).
+   - **Daya Darurat Cold Chain (`trigger_ats_test`):** Pengalihan otomatis ATS Genset 1.500 kVA dalam `< 7 detik` menjaga pasokan 380V untuk kontainer reefer.
+
+---
+
+## 11D. 📊 Metrik Kinerja Kuantitatif Logistik & Efisiensi Biaya
+
+`api/beranda_telemetry.php` bersama Control Tower (`pages/beranda.php`) menghitung indikator performa kuantitatif logistik secara *real-time*:
+1. **Target OTIF (On-Time In-Full %):** Mengukur kepatuhan rilis tepat SLA tanpa penahanan jalur merah/hold terhadap target operasional **$\ge 95,0\%$**.
+2. **Keakuratan Peramalan Gate vs VBS Demand (MAE & MAPE):** Mengevaluasi deviasi peramalan kuota VBS ($F_i$) terhadap realisasi truk per jam ($A_i$) secara matematis:
+   $$\text{MAE} = \frac{1}{n}\sum_{i=1}^{n}|A_i - F_i|, \qquad \text{MAPE} = \frac{100\%}{n}\sum_{i=1}^{n}\frac{|A_i - F_i|}{A_i}$$
+   *(Target standar sangat akurat Lewis: MAPE $< 10\%$, Akurasi $> 90\%$).*
+3. **Efisiensi Siklus Waktu (*Cycle Time Efficiency*):** Membandingkan Gate Turnaround Time aktual ($18{,}2$ menit) terhadap SLA konvensional ($35{,}0$ menit $\rightarrow$ penghematan siklus **$\approx 48\%$**) serta rilis CEISA SPPB otomatis ($14{,}2$ detik vs proses manual $120$ menit).
+4. **Efisiensi Biaya & ROI Operasional:** Mengkuantifikasi penghematan bulanan dari *Modal-Split Kereta Api Pasoso* vs truk jalan tol, eliminasi waktu tunggu gerbang/kertas (*paperless*), pencegahan denda demurrage, serta **0% kebocoran pendapatan (*Zero Revenue Leakage*)**.
 
 ---
 

@@ -27,12 +27,23 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
     $timestamp = microtime(true);
     $time_iso = date('c');
 
-    // 1. ALIRAN FISIK (Physical Flow: Coordinates, Equipment, Trucks, Yard Slots)
+    // 1. ALIRAN FISIK (Physical Flow: Coordinates, Equipment, Trucks, Yard Slots & CFS Interior)
     $defaultCoords = [
-        'RS-01'  => [270.0, 175.0, 'A'],
-        'RS-02'  => [490.0, 175.0, 'B'],
-        'RS-03'  => [770.0, 175.0, 'REEFER'],
-        'RTG-01' => [600.0, 625.0, 'RAIL']
+        'RS-01'     => [270.0, 175.0, 'A'],
+        'RS-02'     => [490.0, 175.0, 'B'],
+        'RS-03'     => [770.0, 175.0, 'REEFER'],
+        'RS-04'     => [270.0, 545.0, 'C'],
+        'RTG-01'    => [600.0, 625.0, 'RAIL'],
+        'RTG-02'    => [270.0, 250.0, 'A'],
+        'RTG-03'    => [490.0, 250.0, 'B'],
+        'RTG-04'    => [270.0, 470.0, 'C'],
+        'RTG-05'    => [490.0, 470.0, 'D'],
+        'FL-01'     => [140.0, 240.0, 'CFS'],
+        'FL-02'     => [835.0, 470.0, 'E'],
+        'FL-03'     => [148.0, 310.0, 'CFS'],
+        'FL-04'     => [90.0,  350.0, 'CFS'],
+        'CDP-TT-01' => [360.0, 585.0, 'RAIL'],
+        'CDP-TT-02' => [635.0, 470.0, 'E']
     ];
     $equipment = [];
     try {
@@ -172,11 +183,83 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         $trains = $trn_stmt->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
-    // CFS active jobs & scheduled preadvice queue
+    // CFS active jobs, CFS pallets (SSCC-18) inside warehouse & scheduled preadvice queue
     $cfs_jobs = [];
+    $cfs_pallets = [];
+    $cfs_containers = [];
+    $cfs_summary = [
+        'active_jobs' => 0,
+        'completed_jobs' => 0,
+        'pallets_in_rack' => 0,
+        'pallets_dispatched' => 0,
+        'total_weight_kg' => 0.0,
+        'total_cbm' => 0.0,
+        'ramps' => [
+            'D1' => ['ramp' => 'D1', 'status' => 'STANDBY', 'container' => null, 'job_number' => null],
+            'D2' => ['ramp' => 'D2', 'status' => 'STANDBY', 'container' => null, 'job_number' => null],
+            'D3' => ['ramp' => 'D3', 'status' => 'STANDBY', 'container' => null, 'job_number' => null],
+            'D4' => ['ramp' => 'D4', 'status' => 'STANDBY', 'container' => null, 'job_number' => null],
+            'D5' => ['ramp' => 'D5', 'status' => 'STANDBY', 'container' => null, 'job_number' => null],
+        ]
+    ];
     try {
-        $cfs_q = $pdo->query("SELECT job_number, job_type, container_number, dock_ramp, customs_status, status, total_packages FROM cfs_jobs ORDER BY id DESC LIMIT 8");
+        $cfs_q = $pdo->query("SELECT id, job_number, job_type, container_number, dock_ramp, shipper_consignee, customs_status, status, total_packages, total_weight_kg, total_cbm FROM cfs_jobs ORDER BY id DESC LIMIT 12");
         $cfs_jobs = $cfs_q->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($cfs_jobs as $cj) {
+            $rmp = strtoupper(trim($cj['dock_ramp'] ?? 'D1'));
+            if ($cj['status'] === 'IN_PROGRESS' || $cj['status'] === 'HOLD') {
+                $cfs_summary['active_jobs']++;
+                if (isset($cfs_summary['ramps'][$rmp])) {
+                    $cfs_summary['ramps'][$rmp] = [
+                        'ramp' => $rmp,
+                        'status' => $cj['status'],
+                        'container' => $cj['container_number'],
+                        'job_number' => $cj['job_number'],
+                        'job_type' => $cj['job_type'],
+                        'packages' => (int)($cj['total_packages'] ?? 0)
+                    ];
+                }
+            } elseif ($cj['status'] === 'COMPLETED') {
+                $cfs_summary['completed_jobs']++;
+            }
+        }
+
+        $pal_q = $pdo->query("SELECT id, job_id, pallet_sscc, container_origin, commodity_name, consignee, category, carton_count, gross_weight_kg, cbm, rack_location, customs_doc, customs_status, status, entry_date FROM cfs_pallets ORDER BY id DESC LIMIT 36");
+        $raw_pallets = $pal_q->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($raw_pallets as $cp) {
+            if ($cp['status'] === 'DISPATCHED') {
+                $cfs_summary['pallets_dispatched']++;
+            } else {
+                $cfs_summary['pallets_in_rack']++;
+                $cfs_summary['total_weight_kg'] += (float)($cp['gross_weight_kg'] ?? 0);
+                $cfs_summary['total_cbm'] += (float)($cp['cbm'] ?? 0);
+            }
+            $sscc = (string)($cp['pallet_sscc'] ?? '');
+            $cp['pallet_code'] = 'PAL-' . substr($sscc, -4);
+            $cp['sscc_barcode'] = $sscc;
+            $cp['container_number'] = $cp['container_origin'] ?? '-';
+            $cp['cargo_description'] = $cp['commodity_name'] ?? 'Kargo LCL';
+            $cp['weight_kg'] = (float)($cp['gross_weight_kg'] ?? 0);
+            $cp['volume_cbm'] = (float)($cp['cbm'] ?? 0);
+            $cfs_pallets[] = $cp;
+        }
+        $cfs_summary['total_weight_kg'] = round($cfs_summary['total_weight_kg'], 1);
+        $cfs_summary['total_cbm'] = round($cfs_summary['total_cbm'], 2);
+
+        foreach ($cfs_jobs as $cj) {
+            if ($cj['status'] !== 'COMPLETED') {
+                $cfs_containers[] = [
+                    'container_number' => $cj['container_number'],
+                    'ramp_no' => $cj['dock_ramp'] ?: 'D1',
+                    'operation_type' => $cj['job_type'] ?: 'STRIPPING',
+                    'status' => $cj['status'],
+                    'processed_pallets' => max(1, (int)round(((float)($cj['total_packages'] ?? 30)) / 30)),
+                    'total_pallets' => 8,
+                    'bl_number' => 'HBL-CIDP-' . substr(preg_replace('/\D/', '', $cj['job_number']), -4),
+                    'consignee' => $cj['shipper_consignee'] ?: 'PT Konsolidasi LCL'
+                ];
+            }
+        }
     } catch (Exception $e) {}
 
     $preadvice_queue = [];
@@ -212,6 +295,12 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
     try {
         $ev_stmt = $pdo->query("SELECT * FROM yard_events ORDER BY id DESC LIMIT 10");
         $recent_events = $ev_stmt->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($recent_events[0]) && ($recent_events[0]['event_type'] ?? '') === 'GATE_OUT') {
+            $evTs = strtotime($recent_events[0]['created_at'] ?? 'now');
+            if (($timestamp - $evTs) <= 15) {
+                $gate_status['outbound_barrier'] = 'OPEN';
+            }
+        }
     } catch (Exception $e) {}
 
     $customs_summary = [
@@ -329,6 +418,7 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         'liftoff_fee_idr' => 0.0,
         'storage_dwell_fee_idr' => 0.0,
         'reefer_power_fee_idr' => 0.0,
+        'cfs_fee_idr' => 0.0,
         'paid_amount_idr' => 0.0,
         'pending_amount_idr' => 0.0,
         'settlement_ratio_pct' => 95.0,
@@ -340,6 +430,7 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
             COALESCE(SUM(lolo_amount), 0) as lolo,
             COALESCE(SUM(storage_amount), 0) as storage,
             COALESCE(SUM(reefer_power_amount), 0) as reefer,
+            COALESCE(SUM(cfs_amount), 0) as cfs,
             COALESCE(SUM(CASE WHEN payment_status = 'PAID' THEN total_amount ELSE 0 END), 0) as paid,
             COALESCE(SUM(CASE WHEN payment_status = 'PENDING' THEN total_amount ELSE 0 END), 0) as pending
             FROM billing_invoices");
@@ -349,6 +440,7 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
             $financial_summary['liftoff_fee_idr'] = (float)$rev['lolo'];
             $financial_summary['storage_dwell_fee_idr'] = (float)$rev['storage'];
             $financial_summary['reefer_power_fee_idr'] = (float)$rev['reefer'];
+            $financial_summary['cfs_fee_idr'] = (float)$rev['cfs'];
             $financial_summary['paid_amount_idr'] = (float)$rev['paid'];
             $financial_summary['pending_amount_idr'] = (float)$rev['pending'];
             if ((float)$rev['total'] > 0) {
@@ -394,6 +486,9 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
             'expected_count' => $expected_count,
             'blocks_distribution' => $blocks,
             'active_slots' => $active_slots,
+            'cfs_pallets' => $cfs_pallets,
+            'cfs_containers' => $cfs_containers,
+            'cfs_summary' => $cfs_summary,
             'in_transit_containers' => $in_transit_containers,
             'on_rail_containers' => $on_rail_containers,
             'trains' => $trains,
@@ -403,6 +498,8 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         'information' => [
             'recent_events' => $recent_events,
             'cfs_jobs' => $cfs_jobs,
+            'cfs_pallets' => $cfs_pallets,
+            'cfs_summary' => $cfs_summary,
             'customs' => $customs_summary,
             'reefer' => $reefer_telematics
         ],
@@ -421,7 +518,7 @@ function write_twin_state_cache(array $state): bool {
     if (!is_dir($dir)) {
         @mkdir($dir, 0777, true);
     }
-    $json = json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    $json = json_encode($state, JSON_UNESCAPED_SLASHES);
     $tmp_file = TWIN_CACHE_FILE . '.tmp.' . uniqid();
     if (@file_put_contents($tmp_file, $json) !== false) {
         return @rename($tmp_file, TWIN_CACHE_FILE);

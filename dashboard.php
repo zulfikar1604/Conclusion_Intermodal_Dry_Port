@@ -254,16 +254,16 @@ $tanggal_sekarang = get_localized_date($current_lang);
     <link rel="stylesheet" href="assets/css/print-document.css">
     <script src="assets/js/print-engine.js"></script>
     <!-- CIDP Executive UX Layer (global: keterbacaan, kontras, tema grafik, ringkasan status) -->
-    <link rel="stylesheet" href="assets/css/executive-ux.css?v=20261025a">
-    <script src="assets/js/executive-ux.js?v=20261025a"></script>
+    <link rel="stylesheet" href="assets/css/executive-ux.css?v=20261118b">
+    <script src="assets/js/executive-ux.js?v=20261118b"></script>
 </head>
-<body class="text-gray-800 antialiased min-h-screen h-[100dvh] overflow-hidden flex bg-cdp-light">
+<body class="text-gray-800 antialiased min-h-screen h-[100dvh] w-full max-w-[100vw] overflow-hidden flex bg-cdp-light">
 
     <!-- Sidebar Component -->
     <?php include_once __DIR__ . '/components/sidebar.php'; ?>
 
     <!-- Main Wrapper -->
-    <div id="appFrame" class="flex-1 flex flex-col h-full overflow-hidden relative">
+    <div id="appFrame" class="flex-1 min-w-0 w-full max-w-full flex flex-col h-full overflow-hidden relative">
         
         <!-- Header & Top Navigation Component -->
         <?php include_once __DIR__ . '/components/header.php'; ?>
@@ -402,6 +402,6 @@ $tanggal_sekarang = get_localized_date($current_lang);
 
     <!-- Dashboard UI & Live Clock Scripts -->
     <script src="assets/js/table-tools.js?v=20261118a"></script>
-    <script src="assets/js/dashboard.js?v=20261025c"></script>
+    <script src="assets/js/dashboard.js?v=20261118b"></script>
 </body>
 </html>

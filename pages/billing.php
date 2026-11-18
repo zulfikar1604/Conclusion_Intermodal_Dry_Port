@@ -169,6 +169,9 @@ $billing_info = [
                     <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold">
                         Lift-On / Lift-Off
                     </span>
+                    <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[9px] font-bold">
+                        0% Revenue Leakage &bull; SSoT Auto-Accrual
+                    </span>
                 </div>
             </div>
         </div>

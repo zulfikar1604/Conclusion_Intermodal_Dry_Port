@@ -16,8 +16,13 @@ require_once __DIR__ . '/../api/beranda_telemetry.php';
 
 $beranda_data = build_beranda_telemetry($pdo ?? null, false);
 $kpi          = $beranda_data['kpi'];
+$perf         = $beranda_data['performance'];
 $fin          = $beranda_data['financial'];
 $latencies    = $beranda_data['latencies'];
+$mhe          = $beranda_data['mhe'] ?? ['total_units' => 15, 'active_units' => 3, 'carrying_units' => 1, 'idle_units' => 12, 'rs_total' => 4, 'rs_active' => 1, 'rtg_total' => 5, 'rtg_active' => 1, 'fl_total' => 4, 'fl_active' => 1, 'tt_total' => 2, 'tt_active' => 0];
+$zones        = $beranda_data['zones'] ?? ['z1_pct' => 28, 'z2_pct' => 35, 'z3_pct' => 42, 'z4_pct' => 55];
+$dwell_b      = $beranda_data['dwell_buckets'] ?? ['pct_1_2' => 68, 'pct_3' => 22, 'pct_4_5' => 7, 'pct_6p' => 3, 'pct_4p' => 10];
+$quick_samples   = $beranda_data['quick_samples'] ?? [];
 $containers_list = $beranda_data['containers'];
 $events_list     = $beranda_data['events'];
 
@@ -39,6 +44,10 @@ $customs_total   = $kpi['customs_total'];
 $sppb_sec        = $kpi['sppb_sec'];
 $cfs_jobs        = $kpi['cfs_jobs'];
 $cfs_pct         = $kpi['cfs_pct'];
+$cfs_pallets_rack = $kpi['cfs_pallets_in_rack'] ?? 6;
+$cfs_pallets_out  = $kpi['cfs_pallets_dispatched'] ?? 2;
+$cfs_weight_kg    = $kpi['cfs_weight_kg'] ?? 4250.0;
+$cfs_volume_cbm   = $kpi['cfs_volume_cbm'] ?? 10.8;
 $paid_rev        = $fin['paid_revenue'];
 $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data['date_display'];
 ?>
@@ -146,59 +155,60 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         </div>
 
         <!-- ======================================================================= -->
-        <!-- 1.5 TOC COMMAND CENTER: UNIVERSAL ASSET & CARGO LIVE LOCATOR (RADAR)   -->
+        <!-- 1.5 TOC COMMAND CENTER: UNIVERSAL ASSET & CARGO LIVE LOCATOR (COMPACT)  -->
         <!-- ======================================================================= -->
-        <div class="bg-white text-slate-800 rounded-xl p-4 shadow-2xs border border-slate-200 border-l-4 border-l-orange-500 relative overflow-hidden">
-            <div class="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-3 pb-3 border-b border-slate-100">
-                <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center text-sm relative flex-shrink-0">
+        <div class="bg-white text-slate-800 rounded-xl px-4 py-3 shadow-2xs border border-slate-200 border-l-4 border-l-orange-500 relative overflow-hidden">
+            <div class="relative z-10 flex flex-col xl:flex-row xl:items-center justify-between gap-2.5">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-8 h-8 rounded-xl bg-orange-50 border border-orange-200 text-orange-600 flex items-center justify-center text-xs relative flex-shrink-0">
                         <i class="fa-solid fa-location-crosshairs"></i>
                         <span class="w-2 h-2 rounded-full bg-emerald-500 absolute -top-0.5 -right-0.5 ring-2 ring-white"></span>
                     </div>
-                    <div>
+                    <div class="min-w-0">
                         <div class="flex items-center gap-2 flex-wrap">
-                            <h2 class="text-sm font-extrabold tracking-tight text-slate-900 flex items-center gap-1.5">
-                                <span>Pusat Kendali TOC: Pelacak Posisi Kargo &amp; Armada Real-Time</span>
+                            <h2 class="text-xs sm:text-sm font-extrabold tracking-tight text-slate-900">
+                                Pusat Kendali TOC: Pelacak Kargo, Palet CFS &amp; 15 Armada Real-Time
                             </h2>
-                            <span class="text-[9.5px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> SCADA &amp; IoT Live
+                            <span class="text-[9px] font-extrabold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded-full inline-flex items-center gap-1">
+                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> 15 MHE &amp; IoT Live
                             </span>
                         </div>
-                        <p class="text-[11px] text-slate-500 mt-0.5">Cari No. Kontainer / Plat Truk di area 35 Ha.</p>
+                        <!-- Dynamic Quick Suggestion Pills (100% Database-Driven) -->
+                        <div class="flex items-center gap-1.5 mt-1 overflow-x-auto text-[10px] text-slate-600 no-scrollbar">
+                            <span class="font-bold text-slate-400 uppercase tracking-wider text-[9px] flex items-center gap-1 flex-shrink-0">
+                                <i class="fa-solid fa-bolt text-orange-500"></i> Lacak Cepat:
+                            </span>
+                            <div id="tocQuickPills" class="flex items-center gap-1.5 flex-nowrap">
+                                <?php foreach ($quick_samples as $qs): ?>
+                                    <button type="button" onclick="trackSampleAsset('<?= htmlspecialchars($qs['code'], ENT_QUOTES) ?>')" class="px-2 py-0.5 rounded-md bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer"><?= htmlspecialchars($qs['label']) ?></button>
+                                <?php endforeach; ?>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <!-- Search Input Bar & Fast Action Button -->
-                <div class="flex items-center gap-2 w-full lg:w-auto">
-                    <div class="relative flex-1 lg:w-72">
+                <!-- Search Input Bar + Direct Digital Twin 3D Launch -->
+                <div class="flex items-center gap-2 w-full xl:w-auto flex-wrap sm:flex-nowrap">
+                    <div class="relative w-full sm:w-64 sm:flex-1">
                         <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
                         <input type="text" id="tocAssetSearchInput" onkeydown="if(event.key==='Enter') executeTocSearch();" placeholder="Ketik No. Kontainer / Plat Truk..." class="w-full pl-8 pr-8 py-1.5 text-xs bg-slate-50 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-orange-500 focus:ring-1 focus:ring-orange-500 transition">
                         <button type="button" id="btnTocClearSearch" onclick="clearTocSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-xs">
                             <i class="fa-solid fa-xmark"></i>
                         </button>
                     </div>
-                    <button type="button" onclick="executeTocSearch()" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer flex-shrink-0">
+                    <button type="button" onclick="executeTocSearch()" class="flex-1 sm:flex-initial justify-center px-3 py-1.5 bg-orange-600 hover:bg-orange-500 text-white rounded-xl text-xs font-bold transition flex items-center gap-1.5 shadow-2xs cursor-pointer flex-shrink-0">
                         <i class="fa-solid fa-crosshairs text-[11px]"></i>
                         <span>Lacak</span>
                     </button>
+                    <a href="dashboard.php?page=twin" class="flex-1 sm:flex-initial justify-center px-3 py-1.5 bg-[#0170b9] hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition flex items-center gap-1.5 shadow-2xs flex-shrink-0" title="Buka Visualisasi Event-Driven Digital Twin 3D (Yard & Interior Gudang CFS)">
+                        <i class="fa-solid fa-cubes text-[11px]"></i>
+                        <span>Digital Twin 3D</span>
+                    </a>
                 </div>
             </div>
 
-            <!-- Quick Suggestion Pills (Instant 1-Click for Presentation) -->
-            <div class="relative z-10 flex items-center gap-1.5 py-2 overflow-x-auto text-[10px] text-slate-600 no-scrollbar">
-                <span class="font-bold text-slate-500 uppercase tracking-wider text-[9px] flex items-center gap-1 flex-shrink-0">
-                    <i class="fa-solid fa-bolt text-orange-500"></i> Sampel Cepat:
-                </span>
-                <div id="tocQuickPills" class="flex items-center gap-1.5 flex-nowrap">
-                    <button type="button" onclick="trackSampleAsset('MSCU9180379')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">MSCU9180379 (Siding KA)</button>
-                    <button type="button" onclick="trackSampleAsset('MAEU9185181')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">MAEU9185181 (Reefer 380V)</button>
-                    <button type="button" onclick="trackSampleAsset('B 2918 CKR')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">B 2918 CKR (Truk)</button>
-                    <button type="button" onclick="trackSampleAsset('TGHU9182222')" class="px-2 py-0.5 rounded-lg bg-slate-50 hover:bg-orange-50 border border-slate-200 hover:border-orange-200 text-slate-700 hover:text-orange-700 transition font-mono font-semibold whitespace-nowrap cursor-pointer">TGHU9182222 (Antrean Luar)</button>
-                </div>
-            </div>
-
-            <!-- Live Track Result Card (Populated by JS) -->
-            <div id="tocLiveResultPanel" class="relative z-10 mt-1 bg-slate-50/90 rounded-xl p-3.5 border border-slate-200">
+            <!-- Live Track Result Card (Collapsible — Hidden until searched or sample clicked) -->
+            <div id="tocLiveResultPanel" class="hidden relative z-10 mt-2.5 bg-slate-50/90 rounded-xl p-3 border border-slate-200 animate-fadeIn">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-center">
                     <!-- Left: Position & Location Title (5 Cols) -->
                     <div class="md:col-span-5 border-b md:border-b-0 md:border-r border-slate-200 pb-2.5 md:pb-0 md:pr-3">
@@ -207,7 +217,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             <span id="tocResZone" class="text-[10px] text-slate-700 font-bold bg-white border border-slate-200 px-1.5 py-0.5 rounded">Zona Z2</span>
                             <span id="tocResCargo" class="text-[10px] text-orange-700 font-bold font-mono">DRY 40FT HC</span>
                         </div>
-                        <h3 id="tocResLocationTitle" class="text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5">
+                        <h3 id="tocResLocationTitle" class="text-sm sm:text-base font-black text-slate-900 tracking-tight flex items-center gap-1.5">
                             <i class="fa-solid fa-location-dot text-orange-600"></i>
                             <span id="tocResLocationText">Memuat Posisi Terkini...</span>
                         </h3>
@@ -238,32 +248,38 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 
                     <!-- Right: Journey Flow Status & Action Buttons (3 Cols) -->
                     <div class="md:col-span-3 flex flex-col justify-between h-full gap-2 text-right">
-                        <div>
-                            <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-500 mb-1">Status Alur 6-Tahap</div>
-                            <!-- Mini Step Flow Ribbon -->
-                            <div class="flex items-center justify-end gap-1">
-                                <span id="flowStep_OUTSIDE" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Pre-Gate Outside"></span>
-                                <span class="w-2 h-0.5 bg-slate-200"></span>
-                                <span id="flowStep_Z1" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Gate In / Scale"></span>
-                                <span class="w-2 h-0.5 bg-slate-200"></span>
-                                <span id="flowStep_Z2" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Yard Stacking"></span>
-                                <span class="w-2 h-0.5 bg-slate-200"></span>
-                                <span id="flowStep_Z3" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="CFS Warehouse"></span>
-                                <span class="w-2 h-0.5 bg-slate-200"></span>
-                                <span id="flowStep_Z4" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Reefer / Rail"></span>
-                                <span class="w-2 h-0.5 bg-slate-200"></span>
-                                <span id="flowStep_GATE_OUT" class="w-2.5 h-2.5 rounded-full bg-slate-300 transition" title="Gate Out"></span>
+                        <div class="flex items-center justify-between md:justify-end gap-2">
+                            <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-500">Alur 6-Tahap</div>
+                            <div class="flex items-center gap-1">
+                                <span id="flowStep_OUTSIDE" class="w-2 h-2 rounded-full bg-slate-300 transition" title="Pre-Gate Outside"></span>
+                                <span class="w-1.5 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z1" class="w-2 h-2 rounded-full bg-slate-300 transition" title="Gate In / Scale"></span>
+                                <span class="w-1.5 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z2" class="w-2 h-2 rounded-full bg-slate-300 transition" title="Yard Stacking"></span>
+                                <span class="w-1.5 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z3" class="w-2 h-2 rounded-full bg-slate-300 transition" title="CFS Warehouse"></span>
+                                <span class="w-1.5 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_Z4" class="w-2 h-2 rounded-full bg-slate-300 transition" title="Reefer / Rail"></span>
+                                <span class="w-1.5 h-0.5 bg-slate-200"></span>
+                                <span id="flowStep_GATE_OUT" class="w-2 h-2 rounded-full bg-slate-300 transition" title="Gate Out"></span>
                             </div>
                         </div>
                         <div class="flex items-center justify-end gap-1.5 flex-wrap">
                             <button type="button" id="btnTocInspectDetail" onclick="inspectCurrentTocAsset()" class="px-2.5 py-1 rounded-lg bg-orange-600 hover:bg-orange-500 text-white text-[10.5px] font-bold transition flex items-center gap-1 cursor-pointer shadow-2xs">
                                 <i class="fa-solid fa-eye text-[9.5px]"></i>
-                                <span>Detail 3-Aliran</span>
+                                <span>3-Aliran</span>
                             </button>
-                            <a id="btnTocYardLink" href="dashboard.php?page=yard" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[10.5px] font-bold transition flex items-center gap-1">
-                                <i class="fa-solid fa-boxes-stacked text-[9.5px]"></i>
-                                <span>Yard 2D</span>
+                            <a id="btnTocTwinLink" href="dashboard.php?page=twin" class="px-2.5 py-1 rounded-lg bg-[#0170b9] hover:bg-blue-700 text-white text-[10.5px] font-bold transition flex items-center gap-1 shadow-2xs">
+                                <i class="fa-solid fa-cubes text-[9.5px]"></i>
+                                <span>Twin 3D</span>
                             </a>
+                            <a id="btnTocYardLink" href="dashboard.php?page=yard" class="px-2 py-1 rounded-lg bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 text-[10.5px] font-bold transition flex items-center gap-1">
+                                <i class="fa-solid fa-boxes-stacked text-[9.5px]"></i>
+                                <span>Yard</span>
+                            </a>
+                            <button type="button" onclick="closeTocResultPanel()" class="px-2 py-1 rounded-lg bg-slate-200/80 hover:bg-slate-300 text-slate-600 text-[10px] font-bold transition cursor-pointer" title="Sembunyikan Panel Pelacak">
+                                <i class="fa-solid fa-chevron-up"></i>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -275,8 +291,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         <!-- ======================================================================= -->
         <div class="cidp-kpi-6-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3">
             
-            <!-- KPI 1: Yard Stacking (Tahap 3 Alur Multimoda) -->
-            <div id="kpiCard_yard" onclick="setBerandaStageFilter('stage_3')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-blue-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter Tahap 3 (Stacking Yard Blok A-C)">
+            <!-- KPI 1: Yard Stacking (Tahap 3 Alur Multimoda - Blok A-E) -->
+            <div id="kpiCard_yard" onclick="setBerandaStageFilter('stage_3')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-blue-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter Tahap 3 (Stacking Yard Blok A-E)">
                 <div class="flex items-center justify-between">
                     <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-[#0170b9] transition"><?= __('kpi_yard_stacking', 'Yard Stacking') ?></span>
                     <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] border border-blue-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
@@ -301,9 +317,9 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
                     <span class="text-emerald-700 font-bold flex items-center gap-1">
                         <i class="fa-solid fa-arrow-trend-up text-[10px]"></i>
-                        <span><?= __('kpi_yard_trend', '+4.2% (24h)') ?></span>
+                        <span>4 E-RTG + 4 RS</span>
                     </span>
-                    <span class="font-semibold text-slate-600">Blok A–C Siaga</span>
+                    <span class="font-semibold text-slate-600">Blok A–E Siaga</span>
                 </div>
             </div>
 
@@ -348,7 +364,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 <div class="my-2 flex items-center justify-between gap-2">
                     <div>
                         <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiRailVal"><?= $loaded_w ?>/<?= $total_w ?></span> <span class="text-xs font-bold text-slate-500">TEU</span></h3>
-                        <span class="text-xs text-[#0170b9] font-semibold mt-1 block"><?= __('kpi_rail_sub', 'KA 2518 ke Priok') ?></span>
+                        <span class="text-xs text-[#0170b9] font-semibold mt-1 block">RMGC RTG-01 &bull; KA Pasoso</span>
                     </div>
                     <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
                         <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
@@ -389,7 +405,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
 
                 <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
-                    <span class="font-semibold text-slate-600">Daya 380V Stabil</span>
+                    <span class="font-semibold text-slate-600">RS-03 &bull; 380V</span>
                     <span class="text-emerald-700 font-bold"><?= __('kpi_reefer_haccp', 'HACCP 98.8% OK') ?></span>
                 </div>
             </div>
@@ -423,19 +439,19 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
             </div>
 
-            <!-- KPI 6: CFS & Terminal Billing -->
-            <div id="kpiCard_cfs" onclick="setBerandaStageFilter('stage_4')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-amber-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter pekerjaan CFS Stripping/Stuffing & Billing">
+            <!-- KPI 6: Gudang CFS (Palet SSCC-18) & Billing -->
+            <div id="kpiCard_cfs" onclick="setBerandaStageFilter('stage_4')" class="cursor-pointer bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 hover:border-amber-400 hover:shadow-sm transition flex flex-col justify-between group overflow-hidden min-w-0" title="Klik untuk memfilter pekerjaan Gudang CFS Stripping/Stuffing & Palet SSCC-18">
                 <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-amber-700 transition"><?= __('kpi_cfs_billing', 'CFS &amp; Billing') ?></span>
+                    <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600 group-hover:text-amber-700 transition">Gudang CFS &amp; LCL</span>
                     <span class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 border border-amber-100 flex items-center justify-center text-xs group-hover:scale-105 transition-transform flex-shrink-0">
-                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                        <i class="fa-solid fa-warehouse"></i>
                     </span>
                 </div>
 
                 <div class="my-2 flex items-center justify-between gap-2">
                     <div>
-                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiCfsJobs"><?= $cfs_jobs ?></span><span class="text-sm font-bold text-slate-500">/24 <?= __('kpi_cfs_jobs', 'Job') ?></span></h3>
-                        <span class="text-xs text-amber-700 font-semibold mt-1 block"><?= __('kpi_cfs_ramps', '5 Rampa LCL Aktif') ?></span>
+                        <h3 class="text-xl sm:text-2xl font-black text-slate-900 tracking-tight leading-none"><span id="kpiCfsPalletsRack"><?= $cfs_pallets_rack ?></span> <span class="text-xs font-bold text-emerald-700">Palet</span></h3>
+                        <span class="text-[11px] text-amber-700 font-semibold mt-1 block"><span id="kpiCfsJobs"><?= $cfs_jobs ?></span> Job &bull; <span id="kpiCfsWeightTxt"><?= number_format($cfs_weight_kg, 0, ',', '.') ?></span> kg</span>
                     </div>
                     <div class="relative w-12 h-12 flex-shrink-0 flex items-center justify-center">
                         <svg class="w-12 h-12 transform -rotate-90" viewBox="0 0 36 36">
@@ -447,7 +463,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
 
                 <div class="pt-2 border-t border-slate-100 flex flex-wrap items-center justify-between gap-x-2 gap-y-0.5 text-[11px]">
-                    <span class="font-semibold text-slate-600"><?= __('kpi_cfs_omzet', 'Omzet Lunas') ?></span>
+                    <span class="font-semibold text-slate-600">Rak A–F &bull; FL-01..04</span>
                     <span id="kpiBillingPaid" class="text-emerald-700 font-extrabold"><?= ($current_lang === 'en') ? 'Rp ' . number_format($paid_rev / 1000000, 1) . 'M Paid' : 'Rp ' . number_format($paid_rev / 1000000, 1) . 'Jt Lunas' ?></span>
                 </div>
             </div>
@@ -455,175 +471,163 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         </div>
 
         <!-- ======================================================================= -->
-        <!-- 3. ALUR LOGISTIK MULTIMODA (6-STAGE CONNECTED FLOW)                     -->
+        <!-- 3. COMPACT 6-STAGE PIPELINE & LIVE 15-UNIT MHE FLEET TELEMETRY BAR      -->
         <!-- ======================================================================= -->
-        <div class="bg-white rounded-xl p-4 shadow-2xs border border-slate-200 relative">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-100">
-                <div>
-                    <h3 class="font-extrabold text-slate-900 text-sm sm:text-[15px] flex items-center gap-2">
+        <div class="bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 relative space-y-2.5">
+            <!-- Row 1: Compact 6-Stage Multimodal Filter Ribbon -->
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-2 pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-extrabold text-slate-900 flex items-center gap-1.5 mr-1">
                         <i class="fa-solid fa-route text-[#ea580c]"></i>
-                        <span><?= ($current_lang === 'en') ? 'Multimodal Logistics Flow' : 'Alur Logistik Multimoda' ?></span>
-                    </h3>
-                    <p class="text-xs text-slate-600 mt-0.5">
-                        <?= ($current_lang === 'en')
-                            ? '6-stage operational flow from Gate-In to Rail Siding. Click any stage to filter containers below.'
-                            : 'Urutan 6 tahap operasional dari Gerbang Masuk hingga Siding Kereta Api. Klik tahap untuk memfilter data.' ?>
-                    </p>
+                        <span>Filter Alur 6-Tahap:</span>
+                    </span>
+                    <button type="button" id="ribbon_stage_1" onclick="setBerandaStageFilter('stage_1')" class="pipeline-stage-card px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-orange-50 hover:border-orange-300 text-[11px] font-bold text-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                        <span class="w-4 h-4 rounded bg-[#0170b9] text-white text-[10px] font-mono font-black inline-flex items-center justify-center">1</span>
+                        <span>Gate ANPR</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 hidden sm:inline"></i>
+                    <button type="button" id="ribbon_stage_2" onclick="setBerandaStageFilter('stage_2')" class="pipeline-stage-card px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-orange-50 hover:border-orange-300 text-[11px] font-bold text-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                        <span class="w-4 h-4 rounded bg-orange-600 text-white text-[10px] font-mono font-black inline-flex items-center justify-center">2</span>
+                        <span>Timbangan 80T</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 hidden sm:inline"></i>
+                    <button type="button" id="ribbon_stage_3" onclick="setBerandaStageFilter('stage_3')" class="pipeline-stage-card px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-blue-50 hover:border-blue-300 text-[11px] font-bold text-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                        <span class="w-4 h-4 rounded bg-[#0170b9] text-white text-[10px] font-mono font-black inline-flex items-center justify-center">3</span>
+                        <span>Yard Blok A–E (<?= number_format($containers_yard) ?>)</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 hidden sm:inline"></i>
+                    <button type="button" id="ribbon_stage_4" onclick="setBerandaStageFilter('stage_4')" class="pipeline-stage-card px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-amber-50 hover:border-amber-300 text-[11px] font-bold text-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                        <span class="w-4 h-4 rounded bg-amber-600 text-white text-[10px] font-mono font-black inline-flex items-center justify-center">4</span>
+                        <span>Gudang CFS (<span id="ribbonCfsPalletCount"><?= $cfs_pallets_rack ?></span> Palet)</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 hidden sm:inline"></i>
+                    <button type="button" id="ribbon_stage_5" onclick="setBerandaStageFilter('stage_5')" class="pipeline-stage-card px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-cyan-50 hover:border-cyan-300 text-[11px] font-bold text-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                        <span class="w-4 h-4 rounded bg-cyan-600 text-white text-[10px] font-mono font-black inline-flex items-center justify-center">5</span>
+                        <span>Reefer 380V (<?= $reefer_plugs ?>)</span>
+                    </button>
+                    <i class="fa-solid fa-chevron-right text-[9px] text-slate-300 hidden sm:inline"></i>
+                    <button type="button" id="ribbon_stage_6" onclick="setBerandaStageFilter('stage_6')" class="pipeline-stage-card px-2.5 py-1 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-[11px] font-bold text-slate-700 transition flex items-center gap-1.5 cursor-pointer">
+                        <span class="w-4 h-4 rounded bg-emerald-600 text-white text-[10px] font-mono font-black inline-flex items-center justify-center">6</span>
+                        <span>Siding KA (<?= $loaded_w ?>/<?= $total_w ?>)</span>
+                    </button>
                 </div>
+
                 <div class="flex items-center gap-2">
-                    <button type="button" id="btnResetPipelineFilter" onclick="resetBerandaFilters()" class="hidden text-xs font-extrabold text-orange-700 bg-orange-50 hover:bg-orange-100 px-3 py-1 rounded-full border border-orange-300 transition cursor-pointer">
+                    <button type="button" id="btnResetPipelineFilter" onclick="resetBerandaFilters()" class="hidden text-[11px] font-extrabold text-orange-700 bg-orange-50 hover:bg-orange-100 px-2.5 py-1 rounded-lg border border-orange-300 transition cursor-pointer">
                         <i class="fa-solid fa-filter-circle-xmark mr-1"></i>Reset Filter
                     </button>
-                    <span class="text-xs font-bold text-emerald-700 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 inline-flex items-center gap-1.5">
-                        <i class="fa-solid fa-circle-check text-[10px]"></i>
-                        <span><?= ($current_lang === 'en') ? 'All 6 Stages Active' : '6 Tahap Berjalan Normal' ?></span>
-                    </span>
+                    <a href="dashboard.php?page=alat" class="text-[11px] font-bold text-[#0170b9] hover:underline flex items-center gap-1 whitespace-nowrap">
+                        <span>Inventaris 15 MHE &rarr;</span>
+                    </a>
                 </div>
             </div>
 
-            <div class="cidp-flow cidp-flow-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3 relative z-10">
-                <!-- Stage 1: Gate-In ANPR OCR -->
-                <div id="ribbon_stage_1" onclick="setBerandaStageFilter('stage_1')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#0170b9]">
-                            <span class="w-5 h-5 rounded-md bg-[#0170b9] text-white inline-flex items-center justify-center text-[11px] font-black font-mono">1</span>
-                            <span>Tahap 1</span>
-                        </span>
-                        <a href="dashboard.php?page=gate" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-[#0170b9] flex items-center justify-center text-[10px]" title="Buka Modul Gate Automation">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </a>
-                    </div>
+            <!-- Row 2: Live 15-Unit MHE Fleet & CFS Interior Summary Strip -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-6 gap-2 text-[11px]">
+                <a href="dashboard.php?page=alat" class="p-2 rounded-lg bg-orange-50/50 border border-orange-200/80 hover:border-orange-400 transition flex items-center justify-between">
                     <div>
-                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-camera text-[#0170b9]"></i>
-                            <span>Gate-In ANPR OCR</span>
-                        </div>
-                        <p class="text-xs text-slate-600 font-medium mt-0.5">Scan plat &amp; RFID box otomatis</p>
+                        <div class="text-[9.5px] font-bold text-orange-800 uppercase">Reach Stacker 45T</div>
+                        <div class="font-extrabold text-slate-900 font-mono mt-0.5"><span id="mheRsCount"><?= $mhe['rs_total'] ?></span> Unit (RS-01..04)</div>
                     </div>
-                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span class="text-slate-700 font-bold">Akurasi 99.4%</span>
-                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-orange-200 text-orange-700 font-mono font-bold text-[9.5px]">Yard A–E</span>
+                </a>
+                <a href="dashboard.php?page=alat" class="p-2 rounded-lg bg-blue-50/50 border border-blue-200/80 hover:border-blue-400 transition flex items-center justify-between">
+                    <div>
+                        <div class="text-[9.5px] font-bold text-[#0170b9] uppercase">E-RTG &amp; Rail Gantry</div>
+                        <div class="font-extrabold text-slate-900 font-mono mt-0.5"><span id="mheRtgCount"><?= $mhe['rtg_total'] ?></span> Unit (RTG-01..05)</div>
                     </div>
-                </div>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-blue-200 text-[#0170b9] font-mono font-bold text-[9.5px]">Zero-Emisi</span>
+                </a>
+                <a href="dashboard.php?page=cfs" class="p-2 rounded-lg bg-emerald-50/50 border border-emerald-200/80 hover:border-emerald-400 transition flex items-center justify-between">
+                    <div>
+                        <div class="text-[9.5px] font-bold text-emerald-800 uppercase">Forklift Gudang CFS</div>
+                        <div class="font-extrabold text-slate-900 font-mono mt-0.5"><span id="mheFlCount"><?= $mhe['fl_total'] ?></span> Unit (FL-01..04)</div>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-emerald-200 text-emerald-700 font-mono font-bold text-[9.5px]">CFS &amp; Blok E</span>
+                </a>
+                <a href="dashboard.php?page=alat" class="p-2 rounded-lg bg-purple-50/50 border border-purple-200/80 hover:border-purple-400 transition flex items-center justify-between">
+                    <div>
+                        <div class="text-[9.5px] font-bold text-purple-800 uppercase">Shuttle Tractor</div>
+                        <div class="font-extrabold text-slate-900 font-mono mt-0.5"><span id="mheTtCount"><?= $mhe['tt_total'] ?></span> Unit (CDP-TT-01..02)</div>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-purple-200 text-purple-700 font-mono font-bold text-[9.5px]">Langsir KA</span>
+                </a>
+                <a href="dashboard.php?page=cfs" class="p-2 rounded-lg bg-amber-50/50 border border-amber-200/80 hover:border-amber-400 transition flex items-center justify-between">
+                    <div>
+                        <div class="text-[9.5px] font-bold text-amber-800 uppercase">Interior Gudang CFS</div>
+                        <div class="font-extrabold text-slate-900 font-mono mt-0.5"><span id="stripCfsPallets"><?= $cfs_pallets_rack ?></span> Palet &bull; <span id="stripCfsCbm"><?= number_format($cfs_volume_cbm, 1) ?></span> CBM</div>
+                    </div>
+                    <span class="px-1.5 py-0.5 rounded bg-white border border-amber-200 text-amber-800 font-mono font-bold text-[9.5px]">Rak A–F</span>
+                </a>
+                <a href="dashboard.php?page=twin" class="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-white transition flex items-center justify-between shadow-2xs">
+                    <div>
+                        <div class="text-[9.5px] font-bold text-cyan-300 uppercase">Total 15 Unit MHE</div>
+                        <div class="font-extrabold text-white font-mono mt-0.5"><span id="mheActiveSummary"><?= $mhe['active_units'] ?> Aktif • <?= $mhe['idle_units'] ?> Siaga</span></div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded bg-orange-600 text-white font-bold text-[9.5px] flex items-center gap-1">
+                        <i class="fa-solid fa-cubes"></i> 3D
+                    </span>
+                </a>
+            </div>
+        </div>
 
-                <!-- Stage 2: Weighbridge SOLAS VGM 80T -->
-                <div id="ribbon_stage_2" onclick="setBerandaStageFilter('stage_2')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-orange-700">
-                            <span class="w-5 h-5 rounded-md bg-orange-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">2</span>
-                            <span>Tahap 2</span>
-                        </span>
-                        <a href="dashboard.php?page=gate" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 flex items-center justify-center text-[10px]" title="Buka Modul Timbangan VGM">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </a>
+        <!-- ======================================================================= -->
+        <!-- 3B. QUANTITATIVE SLA PERFORMANCE STRIP (OTIF, MAE/MAPE, CYCLE TIME, ROI)-->
+        <!-- ======================================================================= -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
+            <div class="bg-white rounded-xl border border-slate-200 px-3.5 py-2.5 shadow-2xs flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                    <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400">Target OTIF (On-Time In-Full)</div>
+                    <div class="flex items-baseline gap-2 mt-0.5">
+                        <span id="perfOtifVal" class="text-lg font-black text-emerald-700 font-mono"><?= $perf['otif_rate_pct'] ?>%</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Target &ge;<?= $perf['otif_target_pct'] ?>%</span>
                     </div>
-                    <div>
-                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-weight-scale text-orange-600"></i>
-                            <span>Timbangan VGM 80T</span>
-                        </div>
-                        <p class="text-xs text-slate-600 font-medium mt-0.5">Verifikasi berat SOLAS IMO</p>
-                    </div>
-                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span class="text-slate-700 font-bold">Presisi &plusmn;0.2%</span>
-                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
-                    </div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Tepat waktu jadwal &amp; SPPB tanpa hold</div>
                 </div>
-
-                <!-- Stage 3: Yard Stacking Blocks A/B/C -->
-                <div id="ribbon_stage_3" onclick="setBerandaStageFilter('stage_3')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-[#0170b9]">
-                            <span class="w-5 h-5 rounded-md bg-[#0170b9] text-white inline-flex items-center justify-center text-[11px] font-black font-mono">3</span>
-                            <span>Tahap 3</span>
-                        </span>
-                        <a href="dashboard.php?page=yard" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-[#0170b9] flex items-center justify-center text-[10px]" title="Buka Modul Yard Stacking">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </a>
-                    </div>
-                    <div>
-                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-cubes-stacked text-[#0170b9]"></i>
-                            <span>Stacking Yard A–C</span>
-                        </div>
-                        <p class="text-xs text-slate-600 font-medium mt-0.5">Reach Stacker Kalmar 45T</p>
-                    </div>
-                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span class="text-slate-700 font-bold"><?= number_format($containers_yard) ?> TEU</span>
-                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
-                    </div>
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-sm shrink-0">
+                    <i class="fa-solid fa-bullseye"></i>
                 </div>
+            </div>
 
-                <!-- Stage 4: CFS Rampa D1-D5 -->
-                <div id="ribbon_stage_4" onclick="setBerandaStageFilter('stage_4')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-orange-50/40 hover:border-orange-300 transition flex flex-col justify-between relative shadow-2xs">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-orange-700">
-                            <span class="w-5 h-5 rounded-md bg-orange-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">4</span>
-                            <span>Tahap 4</span>
-                        </span>
-                        <a href="dashboard.php?page=cfs" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-orange-600 flex items-center justify-center text-[10px]" title="Buka Modul Gudang CFS">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </a>
+            <div class="bg-white rounded-xl border border-slate-200 px-3.5 py-2.5 shadow-2xs flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                    <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400">Akurasi Forecast (MAE &amp; MAPE)</div>
+                    <div class="flex items-baseline gap-2 mt-0.5">
+                        <span id="perfMapeVal" class="text-lg font-black text-[#0170b9] font-mono">MAPE <?= $perf['forecast_mape_pct'] ?>%</span>
+                        <span id="perfMaeBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-[#0170b9] border border-blue-200 font-mono">MAE <?= $perf['forecast_mae'] ?></span>
                     </div>
-                    <div>
-                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-orange-600 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-warehouse text-orange-600"></i>
-                            <span>Gudang CFS D1–D5</span>
-                        </div>
-                        <p class="text-xs text-slate-600 font-medium mt-0.5">Stuffing &amp; stripping LCL</p>
-                    </div>
-                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span class="text-slate-700 font-bold"><?= $cfs_jobs ?> Job Aktif</span>
-                        <span class="font-bold text-[#0170b9] group-hover:text-orange-600">Filter &rarr;</span>
-                    </div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Akurasi VBS: <strong id="perfAccVal" class="text-slate-800"><?= $perf['forecast_accuracy_pct'] ?>%</strong> (&lt;10% Sangat Akurat)</div>
                 </div>
-
-                <!-- Stage 5: Reefer Cold Chain Hub -->
-                <div id="ribbon_stage_5" onclick="setBerandaStageFilter('stage_5')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-cyan-50/40 hover:border-cyan-300 transition flex flex-col justify-between relative shadow-2xs">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-cyan-700">
-                            <span class="w-5 h-5 rounded-md bg-cyan-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">5</span>
-                            <span>Tahap 5</span>
-                        </span>
-                        <a href="dashboard.php?page=reefer" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-cyan-600 flex items-center justify-center text-[10px]" title="Buka Modul Reefer Cold Chain">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </a>
-                    </div>
-                    <div>
-                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-cyan-700 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-snowflake text-cyan-600"></i>
-                            <span>Reefer Cold Chain</span>
-                        </div>
-                        <p class="text-xs text-slate-600 font-medium mt-0.5">300 steker daya 380V</p>
-                    </div>
-                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span class="text-cyan-800 font-bold"><?= $reefer_temp ?>&deg;C Stabil</span>
-                        <span class="font-bold text-cyan-700">Filter &rarr;</span>
-                    </div>
+                <div class="w-9 h-9 rounded-xl bg-blue-50 border border-blue-200 text-[#0170b9] flex items-center justify-center text-sm shrink-0">
+                    <i class="fa-solid fa-chart-line"></i>
                 </div>
+            </div>
 
-                <!-- Stage 6: Rail Siding KA 2518 ke Tanjung Priok -->
-                <div id="ribbon_stage_6" onclick="setBerandaStageFilter('stage_6')" class="pipeline-stage-card cursor-pointer group p-3 rounded-xl border border-slate-200 bg-white hover:bg-emerald-50/40 hover:border-emerald-300 transition flex flex-col justify-between relative shadow-2xs">
-                    <div class="flex items-center justify-between mb-2">
-                        <span class="inline-flex items-center gap-1.5 text-[11px] font-extrabold text-emerald-700">
-                            <span class="w-5 h-5 rounded-md bg-emerald-600 text-white inline-flex items-center justify-center text-[11px] font-black font-mono">6</span>
-                            <span>Tahap 6</span>
-                        </span>
-                        <a href="dashboard.php?page=intermodal" onclick="event.stopPropagation()" class="w-5 h-5 rounded bg-slate-50 border border-slate-200 text-slate-500 hover:text-emerald-600 flex items-center justify-center text-[10px]" title="Buka Modul Siding Kereta Api">
-                            <i class="fa-solid fa-arrow-up-right-from-square"></i>
-                        </a>
+            <div class="bg-white rounded-xl border border-slate-200 px-3.5 py-2.5 shadow-2xs flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                    <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400">Efisiensi Cycle Time</div>
+                    <div class="flex items-baseline gap-2 mt-0.5">
+                        <span id="perfCycleEffVal" class="text-lg font-black text-indigo-700 font-mono">-<?= $perf['cycle_efficiency_pct'] ?>%</span>
+                        <span class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 font-mono">TAT <span id="perfGateTatVal"><?= $perf['gate_tat_min'] ?></span>m</span>
                     </div>
-                    <div>
-                        <div class="text-xs font-extrabold text-slate-900 group-hover:text-emerald-700 transition flex items-center gap-1.5">
-                            <i class="fa-solid fa-train-subway text-emerald-600"></i>
-                            <span>Siding Rel KA 2518</span>
-                        </div>
-                        <p class="text-xs text-slate-600 font-medium mt-0.5">54,8 km ke Pel. Tj. Priok</p>
+                    <div class="text-[10px] text-slate-500 mt-0.5">vs SLA Manual 35m &bull; CEISA SPPB 14.2 dtk</div>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center text-sm shrink-0">
+                    <i class="fa-solid fa-stopwatch"></i>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 px-3.5 py-2.5 shadow-2xs flex items-center justify-between gap-2">
+                <div class="min-w-0">
+                    <div class="text-[9.5px] font-bold uppercase tracking-wider text-slate-400">Efisiensi Biaya &amp; ROI</div>
+                    <div class="flex items-baseline gap-2 mt-0.5">
+                        <span id="perfCostEffVal" class="text-lg font-black text-amber-700 font-mono"><?= $perf['cost_efficiency_pct'] ?>%</span>
+                        <span id="perfSavingVal" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 font-mono">Rp <?= number_format($perf['monthly_saving_idr'] / 1000000, 1, ',', '.') ?> Jt/bln</span>
                     </div>
-                    <div class="mt-2.5 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[11px]">
-                        <span class="text-slate-700 font-bold"><?= $loaded_w ?>/<?= $total_w ?> Gerbong</span>
-                        <span class="font-bold text-emerald-700">Filter &rarr;</span>
-                    </div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">Modal-Split KA &bull; <strong>0%</strong> Kebocoran Pendapatan</div>
+                </div>
+                <div class="w-9 h-9 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center text-sm shrink-0">
+                    <i class="fa-solid fa-sack-dollar"></i>
                 </div>
             </div>
         </div>
@@ -653,12 +657,12 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 
                 <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9.5px] text-slate-600">
                     <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#0170b9]"></span>Aktual: <strong><?= $total_trucks ?> Truk</strong></span>
-                    <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-[#ea580c]"></span>VBS: <strong>250 Slot</strong></span>
-                    <span class="text-emerald-600 font-bold">Kesesuaian: 96.8%</span>
+                    <span class="font-mono font-bold text-slate-700">MAE: <span id="chartVbsMae"><?= $perf['forecast_mae'] ?></span></span>
+                    <span class="text-emerald-600 font-bold font-mono">MAPE: <span id="chartVbsMape"><?= $perf['forecast_mape_pct'] ?>%</span></span>
                 </div>
             </div>
 
-            <!-- Col 2: Heavy Equipment SCADA OEE -->
+            <!-- Col 2: Heavy Equipment SCADA OEE (15 Unit Armada MHE) -->
             <div class="bg-white/95 backdrop-blur-xs rounded-xl shadow-2xs border border-slate-200/90 p-3 sm:p-3.5 flex flex-col justify-between relative overflow-hidden">
                 <div class="absolute -right-8 -top-8 w-32 h-32 pointer-events-none opacity-[0.04] z-0" aria-hidden="true">
                     <svg width="100%" height="100%" viewBox="0 0 100 100" fill="none" stroke="#ea580c" stroke-width="1.5">
@@ -670,13 +674,13 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 <div class="relative z-10">
                     <div class="flex justify-between items-center mb-1 pb-1.5 border-b border-slate-100">
                         <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
-                            <i class="fa-solid fa-chart-radar mr-1.5 text-orange-600 text-xs"></i>Alat Berat SCADA OEE
+                            <i class="fa-solid fa-chart-radar mr-1.5 text-orange-600 text-xs"></i>15 Armada MHE SCADA OEE
                         </h3>
-                        <span class="text-[8.5px] font-bold text-blue-700 bg-blue-50 px-1.5 py-0.5 rounded border border-blue-200 font-mono">
-                            RS-01 vs RTG
-                        </span>
+                        <a href="dashboard.php?page=alat" class="text-[8.5px] font-bold text-blue-700 bg-blue-50 hover:bg-blue-100 px-1.5 py-0.5 rounded border border-blue-200 font-mono transition">
+                            15 Unit MHE &rarr;
+                        </a>
                     </div>
-                    <p class="text-[10px] text-slate-400 mb-2">OEE 5 sumbu: Kalmar RS-01 vs RTG.</p>
+                    <p class="text-[10px] text-slate-400 mb-2">OEE 5 sumbu: 4 RS/2 TT vs 5 E-RTG vs 4 Forklift CFS.</p>
                 </div>
 
                 <div class="h-44 sm:h-48 relative w-full flex-1 flex items-center justify-center">
@@ -685,12 +689,14 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 
                 <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9.5px]">
                     <span class="text-[#0170b9] font-bold flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-[#0170b9]"></span>RS-01: <strong>91.4%</strong>
+                        <span class="w-2 h-2 rounded-full bg-[#0170b9]"></span>RS/TT (6): <strong>93.0%</strong>
                     </span>
                     <span class="text-[#ea580c] font-bold flex items-center gap-1">
-                        <span class="w-2 h-2 rounded-full bg-[#ea580c]"></span>RTG-01: <strong>88.7%</strong>
+                        <span class="w-2 h-2 rounded-full bg-[#ea580c]"></span>E-RTG (5): <strong>93.2%</strong>
                     </span>
-                    <span class="text-slate-500 font-semibold">Uptime: 98.2%</span>
+                    <span class="text-emerald-700 font-bold flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>FL CFS (4): <strong>95.8%</strong>
+                    </span>
                 </div>
             </div>
 
@@ -705,7 +711,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             <?= $fin['demurrage_box_count'] ?> Box Denda &rarr;
                         </button>
                     </div>
-                    <p class="text-[10px] text-slate-400 mb-2">Durasi inap vs batas bebas denda 3 hari.</p>
+                    <p class="text-[10px] text-slate-400 mb-2">Durasi inap aktual vs batas bebas denda 3 hari.</p>
                 </div>
 
                 <div class="h-44 sm:h-48 relative w-full flex-1">
@@ -713,9 +719,9 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
 
                 <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9.5px] text-slate-600">
-                    <span class="text-emerald-600 font-bold">1-2H: 68% Safe</span>
-                    <span class="text-amber-600 font-bold">3H: 22% Warn</span>
-                    <span class="text-rose-600 font-bold">4+H: 10% Denda</span>
+                    <span class="text-emerald-600 font-bold">1-2H: <span id="dwSafePct"><?= $dwell_b['pct_1_2'] ?>%</span> Safe</span>
+                    <span class="text-amber-600 font-bold">3H: <span id="dwWarnPct"><?= $dwell_b['pct_3'] ?>%</span> Warn</span>
+                    <span class="text-rose-600 font-bold">4+H: <span id="dwDendaPct"><?= $dwell_b['pct_4p'] ?>%</span> Denda</span>
                 </div>
             </div>
 
@@ -749,9 +755,36 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         </div>
 
         <!-- ======================================================================= -->
-        <!-- 5. FACILITY SPATIAL RADAR & CUSTOMS INSPECTION HUB (INTERACTIVE ZONES) -->
+        <!-- CONTROL TOWER WORKSPACE TABS (DECLUTTERED PORT TOS VIEW SWITCHER)       -->
         <!-- ======================================================================= -->
-        <div class="cidp-tri-panel-grid grid grid-cols-1 xl:grid-cols-12 gap-3">
+        <div class="bg-white rounded-xl p-2 shadow-2xs border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-1.5 flex-wrap">
+                <button type="button" id="workspaceTabBtn_ops" onclick="switchBerandaWorkspaceTab('ops')" class="px-3 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 bg-[#0170b9] text-white shadow-2xs cursor-pointer">
+                    <i class="fa-solid fa-satellite-dish"></i>
+                    <span>1. Konsinyasi &amp; Telemetri SCADA Live</span>
+                </button>
+                <button type="button" id="workspaceTabBtn_zones" onclick="switchBerandaWorkspaceTab('zones')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer">
+                    <i class="fa-solid fa-map-location-dot text-orange-600"></i>
+                    <span>2. Distribusi 4 Zona, Gudang CFS &amp; CEISA 4.0</span>
+                </button>
+                <button type="button" id="workspaceTabBtn_finance" onclick="switchBerandaWorkspaceTab('finance')" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer">
+                    <i class="fa-solid fa-file-invoice-dollar text-emerald-600"></i>
+                    <span>3. Buku Besar Faktur Odoo 17 &amp; Demurrage</span>
+                </button>
+                <button type="button" id="workspaceTabBtn_all" onclick="switchBerandaWorkspaceTab('all')" class="px-2.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-600 border border-slate-200 cursor-pointer" title="Tampilkan Seluruh Panel Sekaligus">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Tampilkan Semua</span>
+                </button>
+            </div>
+            <div class="text-[10.5px] text-slate-500 font-medium px-2 hidden md:block">
+                <i class="fa-solid fa-circle-info text-[#0170b9] mr-1"></i>Klik tab untuk berpindah cepat tanpa scroll panjang
+            </div>
+        </div>
+
+        <!-- ======================================================================= -->
+        <!-- 5. FACILITY SPATIAL RADAR & CUSTOMS INSPECTION HUB (TAB 2: ZONES)       -->
+        <!-- ======================================================================= -->
+        <div id="workspaceTabPanel_zones" class="hidden cidp-tri-panel-grid grid grid-cols-1 xl:grid-cols-12 gap-3 animate-fadeIn">
             
             <!-- Left: 4-Zone Spatial Terminal Distribution Grid (Clickable Cross-Filter) (4 Cols) -->
             <div class="xl:col-span-4 bg-white/95 backdrop-blur-xs rounded-xl shadow-2xs border border-slate-200/90 p-3 sm:p-3.5 flex flex-col justify-between relative overflow-hidden">
@@ -760,11 +793,16 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
                 <div class="flex items-center justify-between pb-1.5 border-b border-slate-100 mb-2 relative z-10">
                     <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
-                        <i class="fa-solid fa-map-location-dot mr-1.5 text-[#0170b9] text-xs"></i>Distribusi 4 Zona Terminal
+                        <i class="fa-solid fa-map-location-dot mr-1.5 text-[#0170b9] text-xs"></i>Distribusi 4 Zona Terminal (DB Live)
                     </h3>
-                    <a href="dashboard.php?page=denah" class="text-[9.5px] font-bold text-[#0170b9] hover:underline flex items-center gap-1">
-                        <span>GIS Denah &rarr;</span>
-                    </a>
+                    <div class="flex items-center gap-2">
+                        <a href="dashboard.php?page=twin" class="text-[9.5px] font-bold text-orange-600 hover:underline flex items-center gap-1">
+                            <span>Twin 3D &rarr;</span>
+                        </a>
+                        <a href="dashboard.php?page=denah" class="text-[9.5px] font-bold text-[#0170b9] hover:underline flex items-center gap-1">
+                            <span>GIS Denah &rarr;</span>
+                        </a>
+                    </div>
                 </div>
 
                 <div class="space-y-2 py-0.5 flex-1 flex flex-col justify-between text-[10.5px] relative z-10">
@@ -775,10 +813,10 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                                 <span class="w-4 h-4 rounded bg-orange-100 text-orange-700 flex items-center justify-center text-[9px] font-mono font-bold">Z1</span>
                                 Gerbang &amp; Buffer Truk (4.2 Ha)
                             </span>
-                            <span class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200">Lancar</span>
+                            <span id="zoneZ1PctTxt" class="text-[9px] font-bold text-emerald-700 bg-emerald-50 px-1 py-0.2 rounded border border-emerald-200"><?= $zones['z1_pct'] ?>%</span>
                         </div>
                         <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden mb-1">
-                            <div class="bg-orange-500 h-1.5 rounded-full" style="width: 35%"></div>
+                            <div id="zoneZ1Bar" class="bg-orange-500 h-1.5 rounded-full transition-all duration-500" style="width: <?= $zones['z1_pct'] ?>%"></div>
                         </div>
                         <div class="flex justify-between text-[9px] text-slate-500">
                             <span>Antrean: <strong><?= $total_trucks ?> Truk Aktif</strong></span>
@@ -786,38 +824,38 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         </div>
                     </div>
 
-                    <!-- Z2: Stacking Yard 12,500 TEU -->
+                    <!-- Z2: Stacking Yard 12,500 TEU (Blok A-E) -->
                     <div id="zoneCard_Z2" onclick="setBerandaZoneFilter('Z2')" class="spatial-zone-card cursor-pointer p-2 rounded-lg border border-slate-100 bg-slate-50/70 hover:border-blue-300 hover:bg-blue-50/30 transition">
                         <div class="flex justify-between items-center mb-1">
                             <span class="font-bold text-slate-800 flex items-center gap-1.5">
                                 <span class="w-4 h-4 rounded bg-blue-100 text-[#0170b9] flex items-center justify-center text-[9px] font-mono font-bold">Z2</span>
-                                Stacking Yard Blok A-C (16.5 Ha)
+                                Stacking Yard Blok A–E (16.5 Ha)
                             </span>
                             <span class="text-[9px] font-bold text-blue-700 bg-blue-50 px-1 py-0.2 rounded border border-blue-200"><?= $yard_occupancy ?>%</span>
                         </div>
                         <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden mb-1">
-                            <div class="bg-[#0170b9] h-1.5 rounded-full" style="width: <?= min(100, (int)$yard_occupancy) ?>%"></div>
+                            <div id="zoneZ2Bar" class="bg-[#0170b9] h-1.5 rounded-full transition-all duration-500" style="width: <?= $zones['z2_pct'] ?>%"></div>
                         </div>
                         <div class="flex justify-between text-[9px] text-slate-500">
-                            <span><?= number_format($containers_yard) ?> / 12,500 TEU</span>
+                            <span><?= number_format($containers_yard) ?> / 12,500 TEU &bull; 4 RS + 4 E-RTG</span>
                             <span class="text-[#0170b9] font-bold">Klik Filter Z2 &rarr;</span>
                         </div>
                     </div>
 
-                    <!-- Z3: CFS Warehouse Rampa D1-D5 -->
+                    <!-- Z3: CFS Warehouse Rampa D1-D5 & Palet SSCC-18 -->
                     <div id="zoneCard_Z3" onclick="setBerandaZoneFilter('Z3')" class="spatial-zone-card cursor-pointer p-2 rounded-lg border border-slate-100 bg-slate-50/70 hover:border-amber-300 hover:bg-amber-50/30 transition">
                         <div class="flex justify-between items-center mb-1">
                             <span class="font-bold text-slate-800 flex items-center gap-1.5">
                                 <span class="w-4 h-4 rounded bg-amber-100 text-amber-700 flex items-center justify-center text-[9px] font-mono font-bold">Z3</span>
-                                CFS Gudang Rampa D1-D5 (6.8 Ha)
+                                Gudang CFS &amp; Rak A–F (6.8 Ha)
                             </span>
-                            <span class="text-[9px] font-bold text-amber-800 bg-amber-50 px-1 py-0.2 rounded border border-amber-200">LCL Hub</span>
+                            <span id="zoneZ3PctTxt" class="text-[9px] font-bold text-amber-800 bg-amber-50 px-1 py-0.2 rounded border border-amber-200"><?= $zones['z3_pct'] ?>%</span>
                         </div>
                         <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden mb-1">
-                            <div class="bg-amber-500 h-1.5 rounded-full" style="width: 78%"></div>
+                            <div id="zoneZ3Bar" class="bg-amber-500 h-1.5 rounded-full transition-all duration-500" style="width: <?= $zones['z3_pct'] ?>%"></div>
                         </div>
                         <div class="flex justify-between text-[9px] text-slate-500">
-                            <span>Luas: <strong>4.000 m²</strong> (<?= $cfs_jobs ?> Jobs)</span>
+                            <span><strong><?= $cfs_pallets_rack ?> Palet SSCC-18</strong> &bull; <?= $cfs_jobs ?> Job &bull; FL-01..04</span>
                             <span class="text-amber-700 font-bold">Klik Filter Z3 &rarr;</span>
                         </div>
                     </div>
@@ -829,13 +867,13 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                                 <span class="w-4 h-4 rounded bg-cyan-100 text-cyan-700 flex items-center justify-center text-[9px] font-mono font-bold">Z4</span>
                                 Siding KA &amp; Reefer Hub (7.5 Ha)
                             </span>
-                            <span class="text-[9px] font-bold text-cyan-800 bg-cyan-50 px-1 py-0.2 rounded border border-cyan-200">Cold Chain</span>
+                            <span id="zoneZ4PctTxt" class="text-[9px] font-bold text-cyan-800 bg-cyan-50 px-1 py-0.2 rounded border border-cyan-200"><?= $zones['z4_pct'] ?>%</span>
                         </div>
                         <div class="w-full bg-slate-200/80 rounded-full h-1.5 overflow-hidden mb-1">
-                            <div class="bg-cyan-500 h-1.5 rounded-full" style="width: 80%"></div>
+                            <div id="zoneZ4Bar" class="bg-cyan-500 h-1.5 rounded-full transition-all duration-500" style="width: <?= $zones['z4_pct'] ?>%"></div>
                         </div>
                         <div class="flex justify-between text-[9px] text-slate-500">
-                            <span>Rel 2x600m &bull; 300 Plugs</span>
+                            <span>RTG-01 Rel 2x600m &bull; <?= $reefer_plugs ?>/300 Plugs</span>
                             <span class="text-cyan-700 font-bold">Klik Filter Z4 &rarr;</span>
                         </div>
                     </div>
@@ -843,7 +881,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 
                 <div class="pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9.5px] text-slate-500 mt-2 relative z-10">
                     <span>Luas Master Plan: <strong>35 Hektar</strong></span>
-                    <span class="text-emerald-700 font-bold">26 BOM HW OK</span>
+                    <span class="text-emerald-700 font-bold">15 Unit MHE + 26 BOM HW OK</span>
                 </div>
             </div>
 
@@ -906,8 +944,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                                     <i class="fa-solid fa-magnifying-glass-chart"></i>
                                 </div>
                                 <div>
-                                    <h4 class="font-bold text-slate-900 text-[11px]">Dermaga Pemeriksaan Behandle</h4>
-                                    <p class="text-[9px] text-slate-400">Dermaga Fisik &amp; Karantina KPU Bea Cukai</p>
+                                    <h4 class="font-bold text-slate-900 text-[11px]">Dermaga Pemeriksaan Behandle (Blok E)</h4>
+                                    <p class="text-[9px] text-slate-400">Forklift FL-02 &amp; Shuttle CDP-TT-02 Siaga</p>
                                 </div>
                             </div>
                             <span class="text-[8.5px] font-extrabold text-blue-700 bg-blue-50 border border-blue-200 px-1.5 py-0.5 rounded font-mono">
@@ -947,7 +985,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 
                 <div class="mt-2 pt-1.5 border-t border-slate-100 flex items-center justify-between text-[9px] text-slate-600">
                     <span><strong class="text-[#0170b9]">Lo-Lo:</strong> 45%</span>
-                    <span><strong class="text-[#ea580c]">Storage:</strong> 30%</span>
+                    <span><strong class="text-[#ea580c]">Storage/CFS:</strong> 30%</span>
                     <span><strong class="text-[#06b6d4]">Reefer:</strong> 15%</span>
                     <span><strong class="text-[#6366f1]">VGM:</strong> 10%</span>
                 </div>
@@ -958,7 +996,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         <!-- ======================================================================= -->
         <!-- 6. OPSI C: PILAR KE-3 ALIRAN FINANSIAL, DEMURRAGE & ODOO 17 ERP LEDGER -->
         <!-- ======================================================================= -->
-        <div class="bg-white/95 backdrop-blur-xs rounded-xl p-3.5 sm:p-4 shadow-2xs border border-slate-200/90 relative overflow-hidden">
+        <div id="workspaceTabPanel_finance" class="hidden bg-white/95 backdrop-blur-xs rounded-xl p-3.5 sm:p-4 shadow-2xs border border-slate-200/90 relative overflow-hidden animate-fadeIn">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-100">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center text-xs flex-shrink-0">
@@ -973,7 +1011,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                                 <i class="fa-solid fa-plug-circle-check mr-0.5"></i>XML-RPC CONNECTED (<span id="odooLatencyTxt"><?= $latencies['odoo_erp'] ?></span>ms)
                             </span>
                         </div>
-                        <p class="text-[10px] text-slate-500">Akrual storage, demurrage &gt;3 hari &amp; status rilis Gate-Out.</p>
+                        <p class="text-[10px] text-slate-500">Akrual storage, jasa gudang CFS, demurrage &gt;3 hari &amp; status rilis Gate-Out.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -1106,7 +1144,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
         </div>
 
         <!-- ======================================================================= -->
-        <!-- 7. BOTTOM EXECUTION CENTER & INTERACTIVE CONSIGNMENT TRACKING           -->
+        <!-- 7. BOTTOM EXECUTION CENTER & INTERACTIVE CONSIGNMENT TRACKING (TAB 1)   -->
         <!-- ======================================================================= -->
         
         <!-- Banner Status Filter Lintas-Elemen (Tampil saat filter Stage / Zona aktif) -->
@@ -1126,7 +1164,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
             </button>
         </div>
 
-        <div class="cidp-tri-panel-grid grid grid-cols-1 xl:grid-cols-12 gap-3">
+        <div id="workspaceTabPanel_ops" class="cidp-tri-panel-grid grid grid-cols-1 xl:grid-cols-12 gap-3 animate-fadeIn">
             
             <!-- Left: Live SCADA Field Telemetry Feed (5 Cols) -->
             <div class="xl:col-span-5 bg-white rounded-xl shadow-2xs border border-slate-200 p-3 sm:p-3.5 flex flex-col justify-between">
@@ -1145,8 +1183,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
 
                 <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-[10px] mt-2">
                     <span id="scadaFeedCounter" class="text-slate-400 font-semibold">Menampilkan aktivitas terbaru</span>
-                    <a href="dashboard.php?page=kontainer" class="font-bold text-[#0170b9] hover:underline inline-flex items-center gap-1 transition">
-                        <span>Riwayat Log Penuh</span>
+                    <a href="dashboard.php?page=twin" class="font-bold text-[#0170b9] hover:underline inline-flex items-center gap-1 transition">
+                        <span>Buka Digital Twin 3D</span>
                         <i class="fa-solid fa-arrow-right text-[9px]"></i>
                     </a>
                 </div>
@@ -1193,7 +1231,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <!-- Quick Filter Pills + Limit -->
                         <div class="flex items-center gap-1 flex-wrap text-[9.5px]">
                             <button type="button" onclick="setBerandaCategoryFilter('all')" id="catBtn_all" class="px-2 py-1 rounded-md font-bold bg-[#0170b9] text-white cursor-pointer transition">Semua</button>
-                            <button type="button" onclick="setBerandaCategoryFilter('dry_yard')" id="catBtn_dry_yard" class="px-2 py-1 rounded-md font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer transition">Blok A-C</button>
+                            <button type="button" onclick="setBerandaCategoryFilter('dry_yard')" id="catBtn_dry_yard" class="px-2 py-1 rounded-md font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer transition">Blok A–E</button>
                             <button type="button" onclick="setBerandaCategoryFilter('reefer')" id="catBtn_reefer" class="px-2 py-1 rounded-md font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200 hover:bg-cyan-100 cursor-pointer transition">Reefer</button>
                             <button type="button" onclick="setBerandaCategoryFilter('rail')" id="catBtn_rail" class="px-2 py-1 rounded-md font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 cursor-pointer transition">Siding KA</button>
                             <button type="button" onclick="setBerandaCategoryFilter('demurrage')" id="catBtn_demurrage" class="px-2 py-1 rounded-md font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer transition">⚠️ Demurrage</button>
@@ -1431,18 +1469,51 @@ let berandaState = {
 const stageNamesMap = {
     'stage_1': 'Stage 1: Gate-In ANPR OCR & Identifikasi Truk',
     'stage_2': 'Stage 2: Jembatan Timbang SOLAS VGM 80T',
-    'stage_3': 'Stage 3: Yard Stacking Blok A, B, dan C',
-    'stage_4': 'Stage 4: Gudang CFS LCL Rampa D1–D5',
-    'stage_5': 'Stage 5: Reefer Cold Chain Hub (-20.2°C)',
-    'stage_6': 'Stage 6: Jalur Siding Kereta Api KA 2518 Pasoso–Priok'
+    'stage_3': 'Stage 3: Yard Stacking Blok A–E (4 RS + 4 E-RTG)',
+    'stage_4': 'Stage 4: Gudang CFS LCL Rampa D1–D5 & Rak Palet SSCC-18 (FL-01..04)',
+    'stage_5': 'Stage 5: Reefer Cold Chain Hub (-18.0°C • RS-03)',
+    'stage_6': 'Stage 6: Jalur Siding Kereta Api KA Pasoso (RMGC RTG-01 & CDP-TT-01)'
 };
 
 const zoneNamesMap = {
     'Z1': 'Zona Spasial Z1: Gerbang ANPR, Timbangan VGM & Buffer Truk (4.2 Ha)',
-    'Z2': 'Zona Spasial Z2: Lapangan Penumpukan Peti Kemas Blok A–C (16.5 Ha)',
-    'Z3': 'Zona Spasial Z3: Gudang Konsolidasi CFS Rampa D1–D5 (6.8 Ha)',
+    'Z2': 'Zona Spasial Z2: Lapangan Penumpukan Peti Kemas Blok A–E (16.5 Ha)',
+    'Z3': 'Zona Spasial Z3: Gudang Konsolidasi CFS & Rak Palet SSCC-18 (6.8 Ha)',
     'Z4': 'Zona Spasial Z4: Siding Kereta Api Intermodal & Reefer Hub (7.5 Ha)'
 };
+
+function switchBerandaWorkspaceTab(tabKey) {
+    const panels = {
+        ops: document.getElementById('workspaceTabPanel_ops'),
+        zones: document.getElementById('workspaceTabPanel_zones'),
+        finance: document.getElementById('workspaceTabPanel_finance')
+    };
+    const btns = {
+        ops: document.getElementById('workspaceTabBtn_ops'),
+        zones: document.getElementById('workspaceTabBtn_zones'),
+        finance: document.getElementById('workspaceTabBtn_finance'),
+        all: document.getElementById('workspaceTabBtn_all')
+    };
+    const activeCls = 'px-3 py-1.5 rounded-lg text-xs font-extrabold transition flex items-center gap-1.5 bg-[#0170b9] text-white shadow-2xs cursor-pointer';
+    const inactiveCls = 'px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 cursor-pointer';
+
+    Object.keys(btns).forEach(k => {
+        if (btns[k]) btns[k].className = (k === tabKey) ? activeCls : inactiveCls;
+    });
+
+    if (tabKey === 'all') {
+        Object.values(panels).forEach(p => { if (p) p.classList.remove('hidden'); });
+    } else {
+        Object.keys(panels).forEach(k => {
+            if (!panels[k]) return;
+            if (k === tabKey) panels[k].classList.remove('hidden');
+            else panels[k].classList.add('hidden');
+        });
+    }
+    if ((tabKey === 'zones' || tabKey === 'all') && window.cidpWeeklyRevChart) {
+        setTimeout(() => window.cidpWeeklyRevChart.resize(), 60);
+    }
+}
 
 function formatRupiahJs(num) {
     return 'Rp ' + Number(num || 0).toLocaleString('id-ID');
@@ -1586,7 +1657,7 @@ function getFilteredConsignments() {
         if (berandaState.activeZone && c.zone_key !== berandaState.activeZone) return false;
 
         if (berandaState.activeCategory === 'dry_yard') {
-            if (!['A', 'B', 'C'].includes(c.block)) return false;
+            if (!['A', 'B', 'C', 'D', 'E'].includes(c.block)) return false;
         } else if (berandaState.activeCategory === 'reefer') {
             if (c.cargo_type !== 'reefer' && c.block !== 'REEFER') return false;
         } else if (berandaState.activeCategory === 'rail') {
@@ -1785,7 +1856,9 @@ function resetBerandaFilters() {
 // 5. Modal Inspeksi 3-Aliran Kontainer
 function openBerandaInspectModal(encodedCtr) {
     try {
-        const c = JSON.parse(decodeURIComponent(encodedCtr));
+        const c = (typeof encodedCtr === 'object' && encodedCtr !== null)
+            ? encodedCtr
+            : JSON.parse(decodeURIComponent(encodedCtr));
         berandaState.inspectedContainer = c;
         document.getElementById('mdlCtrNumber').innerText = c.container_number;
         document.getElementById('mdlCtrOwner').innerText = c.owner_company;
@@ -1866,12 +1939,59 @@ async function fetchLiveBerandaTelemetry(manual = false) {
             setTxt('kpiCustomsVal', Number(k.customs_pct).toFixed(1) + '%');
             setTxt('kpiCustomsBox', k.customs_cleared + '/' + k.customs_total);
             setTxt('kpiCfsJobs', k.cfs_jobs);
+            if (typeof k.cfs_pallets_in_rack !== 'undefined') {
+                setTxt('kpiCfsPalletsRack', k.cfs_pallets_in_rack);
+                setTxt('ribbonCfsPalletCount', k.cfs_pallets_in_rack);
+                setTxt('stripCfsPallets', k.cfs_pallets_in_rack);
+            }
+            if (typeof k.cfs_weight_kg !== 'undefined') {
+                setTxt('kpiCfsWeightTxt', Math.round(k.cfs_weight_kg).toLocaleString('id-ID'));
+            }
+            if (typeof k.cfs_volume_cbm !== 'undefined') {
+                setTxt('stripCfsCbm', Number(k.cfs_volume_cbm).toFixed(1));
+            }
             if (typeof k.cfs_pct !== 'undefined') {
                 setTxt('kpiCfsPct', Math.round(k.cfs_pct) + '%');
                 setRing('kpiCfsRing', k.cfs_pct);
             }
             setTxt('badgeScadaUptime', 'SCADA ' + k.scada_uptime + '%');
             setTxt('ceisaSppbSec', k.sppb_sec + ' Detik');
+
+            if (data.mhe) {
+                setTxt('mheRsCount', data.mhe.rs_total || 4);
+                setTxt('mheRtgCount', data.mhe.rtg_total || 5);
+                setTxt('mheFlCount', data.mhe.fl_total || 4);
+                setTxt('mheTtCount', data.mhe.tt_total || 2);
+                setTxt('mheActiveSummary', `${data.mhe.active_units || 0} Aktif • ${data.mhe.idle_units || 0} Siaga`);
+            }
+
+            if (data.zones) {
+                const setBar = (barId, txtId, pct) => {
+                    const b = document.getElementById(barId);
+                    const t = document.getElementById(txtId);
+                    if (b) b.style.width = pct + '%';
+                    if (t) t.innerText = pct + '%';
+                };
+                setBar('zoneZ1Bar', 'zoneZ1PctTxt', data.zones.z1_pct);
+                setBar('zoneZ2Bar', null, data.zones.z2_pct);
+                setBar('zoneZ3Bar', 'zoneZ3PctTxt', data.zones.z3_pct);
+                setBar('zoneZ4Bar', 'zoneZ4PctTxt', data.zones.z4_pct);
+            }
+
+            if (data.dwell_buckets) {
+                setTxt('dwSafePct', data.dwell_buckets.pct_1_2 + '%');
+                setTxt('dwWarnPct', data.dwell_buckets.pct_3 + '%');
+                setTxt('dwDendaPct', data.dwell_buckets.pct_4p + '%');
+                if (window.cidpDwellingChart) {
+                    window.cidpDwellingChart.data.datasets[0].data = [
+                        data.dwell_buckets.pct_1_2,
+                        data.dwell_buckets.pct_3,
+                        data.dwell_buckets.pct_4_5,
+                        data.dwell_buckets.pct_6p
+                    ];
+                    window.cidpDwellingChart.update('none');
+                }
+            }
 
             // Update Latencies
             if (data.latencies) {
@@ -1892,6 +2012,26 @@ async function fetchLiveBerandaTelemetry(manual = false) {
                 setTxt('finDemurrageAccrual', formatRupiahJs(data.financial.demurrage_accrual_rp));
                 setTxt('finDemurrageCount', data.financial.demurrage_box_count);
                 setTxt('finSettlementPct', data.financial.settlement_pct + '%');
+            }
+
+            // Update Quantitative SLA Performance (OTIF, MAE/MAPE, Cycle Time, Cost Efficiency)
+            if (data.performance) {
+                const pf = data.performance;
+                setTxt('perfOtifVal', Number(pf.otif_rate_pct).toFixed(1) + '%');
+                setTxt('perfMapeVal', 'MAPE ' + Number(pf.forecast_mape_pct).toFixed(1) + '%');
+                setTxt('perfMaeBadge', 'MAE ' + pf.forecast_mae);
+                setTxt('perfAccVal', Number(pf.forecast_accuracy_pct).toFixed(1) + '%');
+                setTxt('perfCycleEffVal', '-' + Number(pf.cycle_efficiency_pct).toFixed(1) + '%');
+                setTxt('perfGateTatVal', pf.gate_tat_min);
+                setTxt('perfCostEffVal', Number(pf.cost_efficiency_pct).toFixed(1) + '%');
+                setTxt('perfSavingVal', 'Rp ' + (Number(pf.monthly_saving_idr) / 1000000).toFixed(1).replace('.', ',') + ' Jt/bln');
+                setTxt('chartVbsMae', pf.forecast_mae);
+                setTxt('chartVbsMape', Number(pf.forecast_mape_pct).toFixed(1) + '%');
+                if (window.cidpGateVbsChart && Array.isArray(pf.actual_series) && Array.isArray(pf.forecast_series)) {
+                    window.cidpGateVbsChart.data.datasets[0].data = pf.actual_series;
+                    window.cidpGateVbsChart.data.datasets[1].data = pf.forecast_series;
+                    window.cidpGateVbsChart.update('none');
+                }
             }
 
             renderBerandaInvoices();
@@ -1990,14 +2130,14 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. Dual Smooth Area Chart: Gate Throughput vs VBS Hourly Demand
     const gateVbsCanvas = document.getElementById('gateVbsAreaChart');
     if (gateVbsCanvas) {
-        new Chart(gateVbsCanvas, {
+        window.cidpGateVbsChart = new Chart(gateVbsCanvas, {
             type: 'line',
             data: {
-                labels: ['06:00', '08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'],
+                labels: <?= json_encode($perf['forecast_labels']) ?>,
                 datasets: [
                     {
                         label: 'Aktual Gate-In',
-                        data: [14, 28, 42, 35, 48, 52, 38, 22, 16],
+                        data: <?= json_encode($perf['actual_series']) ?>,
                         borderColor: '#0170b9',
                         backgroundColor: 'rgba(1, 112, 185, 0.10)',
                         fill: true,
@@ -2010,8 +2150,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         pointHoverRadius: 5
                     },
                     {
-                        label: 'Kuota VBS',
-                        data: [18, 32, 38, 42, 44, 46, 34, 24, 18],
+                        label: 'Forecast VBS',
+                        data: <?= json_encode($perf['forecast_series']) ?>,
                         borderColor: '#ea580c',
                         backgroundColor: 'transparent',
                         fill: false,
@@ -2051,31 +2191,40 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 2. Heavy Equipment SCADA OEE: 5-Axis Pentagon Spider Radar Chart
+    // 2. Heavy Equipment SCADA OEE: 5-Axis Pentagon Spider Radar Chart (15 Unit MHE)
     const radarCanvas = document.getElementById('scadaEquipmentRadarChart');
     if (radarCanvas) {
         new Chart(radarCanvas, {
             type: 'radar',
             data: {
-                labels: ['Moves/Jam', 'Efisiensi BBM', 'Uptime Mesin', 'Maneuver Speed', 'K3 Safety'],
+                labels: ['Moves/Jam', 'Efisiensi Energi', 'Uptime Mesin', 'Maneuver Speed', 'K3 Safety'],
                 datasets: [
                     {
-                        label: 'Kalmar RS-01',
-                        data: [92, 85, 96, 88, 95],
+                        label: '4 RS & 2 Shuttle (6 Unit)',
+                        data: [93, 88, 97, 91, 96],
                         borderColor: '#0170b9',
                         backgroundColor: 'rgba(1, 112, 185, 0.10)',
-                        borderWidth: 2.2,
+                        borderWidth: 2.0,
                         pointBackgroundColor: '#0170b9',
-                        pointRadius: 3
+                        pointRadius: 2.5
                     },
                     {
-                        label: 'RTG Konecranes',
-                        data: [88, 92, 94, 80, 98],
+                        label: '5 E-RTG & RMGC (5 Unit)',
+                        data: [90, 96, 95, 86, 99],
                         borderColor: '#ea580c',
-                        backgroundColor: 'rgba(234, 88, 12, 0.09)',
-                        borderWidth: 2.2,
+                        backgroundColor: 'rgba(234, 88, 12, 0.08)',
+                        borderWidth: 2.0,
                         pointBackgroundColor: '#ea580c',
-                        pointRadius: 3
+                        pointRadius: 2.5
+                    },
+                    {
+                        label: '4 Forklift CFS (4 Unit)',
+                        data: [94, 98, 97, 92, 98],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.08)',
+                        borderWidth: 2.0,
+                        pointBackgroundColor: '#10b981',
+                        pointRadius: 2.5
                     }
                 ]
             },
@@ -2085,7 +2234,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: {
                         position: 'bottom',
-                        labels: { usePointStyle: true, boxWidth: 9, padding: 12, font: { size: 11.5, weight: '600' }, color: '#334155' }
+                        labels: { usePointStyle: true, boxWidth: 8, padding: 8, font: { size: 10, weight: '600' }, color: '#334155' }
                     }
                 },
                 scales: {
@@ -2096,7 +2245,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         grid: { color: '#e2e8f0' },
                         angleLines: { color: '#e2e8f0' },
                         pointLabels: {
-                            font: { size: 11, weight: '700' },
+                            font: { size: 10.5, weight: '700' },
                             color: '#334155'
                         }
                     }
@@ -2105,16 +2254,16 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // 3. Container Dwelling Time & Demurrage Risk (Interactive Click filters Demurrage)
+    // 3. Container Dwelling Time & Demurrage Risk (100% Database-Driven)
     const dwellingCanvas = document.getElementById('dwellingTimeBarChart');
     if (dwellingCanvas) {
-        new Chart(dwellingCanvas, {
+        window.cidpDwellingChart = new Chart(dwellingCanvas, {
             type: 'bar',
             data: {
                 labels: ['1-2 Hari', '3 Hari', '4-5 Hari', '6+ Hari'],
                 datasets: [{
                     label: 'Porsi Peti Kemas (%)',
-                    data: [68, 22, 7, 3],
+                    data: <?= json_encode([$dwell_b['pct_1_2'], $dwell_b['pct_3'], $dwell_b['pct_4_5'], $dwell_b['pct_6p']]) ?>,
                     backgroundColor: ['#10b981', '#f59e0b', '#ea580c', '#ef4444'],
                     borderRadius: 6,
                     barThickness: 26
@@ -2144,7 +2293,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 scales: {
                     y: {
                         beginAtZero: true,
-                        max: 80,
+                        max: 100,
                         grid: { borderDash: [2, 4], color: '#e2e8f0' },
                         ticks: {
                             font: { size: 10.5 },
@@ -2217,7 +2366,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 5. Weekly Revenue Breakdown: Stacked Bar Chart
     const revenueCanvas = document.getElementById('weeklyRevenueChart');
     if (revenueCanvas) {
-        new Chart(revenueCanvas, {
+        window.cidpWeeklyRevChart = new Chart(revenueCanvas, {
             type: 'bar',
             data: {
                 labels: ['H-6', 'H-5', 'H-4', 'H-3', 'H-2', 'H-1', 'Hari Ini'],
@@ -2229,7 +2378,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         borderRadius: { topLeft: 0, topRight: 0, bottomLeft: 2, bottomRight: 2 }
                     },
                     {
-                        label: 'Storage',
+                        label: 'Storage & CFS',
                         data: [9.5, 10.2, 9.8, 11.5, 12.0, 10.1, 13.8],
                         backgroundColor: '#ea580c'
                     },
@@ -2285,7 +2434,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // =============================================================================
 // TOC UNIVERSAL ASSET & CARGO LIVE LOCATOR CONTROLLER
 // =============================================================================
-let currentTrackedAsset = 'MSCU9180379';
+let currentTrackedAsset = '';
 
 function cycleSyncSpeed() {
     const speeds = [5, 15, 30];
@@ -2299,11 +2448,17 @@ function cycleSyncSpeed() {
     if (cd) cd.innerText = berandaState.syncInterval + 's';
 }
 
+function closeTocResultPanel() {
+    const panel = document.getElementById('tocLiveResultPanel');
+    if (panel) panel.classList.add('hidden');
+}
+
 function clearTocSearch() {
     const inp = document.getElementById('tocAssetSearchInput');
     const btn = document.getElementById('btnTocClearSearch');
     if (inp) { inp.value = ''; inp.focus(); }
     if (btn) btn.classList.add('hidden');
+    closeTocResultPanel();
 }
 
 function trackSampleAsset(q) {
@@ -2327,6 +2482,8 @@ function executeTocSearch(queryOverride, silent = false) {
         .then(r => r.json())
         .then(data => {
             if (data.success && data.found) {
+                const panel = document.getElementById('tocLiveResultPanel');
+                if (panel) panel.classList.remove('hidden');
                 renderTocResult(data);
             } else {
                 if (!silent) alert(data.message || 'Aset tidak ditemukan');
@@ -2382,17 +2539,16 @@ function renderTocResult(data) {
         }
     }
 
-    // Update Mini Step Flow Ribbon
     ['OUTSIDE', 'Z1', 'Z2', 'Z3', 'Z4', 'GATE_OUT'].forEach(st => {
         const dot = document.getElementById('flowStep_' + st);
         if (dot) {
-            dot.className = 'w-2.5 h-2.5 rounded-full bg-slate-300 transition';
+            dot.className = 'w-2 h-2 rounded-full bg-slate-300 transition';
         }
     });
 
     const activeStepDot = document.getElementById('flowStep_' + p.zone_code);
     if (activeStepDot) {
-        activeStepDot.className = 'w-2.5 h-2.5 rounded-full bg-orange-600 ring-2 ring-orange-200 animate-pulse';
+        activeStepDot.className = 'w-2 h-2 rounded-full bg-orange-600 ring-2 ring-orange-200 animate-pulse';
     }
 }
 
@@ -2405,14 +2561,4 @@ function inspectCurrentTocAsset() {
         window.location.href = 'dashboard.php?page=kontainer&search=' + encodeURIComponent(currentTrackedAsset);
     }
 }
-
-// Inisialisasi pelacakan default saat DOM selesai
-document.addEventListener('DOMContentLoaded', function() {
-    setTimeout(function() {
-        if (typeof executeTocSearch === 'function') {
-            executeTocSearch('MSCU9180379');
-        }
-    }, 400);
-});
-
 </script>

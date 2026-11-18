@@ -44,9 +44,17 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['alat_actio
 
                 $fee = ($job_type === 'RAIL_LOAD') ? 250000 : 150000;
 
-                // 1. Update status armada alat
-                $stmtUpEq = $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = ?, last_updated = NOW() WHERE equipment_id = ?");
-                $stmtUpEq->execute([$ctr_num, $t_block, $eq_id]);
+                // 1. Update status armada alat + koordinat GPS/RTK blok tujuan (WCS -> MHE Spatial Sync)
+                $blockCoords = [
+                    'A' => [270.0, 175.0], 'B' => [490.0, 175.0], 'C' => [270.0, 385.0],
+                    'D' => [490.0, 385.0], 'E' => [770.0, 385.0], 'REEFER' => [770.0, 175.0],
+                    'RAIL' => [600.0, 625.0], 'CFS' => [210.0, 520.0]
+                ];
+                $bc = $blockCoords[$t_block] ?? [360.0, 240.0];
+                $gx = round($bc[0] + (($t_bay % 4) * 12.0), 2);
+                $gy = round($bc[1] + (($t_row % 4) * 10.0), 2);
+                $stmtUpEq = $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = ?, gps_x = ?, gps_y = ?, last_updated = NOW() WHERE equipment_id = ?");
+                $stmtUpEq->execute([$ctr_num, $t_block, $gx, $gy, $eq_id]);
 
                 // 2. Update koordinat fisik kontainer di database (status ENUM valid: in_yard / on_rail)
                 $newStatus = ($job_type === 'RAIL_LOAD' || $t_block === 'RAIL') ? 'on_rail' : 'in_yard';
@@ -134,9 +142,15 @@ try {
 $total_units = count($equipment_list);
 $operating_units = 0;
 $idle_units = 0;
+$cnt_rs = 0; $cnt_rtg = 0; $cnt_fl = 0; $cnt_tt = 0;
 foreach ($equipment_list as $eq) {
     if ($eq['status'] === 'operating' || $eq['status'] === 'carrying') $operating_units++;
     else $idle_units++;
+    $et = strtoupper($eq['equipment_type'] ?? '');
+    if (strpos($et, 'STACKER') !== false) $cnt_rs++;
+    elseif (strpos($et, 'RTG') !== false) $cnt_rtg++;
+    elseif (strpos($et, 'FORKLIFT') !== false) $cnt_fl++;
+    elseif (strpos($et, 'TRACTOR') !== false) $cnt_tt++;
 }
 ?>
 
@@ -194,9 +208,9 @@ foreach ($equipment_list as $eq) {
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2">
         <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between hover:border-orange-300 transition">
             <div>
-                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Armada Aktif</p>
-                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5"><?= $total_units ?> <span class="text-[10px] font-medium text-slate-400">Unit</span></h3>
-                <div class="text-[9px] text-blue-600 font-medium">3 RS + 1 RTG</div>
+                <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Armada &amp; MHE Aktif</p>
+                <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5"><?= $total_units ?> <span class="text-[10px] font-medium text-slate-400">Unit Terpetakan</span></h3>
+                <div class="text-[9px] text-blue-600 font-semibold font-mono"><?= $cnt_rs ?> RS &bull; <?= $cnt_rtg ?> RTG &bull; <?= $cnt_fl ?> FL &bull; <?= $cnt_tt ?> Shuttle</div>
             </div>
             <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-xs">
                 <i class="fa-solid fa-dolly"></i>
@@ -240,171 +254,152 @@ foreach ($equipment_list as $eq) {
         </div>
     </div>
 
-    <!-- PETA SKEMATIK POSISI ALAT BERAT DI TERMINAL (RADAR GRID) -->
+    <!-- PETA SKEMATIK PEMETAAN ZONA SELURUH ARMADA & MHE (15 UNIT) -->
     <div class="bg-white rounded-xl p-3 shadow-2xs border border-slate-200/80">
-        <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/80">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 mb-2.5 border-b border-slate-200/80">
             <div>
                 <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
-                    <i class="fa-solid fa-map-location-dot mr-1.5 text-orange-600"></i>Posisi Live Alat Berat Terminal
+                    <i class="fa-solid fa-map-location-dot mr-1.5 text-orange-600"></i>Pemetaan Zona Live Armada &amp; MHE Terminal (<?= $total_units ?> Unit)
                 </h3>
-                <p class="text-[9px] text-slate-400 mt-0.5">Sebaran unit aktif per zona yard.</p>
+                <p class="text-[9px] text-slate-400 mt-0.5">Sinkron dengan aset 3D Simulator: Reach Stacker, E-RTG Yard/Rail, Forklift Gudang CFS, &amp; Shuttle Tractor.</p>
             </div>
             <div class="flex items-center space-x-2.5 text-[10px]">
                 <span class="flex items-center text-slate-600 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-1"></span>Standby</span>
-                <span class="flex items-center text-slate-600 font-medium"><span class="w-2 h-2 rounded-full bg-purple-600 mr-1 animate-ping"></span>Sedang Memindahkan</span>
+                <span class="flex items-center text-slate-600 font-medium"><span class="w-2 h-2 rounded-full bg-orange-500 mr-1 animate-ping"></span>Beroperasi</span>
             </div>
         </div>
 
-        <div class="bg-gradient-to-br from-blue-50 to-slate-50 rounded-xl p-3 text-slate-800 relative overflow-hidden border border-blue-200 shadow-xs">
-            <?php
-            $rs01 = $eq_map['RS-01'] ?? ['operator_name' => 'Budi Santoso', 'status' => 'idle', 'current_container' => '', 'last_block' => 'A', 'fuel_percent' => 85];
-            $rs02 = $eq_map['RS-02'] ?? ['operator_name' => 'Agus Setiawan', 'status' => 'idle', 'current_container' => '', 'last_block' => 'B', 'fuel_percent' => 87];
-            $rs03 = $eq_map['RS-03'] ?? ['operator_name' => 'Rudi Hermawan', 'status' => 'idle', 'current_container' => '', 'last_block' => 'R', 'fuel_percent' => 78];
-            $rtg01 = $eq_map['RTG-01'] ?? ['operator_name' => 'Joko Susilo', 'status' => 'idle', 'current_container' => '', 'last_block' => 'S', 'fuel_percent' => 95];
-
-            $rs01_op = ($rs01['status'] === 'operating' || $rs01['status'] === 'carrying');
-            $rs02_op = ($rs02['status'] === 'operating' || $rs02['status'] === 'carrying');
-            $rs03_op = ($rs03['status'] === 'operating' || $rs03['status'] === 'carrying');
-            $rtg01_op = ($rtg01['status'] === 'operating' || $rtg01['status'] === 'carrying');
-            ?>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-2.5 mb-2.5">
-                
-                <!-- Blok A (RS-01) -->
-                <div class="bg-white border <?= $rs01_op ? 'border-orange-300' : 'border-slate-200' ?> rounded-xl p-2.5 shadow-2xs">
-                    <div class="flex justify-between items-center mb-1.5">
-                        <span class="text-[11px] font-extrabold text-slate-700">BLOK A (Dry 40ft)</span>
-                        <span class="w-2 h-2 rounded-full <?= $rs01_op ? 'bg-orange-500 animate-ping' : 'bg-emerald-500' ?>"></span>
+        <?php
+        $zoneGroups = [
+            ['title' => 'Yard Utara • Blok A &amp; B', 'badge' => 'text-blue-700 bg-blue-50 border-blue-200', 'ids' => ['RTG-02', 'RS-01', 'RTG-03', 'RS-02']],
+            ['title' => 'Yard Selatan • Blok C &amp; D', 'badge' => 'text-emerald-700 bg-emerald-50 border-emerald-200', 'ids' => ['RTG-04', 'RS-04', 'RTG-05']],
+            ['title' => 'Reefer, Blok E &amp; Behandle', 'badge' => 'text-cyan-700 bg-cyan-50 border-cyan-200', 'ids' => ['RS-03', 'FL-02', 'CDP-TT-02']],
+            ['title' => 'Gudang CFS (Rampa D1–D5)', 'badge' => 'text-amber-700 bg-amber-50 border-amber-200', 'ids' => ['FL-01', 'FL-03', 'FL-04']],
+            ['title' => 'Rail Siding KA Pasoso', 'badge' => 'text-indigo-700 bg-indigo-50 border-indigo-200', 'ids' => ['RTG-01', 'CDP-TT-01']],
+        ];
+        ?>
+        <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-2.5">
+            <?php foreach ($zoneGroups as $zg): ?>
+                <div class="bg-slate-50/70 border border-slate-200 rounded-xl p-2.5 space-y-1.5">
+                    <div class="flex items-center justify-between pb-1 border-b border-slate-200/80">
+                        <span class="text-[10px] font-extrabold text-slate-800"><?= $zg['title'] ?></span>
+                        <span class="text-[9px] font-bold px-1.5 py-0.2 rounded border <?= $zg['badge'] ?>"><?= count($zg['ids']) ?> Unit</span>
                     </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center space-x-2.5">
-                        <span class="font-mono font-bold <?= $rs01_op ? 'text-orange-700 bg-orange-50 border border-orange-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200' ?> text-xs px-1.5 py-0.5 rounded">RS-01</span>
-                        <div class="text-xs">
-                            <strong class="text-slate-900 block text-[11px]"><?= htmlspecialchars($rs01['operator_name']) ?></strong>
-                            <?php if ($rs01_op && !empty($rs01['current_container'])): ?>
-                                <span class="text-orange-700 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs01['current_container']) ?></span>
-                            <?php else: ?>
-                                <span class="text-slate-500 text-[9px]">Standby Blok <?= htmlspecialchars($rs01['last_block'] ?? 'A') ?> (BBM <?= $rs01['fuel_percent'] ?>%)</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
+                    <?php foreach ($zg['ids'] as $zid):
+                        $u = $eq_map[$zid] ?? null;
+                        if (!$u) continue;
+                        $uOp = ($u['status'] === 'operating' || $u['status'] === 'carrying');
+                    ?>
+                        <button type="button" onclick="openDispatchModal('<?= htmlspecialchars($zid) ?>')" class="w-full text-left bg-white hover:border-orange-300 border <?= $uOp ? 'border-orange-300' : 'border-slate-200' ?> rounded-lg p-2 transition flex items-center justify-between gap-2 cursor-pointer">
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-1.5">
+                                    <span class="font-mono font-extrabold text-[10.5px] text-slate-900"><?= htmlspecialchars($zid) ?></span>
+                                    <span class="w-1.5 h-1.5 rounded-full <?= $uOp ? 'bg-orange-500 animate-ping' : 'bg-emerald-500' ?>"></span>
+                                </div>
+                                <div class="text-[9.5px] text-slate-500 truncate"><?= htmlspecialchars($u['operator_name']) ?> &bull; Blok <?= htmlspecialchars($u['last_block'] ?? '-') ?></div>
+                            </div>
+                            <span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded <?= $uOp ? 'bg-orange-50 text-orange-700' : 'bg-slate-100 text-slate-600' ?> shrink-0">
+                                <?= $uOp && !empty($u['current_container']) ? htmlspecialchars($u['current_container']) : ((int)$u['fuel_percent'] . '%') ?>
+                            </span>
+                        </button>
+                    <?php endforeach; ?>
                 </div>
-
-                <!-- Blok B (RS-02) -->
-                <div class="bg-white border <?= $rs02_op ? 'border-orange-300' : 'border-slate-200' ?> rounded-xl p-2.5 shadow-2xs">
-                    <div class="flex justify-between items-center mb-1.5">
-                        <span class="text-[11px] font-extrabold text-slate-700">BLOK B (Dry 20ft)</span>
-                        <span class="w-2 h-2 rounded-full <?= $rs02_op ? 'bg-orange-500 animate-ping' : 'bg-emerald-500' ?>"></span>
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center space-x-2.5">
-                        <span class="font-mono font-bold <?= $rs02_op ? 'text-orange-700 bg-orange-50 border border-orange-200' : 'text-emerald-700 bg-emerald-50 border border-emerald-200' ?> text-xs px-1.5 py-0.5 rounded">RS-02</span>
-                        <div class="text-xs">
-                            <strong class="text-slate-900 block text-[11px]"><?= htmlspecialchars($rs02['operator_name']) ?></strong>
-                            <?php if ($rs02_op && !empty($rs02['current_container'])): ?>
-                                <span class="text-orange-700 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs02['current_container']) ?></span>
-                            <?php else: ?>
-                                <span class="text-slate-500 text-[9px]">Standby Blok <?= htmlspecialchars($rs02['last_block'] ?? 'B') ?> (BBM <?= $rs02['fuel_percent'] ?>%)</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Reefer (RS-03) -->
-                <div class="bg-white border <?= $rs03_op ? 'border-orange-300' : 'border-slate-200' ?> rounded-xl p-2.5 shadow-2xs">
-                    <div class="flex justify-between items-center mb-1.5">
-                        <span class="text-[11px] font-extrabold text-cyan-700">ZONA REEFER &amp; DG</span>
-                        <span class="w-2 h-2 rounded-full <?= $rs03_op ? 'bg-orange-500 animate-ping' : 'bg-cyan-500' ?>"></span>
-                    </div>
-                    <div class="bg-slate-50 p-2 rounded-lg border border-slate-200 flex items-center space-x-2.5">
-                        <span class="font-mono font-bold <?= $rs03_op ? 'text-orange-700 bg-orange-50 border border-orange-200' : 'text-cyan-700 bg-cyan-50 border border-cyan-200' ?> text-xs px-1.5 py-0.5 rounded">RS-03</span>
-                        <div class="text-xs">
-                            <strong class="text-slate-900 block text-[11px]"><?= htmlspecialchars($rs03['operator_name']) ?></strong>
-                            <?php if ($rs03_op && !empty($rs03['current_container'])): ?>
-                                <span class="text-orange-700 font-mono text-[9px] font-bold block">Angkut: <?= htmlspecialchars($rs03['current_container']) ?></span>
-                            <?php else: ?>
-                                <span class="text-slate-500 text-[9px]">Siaga Steker Reefer (BBM <?= $rs03['fuel_percent'] ?>%)</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- Rail Siding (RTG-01) -->
-            <div class="bg-white border <?= $rtg01_op ? 'border-amber-300' : 'border-slate-200' ?> rounded-xl p-2.5 flex items-center justify-between shadow-2xs">
-                <div class="flex items-center space-x-2.5 text-xs">
-                    <span class="font-mono font-bold text-amber-800 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded text-[11px]">RTG-01</span>
-                    <div>
-                        <strong class="text-slate-900 text-xs"><?= htmlspecialchars($rtg01['operator_name']) ?> (RTG Electric)</strong>
-                        <?php if ($rtg01_op && !empty($rtg01['current_container'])): ?>
-                            <span class="text-amber-700 block text-[9px] font-mono">Memuat KA: <strong><?= htmlspecialchars($rtg01['current_container']) ?></strong> • Daya Grid 100%</span>
-                        <?php else: ?>
-                            <span class="text-slate-500 block text-[9px]">Jalur Rel Siding KA Logistik (Siaga di Rel Siding • Daya Grid 100%)</span>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                <span class="px-2 py-0.5 rounded text-[9px] font-bold border <?= $rtg01_op ? 'bg-amber-50 text-amber-800 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200' ?>">
-                    <?= $rtg01_op ? 'AKTIF MEMUAT KA' : 'STANDBY SIDING' ?>
-                </span>
-            </div>
+            <?php endforeach; ?>
         </div>
     </div>
 
-    <!-- KARTU RINGKAS TIAP UNIT ALAT BERAT (4 CARDS) -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
-        <?php foreach ($equipment_list as $eq): ?>
-            <?php
-            $is_operating = ($eq['status'] === 'operating' || $eq['status'] === 'carrying');
-            ?>
-            <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs hover:border-orange-300 transition flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-2 pb-1.5 border-b border-slate-100">
-                        <span class="font-mono font-bold text-slate-900 text-xs bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                            <?= htmlspecialchars($eq['equipment_id']) ?>
-                        </span>
-                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-bold <?= $is_operating ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' ?>">
-                            <?= $is_operating ? 'Operating' : 'Standby' ?>
-                        </span>
-                    </div>
-                    <div class="space-y-1 text-xs text-slate-600 mb-2">
-                        <div class="font-semibold text-slate-800 flex items-center justify-between text-xs">
-                            <span><?= htmlspecialchars($eq['operator_name']) ?></span>
-                            <span class="text-[9px] text-slate-400 font-mono"><?= htmlspecialchars($eq['operator_id'] ?? '') ?></span>
-                        </div>
-                        <div class="text-[10px] text-slate-500">Blok Terakhir: <strong><?= htmlspecialchars($eq['last_block'] ?? '-') ?></strong></div>
-                        <?php if (!empty($eq['current_container'])): ?>
-                            <div class="text-purple-700 font-mono font-bold text-[10px] bg-purple-50 px-1.5 py-0.5 rounded border border-purple-100">
-                                <i class="fa-solid fa-lock mr-1"></i><?= htmlspecialchars($eq['current_container']) ?>
-                            </div>
-                        <?php else: ?>
-                            <div class="text-slate-400 italic text-[10px] bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                                <i class="fa-solid fa-check mr-1 text-emerald-500"></i>Spreader Siap
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-
-                <div class="pt-1.5 border-t border-slate-100 space-y-1.5">
-                    <div class="flex items-center justify-between text-[10px] text-slate-500">
-                        <span>Power: <strong><?= $eq['fuel_percent'] ?>%</strong></span>
-                        <span>Jam: <strong><?= $eq['hours_today'] ?>j</strong></span>
-                    </div>
-                    <div class="flex items-center gap-1">
-                        <button onclick="openDispatchModal('<?= htmlspecialchars($eq['equipment_id']) ?>')" class="flex-1 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white rounded text-[11px] font-bold transition flex items-center justify-center space-x-1">
-                            <i class="fa-solid fa-paper-plane text-[9px]"></i>
-                            <span>Tugaskan</span>
-                        </button>
-                        <?php if ($is_operating): ?>
-                        <form method="POST" class="inline" onsubmit="return confirm('Lepas twistlock spreader unit <?= $eq['equipment_id'] ?> dan ubah status ke Standby?')">
-                            <input type="hidden" name="alat_action" value="release_spreader">
-                            <input type="hidden" name="equipment_id" value="<?= htmlspecialchars($eq['equipment_id']) ?>">
-                            <button type="submit" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[11px] font-bold transition" title="Lepas Spreader & Standby">
-                                <i class="fa-solid fa-lock-open"></i>
-                            </button>
-                        </form>
-                        <?php endif; ?>
-                    </div>
-                </div>
+    <!-- MASTER INVENTARIS & TELEMETRI SELURUH ASET ALAT BERAT / MHE PERUSAHAAN -->
+    <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 overflow-hidden">
+        <div class="px-3.5 py-2.5 border-b border-slate-200/80 flex flex-wrap items-center justify-between gap-2 bg-slate-50/70">
+            <div class="flex flex-wrap items-center gap-1.5">
+                <h3 class="font-extrabold text-slate-900 text-xs flex items-center mr-2">
+                    <i class="fa-solid fa-warehouse mr-1.5 text-[#0170b9]"></i>Inventaris Master Alat &amp; MHE
+                </h3>
+                <button type="button" onclick="filterAlatFleet('ALL')" id="fltAlat_ALL" class="alat-flt-btn px-2 py-1 rounded-md text-[10px] font-bold bg-slate-900 text-white cursor-pointer">Semua (<?= $total_units ?>)</button>
+                <button type="button" onclick="filterAlatFleet('REACH_STACKER')" id="fltAlat_REACH_STACKER" class="alat-flt-btn px-2 py-1 rounded-md text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer">Reach Stacker (<?= $cnt_rs ?>)</button>
+                <button type="button" onclick="filterAlatFleet('RTG_CRANE')" id="fltAlat_RTG_CRANE" class="alat-flt-btn px-2 py-1 rounded-md text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer">E-RTG Crane (<?= $cnt_rtg ?>)</button>
+                <button type="button" onclick="filterAlatFleet('ELECTRIC_FORKLIFT')" id="fltAlat_ELECTRIC_FORKLIFT" class="alat-flt-btn px-2 py-1 rounded-md text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer">Forklift CFS (<?= $cnt_fl ?>)</button>
+                <button type="button" onclick="filterAlatFleet('TERMINAL_TRACTOR')" id="fltAlat_TERMINAL_TRACTOR" class="alat-flt-btn px-2 py-1 rounded-md text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer">Shuttle Tractor (<?= $cnt_tt ?>)</button>
             </div>
-        <?php endforeach; ?>
+            <div class="flex items-center gap-2">
+                <span id="alatInventoryCount" class="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <?= $total_units ?> Unit
+                </span>
+                <select id="alatInventoryLimit" data-limit-target="#equipmentInventoryTable" data-limit-callback="filterAlatFleetCurrent" data-count-target="#alatInventoryCount" data-count-unit="Unit" class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[10.5px] font-bold text-slate-700 cursor-pointer">
+                    <option value="10">Tampil: 10</option>
+                    <option value="25" selected>Tampil: 25</option>
+                    <option value="50">Tampil: 50</option>
+                    <option value="all">Semua</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse min-w-[780px]" id="equipmentInventoryTable">
+                <thead>
+                    <tr class="bg-slate-50/90 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-200/80">
+                        <th class="py-2 px-2.5 text-center w-10">No</th>
+                        <th class="py-2 px-3">Kode Unit &amp; Kategori</th>
+                        <th class="py-2 px-3">Merk / Tipe Aset</th>
+                        <th class="py-2 px-3">Operator / PIC</th>
+                        <th class="py-2 px-3">Zona &amp; Koordinat (RTK)</th>
+                        <th class="py-2 px-3">Status &amp; Muatan</th>
+                        <th class="py-2 px-3 text-center">Daya / Jam</th>
+                        <th class="py-2 px-3 text-right">Aksi VMT</th>
+                    </tr>
+                </thead>
+                <tbody class="text-xs divide-y divide-slate-100">
+                    <?php foreach ($equipment_list as $eq_idx => $eq):
+                        $is_operating = ($eq['status'] === 'operating' || $eq['status'] === 'carrying');
+                        $eqType = strtoupper($eq['equipment_type'] ?? 'REACH_STACKER');
+                        $typeLabel = $eqType === 'RTG_CRANE' ? 'E-RTG Crane' : ($eqType === 'ELECTRIC_FORKLIFT' ? 'Forklift Elektrik' : ($eqType === 'TERMINAL_TRACTOR' ? 'Shuttle Tractor' : 'Reach Stacker'));
+                        $typeBadge = $eqType === 'RTG_CRANE' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' : ($eqType === 'ELECTRIC_FORKLIFT' ? 'bg-amber-50 text-amber-800 border-amber-200' : ($eqType === 'TERMINAL_TRACTOR' ? 'bg-cyan-50 text-cyan-700 border-cyan-200' : 'bg-blue-50 text-[#0170b9] border-blue-200'));
+                    ?>
+                    <tr class="alat-inv-row hover:bg-slate-50 transition" data-eq-type="<?= htmlspecialchars($eqType) ?>">
+                        <td class="py-2 px-2.5 text-center font-mono text-slate-400" data-row-num><?= $eq_idx + 1 ?></td>
+                        <td class="py-2 px-3 whitespace-nowrap">
+                            <span class="font-mono font-extrabold text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 mr-1.5"><?= htmlspecialchars($eq['equipment_id']) ?></span>
+                            <span class="px-1.5 py-0.5 rounded text-[9.5px] font-bold border <?= $typeBadge ?>"><?= $typeLabel ?></span>
+                        </td>
+                        <td class="py-2 px-3 font-medium text-slate-700"><?= htmlspecialchars($eq['brand_model'] ?? '-') ?></td>
+                        <td class="py-2 px-3 whitespace-nowrap">
+                            <span class="font-semibold text-slate-900"><?= htmlspecialchars($eq['operator_name']) ?></span>
+                            <span class="text-[10px] text-slate-400 font-mono ml-1"><?= htmlspecialchars($eq['operator_id'] ?? '') ?></span>
+                        </td>
+                        <td class="py-2 px-3 whitespace-nowrap">
+                            <span class="font-bold text-slate-800">Blok <?= htmlspecialchars($eq['last_block'] ?? '-') ?></span>
+                            <span class="text-[10px] font-mono text-slate-400 ml-1">(<?= round((float)$eq['gps_x']) ?>, <?= round((float)$eq['gps_y']) ?>)</span>
+                        </td>
+                        <td class="py-2 px-3 whitespace-nowrap">
+                            <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold <?= $is_operating ? 'bg-purple-50 text-purple-700 border border-purple-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200' ?>">
+                                <?= $is_operating ? 'Operating' : 'Standby' ?>
+                            </span>
+                            <?php if (!empty($eq['current_container'])): ?>
+                                <span class="ml-1 font-mono font-bold text-[10px] text-purple-700"><?= htmlspecialchars($eq['current_container']) ?></span>
+                            <?php endif; ?>
+                        </td>
+                        <td class="py-2 px-3 text-center whitespace-nowrap font-mono text-[11px] text-slate-700">
+                            <strong><?= (int)$eq['fuel_percent'] ?>%</strong> <span class="text-slate-400">/ <?= $eq['hours_today'] ?>j</span>
+                        </td>
+                        <td class="py-2 px-3 text-right whitespace-nowrap space-x-1">
+                            <button type="button" onclick="openDispatchModal('<?= htmlspecialchars($eq['equipment_id']) ?>')" class="px-2.5 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white rounded text-[10.5px] font-bold transition cursor-pointer">
+                                <i class="fa-solid fa-paper-plane mr-1 text-[9px]"></i>Tugaskan
+                            </button>
+                            <?php if ($is_operating): ?>
+                            <form method="POST" class="inline" onsubmit="return confirm('Lepas twistlock/beban unit <?= $eq['equipment_id'] ?> dan ubah status ke Standby?')">
+                                <input type="hidden" name="alat_action" value="release_spreader">
+                                <input type="hidden" name="equipment_id" value="<?= htmlspecialchars($eq['equipment_id']) ?>">
+                                <button type="submit" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[10.5px] font-bold transition cursor-pointer" title="Lepas Muatan & Standby">
+                                    <i class="fa-solid fa-lock-open"></i>
+                                </button>
+                            </form>
+                            <?php endif; ?>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <!-- CLEAN & COMPACT AUDIT LOG TABEL PEMINDAHAN YARD -->
@@ -647,7 +642,7 @@ foreach ($equipment_list as $eq) {
                 <select name="equipment_id" id="disp_equipment_id" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold focus:outline-hidden focus:ring-2 focus:ring-[#0170b9]">
                     <?php foreach ($equipment_list as $eq_opt): ?>
                         <option value="<?= htmlspecialchars($eq_opt['equipment_id']) ?>">
-                            <?= htmlspecialchars($eq_opt['equipment_id']) ?> — <?= htmlspecialchars($eq_opt['operator_name']) ?> (<?= ucfirst($eq_opt['status']) ?>)
+                            <?= htmlspecialchars($eq_opt['equipment_id']) ?> [<?= htmlspecialchars($eq_opt['equipment_type'] ?? 'MHE') ?>] — <?= htmlspecialchars($eq_opt['operator_name']) ?> (<?= ucfirst($eq_opt['status']) ?>)
                         </option>
                     <?php endforeach; ?>
                 </select>
@@ -688,12 +683,14 @@ foreach ($equipment_list as $eq) {
                     <div>
                         <span class="text-[10px] text-gray-400 block mb-0.5">Blok</span>
                         <select name="target_block" class="w-full px-2 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-center">
-                            <option value="A">A (40ft)</option>
-                            <option value="B">B (20ft)</option>
-                            <option value="C">C (Empty)</option>
-                            <option value="D">D (Trans)</option>
-                            <option value="E">E (Buffer)</option>
-                            <option value="R">R (Reefer)</option>
+                            <option value="A">A (Ekspor)</option>
+                            <option value="B">B (Impor)</option>
+                            <option value="C">C (Domestik)</option>
+                            <option value="D">D (Buffer)</option>
+                            <option value="E">E (Behandle/DG)</option>
+                            <option value="REEFER">REEFER</option>
+                            <option value="CFS">CFS (Gudang)</option>
+                            <option value="RAIL">RAIL (Siding KA)</option>
                         </select>
                     </div>
                     <div>
@@ -733,6 +730,31 @@ foreach ($equipment_list as $eq) {
 </div>
 
 <script>
+let currentAlatCategory = 'ALL';
+
+function filterAlatFleet(cat) {
+    currentAlatCategory = cat || 'ALL';
+    document.querySelectorAll('.alat-flt-btn').forEach(btn => {
+        const active = btn.id === ('fltAlat_' + currentAlatCategory);
+        btn.className = active
+            ? 'alat-flt-btn px-2 py-1 rounded-md text-[10px] font-bold bg-slate-900 text-white cursor-pointer'
+            : 'alat-flt-btn px-2 py-1 rounded-md text-[10px] font-bold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer';
+    });
+    filterAlatFleetCurrent();
+}
+
+function filterAlatFleetCurrent() {
+    document.querySelectorAll('#equipmentInventoryTable tbody tr.alat-inv-row').forEach(row => {
+        const eqType = row.dataset.eqType || '';
+        const match = (currentAlatCategory === 'ALL') || (eqType === currentAlatCategory);
+        row.dataset.filteredOut = match ? '0' : '1';
+        row.style.display = match ? '' : 'none';
+    });
+    if (window.CIDPTableTools) {
+        window.CIDPTableTools.apply('#equipmentInventoryTable');
+    }
+}
+
 function refreshEquipment() {
     const icon = document.getElementById('refreshIcon');
     icon.classList.add('fa-spin');

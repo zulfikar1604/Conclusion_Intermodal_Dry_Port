@@ -49,11 +49,12 @@ Sebelum atau selama demonstrasi visualisasi 3D, jelaskan dengan tegas pemisahan 
 
 ## 3. Urutan Live Demo Operasional End-to-End (Tahap demi Tahap)
 
-### Tahap 0 — Pembukaan di Pusat Kontrol Utama (TOC Command Center)
+### Tahap 0 — Pembukaan di Pusat Kontrol Utama (TOC Command Center) & Metrik Kuantitatif
 - **Layar Utama (Zulfikar):** Buka `dashboard.php?page=beranda` dan buka tab kedua pada `dashboard.php?page=twin`.
 - **Tunjukkan:**
-  - KPI awal terminal setelah reset bersih (`0` kontainer di dalam yard, 30 manifest Pre-Advice antri di luar).
-  - Fitur **Pusat Kendali TOC: Pelacak Posisi Kargo & Armada** (*TOC Universal Asset Locator* yang memanggil `api/track_asset.php`): ketik atau klik pill cepat `MSCU9180379` untuk memperlihatkan bahwa sistem langsung melacak posisi aset secara *live* (sebelum masuk: masih terdaftar di pre-advice luar terminal).
+  - Strip **SLA Kuantitatif & Efisiensi** di Control Tower: **Target OTIF ($\ge 95\%$)**, **Akurasi Peramalan VBS (MAE & MAPE $<10\%$)** pada grafik `Gate vs VBS Demand`, **Efisiensi Cycle Time** ($18{,}2$ menit vs SLA 35 menit), dan **Efisiensi Biaya & ROI (0% Revenue Leakage)**.
+  - KPI awal terminal setelah reset bersih (`0` kontainer di dalam yard, 30 manifest Pre-Advice antri di luar) dan fitur filter tabel **`No` + `Tampil: 10/25/50/Semua`** di setiap modul.
+  - Fitur **Pusat Kendali TOC: Pelacak Posisi Kargo & Armada** (*TOC Universal Asset Locator* yang memanggil `api/track_asset.php`): ketik atau klik pill cepat `MSCU9180379` untuk memperlihatkan bahwa sistem langsung melacak posisi aset secara *live* tanpa re-entry data (*Zero Re-Entry SSoT*).
 
 ---
 
@@ -117,24 +118,26 @@ Sebelum atau selama demonstrasi visualisasi 3D, jelaskan dengan tegas pemisahan 
 
 ---
 
-### Tahap 4 — Audit Keamanan API Gateway (OAuth 2.0, HMAC-SHA256, & DLQ)
-*(Sangat kuat untuk tanya-jawab / sesi uji penguji IT)*
+### Tahap 4 — Audit Keamanan API Gateway, Penanganan Lonjakan (Surge) & BCP Failover
+*(Sangat kuat untuk tanya-jawab / sesi uji penguji IT & Keandalan Bisnis)*
 
 Buka `dashboard.php?page=integration` pada laptop **Armansyah** atau **Zulfikar**:
-1. **Tab `2. OAuth 2.0 Server & Uji Keamanan Payload (Slide 7–8)`:**
-   - Pilih salah satu `client_id` (misal `cidp-edge-gate-01`) dan klik **`Minta Bearer Token`** untuk memperlihatkan token JWT HS256 & cakupan *scopes*-nya.
-   - Uji **Skenario 1 • HTTP 401 (`Serangan Manipulasi Payload MITM`)**: buktikan perubahan berat `34.850 kg` → `20.000 kg` gagal verifikasi HMAC-SHA256 dan dikarantina ke DLQ.
-   - Uji **Skenario 2 • HTTP 403 (`Pelanggaran Scope Least Privilege`)**: buktikan token gate (`cidp-edge-gate-01`) ditolak saat mencoba menembak event keuangan `PAYMENT_SETTLED`.
-   - Uji **Skenario 3 • HTTP 422 (`Truk Tanpa Pre-Advice Ilegal`)**: buktikan plat tak terdaftar `B 0000 XXX` ditolak agar tidak membuat data hantu.
-   - Uji **Skenario 4 • IDEMPOTENT (`Zero Double-Billing`)**: kirim ulang `event_id` yang sama 2×; tembakan kedua dikenali sebagai duplikat tanpa menagih ulang.
-2. **Tab `3. Dead Letter Queue (DLQ) & Audit Trail`:**
-   - Tunjukkan payload yang gagal tercatat rapi dengan status `QUARANTINED` untuk ditinjau/diselesaikan admin (`RESOLVED`/`DISCARDED`) tanpa menghentikan alur sensor lain.
+1. **Tab `Antrean Error (DLQ)` — Isolasi Eror, Keamanan & Surge/BCP:**
+   - **Skenario 1 • HTTP 401 (`Payload Palsu / MITM`):** Buktikan perubahan berat `34.850 kg` → `20.000 kg` gagal verifikasi HMAC-SHA256 dan dikarantina (`QUARANTINED`) ke DLQ.
+   - **Skenario 2 • HTTP 403 (`Izin Ditolak / Least Privilege`):** Buktikan token gate (`cidp-edge-gate-01`) ditolak saat mencoba menembak event keuangan `PAYMENT_SETTLED`.
+   - **Skenario 3 • HTTP 422 (`Truk Tak Terdaftar`):** Buktikan plat ilegal `B 0000 XXX` ditolak tanpa membuat data hantu.
+   - **Skenario 4 • `Cegah Kirim Ganda` (Idempotency):** Kirim ulang `event_id` yang sama 2×; tembakan kedua dikenali sebagai duplikat tanpa menagih ulang.
+   - **Skenario 5 • `Uji Lonjakan (12 Req)` (Surge Backpressure):** Simulasikan lonjakan trafik 12 transaksi serentak; 6 diproses live dan 6 sisanya diamankan ke status **`Buffer BCP/Surge` (`BUFFERED`, 0 data hilang)**.
+   - **Skenario 6 • `Toggle BCP Failover` & `Pulihkan & Flush Buffer`:** Tunjukkan alih mode kontingensi (*BCP Edge Buffer*, `RPO=0`, `RTO<10 detik`), lalu klik **`Pulihkan & Flush Buffer`** untuk memproses ulang seluruh antrean tertunda secara penuh.
+2. **Tab `Koneksi Odoo & API` — OAuth 2.0 Bearer JWT & Odoo Cloud:**
+   - Pilih salah satu `client_id` (misal `cidp-edge-gate-01`) dan klik **`Minta Token`** untuk memperlihatkan token JWT HS256 & cakupan *scopes*-nya serta test koneksi **Cloud ERP Odoo**.
 
 ---
 
-### Tahap 5 — Penutupan & Pelaporan Eksekutif + Tour 3D Sandbox
-- **Afriansayah / Zulfikar (`page=beranda`):** Klik tombol **`Cetak Laporan PDF`** (`report_executive.php?autoprint=1`) atau menu **`Ekspor`** → **`Executive Briefing (A4)`** (`report_executive.php`) untuk menyajikan rangkuman A4 gabungan **3 Aliran (Fisik, Informasi, Finansial)** lengkap dengan pengesahan Pejabat Pabean (`Hendra Kusuma, S.E.`), ERP Finance (`Afriansyah Ayubi, S.Log.`), dan Lead Architect (`Zulfikar J.F.`).
-- **Zulfikar (`page=simulator`):** Tutup sesi visualisasi dengan tur interaktif **Simulator 3D (Eksplorasi Fasilitas)** yang berjalan 100% di *sandbox* browser untuk memperlihatkan sudut kamera sinematik dry port 35 Ha tanpa mengotori data transaksi nyata di database.
+### Tahap 5 — Dokumen Kontekstual A4 & Tour 3D Sandbox
+- **Context-Aware `Dokumen A4` di Navbar:** Klik tombol **`Dokumen A4`** dari modul mana saja (mis. dari `Gate` langsung membuka `Surat Jalan / Gate Pass A4`, dari `Bea Cukai` membuka `SPPB A4`, dari `CFS` membuka `CFS Tally Sheet`, dari `Reefer` membuka `Sertifikat HACCP`, dari `Billing` membuka `Invoice A4`) lengkap dengan pemilih record (`Sebelumnya` / `Berikutnya`).
+- **Afriansayah / Zulfikar (`page=beranda`):** Klik **`Ekspor`** → **`Executive Briefing (A4)`** (`report_executive.php`) untuk menyajikan rangkuman A4 gabungan **3 Aliran (Fisik, Informasi, Finansial)**.
+- **Zulfikar (`page=simulator`):** Tutup sesi visualisasi dengan tur interaktif **Simulator 3D (`480m × 230m`, Blok Bay×Row 8×8)** yang berjalan 100% di *sandbox* browser dengan **RTG Crane + Reach Stacker** otomatis serta arus **truk keluar-masuk kontinu 2 arah** tanpa memotong yard dan tanpa mengotori data transaksi nyata di database.
 
 ---
 
@@ -161,14 +164,14 @@ Berikut daftar lengkap seluruh tindakan operasional (*POST form*, *AJAX CRUD*, d
 | :--- | :--- | :--- |
 | **Ringkasan & Telemetri** | `beranda` (`pages/beranda.php`) | • **TOC Live Asset Locator** (`api/track_asset.php?q=...`)<br>• Cetak faktur langsung (`document.php?type=invoice`) & **`Cetak Laporan PDF`** (`report_executive.php`)<br>• Ekspor data tabel ke Excel (`exportBerandaToExcel`) |
 | | `twin` (`pages/digital_twin.php`) | • Monitor Live 3D/2D via SSE (`api/stream_twin.php`)<br>• Step trigger (`api/edge_simulator.php`) sinkron Real DB |
-| | `integration` (`pages/integration.php`) | • **Tab 1:** Daftarkan Pre-Advice baru (`register`), generator ISO 6346 (`generate_iso`), Ekspor/Impor JSON EDI-940, Trigger Step 1–6 / Auto-Run, dan 10 tombol aktivitas lapangan (`relocate`, `cfs_cycle`, `cfs_dispatch`, `customs_inspect`, `customs_release`, `reefer_plug`, `reefer_telemetry`, `reefer_telemetry&fault=1`, `rail_load`, `gate_out`)<br>• **Tab 2:** Penerbitan Bearer JWT OAuth 2.0 + Uji Serangan MITM 401, Scope 403, Truk Ilegal 422, Idempotency<br>• **Tab 3:** Daftar DLQ (`integration_dlq`) dengan aksi `RESOLVED` / `DISCARDED`<br>• **Tab 4 (Odoo Cloud):** **`Test Connection Odoo`**, **`Tarik Invoice Odoo (account.move)`**, & **`Sync Semua Invoice DB ke Odoo`** |
+| | `integration` (`pages/integration.php`) | • **Tab 1 (`Antrean & Alur Gate`):** Daftar Pre-Advice (`register`), generator ISO 6346 (`generate_iso`), Ekspor/Impor JSON EDI-940, Jalankan 1 Truk / Step 1–6 / 10 tombol aktivitas lapangan<br>• **Tab 2 (`Antrean Error (DLQ)`):** Isolasi DLQ (`QUARANTINED`), Buffer Lonjakan & BCP (`BUFFERED`), Uji 401/403/422/Idempotency, **`Uji Lonjakan (12 Req)`**, **`Toggle BCP Failover`**, & **`Pulihkan & Flush Buffer`**<br>• **Tab 3 (`Koneksi Odoo & API`):** Token OAuth 2.0 Bearer JWT & Sinkronisasi Odoo Cloud (`account.move`) |
 | **Peta & Simulasi Spasial** | `denah` (`pages/denah.php`) | • Inspeksi peta zonasi master 35 Ha berbasis koordinat tunggal `layout_master.php` |
 | | `simulator` (`pages/simulator.php`) | • *Read-Only 3D Sandbox*: kamera sinematik & animasi simulasi tanpa memodifikasi MySQL |
 | **TMS • Transportasi** | `gate` (`pages/gate.php`) | • `trigger_anpr_gate_in` (`Trigger ANPR Masuk & Buka Palang`)<br>• `trigger_weighbridge` (`Trigger Timbang & Terbitkan VGM`)<br>• `quick_gate_in`, `batch_gate_in`, `reset_demo_queue`<br>• `release_gate_out` (*Dual-Clearance Interlock*: wajib `SPPB_CLEARED` + `0` invoice belum lunas)<br>• Tambah truk manual (`api/crud.php?action=add_truck`) & cetak **Gate Pass A4** |
 | | `trucking` (`pages/trucking.php`) | • Manajemen antrean armada & shunting internal, tambah armada (`api/crud.php?action=add_truck`), & cetak **Gate Pass A4** |
 | | `intermodal` (`pages/intermodal.php`) | • `manual_load_wagon` (muat kontainer ke gerbong `KA 2518`/`KA 2519`)<br>• `manual_unload_wagon` (bongkar kontainer dari gerbong ke Yard)<br>• Manajemen jadwal kereta (`api/crud.php?action=add_train`) |
 | **YMS • Lapangan Yard** | `yard` (`pages/yard.php`) | • `relocate_container` (relokasi slot Blok–Bay–Row–Tier + akrual fee + update Live Twin) |
-| | `alat` (`pages/alat.php`) | • `dispatch_job` (penugasan VMT Reach Stacker `RS-01`..`RS-03` / `RTG-01` memindah kontainer)<br>• `release_spreader` (lepas twistlock, kembalikan status alat ke `idle`) |
+| | `alat` (`pages/alat.php`) | • **Pemetaan 15 Unit MHE & Armada Terminal** (`4 Reach Stacker`, `5 E-RTG`, `4 Forklift CFS/Behandle`, `2 Shuttle Tractor`) sinkron DB & Simulator 3D<br>• `dispatch_job` (penugasan VMT + update koordinat GPS/RTK blok sasaran)<br>• `release_spreader` (lepas twistlock, kembalikan status alat ke `idle`) |
 | | `kontainer` (`pages/kontainer.php`) | • CRUD Inventori Peti Kemas (`api/crud.php`: `add_container`, `update_container`, `gate_out_container`, `delete_container`) & filter status |
 | | `reefer` (`pages/reefer.php`) | • `plug_in` (colok soket daya 380V + akrual)<br>• `un_plug` (cabut soket listrik)<br>• `trigger_lorawan_ping` (update suhu & deteksi deviasi > 2°C), `trigger_thermal_scan`, `trigger_ats_test`<br>• Cetak **Sertifikat Reefer HACCP A4** |
 | **WMS • Gudang CFS** | `cfs` (`pages/cfs.php`) | • `create_job` (buat Work Order `STRIPPING`/`STUFFING`), `update_tally`, `complete_job` (`COMPLETED`)<br>• `add_pallet` (input palet SSCC-18), `trigger_dock_sensor`, `trigger_floor_scale`, `trigger_hht_scan`, `trigger_cfs_env`<br>• Cetak **CFS Tally Sheet A4** |

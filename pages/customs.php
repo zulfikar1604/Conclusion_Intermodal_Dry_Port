@@ -482,16 +482,16 @@ $customs_docs = [
     ]
 ];
 
-// Sinkronisasi Status Dokumen Pabean dengan Basis Data Nyata (containers)
+// Sinkronisasi Status Dokumen Pabean dengan Basis Data Nyata (containers — SSoT Zero Re-entry)
 if (isset($pdo)) {
     try {
-        $stmtSync = $pdo->query("SELECT * FROM containers WHERE status != 'expected' ORDER BY id DESC");
+        $stmtSync = $pdo->query("SELECT * FROM containers WHERE status IN ('in_yard','in_transit','on_rail','gate_out') ORDER BY id DESC");
         $customs_docs = [];
         $idxDoc = 1;
         while ($r = $stmtSync->fetch(PDO::FETCH_ASSOC)) {
             $cStat = $r['customs_status'] ?? 'BC23_TRANSIT';
             $isCleared = ($cStat === 'SPPB_CLEARED');
-            $isHold    = ($cStat === 'RED_LANE_CHECK' || $cStat === 'DOC_HOLD');
+            $isHold    = ($cStat === 'RED_LANE_CHECK' || $cStat === 'DOC_HOLD' || $cStat === 'RED_LANE');
             $cifUsd    = 45000 + (($r['id'] % 7) * 12500);
             $cifIdr    = $cifUsd * 15800;
             $bm        = round($cifIdr * 0.05);
@@ -505,7 +505,7 @@ if (isset($pdo)) {
                 'jenis_dok'      => $cStat === 'BC23_TRANSIT' ? 'BC 2.3 (PLP/TPB)' : 'PIB (BC 2.0)',
                 'importir'       => $r['owner_company'] ?? 'Importir Terdaftar CIDP',
                 'npwp'           => '01.000.' . str_pad((int)$r['id'], 3, '0', STR_PAD_LEFT) . '.8-054.000',
-                'kategori_mitra' => $isHold ? ' Importir Umum (Pemeriksaan Fisik)' : 'AEO / MITA Pabean',
+                'kategori_mitra' => $isHold ? 'Importir Umum (Pemeriksaan Fisik)' : 'AEO / MITA Pabean',
                 'no_kontainer'   => $r['container_number'],
                 'ukuran'         => strpos($r['size_type'] ?? '', '20') !== false ? "20' GP" : "40' HC",
                 'tipe_box'       => strtoupper($r['cargo_type'] ?? 'DRY') === 'REEFER' ? 'Reefer High Cube' : 'Dry High Cube',
@@ -520,7 +520,7 @@ if (isset($pdo)) {
                 'total_pungutan' => $bm + $ppn + $pph,
                 'ntpn'           => $isCleared ? strtoupper(substr(md5($r['container_number']), 0, 16)) : '-',
                 'jalur'          => $isHold ? 'MERAH' : 'HIJAU',
-                'status'         => $isCleared ? 'SPPB_TERBIT' : ($cStat === 'RED_LANE_CHECK' ? 'DALAM_BEHANDLE' : ($cStat === 'DOC_HOLD' ? 'SPJM_TERBIT' : 'PROSES_VERIFIKASI')),
+                'status'         => $isCleared ? 'SPPB_TERBIT' : ($cStat === 'RED_LANE_CHECK' || $cStat === 'RED_LANE' ? 'DALAM_BEHANDLE' : ($cStat === 'DOC_HOLD' ? 'SPJM_TERBIT' : 'PROSES_VERIFIKASI')),
                 'alasan_jalur'   => $isHold ? 'Anomali Pemindaian Gantry X-Ray 6 MeV / Pemeriksaan Fisik' : 'Validasi Dokumen & Manifest CEISA 4.0 Sesuai',
                 'no_sppb'        => $isCleared ? ('SPPB-' . str_pad(42800 + (int)$r['id'], 6, '0', STR_PAD_LEFT) . '/KPU.01/2026') : '-',
                 'tgl_sppb'       => $isCleared ? (date('Y-m-d H:i') . ' WIB') : '-',
@@ -533,29 +533,6 @@ if (isset($pdo)) {
             ];
             $idxDoc++;
         }
-        $stmtSync = $pdo->query("SELECT container_number, customs_status, block FROM containers WHERE 1=0");
-        $dbStatusMap = [];
-        while ($r = $stmtSync->fetch(PDO::FETCH_ASSOC)) {
-            $dbStatusMap[$r['container_number']] = $r;
-        }
-
-        foreach ($customs_docs as &$cd) {
-            if (isset($dbStatusMap[$cd['no_kontainer']])) {
-                $stat = $dbStatusMap[$cd['no_kontainer']]['customs_status'];
-                if ($stat === 'SPPB_CLEARED') {
-                    $cd['status'] = 'SPPB_TERBIT';
-                    $cd['jalur'] = 'HIJAU';
-                    $cd['e_seal_status'] = 'UNLOCKED';
-                    $cd['no_sppb'] = ($cd['no_sppb'] === '-' ? 'SPPB-0428' . rand(10,99) . '/KPU.01/2026' : $cd['no_sppb']);
-                } elseif ($stat === 'RED_LANE') {
-                    $cd['status'] = 'SPJM_TERBIT';
-                    $cd['jalur'] = 'MERAH';
-                    $cd['e_seal_status'] = 'LOCKED';
-                    $cd['lokasi_yard'] = 'Blok E (Terminal Behandle)';
-                }
-            }
-        }
-        unset($cd);
     } catch (Exception $e) {}
 }
 

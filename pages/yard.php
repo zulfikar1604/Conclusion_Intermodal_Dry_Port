@@ -49,10 +49,10 @@ $yard_kpis = [
         'color' => 'amber'
     ],
     [
-        'label' => 'Alat Berat Beroperasi (VMT & RTK)',
-        'val' => '6',
-        'unit' => 'Unit RS / EH',
-        'sub' => 'Terhubung Telemetri RTK GNSS',
+        'label' => 'Armada Alat & MHE Aktif (RTK)',
+        'val' => '15',
+        'unit' => 'Unit MHE',
+        'sub' => 'RS, E-RTG, Forklift & Shuttle',
         'icon' => 'fa-truck-monster',
         'color' => 'cyan'
     ]
@@ -215,7 +215,20 @@ if (isset($pdo)) {
                 $yard_kpis[1]['val'] = round(($__teu / 15000) * 100, 2) . '%';
                 $yard_kpis[1]['unit'] = '(' . $__teu . ' TEUs)';
 
-                $yard_containers = $live_mapped;
+                // SSoT KPI dinamis: CRP Reshuffle Ratio, Rata-rata Dwell Time & Armada MHE dari MySQL
+                try {
+                    $evTot = max(1, (int)$pdo->query("SELECT COUNT(*) FROM yard_events")->fetchColumn());
+                    $evReloc = (int)$pdo->query("SELECT COUNT(*) FROM yard_events WHERE event_type IN ('RELOCATION','CRP_RESHUFFLE')")->fetchColumn();
+                    $crpPct = round(($evReloc / $evTot) * 100, 1);
+                    $yard_kpis[2]['val'] = number_format($crpPct, 1, ',', '.') . '%';
+
+                    $avgH = $pdo->query("SELECT AVG(TIMESTAMPDIFF(HOUR, gate_in_time, NOW())) FROM containers WHERE status IN ('in_yard','in_transit') AND gate_in_time IS NOT NULL")->fetchColumn();
+                    $avgD = ($avgH !== false && $avgH !== null) ? max(0.2, round(((float)$avgH) / 24.0, 1)) : 0.0;
+                    $yard_kpis[3]['val'] = count($yard_containers) > 0 ? number_format($avgD, 1, ',', '.') : '0,0';
+
+                    $eqAct = (int)$pdo->query("SELECT COUNT(*) FROM equipment WHERE status <> 'maintenance'")->fetchColumn();
+                    $yard_kpis[4]['val'] = (string)$eqAct;
+                } catch (Throwable $e) {}
             }
         }
     } catch (Exception $e) {}

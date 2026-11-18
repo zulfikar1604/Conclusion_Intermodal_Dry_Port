@@ -13,12 +13,14 @@ ensure_integration_schema($pdo);
 
 $oauth_clients = oauth_registered_clients();
 
+$bcp_state = cidp_get_bcp_state($pdo);
 $init_stats = [
     'outside_scheduled'  => (int)$pdo->query("SELECT COUNT(*) FROM preadvice WHERE status='SCHEDULED'")->fetchColumn(),
     'arrived'            => (int)$pdo->query("SELECT COUNT(*) FROM preadvice WHERE status='ARRIVED'")->fetchColumn(),
     'containers_in_yard' => (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status='in_yard'")->fetchColumn(),
     'events_logged'      => (int)$pdo->query("SELECT COUNT(*) FROM yard_events")->fetchColumn(),
     'dlq_open'           => (int)$pdo->query("SELECT COUNT(*) FROM integration_dlq WHERE status='QUARANTINED'")->fetchColumn(),
+    'dlq_buffered'       => (int)($bcp_state['buffered_count'] ?? 0),
 ];
 ?>
 
@@ -125,7 +127,7 @@ $init_stats = [
             <button type="button" onclick="switchIntegrationTab('tab-dlq')" id="btn-tab-dlq" class="int-tab-btn px-3.5 py-2 rounded-lg text-xs font-extrabold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100 cursor-pointer">
                 <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
                 <span>Antrean Error (DLQ)</span>
-                <span id="tabDlqBadge" class="px-1.5 py-0.5 rounded-full text-[10px] bg-rose-100 text-rose-700 font-black"><?= $init_stats['dlq_open'] ?></span>
+                <span id="tabDlqBadge" class="px-1.5 py-0.5 rounded-full text-[10px] bg-rose-100 text-rose-700 font-black"><?= $init_stats['dlq_open'] + $init_stats['dlq_buffered'] ?></span>
             </button>
             <button type="button" onclick="switchIntegrationTab('tab-connectors')" id="btn-tab-connectors" class="int-tab-btn px-3.5 py-2 rounded-lg text-xs font-extrabold transition flex items-center gap-2 text-slate-600 hover:bg-slate-100 cursor-pointer">
                 <i class="fa-solid fa-plug-circle-check text-emerald-600"></i>
@@ -244,6 +246,123 @@ $init_stats = [
                     <i class="fa-solid fa-right-from-bracket"></i> Gate-Out
                 </button>
             </div>
+
+            <!-- Baris Simulasi Trigger Anomali & Masalah Operasional Nyata (SOP Penolakan vs Penyelesaian) -->
+            <div class="pt-2.5 border-t border-rose-100 bg-rose-50/40 -mx-4 -mb-4 px-4 py-3 rounded-b-2xl flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-1.5">
+                    <span class="w-5 h-5 rounded-md bg-rose-600 text-white flex items-center justify-center text-[10px] shrink-0"><i class="fa-solid fa-triangle-exclamation"></i></span>
+                    <span class="text-[11px] font-extrabold text-rose-900">Trigger Kasus Anomali Lapangan (SOP Tolak / Atasi):</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="triggerAnomalyScenario('doc_expired')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10.5px] font-extrabold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Truk tiba dengan e-DO kadaluarsa & pajak PIB belum lunas">
+                        <i class="fa-solid fa-file-circle-xmark"></i> 1. e-DO Expired
+                    </button>
+                    <button type="button" onclick="triggerAnomalyScenario('container_mismatch')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10.5px] font-extrabold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Kamera OCR membaca nomor kontainer fisik berbeda dari manifest booking">
+                        <i class="fa-solid fa-boxes-packing"></i> 2. Salah Kontainer (OCR ≠ B/L)
+                    </button>
+                    <button type="button" onclick="triggerAnomalyScenario('vgm_overweight')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 text-[10.5px] font-extrabold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Timbangan 80T mendeteksi selisih berat SOLAS VGM > 5% (Overload 39,2 Ton)">
+                        <i class="fa-solid fa-weight-hanging"></i> 3. Overload Timbangan VGM (+51%)
+                    </button>
+                    <button type="button" onclick="triggerAnomalyScenario('seal_tampered')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10.5px] font-extrabold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Segel pelayaran putus / tidak cocok & dinding kontainer penyok">
+                        <i class="fa-solid fa-link-slash"></i> 4. Segel Putus &amp; Cacat Fisik
+                    </button>
+                    <button type="button" onclick="triggerAnomalyScenario('customs_mismatch')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-purple-100 text-purple-800 border border-purple-200 text-[10.5px] font-extrabold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Dokumen BC 2.3 / HS Code tidak cocok dengan Packing List CEISA 4.0">
+                        <i class="fa-solid fa-building-shield"></i> 5. BC 2.3 Tidak Cocok (Jalur Merah)
+                    </button>
+                    <button type="button" onclick="triggerAnomalyScenario('gate_out_unpaid')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-200 text-slate-800 border border-slate-300 text-[10.5px] font-extrabold transition cursor-pointer flex items-center gap-1 shadow-2xs" title="Truk mencoba Gate-Out saat invoice belum lunas / belum SPPB">
+                        <i class="fa-solid fa-ban"></i> 6. Gate-Out Ditolak (Belum Lunas)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- PANEL RESOLUSI ANOMALI & KEPUTUSAN SOP (MUNCUL SAAT ADA INTERLOCK / MASALAH) -->
+        <div id="anomalyActionCard" class="hidden bg-gradient-to-r from-rose-50 via-amber-50/70 to-white rounded-2xl border-2 border-rose-300 shadow-md p-4 space-y-3">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-rose-200/80 pb-3">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center text-base shrink-0 shadow-xs animate-pulse">
+                        <i class="fa-solid fa-hand"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-black uppercase bg-rose-600 text-white tracking-wider">INTERLOCK AKTIF — TERTAHAN</span>
+                            <span id="anomBadgeCode" class="px-2 py-0.5 rounded-md text-[10px] font-mono font-extrabold bg-rose-100 text-rose-800 border border-rose-300">DOC_DO_EXPIRED</span>
+                            <span id="anomBadgeAsset" class="text-xs font-mono font-extrabold text-slate-900 bg-white px-2 py-0.5 rounded border border-slate-300">B 1274 TRB • MAEU9180740</span>
+                        </div>
+                        <h3 id="anomTitleText" class="text-sm sm:text-base font-black text-rose-950 mt-1">Dokumen e-DO Kadaluarsa &amp; Billing PIB Belum Lunas</h3>
+                        <p id="anomDescText" class="text-xs text-slate-700 mt-0.5 leading-relaxed">Masa berlaku Electronic Delivery Order telah habis &amp; palang Gate Inbound dikunci otomatis.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="document.getElementById('anomalyActionCard').classList.add('hidden')" class="self-end lg:self-start text-slate-400 hover:text-slate-700 text-xs font-bold px-2 py-1 cursor-pointer">
+                    <i class="fa-solid fa-xmark mr-1"></i>Tutup
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <!-- Opsi 1: SOP Penolakan & Putar Balik (Turn-Back) -->
+                <div class="bg-white rounded-xl p-3.5 border border-rose-200 flex flex-col justify-between gap-2.5 shadow-2xs">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-rose-700"><i class="fa-solid fa-ban mr-1"></i>OPSI A — SOP PENOLAKAN GATE (TURN-BACK)</span>
+                            <span class="text-[10px] font-mono font-bold text-rose-600 bg-rose-50 px-1.5 py-0.5 rounded">Terbitkan BA Tolak</span>
+                        </div>
+                        <p id="anomSopRejectText" class="text-[11.5px] text-slate-700 mt-1.5 leading-snug">Tolak akses masuk terminal, kunci palang gate, dan arahkan truk putar balik keluar melalui Jalur Darurat Gate.</p>
+                    </div>
+                    <button type="button" onclick="executeAnomalyDecision('reject')" class="w-full py-2 px-3 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
+                        <i class="fa-solid fa-truck-arrow-right"></i>
+                        <span>Tolak &amp; Putar Balik (Cetak Berita Acara Penolakan)</span>
+                    </button>
+                </div>
+
+                <!-- Opsi 2: SOP Penyelesaian / Override / Koreksi Dokumen -->
+                <div class="bg-white rounded-xl p-3.5 border border-emerald-200 flex flex-col justify-between gap-2.5 shadow-2xs">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-emerald-700"><i class="fa-solid fa-screwdriver-wrench mr-1"></i>OPSI B — SOP PENYELESAIAN / KOREKSI &amp; OVERRIDE</span>
+                            <span class="text-[10px] font-mono font-bold text-emerald-700 bg-emerald-50 px-1.5 py-0.5 rounded">Klinik Dokumen / VGM</span>
+                        </div>
+                        <p id="anomSopResolveText" class="text-[11.5px] text-slate-700 mt-1.5 leading-snug">Verifikasi dokumen pengganti / amandemen VGM / pasang segel baru (Reseal), buka interlock, dan lanjutkan proses truk.</p>
+                    </div>
+                    <button type="button" onclick="executeAnomalyDecision('resolve')" class="w-full py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition flex items-center justify-center gap-1.5 cursor-pointer shadow-2xs">
+                        <i class="fa-solid fa-circle-check"></i>
+                        <span>Atasi Masalah Sesuai SOP &amp; Lanjutkan Operasi</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- KARTU BUKTI BERITA ACARA PENOLAKAN / PENYELESAIAN SOP (MUNCUL SETELAH KEPUTUSAN) -->
+        <div id="baSlipCard" class="hidden bg-white rounded-2xl border-2 border-slate-800 shadow-md p-4 space-y-3 text-xs">
+            <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200 pb-2.5">
+                <div class="flex items-center gap-2.5">
+                    <span id="baSlipIcon" class="w-8 h-8 rounded-xl bg-slate-900 text-white flex items-center justify-center text-sm"><i class="fa-solid fa-file-signature"></i></span>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] font-black uppercase tracking-wider text-slate-500">BERITA ACARA OPERASIONAL GATE &amp; TOS</span>
+                            <span id="baSlipNumber" class="font-mono font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200">BA-TOLAK/CIDP/20261118/001</span>
+                        </div>
+                        <h4 id="baSlipDecision" class="text-sm font-black text-slate-900 mt-0.5">DITOLAK &amp; PUTAR BALIK</h4>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs cursor-pointer flex items-center gap-1.5">
+                        <i class="fa-solid fa-print"></i> Cetak Slip BA
+                    </button>
+                    <button type="button" onclick="document.getElementById('baSlipCard').classList.add('hidden')" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs cursor-pointer">
+                        Tutup
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-200">
+                <div><span class="text-[10px] text-slate-400 block">Plat Truk &amp; Pre-Gate</span><strong id="baSlipTruck" class="font-mono text-slate-900">-</strong></div>
+                <div><span class="text-[10px] text-slate-400 block">Nomor Kontainer</span><strong id="baSlipContainer" class="font-mono text-indigo-700">-</strong></div>
+                <div><span class="text-[10px] text-slate-400 block">Jenis Masalah / Anomali</span><strong id="baSlipAnomaly" class="text-rose-700">-</strong></div>
+                <div><span class="text-[10px] text-slate-400 block">Waktu &amp; Otorisasi</span><strong id="baSlipTime" class="text-slate-800">-</strong></div>
+            </div>
+            <div class="p-2.5 rounded-xl bg-amber-50/70 border border-amber-200 text-slate-800">
+                <span class="font-extrabold text-amber-900">Tindakan SOP yang Dieksekusi: </span>
+                <span id="baSlipAction">-</span>
+            </div>
         </div>
 
         <!-- RINGKASAN AKTIVITAS TERKINI (STRIP HORIZONTAL 3-KOLOM PENUH) -->
@@ -302,15 +421,19 @@ $init_stats = [
         <div id="intSplitLeft" class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2.5 border-b border-slate-100 pb-3">
                 <div>
-                    <h2 class="text-sm font-extrabold text-slate-900">Antrean Truk &amp; Kontainer (Pre-Advice)</h2>
+                    <h2 class="text-sm font-extrabold text-slate-900">Antrean Truk &amp; Kontainer (Pre-Advice &amp; Skenario Anomali)</h2>
+                    <p class="text-[11px] text-slate-500">Data antrean mencakup truk normal &amp; 6 skenario anomali nyata (e-DO expired, salah kontainer, overload VGM, segel rusak, BC 2.3 mismatch, &amp; OCR error).</p>
                 </div>
                 <div class="flex flex-wrap items-center gap-1.5">
-                    <select id="preadviceFilterStatus" onchange="loadPreadviceTable()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50">
-                        <option value="ALL">Semua Status</option>
-                        <option value="SCHEDULED" selected>Di Luar Gate</option>
-                        <option value="ARRIVED">Sudah Masuk</option>
+                    <select id="preadviceFilterStatus" onchange="loadPreadviceTable()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50 cursor-pointer">
+                        <option value="ALL">Semua Status (30)</option>
+                        <option value="SCHEDULED" selected>Di Luar &amp; Hold Gate</option>
+                        <option value="ANOMALY">⚠️ Hanya Data Anomali (6 Kasus)</option>
+                        <option value="HOLD_ANOMALY">🚨 Sedang Ditahan (Hold Gate)</option>
+                        <option value="REJECTED">🚫 Ditolak (Putar Balik)</option>
+                        <option value="ARRIVED">✅ Sudah Masuk Gate</option>
                     </select>
-                    <input type="text" id="preadviceSearch" oninput="renderPreadviceFiltered()" placeholder="Cari plat / box..." class="w-36 sm:w-44 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-slate-50 focus:bg-white focus:outline-none">
+                    <input type="text" id="preadviceSearch" oninput="renderPreadviceFiltered()" placeholder="Cari plat / box / anomali..." class="w-36 sm:w-44 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs bg-slate-50 focus:bg-white focus:outline-none">
                     <select id="preadviceLimitSelect" onchange="renderPreadviceFiltered()" class="px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-bold bg-slate-50 text-slate-700 cursor-pointer">
                         <option value="10" selected>Tampil: 10</option>
                         <option value="25">Tampil: 25</option>
@@ -333,13 +456,14 @@ $init_stats = [
                             <th class="py-2 px-2.5 text-center w-10">No</th>
                             <th class="py-2 px-3">Truk &amp; Kode</th>
                             <th class="py-2 px-3">Kontainer &amp; Pelayaran</th>
+                            <th class="py-2 px-3">Kondisi Dokumen / Fisik</th>
                             <th class="py-2 px-3">Blok Tujuan</th>
                             <th class="py-2 px-3">Status</th>
-                            <th class="py-2 px-3 text-right">Aksi</th>
+                            <th class="py-2 px-3 text-right">Aksi &amp; SOP</th>
                         </tr>
                     </thead>
                     <tbody id="preadviceTableBody" class="divide-y divide-slate-100">
-                        <tr data-empty-row><td colspan="6" class="py-6 text-center text-slate-400">Memuat antrean...</td></tr>
+                        <tr data-empty-row><td colspan="7" class="py-6 text-center text-slate-400">Memuat antrean...</td></tr>
                     </tbody>
                 </table>
             </div>
@@ -347,14 +471,48 @@ $init_stats = [
     </div>
 
     <!-- =================================================================== -->
-    <!-- TAB 2: ANTREAN ERROR (DLQ) — SIMPEL UNTUK OPERATOR                  -->
+    <!-- TAB 2: ANTREAN ERROR (DLQ), SURGE BUFFER & BCP FAILOVER             -->
     <!-- =================================================================== -->
     <div id="tab-dlq" class="int-tab-pane hidden space-y-4">
+        <!-- Ketahanan & BCP Failover Strip (Ringkas Port-TOS) -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs flex items-center justify-between">
+                <div>
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Status Kontingensi (BCP)</div>
+                    <div id="bcpModeBadge" class="text-xs font-black mt-0.5 <?= !empty($bcp_state['failover_active']) ? 'text-amber-600' : 'text-emerald-700' ?>">
+                        <?= !empty($bcp_state['failover_active']) ? 'BCP EDGE BUFFER' : 'PRIMARY ONLINE' ?>
+                    </div>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 flex items-center justify-center text-xs"><i class="fa-solid fa-server"></i></div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs flex items-center justify-between">
+                <div>
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Buffer Lonjakan (Surge)</div>
+                    <div class="text-xs font-black mt-0.5 text-[#0170b9]"><span id="bcpBufferedCount"><?= $init_stats['dlq_buffered'] ?></span> Antrean Aman</div>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 text-[#0170b9] flex items-center justify-center text-xs"><i class="fa-solid fa-layer-group"></i></div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs flex items-center justify-between">
+                <div>
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Kehilangan Data (RPO)</div>
+                    <div class="text-xs font-black mt-0.5 text-emerald-700">0 Data (Zero Loss)</div>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-600 flex items-center justify-center text-xs"><i class="fa-solid fa-database"></i></div>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-3 shadow-2xs flex items-center justify-between">
+                <div>
+                    <div class="text-[10px] font-bold uppercase text-slate-400">Waktu Pulih (RTO &amp; ATS)</div>
+                    <div class="text-xs font-black mt-0.5 text-indigo-700">&lt; 10 Detik</div>
+                </div>
+                <div class="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-200 text-indigo-600 flex items-center justify-center text-xs"><i class="fa-solid fa-bolt"></i></div>
+            </div>
+        </div>
+
         <div class="bg-white rounded-2xl border border-slate-200 shadow-2xs p-4 space-y-3">
             <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-100 pb-3">
                 <div>
-                    <h2 class="text-sm font-extrabold text-slate-900">Antrean Error &amp; Data Ditolak (DLQ)</h2>
-                    <p class="text-[11px] text-slate-500">Transaksi bermasalah dipisahkan agar alur truk lain di gerbang tidak terhambat.</p>
+                    <h2 class="text-sm font-extrabold text-slate-900">Isolasi Eror (DLQ), Penanganan Lonjakan &amp; Pemulihan BCP</h2>
+                    <p class="text-[11px] text-slate-500">Eror dikarantina &amp; lonjakan/gangguan ditampung ke Edge Buffer tanpa menghentikan gate.</p>
                 </div>
                 <div class="flex items-center gap-2">
                     <select id="dlqLimitSelect" data-limit-target="#dlqTable" data-observe-body="1" class="px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 cursor-pointer">
@@ -388,14 +546,17 @@ $init_stats = [
                 </table>
             </div>
 
-            <!-- Tombol Uji Keamanan Ringkas -->
+            <!-- Tombol Uji Keamanan, Surge & BCP Ringkas -->
             <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex flex-wrap items-center gap-1.5">
-                    <span class="text-[11px] font-bold text-slate-500 mr-1">Uji Proteksi Sistem:</span>
+                    <span class="text-[11px] font-bold text-slate-500 mr-1">Uji Proteksi &amp; BCP:</span>
                     <button type="button" onclick="runSecurityScenario('tamper')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-bold cursor-pointer">Payload Palsu (401)</button>
                     <button type="button" onclick="runSecurityScenario('scope')" class="px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-700 border border-amber-200 text-[11px] font-bold cursor-pointer">Izin Ditolak (403)</button>
                     <button type="button" onclick="runSecurityScenario('unregistered')" class="px-2.5 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-purple-700 border border-purple-200 text-[11px] font-bold cursor-pointer">Truk Tak Terdaftar (422)</button>
                     <button type="button" onclick="runSecurityScenario('idempotency')" class="px-2.5 py-1.5 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 text-[11px] font-bold cursor-pointer">Cegah Kirim Ganda</button>
+                    <button type="button" onclick="runSecurityScenario('surge')" class="px-2.5 py-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0170b9] border border-blue-200 text-[11px] font-bold cursor-pointer"><i class="fa-solid fa-burst mr-1"></i>Uji Lonjakan (12 Req)</button>
+                    <button type="button" onclick="toggleBcpMode()" class="px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-[11px] font-bold cursor-pointer"><i class="fa-solid fa-shield-halved mr-1"></i>Toggle BCP Failover</button>
+                    <button type="button" onclick="flushBcpBuffer()" class="px-2.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer"><i class="fa-solid fa-play mr-1"></i>Pulihkan &amp; Flush Buffer</button>
                 </div>
                 <span id="secTestStatus" class="text-[11px] font-mono text-slate-500">Siap diuji</span>
             </div>
@@ -669,6 +830,7 @@ $init_stats = [
 
 <script>
 let allPreadviceRows = [];
+let activeAnomalyCtx = null;
 
 function openHwModal()  { document.getElementById('hwModal')?.classList.remove('hidden'); }
 function closeHwModal() { document.getElementById('hwModal')?.classList.add('hidden'); }
@@ -689,6 +851,60 @@ function switchIntegrationTab(tabId) {
     if (tabId === 'tab-dlq') loadDlqTable();
 }
 
+function showAnomalyActionCard(anom, dlqId = 0) {
+    if (!anom) return;
+    activeAnomalyCtx = {
+        dlq_id: dlqId || anom.dlq_id || 0,
+        pre_gate_code: anom.pre_gate_code || '',
+        anomaly_code: anom.anomaly_code || 'OPERATIONAL_EXCEPTION',
+        container_number: anom.container_number || '',
+        truck_plate: anom.truck_plate || ''
+    };
+    const card = document.getElementById('anomalyActionCard');
+    const slipCard = document.getElementById('baSlipCard');
+    if (slipCard) slipCard.classList.add('hidden');
+    if (!card) return;
+
+    document.getElementById('anomBadgeCode').textContent = anom.anomaly_code || 'ANOMALY';
+    document.getElementById('anomBadgeAsset').textContent = `${anom.truck_plate || '-'} • ${anom.container_number || '-'} (${anom.pre_gate_code || 'GATE'})`;
+    document.getElementById('anomTitleText').textContent = anom.anomaly_title || 'Ketidakcocokan Dokumen / Fisik Terdeteksi';
+    document.getElementById('anomDescText').textContent = anom.anomaly_notes || 'Interlock mengunci proses untuk mencegah data tidak valid masuk ke yard.';
+    document.getElementById('anomSopRejectText').textContent = anom.sop_reject || 'Tolak akses masuk terminal, kunci palang gate, dan arahkan truk putar balik keluar melalui Jalur Darurat Gate.';
+    document.getElementById('anomSopResolveText').textContent = anom.sop_resolve || 'Verifikasi dokumen pengganti / amandemen VGM / pasang segel baru (Reseal), buka interlock, dan lanjutkan proses truk.';
+
+    card.classList.remove('hidden');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function openAnomalyFromRow(encodedJson) {
+    try {
+        const r = JSON.parse(decodeURIComponent(encodedJson));
+        showAnomalyActionCard(r, 0);
+    } catch (e) {}
+}
+
+function showBaSlipCard(slip, isResolve = false) {
+    if (!slip) return;
+    const card = document.getElementById('baSlipCard');
+    if (!card) return;
+    document.getElementById('baSlipNumber').textContent = slip.ba_number || '-';
+    const decEl = document.getElementById('baSlipDecision');
+    decEl.textContent = slip.decision_label || '-';
+    decEl.className = 'text-sm font-black mt-0.5 ' + (isResolve ? 'text-emerald-700' : 'text-rose-700');
+    const iconEl = document.getElementById('baSlipIcon');
+    if (iconEl) {
+        iconEl.className = 'w-8 h-8 rounded-xl text-white flex items-center justify-center text-sm ' + (isResolve ? 'bg-emerald-600' : 'bg-rose-600');
+        iconEl.innerHTML = isResolve ? '<i class="fa-solid fa-file-circle-check"></i>' : '<i class="fa-solid fa-file-circle-xmark"></i>';
+    }
+    document.getElementById('baSlipTruck').textContent = `${slip.truck_plate || '-'} (${slip.pre_gate_code || '-'})`;
+    document.getElementById('baSlipContainer').textContent = slip.container_number || '-';
+    document.getElementById('baSlipAnomaly').textContent = `${slip.anomaly_code || '-'} — ${slip.anomaly_title || ''}`;
+    document.getElementById('baSlipTime').textContent = `${slip.timestamp || '-'} • ${slip.officer || 'Supervisor TOC'}`;
+    document.getElementById('baSlipAction').textContent = slip.action_taken || '-';
+    card.classList.remove('hidden');
+    card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 function updateLiveConsole(data, label = 'DONE') {
     const badge = document.getElementById('consoleStatusBadge');
     const pre   = document.getElementById('liveJsonConsole');
@@ -702,7 +918,7 @@ function updateLiveConsole(data, label = 'DONE') {
 
     const ok = Boolean(data?.success && (resObj?.success !== false));
     if (badge) {
-        badge.textContent = ok ? (label + ' • SUKSES') : (label + ' • DITOLAK');
+        badge.textContent = ok ? (label + ' • SUKSES') : (label + ' • INTERLOCK / DITOLAK');
         badge.className = ok
             ? 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200'
             : 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200';
@@ -721,11 +937,56 @@ function updateLiveConsole(data, label = 'DONE') {
         document.getElementById('tfPhysical').textContent = resObj.tri_flow.physical || '-';
         document.getElementById('tfInformation').textContent = resObj.tri_flow.information || '-';
         document.getElementById('tfFinancial').textContent = resObj.tri_flow.financial || '-';
+    } else if (data?.tri_flow) {
+        document.getElementById('tfPhysical').textContent = data.tri_flow.physical || '-';
+        document.getElementById('tfInformation').textContent = data.tri_flow.information || '-';
+        document.getElementById('tfFinancial').textContent = data.tri_flow.financial || '-';
     } else if (resObj?.error || data?.error) {
-        document.getElementById('tfPhysical').textContent = 'Transaksi dibatalkan sistem.';
+        document.getElementById('tfPhysical').textContent = 'Interlock aktif: Palang / Alat Berat dikunci otomatis.';
         document.getElementById('tfInformation').textContent = resObj?.error || data?.error;
-        document.getElementById('tfFinancial').textContent = 'Masuk ke Antrean Error (DLQ).';
+        document.getElementById('tfFinancial').textContent = 'Ditahan di Antrean Resolusi Masalah (DLQ); pilih SOP Tolak atau Override.';
     }
+
+    if (resObj?.anomaly) {
+        showAnomalyActionCard(resObj.anomaly, resObj.dlq_id || 0);
+    }
+}
+
+async function triggerAnomalyScenario(type, code = '') {
+    let url = `api/edge_simulator.php?action=trigger_anomaly&type=${encodeURIComponent(type)}`;
+    if (code) url += `&code=${encodeURIComponent(code)}`;
+    const r = await fetch(url);
+    const d = await r.json();
+    updateLiveConsole(d, 'ANOMALI SENSOR');
+    await refreshIntegrationStats();
+    await loadPreadviceTable();
+    await loadDlqTable();
+}
+
+async function executeAnomalyDecision(decision) {
+    if (!activeAnomalyCtx) return;
+    const payload = {
+        decision: decision,
+        dlq_id: activeAnomalyCtx.dlq_id || 0,
+        pre_gate_code: activeAnomalyCtx.pre_gate_code || '',
+        anomaly_code: activeAnomalyCtx.anomaly_code || '',
+        container_number: activeAnomalyCtx.container_number || '',
+        truck_plate: activeAnomalyCtx.truck_plate || ''
+    };
+    const r = await fetch('api/demo_control.php?action=handle_anomaly', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+    });
+    const d = await r.json();
+    document.getElementById('anomalyActionCard')?.classList.add('hidden');
+    updateLiveConsole(d, decision === 'reject' ? 'SOP PENOLAKAN' : 'SOP PENYELESAIAN');
+    if (d.slip) {
+        showBaSlipCard(d.slip, decision !== 'reject');
+    }
+    await refreshIntegrationStats();
+    await loadPreadviceTable();
+    await loadDlqTable();
 }
 
 async function refreshIntegrationStats() {
@@ -738,7 +999,14 @@ async function refreshIntegrationStats() {
             document.getElementById('kpiInYard').textContent = d.containers_in_yard;
             document.getElementById('kpiEventsLogged').textContent = d.events_logged;
             document.getElementById('kpiDlqOpen').textContent = d.dlq_open;
-            document.getElementById('tabDlqBadge').textContent = d.dlq_open;
+            document.getElementById('tabDlqBadge').textContent = (d.dlq_open || 0) + (d.dlq_buffered || 0);
+            const bufEl = document.getElementById('bcpBufferedCount');
+            if (bufEl) bufEl.textContent = d.dlq_buffered ?? 0;
+            const bcpEl = document.getElementById('bcpModeBadge');
+            if (bcpEl && d.bcp) {
+                bcpEl.textContent = d.bcp.failover_active ? 'BCP EDGE BUFFER' : 'PRIMARY ONLINE';
+                bcpEl.className = 'text-xs font-black mt-0.5 ' + (d.bcp.failover_active ? 'text-amber-600' : 'text-emerald-700');
+            }
         }
     } catch (e) {}
 }
@@ -762,11 +1030,13 @@ function renderPreadviceFiltered() {
             || (r.truck_plate || '').toLowerCase().includes(q)
             || (r.container_number || '').toLowerCase().includes(q)
             || (r.driver_name || '').toLowerCase().includes(q)
-            || (r.owner_company || '').toLowerCase().includes(q);
+            || (r.owner_company || '').toLowerCase().includes(q)
+            || (r.anomaly_code || '').toLowerCase().includes(q)
+            || (r.anomaly_title || '').toLowerCase().includes(q);
     });
 
     if (rows.length === 0) {
-        tbody.innerHTML = '<tr data-empty-row><td colspan="6" class="py-6 text-center text-slate-400">Tidak ada data antrean.</td></tr>';
+        tbody.innerHTML = '<tr data-empty-row><td colspan="7" class="py-6 text-center text-slate-400">Tidak ada data antrean sesuai filter.</td></tr>';
         return;
     }
 
@@ -775,6 +1045,11 @@ function renderPreadviceFiltered() {
 
     tbody.innerHTML = visible.map((r, idx) => {
         const isSched = r.status === 'SCHEDULED';
+        const isHold  = r.status === 'HOLD_ANOMALY';
+        const isRej   = r.status === 'REJECTED';
+        const hasAnom = Boolean(r.anomaly_code && r.anomaly_code !== '');
+        const isOverridden = r.resolution_status === 'OVERRIDDEN_APPROVED';
+
         const cargoColors = {
             dry: 'bg-slate-100 text-slate-700',
             reefer: 'bg-cyan-50 text-cyan-700 border border-cyan-200',
@@ -784,7 +1059,59 @@ function renderPreadviceFiltered() {
         const cBadge = cargoColors[r.cargo_type] || cargoColors.dry;
         const rowJson = encodeURIComponent(JSON.stringify(r));
 
-        return `<tr class="hover:bg-slate-50/80 transition">
+        let condHtml = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200"><i class="fa-solid fa-check"></i> Dokumen &amp; VGM Sesuai</span>`;
+        if (hasAnom) {
+            if (isOverridden) {
+                condHtml = `<div class="space-y-0.5">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300"><i class="fa-solid fa-screwdriver-wrench"></i> Diatasi SOP (${r.anomaly_code})</span>
+                    <div class="text-[10px] font-mono text-slate-500">${r.ba_number || ''}</div>
+                </div>`;
+            } else if (isRej) {
+                condHtml = `<div class="space-y-0.5">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300"><i class="fa-solid fa-ban"></i> Ditolak (${r.anomaly_code})</span>
+                    <div class="text-[10px] font-mono text-rose-600">${r.ba_number || ''}</div>
+                </div>`;
+            } else {
+                condHtml = `<div class="space-y-0.5 max-w-[250px]">
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-extrabold bg-rose-50 text-rose-700 border border-rose-200"><i class="fa-solid fa-triangle-exclamation"></i> ${r.anomaly_code}</span>
+                    <div class="text-[10.5px] text-slate-600 font-semibold leading-tight truncate" title="${(r.anomaly_title || '').replace(/"/g, '&quot;')}">${r.anomaly_title || r.anomaly_notes || ''}</div>
+                </div>`;
+            }
+        }
+
+        let statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Masuk Gate</span>';
+        if (isHold) {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-600 text-white animate-pulse">HOLD GATE</span>';
+        } else if (isRej) {
+            statusBadge = '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-rose-700 border border-rose-300">Putar Balik</span>';
+        } else if (isSched) {
+            statusBadge = hasAnom && !isOverridden
+                ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">Siap Uji Anomali</span>'
+                : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Di Luar</span>';
+        }
+
+        let actionsHtml = `<button type="button" onclick="openBarcodeTicket('${rowJson}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer" title="Tiket Barcode"><i class="fa-solid fa-barcode"></i></button>`;
+        if (isHold || (hasAnom && !isOverridden && !isRej)) {
+            actionsHtml += `
+                <button type="button" onclick="triggerAnomalyScenario('${(r.anomaly_code || '').toLowerCase()}', '${r.pre_gate_code}')" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[11px] font-bold cursor-pointer" title="Trigger Sensor & Lihat Interlock"><i class="fa-solid fa-bolt mr-0.5"></i>Uji</button>
+                <button type="button" onclick="openAnomalyFromRow('${rowJson}')" class="px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-bold cursor-pointer" title="Buka Panel Keputusan SOP (Tolak / Atasi)">SOP</button>
+            `;
+        } else if (isRej) {
+            actionsHtml += `
+                <button type="button" onclick="openAnomalyFromRow('${rowJson}')" class="px-2 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-700 text-[11px] font-bold cursor-pointer">Tinjau Ulang</button>
+            `;
+        } else if (isSched) {
+            actionsHtml += `
+                <button type="button" onclick="triggerStep(1, '${r.pre_gate_code}')" class="px-2 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-bold cursor-pointer">Masuk</button>
+                <button type="button" onclick="runAutoCycleForCode('${r.pre_gate_code}')" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer">Auto</button>
+            `;
+        } else {
+            actionsHtml += `
+                <button type="button" onclick="selectContainerForActivity('${r.container_number}')" class="px-2 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 text-[11px] font-bold cursor-pointer">Pilih</button>
+            `;
+        }
+
+        return `<tr class="${isHold ? 'bg-rose-50/60' : 'hover:bg-slate-50/80'} transition">
             <td class="py-2 px-2.5 text-center font-mono text-slate-400">${idx + 1}</td>
             <td class="py-2 px-2 whitespace-nowrap">
                 <div class="font-mono font-extrabold text-slate-900">${r.truck_plate}</div>
@@ -792,27 +1119,15 @@ function renderPreadviceFiltered() {
             </td>
             <td class="py-2 px-2">
                 <span class="font-mono font-bold text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded border border-indigo-200/70">${r.container_number}</span>
-                <div class="text-[10.5px] text-slate-500 mt-0.5 truncate max-w-[160px]">${r.owner_company || '-'}</div>
+                <div class="text-[10.5px] text-slate-500 mt-0.5 truncate max-w-[150px]">${r.owner_company || '-'}</div>
             </td>
+            <td class="py-2 px-2">${condHtml}</td>
             <td class="py-2 px-2 whitespace-nowrap">
                 <span class="px-1.5 py-0.5 rounded text-[10px] font-bold uppercase ${cBadge}">${r.cargo_type}</span>
                 <span class="ml-1 font-bold text-slate-700">${r.target_block || 'B'}</span>
             </td>
-            <td class="py-2 px-2 whitespace-nowrap">
-                ${isSched
-                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200">Di Luar</span>'
-                    : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Masuk Gate</span>'
-                }
-            </td>
-            <td class="py-2 px-2 text-right whitespace-nowrap space-x-1">
-                <button type="button" onclick="openBarcodeTicket('${rowJson}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-bold cursor-pointer" title="Tiket Barcode"><i class="fa-solid fa-barcode"></i></button>
-                ${isSched ? `
-                    <button type="button" onclick="triggerStep(1, '${r.pre_gate_code}')" class="px-2 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-[11px] font-bold cursor-pointer">Masuk</button>
-                    <button type="button" onclick="runAutoCycleForCode('${r.pre_gate_code}')" class="px-2 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-bold cursor-pointer">Auto</button>
-                ` : `
-                    <button type="button" onclick="selectContainerForActivity('${r.container_number}')" class="px-2 py-1 rounded-lg bg-teal-50 hover:bg-teal-100 text-teal-700 border border-teal-200 text-[11px] font-bold cursor-pointer">Pilih</button>
-                `}
-            </td>
+            <td class="py-2 px-2 whitespace-nowrap">${statusBadge}</td>
+            <td class="py-2 px-2 text-right whitespace-nowrap space-x-1">${actionsHtml}</td>
         </tr>`;
     }).join('');
 }
@@ -867,6 +1182,8 @@ async function resetDemoDatabase() {
     const r = await fetch('api/demo_control.php?action=reset');
     const d = await r.json();
     document.getElementById('activityTargetContainer').value = '';
+    document.getElementById('anomalyActionCard')?.classList.add('hidden');
+    document.getElementById('baSlipCard')?.classList.add('hidden');
     updateLiveConsole(d, 'RESET');
     await refreshIntegrationStats();
     await loadPreadviceTable();
@@ -917,9 +1234,41 @@ async function runSecurityScenario(kind) {
         d = { event_id_tested: evId, first_send: r1, second_send_replay: r2 };
         st.textContent = 'AMAN • Kiriman ke-2 dicegah (duplicate=' + String(r2.duplicate) + ')';
         st.className = 'text-[11px] font-mono text-emerald-600 font-bold';
+    } else if (kind === 'surge') {
+        st.textContent = 'Menguji lonjakan 12 transaksi/detik...';
+        d = await (await fetch('api/edge_simulator.php?action=surge_test')).json();
+        st.textContent = `SURGE OK • ${d.processed_live} live, ${d.buffered_zero_loss} di Edge Buffer (0 hilang)`;
+        st.className = 'text-[11px] font-mono text-[#0170b9] font-bold';
     }
     if (out) out.textContent = JSON.stringify(d, null, 2);
-    updateLiveConsole(d, 'PROTEKSI');
+    updateLiveConsole(d, kind === 'surge' ? 'SURGE BUFFER' : 'PROTEKSI');
+    await refreshIntegrationStats();
+    await loadDlqTable();
+}
+
+async function toggleBcpMode() {
+    const out = document.getElementById('secTestOutput');
+    const st  = document.getElementById('secTestStatus');
+    const d = await (await fetch('api/demo_control.php?action=bcp_toggle')).json();
+    if (out) out.textContent = JSON.stringify(d, null, 2);
+    if (st && d.bcp) {
+        st.textContent = d.bcp.failover_active ? 'BCP AKTIF • Event masuk diamankan ke Edge Buffer' : 'PRIMARY ONLINE • Sinkronisasi normal aktif';
+        st.className = 'text-[11px] font-mono font-bold ' + (d.bcp.failover_active ? 'text-amber-600' : 'text-emerald-600');
+    }
+    await refreshIntegrationStats();
+}
+
+async function flushBcpBuffer() {
+    const out = document.getElementById('secTestOutput');
+    const st  = document.getElementById('secTestStatus');
+    if (st) st.textContent = 'Memulihkan & me-replay Edge Buffer...';
+    const d = await (await fetch('api/demo_control.php?action=bcp_flush')).json();
+    if (out) out.textContent = JSON.stringify(d, null, 2);
+    if (st) {
+        st.textContent = `PULIH (RPO=0) • ${d.resolved || 0} antrean dipulihkan dalam ${d.elapsed_ms || 0} ms`;
+        st.className = 'text-[11px] font-mono text-emerald-600 font-bold';
+    }
+    updateLiveConsole(d, 'BCP RECOVERY');
     await refreshIntegrationStats();
     await loadDlqTable();
 }
@@ -931,33 +1280,55 @@ async function loadDlqTable() {
         const d = await r.json();
         const rows = d.data || [];
         if (rows.length === 0) {
-            tbody.innerHTML = '<tr data-empty-row><td colspan="7" class="py-6 text-center text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Bersih — tidak ada error di antrean DLQ.</td></tr>';
+            tbody.innerHTML = '<tr data-empty-row><td colspan="7" class="py-6 text-center text-emerald-600 font-bold"><i class="fa-solid fa-circle-check mr-1"></i> Bersih — tidak ada error atau antrean buffer DLQ.</td></tr>';
             return;
         }
-        tbody.innerHTML = rows.map((x, idx) => `
+        tbody.innerHTML = rows.map((x, idx) => {
+            const stBadge = x.status === 'QUARANTINED'
+                ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700">Tertahan (Quarantined)</span>'
+                : (x.status === 'BUFFERED'
+                    ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-blue-100 text-[#0170b9]">Buffer BCP/Surge</span>'
+                    : (x.status === 'RESOLVED'
+                        ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700">Selesai SOP</span><div class="text-[9.5px] font-mono text-slate-400 mt-0.5">${x.ba_number || ''}</div>`
+                        : `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-rose-700">Ditolak (Turn-Back)</span><div class="text-[9.5px] font-mono text-rose-500 mt-0.5">${x.ba_number || ''}</div>`));
+            const acts = x.status === 'QUARANTINED'
+                ? `<button type="button" onclick="resolveDlq(${x.id}, 'dlq_resolve')" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[10px] font-bold cursor-pointer" title="${(x.sop_resolve || '').replace(/"/g, '&quot;')}"><i class="fa-solid fa-screwdriver-wrench mr-0.5"></i>SOP Atasi</button>
+                   <button type="button" onclick="resolveDlq(${x.id}, 'dlq_discard')" class="px-2.5 py-1 rounded-lg bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold cursor-pointer" title="${(x.sop_reject || '').replace(/"/g, '&quot;')}"><i class="fa-solid fa-ban mr-0.5"></i>Tolak &amp; BA</button>`
+                : (x.status === 'BUFFERED'
+                    ? `<button type="button" onclick="flushBcpBuffer()" class="px-2 py-1 rounded bg-[#0170b9] text-white text-[10px] font-bold cursor-pointer">Flush Buffer</button>`
+                    : `<span class="text-[10px] text-slate-500 font-mono">${x.resolution_action || 'Selesai'}</span>`);
+            return `
             <tr class="hover:bg-slate-50">
                 <td class="py-2.5 px-2.5 text-center font-mono text-slate-400" data-row-num>${idx + 1}</td>
                 <td class="py-2.5 px-3 font-mono text-[11px] text-slate-500">#${x.id}<div>${x.created_at}</div></td>
-                <td class="py-2.5 px-3 font-mono font-bold text-slate-900">${x.event_type || '-'}</td>
-                <td class="py-2.5 px-3 font-mono text-xs text-slate-700">${x.source_device || '-'}</td>
-                <td class="py-2.5 px-3 text-rose-700 font-semibold max-w-md">${x.reason}</td>
-                <td class="py-2.5 px-3">
-                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${x.status === 'QUARANTINED' ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${x.status === 'QUARANTINED' ? 'Error' : 'Selesai'}</span>
+                <td class="py-2.5 px-3 font-mono font-bold text-slate-900">
+                    <div>${x.event_type || '-'}</div>
+                    ${x.anomaly_code ? `<span class="px-1.5 py-0.2 rounded text-[9.5px] bg-rose-50 text-rose-700 border border-rose-200 font-extrabold">${x.anomaly_code}</span>` : ''}
                 </td>
-                <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">
-                    ${x.status === 'QUARANTINED' ? `
-                        <button type="button" onclick="resolveDlq(${x.id}, 'dlq_resolve')" class="px-2 py-1 rounded bg-emerald-600 text-white text-[10px] font-bold cursor-pointer">Proses Ulang</button>
-                        <button type="button" onclick="resolveDlq(${x.id}, 'dlq_discard')" class="px-2 py-1 rounded bg-slate-200 text-slate-700 text-[10px] font-bold cursor-pointer">Abaikan</button>
-                    ` : '<span class="text-[10px] text-slate-400">—</span>'}
+                <td class="py-2.5 px-3 font-mono text-xs text-slate-700">
+                    <div>${x.source_device || '-'}</div>
+                    ${x.truck_plate || x.container_number ? `<div class="text-[10px] text-indigo-700 font-bold">${x.truck_plate || ''} ${x.container_number || ''}</div>` : ''}
                 </td>
-            </tr>
-        `).join('');
+                <td class="py-2.5 px-3 text-slate-700 font-semibold max-w-md">
+                    <div>${x.reason}</div>
+                    ${x.resolution_notes ? `<div class="text-[10.5px] text-emerald-700 font-bold mt-0.5"><i class="fa-solid fa-check-double mr-1"></i>SOP: ${x.resolution_notes}</div>` : ''}
+                </td>
+                <td class="py-2.5 px-3 whitespace-nowrap">${stBadge}</td>
+                <td class="py-2.5 px-3 text-right space-x-1 whitespace-nowrap">${acts}</td>
+            </tr>`;
+        }).join('');
     } catch (e) {}
 }
 
 async function resolveDlq(id, act) {
-    await fetch(`api/demo_control.php?action=${act}&id=${id}`);
+    const r = await fetch(`api/demo_control.php?action=${act}&id=${id}`);
+    const d = await r.json();
+    updateLiveConsole(d, act === 'dlq_resolve' ? 'SOP PENYELESAIAN' : 'SOP PENOLAKAN');
+    if (d.slip) {
+        showBaSlipCard(d.slip, act === 'dlq_resolve');
+    }
     await refreshIntegrationStats();
+    await loadPreadviceTable();
     await loadDlqTable();
 }
 
@@ -1061,6 +1432,7 @@ function copyConsoleJson() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    refreshIntegrationStats();
     loadPreadviceTable();
     requestOAuthToken();
 });

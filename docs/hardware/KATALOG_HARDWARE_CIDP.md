@@ -95,3 +95,27 @@ Seluruh 26 perangkat dikelompokkan ke dalam 6 klaster fungsional:
    - **Rugged Mobile PDA (Item #24):** Mempercepat pemeriksaan kondisi fisik kontainer (*Equipment Interchange Receipt / EIR*) di lapangan.
    - **Rail Axle Counter (Item #25):** Mengotomasi deteksi kedatangan dan keberangkatan kereta api kontainer di jalur siding intermodal.
    - **E-Seal Bea Cukai (Item #26):** Menjamin integritas keamanan kontainer transit berstatus pabean antara Pelabuhan Tanjung Priok dan CIDP Cikarang.
+
+---
+
+## 6. Pemetaan Armada MHE & Alat Berat Terdaftar (15 Unit SSoT & Simulator 3D)
+
+Seluruh unit alat berat dan *Material Handling Equipment* (MHE) pada lanskap 3D terminal 35 Ha (`pages/simulator.php`) terpetakan 1-ke-1 ke tabel `equipment` MySQL serta modul `pages/alat.php`, `pages/cfs.php`, dan `pages/trucking.php`:
+
+| Kode Unit | Kategori MHE | Model & Kapasitas | Zona Penempatan / Jalur Operasi | Operator / PIC Default |
+| :--- | :--- | :--- | :--- | :--- |
+| **RS-01** | Reach Stacker | Kalmar DRG450-65S5 (45T) | Koridor Mid-West & Empty Depot (Blok A) | Budi Santoso (`OP-001`) |
+| **RS-02** | Reach Stacker | Kalmar DRG450-65S5 (45T) | Koridor Mid-East (Blok B & Blok E) | Agus Setiawan (`OP-002`) |
+| **RS-03** | Reach Stacker | Kalmar DRG450-65S5 (45T) | Zona Reefer & Cold Chain | Rudi Hermawan (`OP-003`) |
+| **RS-04** | Reach Stacker | Kalmar DRG450-65S5 (45T) | Koridor Selatan Blok C & Blok D | Slamet Riyadi (`OP-005`) |
+| **RTG-01** | RMGC Rail Gantry | Konecranes Rail Gantry (Grid) | Rail Siding KA Pasoso (Track 1–2) | Joko Susilo (`OP-004`) |
+| **RTG-02** | E-RTG Yard | Konecranes Zero-Emission E-RTG | Lapangan Blok A (Laden Ekspor 8×8) | Hendra Wijaya (`OP-006`) |
+| **RTG-03** | E-RTG Yard | Konecranes Zero-Emission E-RTG | Lapangan Blok B (Laden Impor 8×8) | Dedi Kurniawan (`OP-007`) |
+| **RTG-04** | E-RTG Yard | Konecranes Zero-Emission E-RTG | Lapangan Blok C (Domestik 8×8) | Wahyu Pratama (`OP-008`) |
+| **RTG-05** | E-RTG Yard | Konecranes Zero-Emission E-RTG | Lapangan Blok D (Buffer KA 8×8) | Fajar Nugroho (`OP-009`) |
+| **FL-01** | Electric Forklift | Linde E35 Electric (3.5T) | Gudang CFS — Charging Hub & Rampa | Ahmad Fauzi (`OP-010`) |
+| **FL-02** | Electric Forklift | Linde E50 Heavy Electric (5.0T) | Karantina & Behandle Bea Cukai (Blok E) | Taufik Hidayat (`OP-011`) |
+| **FL-03** | Electric Forklift | Linde E35 Electric (3.5T) | Gudang CFS — Loading Dock Bay 1 | Irwan Maulana (`OP-012`) |
+| **FL-04** | Reach Forklift | Linde E25 Reach Truck (2.5T) | Gudang CFS — Racking Aisle A–F | Eko Prasetyo (`OP-013`) |
+| **CDP-TT-01** | Terminal Tractor | Kalmar Ottawa T2 Shuttle | Shuttle Internal CFS ↔ Rail Siding KA | Yusuf Hakim (`OP-014`) |
+| **CDP-TT-02** | Terminal Tractor | Terberg YT220 Terminal Tractor | Shuttle Internal Bea Cukai ↔ Blok E/C | Bambang Hermawan (`OP-015`) |

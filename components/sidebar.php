@@ -178,10 +178,21 @@ $menu_status_badges = [
         padding: 0.5rem !important;
     }
 }
+@media (max-width: 767.98px) {
+    #sidebar {
+        position: fixed !important;
+        top: 0 !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        z-index: 50 !important;
+        width: min(272px, 84vw) !important;
+        max-width: 84vw !important;
+    }
+}
 </style>
 
 <!-- Sidebar Navigasi & Pemantau Operasional (Latar Bersih + Sticky Footer) -->
-<aside id="sidebar" class="bg-white text-slate-700 flex-shrink-0 z-40 h-[100dvh] max-h-[100dvh] overflow-hidden sidebar-transition w-64 md:w-60 fixed md:relative transform -translate-x-full md:translate-x-0 transition-all duration-200 ease-in-out shadow-lg md:shadow-none flex flex-col justify-between border-r border-slate-200/90 font-sans relative">
+<aside id="sidebar" class="bg-white text-slate-700 flex-shrink-0 z-50 md:z-40 h-[100dvh] max-h-[100dvh] overflow-hidden sidebar-transition w-64 md:w-60 fixed inset-y-0 left-0 md:relative md:inset-auto transform -translate-x-full md:translate-x-0 transition-all duration-200 ease-in-out shadow-2xl md:shadow-none flex flex-col justify-between border-r border-slate-200/90 font-sans">
 
     <!-- ======================================================================= -->
     <!-- TOP: LOGO HEADER + TOMBOL COLLAPSE SIDEBAR YANG TERLIHAT JELAS          -->

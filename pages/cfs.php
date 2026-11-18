@@ -992,7 +992,7 @@ $active_docks_count = 4;
                 <span>Wheel Chock &amp; Dock Seal Interlock K3 Aktif</span>
             </div>
             <span class="px-2.5 py-0.5 bg-white rounded-lg border border-slate-200 text-slate-700 font-semibold text-[11px]">
-                <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> MHE: 4 Forklift Linde E20
+                <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> MHE Terpetakan: FL-01..FL-04 (4 Forklift Linde E-Series)
             </span>
         </div>
     </div>

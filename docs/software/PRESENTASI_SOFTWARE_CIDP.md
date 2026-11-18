@@ -623,4 +623,28 @@
 > Demikian presentasi progres software dari kelompok Conclusion Supply Chain Consultant. Kami siap mendemonstrasikan kode program dan menjawab pertanyaan dari Bapak Dosen. Terima kasih."*
 
 ---
+
+```
+========================================================================================
+[SLIDE 16] ARSITEKTUR RATA KANAN: SSoT, SINKRONISASI WCS–MHE, SURGE/BCP & OTIF–MAE/MAPE
+========================================================================================
+```
+
+### 1. Visual Slide
+* **Judul:** Pilar Kesiapan Operasional Enterprise (5 Standar Evaluasi Terminal Modern)
+* **5 Kartu Ringkas Standar Evaluasi:**
+  1. **Zero Re-Entry & SSoT (25%):** 1 input EDI-940 Pre-Advice di gerbang mengalir otomatis ke `containers`, `trucks`, `cfs_pallets`, `reefer_telemetry`, `customs`, `billing_invoices`, hingga cetak **Context-Aware Dokumen A4**.
+  2. **Sinkronisasi Digital WMS/WCS ↔ MHE (25%):** Work Order VMT (`pages/alat.php`) memperbarui status spreader, koordinat GPS/RTK alat (`RS-01..03`, `RTG-01`), dan posisi fisik kontainer ke Digital Twin secara serempak.
+  3. **Exception Handling, Surge & BCP (20%):** Isolasi eror `QUARANTINED` (401/403/422), Idempotency Anti-Double Billing, Rate-Limiter Surge Backpressure `BUFFERED` (0 data hilang), dan **BCP Store-and-Forward (`RPO=0`, `RTO<10 detik`)**.
+  4. **Metrik Kuantitatif Logistik (15%):** Control Tower menghitung real-time **OTIF Rate ($\ge 95\%$)**, **MAE & MAPE Peramalan VBS ($<10\%$)**, **Efisiensi Cycle Time ($-48\%$)**, serta **Efisiensi Biaya Modal-Split & 0% Leakage**.
+  5. **UI Ringkas Ala Port-TOS & Kemudahan Audit:** Antarmuka bersih minim teks, kolom nomor urut (`No`) & filter batas baris (`Tampil: 10/25/50/Semua`), serta Simulator 3D `480m × 230m` proporsional dengan arus truk kontinu 2 arah + RTG/Reach Stacker.
+
+### 2. Skrip Pembicara (Speaker Notes — Siap Sidang)
+> *"Untuk menjamin ketangguhan prototipe di lingkungan nyata, sistem kami telah melampaui sekadar CRUD standar:*
+> 1. ***Zero Re-Entry Data & SSoT:*** Operator tidak pernah mengetik ulang nomor kontainer dari gerbang ke gudang hingga kasir—satu scan EDI/OCR langsung menggerakkan seluruh modul termasuk pencetakan dokumen resmi A4 yang kontekstual.
+> 2. ***WCS ↔ MHE Sync:*** Setiap instruksi Work Order di sistem otomatis menggeser koordinat telemetri MHE (`RS-01`–`RTG-01`) dan memperbarui slot tumpukan serta faktur jasa.
+> 3. ***Manajemen Pengecualian & BCP:*** Kami memisahkan transaksi bermasalah ke DLQ (`QUARANTINED`), melindungi lonjakan trafik lewat Rate-Limiter Backpressure (`BUFFERED`), dan menyediakan simulasi **BCP Failover & Flush Buffer** dengan jaminan RPO nol data hilang.
+> 4. ***Indikator Kuantitatif Nyata:*** Di beranda Control Tower kami tampilkan angka live **OTIF**, **MAE & MAPE** untuk peramalan antrean gerbang VBS, **Efisiensi Cycle Time**, serta **Penghematan Biaya & ROI** berbasis data operasional MySQL."*
+
+---
 *Dokumen ini disusun secara resmi oleh **Conclusion Supply Chain Consultant** untuk mata kuliah Teknologi dan Perangkat Lunak Logistik, ITL Trisakti (2026).*

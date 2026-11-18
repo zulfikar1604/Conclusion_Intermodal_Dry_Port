@@ -60,9 +60,10 @@ while (!connection_aborted()) {
         $last_mtime = $current_mtime;
         $content = @file_get_contents($cache_file);
         if ($content) {
+            $singleLine = str_replace(["\r\n", "\r", "\n"], ' ', trim($content));
             echo "event: state_update\n";
             echo "id: " . uniqid('msg_') . "\n";
-            echo "data: " . $content . "\n\n";
+            echo "data: " . $singleLine . "\n\n";
             flush();
         }
     }
