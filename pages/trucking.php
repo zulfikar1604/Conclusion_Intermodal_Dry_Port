@@ -313,6 +313,13 @@ $total_trucks = count($trucks);
                 <option value="gate_out">Selesai Gate-Out</option>
             </select>
 
+            <select id="truckLimitSelect" data-limit-target="#truckTable" data-limit-callback="filterTrucks" data-count-target="#truckRowCountDisplay" data-count-unit="Armada" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                <option value="10" selected>Tampil: 10</option>
+                <option value="25">Tampil: 25</option>
+                <option value="50">Tampil: 50</option>
+                <option value="all">Semua</option>
+            </select>
+
             <button onclick="resetTruckFilter()" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-semibold rounded-lg transition">
                 <i class="fa-solid fa-rotate-left mr-1 text-[10px]"></i> Reset
             </button>
@@ -337,6 +344,7 @@ $total_trucks = count($trucks);
             <table class="w-full text-left border-collapse min-w-[720px]" id="truckTable">
                 <thead>
                     <tr class="bg-slate-50/90 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-200/80">
+                        <th class="py-2 px-2.5 text-center w-10">No</th>
                         <th class="py-2 px-3">Armada / Plat Truk</th>
                         <th class="py-2 px-3">Pengemudi</th>
                         <th class="py-2 px-3">Tugas / Misi</th>
@@ -347,7 +355,7 @@ $total_trucks = count($trucks);
                     </tr>
                 </thead>
                 <tbody class="text-xs divide-y divide-slate-100">
-                    <?php foreach ($trucks as $t): ?>
+                    <?php foreach ($trucks as $idx => $t): ?>
                         <?php
                         $is_shunting = (($t['fleet_type'] ?? '') === 'internal_shunting');
 
@@ -408,6 +416,9 @@ $total_trucks = count($trucks);
                             data-container="<?= strtolower($t['container_number'] ?? '') ?>"
                             data-do="<?= strtolower($t['do_number']) ?>">
                             
+                            <!-- No -->
+                            <td class="py-1.5 px-2.5 text-center font-mono text-slate-400" data-row-num><?= $idx + 1 ?></td>
+
                             <!-- Armada / Plat Truk -->
                             <td class="py-1.5 px-3 whitespace-nowrap">
                                 <div class="flex items-center space-x-1.5">
@@ -604,10 +615,9 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-gray-900">1. Antrian Pra-Gerbang (Pre-Gate Queue)</span>
-                                <span class="text-[10px] text-gray-400">Verifikasi Plat Kamera ANPR</span>
+                                <span class="font-bold text-gray-900">1. Pra-Gerbang (ANPR)</span>
+                                <span class="text-[10px] text-gray-400">Deteksi Plat Otomatis</span>
                             </div>
-                            <p class="text-gray-600 mt-1">Armada tiba di area buffer luar gerbang CIDP. Kamera ANPR mendeteksi plat nomor secara otomatis.</p>
                         </div>
                     </div>
 
@@ -618,12 +628,10 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-indigo-50/60 p-3 rounded-xl border border-indigo-100">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-indigo-950">2. Masuk Gerbang &amp; Jembatan Timbang (Gate-In)</span>
+                                <span class="font-bold text-indigo-950">2. Gate-In &amp; VGM 80T</span>
                                 <span class="text-[10px] text-indigo-700 font-mono font-bold" id="p_gate_in">13:45 WIB</span>
                             </div>
-                            <p class="text-gray-700 mt-1">
-                                Masuk melalui <strong class="text-gray-900" id="p_gate_lane">Gate 01 Lane A</strong>. Ditimbang di jembatan timbang 80 Ton &amp; Tag RFID divalidasi.
-                            </p>
+                            <p class="text-gray-700 mt-1"><strong class="text-gray-900" id="p_gate_lane">Gate 01 Lane A</strong> &bull; RFID Tervalidasi</p>
                         </div>
                     </div>
 
@@ -634,11 +642,11 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-blue-950">3. Posisi Terkini di Lapangan Yard</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">LOKASI AKTIF</span>
+                                <span class="font-bold text-blue-950">3. Posisi Yard</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">AKTIF</span>
                             </div>
                             <p class="text-gray-700 mt-1 font-semibold" id="p_location">Slot Blok B / Bay 08</p>
-                            <p class="text-gray-500 mt-0.5">Alat berat pelayan: <strong class="text-gray-800" id="p_equipment">RS-02 (Agus Setiawan)</strong></p>
+                            <p class="text-gray-500 mt-0.5">Alat: <strong class="text-gray-800" id="p_equipment">RS-02 (Agus Setiawan)</strong></p>
                         </div>
                     </div>
 
@@ -649,12 +657,10 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-purple-50/50 p-3 rounded-xl border border-purple-100">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-purple-950">4. Operasional Bongkar / Muat (Lift-Off/On)</span>
+                                <span class="font-bold text-purple-950">4. Bongkar / Muat</span>
                                 <span class="text-[10px] text-purple-700 font-mono font-bold" id="p_container">MSKU9182374</span>
                             </div>
-                            <p class="text-gray-700 mt-1">
-                                Kontainer ditangani oleh operator Reach Stacker. Dokumen / Surat Jalan: <strong class="text-gray-900 font-mono" id="p_do">DO-2026/CIDP/0101</strong>.
-                            </p>
+                            <p class="text-gray-700 mt-1">DO: <strong class="text-gray-900 font-mono" id="p_do">DO-2026/CIDP/0101</strong></p>
                         </div>
                     </div>
 
@@ -665,29 +671,24 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-emerald-950">5. Gerbang Keluar &amp; Penyelesaian (Gate-Out)</span>
+                                <span class="font-bold text-emerald-950">5. Gate-Out</span>
                                 <span class="text-[10px] text-emerald-700 font-bold" id="p_tat">TAT: 21 Menit</span>
                             </div>
-                            <p class="text-gray-700 mt-1">
-                                Waktu Gate-Out: <span id="p_gate_out" class="font-mono text-gray-800 font-semibold">Sedang di Yard</span>. Validasi e-Gate Pass selesai.
-                            </p>
+                            <p class="text-gray-700 mt-1">Keluar: <span id="p_gate_out" class="font-mono text-gray-800 font-semibold">Sedang di Yard</span></p>
                         </div>
                     </div>
                 </div>
 
                 <!-- 2. Milestone Head Truck Langsir Internal (Terminal Tractor) -->
-                <div id="milestoneInternal" class="hidden relative border-l-2 border-amber-300 ml-4 space-y-5">
+                <div id="milestoneInternal" class="hidden relative border-l-2 border-amber-300 ml-4 space-y-4">
                     <!-- Milestone 1: Dispatching YMS/TMS -->
                     <div class="relative pl-6">
                         <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-amber-600 ring-4 ring-amber-100 flex items-center justify-center text-[8px] text-white">
                             <i class="fa-solid fa-check"></i>
                         </div>
-                        <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-200">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-amber-950">1. Penugasan Misi Langsir (YMS &amp; TMS Dispatching)</span>
-                                <span class="text-[10px] text-amber-700 font-mono font-bold">DISPATCHED</span>
-                            </div>
-                            <p class="text-gray-700 mt-1">Perintah kerja langsir diterbitkan otomatis oleh DPMS Engine untuk relokasi intermodal peti kemas.</p>
+                        <div class="bg-amber-50/70 p-3 rounded-xl border border-amber-200 flex justify-between items-center">
+                            <span class="font-bold text-amber-950">1. Dispatch Langsir (DPMS)</span>
+                            <span class="text-[10px] text-amber-700 font-mono font-bold">DISPATCHED</span>
                         </div>
                     </div>
 
@@ -698,12 +699,10 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-white p-3 rounded-xl border border-gray-200">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-gray-900">2. Titik Asal &amp; Gandeng Chassis</span>
+                                <span class="font-bold text-gray-900">2. Asal &amp; Gandeng Chassis</span>
                                 <span class="text-[10px] text-indigo-700 font-mono font-bold" id="pi_route_origin">Siding KA Pasoso</span>
                             </div>
-                            <p class="text-gray-700 mt-1">
-                                KTT merapat ke titik asal. Dilayani oleh alat berat: <strong class="text-gray-900" id="pi_equipment">RTG-01 Pasoso</strong>.
-                            </p>
+                            <p class="text-gray-700 mt-1">Alat: <strong class="text-gray-900" id="pi_equipment">RTG-01 Pasoso</strong></p>
                         </div>
                     </div>
 
@@ -714,11 +713,11 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-blue-950">3. Sirkulasi Perimeter Internal 35 Ha</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">LOKASI AKTIF</span>
+                                <span class="font-bold text-blue-950">3. Sirkulasi Internal 35 Ha</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800">AKTIF</span>
                             </div>
-                            <p class="text-gray-700 mt-1 font-semibold" id="pi_location">Jalur Sirkulasi Siding KA ↔ CFS Gudang</p>
-                            <p class="text-gray-500 mt-0.5"><i class="fa-solid fa-shield-halved mr-1 text-emerald-600"></i>Batas Kecepatan Internal Terminal: <strong class="text-gray-800">Max 20 km/jam</strong> (Non-Highway Vehicle)</p>
+                            <p class="text-gray-700 mt-1 font-semibold" id="pi_location">Jalur Sirkulasi Siding KA &harr; CFS Gudang</p>
+                            <p class="text-gray-500 mt-0.5"><i class="fa-solid fa-shield-halved mr-1 text-emerald-600"></i>Batas kecepatan yard: <strong class="text-gray-800">Max 20 km/jam</strong></p>
                         </div>
                     </div>
 
@@ -729,12 +728,10 @@ $total_trucks = count($trucks);
                         </div>
                         <div class="bg-purple-50/50 p-3 rounded-xl border border-purple-100">
                             <div class="flex justify-between items-center">
-                                <span class="font-bold text-purple-950">4. Penanganan Kargo / Rampa Konsolidasi</span>
+                                <span class="font-bold text-purple-950">4. Penanganan Rampa / Yard</span>
                                 <span class="text-[10px] text-purple-700 font-mono font-bold" id="pi_container">TCLU8192031</span>
                             </div>
-                            <p class="text-gray-700 mt-1">
-                                Kontainer diturunkan di rampa gudang / slot stacking. Surat Tugas Langsir: <strong class="text-gray-900 font-mono" id="pi_do">SHNT-2026/KA-CFS/041</strong>.
-                            </p>
+                            <p class="text-gray-700 mt-1">Surat Tugas: <strong class="text-gray-900 font-mono" id="pi_do">SHNT-2026/KA-CFS/041</strong></p>
                         </div>
                     </div>
 
@@ -743,14 +740,9 @@ $total_trucks = count($trucks);
                         <div class="absolute -left-[9px] top-0 w-4 h-4 rounded-full bg-emerald-600 ring-4 ring-emerald-100 flex items-center justify-center text-[8px] text-white">
                             <i class="fa-solid fa-flag-checkered"></i>
                         </div>
-                        <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100">
-                            <div class="flex justify-between items-center">
-                                <span class="font-bold text-emerald-950">5. Siklus Langsir Selesai (Standby di Yard)</span>
-                                <span class="text-[10px] text-emerald-700 font-bold" id="pi_tat">Siklus: 8.5 Menit</span>
-                            </div>
-                            <p class="text-gray-700 mt-1">
-                                Head truck tetap berada di dalam kawasan 35 Ha tanpa gate-out. Sistem TMS mengarahkan unit ke tugas penjemputan berikutnya.
-                            </p>
+                        <div class="bg-emerald-50/50 p-3 rounded-xl border border-emerald-100 flex justify-between items-center">
+                            <span class="font-bold text-emerald-950">5. Selesai (Standby Yard)</span>
+                            <span class="text-[10px] text-emerald-700 font-bold" id="pi_tat">Siklus: 8.5 Menit</span>
                         </div>
                     </div>
                 </div>
@@ -827,7 +819,6 @@ function filterTrucks() {
     const fleetVal = document.getElementById('filterFleetType') ? document.getElementById('filterFleetType').value.toLowerCase() : '';
 
     const rows = document.querySelectorAll('#truckTable tbody tr.truck-row');
-    let visibleCount = 0;
 
     rows.forEach(row => {
         const plate = row.getAttribute('data-plate') || '';
@@ -842,15 +833,12 @@ function filterTrucks() {
         const matchStatus = (!statusVal || status === statusVal);
         const matchFleet = (!fleetVal || fleetType === fleetVal);
 
-        if (matchSearch && matchStatus && matchFleet) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+        row.dataset.filteredOut = (matchSearch && matchStatus && matchFleet) ? '0' : '1';
     });
 
-    document.getElementById('truckRowCountDisplay').innerText = `Menampilkan ${visibleCount} Armada`;
+    if (window.CIDPTableTools) {
+        window.CIDPTableTools.apply('#truckTable');
+    }
 }
 
 function resetTruckFilter() {
@@ -987,59 +975,6 @@ setTimeout(() => {
             const fleetSelect = document.getElementById('filterFleetType');
             if (fleetSelect) {
                 fleetSelect.value = fleetParam;
-                filterTrucks();
-            }
-        }
-    } catch(e) {}
-}, 200);
-
-    // Tombol Lintas Modul
-    const btnC = document.getElementById('btnTrkCont');
-    const btn3 = document.getElementById('btnTrk3D');
-    const btnB = document.getElementById('btnTrkBilling');
-    if (data.container_number && data.container_number !== '-') {
-        if (btnC) {
-            btnC.classList.remove('hidden');
-            btnC.href = `dashboard.php?page=kontainer&search=${encodeURIComponent(data.container_number)}&open=1`;
-        }
-        if (btn3) {
-            btn3.classList.remove('hidden');
-            btn3.href = `dashboard.php?page=simulator&focus_box=${encodeURIComponent(data.container_number)}`;
-        }
-        if (btnB) {
-            btnB.classList.remove('hidden');
-            btnB.href = `dashboard.php?page=billing&search=${encodeURIComponent(data.container_number)}`;
-        }
-    } else {
-        if (btnC) btnC.classList.add('hidden');
-        if (btn3) btn3.classList.add('hidden');
-        if (btnB) btnB.classList.add('hidden');
-    }
-
-    document.getElementById('gatePassModal').classList.remove('hidden');
-}
-
-function closeGatePassModal() {
-    document.getElementById('gatePassModal').classList.add('hidden');
-}
-
-// URL Deep-Linking Initializer for Trucking Monitor
-setTimeout(() => {
-    try {
-        const urlParams = new URLSearchParams(window.location.search);
-        const searchParam = urlParams.get('search') || urlParams.get('plate') || urlParams.get('q');
-        const statusParam = urlParams.get('status');
-        if (searchParam) {
-            const input = document.getElementById('searchTruckInput');
-            if (input) {
-                input.value = searchParam;
-                filterTrucks();
-            }
-        }
-        if (statusParam) {
-            const select = document.getElementById('filterStatus');
-            if (select) {
-                select.value = statusParam;
                 filterTrucks();
             }
         }

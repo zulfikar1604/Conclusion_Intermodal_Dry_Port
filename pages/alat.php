@@ -245,9 +245,9 @@ foreach ($equipment_list as $eq) {
         <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/80">
             <div>
                 <h3 class="font-extrabold text-slate-900 text-xs flex items-center">
-                    <i class="fa-solid fa-map-location-dot mr-1.5 text-orange-600"></i>Peta Skematik Posisi Live Alat Berat Terminal
+                    <i class="fa-solid fa-map-location-dot mr-1.5 text-orange-600"></i>Posisi Live Alat Berat Terminal
                 </h3>
-                <p class="text-[9px] text-slate-400 mt-0.5">Penempatan posisi fisik alat berat pada masing-masing zona yard.</p>
+                <p class="text-[9px] text-slate-400 mt-0.5">Sebaran unit aktif per zona yard.</p>
             </div>
             <div class="flex items-center space-x-2.5 text-[10px]">
                 <span class="flex items-center text-slate-600 font-medium"><span class="w-2 h-2 rounded-full bg-emerald-500 mr-1"></span>Standby</span>
@@ -416,15 +416,24 @@ foreach ($equipment_list as $eq) {
                 </h3>
                 <span class="text-[9px] font-bold text-slate-400">• Satu baris ringkas per tiket pemindahan</span>
             </div>
-            <span class="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
-                <?= count($recent_events) ?> Catatan Terakhir
-            </span>
+            <div class="flex items-center gap-2">
+                <span id="alatEventCount" class="text-[10px] font-bold text-slate-600 bg-white px-2 py-0.5 rounded border border-slate-200">
+                    <?= count($recent_events) ?> Catatan Terakhir
+                </span>
+                <select id="alatLimitSelect" data-limit-target="#eventTable" data-count-target="#alatEventCount" data-count-unit="Catatan" class="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded-lg text-[10.5px] font-bold text-slate-700">
+                    <option value="10" selected>Tampil: 10</option>
+                    <option value="25">Tampil: 25</option>
+                    <option value="50">Tampil: 50</option>
+                    <option value="all">Semua</option>
+                </select>
+            </div>
         </div>
 
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse min-w-[720px]" id="eventTable">
                 <thead>
                     <tr class="bg-slate-50/90 text-slate-500 text-[10px] uppercase font-bold tracking-wider border-b border-slate-200/80">
+                        <th class="py-2 px-2.5 text-center w-10">No</th>
                         <th class="py-2 px-3">Alat & Operator</th>
                         <th class="py-2 px-3">Tipe Tugas</th>
                         <th class="py-2 px-3">Nomor Kontainer</th>
@@ -434,7 +443,7 @@ foreach ($equipment_list as $eq) {
                     </tr>
                 </thead>
                 <tbody class="text-xs divide-y divide-slate-100">
-                    <?php foreach ($recent_events as $ev): ?>
+                    <?php foreach ($recent_events as $ev_idx => $ev): ?>
                         <?php
                         $badge_ev = 'bg-blue-50 text-blue-700 border-blue-200';
                         if ($ev['event_type'] === 'RELOCATION') $badge_ev = 'bg-purple-50 text-purple-700 border-purple-200';
@@ -460,6 +469,8 @@ foreach ($equipment_list as $eq) {
                         <tr class="hover:bg-orange-50/30 transition cursor-pointer group"
                             onclick='showJobModal(<?= $json_event ?>)'>
                             
+                            <td class="py-1.5 px-2.5 text-center font-mono text-slate-400" data-row-num><?= $ev_idx + 1 ?></td>
+
                             <!-- Alat & Operator -->
                             <td class="py-1.5 px-3 whitespace-nowrap">
                                 <div class="flex items-center space-x-1.5">

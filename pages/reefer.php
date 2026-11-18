@@ -675,9 +675,7 @@ $alarm_count = $warning_count + $critical_count;
                             REAL DATABASE MUTATION
                         </span>
                     </div>
-                    <p class="text-xs text-cyan-100/70 mt-0.5">
-                        Uji &amp; catat telemetri sensor cold chain riil (SHT40 LoRaWAN, Kamera Termal HW-16, &amp; ATS Genset 1.500 kVA) langsung ke basis data YMS.
-                    </p>
+                    <p class="text-xs text-cyan-100/80 mt-0.5">Uji telemetri cold chain, audit termal HW-16 &amp; ATS Genset 1.500 kVA.</p>
                 </div>
             </div>
             <div class="flex items-center space-x-2 text-xs">
@@ -698,10 +696,8 @@ $alarm_count = $warning_count + $critical_count;
                         </span>
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
                     </div>
-                    <h4 class="font-bold text-sm text-white group-hover:text-cyan-200 transition">Transmisi Telemetri Suhu Kontinu</h4>
-                    <p class="text-[11px] text-cyan-100/70 mt-1 leading-relaxed">
-                        Kirim data uplink nirkabel sensor boks (Suhu Aktual, Supply/Return, Tegangan 380V, Kelembaban RH) dan catat log kepatuhan HACCP.
-                    </p>
+                    <h4 class="font-bold text-sm text-white group-hover:text-cyan-200 transition">Telemetri Suhu Kontinu</h4>
+                    <p class="text-[11px] text-cyan-100/80 mt-1">Uplink sensor nirkabel &amp; log kepatuhan HACCP.</p>
                     <div class="mt-3 bg-black/30 p-2 rounded-lg font-mono text-[10.5px] text-cyan-200/90 space-y-0.5 border border-white/5">
                         <div class="flex justify-between"><span>Container:</span> <strong class="text-white">EITU9823102</strong></div>
                         <div class="flex justify-between"><span>Slot Steker:</span> <strong class="text-cyan-300">R01-S04</strong></div>
@@ -723,10 +719,8 @@ $alarm_count = $warning_count + $critical_count;
                         </span>
                         <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
                     </div>
-                    <h4 class="font-bold text-sm text-white group-hover:text-amber-200 transition">Audit Termal Inframerah Kompresor</h4>
-                    <p class="text-[11px] text-cyan-100/70 mt-1 leading-relaxed">
-                        Pindai titik panas (*hotspot*) kompresor reefer jarak jauh (380m). Verifikasi ambang batas K3 85°C untuk mencegah kebakaran kompresor.
-                    </p>
+                    <h4 class="font-bold text-sm text-white group-hover:text-amber-200 transition">Audit Termal Kompresor</h4>
+                    <p class="text-[11px] text-cyan-100/80 mt-1">Deteksi hotspot jarak jauh &bull; batas trip 85&deg;C.</p>
                     <div class="mt-3 bg-black/30 p-2 rounded-lg font-mono text-[10.5px] text-amber-200/90 space-y-0.5 border border-white/5">
                         <div class="flex justify-between"><span>Target Rak:</span> <strong class="text-white">Rack 03 (40ft High Cube)</strong></div>
                         <div class="flex justify-between"><span>Kamera:</span> <strong class="text-amber-300">DS-2TD2636B</strong></div>
@@ -748,10 +742,8 @@ $alarm_count = $warning_count + $critical_count;
                         </span>
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
                     </div>
-                    <h4 class="font-bold text-sm text-white group-hover:text-emerald-200 transition">Uji Beban ATS Genset Shelter</h4>
-                    <p class="text-[11px] text-cyan-100/70 mt-1 leading-relaxed">
-                        Simulasikan pemadaman grid PLN dan alih daya otomatis (*Automatic Transfer Switch*) dalam 8 detik untuk menjamin kontinuitas 300 steker 380V.
-                    </p>
+                    <h4 class="font-bold text-sm text-white group-hover:text-emerald-200 transition">Uji Beban ATS Genset</h4>
+                    <p class="text-[11px] text-cyan-100/80 mt-1">Simulasi alih daya &lt;10 detik untuk 300 steker 380V.</p>
                     <div class="mt-3 bg-black/30 p-2 rounded-lg font-mono text-[10.5px] text-emerald-200/90 space-y-0.5 border border-white/5">
                         <div class="flex justify-between"><span>Kapasitas:</span> <strong class="text-white">1.500 kVA / 1.200 kW</strong></div>
                         <div class="flex justify-between"><span>Waktu Alih:</span> <strong class="text-emerald-300">&lt; 10 Detik (ATS)</strong></div>
@@ -817,6 +809,12 @@ $alarm_count = $warning_count + $critical_count;
                         <option value="normal">Normal / Stabil</option>
                         <option value="warning">Warning / Drift</option>
                     </select>
+                    <select id="reeferLimitSelect" data-limit-target="#reeferTable" data-limit-callback="filterReeferTable" class="px-2.5 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold focus:ring-1 focus:ring-cyan-500 text-gray-700">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="50">Tampil: 50</option>
+                        <option value="all">Semua</option>
+                    </select>
                 </div>
             </div>
 
@@ -825,6 +823,7 @@ $alarm_count = $warning_count + $critical_count;
                 <table class="w-full text-left text-xs text-gray-600" id="reeferTable">
                     <thead class="bg-gray-50/80 text-[10.5px] uppercase font-bold text-gray-500 border-b border-gray-100 tracking-wider">
                         <tr>
+                            <th class="p-3 text-center w-10">No</th>
                             <th class="p-3.5">No. Kontainer / ISO</th>
                             <th class="p-3.5">Pelayaran / Komoditas</th>
                             <th class="p-3.5">Slot Steker (HW-23)</th>
@@ -841,6 +840,7 @@ $alarm_count = $warning_count + $critical_count;
                     <tbody class="divide-y divide-gray-100 font-sans">
                         <?php foreach ($active_reefers as $idx => $r): ?>
                             <tr class="hover:bg-cyan-50/30 transition reefer-row" data-cat="<?= $r['category'] ?>" data-status="<?= $r['status'] ?>">
+                                <td class="p-3 text-center font-mono text-gray-400" data-row-num><?= $idx + 1 ?></td>
                                 <!-- Kontainer & ISO -->
                                 <td class="p-3.5">
                                     <div class="flex items-center space-x-2">
@@ -967,10 +967,8 @@ $alarm_count = $warning_count + $critical_count;
             <!-- Header Rack Grid -->
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-100">
                 <div>
-                    <h3 class="text-base font-bold text-gray-900">Visualisasi Rak Penumpukan Reefer (300 Soket 380V/32A)</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">
-                        Representasi 10 Rak Reefer (Rack 01 s/d Rack 10) dengan 30 titik steker industri Marechal per rak. Dilengkapi sensor arus telemetri Modbus RS-485.
-                    </p>
+                    <h3 class="text-base font-bold text-gray-900">Matriks 300 Soket Reefer (380V/32A)</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">10 Rak &bull; 30 titik steker Marechal / rak &bull; Modbus RS-485.</p>
                 </div>
                 <!-- Legend Status -->
                 <div class="flex flex-wrap items-center gap-3 text-xs font-semibold">
@@ -1073,10 +1071,8 @@ $alarm_count = $warning_count + $critical_count;
         <div class="bg-white rounded-2xl p-5 sm:p-6 border border-gray-100 shadow-sm">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-gray-100">
                 <div>
-                    <h3 class="text-base font-bold text-gray-900">Grafik Fluktuasi Suhu Kontinu 24 Jam (Audit HACCP &amp; WHO GDP)</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">
-                        Perekaman data telemetri nirkabel per 15 menit. Memantau akurasi suhu supply air, return air, dan toleransi setpoint peti kemas.
-                    </p>
+                    <h3 class="text-base font-bold text-gray-900">Log Suhu Kontinu 24 Jam (HACCP &amp; WHO GDP)</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Sampling 15 menit: Supply vs Return Air.</p>
                 </div>
                 <!-- Dropdown Pilih Kontainer -->
                 <div class="flex items-center space-x-2">
@@ -1122,7 +1118,7 @@ $alarm_count = $warning_count + $critical_count;
             </div>
 
             <div class="mt-4 pt-3 border-t border-gray-100 flex flex-wrap items-center justify-between text-xs text-gray-500 gap-2">
-                <span>Pencatatan telemetri mematuhi regulasi <strong>FDA 21 CFR Part 11</strong> dan <strong>Peraturan Kepala BPOM No. 24/2021</strong>.</span>
+                <span>Standar <strong class="text-gray-700">FDA 21 CFR Part 11</strong> &bull; <strong class="text-gray-700">BPOM No. 24/2021</strong></span>
                 <button onclick="downloadChartPDF()" class="px-3 py-1 bg-white border border-gray-200 hover:bg-gray-50 text-gray-700 rounded-lg text-xs font-semibold flex items-center space-x-1 shadow-2xs">
                     <i class="fa-solid fa-file-pdf text-red-600 mr-1"></i> Cetak Dokumen HACCP Suhu
                 </button>
@@ -1215,9 +1211,7 @@ $alarm_count = $warning_count + $critical_count;
                             <span class="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.2 rounded border border-emerald-200">ATS Standby Otomatis</span>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-600 leading-relaxed">
-                        Pencatu daya cadangan darurat (Cummins 1.500 kVA Diesel Generator) dengan sistem ATS (*Automatic Transfer Switch*) yang beralih dalam <strong>8 detik</strong> jika listrik PLN terputus.
-                    </p>
+                    <p class="text-xs text-gray-600">Cummins 1.500 kVA &bull; Alih daya otomatis (ATS) dalam <strong>8 detik</strong>.</p>
                     <div class="mt-3.5 space-y-2 text-xs border-t border-gray-100 pt-3">
                         <div class="flex justify-between">
                             <span class="text-gray-500">Kapasitas Bahan Bakar:</span>
@@ -1245,9 +1239,7 @@ $alarm_count = $warning_count + $critical_count;
                             <span class="text-[10px] text-blue-600 font-bold bg-blue-50 px-1.5 py-0.2 rounded border border-blue-200">Hydrant Pilar #06 &amp; #07</span>
                         </div>
                     </div>
-                    <p class="text-xs text-gray-600 leading-relaxed">
-                        Terintegrasi dengan Pos Damkar &amp; Pompa Hydrant (Kolom C Utara). Jika kamera termal HW-16 mendeteksi suhu &gt; 85°C selama 30 detik berturut-turut, sirene terminal dan solenoid pemutus steker langsung aktif.
-                    </p>
+                    <p class="text-xs text-gray-600">Terhubung ke Pos Damkar &amp; Hydrant Pilar #06/#07: trigger &gt;85&deg;C selama 30 detik memutus solenoid steker otomatis.</p>
                     <div class="mt-3.5 flex items-center justify-between text-xs pt-2">
                         <span class="text-gray-500">Tekanan Pompa Air:</span>
                         <span class="font-bold font-mono text-emerald-600">8.2 Bar (Stabil)</span>
@@ -1346,9 +1338,7 @@ $alarm_count = $warning_count + $critical_count;
                 <i class="fa-solid fa-plug-circle-xmark"></i>
             </div>
             <h3 class="text-lg font-bold text-gray-900">Konfirmasi Lepas Steker (Un-Plug)</h3>
-            <p class="text-xs text-gray-500 mt-1">
-                Apakah peti kemas siap dilepas dari steker daya 380V untuk persiapan alih muat (*Gate Out* atau *Rail Siding*)?
-            </p>
+            <p class="text-xs text-gray-500 mt-1">Lepas daya 380V untuk persiapan Gate-Out / Rail Siding?</p>
         </div>
 
         <form method="POST" action="dashboard.php?page=reefer" class="mt-4 space-y-3 text-xs">
@@ -1724,8 +1714,8 @@ function filterReeferTable() {
     const cat = document.getElementById('filterCategorySelect').value;
     const stat = document.getElementById('filterStatusSelect').value;
 
-    let visibleCount = 0;
-    document.querySelectorAll('.reefer-row').forEach(row => {
+    const rows = document.querySelectorAll('.reefer-row');
+    rows.forEach(row => {
         const text = row.innerText.toLowerCase();
         const rowCat = row.getAttribute('data-cat');
         const rowStat = row.getAttribute('data-status');
@@ -1734,16 +1724,12 @@ function filterReeferTable() {
         const matchCat = (cat === 'all' || rowCat === cat);
         const matchStat = (stat === 'all' || rowStat === stat);
 
-        if (matchQ && matchCat && matchStat) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+        row.dataset.filteredOut = (matchQ && matchCat && matchStat) ? '0' : '1';
     });
 
+    const stats = window.CIDPTableTools ? window.CIDPTableTools.apply('#reeferTable') : { shownCount: rows.length };
     const badge = document.getElementById('reeferCountBadge');
-    if (badge) badge.innerText = visibleCount;
+    if (badge) badge.innerText = stats.shownCount;
 }
 
 // Filter Rack Display

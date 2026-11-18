@@ -601,9 +601,9 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             <div>
                 <h3 class="text-xs font-extrabold text-slate-900 flex items-center">
                     <i class="fa-solid fa-clock text-orange-600 mr-1.5"></i>
-                    Jadwal Harian Kereta Api Kontainer 2-Arah (24-Hour Shuttle Timetable)
+                    Jadwal Harian KA Kontainer 2-Arah
                 </h3>
-                <p class="text-[9px] text-slate-400 mt-0.5">Siklus 6 perjalanan KA bolak-balik antara Stasiun Pasoso (Pelabuhan Priok) &amp; CIDP Hub Cikarang.</p>
+                <p class="text-[9px] text-slate-400 mt-0.5">6 siklus PP Pasoso (Priok) &harr; CIDP Hub Cikarang.</p>
             </div>
             <div class="flex items-center space-x-1.5 text-[10px]">
                 <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
@@ -612,13 +612,19 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                 <span class="px-2 py-0.5 rounded bg-blue-50 text-blue-700 font-bold border border-blue-200">
                     <i class="fa-solid fa-arrow-up mr-0.5"></i> 3 Outbound
                 </span>
+                <select id="railScheduleLimitSelect" data-limit-target="#intermodalScheduleTable" class="px-2 py-0.5 bg-slate-50 border border-slate-200 rounded text-[10px] font-bold text-slate-700 cursor-pointer">
+                    <option value="10" selected>Tampil: 10</option>
+                    <option value="25">Tampil: 25</option>
+                    <option value="all">Semua</option>
+                </select>
             </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs" id="intermodalScheduleTable">
                 <thead class="bg-slate-50/90 text-slate-500 uppercase font-bold text-[10px] tracking-wider border-b border-slate-200/80">
                     <tr>
+                        <th class="py-1.5 px-2 text-center w-9">No</th>
                         <th class="py-1.5 px-2.5">Trip #</th>
                         <th class="py-1.5 px-2.5">Nomor KA</th>
                         <th class="py-1.5 px-2.5">Arah Relasi</th>
@@ -631,8 +637,9 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-slate-100 font-sans">
-                    <?php foreach ($shuttle_timetable as $tt): ?>
+                    <?php foreach ($shuttle_timetable as $tt_idx => $tt): ?>
                     <tr class="hover:bg-orange-50/30 transition <?= strpos($tt['badge'], 'pulse') !== false ? 'bg-orange-50/20' : '' ?>">
+                        <td class="py-1.5 px-2 text-center font-mono text-slate-400" data-row-num><?= $tt_idx + 1 ?></td>
                         <td class="py-1.5 px-2.5 font-mono font-bold text-slate-500"><?= $tt['trip_no'] ?></td>
                         <td class="py-1.5 px-2.5 font-mono font-bold text-slate-900"><?= $tt['train_code'] ?></td>
                         <td class="py-1.5 px-2.5">
@@ -652,7 +659,7 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                         <td class="py-1.5 px-2.5 font-mono text-slate-600"><?= $tt['loco'] ?></td>
                         <td class="py-1.5 px-2.5 text-slate-600 max-w-[180px] truncate" title="<?= $tt['cargo'] ?>"><?= $tt['cargo'] ?></td>
                         <td class="py-1.5 px-2.5">
-                            <span class="px-2 py-0.5 rounded text-[10px] font-bold border <?= $tt['badge'] ?>">
+                            <span class="inline-flex items-center whitespace-nowrap px-2 py-0.5 rounded text-[10px] font-bold border <?= $tt['badge'] ?>">
                                 <?= $tt['status'] ?>
                             </span>
                         </td>
@@ -685,9 +692,7 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                         Leaflet.js + OpenStreetMap
                     </span>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">
-                    Pemantauan geospasial waktu-nyata rangkaian KA Logistik melintasi koridor rel pelabuhan Daop 1: <strong class="text-emerald-700">KA 2518 (Inbound Impor)</strong> dan <strong class="text-blue-700">KA 2519 (Outbound Ekspor)</strong> yang melaju dua arah dan berpapasan di jalur ganda.
-                </p>
+                <p class="text-xs text-gray-500 mt-1">Pelacakan real-time <strong class="text-emerald-700">KA 2518 (Impor)</strong> &amp; <strong class="text-blue-700">KA 2519 (Ekspor)</strong> di koridor Daop 1.</p>
             </div>
 
             <!-- Toolbar Kontrol GIS & Animasi -->
@@ -855,9 +860,9 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             <div>
                 <h2 class="text-base font-bold text-gray-900 flex items-center">
                     <i class="fa-solid fa-train-track text-[#0170b9] mr-2"></i>
-                    Visualisasi Rangkaian Gerbong Datar (Sepur Rel Siding CIDP)
+                    Rangkaian Gerbong Datar (Siding CIDP)
                 </h2>
-                <p class="text-xs text-gray-500 mt-0.5">Pilih sepur rel aktif untuk memeriksa susunan gerbong datar, muatan kontainer, dan status alih muat crane.</p>
+                <p class="text-xs text-gray-500 mt-0.5">Pilih sepur rel untuk melihat posisi gerbong &amp; status crane.</p>
             </div>
             <!-- Track Switcher & BAPLIE Button -->
             <div class="flex items-center space-x-2 flex-wrap gap-y-2">
@@ -1166,7 +1171,7 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                         <span>Uji Diagnostik Sinyal Sensor Roda Dual Track (Self-Test)</span>
                     </button>
                     <p class="text-[11px] text-gray-400 text-center">
-                        Memvalidasi sensor Frauscher RSR180 Sepur Utara &amp; Sepur Selatan (Zero Discrepancy Rule). Simulasi alih muat dan pergerakan 3D dijalankan di <a href="dashboard.php?page=simulator" class="text-indigo-600 font-bold underline">Panel Simulasi 3D</a>.
+                        Uji Frauscher RSR180 Dual Track &bull; Lihat pergerakan 3D di <a href="dashboard.php?page=simulator" class="text-indigo-600 font-bold underline">Simulator 3D</a>.
                     </p>
                 </div>
             </div>
@@ -1190,8 +1195,8 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             <i class="fa-solid fa-check text-[10px]"></i>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-900">Tahap 1: Deteksi Kedatangan Dual Siding &amp; Axle Counter</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Sensor RSR180 menghitung 126 as roda KA 2518 (Track-01) dan 126 as roda KA 2519 (Track-02) secara independen.</p>
+                            <h4 class="text-xs font-bold text-gray-900">1. Kedatangan Dual Siding &amp; Axle Counter</h4>
+                            <p class="text-[11px] text-gray-500 mt-0.5">126 as KA 2518 (Track-01) &amp; 126 as KA 2519 (Track-02).</p>
                         </div>
                         <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Selesai</span>
                     </div>
@@ -1202,8 +1207,8 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             <i class="fa-solid fa-check text-[10px]"></i>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-900">Tahap 2: Penguncian Lokomotif &amp; Interlocking Persinyalan SIL 4</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Pemasangan stop block dan penguncian rem sepatu siding menjamin keamanan pekerja crane RMGC &amp; RS.</p>
+                            <h4 class="text-xs font-bold text-gray-900">2. Penguncian Lokomotif &amp; SIL 4 Interlocking</h4>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Stop block &amp; rem sepatu aktif untuk operasi RMGC &amp; RS.</p>
                         </div>
                         <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Selesai</span>
                     </div>
@@ -1214,10 +1219,10 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             3
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-xs font-bold text-blue-900">Tahap 3: Operasi Alih Muat Simultan (Bongkar Impor &amp; Muat Ekspor)</h4>
-                            <p class="text-[11px] text-blue-800 mt-0.5">Track-01 membongkar kontainer impor ke buffer, sementara Track-02 memuat box ekspor (VGM) ke gerbong datar.</p>
+                            <h4 class="text-xs font-bold text-blue-900">3. Alih Muat Simultan Impor / Ekspor</h4>
+                            <p class="text-[11px] text-blue-800 mt-0.5">Track-01 bongkar impor; Track-02 muat ekspor (VGM).</p>
                         </div>
-                        <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded animate-pulse">Berjalan Simultan</span>
+                        <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded animate-pulse">Berjalan</span>
                     </div>
 
                     <!-- Step 4 -->
@@ -1226,8 +1231,8 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             4
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-700">Tahap 4: Klirens Pabean CEISA 4.0 &amp; Cross-Docking Truk</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Relokasi pabean PLP disahkan Bea Cukai, kargo prioritas langsung dipindahkan ke armada truk tanpa pengendapan.</p>
+                            <h4 class="text-xs font-bold text-gray-700">4. Klirens CEISA 4.0 &amp; Cross-Docking</h4>
+                            <p class="text-[11px] text-gray-500 mt-0.5">PLP disahkan &rarr; langsung lanjut ke armada trailer.</p>
                         </div>
                         <span class="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded">Sinkron</span>
                     </div>
@@ -1238,8 +1243,8 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             5
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-700">Tahap 5: Pertukaran Pesan EDI BAPLIE &amp; Pelepasan KA Shuttle</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Penerbitan surat jalan KA dan transmisi BAPLIE ke TOS Dermaga Priok untuk persiapan crane muat kapal.</p>
+                            <h4 class="text-xs font-bold text-gray-700">5. Kirim EDI BAPLIE &amp; Pelepasan Shuttle</h4>
+                            <p class="text-[11px] text-gray-500 mt-0.5">Transmisi manifest slot ke TOS Dermaga Priok.</p>
                         </div>
                         <span class="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded">13:30 / 18:45 WIB</span>
                     </div>
@@ -1256,9 +1261,9 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             <div>
                 <h3 class="text-base font-bold text-gray-900 flex items-center">
                     <i class="fa-solid fa-file-code text-[#0170b9] mr-2"></i>
-                    UN/EDIFACT BAPLIE D.95B (Slot Allocation EDI Standard SMDG)
+                    UN/EDIFACT BAPLIE D.95B
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">Format elektronik standar internasional SMDG untuk pertukaran data manifest slot gerbong KA 2-arah.</p>
+                <p class="text-xs text-gray-500 mt-0.5">Manifest slot gerbong KA standar SMDG.</p>
             </div>
             <!-- BAPLIE Switcher & Actions -->
             <div class="flex items-center space-x-2 flex-wrap gap-y-2">

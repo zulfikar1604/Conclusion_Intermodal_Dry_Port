@@ -851,27 +851,27 @@ $active_docks_count = 4;
 <!-- NAVIGASI TAB MODUL CFS (4 TAB UTAMA) -->
 <!-- ========================================================================= -->
 <div class="bg-white rounded-2xl shadow-sm border border-gray-200/80 overflow-hidden mb-6">
-    <div class="border-b border-gray-200 px-4 sm:px-6 flex items-center justify-between overflow-x-auto gap-4 bg-gray-50/50">
-        <div class="flex space-x-1 sm:space-x-2 py-2.5 flex-nowrap min-w-max">
-            <button onclick="switchCfsTab('tab-rampa')" id="btn-tab-rampa" class="cfs-tab-btn active px-4 py-2 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-xs shadow-orange-500/20 flex items-center gap-2 cursor-pointer">
+    <div class="border-b border-gray-200 px-4 sm:px-5 flex flex-wrap items-center justify-between gap-2 bg-gray-50/50">
+        <div class="flex flex-wrap gap-1.5 py-2.5">
+            <button onclick="switchCfsTab('tab-rampa')" id="btn-tab-rampa" class="cfs-tab-btn active px-3.5 py-2 rounded-xl text-xs font-bold transition-all bg-gradient-to-r from-orange-500 to-orange-600 text-white shadow-xs shadow-orange-500/20 flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-truck-ramp-box"></i>
-                <span>Manajemen Rampa D1-D5 (Live Dock)</span>
+                <span>Rampa D1–D5 (Live)</span>
             </button>
-            <button onclick="switchCfsTab('tab-manifest')" id="btn-tab-manifest" class="cfs-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center gap-2 cursor-pointer">
+            <button onclick="switchCfsTab('tab-manifest')" id="btn-tab-manifest" class="cfs-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-boxes-stacked"></i>
-                <span>Manifest Kargo LCL &amp; Inventori Palet (GS1)</span>
+                <span>Kargo &amp; Palet GS1</span>
             </button>
-            <button onclick="switchCfsTab('tab-denah')" id="btn-tab-denah" class="cfs-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center gap-2 cursor-pointer">
+            <button onclick="switchCfsTab('tab-denah')" id="btn-tab-denah" class="cfs-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-map-location-dot"></i>
-                <span>Warehouse Master Layout (6 Blok)</span>
+                <span>Layout Gudang (6 Blok)</span>
             </button>
-            <button onclick="switchCfsTab('tab-joborder')" id="btn-tab-joborder" class="cfs-tab-btn px-4 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center gap-2 cursor-pointer">
+            <button onclick="switchCfsTab('tab-joborder')" id="btn-tab-joborder" class="cfs-tab-btn px-3.5 py-2 rounded-xl text-xs font-semibold transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center gap-1.5 cursor-pointer">
                 <i class="fa-solid fa-clipboard-check"></i>
-                <span>Job Order &amp; Tally Master Console</span>
+                <span>Job Order &amp; Tally</span>
             </button>
         </div>
-        <div class="text-[11px] text-gray-400 font-mono hidden md:block whitespace-nowrap">
-            Lokasi: Sektor Barat (Zona F-CFS) &bull; Luas 4.000 m²
+        <div class="text-[11px] text-gray-400 font-mono hidden xl:block whitespace-nowrap">
+            Sektor Barat (Zona F-CFS) &bull; 4.000 m²
         </div>
     </div>
 
@@ -885,9 +885,7 @@ $active_docks_count = 4;
                     <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     Status Operasional 5 Rampa Loading Dock Hidrolik (D1 - D5)
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">
-                    Dilengkapi Hydraulic Dock Leveler 15 Ton, Inflatable Dock Shelter, Traffic Signal Light, &amp; Tally Scanner Nirkabel.
-                </p>
+                <p class="text-xs text-gray-500 mt-0.5">Dock Leveler 15T &bull; Shelter &bull; Traffic Signal</p>
             </div>
             <div class="flex items-center gap-2 text-xs">
                 <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 text-amber-700 font-bold border border-amber-200">
@@ -910,17 +908,17 @@ $active_docks_count = 4;
             <div id="dock-card-<?= $dock_id ?>" data-dock="<?= $dock_id ?>" class="rounded-2xl border <?= $is_idle ? 'border-dashed border-gray-300 bg-gray-50/50' : 'border-gray-200 bg-white' ?> p-4 shadow-xs flex flex-col justify-between relative overflow-hidden transition-all hover:shadow-md">
                 <!-- Top Dock Identifier -->
                 <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-9 h-9 rounded-xl font-black text-sm flex items-center justify-center <?= $is_idle ? 'bg-gray-200 text-gray-700' : 'bg-[#0170b9] text-white shadow-sm' ?>">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5 mb-3">
+                        <div class="flex items-center space-x-2 min-w-0">
+                            <span class="w-8 h-8 shrink-0 rounded-xl font-black text-xs flex items-center justify-center <?= $is_idle ? 'bg-gray-200 text-gray-700' : 'bg-[#0170b9] text-white shadow-sm' ?>">
                                 <?= $dock_id ?>
                             </span>
-                            <div>
+                            <div class="min-w-0">
                                 <span class="text-xs font-bold text-gray-900 block leading-tight">Rampa <?= $dock_id ?></span>
-                                <span class="text-[10px] text-gray-500 block">Leveler 15T Hidrolik</span>
+                                <span class="text-[10px] text-gray-500 block">Leveler 15T</span>
                             </div>
                         </div>
-                        <span class="px-2 py-0.5 rounded-full text-[9px] font-bold border <?= $dock['badge'] ?>">
+                        <span class="inline-flex items-center whitespace-nowrap shrink-0 px-2 py-0.5 rounded-full text-[9px] font-bold border <?= $dock['badge'] ?>">
                             <?= $dock['status'] ?>
                         </span>
                     </div>
@@ -987,24 +985,15 @@ $active_docks_count = 4;
             <?php endforeach; ?>
         </div>
 
-        <!-- Informasi SOP Keamanan & Rampa -->
-        <div class="mt-6 bg-gradient-to-r from-slate-50 to-blue-50/40 rounded-2xl p-4 border border-blue-100/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 rounded-xl bg-[#0170b9] text-white flex items-center justify-center text-lg flex-shrink-0 shadow-sm">
-                    <i class="fa-solid fa-shield-halved"></i>
-                </div>
-                <div>
-                    <h4 class="text-xs font-bold text-gray-900">SOP Standar K3 Rampa CFS &bull; Inflatable Dock Seal &amp; Wheel Chock Interlock</h4>
-                    <p class="text-[11px] text-gray-600 mt-0.5 leading-relaxed">
-                        Chassis truk wajib diganjal <em>wheel chock interlock</em> sebelum pintu kontainer dibuka. Sensor nirkabel melarang pengoperasian rampa hidrolik jika ganjal roda belum terpasang.
-                    </p>
-                </div>
+        <!-- Status Keamanan Rampa Ringkas -->
+        <div class="mt-4 bg-slate-50 rounded-xl px-4 py-2.5 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 font-bold text-slate-800">
+                <i class="fa-solid fa-shield-halved text-[#0170b9]"></i>
+                <span>Wheel Chock &amp; Dock Seal Interlock K3 Aktif</span>
             </div>
-            <div class="flex items-center space-x-2 text-xs flex-shrink-0">
-                <span class="px-3 py-1 bg-white rounded-lg border border-gray-200 text-gray-700 font-semibold shadow-2xs">
-                    <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> MHE: 4 Forklift Listrik Linde E20
-                </span>
-            </div>
+            <span class="px-2.5 py-0.5 bg-white rounded-lg border border-slate-200 text-slate-700 font-semibold text-[11px]">
+                <i class="fa-solid fa-bolt text-amber-500 mr-1"></i> MHE: 4 Forklift Linde E20
+            </span>
         </div>
     </div>
 
@@ -1038,6 +1027,12 @@ $active_docks_count = 4;
                     <option value="fmcg">FMCG</option>
                     <option value="textile">Tekstil</option>
                 </select>
+                <select id="palletLimitSelect" data-limit-target="#palletTable" data-limit-callback="filterPalletTable" data-count-target="#palletCountDisplay" data-count-unit="palet" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-orange-500">
+                    <option value="10" selected>Tampil: 10</option>
+                    <option value="25">Tampil: 25</option>
+                    <option value="50">Tampil: 50</option>
+                    <option value="all">Semua</option>
+                </select>
             </div>
             <div class="flex items-center space-x-2">
                 <span class="text-xs text-gray-500 font-medium" id="palletCountDisplay">Menampilkan <?= count($cfs_pallets) ?> palet terdaftar</span>
@@ -1049,6 +1044,7 @@ $active_docks_count = 4;
             <table class="w-full text-left border-collapse text-xs" id="palletTable">
                 <thead>
                     <tr class="bg-gray-50/80 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider text-[10.5px]">
+                        <th class="py-3 px-2.5 text-center w-10">No</th>
                         <th class="py-3 px-3.5">No. Palet SSCC-18 (GS1)</th>
                         <th class="py-3 px-3.5">Ex-Kontainer &amp; Dokumen</th>
                         <th class="py-3 px-3.5">Deskripsi Komoditas &amp; Consignee</th>
@@ -1061,7 +1057,7 @@ $active_docks_count = 4;
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 font-medium text-gray-800">
-                    <?php foreach ($cfs_pallets as $p): 
+                    <?php foreach ($cfs_pallets as $p_idx => $p): 
                         $status_badge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                         if ($p['status'] === 'STAGING_OUT') $status_badge = 'bg-blue-50 text-blue-700 border-blue-200';
                         if ($p['status'] === 'HOLD') $status_badge = 'bg-red-50 text-red-700 border-red-200';
@@ -1075,6 +1071,7 @@ $active_docks_count = 4;
                         data-category="<?= $p['category'] ?>"
                         data-search="<?= strtolower($p['pallet_sscc'] . ' ' . $p['commodity_name'] . ' ' . $p['consignee'] . ' ' . ($p['container_origin'] ?? '') . ' ' . $p['rack_location']) ?>">
                         
+                        <td class="py-3 px-2.5 text-center font-mono text-gray-400" data-row-num><?= $p_idx + 1 ?></td>
                         <!-- SSCC-18 Pallet Code -->
                         <td class="py-3 px-3.5">
                             <div class="flex items-center space-x-2">
@@ -1698,11 +1695,11 @@ $active_docks_count = 4;
                     </span>
                     <h3 class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-tight flex items-center gap-2">
                         <i class="fa-solid fa-warehouse text-[#0170b9]"></i>
-                        Warehouse Master Layout &amp; Denah Visual Gudang CFS 4.000 m²
+                        Master Layout Gudang CFS (4.000 m²)
                     </h3>
                 </div>
-                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                    Struktur Baja Bentang Bersih 50.000 &times; 80.000 mm &bull; Storage 6 Blok &bull; Integrasi Loading Dock Rampa D1–D5 &bull; Pelacakan Status Rak R1–R4.
+                <p class="text-xs text-gray-500 mt-0.5">
+                    50 × 80 m &bull; 6 Blok Rak &bull; Rampa D1–D5
                 </p>
             </div>
 
@@ -1736,9 +1733,7 @@ $active_docks_count = 4;
                                 </div>
                                 <div>
                                     <div class="office-title">Office / Admin / Control Room</div>
-                                    <div class="office-subtitle">
-                                        Pusat monitoring operasional, administrasi, supervisor, dan kontrol aktivitas gudang
-                                    </div>
+                                    <div class="office-subtitle">Kontrol operasional &amp; administrasi gudang</div>
                                 </div>
                             </div>
 
@@ -2539,17 +2534,18 @@ $active_docks_count = 4;
                         <i class="fa-solid fa-boxes-stacked"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-xs sm:text-sm text-gray-900 flex items-center gap-2">
-                            <span>Rekayasa Racking 200 Palet per Blok (Aisle A - F)</span>
-                            <span class="px-2 py-0.5 rounded text-[9.5px] font-mono font-extrabold bg-blue-100 text-blue-800">ISO / FEM 10.2.02</span>
-                        </h4>
-                        <p class="text-[11px] text-gray-500 mt-0.5">
-                            Parameter susunan fisik Selective Pallet Racking: <strong>Panjang Rak (Bay)</strong>, <strong>Tingkat Susun (Tier)</strong>, <strong>Muatan Stack/Beam</strong>, dan <strong>Slot Ketersediaan (Available)</strong>.
-                        </p>
+                        <h4 class="font-bold text-xs sm:text-sm text-gray-900">Konfigurasi Rak (Aisle A–F)</h4>
                     </div>
                 </div>
-                <div class="text-[11px] font-mono bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700">
-                    Total Kapasitas: <strong class="text-blue-700">1.200 Palet</strong> &bull; Tersedia: <strong class="text-emerald-600">326 Bebas</strong>
+                <div class="flex items-center gap-2">
+                    <div class="text-[11px] font-mono bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700">
+                        Total Kapasitas: <strong class="text-blue-700">1.200 Palet</strong> &bull; Tersedia: <strong class="text-emerald-600">326 Bebas</strong>
+                    </div>
+                    <select id="cfsAislesLimitSelect" data-limit-target="#cfsAislesTable" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="all">Semua</option>
+                    </select>
                 </div>
             </div>
 
@@ -2558,38 +2554,31 @@ $active_docks_count = 4;
                 <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block font-mono">1. Tumpuk Panjang (Bay)</span>
                     <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-1 font-mono">10 Bay Memanjang</div>
-                    <p class="text-[10.5px] text-gray-500 mt-1 leading-snug">
-                        10 modul bay per baris (panjang balok beam 2.700 mm). Total panjang bentang rak 27,0 meter per baris.
-                    </p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">Bentang 27 m / baris</p>
                 </div>
                 <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block font-mono">2. Susun per Stack / Beam</span>
                     <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-1 font-mono">2 Palet / Stack</div>
-                    <p class="text-[10.5px] text-gray-500 mt-1 leading-snug">
-                        Tiap 1 bay beam memuat 2 unit palet standar EUR/ISO (1.000 &times; 1.200 mm) berdampingan secara horizontal.
-                    </p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">Standar EUR/ISO</p>
                 </div>
                 <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block font-mono">3. Stacking Vertikal (Tier)</span>
                     <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-1 font-mono">5 Tingkat (Tier)</div>
-                    <p class="text-[10.5px] text-gray-500 mt-1 leading-snug">
-                        Level 1 (lantai dasar) + 4 level beam ke atas (tinggi rak ~7,5 m), dijangkau Reach Truck mast 8 m.
-                    </p>
+                    <p class="text-[10px] text-gray-500 mt-0.5">Tinggi rak ~7,5 m</p>
                 </div>
                 <div class="bg-blue-50/60 rounded-xl p-3 border border-blue-200">
                     <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider block font-mono">4. Total Kapasitas 1 Blok</span>
                     <div class="text-sm sm:text-base font-extrabold text-[#0170b9] mt-1 font-mono">200 Palet Slot</div>
-                    <p class="text-[10.5px] text-blue-900 mt-1 leading-snug">
-                        Rumus: 10 Bay &times; 2 Baris (Back-to-Back) &times; 2 Palet &times; 5 Tingkat = Tepat 200 Palet per Blok.
-                    </p>
+                    <p class="text-[10px] text-blue-900 mt-1 leading-snug">2 baris back-to-back</p>
                 </div>
             </div>
 
             <!-- Tabel Detail Ketersediaan Palet Real-Time per Blok -->
             <div class="overflow-x-auto border border-gray-200 rounded-xl">
-                <table class="w-full text-left text-xs border-collapse">
+                <table class="w-full text-left text-xs border-collapse" id="cfsAislesTable">
                     <thead>
                         <tr class="bg-slate-50 text-gray-600 font-bold uppercase text-[10px] font-mono border-b border-gray-200">
+                            <th class="py-2.5 px-2.5 text-center w-10">No</th>
                             <th class="py-2.5 px-3">Blok &amp; Aisle</th>
                             <th class="py-2.5 px-3">Kategori Komoditas</th>
                             <th class="py-2.5 px-3 text-center">Formasi Racking</th>
@@ -2602,8 +2591,9 @@ $active_docks_count = 4;
                     </thead>
                     <tbody class="divide-y divide-gray-100 font-mono text-[11px]">
                         <?php 
-                        $total_cap = 0; $total_occ = 0; $total_avl = 0;
+                        $total_cap = 0; $total_occ = 0; $total_avl = 0; $a_idx = 0;
                         foreach ($aisles_data as $ak => $ad): 
+                            $a_idx++;
                             $cap = $ad['total'];
                             $occ = $ad['occupied'];
                             $avl = $cap - $occ;
@@ -2617,6 +2607,7 @@ $active_docks_count = 4;
                             elseif ($pct < 40) { $badge_color = 'bg-blue-50 text-blue-700 border-blue-200'; $status_text = 'Kapasitas Longgar'; }
                         ?>
                         <tr class="hover:bg-slate-50/80 transition">
+                            <td class="py-2.5 px-2.5 text-center font-mono text-gray-400" data-row-num><?= $a_idx ?></td>
                             <td class="py-2.5 px-3 font-bold text-gray-900">
                                 <span class="text-blue-700 font-bold"><?= $ad['client'] ?></span> 
                                 <span class="text-gray-400 font-normal">(<?= $ad['name'] ?>)</span>
@@ -2642,7 +2633,7 @@ $active_docks_count = 4;
                     </tbody>
                     <tfoot class="bg-slate-100/90 font-mono font-bold text-gray-900 border-t border-gray-200">
                         <tr>
-                            <td class="py-2.5 px-3" colspan="3">TOTAL GUDANG CFS (6 BLOK/AISLE)</td>
+                            <td class="py-2.5 px-3" colspan="4">TOTAL GUDANG CFS (6 BLOK/AISLE)</td>
                             <td class="py-2.5 px-3 text-right"><?= $total_cap ?> Plt</td>
                             <td class="py-2.5 px-3 text-right text-blue-700"><?= $total_occ ?> Plt</td>
                             <td class="py-2.5 px-3 text-right text-emerald-700 bg-emerald-100/50"><?= $total_avl ?> Plt (Bebas)</td>
@@ -2654,149 +2645,76 @@ $active_docks_count = 4;
             </div>
         </div>
 
-        <!-- Floor Specifications & Engineering Callout Accordion -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs">
-            <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-1.5">
-                <h4 class="font-bold text-gray-800 flex items-center gap-1.5 text-xs">
-                    <i class="fa-solid fa-cube text-[#0170b9]"></i>
-                    <span>Spesifikasi Struktur Lantai</span>
-                </h4>
-                <p class="text-gray-600 text-[11px] leading-relaxed">
-                    Pelat beton bertulang tebal 200 mm, mutu beton f'c 30 MPa (K-350), dry-shake floor hardener Sika Chapdur 5 kg/m², toleransi kerataan lantai DIN 15185 Superflat.
-                </p>
-            </div>
-            <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-1.5">
-                <h4 class="font-bold text-gray-800 flex items-center gap-1.5 text-xs">
-                    <i class="fa-solid fa-truck-ramp-box text-emerald-600"></i>
-                    <span>Spesifikasi Rampa Dock D1-D5</span>
-                </h4>
-                <p class="text-gray-600 text-[11px] leading-relaxed">
-                    Hydraulic Dock Leveler kapasitas dinamis 15.000 kg, lip length 400 mm, inflatable dock shelter kedap cuaca, sensor ultrasonik HW-06, lampu sinyal lalu-lintas LED merah/hijau.
-                </p>
-            </div>
-            <div class="bg-slate-50/70 border border-slate-200/80 rounded-xl p-3.5 space-y-1.5">
-                <h4 class="font-bold text-gray-800 flex items-center gap-1.5 text-xs">
-                    <i class="fa-solid fa-fire-extinguisher text-rose-600"></i>
-                    <span>Keselamatan K3 &amp; Proteksi Kebakaran</span>
-                </h4>
-                <p class="text-gray-600 text-[11px] leading-relaxed">
-                    Sistem hidran gedung FHC-01 s/d FHC-04 (tekanan kerja 4.5 bar), APAR Powder 6 kg per 20 meter, koridor evakuasi selebar 2.000 mm menuju pintu darurat ber-panic bar.
-                </p>
-            </div>
+        <!-- Ringkasan Teknis Gudang -->
+        <div class="flex flex-wrap items-center gap-2 mt-3 text-[11px] font-semibold text-slate-600">
+            <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200"><i class="fa-solid fa-cube text-[#0170b9] mr-1.5"></i>Lantai K-350 Superflat</span>
+            <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200"><i class="fa-solid fa-truck-ramp-box text-emerald-600 mr-1.5"></i>5 Rampa Hidrolik 15T (HW-06)</span>
+            <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200"><i class="fa-solid fa-fire-extinguisher text-rose-600 mr-1.5"></i>Hidran FHC-01..04 &amp; Jalur K3</span>
         </div>
 
-        <!-- ================================================================= -->
-        <!-- KONSOL KENDALI & UJI PEMICU SENSOR GUDANG CFS REAL-TIME           -->
-        <!-- ================================================================= -->
-        <div class="mt-6 bg-white rounded-2xl p-5 border border-gray-200 text-gray-800 shadow-sm">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between pb-4 border-b border-gray-100 gap-3">
-                <div class="flex items-center space-x-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#0170b9] border border-blue-200 flex items-center justify-center text-lg shrink-0">
+        <!-- KONSOL UJI SENSOR GUDANG CFS -->
+        <div class="mt-5 bg-white rounded-2xl p-4 border border-gray-200 text-gray-800 shadow-sm">
+            <div class="flex items-center justify-between pb-3 border-b border-gray-100 gap-2">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-xl bg-blue-50 text-[#0170b9] border border-blue-200 flex items-center justify-center text-sm shrink-0">
                         <i class="fa-solid fa-satellite-dish"></i>
                     </div>
-                    <div>
-                        <div class="flex items-center space-x-2 flex-wrap">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-emerald-50 text-emerald-700 border border-emerald-200">Live IoT Trigger</span>
-                            <h4 class="text-sm font-bold text-gray-900">Konsol Pemicu Sensor Operasional Gudang CFS (Real Database Event)</h4>
-                        </div>
-                        <p class="text-xs text-gray-500 mt-0.5">
-                            Setiap pemicu sensor di bawah ini <strong>bukan simulasi semu</strong>, melainkan langsung menulis data nyata ke tabel <code class="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-[11px]">cfs_jobs</code>, <code class="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-[11px]">cfs_pallets</code>, <code class="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-[11px]">trucks</code>, dan <code class="bg-gray-100 text-gray-700 px-1 py-0.5 rounded text-[11px]">yard_events</code> di MySQL.
-                        </p>
-                    </div>
+                    <h4 class="text-sm font-bold text-gray-900">Pemicu Sensor Gudang CFS</h4>
                 </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Live MySQL</span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3.5 mt-4">
-                <!-- Sensor Card 1: Dock Sensor HW-06 -->
-                <div class="bg-slate-50/80 rounded-xl p-4 border border-slate-200/80 flex flex-col justify-between hover:border-amber-400 hover:bg-white hover:shadow-xs transition">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 mt-3">
+                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between gap-2.5 hover:border-amber-400 hover:bg-white transition">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10.5px] font-mono text-amber-700 uppercase font-bold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                                HW-06 &bull; Rampa D1-D5
-                            </span>
-                            <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-mono border border-gray-200">Ultrasonik</span>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-mono text-amber-700 font-bold">HW-06 • Rampa</span>
+                            <span class="text-[9px] text-slate-500">Ultrasonik</span>
                         </div>
-                        <h5 class="text-xs font-bold text-gray-900">Sensor Keberadaan Truk Rampa</h5>
-                        <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                            Mendeteksi truk merapat, memicu hidrolik dock leveler naik, dan membuka Job Order nyata di Rampa D3.
-                        </p>
+                        <h5 class="text-xs font-bold text-gray-900">Truk Merapat Rampa D3</h5>
                     </div>
-                    <div class="mt-3 pt-3 border-t border-gray-200/70">
-                        <button onclick="openSensorTriggerModal('dock', 'D3')" class="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-bolt"></i>
-                            <span>Trigger Rampa D3</span>
-                        </button>
-                    </div>
+                    <button onclick="openSensorTriggerModal('dock', 'D3')" class="w-full py-1.5 bg-amber-500 hover:bg-amber-600 text-white font-bold text-xs rounded-lg transition cursor-pointer">
+                        <i class="fa-solid fa-bolt mr-1"></i> Trigger Rampa D3
+                    </button>
                 </div>
 
-                <!-- Sensor Card 2: Floor Scale HW-21 -->
-                <div class="bg-slate-50/80 rounded-xl p-4 border border-slate-200/80 flex flex-col justify-between hover:border-blue-400 hover:bg-white hover:shadow-xs transition">
+                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between gap-2.5 hover:border-blue-400 hover:bg-white transition">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10.5px] font-mono text-[#0170b9] uppercase font-bold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-[#0170b9] animate-pulse"></span>
-                                HW-21 &bull; Floor Scale 3T
-                            </span>
-                            <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-mono border border-gray-200">Loadcell &amp; Laser</span>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-mono text-[#0170b9] font-bold">HW-21 • Scale 3T</span>
+                            <span class="text-[9px] text-slate-500">Loadcell</span>
                         </div>
-                        <h5 class="text-xs font-bold text-gray-900">Timbangan &amp; Dimensi Palet</h5>
-                        <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                            Membaca berat riil palet &amp; kubikasi CBM, lalu menerbitkan label GS1 SSCC ke database inventori.
-                        </p>
+                        <h5 class="text-xs font-bold text-gray-900">Timbang &amp; Dimensi Palet</h5>
                     </div>
-                    <div class="mt-3 pt-3 border-t border-gray-200/70">
-                        <button onclick="openSensorTriggerModal('scale')" class="w-full py-1.5 bg-[#0170b9] hover:bg-[#004b87] text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-weight-scale"></i>
-                            <span>Trigger Timbang Palet</span>
-                        </button>
-                    </div>
+                    <button onclick="openSensorTriggerModal('scale')" class="w-full py-1.5 bg-[#0170b9] hover:bg-[#004b87] text-white font-bold text-xs rounded-lg transition cursor-pointer">
+                        <i class="fa-solid fa-weight-scale mr-1"></i> Trigger Timbang
+                    </button>
                 </div>
 
-                <!-- Sensor Card 3: Handheld Scanner HW-19 -->
-                <div class="bg-slate-50/80 rounded-xl p-4 border border-slate-200/80 flex flex-col justify-between hover:border-purple-400 hover:bg-white hover:shadow-xs transition">
+                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between gap-2.5 hover:border-purple-400 hover:bg-white transition">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10.5px] font-mono text-purple-700 uppercase font-bold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-purple-500 animate-pulse"></span>
-                                HW-19 &bull; Zebra TC26
-                            </span>
-                            <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-mono border border-gray-200">Laser / RFID</span>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-mono text-purple-700 font-bold">HW-19 • Zebra</span>
+                            <span class="text-[9px] text-slate-500">Barcode</span>
                         </div>
-                        <h5 class="text-xs font-bold text-gray-900">Handheld Barcode Scanner</h5>
-                        <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                            Memindai label SSCC palet, memverifikasi rak simpan (Aisle A-F), &amp; mencatat rekonsiliasi tally counter.
-                        </p>
+                        <h5 class="text-xs font-bold text-gray-900">Scan Label Palet SSCC</h5>
                     </div>
-                    <div class="mt-3 pt-3 border-t border-gray-200/70">
-                        <button onclick="openSensorTriggerModal('scanner')" class="w-full py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-barcode"></i>
-                            <span>Trigger Pindai Barcode</span>
-                        </button>
-                    </div>
+                    <button onclick="openSensorTriggerModal('scanner')" class="w-full py-1.5 bg-purple-600 hover:bg-purple-700 text-white font-bold text-xs rounded-lg transition cursor-pointer">
+                        <i class="fa-solid fa-barcode mr-1"></i> Pindai Barcode
+                    </button>
                 </div>
 
-                <!-- Sensor Card 4: LoRaWAN Telemetry ENV-01 -->
-                <div class="bg-slate-50/80 rounded-xl p-4 border border-slate-200/80 flex flex-col justify-between hover:border-emerald-400 hover:bg-white hover:shadow-xs transition">
+                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80 flex flex-col justify-between gap-2.5 hover:border-emerald-400 hover:bg-white transition">
                     <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[10.5px] font-mono text-emerald-700 uppercase font-bold flex items-center gap-1.5">
-                                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                                ENV-01 &bull; SHT40 Node
-                            </span>
-                            <span class="px-1.5 py-0.5 bg-gray-100 text-gray-600 rounded text-[9px] font-mono border border-gray-200">LoRaWAN 868 MHz</span>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-[10px] font-mono text-emerald-700 font-bold">ENV-01 • SHT40</span>
+                            <span class="text-[9px] text-slate-500">LoRaWAN</span>
                         </div>
-                        <h5 class="text-xs font-bold text-gray-900">Suhu &amp; Kelembaban Gudang</h5>
-                        <p class="text-[11px] text-gray-500 mt-1 leading-relaxed">
-                            Transmisi periodik telemetri lingkungan untuk memastikan standar keselamatan kargo kering &amp; farmasi.
-                        </p>
+                        <h5 class="text-xs font-bold text-gray-900">Suhu &amp; Kelembaban</h5>
                     </div>
-                    <div class="mt-3 pt-3 border-t border-gray-200/70">
-                        <button onclick="openSensorTriggerModal('env')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition shadow-xs flex items-center justify-center gap-1.5">
-                            <i class="fa-solid fa-tower-broadcast"></i>
-                            <span>Trigger Ping Telemetri</span>
-                        </button>
-                    </div>
+                    <button onclick="openSensorTriggerModal('env')" class="w-full py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-lg transition cursor-pointer">
+                        <i class="fa-solid fa-tower-broadcast mr-1"></i> Ping Telemetri
+                    </button>
                 </div>
             </div>
         </div>
@@ -2807,27 +2725,33 @@ $active_docks_count = 4;
     <!-- TAB 4: JOB ORDER & TALLY MASTER CONSOLE -->
     <!-- ===================================================================== -->
     <div id="tab-joborder" class="cfs-tab-content p-5 sm:p-6 hidden">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-5">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
             <div>
                 <h3 class="text-sm font-black text-gray-900 uppercase tracking-wider flex items-center gap-2">
                     <i class="fa-solid fa-clipboard-list text-orange-600"></i>
-                    Konsol Tally Master &bull; Daftar Job Order Bongkar/Muat CFS
+                    Daftar Job Order Bongkar/Muat CFS
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">
-                    Penerbitan Job Order Stripping, Stuffing Konsolidasi, Verifikasi Segel Pabean, &amp; Berita Acara Rekonsiliasi Tally.
-                </p>
             </div>
-            <button onclick="openModal('modalNewJobOrder')" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
-                <i class="fa-solid fa-plus"></i>
-                <span>Terbitkan Job Order Baru</span>
-            </button>
+            <div class="flex items-center gap-2">
+                <select id="cfsJobsLimitSelect" data-limit-target="#cfsJobsTable" class="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700">
+                    <option value="10" selected>Tampil: 10</option>
+                    <option value="25">Tampil: 25</option>
+                    <option value="50">Tampil: 50</option>
+                    <option value="all">Semua</option>
+                </select>
+                <button onclick="openModal('modalNewJobOrder')" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Terbitkan Job Order Baru</span>
+                </button>
+            </div>
         </div>
 
         <!-- Tabel Riwayat Job Order -->
         <div class="overflow-x-auto border border-gray-200 rounded-2xl shadow-2xs">
-            <table class="w-full text-left border-collapse text-xs">
+            <table class="w-full text-left border-collapse text-xs" id="cfsJobsTable">
                 <thead>
                     <tr class="bg-gray-50/80 border-b border-gray-200 text-gray-600 font-bold uppercase tracking-wider text-[10.5px]">
+                        <th class="py-3 px-2.5 text-center w-10">No</th>
                         <th class="py-3 px-3.5">Nomor Job Order</th>
                         <th class="py-3 px-3.5">Tipe &amp; Rampa</th>
                         <th class="py-3 px-3.5">No. Kontainer</th>
@@ -2840,12 +2764,13 @@ $active_docks_count = 4;
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 font-medium text-gray-800">
-                    <?php foreach ($cfs_jobs as $job): 
+                    <?php foreach ($cfs_jobs as $j_idx => $job): 
                         $is_strip = ($job['job_type'] === 'STRIPPING');
                         $job_badge = $is_strip ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-blue-50 text-blue-700 border-blue-200';
                         $status_badge = ($job['status'] === 'COMPLETED') ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-blue-50 text-[#0170b9] border-blue-200';
                     ?>
                     <tr class="hover:bg-gray-50 transition-colors">
+                        <td class="py-3 px-2.5 text-center font-mono text-gray-400" data-row-num><?= $j_idx + 1 ?></td>
                         <td class="py-3 px-3.5 font-mono font-bold text-gray-900">
                             <?= $job['job_number'] ?>
                         </td>
@@ -3629,7 +3554,6 @@ function filterPalletTable() {
     const catVal = document.getElementById('filterCategorySelect').value;
 
     const rows = document.querySelectorAll('.pallet-row');
-    let visibleCount = 0;
 
     rows.forEach(r => {
         const searchTxt = r.getAttribute('data-search') || '';
@@ -3640,16 +3564,12 @@ function filterPalletTable() {
         const matchAisle = !aisleVal || aisle === aisleVal;
         const matchCat = !catVal || cat === catVal;
 
-        if (matchSearch && matchAisle && matchCat) {
-            r.style.display = '';
-            visibleCount++;
-        } else {
-            r.style.display = 'none';
-        }
+        r.dataset.filteredOut = (matchSearch && matchAisle && matchCat) ? '0' : '1';
     });
 
-    const counter = document.getElementById('palletCountDisplay');
-    if (counter) counter.innerText = 'Menampilkan ' + visibleCount + ' palet terdaftar';
+    if (window.CIDPTableTools) {
+        window.CIDPTableTools.apply('#palletTable');
+    }
 }
 
 // Filter from 2D SVG Denah Click

@@ -21,6 +21,7 @@ require_once __DIR__ . '/layout_master.php';
 <script>if (typeof THREE !== 'undefined' && typeof THREE.OrbitControls === 'undefined') document.write('<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"><\/script>');</script>
 <script src="assets/vendor/tween.umd.js"></script>
 <script>if (typeof TWEEN === 'undefined') document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"><\/script>');</script>
+<script src="assets/js/simulator-continuous-traffic.js?v=<?= @filemtime(__DIR__ . '/../assets/js/simulator-continuous-traffic.js') ?: '1' ?>"></script>
 
 <div class="space-y-3.5">
     
@@ -39,15 +40,13 @@ require_once __DIR__ . '/layout_master.php';
                         <i class="fa-solid fa-cube mr-1 text-[9px]"></i>Simulasi Non-Destruktif (Read-Only)
                     </span>
                 </div>
-                <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Simulator 3D (Eksplorasi Fasilitas &amp; Pergerakan Visual)</h1>
+                <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Simulator 3D — Visualisasi Arus Barang End-to-End</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                <button onclick="openEndToEndGuideModal()" class="px-3 py-1.5 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs rounded-lg border border-slate-200 transition flex items-center cursor-pointer">
-                    <i class="fa-solid fa-diagram-project mr-1.5 text-xs text-orange-600"></i>Alur 11 Hardware &amp; Finansial
-                </button>
-                <button onclick="resetSimulation()" id="btnAutoDemo" class="px-3.5 py-1.5 bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs rounded-lg shadow-2xs transition flex items-center cursor-pointer" title="Reset Posisi Simulasi">
-                    <i class="fa-solid fa-rotate-left mr-1.5 text-xs"></i>Reset Simulasi
-                </button>
+                <span class="px-3 py-1.5 bg-slate-900 text-emerald-400 font-mono font-bold text-[11px] rounded-xl border border-slate-800 flex items-center gap-1.5 shadow-2xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span>ARUS OTONOM 35 HA AKTIF</span>
+                </span>
             </div>
         </div>
     </div>
@@ -199,6 +198,78 @@ require_once __DIR__ . '/layout_master.php';
                 </button>
             </div>
         </div>
+
+        <!-- Row 3: Autonomous Continuous Traffic Loop Controls & Opt-In Focus Pills -->
+        <div class="border-t border-gray-100 pt-3 flex flex-col xl:flex-row xl:items-center justify-between gap-2.5">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-700 text-[11px] font-bold uppercase tracking-wide">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+                    <span>Lalu Lintas Otonom End-to-End</span>
+                </span>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.togglePlay()" id="btnTrafficPlayPause" class="px-2.5 py-1.5 text-xs rounded-xl font-bold bg-emerald-600 text-white hover:bg-emerald-700 transition flex items-center gap-1.5 shadow-xs cursor-pointer">
+                    <i class="fa-solid fa-pause text-xs"></i><span>Jeda Traffic</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.cycleSpeed()" class="px-2.5 py-1.5 text-xs rounded-xl font-bold bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition flex items-center gap-1 cursor-pointer" title="Ubah Kecepatan Lalu Lintas Otonom">
+                    <i class="fa-solid fa-forward-fast text-xs"></i><span id="trafficSpeedLabel">1x</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.toggleBadges()" id="btnToggleTrafficBadges" class="px-2.5 py-1.5 text-xs rounded-xl font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200 hover:bg-cyan-100 transition flex items-center gap-1.5 cursor-pointer" title="Tampilkan / Sembunyikan Ikon Unit 3D">
+                    <i class="fa-solid fa-tags text-xs"></i><span>Ikon 3D</span>
+                </button>
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-xl bg-slate-50 border border-slate-200 text-[11px] font-mono text-slate-600">
+                    <span>In: <strong id="trafficGateInCount" class="text-emerald-700">0</strong></span>
+                    <span class="text-slate-300">|</span>
+                    <span>Out: <strong id="trafficGateOutCount" class="text-purple-700">0</strong></span>
+                    <span class="text-slate-300">|</span>
+                    <span>Siklus: <strong id="trafficLoopCount" class="text-blue-700">0</strong></span>
+                    <span class="text-slate-300">|</span>
+                    <span>Aksi: <strong id="trafficBoxCount" class="text-amber-700">0</strong> box</span>
+                </div>
+            </div>
+
+            <!-- Opt-In Camera Focus (Tidak memaksa kamera melompat, klik jika ingin mengikuti unit) -->
+            <div class="flex flex-wrap items-center gap-1">
+                <span class="text-[11px] font-bold text-gray-500 mr-1"><i class="fa-solid fa-video mr-1 text-blue-500"></i>Fokus Unit:</span>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent(null)" data-target="" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-bold bg-[#0170b9] text-white shadow-2xs transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-up-down-left-right text-[10px]"></i><span>Bebas</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('TRK-01')" data-target="TRK-01" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-truck-moving text-[10px] text-blue-600"></i><span>Truk 1</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('TRK-04')" data-target="TRK-04" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-truck-fast text-[10px] text-emerald-600"></i><span>Truk Out</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('TRK-03')" data-target="TRK-03" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-snowflake text-[10px] text-cyan-600"></i><span>Reefer</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('CDP-TT-01')" data-target="CDP-TT-01" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-shuttle-van text-[10px] text-yellow-600"></i><span>Shuttle</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('RS-01')" data-target="RS-01" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-truck-ramp-box text-[10px] text-rose-600"></i><span>RS-01</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('RS-04')" data-target="RS-04" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-truck-ramp-box text-[10px] text-amber-600"></i><span>RS-04</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('RTG-01')" data-target="RTG-01" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-bridge text-[10px] text-emerald-600"></i><span>RTG Rail</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('RTG-02')" data-target="RTG-02" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-bridge text-[10px] text-sky-600"></i><span>RTG Yard A</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('RTG-03')" data-target="RTG-03" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-bridge text-[10px] text-amber-600"></i><span>RTG Yard B</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('RTG-04')" data-target="RTG-04" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-bridge text-[10px] text-emerald-600"></i><span>RTG Yard C</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('RTG-05')" data-target="RTG-05" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-bridge text-[10px] text-purple-600"></i><span>RTG Yard D</span>
+                </button>
+                <button onclick="if(window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent('KA-2518')" data-target="KA-2518" class="traffic-focus-pill px-2.5 py-1 text-[11px] rounded-lg font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200 transition cursor-pointer flex items-center gap-1">
+                    <i class="fa-solid fa-train-subway text-[10px] text-indigo-600"></i><span>KA 2518</span>
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- 3D Canvas Viewport & Floating HUD System (Dinamis & Bebas Tabrakan) -->
@@ -207,9 +278,12 @@ require_once __DIR__ . '/layout_master.php';
         <!-- WebGL Canvas Container -->
         <div id="webglCanvas" class="w-full h-full cursor-grab active:cursor-grabbing"></div>
 
+        <!-- Floating 3D World-Space Billboard Badges (Auto-projected crisp icons) -->
+        <div id="trafficBillboardOverlay" class="absolute inset-0 pointer-events-none overflow-hidden z-10"></div>
+
         <!-- Floating Badge: Top Left Live Status & Proyeksi Aktif -->
-        <div class="absolute top-3.5 left-3.5 pointer-events-auto flex items-center space-x-2 z-10">
-            <span class="bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-md text-[11px] font-mono px-3 py-1.5 rounded-xl shadow-xl flex items-center gap-2">
+        <div class="absolute top-3.5 left-3.5 pointer-events-auto flex items-center space-x-2 z-20">
+            <span class="bg-white/95 border border-slate-200 text-slate-800 shadow-md text-[11px] font-mono px-3 py-1.5 rounded-xl flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                 <span class="font-bold text-cyan-300" id="cadProjectionLabel">PERSPEKTIF DRONE 3D</span>
             </span>
@@ -217,7 +291,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Floating HUD: Top Center - Live Operational Workflow Status -->
         <div id="opFlowHUD" class="absolute top-3.5 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 pointer-events-none z-30 max-w-lg w-[90vw]">
-            <div class="bg-white/95 backdrop-blur-xl border border-cyan-400 rounded-2xl p-2.5 shadow-md text-slate-800">
+            <div class="bg-white/95 border border-cyan-400 rounded-2xl p-2.5 shadow-md text-slate-800">
                 <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-xs">
                     <div class="flex items-center space-x-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
@@ -240,7 +314,7 @@ require_once __DIR__ . '/layout_master.php';
         </div>
 
         <!-- Floating HUD: Top Left Dynamic 3D Azimuth Compass Rose (Di bawah badge status) -->
-        <div id="cadCompassRose" class="absolute top-14 left-3.5 pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl p-2 shadow-md text-center text-slate-800 hidden md:flex flex-col items-center justify-center z-10 transition-all duration-300">
+        <div id="cadCompassRose" class="absolute top-14 left-3.5 pointer-events-auto bg-white/95 border border-slate-200 rounded-xl p-2 shadow-md text-center text-slate-800 hidden md:flex flex-col items-center justify-center z-20 transition-all duration-300">
             <div class="relative w-11 h-11 flex items-center justify-center">
                 <div id="compassDial" class="w-9 h-9 rounded-full border border-slate-600/80 flex items-center justify-center transition-transform duration-75">
                     <div class="w-1 h-7 bg-gradient-to-b from-rose-500 to-slate-400 rounded-full"></div>
@@ -254,7 +328,7 @@ require_once __DIR__ . '/layout_master.php';
         </div>
 
         <!-- Floating HUD: Top Right Dedicated Zoom & Screen Dock (Fitur Zoom Mirip Denah) -->
-        <div class="absolute top-3.5 right-3.5 pointer-events-auto flex items-center bg-white/95 backdrop-blur-md border border-slate-200 rounded-xl p-1 shadow-md z-10 text-slate-700 divide-x divide-slate-200">
+        <div class="absolute top-3.5 right-3.5 pointer-events-auto flex items-center bg-white/95 border border-slate-200 rounded-xl p-1 shadow-md z-20 text-slate-700 divide-x divide-slate-200">
             <!-- Zoom In -->
             <button onclick="simZoom(1)" class="w-8 h-8 flex items-center justify-center text-slate-200 hover:text-white hover:bg-slate-800 rounded-lg transition" title="Perbesar Tampilan / Zoom In (+)">
                 <i class="fa-solid fa-plus text-xs"></i>
@@ -278,7 +352,7 @@ require_once __DIR__ . '/layout_master.php';
         </div>
 
         <!-- Floating HUD: CAD Engineering Title Block (Etiket Gambar Teknik Sipil) -->
-        <div id="cadTitleBlock" class="absolute top-14 right-3.5 pointer-events-auto bg-white/95 backdrop-blur-md border border-slate-200 text-slate-800 shadow-md rounded-xl p-3 shadow-2xl text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-10 transition-all duration-300">
+        <div id="cadTitleBlock" class="absolute top-14 right-3.5 pointer-events-auto bg-white/95 border border-slate-200 text-slate-800 shadow-md rounded-xl p-3 text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-20 transition-all duration-300">
             <div class="flex items-center justify-between pb-1 border-b border-slate-700 font-bold text-white">
                 <span class="text-blue-400 flex items-center gap-1"><i class="fa-solid fa-compass-drafting"></i>CIDP 35 HA TWIN</span>
                 <div class="flex items-center gap-1.5">
@@ -298,7 +372,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Floating HUD: Real-time 3D Navigation Target Indicator (Centered at Top) -->
         <div id="hudTargetPill" class="absolute top-3.5 left-1/2 -translate-x-1/2 pointer-events-auto transition-all duration-300 opacity-0 hidden z-20">
-            <div class="bg-white/95 backdrop-blur-md border border-cyan-400 text-slate-800 px-3.5 py-1.5 rounded-full shadow-md flex items-center space-x-2 text-xs font-mono">
+            <div class="bg-white/95 border border-cyan-400 text-slate-800 px-3.5 py-1.5 rounded-full shadow-md flex items-center space-x-2 text-xs font-mono">
                 <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
                 <span class="text-cyan-300 font-bold uppercase text-[10px] shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i>Arah 3D:</span>
                 <span class="text-white font-bold truncate max-w-[200px] sm:max-w-xs" id="hudTargetText">Smart Gate Inbound Lane 1</span>
@@ -310,25 +384,25 @@ require_once __DIR__ . '/layout_master.php';
             </div>
         </div>
 
-        <!-- Floating HUD: Bottom Left - Digital Twin Intermodal Container Tracking & Yard Telemetry -->
-        <div id="shipmentTrackingCard" class="absolute bottom-3.5 left-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 z-20">
-            <div class="bg-white/95 backdrop-blur-md border border-slate-200/90 rounded-2xl p-3.5 shadow-2xl text-slate-800 space-y-2.5 relative">
+        <!-- Floating HUD: Bottom Left - Compact Intermodal Status Pill (Expandable) -->
+        <div id="shipmentTrackingCard" class="absolute bottom-3.5 left-3.5 pointer-events-auto w-60 sm:w-64 transition-all duration-300 z-20">
+            <div class="bg-white/95 border border-slate-200/90 rounded-2xl p-2.5 shadow-xl text-slate-800 space-y-2 relative">
                 <!-- Header with Status Pill and Minimizer -->
                 <div class="flex items-center justify-between">
                     <div class="flex items-center space-x-2">
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1">
                             <span class="w-1.5 h-1.5 rounded-full bg-emerald-600 animate-pulse"></span>
-                            SPPB Cleared
+                            LIVE FLOW
                         </span>
-                        <span class="font-mono font-bold text-xs text-blue-900 tracking-wider">MSKU 9182374</span>
+                        <span class="font-mono font-bold text-xs text-blue-900 tracking-wider">CIDP 35 HA</span>
                     </div>
-                    <button onclick="toggleShipmentCard()" class="text-slate-400 hover:text-slate-700 text-xs px-1" title="Sembunyikan / Buka Detail">
-                        <i id="shipmentCardChevron" class="fa-solid fa-chevron-down"></i>
+                    <button onclick="toggleShipmentCard()" class="text-slate-400 hover:text-slate-700 text-xs px-1 cursor-pointer" title="Buka / Tutup Detail Pelabuhan">
+                        <i id="shipmentCardChevron" class="fa-solid fa-chevron-up"></i>
                     </button>
                 </div>
 
-                <!-- Collapsible Body Content -->
-                <div id="shipmentCardContent" class="space-y-2.5 text-xs transition-all duration-200">
+                <!-- Collapsible Body Content (Collapsed by default so 3D Rail/Yard stays clear) -->
+                <div id="shipmentCardContent" class="hidden space-y-2.5 text-xs transition-all duration-200">
                     <!-- Route Information: Port to Dry Port -->
                     <div class="bg-slate-50 border border-slate-200/70 rounded-xl p-2.5 space-y-1.5">
                         <div class="flex items-center justify-between text-[11px]">
@@ -389,7 +463,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Floating HUD: Bottom Right - 3D Raycasting Inspector (Only visible when a container is clicked) -->
         <div class="absolute bottom-3.5 right-3.5 pointer-events-auto w-72 sm:w-80 transition-all duration-300 hidden z-30" id="inspectorCard">
-            <div class="bg-white/95 backdrop-blur-lg border border-blue-200 rounded-xl p-3.5 shadow-md text-slate-800 relative overflow-hidden">
+            <div class="bg-slate-900/95 border border-blue-400/40 rounded-xl p-3.5 shadow-md text-slate-100 relative overflow-hidden">
                 <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-blue-500 via-indigo-500 to-amber-500"></div>
                 <div class="flex items-center justify-between mb-2.5">
                     <div class="flex items-center space-x-2">
@@ -449,7 +523,7 @@ require_once __DIR__ . '/layout_master.php';
 
         <!-- Notification Toast (Floating Top Center) -->
         <div id="simToast" class="absolute top-16 left-1/2 -translate-x-1/2 pointer-events-none transition-all duration-300 opacity-0 transform -translate-y-4 z-50">
-            <div class="bg-white/95 backdrop-blur-md border border-emerald-400 text-slate-800 px-4 py-2.5 rounded-xl shadow-md flex items-center space-x-3">
+            <div class="bg-slate-900/95 border border-emerald-400 text-slate-100 px-4 py-2.5 rounded-xl shadow-md flex items-center space-x-3">
                 <div class="w-7 h-7 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm shrink-0" id="toastIcon">
                     <i class="fa-solid fa-check"></i>
                 </div>
@@ -463,91 +537,31 @@ require_once __DIR__ . '/layout_master.php';
     </div>
 
     <!-- ========================================================================= -->
-    <!-- PANEL KONTROL CEPAT & TELEMETRI SCADA (DITEMPATKAN RAPI DI LUAR LAYAR 3D) -->
+    <!-- LIVE SCADA TELEMETRY & AUTONOMOUS TRAFFIC LOG FEED (FULL-WIDTH CLEAN UI)  -->
     <!-- ========================================================================= -->
-    <div class="bg-white rounded-2xl border border-slate-200/80 p-3 sm:p-4 shadow-xs text-slate-800">
-        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3.5 items-center">
-            
-            <!-- Kolom Kiri (7 Kolom): Tombol Aksi Cepat Operasional Lapangan -->
-            <div class="lg:col-span-7 xl:col-span-7 flex flex-col space-y-2.5">
-                <div class="flex items-center justify-between flex-wrap gap-2">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse"></span>
-                        <span class="font-bold text-slate-200 uppercase tracking-wider text-xs font-mono flex items-center gap-1.5">
-                            <i class="fa-solid fa-gamepad text-cyan-400"></i>Aksi Cepat Lapangan
-                        </span>
-                    </div>
-                    <!-- Pengatur Kecepatan & Tombol Sinkronisasi Database -->
-                    <div class="flex items-center space-x-1.5">
-                        <button onclick="toggleSimSpeed()" id="btnSimSpeed" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-amber-300 hover:text-amber-200 font-bold text-xs rounded-lg transition shrink-0 cursor-pointer border border-amber-500/30 flex items-center gap-1.5" title="Atur Kecepatan Simulasi Alur Gerakan">
-                            <i class="fa-solid fa-gauge-high text-xs"></i><span id="speedBtnText">1.25x</span>
-                        </button>
-                        <button onclick="refreshStateFromDB()" class="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs rounded-lg transition shrink-0 cursor-pointer border border-slate-700 flex items-center gap-1.5" title="Sinkronkan MySQL">
-                            <i class="fa-solid fa-rotate text-xs"></i><span class="text-[11px] font-semibold">Sync DB</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Kelompok Tombol Aksi Cepat (Bersih, Rapi & Tanpa Scrollbar Abu-Abu) -->
-                <div class="flex flex-wrap items-center gap-2">
-                    <!-- 1. Drop-Off: Alur Penuh (Masuk ➔ Bongkar RS ➔ Keluar) -->
-                    <button onclick="triggerGateIn('drop_off')" class="px-3.5 py-2 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Alur Penuh: Truk Masuk Gerbang ➔ Timbang VGM ➔ Melaju ke Yard ➔ Lift-Off RS-01 ➔ Gate-Out Keluar">
-                        <i class="fa-solid fa-arrow-down-to-bracket text-xs text-blue-200"></i>
-                        <span>Truk Drop-Off</span>
-                    </button>
-                    <!-- 2. Pick-Up: Alur Penuh (Masuk Kosong ➔ Muat RS ➔ Keluar) -->
-                    <button onclick="triggerGateIn('pick_up')" class="px-3.5 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Alur Penuh: Truk Masuk Kosong ➔ Verifikasi DO ➔ Melaju ke Yard ➔ Lift-On RS-02 ➔ Gate-Out Keluar">
-                        <i class="fa-solid fa-arrow-up-from-bracket text-xs text-amber-200"></i>
-                        <span>Truk Pick-Up</span>
-                    </button>
-                    <!-- 3. Gate-Out Saja -->
-                    <button onclick="triggerGateOut()" class="px-3.5 py-2 bg-gradient-to-r from-purple-600 to-purple-500 hover:from-purple-500 hover:to-purple-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Truk Keluar Gerbang (Gate-Out Selesai)">
-                        <i class="fa-solid fa-door-closed text-xs text-purple-200"></i>
-                        <span>Gate-Out</span>
-                    </button>
-                    <!-- 4. Relokasi Box (RS) -->
-                    <button onclick="openMoveModal()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 border border-slate-700 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi Pemindahan Box Antar-Blok oleh Reach Stacker">
-                        <i class="fa-solid fa-arrows-up-down-left-right text-xs text-amber-400"></i>
-                        <span>Relokasi RS</span>
-                    </button>
-                    <!-- 5. Alih Muat KA (RTG) -->
-                    <button onclick="triggerRailDischarge()" class="px-3.5 py-2 bg-gradient-to-r from-indigo-600 to-indigo-500 hover:from-indigo-500 hover:to-indigo-400 text-white font-bold text-xs rounded-xl shadow-sm transition flex items-center space-x-1.5 cursor-pointer flex-1 sm:flex-none justify-center" title="Simulasi RTG Mengangkat Box dari Rangkaian Kereta ke Yard">
-                        <i class="fa-solid fa-train text-xs text-indigo-200"></i>
-                        <span>Alih Muat KA</span>
-                    </button>
-                </div>
+    <div class="bg-slate-900 rounded-2xl border border-slate-800 p-3.5 sm:p-4 shadow-sm text-slate-100">
+        <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px]">
+            <div class="flex items-center space-x-2">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                <span class="font-bold uppercase tracking-wider text-cyan-300 font-mono">Live Arus Barang &amp; SCADA Telemetry Feed (480m × 230m Yard)</span>
             </div>
-
-            <!-- Kolom Kanan (5 Kolom): Live SCADA Telemetry Feed Terminal (Tertata Rapi & Modern) -->
-            <div class="lg:col-span-5 xl:col-span-5 bg-slate-50 rounded-xl p-3 border border-slate-200 shadow-inner text-slate-800">
-                <div class="flex items-center justify-between pb-1.5 mb-1.5 border-b border-slate-800 text-[10.5px]">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                        <span class="font-bold uppercase tracking-wider text-slate-300 font-mono">SCADA Telemetry Feed</span>
-                    </div>
-                    <div class="flex items-center space-x-2">
-                        <span class="text-slate-400 font-mono text-[9.5px]" id="liveClock">--:--:-- WIB</span>
-                        <button onclick="toggleScadaFeed()" class="text-slate-400 hover:text-white text-xs px-1 cursor-pointer" title="Sembunyikan/Tampilkan Feed">
-                            <i class="fa-solid fa-chevron-down text-[10px]" id="scadaFeedChevron"></i>
-                        </button>
-                    </div>
-                </div>
-                <div class="space-y-1 max-h-20 sm:max-h-24 overflow-y-auto text-[10.5px] font-mono leading-tight transition-all duration-200 pr-1" id="simLogTicker">
-                    <div class="text-emerald-400 flex items-start">
-                        <span class="text-slate-500 mr-1.5">[SYS]</span>
-                        <span>Terminal Engine aktif. 19 box disinkronkan dari MySQL.</span>
-                    </div>
-                    <div class="text-blue-400 flex items-start">
-                        <span class="text-slate-500 mr-1.5">[GPS]</span>
-                        <span>RS-02 terkoneksi di Blok B (Operator: Agus Setiawan).</span>
-                    </div>
-                    <div class="text-amber-400 flex items-start">
-                        <span class="text-slate-500 mr-1.5">[GATE]</span>
-                        <span>Kamera ANPR Lane 1 &amp; 2 Siap (Jembatan 80T Siap).</span>
-                    </div>
-                </div>
+            <div class="flex items-center space-x-3">
+                <span class="hidden sm:inline text-[10px] font-mono text-slate-400">6 Armada Tol • 5 E-RTG • 4 Reach Stacker • 2 Forklift • KA Pasoso</span>
+                <span class="text-slate-300 font-mono text-[10px] bg-slate-800 px-2 py-0.5 rounded border border-slate-700" id="liveClock">--:--:-- WIB</span>
+                <button onclick="toggleScadaFeed()" class="text-slate-400 hover:text-white text-xs px-1 cursor-pointer" title="Sembunyikan/Tampilkan Feed">
+                    <i class="fa-solid fa-chevron-down text-[10px]" id="scadaFeedChevron"></i>
+                </button>
             </div>
-
+        </div>
+        <div class="space-y-1 max-h-24 sm:max-h-28 overflow-y-auto text-[11px] font-mono leading-snug transition-all duration-200 pr-1" id="simLogTicker">
+            <div class="text-emerald-400 flex items-start">
+                <span class="text-slate-500 mr-1.5">[SYS]</span>
+                <span>Terminal 3D Sandbox aktif. Struktur Yard Block-Bay-Row diperluas (8 Bay × 8 Row).</span>
+            </div>
+            <div class="text-blue-400 flex items-start">
+                <span class="text-slate-500 mr-1.5">[RTG]</span>
+                <span>RTG-01 (Rail), RTG-02..05 (Blok A-D), &amp; RS-01..04 siap melayani arus keluar-masuk barang.</span>
+            </div>
         </div>
     </div>
 </div>
@@ -814,15 +828,23 @@ require_once __DIR__ . '/layout_master.php';
 
             <!-- TAB 2: MATRIKS 11 HARDWARE LIVE TELEMETRI -->
             <div id="guideTabHardware" class="space-y-3 hidden">
-                <p class="text-xs text-gray-500 mb-2">
-                    Berikut adalah tabel pemetaan 11 perangkat keras yang terintegrasi langsung dengan antarmuka telemetri software CIDP YMS:
-                </p>
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                    <p class="text-xs text-gray-500">
+                        Pemetaan 11 perangkat keras yang terintegrasi dengan antarmuka telemetri software CIDP YMS:
+                    </p>
+                    <select id="simHwLimitSelect" data-limit-target="#simHardwareMatrixTable" class="px-2.5 py-1 bg-slate-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-700 cursor-pointer">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="all">Semua</option>
+                    </select>
+                </div>
 
                 <div class="overflow-x-auto border border-gray-200 rounded-xl">
-                    <table class="w-full text-left border-collapse text-xs">
+                    <table class="w-full text-left border-collapse text-xs" id="simHardwareMatrixTable">
                         <thead class="bg-slate-50 text-gray-700 font-bold border-b border-gray-200">
                             <tr>
-                                <th class="p-2.5">No &amp; Hardware</th>
+                                <th class="p-2.5 text-center w-10">No</th>
+                                <th class="p-2.5">Hardware</th>
                                 <th class="p-2.5">Model / Spesifikasi</th>
                                 <th class="p-2.5">Pemicu Fisik Lapangan</th>
                                 <th class="p-2.5">Sinyal / Protokol Data</th>
@@ -832,6 +854,7 @@ require_once __DIR__ . '/layout_master.php';
                         </thead>
                         <tbody class="divide-y divide-gray-100 font-sans text-[11px]">
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>1</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-01: Kamera ANPR</td>
                                 <td class="p-2.5 text-gray-600">Hikvision DS-TCG406-E</td>
                                 <td class="p-2.5">Truk melintasi sensor loop magnetik di aspal</td>
@@ -840,6 +863,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Tarif Pas Masuk Gerbang (Rp 50.000)</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>2</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-02: Kamera OCR Kontainer</td>
                                 <td class="p-2.5 text-gray-600">Hikvision iDS-TCV300-A6I</td>
                                 <td class="p-2.5">Peti kemas melintasi portal multi-angle 5.5m</td>
@@ -848,6 +872,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Argo Masa Penumpukan / Free Time Aktif</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>3</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-03: Timbangan Truk 80T</td>
                                 <td class="p-2.5 text-gray-600">Fangda Electronic 80 Ton</td>
                                 <td class="p-2.5">Gandar truk berhenti 5 detik di platform baja</td>
@@ -856,6 +881,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Biaya Sertifikasi VGM (Rp 120.000)</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>4</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-04: RFID Reader UHF</td>
                                 <td class="p-2.5 text-gray-600">Long-Range UHF 20m 860-960MHz</td>
                                 <td class="p-2.5">Kartu e-Pass di kaca truk masuk radius 20 meter</td>
@@ -864,6 +890,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Auto-debit saldo deposit trucking mitra</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>5</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-05: LED Display Gate</td>
                                 <td class="p-2.5 text-gray-600">Chipshow Outdoor P6/P8</td>
                                 <td class="p-2.5">Seluruh sensor gerbang berstatus VALID</td>
@@ -872,6 +899,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Efisiensi TAT (Pangkas waktu antre &gt;60%)</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>6</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-06: Industrial Edge PC</td>
                                 <td class="p-2.5 text-gray-600">Advantech ARK-3532 Fanless</td>
                                 <td class="p-2.5">Truk mendekat &amp; menerima aliran data sensor</td>
@@ -880,6 +908,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Meniadakan kerugian downtime gerbang</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>7</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-07: DGPS/RTK GNSS</td>
                                 <td class="p-2.5 text-gray-600">CHCNAV CGI-610 Centimeter</td>
                                 <td class="p-2.5">Reach Stacker bergerak di koridor yard 35 Ha</td>
@@ -888,6 +917,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Meniadakan biaya Rehandling salah letak</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>8</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-08: Spreader Twistlock</td>
                                 <td class="p-2.5 text-gray-600">Bromma SmartSpreader Sensor Kit</td>
                                 <td class="p-2.5">Pin twistlock berputar mengunci &amp; mengangkat box</td>
@@ -896,6 +926,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Tagihan Jasa Lift-Off (Rp 250.000 / gerakan)</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>9</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-09: Smart Reefer Socket</td>
                                 <td class="p-2.5 text-gray-600">Marechal 380V/32A Receptacle</td>
                                 <td class="p-2.5">Steker kontainer reefer dicolokkan ke stopkontak</td>
@@ -904,6 +935,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Tagihan Plugging Listrik (Rp 35.000 / jam)</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>10</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-10: Rail Axle Counter</td>
                                 <td class="p-2.5 text-gray-600">Frauscher RSR123 Wheel Sensor</td>
                                 <td class="p-2.5">Gandar roda KA melintas di atas rel sepur simpang</td>
@@ -912,6 +944,7 @@ require_once __DIR__ . '/layout_master.php';
                                 <td class="p-2.5 font-semibold text-emerald-700">Freight Rail Haulage (Rp 1.850.000 / TEU)</td>
                             </tr>
                             <tr class="hover:bg-blue-50/20">
+                                <td class="p-2.5 text-center font-mono text-gray-400" data-row-num>11</td>
                                 <td class="p-2.5 font-bold text-cdp-navy">HW-11: Smart E-Seal Pabean</td>
                                 <td class="p-2.5 text-gray-600">Jointech JT701 GPS Smart Lock</td>
                                 <td class="p-2.5">Kawat segel dipasang di Priok / dibuka di CIDP</td>
@@ -1122,13 +1155,13 @@ function relocEnd(m, id, ox, oz, mirror) {
 
 // Layout coordinates mapping for terminal blocks (posisi dari layout master)
 const BLOCK_COORDS = {
-    'A':      { ...LW('blok_a'), width: 72, depth: 24, label: 'BLOK A (LADEN EXPORT - 4 TIERS)' },
-    'B':      { ...LW('blok_b'), width: 72, depth: 24, label: 'BLOK B (LADEN IMPORT - 4 TIERS)' },
-    'C':      { ...LW('blok_c'), width: 72, depth: 24, label: 'BLOK C (DOMESTIC CARGO - 4 TIERS)' },
-    'D':      { ...LW('blok_d'), width: 72, depth: 24, label: 'BLOK D (BUFFER YARD - 4 TIERS)' },
-    'DG':     { ...LW('blok_e'), width: 32, depth: 24, label: 'BLOK E (HAZMAT DG BUNDED 1.4M)' },
-    'REEFER': { ...LW('f_reefer_racks'), width: 32, depth: 24, label: 'REEFER ZONE (300 POWER PLUGS)' },
-    'EMPTY':  { ...LW('f_empty_depot'), width: 32, depth: 56, label: 'EMPTY DEPOT (2.500 TEU - 5 TIERS)' }
+    'A':      { ...LW('blok_a'), width: 114, depth: 32, label: 'BLOK A • LADEN EXPORT (8 BAY × 8 ROW × 4 TIER)' },
+    'B':      { ...LW('blok_b'), width: 114, depth: 32, label: 'BLOK B • LADEN IMPORT (8 BAY × 8 ROW × 4 TIER)' },
+    'C':      { ...LW('blok_c'), width: 114, depth: 32, label: 'BLOK C • DOMESTIK (8 BAY × 8 ROW × 4 TIER)' },
+    'D':      { ...LW('blok_d'), width: 114, depth: 32, label: 'BLOK D • BUFFER YARD (8 BAY × 8 ROW × 4 TIER)' },
+    'DG':     { ...LW('blok_e'), width: 44,  depth: 32, label: 'BLOK E • HAZMAT DG BUNDED (3 BAY × 8 ROW)' },
+    'REEFER': { ...LW('f_reefer_racks'), width: 44, depth: 32, label: 'REEFER ZONE • 300 POWER PLUGS (3 BAY × 8 ROW)' },
+    'EMPTY':  { ...LW('f_empty_depot'), width: 44,  depth: 74, label: 'EMPTY DEPOT • 2.500 TEU (3 BAY × 18 ROW × 5 TIER)' }
 };
 
 // Technical CAD overlay states
@@ -1242,15 +1275,17 @@ function registerHazardLight(mesh, light, speed, pulse) {
     animatedHazardLights.push({ mesh: mesh, light: light || null, speed: speed || 6, phase: Math.random() * Math.PI * 2, pulse: !!pulse });
 }
 
-// Dipanggil tiap frame dari animate(time)
+// Dipanggil tiap frame dari animate(time) — di-throttle ke ~20Hz agar bebas DOM/material write berlebih
+let _lastHazardTick = 0;
 function updateHazardLights(time) {
     time = time || 0;
+    if (time - _lastHazardTick < 48) return;
+    _lastHazardTick = time;
     const t = time * 0.001;
     const pulse = (Math.sin(time * 0.012) + 1) / 2; // strobo K3 ~2 Hz
     for (let i = 0; i < animatedHazardLights.length; i++) {
         const h = animatedHazardLights[i];
         if (h.pulse) {
-            // Strobo amber berkedip: ubah warna material (RGB amber -> redup)
             if (h.mesh && h.mesh.material) h.mesh.material.color.setRGB(1.0, 0.6 * pulse + 0.2, 0);
         } else if (h.mesh) {
             h.mesh.rotation.y = t * h.speed + h.phase;
@@ -1280,6 +1315,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initThreeScene();
     buildTerminalEnvironment();
     fetchSimulationState();
+    if (window.CIDPTrafficEngine) CIDPTrafficEngine.init();
 
     // Clock ticker
     setInterval(updateLiveClock, 1000);
@@ -1295,16 +1331,16 @@ function initThreeScene() {
     // Scene (Bright Clean Digital Twin Atmosphere seperti referensi WareTrack)
     scene = new THREE.Scene();
     scene.background = new THREE.Color(0xecf3f9);
-    scene.fog = new THREE.FogExp2(0xecf3f9, 0.0022);
+    scene.fog = new THREE.FogExp2(0xecf3f9, 0.0014);
 
     // Camera (Menghadap ke Utara / North ke arah Kantor & Gate dari koridor Rel Selatan)
-    camera = new THREE.PerspectiveCamera(45, width / height, 1, 1200);
-    camera.position.set(0, 110, -155);
+    camera = new THREE.PerspectiveCamera(45, width / height, 1, 1800);
+    camera.position.set(0, 192, -298);
 
-    // Renderer (ACESFilmic Tone Mapping + sRGB Color Space untuk render bersih berkualitas tinggi)
+    // Renderer (ACESFilmic Tone Mapping + sRGB Color Space, PixelRatio <= 1.5 untuk FPS optimal)
     renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
     renderer.shadowMap.enabled = true;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -1315,11 +1351,11 @@ function initThreeScene() {
     // Controls
     controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
+    controls.dampingFactor = 0.08;
     controls.maxPolarAngle = Math.PI / 2 - 0.05; // Do not go below ground
     controls.minDistance = 15;
-    controls.maxDistance = 380;
-    controls.target.set(0, 0, 5);
+    controls.maxDistance = 760;
+    controls.target.set(0, 0, 10);
 
     // Zoom Indicator on OrbitControls Changes
     controls.addEventListener('change', updateSimZoomDisplay);
@@ -1351,14 +1387,14 @@ function setupLighting() {
     ambientLight = new THREE.HemisphereLight(0xffffff, 0xcbd5e1, LIGHT_DAY.ambient);
     scene.add(ambientLight);
 
-    // Directional Sun Light (Matahari alami dengan bayangan kontak halus presisi)
+    // Directional Sun Light (1024x1024 shadow map optimal kecepatan frame tinggi)
     sunLight = new THREE.DirectionalLight(LIGHT_DAY.sunColor, LIGHT_DAY.sun);
     sunLight.position.set(75, 120, 60);
     sunLight.castShadow = true;
 
     // Contact soft shadow parameters
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
+    sunLight.shadow.mapSize.width = 1024;
+    sunLight.shadow.mapSize.height = 1024;
     sunLight.shadow.camera.near = 10;
     sunLight.shadow.camera.far = 350;
     sunLight.shadow.camera.left = -140;
@@ -1450,10 +1486,10 @@ function buildCivilPavementsAndRoadNetwork() {
     cadGridGroup.name = "CadGridAxesLayer";
     scene.add(cadGridGroup);
 
-    // Base 35 Hektar Ground Floor: Rigid Pavement K-450 (tile 10 unit ~ pelat 5x5 m)
-    const groundGeo = new THREE.PlaneGeometry(380, 260);
+    // Base 35 Hektar Ground Floor: Rigid Pavement K-450 (Skala diperluas proporsional 660x420m)
+    const groundGeo = new THREE.PlaneGeometry(660, 420);
     const groundMat = new THREE.MeshStandardMaterial({
-        map: getRigidPavementTexture(),
+        map: getRigidPavementTexture(28, 20),
         color: 0xffffff,
         roughness: 0.9,
         metalness: 0.05
@@ -1465,31 +1501,30 @@ function buildCivilPavementsAndRoadNetwork() {
     pavementGroup.add(ground);
 
     // CAD axis grid (grid sumbu 5 unit) - layer 'gridAxes'
-    // CAD axis grid (grid sumbu 5 unit) - layer 'gridAxes'
-    const grid = new THREE.GridHelper(380, 76, 0x94a3b8, 0xcbd5e1);
+    const grid = new THREE.GridHelper(640, 128, 0x94a3b8, 0xcbd5e1);
     grid.position.y = 0.03;
     grid.material.transparent = true;
-    grid.material.opacity = 0.35;
+    grid.material.opacity = 0.32;
     cadGridGroup.add(grid);
 
-    // Concrete Apron Platforms for Each Zone (Scale-Accurate Clean Architectural Slabs)
+    // Concrete Apron Platforms for Each Zone (Block-Bay-Row Diperlebar & Koridor Rapi)
     const aprons = [
-        // Expansive Container Stacking Yard Apron (Core Terminal Blocks A-E + Empty Depot)
-        { w: 260, d: 120, x: 0, z: -5, color: 0xe2e8f0 },
-        // CFS / M&R / Transit Warehouse Apron (kolom BARAT, sesuai denah)
-        { w: 46, d: 66, x: LW('f_cfs').x, z: -3, color: 0xedf2f7 },
-        // Customs KPPBC, X-Ray & Behandle Apron (kolom TIMUR, sesuai denah)
-        { w: 38, d: 86, x: LW('f_kppbc').x, z: 6, color: 0xedf2f7 },
+        // Core Container Stacking Yard Apron (Blok A-D + Empty/Reefer/DG + Spine)
+        { w: 396, d: 112, x: 0, z: 0, color: 0xe2e8f0 },
+        // CFS / M&R / Transit Warehouse Apron (kolom BARAT)
+        { w: 54, d: 104, x: LW('f_cfs').x, z: 0, color: 0xedf2f7 },
+        // Customs KPPBC, X-Ray & Behandle Apron (kolom TIMUR)
+        { w: 54, d: 104, x: LW('f_kppbc').x, z: 12, color: 0xedf2f7 },
         // Administration HQ, Datacenter NOC (UTARA-TENGAH)
-        { w: 88, d: 38, x: -((LW('f_datacenter').x + LW('f_parking_staff').x) / 2), z: 52, color: 0xf1f5f9 },
+        { w: 100, d: 44, x: (LW('f_datacenter').x + LW('f_parking_staff').x) / 2, z: 78, color: 0xf1f5f9 },
         // Fasum: Masjid, Kantin, Klinik, Damkar, Genset (BARAT LAUT)
-        { w: 66, d: 40, x: LW('f_kantin').x + 20, z: 46, color: 0xf1f5f9 },
+        { w: 94, d: 46, x: LW('f_kantin').x + 26, z: 74, color: 0xf1f5f9 },
         // Gate Complex & Truck Queuing Approach Apron (TIMUR LAUT)
-        { w: 76, d: 38, x: -58, z: 52, color: 0xe2e8f0 },
-        // Reefer Cold Chain Specialized Apron
-        { w: 38, d: 36, x: LW('f_reefer_racks').x, z: 16, color: 0xe0f2fe },
+        { w: 92, d: 48, x: (LW('f_gate_in').x + LW('f_security_gate').x) / 2, z: 83, color: 0xe2e8f0 },
+        // Reefer Cold Chain Specialized Apron (3 Bays)
+        { w: 48, d: 36, x: LW('f_reefer_racks').x, z: LW('f_reefer_racks').z, color: 0xe0f2fe },
         // Rail Siding Intermodal Loading Apron (South Perimeter)
-        { w: 280, d: 24, x: 0, z: -52, color: 0xdbeafe }
+        { w: 390, d: 34, x: 0, z: LW('rail_siding').z - 2, color: 0xdbeafe }
     ];
 
     aprons.forEach(ap => {
@@ -1513,42 +1548,65 @@ function buildCivilPavementsAndRoadNetwork() {
     const dashGeoH = new THREE.BoxGeometry(3.5, 0.02, 0.35);
     const dashGeoV = new THREE.BoxGeometry(0.35, 0.02, 3.5);
 
+    const gInX  = LW('f_gate_in').x;
+    const gOutX = LW('f_gate_out').x;
+    const gTopZ = LW('f_gate_in').z + 28;
     const roadMarkings = [
-        // North Cross Road (Connecting Gate to Admin, Transfer Lanes, Customs)
-        { sx: -140, ex: 130, z: 28, orient: 'h' },
-        // Central Yard Spine Road (Connecting West CFS across Blok A-D and Reefer to Eastern Haul Road)
-        { sx: -122, ex: 84, z: -5, orient: 'h' },
-        // South Haul Road (Alongside Rail Siding Loading Ramp to Customs Exit)
-        { sx: -140, ex: 130, z: -39, orient: 'h' },
+        // North Cross Boulevard (Jalan arteri utara penghubung Gate, Yard & Customs)
+        { sx: -190, ex: 190, z: 47, orient: 'h' },
+        // Central Yard Spine Road (Jalan tengah yard 2-lajur antara Blok Utara & Selatan + Reefer/DG)
+        { sx: -183, ex: 126.5, z: 0, orient: 'h' },
+        // South Haul Boulevard (Jalan selatan sejajar Rail Siding Ramp)
+        { sx: -190, ex: 190, z: -47, orient: 'h' },
         // Gate Inbound Corridor (Lane 1)
-        { sz: 75, ez: 28, x: -49, orient: 'v' },
+        { sz: gTopZ, ez: 47, x: gInX, orient: 'v' },
         // Gate Outbound Corridor (Lane 2)
-        { sz: 75, ez: 28, x: -41, orient: 'v' },
-        // Central Transfer Boulevard (Between Blok A and Blok B - 16m Wide)
-        { sz: 28, ez: -39, x: 0, orient: 'v' },
-        // Mid-East Corridor (Between Yard Blok B/D and Reefer Yard)
-        { sz: 28, ez: -39, x: -84, orient: 'v' },
-        // Eastern Haul Road (Connecting Reefer/DG to Customs, X-Ray & Behandle)
-        { sz: 28, ez: -39, x: -122, orient: 'v' },
-        // West Corridor (Connecting Empty Depot to CFS)
-        { sz: 28, ez: -39, x: 82, orient: 'v' }
+        { sz: gTopZ, ez: 47, x: gOutX, orient: 'v' },
+        // Central Transfer Boulevard (Blok A/C <-> Blok B/D)
+        { sz: 47, ez: -47, x: 0, orient: 'v' },
+        // Mid-East Corridor (Blok B/D <-> Reefer/DG)
+        { sz: 47, ez: -47, x: -126.5, orient: 'v' },
+        // Eastern Haul Road (Reefer/DG <-> Customs X-Ray & Behandle)
+        { sz: 47, ez: -47, x: -183, orient: 'v' },
+        // Mid-West Corridor (Blok A/C <-> Empty Depot)
+        { sz: 47, ez: -47, x: 126.5, orient: 'v' },
+        // CFS Corridor (Empty Depot <-> CFS Warehouse)
+        { sz: 47, ez: -47, x: 183, orient: 'v' }
     ];
 
+    const dashPositionsH = [];
+    const dashPositionsV = [];
     roadMarkings.forEach(rm => {
         if (rm.orient === 'h') {
-            for (let rx = rm.sx; rx <= rm.ex; rx += 6) {
-                const dash = new THREE.Mesh(dashGeoH, dashMat);
-                dash.position.set(rx, 0.13, rm.z);
-                pavementGroup.add(dash);
-            }
+            for (let rx = rm.sx; rx <= rm.ex; rx += 6) dashPositionsH.push([rx, 0.13, rm.z]);
         } else {
-            for (let rz = rm.sz; rz >= rm.ez; rz -= 6) {
-                const dash = new THREE.Mesh(dashGeoV, dashMat);
-                dash.position.set(rm.x, 0.13, rz);
-                pavementGroup.add(dash);
-            }
+            for (let rz = rm.sz; rz >= rm.ez; rz -= 6) dashPositionsV.push([rm.x, 0.13, rz]);
         }
     });
+
+    const dashDummy = new THREE.Object3D();
+    if (dashPositionsH.length) {
+        const dashInstH = new THREE.InstancedMesh(dashGeoH, dashMat, dashPositionsH.length);
+        dashPositionsH.forEach((p, idx) => {
+            dashDummy.position.set(p[0], p[1], p[2]);
+            dashDummy.updateMatrix();
+            dashInstH.setMatrixAt(idx, dashDummy.matrix);
+        });
+        dashInstH.instanceMatrix.needsUpdate = true;
+        dashInstH.frustumCulled = false;
+        pavementGroup.add(dashInstH);
+    }
+    if (dashPositionsV.length) {
+        const dashInstV = new THREE.InstancedMesh(dashGeoV, dashMat, dashPositionsV.length);
+        dashPositionsV.forEach((p, idx) => {
+            dashDummy.position.set(p[0], p[1], p[2]);
+            dashDummy.updateMatrix();
+            dashInstV.setMatrixAt(idx, dashDummy.matrix);
+        });
+        dashInstV.instanceMatrix.needsUpdate = true;
+        dashInstV.frustumCulled = false;
+        pavementGroup.add(dashInstV);
+    }
 
     // Marka Garis Parkir Truk di Depan Loading Dock CFS (Dock Stalls Bay 01 - 04)
     const stallLineMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
@@ -1573,7 +1631,7 @@ function buildCivilPavementsAndRoadNetwork() {
 }
 
 // Saluran Parit Drainase U-Ditch Beton Pracetak di Sepanjang Koridor Jalan
-// Diletakkan di celah antar blok (bukan di bawah tumpukan kontainer): z=31 (tepi utara Blok A/B) dan z=-6.8 (jalan tengah yard).
+// Diletakkan di tepi blok (tidak memotong persimpangan jalan). Grating digabung 1 InstancedMesh.
 function buildUDitchDrainageNetwork() {
     if (!drainageGroup) {
         drainageGroup = new THREE.Group();
@@ -1582,28 +1640,41 @@ function buildUDitchDrainageNetwork() {
     drainageGroup.name = "CivilDrainageUDitch";
 
     const ditchTroughs = [
-        { x: 0, z: 31, w: 170, d: 0.8 },
-        { x: 0, z: -6.8, w: 170, d: 0.8 }
+        { x: 64,  z: 40.6,  w: 114, d: 0.7 },
+        { x: -64, z: 40.6,  w: 114, d: 0.7 },
+        { x: 64,  z: -40.6, w: 114, d: 0.7 },
+        { x: -64, z: -40.6, w: 114, d: 0.7 }
     ];
 
     const concMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9 });
     const grateMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.8, roughness: 0.3 });
     const grateGeo = new THREE.BoxGeometry(1.8, 0.04, 0.7);
+    const ditchGeo = new THREE.BoxGeometry(114, 0.3, 0.7);
 
+    const grateCoords = [];
     ditchTroughs.forEach(dt => {
-        // Badan Parit U-Ditch (puncak sedikit di atas apron 0.12 agar terbaca)
-        const ditch = new THREE.Mesh(new THREE.BoxGeometry(dt.w, 0.3, dt.d), concMat);
+        const ditch = new THREE.Mesh(ditchGeo, concMat);
         ditch.position.set(dt.x, 0.0, dt.z);
         ditch.receiveShadow = true;
         drainageGroup.add(ditch);
 
-        // Penutup Kisi Besi Galvanis (Steel Grating) per 2 unit
         for (let gx = -dt.w / 2 + 1; gx <= dt.w / 2 - 1; gx += 2) {
-            const grate = new THREE.Mesh(grateGeo, grateMat);
-            grate.position.set(dt.x + gx, 0.16, dt.z);
-            drainageGroup.add(grate);
+            grateCoords.push([dt.x + gx, 0.16, dt.z]);
         }
     });
+
+    if (grateCoords.length) {
+        const grateInst = new THREE.InstancedMesh(grateGeo, grateMat, grateCoords.length);
+        const dummy = new THREE.Object3D();
+        grateCoords.forEach((p, idx) => {
+            dummy.position.set(p[0], p[1], p[2]);
+            dummy.updateMatrix();
+            grateInst.setMatrixAt(idx, dummy.matrix);
+        });
+        grateInst.instanceMatrix.needsUpdate = true;
+        grateInst.frustumCulled = false;
+        drainageGroup.add(grateInst);
+    }
 
     drainageGroup.visible = cadLayers.drainage;
 }
@@ -1713,24 +1784,70 @@ function buildStackingTierIndicatorPost(px, pz, blockKey) {
     scene.add(postGroup);
 }
 
-// Painted Yellow L-Corner Ground Markings & Bay/Row Markings for Yard Slots
+// Painted Yellow L-Corner Ground Markings, RTG Concrete Runways & Block-Bay-Row Identifiers (InstancedMesh GPU Batching)
+const _slotMarkCache = {
+    hGeo: null,
+    vGeo: null,
+    yellowMat: null,
+    dgMat: null,
+    runwayMat: null,
+    stripeMat: null,
+    bayMatCache: {}
+};
+
 function createSlotGroundMarkings(blockKey, cx, cz, bw, bd) {
     const isMainBlock = (blockKey === 'A' || blockKey === 'B' || blockKey === 'C' || blockKey === 'D');
-    const bays = isMainBlock ? 5 : (blockKey === 'EMPTY' ? 2 : 2);
-    const rows = (blockKey === 'EMPTY') ? 16 : 7;
+    const bays = isMainBlock ? 8 : 3;
+    const rows = (blockKey === 'EMPTY') ? 18 : 8;
+    const pitch = (blockKey === 'EMPTY') ? 3.2 : 2.8;
+    const zOffset = isMainBlock ? ((blockKey === 'A' || blockKey === 'B') ? 2.0 : -2.0) : 0;
 
-    const markMat = new THREE.MeshBasicMaterial({ color: blockKey === 'DG' ? 0xef4444 : 0xfbbf24 });
+    if (!_slotMarkCache.hGeo) {
+        _slotMarkCache.hGeo = new THREE.BoxGeometry(0.9, 0.02, 0.15);
+        _slotMarkCache.vGeo = new THREE.BoxGeometry(0.15, 0.02, 0.9);
+        _slotMarkCache.yellowMat = new THREE.MeshBasicMaterial({ color: 0xfbbf24 });
+        _slotMarkCache.dgMat     = new THREE.MeshBasicMaterial({ color: 0xef4444 });
+        _slotMarkCache.runwayMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
+        _slotMarkCache.stripeMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
+    }
+
+    // Landasan pacu beton E-RTG crane (Reinforced Concrete Crane Runway Strips) pada Blok Utama A-D
+    if (isMainBlock) {
+        const isNorth = (blockKey === 'A' || blockKey === 'B');
+        const railInnerZ = isNorth ? 1.0 : -1.0;
+        const railOuterZ = isNorth ? 40.0 : -40.0;
+        const stripGeo = new THREE.BoxGeometry(bw + 2, 0.08, 1.5);
+        const stripeGeo = new THREE.BoxGeometry(bw + 2, 0.02, 0.18);
+        [railInnerZ, railOuterZ].forEach(rz => {
+            const strip = new THREE.Mesh(stripGeo, _slotMarkCache.runwayMat);
+            strip.position.set(cx, 0.14, rz);
+            strip.receiveShadow = true;
+            strip.matrixAutoUpdate = false;
+            strip.updateMatrix();
+            scene.add(strip);
+            const stripe = new THREE.Mesh(stripeGeo, _slotMarkCache.stripeMat);
+            stripe.position.set(cx, 0.19, rz + (isNorth ? 0.65 : -0.65));
+            stripe.matrixAutoUpdate = false;
+            stripe.updateMatrix();
+            scene.add(stripe);
+        });
+    }
+
+    const markMat = blockKey === 'DG' ? _slotMarkCache.dgMat : _slotMarkCache.yellowMat;
+    const totalCorners = bays * rows * 4;
+    const hInst = new THREE.InstancedMesh(_slotMarkCache.hGeo, markMat, totalCorners);
+    const vInst = new THREE.InstancedMesh(_slotMarkCache.vGeo, markMat, totalCorners);
+    const dummy = new THREE.Object3D();
+    let idx = 0;
 
     for (let b = 1; b <= bays; b++) {
-        let sx = cx;
-        if (isMainBlock) {
-            sx = (cx + 27.0) - (b - 1) * 13.5;   // Bay 01 di sisi barat (kiri denah)
-        } else {
-            sx = (cx + 6.75) - (b - 1) * 13.5;
-        }
+        const sx = isMainBlock
+            ? (cx + 47.25) - (b - 1) * 13.5
+            : (cx + 13.5) - (b - 1) * 13.5;
 
-        // Painted Bay ID Mark on the front of each bay (e.g. BAY 01, BAY 03, etc.)
-        if (b <= bays) {
+        // Cached Bay ID Sprite (Berbagi CanvasTexture untuk B01..B15)
+        const bayCacheKey = (blockKey === 'DG' ? 'dg_' : 'std_') + b;
+        if (!_slotMarkCache.bayMatCache[bayCacheKey]) {
             const bayCanvas = document.createElement('canvas');
             bayCanvas.width = 128;
             bayCanvas.height = 64;
@@ -1739,43 +1856,46 @@ function createSlotGroundMarkings(blockKey, cx, cz, bw, bd) {
             bctx.fillStyle = blockKey === 'DG' ? '#ef4444' : '#f59e0b';
             bctx.textAlign = 'center';
             bctx.textBaseline = 'middle';
-            bctx.fillText(`B${String(b*2-1).padStart(2, '0')}`, 64, 32);
-
+            bctx.fillText(`B${String(b * 2 - 1).padStart(2, '0')}`, 64, 32);
             const bTex = new THREE.CanvasTexture(bayCanvas);
-            const bSprMat = new THREE.SpriteMaterial({ map: bTex, transparent: true });
-            const bSpr = new THREE.Sprite(bSprMat);
-            bSpr.position.set(sx, 0.25, cz + bd/2 - 1.2);
-            bSpr.scale.set(2.4, 1.2, 1);
-            scene.add(bSpr);
+            _slotMarkCache.bayMatCache[bayCacheKey] = new THREE.SpriteMaterial({ map: bTex, transparent: true });
         }
+        const bSpr = new THREE.Sprite(_slotMarkCache.bayMatCache[bayCacheKey]);
+        bSpr.position.set(sx, 0.25, cz + bd / 2 - 1.0);
+        bSpr.scale.set(2.4, 1.2, 1);
+        scene.add(bSpr);
 
         for (let r = 1; r <= rows; r++) {
-            const sz = (cz - ((rows - 1) * 3.0) / 2) + (r - 1) * 3.0;
-
-            // Draw 4 corner marks for 40ft container footprint (12.0m x 2.44m)
+            const sz = (cz + zOffset - ((rows - 1) * pitch) / 2) + (r - 1) * pitch;
             const cL = 12.0, cW = 2.44;
-            const offsets = [
-                { x: sx - cL/2, z: sz - cW/2, dx: 0.9, dz: 0.9 },
-                { x: sx + cL/2, z: sz - cW/2, dx: -0.9, dz: 0.9 },
-                { x: sx - cL/2, z: sz + cW/2, dx: 0.9, dz: -0.9 },
-                { x: sx + cL/2, z: sz + cW/2, dx: -0.9, dz: -0.9 }
+            const corners = [
+                [sx - cL/2, sz - cW/2,  0.45,  0.45],
+                [sx + cL/2, sz - cW/2, -0.45,  0.45],
+                [sx - cL/2, sz + cW/2,  0.45, -0.45],
+                [sx + cL/2, sz + cW/2, -0.45, -0.45]
             ];
+            for (let k = 0; k < 4; k++) {
+                const c = corners[k];
+                dummy.position.set(c[0] + c[2], 0.22, c[1]);
+                dummy.updateMatrix();
+                hInst.setMatrixAt(idx, dummy.matrix);
 
-            offsets.forEach(co => {
-                // Horizontal leg of L
-                const hGeo = new THREE.BoxGeometry(0.9, 0.02, 0.15);
-                const hMesh = new THREE.Mesh(hGeo, markMat);
-                hMesh.position.set(co.x + co.dx/2, 0.22, co.z);
-                scene.add(hMesh);
-
-                // Vertical leg of L
-                const vGeo = new THREE.BoxGeometry(0.15, 0.02, 0.9);
-                const vMesh = new THREE.Mesh(vGeo, markMat);
-                vMesh.position.set(co.x, 0.22, co.z + co.dz/2);
-                scene.add(vMesh);
-            });
+                dummy.position.set(c[0], 0.22, c[1] + c[3]);
+                dummy.updateMatrix();
+                vInst.setMatrixAt(idx, dummy.matrix);
+                idx++;
+            }
         }
     }
+
+    hInst.instanceMatrix.needsUpdate = true;
+    vInst.instanceMatrix.needsUpdate = true;
+    hInst.frustumCulled = false;
+    vInst.frustumCulled = false;
+    hInst.matrixAutoUpdate = false;
+    vInst.matrixAutoUpdate = false;
+    scene.add(hInst);
+    scene.add(vInst);
 }
 
 // Hazmat / DG Bunded Containment Wall (1.2m Reinforced Concrete)
@@ -1860,7 +1980,8 @@ function createReeferPowerRacks(bx, bz, bw, bd) {
 // 3. Intermodal Rail Siding (400m Dual Tracks + Loading Ramp + Train + Dispatcher)
 function buildRailSiding() {
     const trackZ = -48;
-    const railLength = 210;
+    const railLength = CIDP_LAYOUT.meta.rail_length || 300;
+    const halfRail = railLength / 2;
 
     // Balast Batu Pecah Bersudut (Crushed Rock Ballast Bed)
     const ballastGeo = new THREE.BoxGeometry(railLength, 0.4, 16);
@@ -1877,7 +1998,7 @@ function buildRailSiding() {
     // Bantalan Beton Pratekan (Prestressed Concrete Sleepers) + Klip Pandrol Elastis
     // Pakai InstancedMesh: ratusan bantalan/klip hanya 2 draw call.
     const sleeperXs = [];
-    for (let x = -105; x <= 105; x += 2.0) sleeperXs.push(x);
+    for (let x = -halfRail; x <= halfRail; x += 2.0) sleeperXs.push(x);
 
     const sleeperMesh = new THREE.InstancedMesh(
         new THREE.BoxGeometry(0.42, 0.2, 13.2),
@@ -2008,10 +2129,11 @@ function buildFreightTrain(zPos) {
 
 // 4. Gate Complex (Gate-In, Weighbridge 80T, OCR, ANPR, Barrier, Security, Rest Area)
 function buildGateComplex() {
-    const gateZ = 52;
-    const laneInX = -49;   // Lane 1 Inbound
-    const laneOutX = -41;  // Lane 2 Outbound
-    const gateCenterX = (laneInX + laneOutX) / 2; // -45
+    const gateZ = LW('f_gate_in').z;
+    const laneInX = LW('f_gate_in').x;    // Lane 1 Inbound (-60)
+    const laneOutX = LW('f_gate_out').x;  // Lane 2 Outbound (-50)
+    const gateCenterX = (laneInX + laneOutX) / 2; // -55
+    const barrierZ = gateZ - 9;           // 67
 
     // Inbound & Outbound Gate Portal Gantry (Steel Overhead Structure)
     const gantryMat = new THREE.MeshStandardMaterial({ color: 0x004b87, metalness: 0.6, roughness: 0.3 });
@@ -2031,7 +2153,7 @@ function buildGateComplex() {
     scene.add(colRight);
 
     // Overhead Portal Crossbeam
-    const beam = new THREE.Mesh(new THREE.BoxGeometry(20.0, 1.6, 1.6), gantryMat);
+    const beam = new THREE.Mesh(new THREE.BoxGeometry(22.0, 1.6, 1.6), gantryMat);
     beam.position.set(gateCenterX, 8.0, gateZ);
     scene.add(beam);
 
@@ -2069,24 +2191,24 @@ function buildGateComplex() {
     const barrierBaseGeo = new THREE.CylinderGeometry(0.35, 0.4, 1.4, 16);
     const barrierBaseMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
     const bBaseIn = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
-    bBaseIn.position.set(laneInX - 2.2, 0.7, 43);
+    bBaseIn.position.set(laneInX - 2.2, 0.7, barrierZ);
     scene.add(bBaseIn);
 
     const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, 4.4, 12);
     const poleMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
     boomBarrierMesh = new THREE.Mesh(poleGeo, poleMat);
     boomBarrierMesh.rotation.z = Math.PI / 2;
-    boomBarrierMesh.position.set(laneInX, 1.2, 43);
+    boomBarrierMesh.position.set(laneInX, 1.2, barrierZ);
     scene.add(boomBarrierMesh);
 
     // Outbound Boom Barrier Pole (Lane 2, Animated Palang Pintu Keluar)
     const bBaseOut = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
-    bBaseOut.position.set(laneOutX + 2.2, 0.7, 43);
+    bBaseOut.position.set(laneOutX + 2.2, 0.7, barrierZ);
     scene.add(bBaseOut);
 
     outboundBarrierMesh = new THREE.Mesh(poleGeo, poleMat);
     outboundBarrierMesh.rotation.z = Math.PI / 2;
-    outboundBarrierMesh.position.set(laneOutX, 1.2, 43);
+    outboundBarrierMesh.position.set(laneOutX, 1.2, barrierZ);
     scene.add(outboundBarrierMesh);
 
     // Outbound Lane Display
@@ -2095,18 +2217,18 @@ function buildGateComplex() {
     outDisp.position.set(laneOutX, 6.2, gateZ);
     scene.add(outDisp);
 
-    createBlockLabelSprite('OUTBOUND GATE (CHECKOUT & E-SEAL)', laneOutX, 7.5, 43);
+    createBlockLabelSprite('OUTBOUND GATE (CHECKOUT & E-SEAL)', laneOutX, 7.5, barrierZ);
 
     const __mSec = relocBegin(null);
     // Security Post 24 Jam (fac_f_security_gate)
     const secGeo = new THREE.BoxGeometry(8, 4.5, 8);
     const secMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 });
     const secPost = new THREE.Mesh(secGeo, secMat);
-    secPost.position.set(-65, 2.25, gateZ);
+    secPost.position.set(-65, 2.25, 52);
     secPost.castShadow = true;
     scene.add(secPost);
 
-    createBlockLabelSprite('SECURITY POST 24 JAM', -65, 5.5, gateZ);
+    createBlockLabelSprite('SECURITY POST 24 JAM', -65, 5.5, 52);
 
     relocEnd(__mSec, 'f_security_gate', -65, 52);
     const __mRest = relocBegin(null);
@@ -3151,33 +3273,34 @@ function buildStylizedTrees() {
     }
 
     const treePositions = [
-        // Along North Boulevard & Administration HQ Green Lawn
-        { x: -35, z: 66, s: 1.1 },
-        { x: -25, z: 68, s: 1.25 },
-        { x: -12, z: 68, s: 1.0 },
-        { x: 12,  z: 68, s: 1.15 },
-        { x: 26,  z: 68, s: 1.3 },
-        { x: 38,  z: 66, s: 1.05 },
-        // Between Gate and Admin
-        { x: -52, z: 68, s: 1.2 },
-        { x: -62, z: 68, s: 0.95 },
-        { x: -74, z: 66, s: 1.15 },
-        // Near CFS Warehouse Entrance (West Green Verge)
-        { x: 167, z: 20, s: 1.2 },
-        { x: 167, z: 8,  s: 1.0 },
-        { x: 167, z: -4, s: 1.1 },
-        { x: 167, z: -16,s: 0.95 },
-        // Near Customs Complex (East Green Verge)
-        { x: -167, z: 24,  s: 1.1 },
-        { x: -167, z: 12,  s: 1.2 },
-        { x: -167, z: 0,   s: 1.05 },
-        { x: -167, z: -12, s: 1.15 },
-        // South Perimeter Green Belt
-        { x: -90, z: -68, s: 1.2 },
-        { x: -45, z: -68, s: 1.05 },
-        { x: 0,   z: -68, s: 1.15 },
-        { x: 45,  z: -68, s: 1.0 },
-        { x: 90,  z: -68, s: 1.25 }
+        // North Perimeter Green Lawn (Di kanan-kiri gerbang Z=106, bersih dari jalur truk Gate X=-68..-42 & Gedung Utara)
+        { x: -195, z: 106, s: 1.15 },
+        { x: -150, z: 106, s: 1.25 },
+        { x: -105, z: 106, s: 1.1 },
+        { x: -74,  z: 106, s: 1.2 },
+        { x: -36,  z: 106, s: 1.15 },
+        { x: -10,  z: 106, s: 1.05 },
+        { x: 25,   z: 106, s: 1.25 },
+        { x: 65,   z: 106, s: 1.15 },
+        { x: 110,  z: 106, s: 1.2 },
+        { x: 155,  z: 106, s: 1.1 },
+        { x: 195,  z: 106, s: 1.2 },
+        // West Perimeter Green Verge (Di belakang CFS/M&R X=+232)
+        { x: 232,  z: 36,  s: 1.2 },
+        { x: 232,  z: 12,  s: 1.05 },
+        { x: 232,  z: -12, s: 1.15 },
+        { x: 232,  z: -36, s: 1.0 },
+        // East Perimeter Green Verge (Di belakang Bea Cukai X=-232)
+        { x: -232, z: 36,  s: 1.1 },
+        { x: -232, z: 12,  s: 1.2 },
+        { x: -232, z: -12, s: 1.05 },
+        { x: -232, z: -36, s: 1.15 },
+        // South Perimeter Green Belt (Di selatan rel kereta Z=-104)
+        { x: -140, z: -104, s: 1.2 },
+        { x: -70,  z: -104, s: 1.05 },
+        { x: 0,    z: -104, s: 1.15 },
+        { x: 70,   z: -104, s: 1.0 },
+        { x: 140,  z: -104, s: 1.25 }
     ];
 
     treePositions.forEach(tp => {
@@ -3362,19 +3485,19 @@ function buildEngineeringDimensionLeaders() {
     buildCivilGridAxesSystem();
 
     // 2. ISO Dimension Leaders dengan tick 45 derajat
-    createCADLeaderDimension(-CIDP_LAYOUT.meta.rail_length / 2, CIDP_LAYOUT.meta.rail_length / 2, -60, `STA 0+000 s/d 0+${CIDP_LAYOUT.meta.rail_length} (${CIDP_LAYOUT.meta.rail_length}.00 M RAIL SIDING TERMODEL)`, 0xd97706);
-    createCADLeaderDimension(-80, 80, 20, '160.00 M CORE STACKING YARD (BLOK A-D)', 0x4f46e5);
+    createCADLeaderDimension(-CIDP_LAYOUT.meta.rail_length / 2, CIDP_LAYOUT.meta.rail_length / 2, LW('rail_siding').z - 12, `STA 0+000 s/d 0+${CIDP_LAYOUT.meta.rail_length} (${CIDP_LAYOUT.meta.rail_length}.00 M RAIL SIDING TERMODEL)`, 0xd97706);
+    createCADLeaderDimension(-121, 121, 42.5, '242.00 M CORE STACKING YARD (8 BAY × 8 ROW BLOK A-D)', 0x4f46e5);
 
     // 3. Dimensi lain (CFS & jalan haul) tetap dipertahankan
-    createDimensionLineZ(26, -27, LW('f_cfs').x + 16, '← 53.00 M CFS & M&R LOGISTICS COMPLEX →', 0x0284c7);
-    createDimensionLine(-52, -38, 28, '← 14.00 M TWO-WAY CONTAINER TRUCK ROAD →', 0x10b981);
+    createDimensionLineZ(40, -40, LW('f_cfs').x + 18, '← 80.00 M CFS & M&R LOGISTICS COMPLEX →', 0x0284c7);
+    createDimensionLine(LW('f_gate_in').x - 5, LW('f_gate_out').x + 5, 47, '← 18.00 M MAIN ACCESS ARTERIAL →', 0x10b981);
 
     // 4. Elevation marks (duga)
-    createCADLeaderElevation(0, 0.16, 28, 'EL +0.16 M (TOP SLAB PEKERASAN)');
-    createCADLeaderElevation(LW('blok_b').x, 10.6, 16, 'EL +10.60 M (MAX TIER 4 HOIST LIMIT)');
+    createCADLeaderElevation(0, 0.16, 47, 'EL +0.16 M (TOP SLAB PEKERASAN)');
+    createCADLeaderElevation(LW('blok_b').x, 10.6, LW('blok_b').z, 'EL +10.60 M (MAX TIER 4 HOIST LIMIT)');
 
     // 5. Benchmark Datum Geodetik
-    createDatumBenchmarkMarker(-110, 0.5, 62);
+    createDatumBenchmarkMarker(-135, 0.5, 96);
 
     technicalDimensionsGroup.visible = cadLayers.dimensions && showTechnicalDimensions;
 }
@@ -3401,11 +3524,11 @@ function buildCivilGridAxesSystem() {
     ];
 
     const zAxes = [
-        { z: 52,   label: 'AS A' },
-        { z: 16,   label: 'AS B' },
-        { z: -5,   label: 'AS C' },
-        { z: -26,  label: 'AS D' },
-        { z: -52,  label: 'AS E' }
+        { z: LW('f_gate_in').z,   label: 'AS A' },
+        { z: LW('blok_a').z,      label: 'AS B' },
+        { z: 0,                   label: 'AS C' },
+        { z: LW('blok_c').z,      label: 'AS D' },
+        { z: LW('rail_siding').z, label: 'AS E' }
     ];
 
     // Material dipakai bersama (satu instance) untuk semua garis as
@@ -3418,13 +3541,13 @@ function buildCivilGridAxesSystem() {
     // Garis As Vertikal (sejajar sumbu Z)
     xAxes.forEach(ax => {
         const geom = new THREE.BufferGeometry().setFromPoints([
-            new THREE.Vector3(ax.x, 0.3, 72),
-            new THREE.Vector3(ax.x, 0.3, -72)
+            new THREE.Vector3(ax.x, 0.3, CIDP_LAYOUT.meta.fence_half_d),
+            new THREE.Vector3(ax.x, 0.3, -CIDP_LAYOUT.meta.fence_half_d)
         ]);
         const line = new THREE.Line(geom, lineMat);
         line.computeLineDistances();
         cadGridGroup.add(line);
-        createGridBubbleSprite(ax.label, ax.x, 1.2, 75);
+        createGridBubbleSprite(ax.label, ax.x, 1.2, CIDP_LAYOUT.meta.fence_half_d + 4);
     });
 
     // Garis As Horisontal (sejajar sumbu X)
@@ -3602,10 +3725,10 @@ function toggleCADLayer(layerName) {
 // 10. Yard Floodlight High Towers
 function buildFloodlightTowers() {
     const towerCoords = [
-        { x: -75, z: -35 },
-        { x: 75,  z: -35 },
-        { x: -75, z: 45 },
-        { x: 75,  z: 45 }
+        { x: -118, z: -58 },
+        { x: 118,  z: -58 },
+        { x: -118, z: 62 },
+        { x: 118,  z: 62 }
     ];
 
     towerCoords.forEach((tc) => {
@@ -3622,28 +3745,37 @@ function buildFloodlightTowers() {
         scene.add(head);
 
         // Spotlights
-        const spot = new THREE.SpotLight(0xfffaed, 0, 140, Math.PI / 3, 0.4, 1);
+        const spot = new THREE.SpotLight(0xfffaed, 0, 160, Math.PI / 3, 0.4, 1);
         spot.position.set(tc.x, 23.8, tc.z);
-        spot.target.position.set(tc.x > 0 ? 20 : -20, 0, 0);
+        spot.target.position.set(tc.x > 0 ? 25 : -25, 0, 0);
         scene.add(spot);
         scene.add(spot.target);
         floodlightLights.push(spot);
     });
 }
 
-// 11. Spawn Heavy Equipment (3 Reach Stackers + 1 RTG Crane)
+// 11. Spawn Heavy Equipment (Reach Stackers + Rail RTG-01 + Field Yard RTG-02..RTG-05)
 function spawnEquipmentModels() {
-    // RS-01 (Blok A Transfer Corridor - Primary Drop-Off Handler)
-    equipmentMeshes['RS-01'] = createReachStackerModel('RS-01', 34, 0, 28);
+    // RS-01 (Mid-West Corridor — Empty Depot & East Transfer)
+    equipmentMeshes['RS-01'] = createReachStackerModel('RS-01', 126.5, 0, 12);
     
-    // RS-02 (Blok B Transfer Corridor - Primary Pick-Up Handler)
-    equipmentMeshes['RS-02'] = createReachStackerModel('RS-02', -54, 0, 28);
+    // RS-02 (Mid-East Corridor — Blok D / Blok E Buffer Transfer)
+    equipmentMeshes['RS-02'] = createReachStackerModel('RS-02', -126.5, 0, -24);
 
-    // RS-03 (Reefer & DG Area Transfer Corridor)
-    equipmentMeshes['RS-03'] = createReachStackerModel('RS-03', -104, 0, 28);
+    // RS-03 (Mid-East Corridor — Reefer & Cold Chain)
+    equipmentMeshes['RS-03'] = createReachStackerModel('RS-03', -126.5, 0, 24);
+
+    // RS-04 (South Haul Boulevard — Blok C/D Southern Apron)
+    equipmentMeshes['RS-04'] = createReachStackerModel('RS-04', 64, 0, -47.0);
 
     // RTG-01 (Rail Siding Crane spanning across track and buffer)
-    equipmentMeshes['RTG-01'] = createRTGCraneModel('RTG-01', 0, 0, -52);
+    equipmentMeshes['RTG-01'] = createRTGCraneModel('RTG-01', 0, 0, LW('rail_siding').z - 1);
+
+    // RTG-02..RTG-05 (E-RTG Lapangan Blok A, B, C, D — bentangan lebar 39m melintasi 8 Row + Lajur Truk!)
+    equipmentMeshes['RTG-02'] = createYardRTGCraneModel('RTG-02', LW('blok_a').x, 0,  20.5, 0x0284c7);
+    equipmentMeshes['RTG-03'] = createYardRTGCraneModel('RTG-03', LW('blok_b').x, 0,  20.5, 0xd97706);
+    equipmentMeshes['RTG-04'] = createYardRTGCraneModel('RTG-04', LW('blok_c').x, 0, -20.5, 0x059669);
+    equipmentMeshes['RTG-05'] = createYardRTGCraneModel('RTG-05', LW('blok_d').x, 0, -20.5, 0x7c3aed);
 }
 
 // Procedural 3D Reach Stacker Model (Kalmar DRG450)
@@ -3805,6 +3937,93 @@ function createRTGCraneModel(name, x, y, z) {
     const rtgSpreader = new THREE.Mesh(rtgSpreaderGeo, trolleyMat);
     rtgSpreader.name = "rtgSpreader";
     rtgSpreader.position.set(0, 12, 0);
+    rtgSpreader.castShadow = true;
+    rtg.add(rtgSpreader);
+
+    rtg.position.set(x, y, z);
+    scene.add(rtg);
+    return rtg;
+}
+
+// Procedural 3D Wide-Span Yard E-RTG Crane (Spans 8 Container Rows + Inner Truck Lane Z=±4.5)
+function createYardRTGCraneModel(name, x, y, z, primaryColor) {
+    const rtg = new THREE.Group();
+    rtg.name = name;
+
+    const rtgMat  = new THREE.MeshStandardMaterial({ color: primaryColor || 0x0284c7, roughness: 0.38 });
+    const trimMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
+    const tyreMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+
+    // 4 Wide-Span Gantry Legs (z = ±19.5 -> bentangan 39m tepat di atas rel RTG Z=±1.0 & Z=±40.0)
+    const legGeo = new THREE.BoxGeometry(1.1, 18.0, 1.1);
+    const sillGeo = new THREE.BoxGeometry(1.3, 1.2, 5.2);
+    const legCoords = [
+        { x: -7.2, z: -19.5 }, { x: 7.2, z: -19.5 },
+        { x: -7.2, z:  19.5 }, { x: 7.2, z:  19.5 }
+    ];
+    legCoords.forEach(lp => {
+        const leg = new THREE.Mesh(legGeo, rtgMat);
+        leg.position.set(lp.x, 9.0, lp.z);
+        leg.castShadow = true;
+        rtg.add(leg);
+
+        const sill = new THREE.Mesh(sillGeo, trimMat);
+        sill.position.set(lp.x, 1.4, lp.z);
+        rtg.add(sill);
+
+        [-1.6, 1.6].forEach(rz => {
+            const tyre = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.05, 0.75, 16), tyreMat);
+            tyre.rotation.z = Math.PI / 2;
+            tyre.position.set(lp.x, 1.05, lp.z + rz);
+            rtg.add(tyre);
+        });
+    });
+
+    // Overhead Girder Bridges Spanning Along Z (Over 8 Container Rows & Truck Transfer Lane)
+    const zBeamGeo = new THREE.BoxGeometry(1.4, 1.7, 40.5);
+    [-7.2, 7.2].forEach(bx => {
+        const zb = new THREE.Mesh(zBeamGeo, rtgMat);
+        zb.position.set(bx, 18.0, 0);
+        zb.castShadow = true;
+        rtg.add(zb);
+    });
+
+    // Cross Ties at Ends + Warning Hazard Strobes
+    const endTieGeo = new THREE.BoxGeometry(15.6, 1.2, 1.2);
+    [-19.5, 19.5].forEach(ez => {
+        const et = new THREE.Mesh(endTieGeo, rtgMat);
+        et.position.set(0, 17.8, ez);
+        rtg.add(et);
+
+        const strobe = new THREE.Mesh(
+            new THREE.CylinderGeometry(0.18, 0.18, 0.35, 10),
+            new THREE.MeshBasicMaterial({ color: 0xf59e0b })
+        );
+        strobe.position.set(0, 19.0, ez);
+        rtg.add(strobe);
+        if (typeof registerHazardLight === 'function') registerHazardLight(strobe, null, 0, true);
+    });
+
+    // Operator Cabin & Traversing Trolley
+    const trolley = new THREE.Group();
+    trolley.name = "rtgTrolley";
+    trolley.position.set(0, 18.6, 0);
+
+    const tFrame = new THREE.Mesh(new THREE.BoxGeometry(15.2, 1.0, 4.0), trimMat);
+    trolley.add(tFrame);
+
+    const cab = new THREE.Mesh(
+        new THREE.BoxGeometry(2.2, 2.0, 2.2),
+        new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.2, transparent: true, opacity: 0.85 })
+    );
+    cab.position.set(4.5, -1.5, 0);
+    trolley.add(cab);
+    rtg.add(trolley);
+
+    // 40FT ISO Telescopic Spreader
+    const rtgSpreader = new THREE.Mesh(new THREE.BoxGeometry(12.2, 0.65, 2.48), trimMat);
+    rtgSpreader.name = "rtgSpreader";
+    rtgSpreader.position.set(0, 12.5, 0);
     rtgSpreader.castShadow = true;
     rtg.add(rtgSpreader);
 
@@ -4028,17 +4247,21 @@ function refreshSandboxUI() {
     populateMoveSelect(boxes);
 }
 
+let instancedYardMeshes = [];
+const baselineSlotMap = {};
+
 function findOpenSandboxSlot(blockKey) {
-    const occupied = new Set();
+    const occupied = new Set(Object.keys(baselineSlotMap));
     Object.values(containerMeshes).forEach(m => {
         if (m && m.userData) {
             const k = `${m.userData.block || 'A'}-${String(m.userData.bay || '01').padStart(2, '0')}-${String(m.userData.row || '01').padStart(2, '0')}-${String(m.userData.tier || '01').padStart(2, '0')}`;
             occupied.add(k);
         }
     });
-    for (let t = 1; t <= 3; t++) {
-        for (let r = 1; r <= 4; r++) {
-            for (let b = 1; b <= 5; b++) {
+    const maxB = (blockKey === 'A' || blockKey === 'B' || blockKey === 'C' || blockKey === 'D') ? 8 : 3;
+    for (let t = 1; t <= 4; t++) {
+        for (let r = 1; r <= 8; r++) {
+            for (let b = 1; b <= maxB; b++) {
                 const bay = String(b).padStart(2, '0');
                 const row = String(r).padStart(2, '0');
                 const tier = String(t).padStart(2, '0');
@@ -4055,7 +4278,7 @@ function findOpenSandboxSlot(blockKey) {
 // CONTAINER SLOT COORDINATE ENGINE & PROCEDURAL BASELINE GENERATOR
 // =============================================================================
 
-// Helper: Calculate Exact 3D World Position for Yard Slots (5 Bays, 7 Rows, 4-5 Tiers Port Standard)
+// Helper: Calculate Exact 3D World Position for Yard Slots (8 Bays x 8 Rows x 4 Tiers Port Standard)
 function getSlotWorldPosition(blockKey, bay, row, tier, is20ft = false) {
     const bCoord = BLOCK_COORDS[blockKey] || BLOCK_COORDS['A'];
     const bayNum  = parseInt(bay, 10) || 1;
@@ -4067,22 +4290,26 @@ function getSlotWorldPosition(blockKey, bay, row, tier, is20ft = false) {
     const isMainBlock = (blockKey === 'A' || blockKey === 'B' || blockKey === 'C' || blockKey === 'D');
 
     if (isMainBlock) {
-        // 5 bays of 40ft (spacing 13.5m), or 10 bays of 20ft (spacing 6.75m)
+        // 8 bays of 40ft (spacing 13.5m), or 16 bays of 20ft (spacing 6.75m)
         if (is20ft) {
-            posX = (bCoord.x + 30.375) - ((bayNum - 1) % 10) * 6.75;
+            posX = (bCoord.x + 50.625) - ((bayNum - 1) % 16) * 6.75;
         } else {
-            posX = (bCoord.x + 27.0) - ((bayNum - 1) % 5) * 13.5;
+            posX = (bCoord.x + 47.25) - ((bayNum - 1) % 8) * 13.5;
         }
-    } else if (blockKey === 'EMPTY') {
-        posX = (bCoord.x + 6.75) - ((bayNum - 1) % 2) * 13.5;
     } else {
-        // REEFER or DG (2 bays)
-        posX = (bCoord.x + 6.75) - ((bayNum - 1) % 2) * 13.5;
+        // EMPTY, REEFER, or DG (3 bays of 40ft / 6 bays of 20ft)
+        if (is20ft) {
+            posX = (bCoord.x + 16.875) - ((bayNum - 1) % 6) * 6.75;
+        } else {
+            posX = (bCoord.x + 13.5) - ((bayNum - 1) % 3) * 13.5;
+        }
     }
 
-    // Rows along Z (pitch 3.0m)
-    const maxR = (blockKey === 'EMPTY') ? 16 : 7;
-    const posZ = (bCoord.z - ((maxR - 1) * 3.0) / 2) + ((rowNum - 1) % maxR) * 3.0;
+    // Rows along Z (pitch 2.8m untuk Yard 8-Row, pitch 3.2m untuk Empty 18-Row)
+    const maxR = (blockKey === 'EMPTY') ? 18 : 8;
+    const pitch = (blockKey === 'EMPTY') ? 3.2 : 2.8;
+    const zOffset = isMainBlock ? ((blockKey === 'A' || blockKey === 'B') ? 2.0 : -2.0) : 0;
+    const posZ = (bCoord.z + zOffset - ((maxR - 1) * pitch) / 2) + ((rowNum - 1) % maxR) * pitch;
 
     // Tiers along Y: Ground slab at 0.20m, container height 2.60m
     const posY = 0.20 + (cHeight / 2) + ((tierNum - 1) * cHeight);
@@ -4090,125 +4317,93 @@ function getSlotWorldPosition(blockKey, bay, row, tier, is20ft = false) {
     return { x: posX, y: posY, z: posZ };
 }
 
-// Generate Realistic Multi-Tier Stacking Yard Baseline (Populates the Expansive 35 Ha Port)
+// Generate Realistic Block-Bay-Row-Tier Stacking Yard Baseline (Populates 8 Bays x 8 Rows per Main Block)
 function generateBaselineYardContainers() {
     const baselineList = [
-        // --- BLOK A (LADEN EXPORT) - Multi-Tier Stacks ---
-        // Bay 1
-        { block: 'A', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU2091823', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28400 },
-        { block: 'A', bay: 1, row: 1, tier: 2, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU7718291', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27100 },
-        { block: 'A', bay: 1, row: 1, tier: 3, color: SHIPPING_COLORS['ONE'],       num: 'ONEU9928104', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26500 },
-        { block: 'A', bay: 1, row: 1, tier: 4, color: SHIPPING_COLORS['MSC'],       num: 'MSCU1102938', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29300 },
-        { block: 'A', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU8821940', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 29000 },
-        { block: 'A', bay: 1, row: 2, tier: 2, color: SHIPPING_COLORS['MSC'],       num: 'MSCU6629104', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 28800 },
-        { block: 'A', bay: 1, row: 3, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU5519284', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25400 },
-        { block: 'A', bay: 1, row: 4, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU3381920', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 27600 },
-        { block: 'A', bay: 1, row: 4, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU1129384', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28100 },
-        { block: 'A', bay: 1, row: 5, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU4419201', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 26800 },
-        { block: 'A', bay: 1, row: 6, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU3301928', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 27900 },
-        { block: 'A', bay: 1, row: 7, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU7729103', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 28400 },
-
-        // Bay 2 (Leaves Row 2, Tier 1 open for dynamic gate-in drop-off!)
-        { block: 'A', bay: 2, row: 1, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU1029384', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 27200 },
-        { block: 'A', bay: 2, row: 1, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU2291029', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28100 },
-        { block: 'A', bay: 2, row: 3, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU8829102', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28600 },
-        { block: 'A', bay: 2, row: 3, tier: 2, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU9920183', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 26900 },
-        { block: 'A', bay: 2, row: 3, tier: 3, color: SHIPPING_COLORS['MSC'],       num: 'MSCU5519203', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 28700 },
-        { block: 'A', bay: 2, row: 4, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU4410294', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29100 },
-        { block: 'A', bay: 2, row: 5, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU7719203', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25800 },
-        { block: 'A', bay: 2, row: 6, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU9920194', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 27300 },
-        { block: 'A', bay: 2, row: 7, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU2219483', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 28000 },
-
-        // Bay 3
-        { block: 'A', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU5510293', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28900 },
-        { block: 'A', bay: 3, row: 2, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU3329102', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 27500 },
-        { block: 'A', bay: 3, row: 2, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU6619284', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28300 },
-        { block: 'A', bay: 3, row: 3, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU7718293', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26400 },
-        { block: 'A', bay: 3, row: 4, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU2210493', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25600 },
-        { block: 'A', bay: 3, row: 5, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU9918294', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27800 },
-        { block: 'A', bay: 3, row: 6, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU4410293', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 28100 },
-
-        // Bay 4 & 5
-        { block: 'A', bay: 4, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU8810291', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28500 },
-        { block: 'A', bay: 4, row: 1, tier: 2, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU7719284', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28700 },
-        { block: 'A', bay: 4, row: 3, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU6619283', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26800 },
-        { block: 'A', bay: 5, row: 2, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU5519284', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29100 },
-
-        // --- BLOK B (LADEN IMPORT) ---
-        // Bay 1
-        { block: 'B', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU9918294', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29400 },
-        { block: 'B', bay: 1, row: 1, tier: 2, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU4419203', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28200 },
-        { block: 'B', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU7718294', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28700 },
-        { block: 'B', bay: 1, row: 3, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU3319284', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26700 },
-        { block: 'B', bay: 1, row: 4, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU6619283', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27500 },
-        { block: 'B', bay: 1, row: 5, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU8819204', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25900 },
-        { block: 'B', bay: 1, row: 6, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU1120493', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 27800 },
-        { block: 'B', bay: 1, row: 7, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU2219485', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29000 },
-
-        // Bay 2 (Target Pick-Up Container at Row 2, Tier 1)
-        { block: 'B', bay: 2, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU5519283', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28500 },
-        { block: 'B', bay: 2, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'MSKU4952240', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28800 },
-        { block: 'B', bay: 2, row: 3, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU3319204', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27400 },
-        { block: 'B', bay: 2, row: 4, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU8819284', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26800 },
-        { block: 'B', bay: 2, row: 5, tier: 1, color: SHIPPING_COLORS['MSC'],       num: 'MSCU7719283', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29200 },
-        { block: 'B', bay: 2, row: 6, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU4419203', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25700 },
-
-        // Bay 3
-        { block: 'B', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU2219483', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26500 },
-        { block: 'B', bay: 3, row: 1, tier: 2, color: SHIPPING_COLORS['MSC'],       num: 'MSCU8819204', owner: 'Mediterranean Shipping',type: '40FT HC',cargo: 'dry', weight: 29100 },
-        { block: 'B', bay: 3, row: 2, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU7719284', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28400 },
-        { block: 'B', bay: 3, row: 3, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU4419204', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28600 },
-        { block: 'B', bay: 3, row: 4, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU5519283', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27900 },
-        { block: 'B', bay: 3, row: 5, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU6619284', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 28000 },
-
-        // Bay 4 & 5
-        { block: 'B', bay: 4, row: 2, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU3310492', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28300 },
-        { block: 'B', bay: 4, row: 2, tier: 2, color: SHIPPING_COLORS['ONE'],       num: 'ONEU5510294', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26600 },
-        { block: 'B', bay: 5, row: 3, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU2219401', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 28800 },
-
-        // --- BLOK C (DOMESTIC CARGO) ---
-        { block: 'C', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU1029381', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25100 },
-        { block: 'C', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU2039481', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 26200 },
-        { block: 'C', bay: 2, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU3049581', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 24900 },
-        { block: 'C', bay: 2, row: 3, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU4059681', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 25800 },
-        { block: 'C', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU5069781', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25300 },
-        { block: 'C', bay: 3, row: 2, tier: 1, color: SHIPPING_COLORS['Samudera'],  num: 'SMDU6079881', owner: 'Samudera Indonesia',  type: '40FT HC', cargo: 'dry', weight: 26000 },
-        { block: 'C', bay: 4, row: 1, tier: 1, color: SHIPPING_COLORS['Meratus'],   num: 'MRTU7089981', owner: 'Meratus Line',        type: '40FT HC', cargo: 'dry', weight: 25400 },
-
-        // --- BLOK D (BUFFER YARD) ---
-        { block: 'D', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU9018273', owner: 'Maersk Line',         type: '40FT HC', cargo: 'dry', weight: 28200 },
-        { block: 'D', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'EGLU8027162', owner: 'Evergreen Marine',   type: '40FT HC', cargo: 'dry', weight: 27800 },
-        { block: 'D', bay: 2, row: 2, tier: 1, color: SHIPPING_COLORS['CMA CGM'],   num: 'CMAU9920194', owner: 'CMA CGM',             type: '40FT HC', cargo: 'dry', weight: 27900 },
-        { block: 'D', bay: 3, row: 1, tier: 1, color: SHIPPING_COLORS['ONE'],       num: 'ONEU7036251', owner: 'Ocean Network Express',type: '40FT HC', cargo: 'dry', weight: 26900 },
-
-        // --- REEFER ZONE (Cold Chain Pure White) ---
-        { block: 'REEFER', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'EITU9823102', owner: 'Maersk Reefer Cool',   type: '40FT RF', cargo: 'reefer', weight: 29500 },
-        { block: 'REEFER', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'MSKU4410297', owner: 'Carrier Transicold',   type: '40FT RF', cargo: 'reefer', weight: 29800 },
-        { block: 'REEFER', bay: 1, row: 3, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'TRLU5510294', owner: 'Thermo King Cold',    type: '40FT RF', cargo: 'reefer', weight: 29200 },
-        { block: 'REEFER', bay: 1, row: 4, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'EITU7729104', owner: 'Daikin Reefer Tech',   type: '40FT RF', cargo: 'reefer', weight: 29600 },
-
-        // --- HAZMAT DG (Red & Hazard Striped) ---
-        { block: 'DG', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['dg'], num: 'DGAU1102938', owner: 'Bollore Hazmat Logistics', type: '20FT DG', cargo: 'dg', weight: 22000 },
-        { block: 'DG', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['dg'], num: 'DGAU2203948', owner: 'KWE Chemical Freight',      type: '20FT DG', cargo: 'dg', weight: 21500 },
-
-        // --- EMPTY DEPOT (Stacked up to 5 Tiers High) ---
-        { block: 'EMPTY', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['empty'], num: 'MTYU1000001', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
-        { block: 'EMPTY', bay: 1, row: 1, tier: 2, color: SHIPPING_COLORS['empty'], num: 'MTYU1000002', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
-        { block: 'EMPTY', bay: 1, row: 1, tier: 3, color: SHIPPING_COLORS['empty'], num: 'MTYU1000003', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
-        { block: 'EMPTY', bay: 1, row: 1, tier: 4, color: SHIPPING_COLORS['empty'], num: 'MTYU1000004', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
-        { block: 'EMPTY', bay: 1, row: 1, tier: 5, color: SHIPPING_COLORS['empty'], num: 'MTYU1000005', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
-        { block: 'EMPTY', bay: 1, row: 2, tier: 1, color: SHIPPING_COLORS['empty'], num: 'MTYU1000006', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
-        { block: 'EMPTY', bay: 1, row: 2, tier: 2, color: SHIPPING_COLORS['empty'], num: 'MTYU1000007', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 },
-        { block: 'EMPTY', bay: 1, row: 2, tier: 3, color: SHIPPING_COLORS['empty'], num: 'MTYU1000008', owner: 'CIDP Depot Operations', type: '40FT MT', cargo: 'empty', weight: 3800 }
+        // Landmark Inspection Boxes (Always Fixed for Operator Tracking)
+        { block: 'A', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['Maersk'],    num: 'MSKU2091823', owner: 'Maersk Line',          type: '40FT HC', cargo: 'dry',    weight: 28400 },
+        { block: 'B', bay: 2, row: 2, tier: 1, color: SHIPPING_COLORS['Evergreen'], num: 'MSKU4952240', owner: 'Evergreen Marine',     type: '40FT HC', cargo: 'dry',    weight: 28800 },
+        { block: 'REEFER', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['reefer'], num: 'EITU9823102', owner: 'Maersk Reefer Cool', type: '40FT RF', cargo: 'reefer', weight: 29500 },
+        { block: 'DG', bay: 1, row: 1, tier: 1, color: SHIPPING_COLORS['dg'],       num: 'DGAU1102938', owner: 'Bollore Hazmat',     type: '20FT DG', cargo: 'dg',     weight: 22000 }
     ];
 
+    const usedKeys = new Set(baselineList.map(c => `${c.block}-${c.bay}-${c.row}-${c.tier}`));
+    const carriers = [
+        { key: 'Maersk',    prefix: 'MSKU', owner: 'Maersk Line' },
+        { key: 'MSC',       prefix: 'MSCU', owner: 'Mediterranean Shipping' },
+        { key: 'CMA CGM',   prefix: 'CMAU', owner: 'CMA CGM' },
+        { key: 'ONE',       prefix: 'ONEU', owner: 'Ocean Network Express' },
+        { key: 'Evergreen', prefix: 'EGLU', owner: 'Evergreen Marine' },
+        { key: 'Meratus',   prefix: 'MRTU', owner: 'Meratus Line' },
+        { key: 'Samudera',  prefix: 'SMDU', owner: 'Samudera Indonesia' }
+    ];
+
+    let serial = 3100001;
+    const pushSlot = (block, bay, row, tier, carrierIdx, type, cargo, weight) => {
+        const key = `${block}-${bay}-${row}-${tier}`;
+        if (usedKeys.has(key)) return;
+        usedKeys.add(key);
+        const car = carriers[carrierIdx % carriers.length];
+        const col = (cargo === 'dry') ? SHIPPING_COLORS[car.key] : SHIPPING_COLORS[cargo];
+        const num = (cargo === 'empty' ? 'MTYU' : cargo === 'reefer' ? 'TRLU' : cargo === 'dg' ? 'DGAU' : car.prefix) + (serial++);
+        baselineList.push({ block, bay, row, tier, color: col, num, owner: car.owner, type, cargo, weight });
+    };
+
+    // Blok A (Ekspor 8x8), B (Impor 8x8), C (Domestik 8x8), D (Buffer 8x8)
+    [
+        { block: 'A', density: 0.72, maxTier: 4, seed: 3 },
+        { block: 'B', density: 0.68, maxTier: 4, seed: 7 },
+        { block: 'C', density: 0.62, maxTier: 3, seed: 11 },
+        { block: 'D', density: 0.56, maxTier: 3, seed: 17 }
+    ].forEach(cfg => {
+        for (let b = 1; b <= 8; b++) {
+            for (let r = 1; r <= 8; r++) {
+                // Sisakan celah inspeksi di Bay 2 Row 2 blok A agar terlihat natural
+                if (cfg.block === 'A' && b === 2 && r === 2) continue;
+                const hash = ((b * 31 + r * 17 + cfg.seed * 13) % 100) / 100;
+                if (hash > cfg.density) continue;
+                const stackH = 1 + ((b * 7 + r * 11 + cfg.seed) % cfg.maxTier);
+                for (let t = 1; t <= stackH; t++) {
+                    pushSlot(cfg.block, b, r, t, b + r + t + cfg.seed, '40FT HC', 'dry', 25500 + ((t * 700 + r * 300) % 4500));
+                }
+            }
+        }
+    });
+
+    // Reefer Zone (3 Bays x 8 Rows, 1-2 Tiers High)
+    for (let b = 1; b <= 3; b++) {
+        for (let r = 1; r <= 8; r++) {
+            if ((b + r) % 3 === 0) continue;
+            const h = ((b * 3 + r) % 2) + 1;
+            for (let t = 1; t <= h; t++) pushSlot('REEFER', b, r, t, b + r, '40FT RF', 'reefer', 29200);
+        }
+    }
+
+    // Hazmat DG Bunded Yard (3 Bays x 8 Rows, Max Tier 2 Safety Rule)
+    for (let b = 1; b <= 3; b++) {
+        for (let r = 1; r <= 6; r += 2) {
+            pushSlot('DG', b, r, 1, b + r, '20FT DG', 'dg', 21800);
+        }
+    }
+
+    // Empty Depot (3 Bays x 18 Rows, Stacked up to 5 Tiers High!)
+    for (let b = 1; b <= 3; b++) {
+        for (let r = 1; r <= 18; r++) {
+            if ((b + r) % 4 === 0) continue;
+            const h = 2 + ((b * 5 + r * 3) % 4); // 2..5 tiers
+            for (let t = 1; t <= h; t++) pushSlot('EMPTY', b, r, t, b + t, '40FT MT', 'empty', 3800);
+        }
+    }
+
+    // Render semua peti kemas baseline dalam 2 InstancedMesh GPU (40ft & 20ft) -> 2 Draw Calls Total!
+    const { instMat, geo40, geo20 } = getSharedContainerResources();
+    const list40 = [];
+    const list20 = [];
+
     baselineList.forEach(c => {
-        const is20ft = (c.type && c.type.includes('20'));
+        const is20ft = !!(c.type && c.type.includes('20'));
         const pos = getSlotWorldPosition(c.block, c.bay, c.row, c.tier, is20ft);
-        const cLength = is20ft ? 6.0 : 12.0;
-        const mesh = createContainerMesh(cLength, 2.60, 2.44, c.color, c.num, c.cargo);
-        mesh.position.set(pos.x, pos.y, pos.z);
-        mesh.userData = {
+        const userData = {
             container_number: c.num,
             size_type: c.type,
             cargo_type: c.cargo,
@@ -4222,14 +4417,52 @@ function generateBaselineYardContainers() {
             customs_status: 'SPPB_CLEARED',
             status: 'in_yard'
         };
-        scene.add(mesh);
-        containerMeshes[c.num] = mesh;
+        const rec = { pos, color: c.color, userData };
+        if (is20ft) list20.push(rec);
+        else list40.push(rec);
     });
+
+    const buildInstBatch = (list, geo, name) => {
+        if (!list.length) return;
+        const inst = new THREE.InstancedMesh(geo, instMat, list.length);
+        inst.name = name;
+        inst.castShadow = true;
+        inst.receiveShadow = true;
+        inst.frustumCulled = false;
+        inst.userData = { items: new Array(list.length) };
+
+        const dummy = new THREE.Object3D();
+        const col = new THREE.Color();
+        for (let i = 0; i < list.length; i++) {
+            const it = list[i];
+            dummy.position.set(it.pos.x, it.pos.y, it.pos.z);
+            dummy.scale.set(1, 1, 1);
+            dummy.updateMatrix();
+            inst.setMatrixAt(i, dummy.matrix);
+            col.setHex(it.color || 0x0284c7);
+            inst.setColorAt(i, col);
+            inst.userData.items[i] = it.userData;
+            const sk = `${it.userData.block}-${it.userData.bay}-${it.userData.row}-${it.userData.tier}`;
+            baselineSlotMap[sk] = { inst, idx: i, userData: it.userData };
+        }
+        inst.instanceMatrix.needsUpdate = true;
+        if (inst.instanceColor) inst.instanceColor.needsUpdate = true;
+        inst.matrixAutoUpdate = false;
+        scene.add(inst);
+        instancedYardMeshes.push(inst);
+    };
+
+    buildInstBatch(list40, geo40, 'InstancedYardContainers_40FT');
+    buildInstBatch(list20, geo20, 'InstancedYardContainers_20FT');
 }
 
 // Render Containers onto 3D Yard Blocks (Synchronized with MySQL)
 function renderContainersFromState(containers) {
     if (!containers || !Array.isArray(containers) || isAnimating) return;
+
+    const dummyHide = new THREE.Object3D();
+    dummyHide.scale.set(0, 0, 0);
+    dummyHide.updateMatrix();
 
     containers.forEach(c => {
         if (c.status !== 'in_yard') {
@@ -4242,6 +4475,15 @@ function renderContainersFromState(containers) {
 
         const bCoord = BLOCK_COORDS[c.block];
         if (!bCoord) return;
+
+        // Kosongkan slot instanced statis jika tertimpa data dinamis MySQL (bebas Z-fighting)
+        const sk = `${c.block}-${String(c.bay || '01').padStart(2, '0')}-${String(c.row || '01').padStart(2, '0')}-${String(c.tier || '01').padStart(2, '0')}`;
+        const baseHit = baselineSlotMap[sk];
+        if (baseHit && baseHit.inst) {
+            baseHit.inst.setMatrixAt(baseHit.idx, dummyHide.matrix);
+            baseHit.inst.instanceMatrix.needsUpdate = true;
+            delete baselineSlotMap[sk];
+        }
 
         const is20ft = (c.size_type && c.size_type.includes('20')) || (c.iso_code && c.iso_code.startsWith('2'));
         const cLength = is20ft ? 6.0 : 12.0;
@@ -4273,222 +4515,131 @@ function renderContainersFromState(containers) {
     });
 }
 
-// Procedural 3D Container Mesh with Authentic Industrial Stacking Details
-function createContainerMesh(l, h, w, colorHex, boxNumber, cargoType = 'dry') {
-    const group = new THREE.Group();
+// Shared Corrugated Container Skin + Cached Geometries & Materials (Menggantikan 108+ Sub-Mesh/Kontainer)
+let _containerResCache = null;
+function getSharedContainerResources() {
+    if (_containerResCache) return _containerResCache;
 
-    // 1. Main Structural Box (Weathered Corten Steel)
-    const boxGeo = new THREE.BoxGeometry(l, h, w);
-    const boxMat = new THREE.MeshStandardMaterial({
-        color: colorHex,
-        roughness: 0.58,
-        metalness: 0.28
+    // 1. Tekstur Corten Corrugated Steel + BumpMap (dibuat SEKALI seumur halaman)
+    const diffCanvas = document.createElement('canvas');
+    diffCanvas.width = 512;
+    diffCanvas.height = 128;
+    const dctx = diffCanvas.getContext('2d');
+
+    const bumpCanvas = document.createElement('canvas');
+    bumpCanvas.width = 512;
+    bumpCanvas.height = 128;
+    const bctx = bumpCanvas.getContext('2d');
+
+    // Warna dasar terang netral agar setColorAt / material.color tetap akurat
+    dctx.fillStyle = '#f8fafc';
+    dctx.fillRect(0, 0, 512, 128);
+    bctx.fillStyle = '#808080';
+    bctx.fillRect(0, 0, 512, 128);
+
+    // 22 Lekuk Korugasi Vertikal Baja (Efek bayangan & highlight autentik)
+    for (let x = 22; x < 490; x += 18) {
+        dctx.fillStyle = '#d1d9e4';
+        dctx.fillRect(x, 10, 7, 108);
+        dctx.fillStyle = '#ffffff';
+        dctx.fillRect(x + 7, 10, 4, 108);
+
+        bctx.fillStyle = '#303030';
+        bctx.fillRect(x, 10, 7, 108);
+        bctx.fillStyle = '#ffffff';
+        bctx.fillRect(x + 7, 10, 6, 108);
+    }
+
+    // Rangka Header & Footer Rail Atas-Bawah + Corner Posts
+    dctx.fillStyle = '#94a3b8';
+    dctx.fillRect(0, 0, 512, 9);
+    dctx.fillRect(0, 119, 512, 9);
+    dctx.fillRect(0, 0, 14, 128);
+    dctx.fillRect(498, 0, 14, 128);
+
+    // Garis Pintu Belakang / Detail Corner Casting Gelap
+    dctx.fillStyle = '#334155';
+    dctx.fillRect(0, 0, 14, 14);
+    dctx.fillRect(498, 0, 14, 14);
+    dctx.fillRect(0, 114, 14, 14);
+    dctx.fillRect(498, 114, 14, 14);
+
+    // Strip Kuning High Cube sudut atas
+    dctx.fillStyle = '#facc15';
+    dctx.fillRect(14, 4, 18, 5);
+    dctx.fillRect(480, 4, 18, 5);
+
+    const diffTex = new THREE.CanvasTexture(diffCanvas);
+    diffTex.encoding = THREE.sRGBEncoding;
+    const bumpTex = new THREE.CanvasTexture(bumpCanvas);
+
+    const instMat = new THREE.MeshStandardMaterial({
+        color: 0xffffff,
+        map: diffTex,
+        bumpMap: bumpTex,
+        bumpScale: 0.06,
+        roughness: 0.56,
+        metalness: 0.24
     });
-    const mainBox = new THREE.Mesh(boxGeo, boxMat);
+
+    const geo40 = new THREE.BoxGeometry(12.0, 2.60, 2.44);
+    const geo20 = new THREE.BoxGeometry(6.0, 2.60, 2.44);
+
+    _containerResCache = {
+        diffTex,
+        bumpTex,
+        instMat,
+        geo40,
+        geo20,
+        boxGeos: { '12_2.6_2.44': geo40, '6_2.6_2.44': geo20 },
+        edgeGeos: {},
+        matsByColor: {},
+        edgeMat: new THREE.LineBasicMaterial({ color: 0x0f172a, transparent: true, opacity: 0.35 }),
+        reeferUnitGeo: new THREE.BoxGeometry(0.28, 2.0, 1.94),
+        reeferUnitMat: new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 })
+    };
+    return _containerResCache;
+}
+
+// Lightweight Procedural 3D Container Mesh (Hanya 2-3 Draw Calls, Berbagi Geometri & Tekstur!)
+function createContainerMesh(l, h, w, colorHex, boxNumber, cargoType = 'dry') {
+    const res = getSharedContainerResources();
+    const dimKey = l + '_' + h + '_' + w;
+    if (!res.boxGeos[dimKey]) res.boxGeos[dimKey] = new THREE.BoxGeometry(l, h, w);
+    const boxGeo = res.boxGeos[dimKey];
+
+    const cHex = colorHex || 0x0284c7;
+    if (!res.matsByColor[cHex]) {
+        res.matsByColor[cHex] = new THREE.MeshStandardMaterial({
+            color: cHex,
+            map: res.diffTex,
+            bumpMap: res.bumpTex,
+            bumpScale: 0.06,
+            roughness: 0.56,
+            metalness: 0.24
+        });
+    }
+
+    const group = new THREE.Group();
+    const mainBox = new THREE.Mesh(boxGeo, res.matsByColor[cHex]);
     mainBox.castShadow = true;
     mainBox.receiveShadow = true;
     group.add(mainBox);
 
-    // 1b. CAD Edge Outline Wireframe (gaya model BIM Revit/Tekla) - geometri di-cache per dimensi
-    const edgeKey = l + '_' + h + '_' + w;
-    if (!createContainerMesh._edgeCache) createContainerMesh._edgeCache = {};
-    if (!createContainerMesh._edgeMat) {
-        createContainerMesh._edgeMat = new THREE.LineBasicMaterial({ color: 0x0f172a, transparent: true, opacity: 0.45 });
-    }
-    if (!createContainerMesh._edgeCache[edgeKey]) {
-        createContainerMesh._edgeCache[edgeKey] = new THREE.EdgesGeometry(boxGeo);
-    }
-    group.add(new THREE.LineSegments(createContainerMesh._edgeCache[edgeKey], createContainerMesh._edgeMat));
+    if (!res.edgeGeos[dimKey]) res.edgeGeos[dimKey] = new THREE.EdgesGeometry(boxGeo);
+    group.add(new THREE.LineSegments(res.edgeGeos[dimKey], res.edgeMat));
 
-    // 2. 8 ISO 1161 Steel Corner Castings (Top and Bottom Corners)
-    const cornerMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.3, metalness: 0.8 });
-    const cornerHoleMat = new THREE.MeshBasicMaterial({ color: 0x020617 });
-    const cornerGeo = new THREE.BoxGeometry(0.32, 0.32, 0.32);
-    const holeGeo = new THREE.BoxGeometry(0.12, 0.04, 0.18);
-
-    const cornerX = [ -l/2 + 0.16, l/2 - 0.16 ];
-    const cornerY = [ -h/2 + 0.16, h/2 - 0.16 ];
-    const cornerZ = [ -w/2 + 0.16, w/2 - 0.16 ];
-
-    cornerX.forEach(cx => {
-        cornerY.forEach(cy => {
-            cornerZ.forEach(cz => {
-                const cornerMesh = new THREE.Mesh(cornerGeo, cornerMat);
-                cornerMesh.position.set(cx, cy, cz);
-                group.add(cornerMesh);
-
-                // Aperture cutout / twistlock pocket on casting face
-                const hole = new THREE.Mesh(holeGeo, cornerHoleMat);
-                hole.position.set(cx, cy + (cy > 0 ? 0.15 : -0.15), cz);
-                group.add(hole);
-            });
-        });
-    });
-
-    // 3. Stacking Interlock Cones (Twistlock Guides on 4 Top Corners)
-    const twistlockGeo = new THREE.CylinderGeometry(0.04, 0.08, 0.16, 8);
-    const twistlockMat = new THREE.MeshBasicMaterial({ color: 0xeab308 }); // Safety Yellow
-    cornerX.forEach(cx => {
-        cornerZ.forEach(cz => {
-            const tl = new THREE.Mesh(twistlockGeo, twistlockMat);
-            tl.position.set(cx, h/2 + 0.08, cz);
-            group.add(tl);
-        });
-    });
-
-    // 4. Side Corrugation Vertical Ribs (Authentic light/shadow ripples)
-    const vRibGeo = new THREE.BoxGeometry(0.12, h - 0.36, 0.04);
-    const vRibMat = new THREE.MeshStandardMaterial({ color: colorHex, roughness: 0.5 });
-    for (let rx = -l/2 + 0.4; rx <= l/2 - 0.4; rx += 0.55) {
-        [-w/2 - 0.02, w/2 + 0.02].forEach(rz => {
-            const vRib = new THREE.Mesh(vRibGeo, vRibMat);
-            vRib.position.set(rx, 0, rz);
-            group.add(vRib);
-        });
-    }
-
-    // 5. Roof Transverse Corrugations
-    const rRibGeo = new THREE.BoxGeometry(0.15, 0.06, w - 0.35);
-    for (let rx = -l/2 + 0.4; rx <= l/2 - 0.4; rx += 0.55) {
-        const rRib = new THREE.Mesh(rRibGeo, vRibMat);
-        rRib.position.set(rx, h/2 + 0.03, 0);
-        group.add(rRib);
-    }
-
-    // 6. Rear End Cargo Doors (+X Face) with Locking Rods & Customs Seal
-    const doorFrameGeo = new THREE.BoxGeometry(0.06, h - 0.1, w - 0.1);
-    const doorFrameMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.7 });
-    const doorFrame = new THREE.Mesh(doorFrameGeo, doorFrameMat);
-    doorFrame.position.set(l/2 + 0.02, 0, 0);
-    group.add(doorFrame);
-
-    // Center vertical split line
-    const splitGeo = new THREE.BoxGeometry(0.08, h - 0.2, 0.04);
-    const splitMesh = new THREE.Mesh(splitGeo, cornerHoleMat);
-    splitMesh.position.set(l/2 + 0.03, 0, 0);
-    group.add(splitMesh);
-
-    // 4 Galvanized Vertical Locking Bars (2 per door)
-    const rodGeo = new THREE.CylinderGeometry(0.03, 0.03, h - 0.35, 8);
-    const rodMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.9, roughness: 0.2 });
-    [-0.7, -0.25, 0.25, 0.7].forEach(rz => {
-        const rod = new THREE.Mesh(rodGeo, rodMat);
-        rod.position.set(l/2 + 0.05, 0, rz);
-        group.add(rod);
-
-        // Cam Keepers (top and bottom brackets)
-        [-h/2 + 0.25, h/2 - 0.25].forEach(ry => {
-            const camGeo = new THREE.BoxGeometry(0.08, 0.12, 0.1);
-            const camMesh = new THREE.Mesh(camGeo, cornerMat);
-            camMesh.position.set(l/2 + 0.05, ry, rz);
-            group.add(camMesh);
-        });
-    });
-
-    // Horizontal Door Locking Handles & Customs Bullet Seal
-    const handleGeo = new THREE.BoxGeometry(0.06, 0.04, 0.25);
-    const handleMesh = new THREE.Mesh(handleGeo, rodMat);
-    handleMesh.position.set(l/2 + 0.07, -0.15, 0.25);
-    group.add(handleMesh);
-
-    const sealGeo = new THREE.CylinderGeometry(0.025, 0.025, 0.1, 8);
-    const sealMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 }); // Cyan e-Seal
-    const sealMesh = new THREE.Mesh(sealGeo, sealMat);
-    sealMesh.position.set(l/2 + 0.09, -0.15, 0.20);
-    group.add(sealMesh);
-
-    // 7. Stencil Markings Canvas Decal (Box Number, ISO Code, Stacking Info)
-    const decalCanvas = document.createElement('canvas');
-    decalCanvas.width = 512;
-    decalCanvas.height = 128;
-    const dctx = decalCanvas.getContext('2d');
-    dctx.clearRect(0, 0, 512, 128);
-    dctx.font = 'bold 36px monospace';
-    dctx.fillStyle = '#ffffff';
-    dctx.fillText(boxNumber || 'MSKU1029384', 20, 45);
-    dctx.font = 'bold 22px monospace';
-    dctx.fillStyle = '#cbd5e1';
-    dctx.fillText('45G1  HIGH CUBE  9\'6"', 20, 80);
-    dctx.font = '16px monospace';
-    dctx.fillStyle = '#94a3b8';
-    dctx.fillText('MAX 32.500 KG | TARE 3.850 KG', 20, 110);
-
-    const decalTex = new THREE.CanvasTexture(decalCanvas);
-    const decalMat = new THREE.MeshBasicMaterial({ map: decalTex, transparent: true });
-    const decalGeo = new THREE.PlaneGeometry(3.6, 0.9);
-    
-    // Front side decal
-    const decalMeshF = new THREE.Mesh(decalGeo, decalMat);
-    decalMeshF.position.set(l/2 - 2.5, 0.35, w/2 + 0.03);
-    group.add(decalMeshF);
-
-    // Rear door decal
-    const doorDecalCanvas = document.createElement('canvas');
-    doorDecalCanvas.width = 256;
-    doorDecalCanvas.height = 128;
-    const ddctx = doorDecalCanvas.getContext('2d');
-    ddctx.font = 'bold 26px monospace';
-    ddctx.fillStyle = '#ffffff';
-    ddctx.fillText(boxNumber || 'MSKU1029384', 10, 35);
-    ddctx.font = '18px monospace';
-    ddctx.fillStyle = '#f59e0b';
-    ddctx.fillText('WARNING 9\'6" HIGH', 10, 70);
-    ddctx.font = '14px monospace';
-    ddctx.fillStyle = '#94a3b8';
-    ddctx.fillText('CSC SAFETY APPROVED', 10, 100);
-
-    const doorTex = new THREE.CanvasTexture(doorDecalCanvas);
-    const doorDecalMat = new THREE.MeshBasicMaterial({ map: doorTex, transparent: true });
-    const doorDecalGeo = new THREE.PlaneGeometry(1.0, 0.5);
-    const doorDecalMesh = new THREE.Mesh(doorDecalGeo, doorDecalMat);
-    doorDecalMesh.rotation.y = Math.PI / 2;
-    doorDecalMesh.position.set(l/2 + 0.06, 0.45, -0.45);
-    group.add(doorDecalMesh);
-
-    // 8. High Cube Zebra Warning Stripes on Top Front/Rear Corners (IMO Requirement)
-    const zebraGeo = new THREE.BoxGeometry(0.4, 0.12, 0.02);
-    const zebraCanvas = document.createElement('canvas');
-    zebraCanvas.width = 128;
-    zebraCanvas.height = 32;
-    const zctx = zebraCanvas.getContext('2d');
-    zctx.fillStyle = '#eab308';
-    zctx.fillRect(0, 0, 128, 32);
-    zctx.fillStyle = '#000000';
-    for (let zx = 0; zx < 128; zx += 20) {
-        zctx.beginPath();
-        zctx.moveTo(zx, 0);
-        zctx.lineTo(zx + 10, 0);
-        zctx.lineTo(zx, 32);
-        zctx.lineTo(zx - 10, 32);
-        zctx.fill();
-    }
-    const zebraTex = new THREE.CanvasTexture(zebraCanvas);
-    const zebraMat = new THREE.MeshBasicMaterial({ map: zebraTex });
-    [-l/2 + 0.4, l/2 - 0.4].forEach(zx => {
-        const zm = new THREE.Mesh(zebraGeo, zebraMat);
-        zm.position.set(zx, h/2 - 0.08, w/2 + 0.025);
-        group.add(zm);
-    });
-
-    // 9. Reefer Machinery Unit (if reefer cargo)
-    if (cargoType === 'reefer' || colorHex === SHIPPING_COLORS['reefer']) {
-        const reeferUnitGeo = new THREE.BoxGeometry(0.3, h - 0.6, w - 0.5);
-        const reeferUnitMat = new THREE.MeshStandardMaterial({ color: 0xe2e8f0, roughness: 0.3 });
-        const reeferUnit = new THREE.Mesh(reeferUnitGeo, reeferUnitMat);
-        reeferUnit.position.set(-l/2 - 0.08, 0, 0);
+    if (cargoType === 'reefer' || cHex === SHIPPING_COLORS['reefer']) {
+        const reeferUnit = new THREE.Mesh(res.reeferUnitGeo, res.reeferUnitMat);
+        reeferUnit.position.set(-l / 2 - 0.08, 0, 0);
         group.add(reeferUnit);
-
-        // Green Running LED Light
-        const rLed = new THREE.Mesh(new THREE.SphereGeometry(0.06, 8, 8), new THREE.MeshBasicMaterial({ color: 0x22c55e }));
-        rLed.position.set(-l/2 - 0.24, 0.4, 0.5);
-        group.add(rLed);
     }
 
     return group;
 }
 
 // =============================================================================
-// INTERACTIVE RAYCASTING (KLIK KONTAINER LANGSUNG DI 3D)
+// INTERACTIVE RAYCASTING (KLIK KONTAINER LANGSUNG DI 3D — MENDUKUNG INSTANCEDMESH)
 // =============================================================================
 let raycaster = new THREE.Raycaster();
 let mouse = new THREE.Vector2();
@@ -4504,17 +4655,22 @@ function onCanvasClick(event) {
 
     raycaster.setFromCamera(mouse, camera);
 
-    // Test intersections with container meshes
-    const candidates = Object.values(containerMeshes);
+    const candidates = Object.values(containerMeshes).concat(instancedYardMeshes);
     const intersects = raycaster.intersectObjects(candidates, true);
 
     if (intersects.length > 0) {
-        // Find top-level group
-        let hitObject = intersects[0].object;
+        const hit = intersects[0];
+        if (hit.instanceId !== undefined && hit.object && hit.object.userData && hit.object.userData.items) {
+            const instData = hit.object.userData.items[hit.instanceId];
+            if (instData && instData.container_number) {
+                inspectContainer(instData);
+                return;
+            }
+        }
+        let hitObject = hit.object;
         while (hitObject.parent && hitObject.parent !== scene) {
             hitObject = hitObject.parent;
         }
-
         if (hitObject.userData && hitObject.userData.container_number) {
             inspectContainer(hitObject.userData);
         }
@@ -5668,6 +5824,7 @@ function refreshStateFromDB() {
 // CAMERA PRESETS & ENVIRONMENT CONTROLS (CAD MULTI-VIEW ENGINE)
 // =============================================================================
 function setCameraView(preset) {
+    if (window.CIDPTrafficEngine) CIDPTrafficEngine.followAgent(null);
     document.querySelectorAll('.cam-btn').forEach(btn => {
         btn.classList.remove('bg-[#0170b9]', 'bg-blue-600', 'text-white', 'shadow-xs', 'border-[#0170b9]');
         btn.classList.add('bg-gray-100', 'text-gray-700', 'border-gray-200');
@@ -5692,74 +5849,70 @@ function setCameraView(preset) {
 
     switch(preset) {
         case 'plan':
-            // Denah 2D Top-Down CAD: Kamera melihat lurus ke bawah, menatap dari Selatan ke Utara sehingga Kantor Utama & Gate berada di ATAS (Utara), Rel Siding di BAWAH (Selatan) persis seperti denah.php
-            targetPos = { x: 0, y: 180, z: -0.01 };
-            targetLook = { x: 0, y: 0, z: 0 };
+            targetPos = { x: 0, y: 385, z: -0.01 };
+            targetLook = { x: 0, y: 0, z: 8 };
             activateBtn('btnCamPlan');
             setProjectionText('ORTOGRAFIK 2D (CAD PLAN - UTARA DI ATAS)');
             break;
         case 'iso':
-            // Sudut Isometrik 45° dari arah Barat Daya menatap Timur Laut (Barat = +X dunia)
-            targetPos = { x: 105, y: 90, z: -115 };
+            targetPos = { x: 205, y: 168, z: -242 };
             targetLook = { x: 0, y: 0, z: 10 };
             activateBtn('btnCamIso');
             setProjectionText('AKSONOMETRI ISOMETRIK 45° BIM');
             break;
         case 'overview':
-            // Drone 35 Ha: Kamera menyorot ke Utara dari sisi Selatan koridor rel KA
-            targetPos = { x: 0, y: 90, z: -125 };
-            targetLook = { x: 0, y: 0, z: 15 };
+            targetPos = { x: 0, y: 192, z: -298 };
+            targetLook = { x: 0, y: 0, z: 10 };
             activateBtn('btnCamOverview');
             setProjectionText('PERSPEKTIF DRONE 3D (MENYOROT UTARA)');
             break;
         case 'office':
-            // Fokus ke Kantor Utama PT MTI & Datacenter NOC di Zona 6 & 7 (Utara)
-            targetPos = { x: LW('f_admin_office').x, y: 22, z: 22 };
-            targetLook = { x: LW('f_admin_office').x, y: 4, z: 54 };
+            targetPos = { x: LW('f_admin_office').x, y: 26, z: LW('f_admin_office').z - 34 };
+            targetLook = { x: LW('f_admin_office').x, y: 4, z: LW('f_admin_office').z };
             activateBtn('btnCamOffice');
             setProjectionText('DETAIL ZONA 6 (KANTOR UTAMA MTI & NOC UTARA)');
             break;
         case 'gate':
-            targetPos = { x: -45, y: 24, z: 22 };
-            targetLook = { x: -45, y: 2, z: 54 };
+            targetPos = { x: (LW('f_gate_in').x + LW('f_gate_out').x) / 2, y: 28, z: LW('f_gate_in').z - 36 };
+            targetLook = { x: (LW('f_gate_in').x + LW('f_gate_out').x) / 2, y: 2, z: LW('f_gate_in').z };
             activateBtn('btnCamGate');
             setProjectionText('DETAIL ZONA 1 (GATE COMPLEX UTARA)');
             break;
         case 'vgm':
-            targetPos = { x: -49, y: 16, z: 28 };
-            targetLook = { x: -49, y: 1.5, z: 52 };
+            targetPos = { x: LW('f_gate_in').x, y: 18, z: LW('f_gate_in').z - 26 };
+            targetLook = { x: LW('f_gate_in').x, y: 1.5, z: LW('f_gate_in').z };
             activateBtn('btnCamGate');
             setProjectionText('DETAIL WEIGHBRIDGE VGM (80T)');
             break;
         case 'yard':
-            targetPos = { x: 0, y: 45, z: -55 };
-            targetLook = { x: 0, y: 2, z: -10 };
+            targetPos = { x: 0, y: 74, z: -108 };
+            targetLook = { x: 0, y: 2, z: 0 };
             activateBtn('btnCamYard');
-            setProjectionText('DETAIL ZONA 2 (STACKING YARD BLOK A-E)');
+            setProjectionText('DETAIL ZONA 2 (STACKING YARD 8x8 & E-RTG)');
             break;
         case 'reefer':
-            targetPos = { x: LW('f_reefer_racks').x + 40, y: 26, z: 16 };
-            targetLook = { x: LW('f_reefer_racks').x, y: 3, z: 16 };
+            targetPos = { x: LW('f_reefer_racks').x + 42, y: 28, z: LW('f_reefer_racks').z };
+            targetLook = { x: LW('f_reefer_racks').x, y: 3, z: LW('f_reefer_racks').z };
             activateBtn('btnCamReefer');
             setProjectionText('DETAIL ZONA 3 (REEFER COLD CHAIN TIMUR LAUT)');
             break;
         case 'cfs':
-            targetPos = { x: LW('f_cfs').x - 33, y: 28, z: LW('f_cfs').z };
+            targetPos = { x: LW('f_cfs').x - 38, y: 30, z: LW('f_cfs').z };
             targetLook = { x: LW('f_cfs').x, y: 3, z: LW('f_cfs').z };
             activateBtn('btnCamCfs');
             setProjectionText('DETAIL CFS & M&R WORKSHOP (BARAT)');
             break;
         case 'customs':
-            targetPos = { x: LW('f_kppbc').x + 32, y: 28, z: 0 };
+            targetPos = { x: LW('f_kppbc').x + 36, y: 30, z: 0 };
             targetLook = { x: LW('f_kppbc').x, y: 3, z: 0 };
             activateBtn('btnCamCustoms');
             setProjectionText('DETAIL ZONA 5 (BEA CUKAI & X-RAY TIMUR)');
             break;
         case 'rail':
-            targetPos = { x: 0, y: 28, z: -85 };
-            targetLook = { x: 0, y: 3, z: -48 };
+            targetPos = { x: 0, y: 32, z: LW('rail_siding').z - 42 };
+            targetLook = { x: 0, y: 3, z: LW('rail_siding').z };
             activateBtn('btnCamRail');
-            setProjectionText('DETAIL ZONA 4 (RAIL SIDING 210M SELATAN)');
+            setProjectionText('DETAIL ZONA 4 (RAIL SIDING 340M SELATAN)');
             break;
         case 'cockpit':
             const rs = equipmentMeshes['RS-02'];
@@ -5771,8 +5924,8 @@ function setCameraView(preset) {
             setProjectionText('FIRST-PERSON CABIN RS-02');
             break;
         default:
-            targetPos = { x: 0, y: 90, z: -125 };
-            targetLook = { x: 0, y: 0, z: 15 };
+            targetPos = { x: 0, y: 192, z: -298 };
+            targetLook = { x: 0, y: 0, z: 10 };
             activateBtn('btnCamOverview');
             setProjectionText('PERSPEKTIF DRONE 3D');
     }
@@ -5793,16 +5946,17 @@ function setCameraView(preset) {
 // =============================================================================
 // ZOOM ENGINE & DISPLAY SYSTEM (DEDICATED CONTROLS LIKE DENAH.PHP)
 // =============================================================================
-const BASE_ZOOM_DIST = 135;
+const BASE_ZOOM_DIST = 265;
 
+let _lastZoomPct = -1;
 function updateSimZoomDisplay() {
     if (!camera || !controls) return;
     const dist = camera.position.distanceTo(controls.target);
-    const pct = Math.round((BASE_ZOOM_DIST / Math.max(5, dist)) * 100);
+    const pct = Math.min(999, Math.max(15, Math.round((BASE_ZOOM_DIST / Math.max(5, dist)) * 100)));
+    if (pct === _lastZoomPct) return;
+    _lastZoomPct = pct;
     const zoomEl = document.getElementById('simZoomLevelDisplay');
-    if (zoomEl) {
-        zoomEl.innerText = Math.min(999, Math.max(15, pct)) + '%';
-    }
+    if (zoomEl) zoomEl.textContent = pct + '%';
 }
 
 function simZoom(direction) {
@@ -6126,41 +6280,44 @@ function onWindowResize() {
     renderer.setSize(container.clientWidth, container.clientHeight);
 }
 
-// Animation Render Loop
+// Animation Render Loop (Zero-Allocation & Throttled DOM Compass Writes)
+const _lookDirVec = new THREE.Vector3();
+let _lastCompassDeg = -1;
+let _compassDialEl = null;
+let _compassHeadingEl = null;
 function animate(time) {
     requestAnimationFrame(animate);
     TWEEN.update();
+    if (window.CIDPTrafficEngine) CIDPTrafficEngine.update(time);
     controls.update();
     updateHazardLights(time);
 
-    // Dynamic 3D Azimuth Compass Rose Heading & Dial Rotation (North = +Z Kantor Utama / Gate)
+    // Dynamic 3D Azimuth Compass Rose Heading (Hanya tulis DOM jika derajat berubah)
     if (controls && camera) {
-        const lookDir = new THREE.Vector3().subVectors(controls.target, camera.position);
-        lookDir.y = 0;
-        lookDir.normalize();
+        _lookDirVec.subVectors(controls.target, camera.position);
+        _lookDirVec.y = 0;
+        _lookDirVec.normalize();
 
-        // Sudut arah kamera dari Utara (+Z Kantor MTI) searah jarum jam:
-        // Timur = -X dunia (lihat layout_master.php), sehingga x dinegasikan agar E/W tidak terbalik
-        let headingRad = Math.atan2(-lookDir.x, lookDir.z);
-        let deg = Math.round(headingRad * (180 / Math.PI));
+        let deg = Math.round(Math.atan2(-_lookDirVec.x, _lookDirVec.z) * (180 / Math.PI));
         if (deg < 0) deg += 360;
         if (deg === 360) deg = 0;
 
-        const dial = document.getElementById('compassDial');
-        if (dial) {
-            dial.style.transform = `rotate(${-deg}deg)`;
-        }
-        const headingEl = document.getElementById('compassHeading');
-        if (headingEl) {
-            let dir = 'N';
-            if (deg >= 22.5 && deg < 67.5) dir = 'NE';
-            else if (deg >= 67.5 && deg < 112.5) dir = 'E';
-            else if (deg >= 112.5 && deg < 157.5) dir = 'SE';
-            else if (deg >= 157.5 && deg < 202.5) dir = 'S';
-            else if (deg >= 202.5 && deg < 247.5) dir = 'SW';
-            else if (deg >= 247.5 && deg < 292.5) dir = 'W';
-            else if (deg >= 292.5 && deg < 337.5) dir = 'NW';
-            headingEl.innerText = `${deg}° ${dir}`;
+        if (deg !== _lastCompassDeg) {
+            _lastCompassDeg = deg;
+            if (!_compassDialEl) _compassDialEl = document.getElementById('compassDial');
+            if (_compassDialEl) _compassDialEl.style.transform = `rotate(${-deg}deg)`;
+            if (!_compassHeadingEl) _compassHeadingEl = document.getElementById('compassHeading');
+            if (_compassHeadingEl) {
+                let dir = 'N';
+                if (deg >= 22.5 && deg < 67.5) dir = 'NE';
+                else if (deg >= 67.5 && deg < 112.5) dir = 'E';
+                else if (deg >= 112.5 && deg < 157.5) dir = 'SE';
+                else if (deg >= 157.5 && deg < 202.5) dir = 'S';
+                else if (deg >= 202.5 && deg < 247.5) dir = 'SW';
+                else if (deg >= 247.5 && deg < 292.5) dir = 'W';
+                else if (deg >= 292.5 && deg < 337.5) dir = 'NW';
+                _compassHeadingEl.textContent = `${deg}° ${dir}`;
+            }
         }
     }
 

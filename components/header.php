@@ -124,10 +124,27 @@
                 </a>
             </div>
 
-            <!-- Pusat Dokumen Kertas Resmi A4 (Invoice, Gate Pass, SPPB, CFS, HACCP) -->
-            <a href="document.php?type=invoice" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200/90 text-xs font-bold transition shadow-2xs group" title="Buka Pusat Cetak Dokumen Kertas Resmi A4 (Kop Pelindo MTI / Bea Cukai & Stempel Digital)">
+            <!-- Pusat Dokumen Kertas Resmi A4 (Kontekstual sesuai Modul Aktif) -->
+            <?php
+            $nav_doc_map = [
+                'gate'       => ['type' => 'gate_pass',   'short' => 'EIR Gate',     'label' => 'Surat Jalan & Gate Pass (EIR)'],
+                'trucking'   => ['type' => 'gate_pass',   'short' => 'EIR Truk',     'label' => 'Surat Jalan & Gate Pass (EIR)'],
+                'intermodal' => ['type' => 'gate_pass',   'short' => 'EIR KA',       'label' => 'Surat Jalan Intermodal (EIR)'],
+                'customs'    => ['type' => 'sppb',        'short' => 'SPPB Pabean',  'label' => 'SPPB Bea Cukai CEISA 4.0'],
+                'yard'       => ['type' => 'sppb',        'short' => 'SPPB Yard',    'label' => 'Dokumen Pengeluaran Yard (SPPB)'],
+                'kontainer'  => ['type' => 'sppb',        'short' => 'SPPB Box',     'label' => 'Dokumen Kontainer & SPPB'],
+                'cfs'        => ['type' => 'cfs_tally',   'short' => 'Tally CFS',    'label' => 'CFS Tally Sheet & Stripping'],
+                'scanner'    => ['type' => 'cfs_tally',   'short' => 'Tally CFS',    'label' => 'CFS Tally Sheet & Palet SSCC-18'],
+                'reefer'     => ['type' => 'reefer_cert', 'short' => 'Reefer HACCP', 'label' => 'Sertifikat Suhu Reefer (HACCP)'],
+                'billing'    => ['type' => 'invoice',     'short' => 'Faktur A4',    'label' => 'Faktur Penagihan Jasa (Invoice)'],
+            ];
+            $cur_page_key = $page ?? 'beranda';
+            $active_doc_cfg = $nav_doc_map[$cur_page_key] ?? ['type' => 'invoice', 'short' => 'Dokumen A4', 'label' => 'Pusat Cetak Dokumen Resmi A4'];
+            $nav_doc_href = 'document.php?type=' . rawurlencode($active_doc_cfg['type']) . '&from=' . rawurlencode($cur_page_key);
+            ?>
+            <a href="<?= htmlspecialchars($nav_doc_href) ?>" target="_blank" class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-orange-50 hover:bg-orange-100 text-orange-700 border border-orange-200/90 text-xs font-bold transition shadow-2xs group" title="Buka <?= htmlspecialchars($active_doc_cfg['label']) ?>">
                 <i class="fa-solid fa-stamp text-orange-600 group-hover:rotate-12 transition-transform"></i>
-                <span class="hidden md:inline">Dokumen A4</span>
+                <span class="hidden md:inline"><?= htmlspecialchars($active_doc_cfg['short']) ?></span>
             </a>
 
             <!-- Notification Bell & Categorized Dropdown Card -->

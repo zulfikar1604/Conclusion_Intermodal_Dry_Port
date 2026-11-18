@@ -1420,9 +1420,7 @@ foreach ($zones_data as $z) {
                             <i class="fa-solid fa-compass-drafting text-indigo-500"></i>
                             <span>Spesifikasi Blueprint Fisik</span>
                         </span>
-                        <p class="text-[11px] text-slate-500 leading-snug">
-                            Infrastruktur fisik terpasang di lapangan (Perangkat Pasif / Hardware Pendukung). Tidak memerlukan modul simulasi software.
-                        </p>
+                        <p class="text-[11px] text-slate-500 leading-snug">Perangkat fisik lapangan (pasif &mdash; tanpa simulasi).</p>
                     </div>
                 </div>
             </div>

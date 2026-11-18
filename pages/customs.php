@@ -775,6 +775,13 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                     <option value="LHP_SELESAI">LHP Approved (Siap SPPB)</option>
                 </select>
 
+                <select id="customsLimitSelect" data-limit-target="#customsTable" data-limit-callback="filterCustomsTable" class="px-3 py-2 bg-slate-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#0170b9]">
+                    <option value="10" selected>Tampil: 10</option>
+                    <option value="25">Tampil: 25</option>
+                    <option value="50">Tampil: 50</option>
+                    <option value="all">Semua</option>
+                </select>
+
                 <button onclick="resetCustomsFilter()" class="px-3 py-2 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg text-xs font-medium transition" title="Reset Filter">
                     <i class="fa-solid fa-rotate-left mr-1"></i>Reset
                 </button>
@@ -826,7 +833,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                 }
                             ?>
                             <tr class="hover:bg-slate-50/70 transition doc-row" data-id="<?= $doc['id'] ?>" data-jalur="<?= $doc['jalur'] ?>" data-status="<?= $doc['status'] ?>" data-search="<?= strtolower($doc['no_aju'] . ' ' . $doc['no_kontainer'] . ' ' . $doc['importir'] . ' ' . $doc['no_sppb'] . ' ' . $doc['hs_code']) ?>">
-                                <td class="py-3 px-3.5 text-center text-gray-400 font-mono"><?= $idx + 1 ?></td>
+                                <td class="py-3 px-3.5 text-center text-gray-400 font-mono" data-row-num><?= $idx + 1 ?></td>
                                 <td class="py-3 px-3">
                                     <div class="font-bold text-gray-900 font-mono text-[11px]"><?= $doc['no_daftar'] ?></div>
                                     <div class="text-[10px] text-gray-400 font-mono truncate max-w-[170px]" title="<?= $doc['no_aju'] ?>"><?= $doc['no_aju'] ?></div>
@@ -941,7 +948,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                         <h2 class="text-base font-bold text-gray-900 flex items-center">
                             <i class="fa-solid fa-paper-plane mr-2 text-[#0170b9]"></i>Simulasi Pengajuan PIB ke Gateway CEISA 4.0
                         </h2>
-                        <p class="text-xs text-gray-500 mt-0.5">Uji coba algoritma Risk Profiling, perhitungan bea masuk otomatis, dan penetapan kanal layanan.</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Simulasi Risk Profiling &amp; penetapan kanal layanan.</p>
                     </div>
                     <span class="px-2.5 py-1 bg-blue-50 text-[#0170b9] rounded-lg font-mono text-xs font-bold">API v1.4 REST</span>
                 </div>
@@ -1064,36 +1071,24 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                             <i class="fa-solid fa-shield-halved"></i>
                         </div>
                         <h4 class="text-sm font-bold text-gray-800">Menunggu Pengajuan Dokumen</h4>
-                        <p class="text-xs text-gray-500 max-w-xs mx-auto">
-                            Isi formulir di sebelah kiri dan klik tombol <strong>Kirim ke CEISA 4.0</strong> untuk menguji penetapan kanal pabean secara real-time.
-                        </p>
+                        <p class="text-xs text-gray-500 max-w-xs mx-auto">Kirim formulir PIB di kiri untuk melihat respons CEISA 4.0.</p>
                     </div>
 
                     <!-- Matriks Regulasi Pabean CEISA -->
-                    <div class="space-y-2.5 pt-2">
-                        <h4 class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Aturan Keputusan Kanal Pabean DJBC:</h4>
-                        
-                        <div class="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100 flex items-start space-x-2.5 text-xs">
-                            <span class="w-2 h-2 rounded-full bg-emerald-500 mt-1 flex-shrink-0"></span>
-                            <div>
-                                <strong class="text-emerald-800">Jalur Hijau:</strong>
-                                <p class="text-[11px] text-gray-600">Mitra AEO / MITA, komoditas non-lartas, nilai CIF konsisten dengan database pabean. SPPB otomatis diterbitkan dalam hitungan detik.</p>
+                    <div class="space-y-2 pt-2">
+                        <h4 class="text-[11px] font-bold text-gray-400 uppercase tracking-wider">Referensi Kanal DJBC (PMK 190/2022)</h4>
+                        <div class="grid grid-cols-1 gap-1.5 text-xs">
+                            <div class="p-2 rounded-lg bg-emerald-50/60 border border-emerald-100 flex items-center justify-between gap-2">
+                                <span class="flex items-center gap-2 font-bold text-emerald-800"><span class="w-2 h-2 rounded-full bg-emerald-500"></span>Jalur Hijau</span>
+                                <span class="text-[11px] text-gray-600">AEO / MITA / Non-Lartas &bull; SPPB Otomatis</span>
                             </div>
-                        </div>
-
-                        <div class="p-2.5 rounded-lg bg-blue-50/60 border border-blue-100 flex items-start space-x-2.5 text-xs">
-                            <span class="w-2 h-2 rounded-full bg-blue-500 mt-1 flex-shrink-0"></span>
-                            <div>
-                                <strong class="text-blue-800">Deregulasi PMK 190/PMK.04/2022:</strong>
-                                <p class="text-[11px] text-gray-600">Jalur Kuning (SPBL dokumen) telah resmi <strong>DIHAPUS</strong> sejak 2022. Penelitian dokumen impor disatukan dalam pre-clearance Jalur Hijau atau audit kepatuhan post-clearance (PCA), guna memangkas dwelling time pelabuhan kering.</p>
+                            <div class="p-2 rounded-lg bg-blue-50/60 border border-blue-100 flex items-center justify-between gap-2">
+                                <span class="flex items-center gap-2 font-bold text-blue-800"><span class="w-2 h-2 rounded-full bg-blue-500"></span>Jalur Kuning</span>
+                                <span class="text-[11px] text-blue-700 font-semibold">Dihapus &bull; Pre-Clearance / PCA</span>
                             </div>
-                        </div>
-
-                        <div class="p-2.5 rounded-lg bg-rose-50/60 border border-rose-100 flex items-start space-x-2.5 text-xs">
-                            <span class="w-2 h-2 rounded-full bg-rose-500 mt-1 flex-shrink-0"></span>
-                            <div>
-                                <strong class="text-rose-800">Jalur Merah:</strong>
-                                <p class="text-[11px] text-gray-600">Importir risiko tinggi, komoditas Lartas (tekstil, B3, pangan segar), atau sampling acak pabean. Wajib Gantry X-Ray 6 MeV dan inspeksi fisik behandle di Zona 5.</p>
+                            <div class="p-2 rounded-lg bg-rose-50/60 border border-rose-100 flex items-center justify-between gap-2">
+                                <span class="flex items-center gap-2 font-bold text-rose-800"><span class="w-2 h-2 rounded-full bg-rose-500"></span>Jalur Merah</span>
+                                <span class="text-[11px] text-gray-600">High Risk / Lartas &bull; X-Ray &amp; Behandle Zona 5</span>
                             </div>
                         </div>
                     </div>
@@ -1137,10 +1132,8 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                     </span>
                     <span class="px-2.5 py-0.5 bg-slate-100 text-slate-700 border border-slate-200 rounded-full text-xs font-mono font-bold">4 Bay Behandle + 1 Gantry 6 MeV</span>
                 </div>
-                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">Zona Pemeriksaan Fisik Terpadu &amp; Pemindai Gantry X-Ray 6 MeV</h2>
-                <p class="text-xs sm:text-sm text-slate-600 max-w-2xl leading-relaxed">
-                    Fasilitas pemeriksaan pabean terstandar internasional di Zona 5 CIDP dilengkapi <strong class="text-slate-900">Gantry X-Ray Nuctech MB1215DE berdaya tembus baja &gt;300 mm</strong> (Hardware #19) dan 4 Bay kanopi behandle untuk verifikasi fisik kargo Jalur Merah &amp; Karantina.
-                </p>
+                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">Zona 5 Pemeriksaan Fisik &amp; Gantry X-Ray 6 MeV</h2>
+                <p class="text-xs sm:text-sm text-slate-600 max-w-2xl">Nuctech MB1215DE (&gt;300 mm baja) &amp; 4 Bay Kanopi Behandle.</p>
             </div>
 
             <!-- Thumbnail Produk Hardware #19 -->
@@ -1163,7 +1156,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                         <h3 class="text-sm font-bold text-gray-900 flex items-center">
                             <i class="fa-solid fa-x-ray mr-2 text-rose-600"></i>Simulator Citra Radiografi Gantry X-Ray 6 MeV
                         </h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Pemindaian non-intrusif multi-energi untuk membedakan material organik, logam, dan anorganik.</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Pemindaian non-intrusif multi-energi (Organik / Logam / Anorganik).</p>
                     </div>
                     <div class="flex items-center space-x-2">
                         <select id="xraySampleSelect" onchange="changeXRaySample()" class="px-2.5 py-1 bg-slate-50 border border-gray-200 rounded text-xs font-semibold text-gray-700">
@@ -1253,7 +1246,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                         <h3 class="text-sm font-bold text-gray-900 flex items-center">
                             <i class="fa-solid fa-boxes-packing mr-2 text-indigo-600"></i>Status 4 Bay Kanopi Behandle
                         </h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Area pemeriksaan fisik langsung kargo Jalur Merah oleh Pejabat Bea Cukai.</p>
+                        <p class="text-xs text-gray-500 mt-0.5">Area pemeriksaan fisik Jalur Merah.</p>
                     </div>
                     <span class="px-2 py-0.5 bg-purple-50 text-purple-700 text-xs font-bold rounded">2 / 4 Bay Terisi</span>
                 </div>
@@ -1352,12 +1345,10 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                 <img src="assets/img/hardware/converted/item_26.png" alt="Smart GPS E-Seal" class="w-16 h-16 object-contain bg-slate-50 rounded-xl p-1 border border-gray-200 flex-shrink-0" />
                 <div>
                     <div class="flex items-center space-x-2 mb-1">
-                        <h2 class="text-lg font-bold text-gray-900">Monitoring Segel Elektronik (Smart GPS E-Seal Jointech JT701)</h2>
+                        <h2 class="text-lg font-bold text-gray-900">Monitoring Smart GPS E-Seal (JT701)</h2>
                         <span class="px-2 py-0.5 bg-blue-100 text-[#0170b9] rounded-full text-xs font-bold font-mono">Hardware #26</span>
                     </div>
-                    <p class="text-xs text-gray-500 max-w-2xl leading-relaxed">
-                        Pengawasan pergerakan kontainer transit PLP (Pindahan Lokasi Penimbunan) dari Pelabuhan Tanjung Priok menuju Cikarang Dry Port (54.8 km) via jalan tol atau kereta api menggunakan segel elektronik pintar bersensor anti-tampering dan pelacakan GPS real-time.
-                    </p>
+                    <p class="text-xs text-gray-500 max-w-2xl">Pelacakan transit PLP Priok &harr; Cikarang (54.8 km) &bull; Anti-Tampering GPS Live.</p>
                 </div>
             </div>
 
@@ -1428,10 +1419,18 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                 </div>
 
                 <!-- Tabel Status 4 Unit E-Seal Aktif -->
+                <div class="flex items-center justify-end mb-2">
+                    <select id="esealLimitSelect" data-limit-target="#esealTable" class="px-2.5 py-1 bg-slate-50 border border-gray-200 rounded-lg text-[11px] font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#0170b9]">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="all">Semua</option>
+                    </select>
+                </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left text-xs">
+                    <table class="w-full text-left text-xs" id="esealTable">
                         <thead class="bg-slate-50 text-[10px] text-gray-500 font-bold uppercase border-b border-gray-200">
                             <tr>
+                                <th class="py-2.5 px-3 text-center w-10">No</th>
                                 <th class="py-2.5 px-3">ID e-Seal</th>
                                 <th class="py-2.5 px-3">Kontainer</th>
                                 <th class="py-2.5 px-3">Status Kawat</th>
@@ -1443,6 +1442,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             <tr class="hover:bg-slate-50">
+                                <td class="py-2.5 px-3 text-center font-mono text-gray-400" data-row-num>1</td>
                                 <td class="py-2.5 px-3 font-mono font-bold text-gray-900">JT701-ID-8821</td>
                                 <td class="py-2.5 px-3 font-mono">MSKU7829104</td>
                                 <td class="py-2.5 px-3 text-emerald-600 font-semibold"><i class="fa-solid fa-link mr-1"></i>Tersambung (Normal)</td>
@@ -1456,6 +1456,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                 </td>
                             </tr>
                             <tr class="hover:bg-slate-50">
+                                <td class="py-2.5 px-3 text-center font-mono text-gray-400" data-row-num>2</td>
                                 <td class="py-2.5 px-3 font-mono font-bold text-gray-900">JT701-ID-8824</td>
                                 <td class="py-2.5 px-3 font-mono">HLBU1238901</td>
                                 <td class="py-2.5 px-3 text-emerald-600 font-semibold"><i class="fa-solid fa-lock mr-1"></i>Terkunci Aman</td>
@@ -1467,6 +1468,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                 </td>
                             </tr>
                             <tr class="hover:bg-slate-50">
+                                <td class="py-2.5 px-3 text-center font-mono text-gray-400" data-row-num>3</td>
                                 <td class="py-2.5 px-3 font-mono font-bold text-gray-900">JT701-ID-8825</td>
                                 <td class="py-2.5 px-3 font-mono">EITU9823102</td>
                                 <td class="py-2.5 px-3 text-emerald-600 font-semibold"><i class="fa-solid fa-lock mr-1"></i>Terkunci (Hazmat)</td>
@@ -1491,9 +1493,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                 </div>
 
                 <div class="p-4 rounded-xl bg-slate-50 border border-gray-200 text-xs space-y-3">
-                    <p class="text-gray-600 leading-relaxed">
-                        Jika kawat segel dipotong atau dibuka paksa tanpa otorisasi pabean selama perjalanan Priok - Cikarang, e-Seal akan memicu <strong>Tamper Alarm</strong> ke NOC YMS dan Portal CEISA dalam 1.2 detik.
-                    </p>
+                    <p class="text-gray-600">Pemotongan kawat tanpa otorisasi memicu <strong>Tamper Alarm</strong> ke NOC &amp; CEISA (1.2 dtk).</p>
 
                     <div id="tamperResultBox" class="p-3 bg-white rounded-lg border border-gray-200 text-[11px] font-mono text-gray-600">
                         Status Kawat: <span class="text-emerald-600 font-bold">&#10003; Normal &bull; Tidak Ada Pelanggaran</span>
@@ -1510,11 +1510,9 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                     </div>
                 </div>
 
-                <div class="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
-                    <strong>Dasar Hukum Regulasi:</strong>
-                    <p class="text-[11px] mt-0.5 text-amber-900 leading-normal">
-                        Peraturan Dirjen Bea dan Cukai No. PER-09/BC/2020 tentang Tata Laksana Pindahan Lokasi Penimbunan (PLP) Menggunakan Pengaman Elektronik (e-Seal).
-                    </p>
+                <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800 flex items-center justify-between gap-2">
+                    <strong>Regulasi PLP E-Seal:</strong>
+                    <span class="font-mono text-[11px] font-bold text-amber-900">PER-09/BC/2020</span>
                 </div>
             </div>
         </div>
@@ -1528,9 +1526,9 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-gray-100">
                 <div>
                     <h2 class="text-base font-bold text-gray-900 flex items-center">
-                        <i class="fa-solid fa-file-code mr-2 text-[#0170b9]"></i>Generator Standar Maritim Internasional UN/EDIFACT CUSRES &amp; CUSDEC
+                        <i class="fa-solid fa-file-code mr-2 text-[#0170b9]"></i>Generator UN/EDIFACT CUSRES &amp; CUSDEC
                     </h2>
-                    <p class="text-xs text-gray-500 mt-0.5">Format baku pertukaran pesan elektronik kepabeanan WCO (World Customs Organization) standar D.95B.</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Standar pesan elektronik kepabeanan WCO D.95B.</p>
                 </div>
 
                 <div class="flex items-center space-x-2">
@@ -2013,7 +2011,6 @@ function filterCustomsTable() {
     const statusVal = document.getElementById('statusFilterSelect').value;
 
     const rows = document.querySelectorAll('.doc-row');
-    let visibleCount = 0;
 
     rows.forEach(row => {
         const rowSearch = row.getAttribute('data-search') || '';
@@ -2024,16 +2021,12 @@ function filterCustomsTable() {
         const matchChannel = (channelVal === '' || rowJalur === channelVal);
         const matchStatus = (statusVal === '' || rowStatus === statusVal);
 
-        if (matchSearch && matchChannel && matchStatus) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+        row.dataset.filteredOut = (matchSearch && matchChannel && matchStatus) ? '0' : '1';
     });
 
+    const stats = window.CIDPTableTools ? window.CIDPTableTools.apply('#customsTable') : { totalMatched: rows.length };
     const displayCounter = document.getElementById('displayedCount');
-    if (displayCounter) displayCounter.textContent = visibleCount;
+    if (displayCounter) displayCounter.textContent = stats.shownCount;
 }
 
 function resetCustomsFilter() {

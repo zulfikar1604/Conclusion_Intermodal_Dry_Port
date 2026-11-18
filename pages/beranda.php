@@ -164,9 +164,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> SCADA &amp; IoT Live
                             </span>
                         </div>
-                        <p class="text-[11px] text-slate-500 mt-0.5">
-                            Ketik nomor kontainer atau plat truk untuk mendeteksi posisi fisik di kawasan 35 Ha saat pergerakan multi-perangkat berlangsung
-                        </p>
+                        <p class="text-[11px] text-slate-500 mt-0.5">Cari No. Kontainer / Plat Truk di area 35 Ha.</p>
                     </div>
                 </div>
 
@@ -646,7 +644,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             Peak: 14:00 - 16:00
                         </span>
                     </div>
-                    <p class="text-[10px] text-slate-400 mb-2">Throughput truk aktual vs kuota booking VBS per 2 jam.</p>
+                    <p class="text-[10px] text-slate-400 mb-2">Throughput aktual vs kuota VBS / 2 jam.</p>
                 </div>
                 
                 <div class="h-44 sm:h-48 relative w-full flex-1">
@@ -678,7 +676,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             RS-01 vs RTG
                         </span>
                     </div>
-                    <p class="text-[10px] text-slate-400 mb-2">Spider radar OEE 5 sumbu Kalmar RS-01 vs RTG Konecranes.</p>
+                    <p class="text-[10px] text-slate-400 mb-2">OEE 5 sumbu: Kalmar RS-01 vs RTG.</p>
                 </div>
 
                 <div class="h-44 sm:h-48 relative w-full flex-1 flex items-center justify-center">
@@ -707,7 +705,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             <?= $fin['demurrage_box_count'] ?> Box Denda &rarr;
                         </button>
                     </div>
-                    <p class="text-[10px] text-slate-400 mb-2">Durasi inap kontainer dengan ambang batas bebas denda (3 hari).</p>
+                    <p class="text-[10px] text-slate-400 mb-2">Durasi inap vs batas bebas denda 3 hari.</p>
                 </div>
 
                 <div class="h-44 sm:h-48 relative w-full flex-1">
@@ -732,7 +730,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             -1.84 T CO&sup2;
                         </span>
                     </div>
-                    <p class="text-[10px] text-slate-400 mb-2">Pangsa moda angkutan ramah lingkungan Kereta vs Truk.</p>
+                    <p class="text-[10px] text-slate-400 mb-2">Pangsa moda ramah lingkungan Kereta vs Truk.</p>
                 </div>
 
                 <div class="h-44 sm:h-48 relative w-full flex-1 flex items-center justify-center">
@@ -975,7 +973,7 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                                 <i class="fa-solid fa-plug-circle-check mr-0.5"></i>XML-RPC CONNECTED (<span id="odooLatencyTxt"><?= $latencies['odoo_erp'] ?></span>ms)
                             </span>
                         </div>
-                        <p class="text-[10px] text-slate-500">Pemantauan otomatis akrual sewa penumpukan (Storage), denda keterlambatan inap (&gt;3 hari), dan izin Gate-Out komersial.</p>
+                        <p class="text-[10px] text-slate-500">Akrual storage, demurrage &gt;3 hari &amp; status rilis Gate-Out.</p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
@@ -1070,18 +1068,25 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             <i class="fa-solid fa-receipt text-[#0170b9]"></i>
                             <span>Buku Besar Faktur Komersial Terbaru (Odoo 17 Billing Ledger)</span>
                         </span>
-                        <div class="flex items-center gap-1 text-[9.5px]">
+                        <div class="flex items-center gap-1 text-[9.5px] flex-wrap">
                             <button type="button" onclick="filterBerandaInvoices('ALL')" id="invTab_ALL" class="px-2 py-0.5 rounded font-bold bg-[#0170b9] text-white cursor-pointer transition">Semua</button>
                             <button type="button" onclick="filterBerandaInvoices('PAID')" id="invTab_PAID" class="px-2 py-0.5 rounded font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer transition">Lunas</button>
                             <button type="button" onclick="filterBerandaInvoices('PENDING')" id="invTab_PENDING" class="px-2 py-0.5 rounded font-semibold bg-white border border-slate-200 text-slate-600 hover:bg-slate-100 cursor-pointer transition">Menunggu</button>
                             <button type="button" onclick="filterBerandaInvoices('OVERDUE')" id="invTab_OVERDUE" class="px-2 py-0.5 rounded font-semibold bg-white border border-slate-200 text-rose-600 hover:bg-rose-50 cursor-pointer transition">Overdue</button>
+                            <select id="berandaInvLimitSelect" onchange="renderBerandaInvoices()" class="ml-1 px-2 py-0.5 rounded border border-slate-200 bg-white text-slate-700 font-bold text-[9.5px] cursor-pointer">
+                                <option value="5" selected>Tampil: 5</option>
+                                <option value="10">Tampil: 10</option>
+                                <option value="25">Tampil: 25</option>
+                                <option value="all">Semua</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[520px]">
+                        <table class="w-full text-left border-collapse min-w-[520px]" id="berandaInvoiceTable">
                             <thead>
                                 <tr class="bg-white text-slate-500 text-[9.5px] border-y border-slate-200 uppercase">
+                                    <th class="py-1.5 px-2 font-bold text-center w-8">No</th>
                                     <th class="py-1.5 px-2 font-bold">No. Faktur</th>
                                     <th class="py-1.5 px-2 font-bold">Kontainer</th>
                                     <th class="py-1.5 px-2 font-bold">Pelanggan / Shipper</th>
@@ -1185,22 +1190,29 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                             </button>
                         </div>
 
-                        <!-- Quick Filter Pills -->
+                        <!-- Quick Filter Pills + Limit -->
                         <div class="flex items-center gap-1 flex-wrap text-[9.5px]">
                             <button type="button" onclick="setBerandaCategoryFilter('all')" id="catBtn_all" class="px-2 py-1 rounded-md font-bold bg-[#0170b9] text-white cursor-pointer transition">Semua</button>
                             <button type="button" onclick="setBerandaCategoryFilter('dry_yard')" id="catBtn_dry_yard" class="px-2 py-1 rounded-md font-semibold bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer transition">Blok A-C</button>
                             <button type="button" onclick="setBerandaCategoryFilter('reefer')" id="catBtn_reefer" class="px-2 py-1 rounded-md font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200 hover:bg-cyan-100 cursor-pointer transition">Reefer</button>
                             <button type="button" onclick="setBerandaCategoryFilter('rail')" id="catBtn_rail" class="px-2 py-1 rounded-md font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 hover:bg-emerald-100 cursor-pointer transition">Siding KA</button>
                             <button type="button" onclick="setBerandaCategoryFilter('demurrage')" id="catBtn_demurrage" class="px-2 py-1 rounded-md font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 cursor-pointer transition">⚠️ Demurrage</button>
+                            <select id="berandaConsignLimitSelect" onchange="renderBerandaConsignments()" class="px-2 py-1 rounded-md border border-slate-200 bg-white text-slate-700 font-bold text-[9.5px] cursor-pointer">
+                                <option value="10" selected>Tampil: 10</option>
+                                <option value="25">Tampil: 25</option>
+                                <option value="50">Tampil: 50</option>
+                                <option value="all">Semua</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 <!-- Dynamic Consignment Table -->
                 <div class="overflow-x-auto flex-1 relative z-10">
-                    <table class="w-full text-left border-collapse min-w-[620px]">
+                    <table class="w-full text-left border-collapse min-w-[620px]" id="berandaConsignmentTable">
                         <thead>
                             <tr class="bg-slate-50 text-slate-500 text-[9.5px] border-y border-slate-200 uppercase">
+                                <th class="py-2 px-2 font-bold text-center w-8">No</th>
                                 <th class="py-2 px-2 font-bold">No. Kontainer &amp; Shipper</th>
                                 <th class="py-2 px-2 font-bold">Tipe &amp; ISO</th>
                                 <th class="py-2 px-2 font-bold">Tag RFID UHF</th>
@@ -1447,11 +1459,14 @@ function renderBerandaInvoices() {
     });
 
     if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="7" class="py-4 text-center text-slate-400 text-xs">Tidak ada faktur pada kategori ini.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="8" class="py-4 text-center text-slate-400 text-xs">Tidak ada faktur pada kategori ini.</td></tr>`;
         return;
     }
 
-    tbody.innerHTML = filtered.map(inv => {
+    const limVal = document.getElementById('berandaInvLimitSelect')?.value || '5';
+    const visible = (limVal === 'all') ? filtered : filtered.slice(0, parseInt(limVal, 10) || 5);
+
+    tbody.innerHTML = visible.map((inv, idx) => {
         let badge = `<span class="px-1.5 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200 font-bold text-[9px]">MENUNGGU</span>`;
         if (inv.payment_status === 'PAID') {
             badge = `<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 font-bold text-[9px]">LUNAS</span>`;
@@ -1462,6 +1477,7 @@ function renderBerandaInvoices() {
         const safeInv = encodeURIComponent(JSON.stringify(inv));
         return `
         <tr class="hover:bg-blue-50/30 transition">
+            <td class="py-1.5 px-2 text-center font-mono text-slate-400">${idx + 1}</td>
             <td class="py-1.5 px-2 font-mono font-bold text-slate-900">${inv.invoice_number}</td>
             <td class="py-1.5 px-2 font-mono font-bold text-[#0170b9]">${inv.container_number}</td>
             <td class="py-1.5 px-2 font-semibold text-slate-800 truncate max-w-[150px]">${inv.customer_name}</td>
@@ -1595,14 +1611,16 @@ function renderBerandaConsignments() {
     if (!tbody) return;
 
     const filtered = getFilteredConsignments();
+    const limVal = document.getElementById('berandaConsignLimitSelect')?.value || '10';
+    const visible = (limVal === 'all') ? filtered : filtered.slice(0, parseInt(limVal, 10) || 10);
     if (countBadge) {
-        countBadge.innerText = `${filtered.length} / ${berandaState.containers.length} Unit`;
+        countBadge.innerText = `${visible.length} / ${filtered.length} Unit`;
     }
 
     if (filtered.length === 0) {
         tbody.innerHTML = `
         <tr>
-            <td colspan="6" class="py-6 text-center text-slate-400 text-xs">
+            <td colspan="7" class="py-6 text-center text-slate-400 text-xs">
                 Tidak ditemukan kontainer yang cocok dengan filter saat ini.
                 <button type="button" onclick="resetBerandaFilters()" class="ml-2 text-[#0170b9] font-bold underline cursor-pointer">Reset Filter</button>
             </td>
@@ -1610,7 +1628,7 @@ function renderBerandaConsignments() {
         return;
     }
 
-    tbody.innerHTML = filtered.map(c => {
+    tbody.innerHTML = visible.map((c, idx) => {
         const isDem = !!c.is_demurrage;
         const dwellBadge = isDem
             ? `<span class="px-1.5 py-0.2 rounded bg-rose-50 text-rose-700 border border-rose-200 font-mono font-bold text-[9px]" title="Denda Demurrage: ${formatRupiahJs(c.demurrage_rp)}">${c.dwell_days}H ⚠️ Denda</span>`
@@ -1623,6 +1641,7 @@ function renderBerandaConsignments() {
         const safeCtr = encodeURIComponent(JSON.stringify(c));
         return `
         <tr onclick="openBerandaInspectModal('${safeCtr}')" class="hover:bg-blue-50/40 transition cursor-pointer group">
+            <td class="py-2 px-2 text-center font-mono text-slate-400">${idx + 1}</td>
             <td class="py-2 px-2">
                 <div class="font-mono font-bold text-[#0170b9] group-hover:underline flex items-center gap-1">
                     <span>${c.container_number}</span>

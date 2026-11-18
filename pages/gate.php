@@ -981,11 +981,9 @@ foreach ($hardware_list as $item) {
                     </div>
                     <h3 class="text-base font-bold text-gray-900 mt-1 flex items-center">
                         <i class="fa-solid fa-truck-ramp-box text-[#0170b9] mr-2"></i>
-                        Antrean Truk Terjadwal (Siap Eksekusi Gate-In 1-Click)
+                        Antrean Truk Terjadwal (Pra-Gate)
                     </h3>
-                    <p class="text-xs text-gray-500 mt-0.5 max-w-3xl leading-relaxed">
-                        Data booking pra-gate yang telah didaftarkan transporter/shipper. Klik tombol kilat <strong class="text-amber-600">⚡ 1-Click Gate-In</strong> pada salah satu armada untuk memicu alur ANPR, penimbangan SOLAS VGM, penugasan blok yard, dan pembukaan palang gerbang secara instan!
-                    </p>
+                    <p class="text-xs text-gray-500 mt-0.5">Booking terdaftar &bull; Eksekusi <strong>1-Click Gate-In</strong> langsung memicu ANPR, VGM &amp; alokasi yard.</p>
                 </div>
                 <div class="flex items-center space-x-2 shrink-0">
                     <?php if (!empty($queuing_trucks)): ?>
@@ -1012,10 +1010,8 @@ foreach ($hardware_list as $item) {
                 <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center text-xl mb-3 shadow-inner">
                     <i class="fa-solid fa-circle-check"></i>
                 </div>
-                <h4 class="text-sm font-bold text-gray-800">Seluruh Antrean Terjadwal Telah Memasuki Terminal!</h4>
-                <p class="text-xs text-gray-500 mt-1 max-w-md mx-auto">
-                    Semua 5 skenario armada telah sukses diproses masuk melalui gerbang dan saat ini berada di dalam Terminal Yard atau selesai dilayani.
-                </p>
+                <h4 class="text-sm font-bold text-gray-800">Semua Antrean Telah Diproses</h4>
+                <p class="text-xs text-gray-500 mt-1">5 skenario armada sudah masuk atau selesai dilayani.</p>
                 <div class="mt-4 flex items-center justify-center space-x-2">
                     <form method="POST" class="inline">
                         <input type="hidden" name="gate_action" value="reset_demo_queue">
@@ -1186,9 +1182,7 @@ foreach ($hardware_list as $item) {
                             </span>
                             <h3 class="text-base font-extrabold text-blue-700">Konsol Pemicu Sensor Gerbang Lapangan (Real Database Events)</h3>
                         </div>
-                        <p class="text-xs text-slate-600 mt-1 max-w-3xl leading-relaxed">
-                            Uji dan picu sensor gerbang secara langsung. Setiap aksi mengeksekusi telemetri riil dan <strong>mencatat perubahan status nyata</strong> ke basis data MySQL (tabel <code class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono text-[11px] border border-slate-200">trucks</code>, <code class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono text-[11px] border border-slate-200">containers</code>, dan <code class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono text-[11px] border border-slate-200">yard_events</code>).
-                        </p>
+                        <p class="text-xs text-slate-600 mt-1">Uji sensor gate &amp; catat mutasi live ke MySQL.</p>
                     </div>
                 </div>
             </div>
@@ -1205,10 +1199,8 @@ foreach ($hardware_list as $item) {
                             </span>
                             <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Lane 1 Inbound</span>
                         </div>
-                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Trigger Loop &amp; Kamera ANPR Gate-In</h4>
-                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
-                            Simulasikan truk melindas sensor loop induksi. Kamera ANPR membaca plat nomor, OCR membaca peti kemas, palang masuk terbuka, dan armada tercatat MASUK (in_yard) ke database.
-                        </p>
+                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">ANPR &amp; Loop Gate-In</h4>
+                        <p class="text-[11px] text-slate-600 mt-1">Baca plat + ISO kontainer &bull; buka palang masuk.</p>
                     </div>
                     <form method="POST" class="mt-4 pt-3 border-t border-amber-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="trigger_anpr_gate_in">
@@ -1234,10 +1226,8 @@ foreach ($hardware_list as $item) {
                             </span>
                             <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Loadcell Otomatis</span>
                         </div>
-                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Trigger Penimbangan Riil (SOLAS VGM)</h4>
-                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
-                            Memicu penimbangan beban statis pada jembatan timbang Fangda 80 Ton, menghitung bobot netto peti kemas, dan mencatat sertifikasi VGM resmi ke database.
-                        </p>
+                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Weighbridge 80T (SOLAS VGM)</h4>
+                        <p class="text-[11px] text-slate-600 mt-1">Timbang beban statis &bull; cetak sertifikat VGM.</p>
                     </div>
                     <form method="POST" class="mt-4 pt-3 border-t border-emerald-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="trigger_weighbridge">
@@ -1262,10 +1252,8 @@ foreach ($hardware_list as $item) {
                             </span>
                             <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Lane 3 Outbound</span>
                         </div>
-                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Trigger Rilis Keluar (Dual Clearance)</h4>
-                        <p class="text-[11px] text-slate-600 mt-1 leading-relaxed">
-                            Memicu verifikasi digital dual-clearance (Validasi SPPB Bea Cukai CEISA + Faktur Billing Lunas) lalu mengangkat palang keluar otomatis dan mencatat waktu Gate-Out.
-                        </p>
+                        <h4 class="text-xs font-extrabold text-slate-900 mt-2">Gate-Out Dual Clearance</h4>
+                        <p class="text-[11px] text-slate-600 mt-1">Validasi SPPB CEISA + Billing Lunas &bull; buka palang keluar.</p>
                     </div>
                     <form method="POST" class="mt-4 pt-3 border-t border-blue-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="release_gate_out">
@@ -1442,14 +1430,20 @@ foreach ($hardware_list as $item) {
                 <div>
                     <h3 class="text-sm font-bold text-gray-900 flex items-center">
                         <i class="fa-solid fa-clock-rotate-left text-[#0170b9] mr-2"></i>
-                        Log Transaksi Gerbang Real-Time (Live dari Database MySQL)
+                        Log Transaksi Gerbang Real-Time
                     </h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Memantau riwayat armada yang masuk, antri, dan keluar terminal melalui otomasi gerbang.</p>
+                    <p class="text-xs text-gray-500 mt-0.5">Riwayat masuk, antre, dan keluar armada.</p>
                 </div>
                 <div class="flex items-center space-x-2">
-                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-200">
+                    <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 rounded-lg text-xs font-bold border border-emerald-200" id="gateLogCountBadge">
                         <i class="fa-solid fa-database mr-1"></i> <?= count($gate_trucks) ?> Riwayat Terdata
                     </span>
+                    <select id="gateLogLimitSelect" data-limit-target="#gateLogTable" data-count-target="#gateLogCountBadge" data-count-unit="Riwayat" class="px-2.5 py-1 bg-slate-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="50">Tampil: 50</option>
+                        <option value="all">Semua</option>
+                    </select>
                     <button onclick="location.reload()" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition" title="Segarkan Data">
                         <i class="fa-solid fa-rotate-right text-xs"></i>
                     </button>
@@ -1457,9 +1451,10 @@ foreach ($hardware_list as $item) {
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left text-xs">
+                <table class="w-full text-left text-xs" id="gateLogTable">
                     <thead>
                         <tr class="bg-slate-50 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-200">
+                            <th class="py-3 px-3 text-center w-10">No</th>
                             <th class="py-3 px-3.5">Waktu</th>
                             <th class="py-3 px-3.5">Lane</th>
                             <th class="py-3 px-3.5">Plat Nomor (ANPR)</th>
@@ -1472,8 +1467,8 @@ foreach ($hardware_list as $item) {
                     </thead>
                     <tbody id="gate-log-tbody" class="divide-y divide-gray-100 text-gray-700">
                         <?php if (empty($gate_trucks)): ?>
-                        <tr>
-                            <td colspan="8" class="text-center py-8 text-gray-400">
+                        <tr data-empty-row>
+                            <td colspan="9" class="text-center py-8 text-gray-400">
                                 <i class="fa-solid fa-door-open text-3xl mb-2 text-gray-300 block"></i>
                                 Belum ada data gerbang. Silakan registrasi pra-gate atau jalankan simulasi di Panel Simulasi 3D.
                             </td>
@@ -1504,6 +1499,7 @@ foreach ($hardware_list as $item) {
                             }
                         ?>
                         <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3 px-3 text-center font-mono text-gray-400" data-row-num><?= $idx + 1 ?></td>
                             <td class="py-3 px-3.5 font-mono text-gray-500 whitespace-nowrap"><?= date('H:i:s d/m', strtotime($time)) ?></td>
                             <td class="py-3 px-3.5"><span class="px-2 py-0.5 rounded text-[11px] font-bold <?= $laneClass ?>"><?= $lane ?></span></td>
                             <td class="py-3 px-3.5 font-mono font-bold text-gray-900"><?= htmlspecialchars($t['license_plate']) ?></td>
@@ -1591,10 +1587,8 @@ foreach ($hardware_list as $item) {
                     <i class="fa-solid fa-microchip"></i>
                     <span>ISO 6346:1995 / BIC Standard Modulo 11</span>
                 </div>
-                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">Portal Optical Character Recognition (OCR) & Check Digit Engine</h2>
-                <p class="text-xs text-slate-600 max-w-2xl">
-                    Simulasi 4-Camera OCR Gantry (Hikvision iDS-TCV300) yang membaca nomor kontainer, kode ukuran/tipe ISO, serta memvalidasi check digit secara matematis sebelum verifikasi Gate-In dry port.
-                </p>
+                <h2 class="text-lg sm:text-xl font-extrabold tracking-tight text-slate-900">Portal OCR &amp; Check Digit ISO 6346</h2>
+                <p class="text-xs text-slate-600">Validasi 4-Camera OCR &amp; Modulo 11 otomatis.</p>
             </div>
             <div class="flex items-center space-x-2 flex-shrink-0">
                 <button type="button" onclick="triggerOcrDoorScan()" class="px-4 py-2.5 bg-orange-600 hover:bg-orange-500 text-white font-bold rounded-xl text-xs transition-all shadow-2xs flex items-center space-x-2 cursor-pointer">
@@ -1899,9 +1893,17 @@ foreach ($hardware_list as $item) {
                     <button onclick="filterCategory('Core Datacenter & Jaringan')" class="filter-cat-btn px-3 py-1.5 rounded-lg text-xs font-semibold transition-all bg-gray-100 text-gray-600 hover:bg-gray-200" data-cat="Core Datacenter & Jaringan">Core Datacenter (4)</button>
                 </div>
 
-                <div class="relative min-w-[220px]">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
-                    <input type="text" id="hardware-search" onkeyup="searchHardwareTable()" placeholder="Cari hardware, model, spesifikasi..." class="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all">
+                <div class="flex items-center gap-2 min-w-[260px]">
+                    <div class="relative flex-1">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                        <input type="text" id="hardware-search" onkeyup="searchHardwareTable()" placeholder="Cari hardware, model, spesifikasi..." class="w-full pl-8 pr-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs focus:ring-1 focus:ring-blue-500 focus:bg-white transition-all">
+                    </div>
+                    <select id="hardwareLimitSelect" data-limit-target="#hardware-table" data-limit-callback="searchHardwareTable" class="px-2.5 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="50">Tampil: 50</option>
+                        <option value="all">Semua</option>
+                    </select>
                 </div>
             </div>
         </div>
@@ -1928,7 +1930,7 @@ foreach ($hardware_list as $item) {
                     <tbody class="divide-y divide-gray-100 text-gray-700">
                         <?php foreach ($hardware_list as $hw): ?>
                         <tr id="hw-row-<?= $hw['no'] ?>" class="hardware-row hover:bg-slate-50/70 transition-colors" data-category="<?= htmlspecialchars($hw['kategori']) ?>">
-                            <td class="py-3 px-3 text-center font-bold text-gray-400"><?= $hw['no'] ?></td>
+                            <td class="py-3 px-3 text-center font-bold text-gray-400" data-row-num><?= $hw['no'] ?></td>
                             <td class="py-2 px-2 text-center">
                                 <div class="w-12 h-12 rounded-lg bg-slate-50 border border-gray-200 p-1 flex items-center justify-center overflow-hidden mx-auto shadow-2xs hover:shadow-md transition-shadow group/img relative">
                                     <img src="assets/img/hardware/converted/item_<?= $hw['no'] ?>.png" alt="<?= htmlspecialchars($hw['nama']) ?>" class="max-w-full max-h-full object-contain group-hover/img:scale-125 transition-transform" loading="lazy">
@@ -2153,13 +2155,11 @@ foreach ($hardware_list as $item) {
     <div id="tab-dcsa" class="tab-content hidden space-y-6">
         <!-- Header Info DCSA -->
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-2 flex items-center">
+            <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-1 flex items-center">
                 <i class="fa-solid fa-satellite-dish text-[#0170b9] mr-2"></i>
-                DCSA Track & Trace API Standard
+                DCSA Track &amp; Trace API v2.2
             </h2>
-            <p class="text-xs text-gray-500">
-                Digital Container Shipping Association (konsorsium Maersk, MSC, CMA CGM, Hapag-Lloyd, dll). CIDP menggunakan standar struktur event API v2.2 untuk pelaporan aktivitas kontainer (EQUIPMENT), pergerakan moda transportasi (TRANSPORT), dan status pengiriman (SHIPMENT).
-            </p>
+            <p class="text-xs text-gray-500">Pelaporan standar <span class="font-mono font-semibold text-gray-700">EQUIPMENT</span> &bull; <span class="font-mono font-semibold text-gray-700">TRANSPORT</span> &bull; <span class="font-mono font-semibold text-gray-700">SHIPMENT</span>.</p>
         </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -2186,12 +2186,18 @@ foreach ($hardware_list as $item) {
                             <option value="PLN">PLN (Planned)</option>
                             <option value="EST">EST (Estimated)</option>
                         </select>
+                        <select id="dcsaLimitSelect" data-limit-target="#dcsaEventTable" class="text-xs font-bold border border-gray-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-blue-400 text-gray-700">
+                            <option value="10" selected>Tampil: 10</option>
+                            <option value="25">Tampil: 25</option>
+                            <option value="all">Semua</option>
+                        </select>
                     </div>
                 </div>
                 <div class="flex-1 overflow-auto p-4">
-                    <table class="w-full text-left border-collapse">
+                    <table class="w-full text-left border-collapse" id="dcsaEventTable">
                         <thead>
                             <tr class="text-[10px] text-gray-400 uppercase tracking-wider border-b border-gray-100">
+                                <th class="pb-2 pr-2 font-semibold text-center w-8">No</th>
                                 <th class="pb-2 font-semibold">Timestamp</th>
                                 <th class="pb-2 font-semibold">Event Type / ID</th>
                                 <th class="pb-2 font-semibold">Classifier</th>
@@ -2202,6 +2208,7 @@ foreach ($hardware_list as $item) {
                         <tbody class="text-xs divide-y divide-gray-50">
                             <!-- Sample Data 1: GATE_IN -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>1</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-29T08:15:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: GATE_IN</span>
@@ -2213,6 +2220,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 2: DROP_OFF -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>2</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-29T08:25:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: DROP_OFF</span>
@@ -2224,6 +2232,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 3: LOAD -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>3</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-29T11:30:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: LOAD</span>
@@ -2235,6 +2244,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 4: DEPA -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>4</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-29T12:00:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold">TRANSPORT: DEPA</span>
@@ -2246,6 +2256,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 5: ARRI Planned -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>5</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-29T18:00:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded text-[10px] font-bold">TRANSPORT: ARRI</span>
@@ -2257,6 +2268,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 6: RECE -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>6</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-28T09:00:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold">SHIPMENT: RECE</span>
@@ -2268,6 +2280,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 7: CONF -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>7</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-28T10:15:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold">SHIPMENT: CONF</span>
@@ -2279,6 +2292,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 8: STUFF -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>8</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-28T14:30:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: STUFF</span>
@@ -2290,6 +2304,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 9: GATE_OUT -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>9</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-30T09:00:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: GATE_OUT</span>
@@ -2301,6 +2316,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 10: DISCHARGE Estimated -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>10</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-10-01T15:00:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: DISCHARGE</span>
@@ -2312,6 +2328,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 11: ISSU -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>11</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-30T10:00:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-emerald-50 text-emerald-700 rounded text-[10px] font-bold">SHIPMENT: ISSU</span>
@@ -2323,6 +2340,7 @@ foreach ($hardware_list as $item) {
                             </tr>
                             <!-- Sample Data 12: STRIP -->
                             <tr class="hover:bg-slate-50 transition-colors group">
+                                <td class="py-2.5 pr-2 text-center font-mono text-gray-400" data-row-num>12</td>
                                 <td class="py-2.5 font-mono text-gray-500">2026-09-27T11:00:00+07:00</td>
                                 <td class="py-2.5">
                                     <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-[10px] font-bold">EQUIPMENT: STRIP</span>
@@ -2800,29 +2818,27 @@ function filterCategory(category) {
     });
 
     const rows = document.querySelectorAll('.hardware-row');
-    rows.forEach(row => {
-        const rowCat = row.getAttribute('data-category');
-        if (category === 'all' || rowCat === category) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
-    });
+    window._activeHwCategory = category;
+    searchHardwareTable();
 }
 
 // Quick Search Hardware Table
 function searchHardwareTable() {
-    const input = document.getElementById('hardware-search').value.toLowerCase();
+    const input = (document.getElementById('hardware-search')?.value || '').toLowerCase();
+    const cat = window._activeHwCategory || 'all';
     const rows = document.querySelectorAll('.hardware-row');
 
     rows.forEach(row => {
         const text = row.textContent.toLowerCase();
-        if (text.includes(input)) {
-            row.style.display = '';
-        } else {
-            row.style.display = 'none';
-        }
+        const rowCat = row.getAttribute('data-category');
+        const matchCat = (cat === 'all' || rowCat === cat);
+        const matchQ = (!input || text.includes(input));
+        row.dataset.filteredOut = (matchCat && matchQ) ? '0' : '1';
     });
+
+    if (window.CIDPTableTools) {
+        window.CIDPTableTools.apply('#hardware-table');
+    }
 }
 
 // ===========================================================================
@@ -3260,13 +3276,13 @@ function getGateExportData() {
     
     tableRows.forEach(row => {
         const cols = row.querySelectorAll('td');
-        if (cols.length === 5) {
+        if (cols.length === 6 && row.style.display !== 'none') {
             rows.push([
-                cols[0].innerText.trim(),
-                cols[1].innerText.replace(/\n/g, ' - ').trim(),
-                cols[2].innerText.trim(),
+                cols[1].innerText.trim(),
+                cols[2].innerText.replace(/\n/g, ' - ').trim(),
                 cols[3].innerText.trim(),
-                cols[4].innerText.trim()
+                cols[4].innerText.trim(),
+                cols[5].innerText.trim()
             ]);
         }
     });

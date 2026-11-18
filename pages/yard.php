@@ -576,8 +576,8 @@ $vmt_job_orders = [
                     <i class="fa-solid fa-truck-monster"></i>
                 </div>
                 <div>
-                    <h3 class="font-bold text-sm text-gray-900">Antrean Perintah Kerja Alat Berat (VMT Work Order Queue)</h3>
-                    <p class="text-xs text-gray-500">Integrasi Vehicle Mounted Terminal (Zebra VC8300) & Sensor Twistlock Bromma</p>
+                    <h3 class="font-bold text-sm text-gray-900">Antrean Work Order Alat Berat (VMT)</h3>
+                    <p class="text-xs text-gray-500">Zebra VC8300 &amp; sensor twistlock Bromma.</p>
                 </div>
             </div>
 
@@ -585,13 +585,20 @@ $vmt_job_orders = [
                 <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block mr-1.5 animate-pulse"></span>6 VMT Online
                 </span>
+                <select id="yardVmtLimitSelect" data-limit-target="#yardVmtTable" class="px-2.5 py-1 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700">
+                    <option value="10" selected>Tampil: 10</option>
+                    <option value="25">Tampil: 25</option>
+                    <option value="50">Tampil: 50</option>
+                    <option value="all">Semua</option>
+                </select>
             </div>
         </div>
 
         <div class="overflow-x-auto">
-            <table class="w-full text-left text-xs">
+            <table class="w-full text-left text-xs" id="yardVmtTable">
                 <thead>
                     <tr class="bg-slate-50 text-gray-500 uppercase tracking-wider font-semibold border-b border-gray-200">
+                        <th class="py-3 px-2.5 text-center w-10">No</th>
                         <th class="py-3 px-3.5">No. Job Order</th>
                         <th class="py-3 px-3.5">Unit Alat & Operator</th>
                         <th class="py-3 px-3.5">Instruksi Kerja</th>
@@ -603,8 +610,9 @@ $vmt_job_orders = [
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100 text-gray-700">
-                    <?php foreach ($vmt_job_orders as $jo): ?>
+                    <?php foreach ($vmt_job_orders as $v_idx => $jo): ?>
                     <tr class="hover:bg-slate-50/70 transition-colors">
+                        <td class="py-3 px-2.5 text-center font-mono text-gray-400" data-row-num><?= $v_idx + 1 ?></td>
                         <td class="py-3 px-3.5 font-mono font-bold text-blue-700"><?= $jo['id'] ?></td>
                         <td class="py-3 px-3.5">
                             <strong class="text-gray-900 block"><?= $jo['alat'] ?></strong>
@@ -661,8 +669,8 @@ $vmt_job_orders = [
                         <i class="fa-solid fa-table-cells"></i>
                     </span>
                     <div>
-                        <h3 class="font-bold text-base text-gray-900">Penampang 2D Stacking Matrix — Blok A (Bay 01)</h3>
-                        <p class="text-xs text-gray-500">Struktur Penumpukan 6 Row x 4 Tier Kontainer 40ft High Cube</p>
+                        <h3 class="font-bold text-base text-gray-900">Penampang 2D Matrix &mdash; Blok A (Bay 01)</h3>
+                        <p class="text-xs text-gray-500">6 Row &times; 4 Tier (40ft HC)</p>
                     </div>
                 </div>
                 <button onclick="closeBayMatrixModal()" class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex items-center justify-center">

@@ -524,9 +524,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                                     <span class="font-bold text-sm text-gray-900">Bahasa Indonesia</span>
                                     <span class="text-[10px] font-bold px-1.5 py-0.5 bg-orange-100 text-orange-700 rounded">Standar SNI</span>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                    Antarmuka dalam Bahasa Indonesia resmi. Standar operasional domestik, regulasi kepabeanan CEISA 4.0 Bea Cukai, mata uang IDR (Rupiah), dan zona waktu WIB (UTC+7).
-                                </p>
+                                <p class="text-xs text-gray-500 mt-1">Antarmuka Indonesia &bull; Regulasi CEISA 4.0 &bull; IDR (WIB UTC+7).</p>
                             </div>
                         </label>
 
@@ -539,9 +537,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                                     <span class="font-bold text-sm text-gray-900">English (International)</span>
                                     <span class="text-[10px] font-bold px-1.5 py-0.5 bg-blue-100 text-blue-700 rounded">IMO &bull; DCSA</span>
                                 </div>
-                                <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                                    International maritime & intermodal terminal standard. Fully compatible with DCSA v2.2, UN/CEFACT EDIFACT, global shipping line standards (Maersk, MSC, CMA CGM), and ISO documentation.
-                                </p>
+                                <p class="text-xs text-gray-500 mt-1">International maritime standard &bull; DCSA v2.2 &amp; UN/CEFACT EDIFACT.</p>
                             </div>
                         </label>
                     </div>
@@ -564,20 +560,28 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gray-100 gap-3">
                 <div>
-                    <h3 class="font-bold text-base text-gray-900">Daftar Akun Pengguna &amp; Matriks Hak Akses (RBAC)</h3>
-                    <p class="text-xs text-gray-500 mt-0.5">Pengelolaan otentikasi login, profil staf terminal, dan batas wewenang operasional</p>
+                    <h3 class="font-bold text-base text-gray-900">Daftar Akun Pengguna &amp; RBAC</h3>
+                    <p class="text-xs text-gray-500 mt-0.5">Kelola akun login &amp; batas kewenangan.</p>
                 </div>
-                <button onclick="openAddUserModal()" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5 self-start sm:self-auto">
-                    <i class="fa-solid fa-user-plus"></i>
-                    <span>Tambah Akun Baru</span>
-                </button>
+                <div class="flex items-center gap-2 self-start sm:self-auto">
+                    <select id="settingsUsersLimitSelect" data-limit-target="#settingsUsersTable" class="px-3 py-2 bg-slate-50 border border-gray-200 rounded-xl text-xs font-bold text-gray-700 cursor-pointer">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="all">Semua</option>
+                    </select>
+                    <button onclick="openAddUserModal()" class="px-4 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-user-plus"></i>
+                        <span>Tambah Akun Baru</span>
+                    </button>
+                </div>
             </div>
 
             <!-- Tabel Pengguna Langsung dari MySQL login -->
             <div class="overflow-x-auto">
-                <table class="w-full text-xs text-left">
+                <table class="w-full text-xs text-left" id="settingsUsersTable">
                     <thead class="bg-slate-50 text-gray-500 font-bold uppercase text-[10px] tracking-wider border-b border-gray-200/70">
                         <tr>
+                            <th class="py-3 px-2.5 text-center w-10">No</th>
                             <th class="py-3 px-3.5">ID</th>
                             <th class="py-3 px-3.5">Nama Lengkap Pengguna</th>
                             <th class="py-3 px-3.5">Alamat Email Dinas</th>
@@ -588,8 +592,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100">
-                        <?php foreach ($login_users as $u): ?>
+                        <?php foreach ($login_users as $u_idx => $u): ?>
                             <tr class="hover:bg-blue-50/20 transition">
+                                <td class="py-3 px-2.5 text-center font-mono text-gray-400" data-row-num><?= $u_idx + 1 ?></td>
                                 <td class="py-3 px-3.5 font-bold font-mono text-gray-400">#<?= $u['iduser'] ?></td>
                                 <td class="py-3 px-3.5 font-bold text-gray-900 flex items-center space-x-2">
                                     <div class="w-7 h-7 rounded-lg bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-xs uppercase flex-shrink-0">
@@ -632,28 +637,20 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 <span class="text-xs font-bold text-gray-700 uppercase tracking-wider block">Matriks Hak Akses Kewenangan (Role Permissions):</span>
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
                     <div class="bg-white p-3 rounded-lg border border-gray-200">
-                        <span class="font-bold text-purple-700 block mb-1">Superadmin (Arsitek / Direksi)</span>
-                        <p class="text-[11px] text-gray-500 leading-relaxed">
-                            Akses penuh tanpa hambatan ke seluruh modul, pengaturan parameter, manajemen user, dan ekspor basis data.
-                        </p>
+                        <span class="font-bold text-purple-700 block mb-1">Superadmin</span>
+                        <p class="text-[11px] text-gray-500">Akses penuh modul, parameter &amp; user.</p>
                     </div>
                     <div class="bg-white p-3 rounded-lg border border-gray-200">
-                        <span class="font-bold text-blue-700 block mb-1">Operator Alat &amp; Lapangan (Staf)</span>
-                        <p class="text-[11px] text-gray-500 leading-relaxed">
-                            Akses modul Yard Stacking, Reach Stacker VMT, HHT Barcode CFS, dan input pencatatan steker Reefer.
-                        </p>
+                        <span class="font-bold text-blue-700 block mb-1">Operator Alat</span>
+                        <p class="text-[11px] text-gray-500">Yard Stacking, VMT, CFS HHT &amp; Reefer.</p>
                     </div>
                     <div class="bg-white p-3 rounded-lg border border-gray-200">
-                        <span class="font-bold text-emerald-700 block mb-1">Shipper / Mitra Logistik (User)</span>
-                        <p class="text-[11px] text-gray-500 leading-relaxed">
-                            Portal e-Billing, pelacakan kontainer publik, unduh nota faktur PPN 11%, dan cek status SPPB Bea Cukai.
-                        </p>
+                        <span class="font-bold text-emerald-700 block mb-1">Shipper / Mitra</span>
+                        <p class="text-[11px] text-gray-500">e-Billing, tracking kontainer &amp; status SPPB.</p>
                     </div>
                     <div class="bg-white p-3 rounded-lg border border-gray-200">
-                        <span class="font-bold text-amber-700 block mb-1">Sopir Truk Trailer (Driver)</span>
-                        <p class="text-[11px] text-gray-500 leading-relaxed">
-                            Tampilan digital e-Gate Pass di smartphone, tiket timbangan SOLAS VGM, dan penunjuk arah antrean slot blok.
-                        </p>
+                        <span class="font-bold text-amber-700 block mb-1">Sopir Trailer</span>
+                        <p class="text-[11px] text-gray-500">e-Gate Pass, tiket VGM &amp; antrean slot.</p>
                     </div>
                 </div>
             </div>
@@ -666,8 +663,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     <div id="tab-integration" class="settings-tab-content hidden space-y-6">
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
             <div class="pb-3 border-b border-gray-100">
-                <h3 class="font-bold text-base text-gray-900">Arsitektur Gateway Integrasi Antar-Sistem (EDI &amp; IoT)</h3>
-                <p class="text-xs text-gray-500 mt-0.5">Pemantauan antarmuka pertukaran data real-time dengan regulator kepabeanan, pelabuhan laut, ERP akuntansi, dan broker LoRaWAN</p>
+                <h3 class="font-bold text-base text-gray-900">Gateway Integrasi API (EDI &amp; IoT)</h3>
+                <p class="text-xs text-gray-500 mt-0.5">Status antarmuka Bea Cukai, Pelabuhan, ERP &amp; Broker LoRaWAN.</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -682,10 +679,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> ONLINE (200 OK)
                             </span>
                         </div>
-                        <h4 class="font-bold text-sm text-gray-900 mt-2">Kepabeanan &amp; TPS Online Bea Cukai</h4>
-                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                            Pertukaran data elektronik PIB/PEB, SPPB otomatis, Surat Tugas Pemeriksaan Fisik Jalur Merah, dan penguncian Jointech GPS Smart E-Seal (HW-26).
-                        </p>
+                        <h4 class="font-bold text-sm text-gray-900 mt-2">Kepabeanan TPS Online (DJBC)</h4>
+                        <p class="text-xs text-gray-500 mt-1">Pertukaran PIB/PEB, SPPB otomatis &amp; E-Seal HW-26.</p>
                         <div class="mt-3 bg-white p-2.5 rounded-lg border border-gray-200 font-mono text-[10.5px] space-y-1 text-gray-600">
                             <div><span class="text-gray-400">Endpoint:</span> <code>https://ceisa40.beacukai.go.id/tps/v2</code></div>
                             <div><span class="text-gray-400">Auth Token:</span> <code class="text-emerald-700">Bearer **********489c</code></div>
@@ -714,10 +709,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> ONLINE (200 OK)
                             </span>
                         </div>
-                        <h4 class="font-bold text-sm text-gray-900 mt-2">Inaportnet &amp; Terminal Laut Priok (JICT/KOJA)</h4>
-                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                            Sinkronisasi manifest kargo, penerbitan Delivery Order (DO Online), dan Surat Penyerahan Peti Kemas (SP2) rute kereta api Priok &ndash; Cikarang.
-                        </p>
+                        <h4 class="font-bold text-sm text-gray-900 mt-2">Inaportnet &amp; Terminal Laut Priok</h4>
+                        <p class="text-xs text-gray-500 mt-1">Manifest kargo, DO Online &amp; SP2 kereta Priok &ndash; Cikarang.</p>
                         <div class="mt-3 bg-white p-2.5 rounded-lg border border-gray-200 font-mono text-[10.5px] space-y-1 text-gray-600">
                             <div><span class="text-gray-400">Endpoint:</span> <code>https://inaportnet.dephub.go.id/api/edi/v1</code></div>
                             <div><span class="text-gray-400">Protokol:</span> <code class="text-blue-700">UN/EDIFACT CODECO / COARRI</code></div>
@@ -746,10 +739,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> TERHUBUNG
                             </span>
                         </div>
-                        <h4 class="font-bold text-sm text-gray-900 mt-2">Odoo ERP Billing &amp; Finansial Bridge</h4>
-                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                            Membukukan otomatis seluruh tagihan penanganan kargo (Lift-On/Off, timbangan VGM, daya listrik Reefer, dan jasa pergudangan CFS) ke buku besar akuntansi.
-                        </p>
+                        <h4 class="font-bold text-sm text-gray-900 mt-2">Odoo ERP Billing Bridge</h4>
+                        <p class="text-xs text-gray-500 mt-1">Sinkronisasi faktur Lift-On/Off, VGM, Reefer &amp; CFS.</p>
                         <div class="mt-3 bg-white p-2.5 rounded-lg border border-gray-200 font-mono text-[10.5px] space-y-1 text-gray-600">
                             <div><span class="text-gray-400">Endpoint:</span> <code>http://localhost:8069/xmlrpc/2/object</code></div>
                             <div><span class="text-gray-400">Database ERP:</span> <code class="text-purple-700">cidp_odoo_financials</code></div>
@@ -778,10 +769,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                                 <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span> BROKER AKTIF
                             </span>
                         </div>
-                        <h4 class="font-bold text-sm text-gray-900 mt-2">ChirpStack LoRaWAN MQTT Broker</h4>
-                        <p class="text-xs text-gray-500 mt-1 leading-relaxed">
-                            Menerima uplink telemetri kontinu dari sensor suhu boks reefer SHT40, steker industri Marechal HW-23, dan sensor suhu/kelembaban gudang CFS (ENV-01).
-                        </p>
+                        <h4 class="font-bold text-sm text-gray-900 mt-2">ChirpStack LoRaWAN Broker</h4>
+                        <p class="text-xs text-gray-500 mt-1">Uplink sensor Reefer SHT40, HW-23 &amp; Gudang ENV-01.</p>
                         <div class="mt-3 bg-white p-2.5 rounded-lg border border-gray-200 font-mono text-[10.5px] space-y-1 text-gray-600">
                             <div><span class="text-gray-400">Gateway ID:</span> <code>CIDP-GW-01 (Menara Pengawas Timur)</code></div>
                             <div><span class="text-gray-400">Frekuensi:</span> <code class="text-cyan-700">AS923 / EU868 Band ISM</code></div>
@@ -812,8 +801,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
                 <div class="flex items-center justify-between pb-3 border-b border-gray-100">
                     <div>
-                        <h3 class="font-bold text-base text-gray-900">Kalibrasi Parameter Sensor &amp; 26 Perangkat Hardware</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">Penyesuaian ambang deteksi OCR, zero offset jembatan timbang, dan otomasi saklar ATS</p>
+                        <h3 class="font-bold text-base text-gray-900">Kalibrasi Sensor &amp; Perangkat IoT</h3>
+                        <p class="text-xs text-gray-500 mt-0.5">Ambang OCR, zero offset timbangan &amp; saklar ATS.</p>
                     </div>
                     <a href="dashboard.php?page=denah" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition flex items-center space-x-1">
                         <i class="fa-solid fa-map-location-dot"></i>
@@ -933,13 +922,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         <i class="fa-solid fa-receipt text-blue-600"></i>
                         <span>10 Aktivitas Log Sistem Terbaru (Tabel yard_events)</span>
                     </h4>
-                    <span class="text-[11px] font-mono text-gray-400">Audit Trail ISO 27001</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[11px] font-mono text-gray-400">Audit Trail ISO 27001</span>
+                        <select id="settingsLogsLimitSelect" data-limit-target="#settingsLogsTable" class="px-2 py-1 bg-slate-50 border border-gray-200 rounded-lg text-xs font-bold text-gray-700 cursor-pointer">
+                            <option value="10" selected>Tampil: 10</option>
+                            <option value="25">Tampil: 25</option>
+                            <option value="all">Semua</option>
+                        </select>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
-                    <table class="w-full text-xs text-left">
+                    <table class="w-full text-xs text-left" id="settingsLogsTable">
                         <thead class="bg-gray-50/80 text-[10px] uppercase font-bold text-gray-500 border-b border-gray-100 tracking-wider">
                             <tr>
+                                <th class="p-2.5 text-center w-10">No</th>
                                 <th class="p-2.5">ID</th>
                                 <th class="p-2.5">Tipe Event</th>
                                 <th class="p-2.5">Kontainer / Blok</th>
@@ -949,8 +946,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100 font-mono text-[11px]">
-                            <?php foreach ($recent_logs as $log): ?>
+                            <?php foreach ($recent_logs as $l_idx => $log): ?>
                                 <tr class="hover:bg-blue-50/20">
+                                    <td class="p-2.5 text-center text-gray-400" data-row-num><?= $l_idx + 1 ?></td>
                                     <td class="p-2.5 font-bold text-gray-400">#<?= $log['id'] ?></td>
                                     <td class="p-2.5 font-bold text-blue-800"><?= $log['event_type'] ?></td>
                                     <td class="p-2.5 text-gray-900"><?= $log['container_number'] ?? ($log['to_block'] ?? '-') ?></td>
@@ -1010,9 +1008,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                             <input type="radio" name="system_language" value="id" <?= ($cur_lang === 'id') ? 'checked' : '' ?> onchange="localStorage.setItem('cidp_lang', 'id')" class="mt-1 text-orange-600 focus:ring-orange-500 h-5 w-5">
                         </div>
                         
-                        <p class="text-xs text-gray-600 mt-3 leading-relaxed">
-                            Format terminologi operasional nasional sesuai standar Kementerian Perhubungan RI, Direktorat Jenderal Bea dan Cukai (CEISA 4.0), mata uang Rupiah (IDR), dan zona waktu Indonesia Barat (WIB).
-                        </p>
+                        <p class="text-xs text-gray-600 mt-3">Standar nasional Kemenhub RI, CEISA 4.0, mata uang IDR &amp; WIB.</p>
 
                         <div class="mt-4 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-[11px] text-gray-500 font-mono">
                             <div>• Format Tanggal: <strong class="text-gray-700">DD/MM/YYYY</strong></div>
@@ -1042,9 +1038,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                             <input type="radio" name="system_language" value="en" <?= ($cur_lang === 'en') ? 'checked' : '' ?> onchange="localStorage.setItem('cidp_lang', 'en')" class="mt-1 text-blue-600 focus:ring-blue-500 h-5 w-5">
                         </div>
                         
-                        <p class="text-xs text-gray-600 mt-3 leading-relaxed">
-                            Official international maritime standard for intermodal dry ports. Fully conforms with DCSA (Digital Container Shipping Association) APIs, UN/CEFACT EDIFACT messages, and global carrier documentation.
-                        </p>
+                        <p class="text-xs text-gray-600 mt-3">Standar maritim internasional: DCSA v2.2 API, UN/CEFACT EDIFACT &amp; ISO.</p>
 
                         <div class="mt-4 pt-3 border-t border-gray-100 grid grid-cols-2 gap-2 text-[11px] text-gray-500 font-mono">
                             <div>• Date Format: <strong class="text-gray-700">MM/DD/YYYY</strong></div>
@@ -1066,7 +1060,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                 <div class="flex items-center justify-between pt-4 border-t border-gray-100">
                     <p class="text-xs text-gray-500">
                         <i class="fa-solid fa-circle-info text-orange-500 mr-1"></i>
-                        Pilihan bahasa akan disimpan ke dalam profil sesi dan disinkronkan secara global ke modul Landing Page.
+                        Disimpan ke sesi &amp; Landing Page.
                     </p>
                     <button type="submit" class="px-6 py-2.5 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-xs font-bold rounded-xl shadow-sm shadow-orange-500/20 transition flex items-center space-x-1.5">
                         <i class="fa-solid fa-floppy-disk"></i>
@@ -1082,35 +1076,28 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         <i class="fa-solid fa-certificate"></i>
                     </div>
                     <div>
-                        <h4 class="font-bold text-sm text-gray-900">Standar Akreditasi Lokalisasi &amp; Kompatibilitas Sistem</h4>
-                        <p class="text-[11px] text-gray-500">Daftar kepatuhan format data antarmuka CIDP Yard Management System</p>
+                        <h4 class="font-bold text-sm text-gray-900">Kepatuhan Standar Lokalisasi</h4>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
                         <span class="font-bold text-gray-800 flex items-center gap-1.5">
-                            <i class="fa-solid fa-anchor text-blue-600"></i> DCSA Interface Standard
+                            <i class="fa-solid fa-anchor text-blue-600"></i> DCSA v2.2
                         </span>
-                        <p class="text-[11px] text-gray-500 mt-1">
-                            Mendukung pelabelan atribut peti kemas sesuai DCSA v2.2 (Booking Reference, ISO 6346 Container Codes, Equipment Status).
-                        </p>
+                        <span class="text-[11px] text-gray-500">ISO 6346 &amp; Booking</span>
                     </div>
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
                         <span class="font-bold text-gray-800 flex items-center gap-1.5">
-                            <i class="fa-solid fa-file-invoice text-emerald-600"></i> Bea Cukai CEISA 4.0
+                            <i class="fa-solid fa-file-invoice text-emerald-600"></i> CEISA 4.0
                         </span>
-                        <p class="text-[11px] text-gray-500 mt-1">
-                            Validasi dokumen kepabeanan otomatis untuk SPPB, PEB, PIB, dan manifest respon dalam format resmi DJBC.
-                        </p>
+                        <span class="text-[11px] text-gray-500">SPPB, PIB &amp; PEB</span>
                     </div>
-                    <div class="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
                         <span class="font-bold text-gray-800 flex items-center gap-1.5">
-                            <i class="fa-solid fa-shield-halved text-purple-600"></i> ISO/IEC 27001 InfoSec
+                            <i class="fa-solid fa-shield-halved text-purple-600"></i> ISO 27001
                         </span>
-                        <p class="text-[11px] text-gray-500 mt-1">
-                            Audit trail dan pencatatan riwayat sesi bahasa terenkripsi dengan proteksi data pribadi pengguna.
-                        </p>
+                        <span class="text-[11px] text-gray-500">Enkripsi Sesi &amp; Log</span>
                     </div>
                 </div>
             </div>
@@ -1187,8 +1174,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 function switchSettingsTab(tabId) {
     document.querySelectorAll('.settings-tab-content').forEach(el => el.classList.add('hidden'));
     document.querySelectorAll('.settings-tab-btn').forEach(btn => {
-        btn.classList.remove('bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'text-white', 'shadow-sm', 'shadow-orange-500/20');
-        btn.classList.add('text-gray-600');
+        btn.classList.remove('bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'text-white', 'font-bold', 'shadow-sm', 'shadow-orange-500/20');
+        btn.classList.add('text-slate-600', 'font-medium', 'hover:text-orange-600', 'hover:bg-orange-50/50');
     });
 
     const targetTab = document.getElementById(tabId);
@@ -1196,8 +1183,8 @@ function switchSettingsTab(tabId) {
 
     const activeBtn = document.getElementById('btn-' + tabId);
     if (activeBtn) {
-        activeBtn.classList.add('bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'text-white', 'shadow-sm', 'shadow-orange-500/20');
-        activeBtn.classList.remove('text-gray-600');
+        activeBtn.classList.add('bg-gradient-to-r', 'from-orange-500', 'to-orange-600', 'text-white', 'font-bold', 'shadow-sm', 'shadow-orange-500/20');
+        activeBtn.classList.remove('text-slate-600', 'text-gray-600', 'font-medium', 'hover:text-orange-600', 'hover:bg-orange-50/50');
     }
 }
 

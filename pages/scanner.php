@@ -170,9 +170,7 @@ if (isset($pdo)) {
                         </div>
                         <div>
                             <h3 class="text-sm font-bold text-white">Kamera Belum Aktif</h3>
-                            <p class="text-xs text-slate-400 max-w-sm mt-1">
-                                Klik tombol <strong>"Nyalakan Kamera"</strong> di atas untuk memindai barcode fisik kontainer, stiker SSCC-18, atau QR e-Pass sopir secara real-time.
-                            </p>
+                            <p class="text-xs text-slate-400 mt-1">Nyalakan kamera untuk memindai barcode / QR e-Pass.</p>
                         </div>
                         <button onclick="startCameraScanner()" class="px-4 py-2 bg-gradient-to-r from-blue-600 to-[#0170b9] text-white text-xs font-bold rounded-xl shadow-md hover:from-blue-700 hover:to-[#004b87] transition-all flex items-center space-x-2">
                             <i class="fa-solid fa-video"></i>
@@ -236,14 +234,9 @@ if (isset($pdo)) {
 
             <!-- MODE 3: UJI SAMPEL INSTAN (1-CLICK TESTING) -->
             <div id="modeQuick" class="hidden space-y-4">
-                <div class="bg-blue-50/60 border border-blue-100 rounded-xl p-3.5 text-xs text-blue-800 flex items-start space-x-2.5">
-                    <i class="fa-solid fa-wand-magic-sparkles text-blue-600 mt-0.5 text-sm"></i>
-                    <div>
-                        <strong>Mode Uji Cepat Konsultan:</strong>
-                        <p class="mt-0.5 text-[11.5px] leading-relaxed text-blue-700">
-                            Klik salah satu skenario sampel di bawah ini untuk menguji algoritma parser logistik, verifikasi check digit, dan pencocokan otomatis ke basis data YMS secara instan tanpa perlu mencetak barcode fisik.
-                        </p>
-                    </div>
+                <div class="bg-blue-50/60 border border-blue-100 rounded-xl px-3.5 py-2.5 text-xs text-blue-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-wand-magic-sparkles text-blue-600"></i>
+                    <span><strong>Uji Cepat Sampel:</strong> Pilih kartu barcode/QR di bawah untuk simulasi parser otomatis.</span>
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -384,11 +377,9 @@ if (isset($pdo)) {
             <div>
                 <h3 class="text-sm font-bold text-gray-900 flex items-center">
                     <i class="fa-solid fa-qrcode text-[#0170b9] mr-2"></i>
-                    Galeri Barcode & QR Code Siap Pindai (Interactive Test Targets)
+                    Galeri Barcode &amp; QR Target
                 </h3>
-                <p class="text-xs text-gray-500 mt-0.5">
-                    Gunakan kamera smartphone atau webcam Anda untuk memindai target barcode di bawah ini secara langsung dari layar monitor.
-                </p>
+                <p class="text-xs text-gray-500 mt-0.5">Pindai langsung dengan kamera atau klik untuk simulasikan.</p>
             </div>
             <span class="text-xs text-gray-400 font-mono">JsBarcode &amp; qrcode.js Engine</span>
         </div>
@@ -470,6 +461,12 @@ if (isset($pdo)) {
                 </h3>
             </div>
             <div class="flex items-center space-x-2">
+                <select id="scanLogLimitSelect" onchange="renderScanLogTable()" class="px-2.5 py-1.5 rounded-lg text-xs font-bold bg-gray-50 text-gray-700 border border-gray-200 cursor-pointer">
+                    <option value="10" selected>Tampil: 10</option>
+                    <option value="25">Tampil: 25</option>
+                    <option value="50">Tampil: 50</option>
+                    <option value="all">Semua</option>
+                </select>
                 <button onclick="exportScanLogCSV()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gray-50 text-gray-700 hover:bg-gray-100 border border-gray-200 transition flex items-center space-x-1">
                     <i class="fa-solid fa-file-excel text-emerald-600"></i>
                     <span>Export CSV</span>
@@ -982,11 +979,13 @@ function renderScanLogTable() {
     }
 
     tbody.innerHTML = '';
-    scanLog.slice(0, 10).forEach(item => {
+    const limVal = document.getElementById('scanLogLimitSelect')?.value || '10';
+    const itemsToShow = (limVal === 'all') ? scanLog : scanLog.slice(0, parseInt(limVal, 10) || 10);
+    itemsToShow.forEach((item, idx) => {
         const tr = document.createElement('tr');
         tr.className = "hover:bg-slate-50/70 transition-colors";
         tr.innerHTML = `
-            <td class="py-2.5 px-3 text-center font-bold text-gray-400 font-mono">${item.no}</td>
+            <td class="py-2.5 px-3 text-center font-bold text-gray-400 font-mono">${idx + 1}</td>
             <td class="py-2.5 px-3.5 text-gray-500 font-mono text-[11px]">${item.time}</td>
             <td class="py-2.5 px-3.5 font-bold font-mono text-gray-900">${item.code}</td>
             <td class="py-2.5 px-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">${item.standard.split('(')[0]}</span></td>

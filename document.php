@@ -23,22 +23,54 @@ if (session_status() === PHP_SESSION_NONE) {
 require_once __DIR__ . '/connection.php';
 require_once __DIR__ . '/config/i18n.php';
 
+$allowed_types = ['invoice', 'gate_pass', 'sppb', 'cfs_tally', 'reefer_cert'];
 $type = trim($_GET['type'] ?? 'invoice');
+if (!in_array($type, $allowed_types, true)) {
+    $type = 'invoice';
+}
 $ref_id = trim($_GET['id'] ?? ($_GET['no'] ?? ($_GET['container'] ?? ($_GET['plate'] ?? ($_GET['job'] ?? '')))));
+$from_page = preg_replace('/[^a-z0-9_-]/i', '', $_GET['from'] ?? '');
 $auto_print = isset($_GET['autoprint']) && $_GET['autoprint'] == '1';
+
+$default_back_map = [
+    'invoice'     => 'billing',
+    'gate_pass'   => 'gate',
+    'sppb'        => 'customs',
+    'cfs_tally'   => 'cfs',
+    'reefer_cert' => 'reefer',
+];
+$back_page = $from_page ?: ($default_back_map[$type] ?? 'beranda');
+$back_href = 'dashboard.php?page=' . rawurlencode($back_page);
 
 // Format tanggal & nomor dokumen default
 $doc_date = get_localized_date($current_lang ?? 'id');
 $doc_time = date('H:i') . ' WIB';
 
 // =============================================================================
-// 1. DATA FETCHING SESUAI TIPE DOKUMEN
+// 1. DATA FETCHING SESUAI TIPE DOKUMEN + DAFTAR PILIHAN REAL DATABASE
 // =============================================================================
 
 $doc_data = [];
+$selector_items = [];
+$selector_param = 'no';
+$current_selector_val = '';
 
 if ($type === 'invoice') {
     // 1. FAKTUR PENAGIHAN JASA KEPELABUHANAN (INVOICE)
+    $selector_param = 'no';
+    if (isset($pdo)) {
+        try {
+            $list_stmt = $pdo->query("SELECT invoice_number, container_number, customer_name, total_amount, payment_status FROM billing_invoices ORDER BY id DESC LIMIT 35");
+            foreach ($list_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $amt = number_format((float)$row['total_amount'], 0, ',', '.');
+                $selector_items[] = [
+                    'val'   => $row['invoice_number'],
+                    'label' => $row['invoice_number'] . ' • ' . $row['container_number'] . ' — ' . $row['customer_name'] . ' (Rp ' . $amt . ' | ' . strtoupper($row['payment_status'] ?? 'PENDING') . ')'
+                ];
+            }
+        } catch (Exception $e) {}
+    }
+
     $inv = null;
     if (!empty($ref_id) && isset($pdo)) {
         try {
@@ -56,8 +88,18 @@ if ($type === 'invoice') {
     }
 
     $c_num = $inv['container_number'] ?? 'MSKU9180379';
-    $cust = $inv['customer_name'] ?? 'PT Samudera Logistik Prima';
+    $ctr_meta = null;
+    if (isset($pdo) && !empty($c_num)) {
+        try {
+            $cs = $pdo->prepare("SELECT size_type, owner_company FROM containers WHERE container_number = ? LIMIT 1");
+            $cs->execute([$c_num]);
+            $ctr_meta = $cs->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+    }
+
+    $cust = $inv['customer_name'] ?? ($ctr_meta['owner_company'] ?? 'PT Samudera Logistik Prima');
     $inv_no = $inv['invoice_number'] ?? ('INV-L-' . date('Ymd') . '-82df');
+    $current_selector_val = $inv['invoice_number'] ?? $inv_no;
     $status = strtoupper($inv['payment_status'] ?? 'PENDING');
     $lolo = (float)($inv['lolo_amount'] ?? 200000);
     $storage = (float)($inv['storage_amount'] ?? 275000);
@@ -70,7 +112,8 @@ if ($type === 'invoice') {
         $items[] = ['desc' => 'Jasa Lift-On / Lift-Off & Penanganan Terminal / Gate (HW-08)', 'qty' => 1, 'unit' => 'Paket', 'rate' => $lolo, 'amount' => $lolo];
     }
     if ($storage > 0) {
-        $items[] = ['desc' => 'Jasa Penumpukan Lapangan Container Yard (Storage)', 'qty' => 1, 'unit' => 'Periode', 'rate' => $storage, 'amount' => $storage];
+        $dwell = max(1, (int)($inv['dwell_days'] ?? 1));
+        $items[] = ['desc' => 'Jasa Penumpukan Lapangan Container Yard (' . $dwell . ' Hari)', 'qty' => $dwell, 'unit' => 'Hari', 'rate' => $storage / $dwell, 'amount' => $storage];
     }
     if ($cfs > 0) {
         $items[] = ['desc' => 'Jasa Gudang CFS Stripping/Stuffing & Manajemen Palet SSCC-18', 'qty' => 1, 'unit' => 'Paket', 'rate' => $cfs, 'amount' => $cfs];
@@ -85,7 +128,9 @@ if ($type === 'invoice') {
         $items[] = ['desc' => 'Jasa Penimbangan Kendaraan & SOLAS VGM 80 Ton (Load Cell HW-03)', 'qty' => 1, 'unit' => 'Truk', 'rate' => $weigh, 'amount' => $weigh];
     } elseif ($tot > $sum_items) {
         $extra = $tot - $sum_items;
-        $items[] = ['desc' => 'Biaya Penimbangan VGM 80T / Administrasi EDI / Lainnya', 'qty' => 1, 'unit' => 'Dokumen', 'rate' => $extra, 'amount' => $extra];
+        $svc = trim($inv['service_type'] ?? '');
+        $desc = !empty($svc) && $sum_items == 0 ? $svc : 'Biaya Penimbangan VGM 80T / Administrasi EDI / Lainnya';
+        $items[] = ['desc' => $desc, 'qty' => 1, 'unit' => 'Dokumen', 'rate' => $extra, 'amount' => $extra];
     }
     if (empty($items)) {
         $items[] = ['desc' => ($inv['service_type'] ?? 'Terminal Handling & Storage Service'), 'qty' => 1, 'unit' => 'Paket', 'rate' => $tot, 'amount' => $tot];
@@ -93,19 +138,21 @@ if ($type === 'invoice') {
 
     $ppn = round($tot * 0.11);
     $grand_total = $tot + $ppn + 10000; // Bea Meterai Digital Rp 10.000
+    $inv_hash = abs(crc32($cust));
+    $due_base = !empty($inv['created_at']) ? $inv['created_at'] : 'now';
 
     $doc_data = [
         'title' => 'FAKTUR PENAGIHAN JASA TERMINAL (INVOICE)',
         'doc_no' => $inv_no,
-        'tax_serial' => '010.004-26.' . substr(abs(crc32($inv_no)), 0, 8),
+        'tax_serial' => '010.004-26.' . str_pad(substr((string)abs(crc32($inv_no)), 0, 8), 8, '0', STR_PAD_LEFT),
         'customer' => $cust,
-        'customer_npwp' => '01.382.910.4-054.000',
-        'customer_addr' => 'Kawasan Industri Jababeka Blok C-12, Cikarang, Bekasi, Jawa Barat',
+        'customer_npwp' => '01.' . str_pad($inv_hash % 999, 3, '0', STR_PAD_LEFT) . '.' . str_pad(($inv_hash >> 3) % 999, 3, '0', STR_PAD_LEFT) . '.' . ($inv_hash % 9) . '-054.000',
+        'customer_addr' => 'Kawasan Industri Cikarang / Jababeka Koridor Timur, Jawa Barat',
         'container_number' => $c_num,
-        'size_type' => '40FT HIGH CUBE',
+        'size_type' => $ctr_meta['size_type'] ?? '40FT HIGH CUBE',
         'service_type' => $inv['service_type'] ?? 'Terminal Handling & Storage Service',
         'status' => $status,
-        'due_date' => date('d F Y', strtotime('+14 days')),
+        'due_date' => date('d F Y', strtotime($due_base . ' +14 days')),
         'items' => $items,
         'subtotal' => $tot,
         'ppn' => $ppn,
@@ -116,11 +163,25 @@ if ($type === 'invoice') {
 
 } elseif ($type === 'gate_pass') {
     // 2. SURAT JALAN & EQUIPMENT INTERCHANGE RECEIPT (EIR / GATE PASS)
+    $selector_param = 'plate';
+    if (isset($pdo)) {
+        try {
+            $list_stmt = $pdo->query("SELECT license_plate, container_number, driver_name, company, weight_gross, status FROM trucks ORDER BY (weight_gross > 0) DESC, (status IN ('in_yard','loading','weighed','gate_out')) DESC, id DESC LIMIT 40");
+            foreach ($list_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $wt_lbl = ((float)$row['weight_gross'] > 0) ? number_format((float)$row['weight_gross'], 0, ',', '.') . ' kg' : 'Belum Timbang';
+                $selector_items[] = [
+                    'val'   => $row['license_plate'],
+                    'label' => $row['license_plate'] . ' • ' . ($row['container_number'] ?: '-') . ' — ' . ($row['driver_name'] ?: 'Sopir') . ' (' . $wt_lbl . ')'
+                ];
+            }
+        } catch (Exception $e) {}
+    }
+
     $truk = null;
-    $plate = trim($_GET['plate'] ?? '');
+    $plate = trim($_GET['plate'] ?? ($_GET['container'] ?? ($_GET['id'] ?? '')));
     if (!empty($plate) && isset($pdo)) {
         try {
-            $stmt = $pdo->prepare("SELECT * FROM trucks WHERE license_plate = ? OR container_number = ? LIMIT 1");
+            $stmt = $pdo->prepare("SELECT * FROM trucks WHERE license_plate = ? OR container_number = ? ORDER BY id DESC LIMIT 1");
             $stmt->execute([$plate, $plate]);
             $truk = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
@@ -128,86 +189,165 @@ if ($type === 'invoice') {
 
     if (!$truk && isset($pdo)) {
         try {
-            $stmt = $pdo->query("SELECT * FROM trucks WHERE status != 'scheduled' ORDER BY id DESC LIMIT 1");
+            $stmt = $pdo->query("SELECT * FROM trucks WHERE status != 'scheduled' ORDER BY (weight_gross > 0) DESC, (status IN ('in_yard','loading','weighed','gate_out')) DESC, id DESC LIMIT 1");
             $truk = $stmt->fetch(PDO::FETCH_ASSOC);
         } catch (Exception $e) {}
     }
 
     $c_num = $truk['container_number'] ?? 'MAEU9185181';
     $t_plate = $truk['license_plate'] ?? ($plate ?: 'B 2918 CKR');
+    $current_selector_val = $t_plate;
     $driver = !empty($truk['driver_name']) ? $truk['driver_name'] : 'Zulfikar Jafarudin Fatah';
-    $gross = (float)($truk['weight_gross'] ?? 34850);
-    $tare = (float)($truk['weight_tare'] ?? 12500);
+    $gross = (float)($truk['weight_gross'] ?? 0);
+    $tare = (!empty($truk['weight_tare']) && (float)$truk['weight_tare'] > 0) ? (float)$truk['weight_tare'] : ($gross > 0 ? 12500.0 : 0.0);
     $net = max(0, $gross - $tare);
+
+    $ctr_meta = null;
+    if (isset($pdo) && !empty($c_num)) {
+        try {
+            $cs = $pdo->prepare("SELECT size_type, iso_code, seal_number, block, bay, row, tier FROM containers WHERE container_number = ? LIMIT 1");
+            $cs->execute([$c_num]);
+            $ctr_meta = $cs->fetch(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {}
+    }
+
+    $blk = !empty($ctr_meta['block']) ? $ctr_meta['block'] : ($truk['target_block'] ?? 'B');
+    if (!empty($ctr_meta['bay'])) {
+        $yard_slot = 'Blok ' . $blk . ' / Bay ' . str_pad((string)$ctr_meta['bay'], 2, '0', STR_PAD_LEFT) . ' - Row ' . str_pad((string)$ctr_meta['row'], 2, '0', STR_PAD_LEFT) . ' - Tier ' . str_pad((string)$ctr_meta['tier'], 2, '0', STR_PAD_LEFT);
+    } elseif (in_array(strtoupper((string)$blk), ['OUTSIDE', 'GATE'], true)) {
+        $yard_slot = strtoupper((string)$blk) . ' — Antrean / Gate Check-In';
+    } else {
+        $yard_slot = 'Blok ' . $blk . ' (Alokasi Yard Stacking)';
+    }
+
+    $p_hash = abs(crc32($t_plate));
+    $size_lbl = !empty($ctr_meta['size_type']) ? $ctr_meta['size_type'] . (!empty($ctr_meta['iso_code']) ? ' (' . $ctr_meta['iso_code'] . ')' : '') : '40FT HIGH CUBE (45G1)';
 
     $doc_data = [
         'title' => 'SURAT JALAN & TANDA TERIMA ALAT (GATE PASS / EIR)',
-        'doc_no' => 'EIR-IN-' . date('Ymd') . '-' . substr(abs(crc32($t_plate)), 0, 4),
-        'transporter' => $truk['transporter'] ?? 'PT Samudera Logistik Prima',
+        'doc_no' => 'EIR-IN-' . date('Ymd') . '-' . str_pad(substr((string)$p_hash, 0, 4), 4, '0', STR_PAD_LEFT),
+        'transporter' => !empty($truk['company']) ? $truk['company'] : (!empty($truk['transporter']) ? $truk['transporter'] : 'PT Samudera Logistik Prima'),
         'license_plate' => $t_plate,
         'driver_name' => $driver,
-        'driver_sim' => 'SIM B2 Umum #' . (982100 + rand(10, 99)),
-        'rfid_tid' => $truk['rfid_tag'] ?? 'E28011700000020489110014',
+        'driver_sim' => 'SIM B2 Umum #' . (900000 + ($p_hash % 99999)),
+        'rfid_tid' => !empty($truk['rfid_tag']) ? $truk['rfid_tag'] : 'E28011700000020489110014',
         'container_number' => $c_num,
-        'seal_number' => 'SL-CIDP-' . substr(abs(crc32($c_num)), 0, 5),
-        'size_type' => '40FT HIGH CUBE (45G1)',
-        'gate_lane' => 'Gate 01 (Lane A - Inbound Heavy)',
-        'weight_gross' => $gross ?: 34850,
-        'weight_tare' => $tare ?: 12500,
-        'weight_net' => $net ?: 22350,
-        'yard_slot' => 'Blok B / Bay 04 - Row 02 - Tier 01',
-        'equipment' => 'Reach Stacker RS-02 (Agus Setiawan)',
-        'vgm_cert' => 'VGM-SOLAS-' . date('Ymd') . '-OK',
+        'seal_number' => !empty($ctr_meta['seal_number']) ? $ctr_meta['seal_number'] : 'SL-CIDP-' . str_pad(substr((string)abs(crc32($c_num)), 0, 5), 5, '0', STR_PAD_LEFT),
+        'size_type' => $size_lbl,
+        'gate_lane' => (($truk['job_type'] ?? '') === 'pick_up') ? 'Gate 02 (Lane B - Outbound Heavy)' : 'Gate 01 (Lane A - Inbound Heavy)',
+        'weight_gross' => $gross,
+        'weight_tare' => $tare,
+        'weight_net' => $net,
+        'yard_slot' => $yard_slot,
+        'equipment' => (strtoupper((string)$blk) === 'S' || strtoupper((string)$blk) === 'D') ? 'RMGC Rail Crane 01' : 'Reach Stacker RS-02',
+        'vgm_cert' => ($gross > 0) ? ('VGM-SOLAS-' . date('Ymd') . '-OK') : 'MENUNGGU TIMBANG VGM',
         'condition' => 'BAIK / UTUH (CLEAN - NO APPARENT DAMAGE)'
     ];
 
 } elseif ($type === 'sppb') {
     // 3. SURAT PERSETUJUAN PENGELUARAN BARANG (SPPB CEISA 4.0 DJBC)
-    $c_num = trim($_GET['container'] ?? ($_GET['id'] ?? ($_GET['no'] ?? 'MSKU7829104')));
-    $ctr_db = null;
-    if (isset($pdo) && !empty($c_num)) {
+    $selector_param = 'container';
+    if (isset($pdo)) {
         try {
-            $stmt = $pdo->prepare("SELECT * FROM containers WHERE container_number = ? LIMIT 1");
-            $stmt->execute([$c_num]);
-            $ctr_db = $stmt->fetch(PDO::FETCH_ASSOC);
+            $list_stmt = $pdo->query("SELECT container_number, owner_company, size_type, customs_status FROM containers ORDER BY (customs_status = 'SPPB_CLEARED') DESC, id DESC LIMIT 40");
+            foreach ($list_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $selector_items[] = [
+                    'val'   => $row['container_number'],
+                    'label' => $row['container_number'] . ' • ' . ($row['owner_company'] ?: 'Importir') . ' (' . ($row['customs_status'] ?: 'CLEARANCE') . ')'
+                ];
+            }
         } catch (Exception $e) {}
     }
 
+    $c_num = trim($_GET['container'] ?? ($_GET['id'] ?? ($_GET['no'] ?? '')));
+    $ctr_db = null;
+    if (isset($pdo)) {
+        try {
+            if (!empty($c_num)) {
+                $stmt = $pdo->prepare("SELECT * FROM containers WHERE container_number = ? LIMIT 1");
+                $stmt->execute([$c_num]);
+                $ctr_db = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+            if (!$ctr_db) {
+                $stmt = $pdo->query("SELECT * FROM containers ORDER BY (customs_status = 'SPPB_CLEARED') DESC, id DESC LIMIT 1");
+                $ctr_db = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
+        } catch (Exception $e) {}
+    }
+
+    $c_num = $ctr_db['container_number'] ?? ($c_num ?: 'MSKU7829104');
+    $current_selector_val = $c_num;
+    $c_hash = abs(crc32($c_num));
     $importer = !empty($ctr_db['owner_company']) ? $ctr_db['owner_company'] : 'PT Unilever Indonesia Tbk';
-    $seal = !empty($ctr_db['seal_number']) ? $ctr_db['seal_number'] : ('DJBC-SEAL-' . rand(10000, 99999));
+    $seal = !empty($ctr_db['seal_number']) ? $ctr_db['seal_number'] : ('DJBC-SEAL-' . str_pad((string)($c_hash % 90000 + 10000), 5, '0', STR_PAD_LEFT));
     $size = !empty($ctr_db['size_type']) ? $ctr_db['size_type'] : "40' High Cube";
-    $commodity = !empty($ctr_db['cargo_type']) ? $ctr_db['cargo_type'] : 'Bahan Baku Sabun & Personal Care Products (Non-Lartas)';
-    $channel = ($ctr_db['customs_status'] ?? '') === 'RED_LANE' ? 'JALUR MERAH (PEMERIKSAAN FISIK BEHANDLE)' : 'JALUR HIJAU (AUTOMATIC CLEARANCE CEISA 4.0)';
+    $commodity_raw = !empty($ctr_db['cargo_type']) ? strtoupper($ctr_db['cargo_type']) : 'GENERAL';
+    $commodity = match ($commodity_raw) {
+        'REEFER' => 'Kargo Berpendingin (Cold Chain Reefer - Temperature Controlled)',
+        'DG'     => 'Kargo Bahan Kimia / Dangerous Goods (IMO Class)',
+        'EMPTY'  => 'Peti Kemas Kosong (Empty Container Repositioning)',
+        default  => (!empty($ctr_db['cargo_type']) ? $ctr_db['cargo_type'] . ' — General Container Cargo (Non-Lartas)' : 'Bahan Baku Industri & Kargo Kontainer Umum')
+    };
+    $cust_st = strtoupper($ctr_db['customs_status'] ?? 'SPPB_CLEARED');
+    if ($cust_st === 'RED_LANE') {
+        $channel = 'JALUR MERAH (PEMERIKSAAN FISIK & X-RAY ZONA 5)';
+        $stamp_label = 'RED LANE';
+        $ntpn_status = 'MENUNGGU LHP & BEHANDLE';
+    } elseif ($cust_st === 'AWAITING_CLEARANCE') {
+        $channel = 'PROSES PENELITIAN DOKUMEN CEISA 4.0';
+        $stamp_label = 'IN CLEARANCE';
+        $ntpn_status = 'VERIFIKASI BILLING PABEAN';
+    } else {
+        $channel = 'JALUR HIJAU (AUTOMATIC CLEARANCE CEISA 4.0)';
+        $stamp_label = 'SPPB CLEARED';
+        $ntpn_status = 'LUNAS (NTPN: ' . strtoupper(substr(md5($c_num), 0, 16)) . ')';
+    }
+    $pib_ts = !empty($ctr_db['gate_in_time']) ? strtotime($ctr_db['gate_in_time']) : (!empty($ctr_db['created_at']) ? strtotime($ctr_db['created_at']) : time());
 
     $doc_data = [
         'title' => 'SURAT PERSETUJUAN PENGELUARAN BARANG (SPPB)',
-        'doc_no' => 'SPPB-' . rand(100000, 999999) . '/KPU.01/' . date('Y'),
-        'pib_no' => '042819/KPU.01/' . date('Y'),
-        'pib_date' => date('d-m-Y'),
-        'pib_aju' => '000020-001234-' . date('Ymd') . '-000101',
+        'doc_no' => 'SPPB-' . str_pad((string)(100000 + ($c_hash % 899999)), 6, '0', STR_PAD_LEFT) . '/KPU.01/' . date('Y', $pib_ts),
+        'pib_no' => '04' . str_pad((string)($c_hash % 9999), 4, '0', STR_PAD_LEFT) . '/KPU.01/' . date('Y', $pib_ts),
+        'pib_date' => date('d-m-Y', $pib_ts),
+        'pib_aju' => '000020-001234-' . date('Ymd', $pib_ts) . '-' . str_pad((string)($ctr_db['id'] ?? ($c_hash % 999)), 6, '0', STR_PAD_LEFT),
         'importer' => $importer,
-        'importer_npwp' => '01.000.015.8-054.000',
-        'importer_addr' => 'Kawasan Industri Jababeka Tahap II Blok J-5, Cikarang, Bekasi',
+        'importer_npwp' => '01.' . str_pad($c_hash % 999, 3, '0', STR_PAD_LEFT) . '.' . str_pad(($c_hash >> 2) % 999, 3, '0', STR_PAD_LEFT) . '.8-054.000',
+        'importer_addr' => 'Kawasan Industri Cikarang / Jababeka / MM2100, Bekasi',
         'container_number' => $c_num,
         'size_type' => $size,
         'seal_number' => $seal,
         'commodity' => $commodity,
         'channel' => $channel,
-        'ntpn_status' => 'LUNAS (NTPN: 9A8B7C6D5E4F3A2B)',
-        'customs_office' => 'KANTOR PENGAWASAN DAN PELAYANAN TIPE MADYA PABEAN MARUNDA / CIKARANG',
+        'customs_status' => $cust_st,
+        'stamp_label' => $stamp_label,
+        'ntpn_status' => $ntpn_status,
+        'customs_office' => 'KANTOR PENGAWASAN DAN PELAYANAN TIPE MADYA PABEAN CIKARANG',
         'officer_name' => 'HENDRA KUSUMA, S.E.',
         'officer_nip' => '19850412 200801 1 003'
     ];
 
 } elseif ($type === 'cfs_tally') {
     // 4. CFS TALLY SHEET & STRIPPING MANIFEST
-    $c_num = trim($_GET['container'] ?? ($_GET['id'] ?? 'HLCU9181850'));
+    $selector_param = 'job';
+    if (isset($pdo)) {
+        try {
+            $list_stmt = $pdo->query("SELECT job_number, container_number, job_type, shipper_consignee, status FROM cfs_jobs ORDER BY id DESC LIMIT 30");
+            foreach ($list_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $selector_items[] = [
+                    'val'   => $row['job_number'],
+                    'label' => $row['job_number'] . ' • ' . $row['container_number'] . ' — ' . $row['shipper_consignee'] . ' (' . $row['job_type'] . ')'
+                ];
+            }
+        } catch (Exception $e) {}
+    }
+
+    $c_num = trim($_GET['container'] ?? ($_GET['id'] ?? ''));
     $job_param = trim($_GET['job'] ?? ($_GET['no'] ?? ''));
     $job_db = null;
     if (isset($pdo)) {
         try {
             if (!empty($job_param)) {
-                $stmt = $pdo->prepare("SELECT * FROM cfs_jobs WHERE job_number = ? OR container_number = ? LIMIT 1");
+                $stmt = $pdo->prepare("SELECT * FROM cfs_jobs WHERE job_number = ? OR container_number = ? ORDER BY id DESC LIMIT 1");
                 $stmt->execute([$job_param, $job_param]);
                 $job_db = $stmt->fetch(PDO::FETCH_ASSOC);
             } elseif (!empty($c_num)) {
@@ -215,45 +355,111 @@ if ($type === 'invoice') {
                 $stmt->execute([$c_num]);
                 $job_db = $stmt->fetch(PDO::FETCH_ASSOC);
             }
+            if (!$job_db) {
+                $stmt = $pdo->query("SELECT * FROM cfs_jobs ORDER BY id DESC LIMIT 1");
+                $job_db = $stmt->fetch(PDO::FETCH_ASSOC);
+            }
         } catch (Exception $e) {}
     }
 
-    $c_num = $job_db['container_number'] ?? $c_num;
-    $job_no = $job_db['job_number'] ?? ('JO-STP-' . date('Y') . '-008');
-    $consignee = $job_db['shipper_consignee'] ?? 'PT Astra Honda Motor (Karawang Plant)';
-    $ramp = $job_db['dock_ramp'] ?? 'Rampa D-02 (Indoor CFS Warehouse 8.500 m²)';
-    $tallyman = $job_db['operator_name'] ?? 'Juan Gamaliel, S.Log.';
-    $pkgs = (int)($job_db['total_packages'] ?? 184);
-    $weight = (float)($job_db['total_weight_kg'] ?? 4190);
+    $c_num = $job_db['container_number'] ?? ($c_num ?: 'CMAU7234910');
+    $job_no = $job_db['job_number'] ?? 'CFS-JOB-2610-03';
+    $current_selector_val = $job_no;
+    $consignee = $job_db['shipper_consignee'] ?? 'PT Kalbe Farma Tbk';
+    $ramp = $job_db['dock_ramp'] ?? 'Dock 01 (Gudang CFS 4.000 m²)';
+    $tallyman = $job_db['operator_name'] ?? 'Tally Master Rudi';
+    $pkgs = (int)($job_db['total_packages'] ?? 120);
+    $weight = (float)($job_db['total_weight_kg'] ?? 12400);
+    $job_type = strtoupper($job_db['job_type'] ?? 'STRIPPING');
+    $job_status = strtoupper($job_db['status'] ?? 'COMPLETED');
+
+    // Ambil baris palet nyata dari cfs_pallets bila tersedia
+    $pallets = [];
+    if (isset($pdo) && !empty($job_db['id'])) {
+        try {
+            $ps = $pdo->prepare("SELECT pallet_sscc, commodity_name, carton_count, gross_weight_kg, status, rack_location FROM cfs_pallets WHERE job_id = ? OR container_origin = ? ORDER BY id ASC");
+            $ps->execute([(int)$job_db['id'], $c_num]);
+            foreach ($ps->fetchAll(PDO::FETCH_ASSOC) as $pr) {
+                $pallets[] = [
+                    'sscc'   => $pr['pallet_sscc'],
+                    'desc'   => $pr['commodity_name'],
+                    'qty'    => (int)$pr['carton_count'],
+                    'weight' => number_format((float)$pr['gross_weight_kg'], 0, ',', '.') . ' kg',
+                    'cond'   => strtoupper($pr['status'] ?: 'BAIK (OK)'),
+                    'slot'   => $pr['rack_location'] ?: 'Rak A-01'
+                ];
+            }
+        } catch (Exception $e) {}
+    }
+
+    if (empty($pallets)) {
+        // Susun rincian palet proporsional sesuai total_packages & total_weight_kg dari Job DB
+        $job_seed = abs(crc32($job_no));
+        $base_sscc = 389912345000000100 + (($job_db['id'] ?? 1) * 10);
+        $note_line = trim(strtok((string)($job_db['tally_notes'] ?? ''), "\n"));
+        $cargo_prefix = !empty($note_line) ? mb_strimwidth($note_line, 0, 38, '...') : ($job_type . ' Cargo — ' . $consignee);
+        $parts = 4;
+        $rem_qty = $pkgs;
+        $rem_wt = (int)round($weight);
+        $rack_prefix = ['A', 'B', 'C', 'D'][($job_seed) % 4];
+        for ($i = 1; $i <= $parts; $i++) {
+            $q = ($i === $parts) ? max(1, $rem_qty) : max(1, (int)round($pkgs / $parts));
+            $w = ($i === $parts) ? max(10, $rem_wt) : max(10, (int)round($weight / $parts));
+            $rem_qty -= $q;
+            $rem_wt -= $w;
+            $pallets[] = [
+                'sscc'   => '(00)' . ($base_sscc + $i),
+                'desc'   => 'Lot #' . $i . ' — ' . $cargo_prefix,
+                'qty'    => $q,
+                'weight' => number_format($w, 0, ',', '.') . ' kg',
+                'cond'   => 'BAIK (OK)',
+                'slot'   => 'Rak ' . $rack_prefix . '-0' . $i
+            ];
+        }
+    }
 
     $doc_data = [
-        'title' => 'CFS CARGO TALLY SHEET & STRIPPING MANIFEST',
-        'doc_no' => 'TALLY-CFS-' . date('Ymd') . '-' . substr(abs(crc32($c_num)), 0, 4),
+        'title' => 'CFS CARGO TALLY SHEET & ' . $job_type . ' MANIFEST',
+        'doc_no' => 'TALLY-CFS-' . date('Ymd') . '-' . str_pad(substr((string)abs(crc32($job_no)), 0, 4), 4, '0', STR_PAD_LEFT),
         'job_no' => $job_no,
+        'job_type' => $job_type,
+        'bl_number' => $job_db['bl_number'] ?? '-',
         'container_number' => $c_num,
         'size_type' => '40FT DRY VAN',
         'consignee' => $consignee,
         'ramp_id' => $ramp,
         'tallyman' => $tallyman,
         'supervisor' => 'Armansyah Muchtarrom, S.T.',
-        'pallets' => [
-            ['sscc' => '(00)389912345000000101', 'desc' => 'Automotive Engine Parts Box A', 'qty' => 48, 'weight' => '1.240 kg', 'cond' => 'BAIK (OK)', 'slot' => 'Rak R-01'],
-            ['sscc' => '(00)389912345000000102', 'desc' => 'Transmission Gears Assembly', 'qty' => 36, 'weight' => '1.180 kg', 'cond' => 'BAIK (OK)', 'slot' => 'Rak R-02'],
-            ['sscc' => '(00)389912345000000103', 'desc' => 'Electrical Wiring Harness Kit', 'qty' => 60, 'weight' => '850 kg', 'cond' => 'BAIK (OK)', 'slot' => 'Rak R-03'],
-            ['sscc' => '(00)389912345000000104', 'desc' => 'Brake Caliper Sub-Assembly', 'qty' => 40, 'weight' => '920 kg', 'cond' => 'BAIK (OK)', 'slot' => 'Rak R-04']
-        ],
-        'total_koli' => $pkgs ?: 184,
+        'pallets' => $pallets,
+        'total_koli' => $pkgs,
         'total_weight' => number_format($weight, 0, ',', '.') . ' kg',
-        'status' => 'STRIPPING COMPLETED & PALLETS REGISTERED'
+        'status' => $job_status
     ];
 
 } elseif ($type === 'reefer_cert') {
     // 5. REEFER COLD CHAIN INTEGRITY CERTIFICATE (HACCP)
-    $c_num = trim($_GET['container'] ?? ($_GET['id'] ?? 'MAEU9185181'));
+    $selector_param = 'container';
+    if (isset($pdo)) {
+        try {
+            $list_stmt = $pdo->query("SELECT container_number, owner_company, size_type, cargo_type FROM containers WHERE LOWER(cargo_type) LIKE '%reefer%' OR UPPER(block) LIKE '%REEFER%' OR size_type LIKE '%RF%' ORDER BY id DESC LIMIT 30");
+            foreach ($list_stmt->fetchAll(PDO::FETCH_ASSOC) as $row) {
+                $selector_items[] = [
+                    'val'   => $row['container_number'],
+                    'label' => $row['container_number'] . ' • ' . ($row['owner_company'] ?: 'Shipper') . ' (' . ($row['size_type'] ?: 'Reefer') . ')'
+                ];
+            }
+        } catch (Exception $e) {}
+    }
+
+    $c_num = trim($_GET['container'] ?? ($_GET['id'] ?? ($_GET['no'] ?? '')));
     $rf_db = null;
     $ctr_db = null;
-    if (isset($pdo) && !empty($c_num)) {
+    if (isset($pdo)) {
         try {
+            if (empty($c_num)) {
+                $rf_first = $pdo->query("SELECT container_number FROM reefer_telemetry ORDER BY id DESC LIMIT 1")->fetchColumn();
+                $c_num = $rf_first ?: ($selector_items[0]['val'] ?? 'MAEU9185181');
+            }
             $stmt = $pdo->prepare("SELECT * FROM reefer_telemetry WHERE container_number = ? ORDER BY id DESC LIMIT 1");
             $stmt->execute([$c_num]);
             $rf_db = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -264,30 +470,62 @@ if ($type === 'invoice') {
         } catch (Exception $e) {}
     }
 
-    $socket = $rf_db['socket_id'] ?? 'Socket RF-003 (Platform 380V/32A)';
-    $set_temp = isset($rf_db['set_temp_c']) ? number_format((float)$rf_db['set_temp_c'], 1) . '°C' : '-18.0°C';
-    $avg_temp = isset($rf_db['supply_temp_c']) ? number_format((float)$rf_db['supply_temp_c'], 1) . '°C' : '-18.4°C';
+    $c_num = $c_num ?: 'MAEU9185181';
+    $current_selector_val = $c_num;
+    $r_hash = abs(crc32($c_num));
+    $sock_num = str_pad((string)(($r_hash % 30) + 1), 2, '0', STR_PAD_LEFT);
+    $rack_num = str_pad((string)(($r_hash % 10) + 1), 2, '0', STR_PAD_LEFT);
+
+    $base_set = ($r_hash % 2 === 0) ? -18.0 : -20.0;
+    $base_sup = $base_set - 0.3;
+    $socket = $rf_db['socket_id'] ?? ('Rack R-' . $rack_num . ' / Soket #' . $sock_num . ' (Marechal 380V/32A)');
+    $set_val = isset($rf_db['set_temp_c']) ? (float)$rf_db['set_temp_c'] : $base_set;
+    $sup_val = isset($rf_db['supply_temp_c']) ? (float)$rf_db['supply_temp_c'] : $base_sup;
+    $set_temp = number_format($set_val, 1) . '°C';
+    $avg_temp = number_format($sup_val, 1) . '°C';
     $shipper = $ctr_db['owner_company'] ?? 'PT Dua Putra Utama Makmur Tbk';
-    $commodity = $ctr_db['cargo_type'] ?? 'Frozen Vannamei Shrimp (-18.0°C HACCP Export Grade)';
+    $commodity = (!empty($ctr_db['cargo_type']) && strtolower($ctr_db['cargo_type']) !== 'reefer')
+        ? $ctr_db['cargo_type']
+        : ($ctr_db['size_type'] ?? 'Frozen Cold Chain Cargo') . ' (' . $set_temp . ' HACCP Grade)';
+    $hrs = 24 + ($r_hash % 48);
+    $kwh = number_format($hrs * 3.9, 1);
 
     $doc_data = [
         'title' => 'REEFER COLD CHAIN HACCP INTEGRITY CERTIFICATE',
-        'doc_no' => 'HACCP-RF-' . date('Ymd') . '-' . substr(abs(crc32($c_num)), 0, 4),
+        'doc_no' => 'HACCP-RF-' . date('Ymd') . '-' . str_pad(substr((string)$r_hash, 0, 4), 4, '0', STR_PAD_LEFT),
         'container_number' => $c_num,
         'shipper' => $shipper,
         'commodity' => $commodity,
         'socket_id' => $socket,
         'set_point' => $set_temp,
         'avg_temp' => $avg_temp,
-        'temp_min' => '-18.8°C',
-        'temp_max' => '-18.1°C',
-        'total_hours' => '48 Jam 15 Menit',
-        'total_kwh' => '192.4 kWh',
+        'temp_min' => number_format($sup_val - 0.4, 1) . '°C',
+        'temp_max' => number_format($sup_val + 0.3, 1) . '°C',
+        'total_hours' => $hrs . ' Jam ' . (($r_hash % 5) * 10 + 10) . ' Menit',
+        'total_kwh' => $kwh . ' kWh',
         'technician' => 'Armansyah Muchtarrom',
         'qa_inspector' => 'Naufal Andika Heditya, S.Log.',
         'compliance' => 'MEMENUHI SYARAT (100% HACCP COMPLIANT - ZERO TEMPERATURE ABUSE)'
     ];
 }
+
+// Hitung navigasi Sebelumnya / Berikutnya berdasarkan daftar $selector_items
+$prev_val = null;
+$next_val = null;
+if (!empty($selector_items)) {
+    $vals = array_column($selector_items, 'val');
+    $cur_idx = array_search($current_selector_val, $vals, true);
+    if ($cur_idx === false) {
+        $cur_idx = 0;
+    }
+    if ($cur_idx > 0) {
+        $prev_val = $vals[$cur_idx - 1];
+    }
+    if ($cur_idx < count($vals) - 1) {
+        $next_val = $vals[$cur_idx + 1];
+    }
+}
+$from_qs = $from_page ? '&from=' . rawurlencode($from_page) : '';
 
 function terbilangRupiah($n) {
     $satuan = ["", "Satu", "Dua", "Tiga", "Empat", "Lima", "Enam", "Tujuh", "Delapan", "Sembilan", "Sepuluh", "Sebelas"];
@@ -432,34 +670,84 @@ function terbilangRupiah($n) {
     <!-- FLOATING ACTION BAR: PENGENDALI CETAK & NAVIGASI DOKUMEN (NO-PRINT)     -->
     <!-- ======================================================================= -->
     <header class="no-print sticky top-0 z-50 bg-white text-slate-800 border-b border-slate-200 shadow-2xs">
-        <div class="max-w-[1050px] mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-3">
-            <div class="flex items-center gap-2.5">
-                <a href="dashboard.php?page=billing" class="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition border border-slate-200">
-                    <i class="fa-solid fa-arrow-left text-[10px]"></i>
-                    <span>Kembali ke Dashboard</span>
-                </a>
-                <span class="text-slate-300">|</span>
-                <div class="flex items-center gap-1.5 text-xs">
-                    <span class="font-extrabold text-orange-600 uppercase tracking-wide">Pusat Cetak Dokumen Resmi:</span>
-                    <span class="text-slate-700 font-bold"><?= htmlspecialchars($doc_data['title']) ?></span>
+        <div class="max-w-[1050px] mx-auto px-4 py-2.5 space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5">
+                    <a href="<?= htmlspecialchars($back_href) ?>" class="px-3 py-1.5 rounded-lg bg-slate-50 hover:bg-slate-100 text-slate-700 text-xs font-bold flex items-center gap-1.5 transition border border-slate-200">
+                        <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                        <span>Kembali</span>
+                    </a>
+                    <span class="text-slate-300">|</span>
+                    <div class="flex items-center gap-1.5 text-xs">
+                        <span class="font-extrabold text-orange-600 uppercase tracking-wide">Dokumen Resmi A4:</span>
+                        <span class="text-slate-700 font-bold truncate max-w-[260px]"><?= htmlspecialchars($doc_data['title']) ?></span>
+                    </div>
+                </div>
+
+                <!-- Pilihan Cepat Format Dokumen Lain -->
+                <div class="flex items-center gap-1.5 flex-wrap text-xs">
+                    <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10.5px]">
+                        <a href="document.php?type=invoice<?= $from_qs ?>" class="px-2.5 py-1 rounded-md <?= ($type === 'invoice') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Faktur Billing</a>
+                        <a href="document.php?type=gate_pass<?= $from_qs ?>" class="px-2.5 py-1 rounded-md <?= ($type === 'gate_pass') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Surat Jalan EIR</a>
+                        <a href="document.php?type=sppb<?= $from_qs ?>" class="px-2.5 py-1 rounded-md <?= ($type === 'sppb') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">SPPB Bea Cukai</a>
+                        <a href="document.php?type=cfs_tally<?= $from_qs ?>" class="px-2.5 py-1 rounded-md <?= ($type === 'cfs_tally') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Tally CFS</a>
+                        <a href="document.php?type=reefer_cert<?= $from_qs ?>" class="px-2.5 py-1 rounded-md <?= ($type === 'reefer_cert') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Reefer HACCP</a>
+                    </div>
+
+                    <button type="button" onclick="window.print()" class="px-3.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Cetak PDF (A4)</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Pilihan Cepat Format Dokumen Lain -->
-            <div class="flex items-center gap-1.5 flex-wrap text-xs">
-                <div class="flex items-center bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-[10.5px]">
-                    <a href="document.php?type=invoice" class="px-2.5 py-1 rounded-md <?= ($type === 'invoice') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Faktur Billing</a>
-                    <a href="document.php?type=gate_pass" class="px-2.5 py-1 rounded-md <?= ($type === 'gate_pass') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Surat Jalan EIR</a>
-                    <a href="document.php?type=sppb" class="px-2.5 py-1 rounded-md <?= ($type === 'sppb') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">SPPB Bea Cukai</a>
-                    <a href="document.php?type=cfs_tally" class="px-2.5 py-1 rounded-md <?= ($type === 'cfs_tally') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Tally CFS</a>
-                    <a href="document.php?type=reefer_cert" class="px-2.5 py-1 rounded-md <?= ($type === 'reefer_cert') ? 'bg-orange-600 text-white font-bold shadow-2xs' : 'text-slate-600 hover:text-slate-900 font-semibold' ?>">Reefer HACCP</a>
-                </div>
+            <?php if (!empty($selector_items)): ?>
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-xs">
+                <form method="GET" action="document.php" class="flex items-center gap-2 flex-1 min-w-0">
+                    <input type="hidden" name="type" value="<?= htmlspecialchars($type) ?>">
+                    <?php if ($from_page): ?>
+                    <input type="hidden" name="from" value="<?= htmlspecialchars($from_page) ?>">
+                    <?php endif; ?>
+                    <label for="docRecordSelect" class="text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap flex items-center gap-1.5">
+                        <i class="fa-solid fa-database text-[#0170b9]"></i>
+                        <span>Pilih Data (<?= count($selector_items) ?>):</span>
+                    </label>
+                    <select id="docRecordSelect" name="<?= htmlspecialchars($selector_param) ?>" onchange="this.form.submit()" class="flex-1 min-w-[220px] max-w-[540px] px-2.5 py-1 bg-slate-50 hover:bg-white border border-slate-200 rounded-lg text-xs font-mono font-semibold text-slate-800 focus:outline-none focus:border-orange-500 cursor-pointer">
+                        <?php foreach ($selector_items as $opt): ?>
+                        <option value="<?= htmlspecialchars($opt['val']) ?>" <?= ($opt['val'] === $current_selector_val) ? 'selected' : '' ?>>
+                            <?= htmlspecialchars($opt['label']) ?>
+                        </option>
+                        <?php endforeach; ?>
+                    </select>
+                </form>
 
-                <button type="button" onclick="window.print()" class="px-3.5 py-1.5 rounded-lg bg-orange-600 hover:bg-orange-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow-2xs transition cursor-pointer">
-                    <i class="fa-solid fa-print"></i>
-                    <span>Cetak / Simpan PDF (A4)</span>
-                </button>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <?php if ($prev_val !== null): ?>
+                    <a href="document.php?type=<?= urlencode($type) ?>&<?= urlencode($selector_param) ?>=<?= urlencode($prev_val) ?><?= $from_qs ?>" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] flex items-center gap-1 transition">
+                        <i class="fa-solid fa-chevron-left text-[9px]"></i>
+                        <span>Sebelumnya</span>
+                    </a>
+                    <?php else: ?>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-50 text-slate-300 font-bold text-[11px] flex items-center gap-1 cursor-not-allowed">
+                        <i class="fa-solid fa-chevron-left text-[9px]"></i>
+                        <span>Sebelumnya</span>
+                    </span>
+                    <?php endif; ?>
+
+                    <?php if ($next_val !== null): ?>
+                    <a href="document.php?type=<?= urlencode($type) ?>&<?= urlencode($selector_param) ?>=<?= urlencode($next_val) ?><?= $from_qs ?>" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[11px] flex items-center gap-1 transition">
+                        <span>Berikutnya</span>
+                        <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                    </a>
+                    <?php else: ?>
+                    <span class="px-2.5 py-1 rounded-lg bg-slate-50 text-slate-300 font-bold text-[11px] flex items-center gap-1 cursor-not-allowed">
+                        <span>Berikutnya</span>
+                        <i class="fa-solid fa-chevron-right text-[9px]"></i>
+                    </span>
+                    <?php endif; ?>
+                </div>
             </div>
+            <?php endif; ?>
         </div>
     </header>
 
@@ -530,13 +818,20 @@ function terbilangRupiah($n) {
                     <td class="p-2 font-bold bg-slate-50 border-r border-slate-200">Uraian Jenis Muatan Kargo:</td>
                     <td class="p-2 text-slate-800"><?= htmlspecialchars($doc_data['commodity']) ?></td>
                 </tr>
+                <?php
+                $is_red_sppb = (($doc_data['customs_status'] ?? '') === 'RED_LANE');
+                $is_wait_sppb = (($doc_data['customs_status'] ?? '') === 'AWAITING_CLEARANCE');
+                $chan_cls = $is_red_sppb ? 'text-rose-700 bg-rose-50/70' : ($is_wait_sppb ? 'text-amber-700 bg-amber-50/70' : 'text-emerald-700 bg-emerald-50/50');
+                $stamp_hex = $is_red_sppb ? '#dc2626' : ($is_wait_sppb ? '#d97706' : '#059669');
+                $stamp_bg = $is_red_sppb ? '#fef2f2' : ($is_wait_sppb ? '#fffbeb' : '#ecfdf5');
+                ?>
                 <tr class="border-b border-slate-200">
                     <td class="p-2 font-bold bg-slate-50 border-r border-slate-200">Kanal Pelayanan / Penetapan:</td>
-                    <td class="p-2 font-black text-emerald-700 bg-emerald-50/50"><?= htmlspecialchars($doc_data['channel']) ?></td>
+                    <td class="p-2 font-black <?= $chan_cls ?>"><?= htmlspecialchars($doc_data['channel']) ?></td>
                 </tr>
                 <tr>
                     <td class="p-2 font-bold bg-slate-50 border-r border-slate-200">Status Pelunasan Pungutan (NTPN):</td>
-                    <td class="p-2 font-mono-code font-extrabold text-emerald-700"><?= htmlspecialchars($doc_data['ntpn_status']) ?></td>
+                    <td class="p-2 font-mono-code font-extrabold <?= $is_red_sppb ? 'text-rose-700' : ($is_wait_sppb ? 'text-amber-700' : 'text-emerald-700') ?>"><?= htmlspecialchars($doc_data['ntpn_status']) ?></td>
                 </tr>
             </table>
 
@@ -561,14 +856,14 @@ function terbilangRupiah($n) {
                     <div class="text-[9.5px] font-bold text-slate-600">Ditetapkan di Cikarang, <?= $doc_date ?></div>
                     <div class="text-[10px] font-extrabold text-slate-900">a.n. KEPALA KANTOR PELAYANAN BEA DAN CUKAI</div>
                     <div class="h-16 flex items-center justify-center relative my-1">
-                        <!-- Stempel Vektor Hijau Bea Cukai -->
+                        <!-- Stempel Vektor Bea Cukai -->
                         <svg viewBox="0 0 120 120" width="68" height="68" class="absolute opacity-85" style="transform: rotate(-5deg);">
-                            <circle cx="60" cy="60" r="54" fill="#ecfdf5" fill-opacity="0.5" stroke="#059669" stroke-width="2.5"/>
-                            <circle cx="60" cy="60" r="49" fill="none" stroke="#059669" stroke-width="1" stroke-dasharray="3 2"/>
-                            <rect x="14" y="47" width="92" height="24" rx="3" fill="#059669" fill-opacity="0.12" stroke="#059669" stroke-width="1.3"/>
-                            <text x="60" y="61" font-size="10" font-weight="900" fill="#059669" text-anchor="middle" letter-spacing="1">SPPB CLEARED</text>
-                            <text x="60" y="34" font-size="6.5" font-weight="800" fill="#059669" text-anchor="middle">BEA DAN CUKAI</text>
-                            <text x="60" y="88" font-size="6" font-weight="700" fill="#059669" text-anchor="middle">KPU CIKARANG</text>
+                            <circle cx="60" cy="60" r="54" fill="<?= $stamp_bg ?>" fill-opacity="0.5" stroke="<?= $stamp_hex ?>" stroke-width="2.5"/>
+                            <circle cx="60" cy="60" r="49" fill="none" stroke="<?= $stamp_hex ?>" stroke-width="1" stroke-dasharray="3 2"/>
+                            <rect x="14" y="47" width="92" height="24" rx="3" fill="<?= $stamp_hex ?>" fill-opacity="0.12" stroke="<?= $stamp_hex ?>" stroke-width="1.3"/>
+                            <text x="60" y="61" font-size="9" font-weight="900" fill="<?= $stamp_hex ?>" text-anchor="middle" letter-spacing="0.8"><?= htmlspecialchars($doc_data['stamp_label'] ?? 'SPPB CLEARED') ?></text>
+                            <text x="60" y="34" font-size="6.5" font-weight="800" fill="<?= $stamp_hex ?>" text-anchor="middle">BEA DAN CUKAI</text>
+                            <text x="60" y="88" font-size="6" font-weight="700" fill="<?= $stamp_hex ?>" text-anchor="middle">KPU CIKARANG</text>
                         </svg>
                         <span class="font-signature text-2xl text-slate-900 relative z-10">Hendra Kusuma</span>
                     </div>
@@ -755,7 +1050,7 @@ function terbilangRupiah($n) {
                     <div class="text-right">
                         <div><span class="text-slate-500">Lokasi Rampa:</span> <strong class="text-slate-900"><?= htmlspecialchars($doc_data['ramp_id']) ?></strong></div>
                         <div><span class="text-slate-500">Tally Clerk:</span> <strong class="text-slate-800"><?= htmlspecialchars($doc_data['tallyman']) ?></strong></div>
-                        <div><span class="text-slate-500">Status:</span> <span class="px-1.5 py-0.2 rounded font-bold text-[9px] bg-emerald-100 text-emerald-800">COMPLETED</span></div>
+                        <div><span class="text-slate-500">Status:</span> <span class="px-1.5 py-0.2 rounded font-bold text-[9px] <?= ($doc_data['status'] === 'COMPLETED') ? 'bg-emerald-100 text-emerald-800' : 'bg-blue-100 text-blue-800' ?>"><?= htmlspecialchars($doc_data['status']) ?></span></div>
                     </div>
                 </div>
 
@@ -825,7 +1120,7 @@ function terbilangRupiah($n) {
                 </div>
 
                 <div class="p-2 bg-emerald-50/70 border border-emerald-300 rounded text-[10.5px] text-emerald-900 mb-3">
-                    <strong>Pernyataan Kepatuhan HACCP:</strong> <?= htmlspecialchars($doc_data['compliance']) ?>. Tidak terdeteksi lonjakan suhu (*temperature abuse*) melampaui toleransi 2.0°C sepanjang masa penyimpanan di reefer yard CIDP 35 Ha.
+                    <strong>Pernyataan Kepatuhan HACCP:</strong> <?= htmlspecialchars($doc_data['compliance']) ?>. Tidak terdeteksi lonjakan suhu (<em>temperature abuse</em>) melampaui toleransi 2.0°C sepanjang masa penyimpanan di reefer yard CIDP 35 Ha.
                 </div>
 
             <?php endif; ?>

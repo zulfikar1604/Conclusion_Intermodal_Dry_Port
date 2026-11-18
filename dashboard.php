@@ -401,6 +401,7 @@ $tanggal_sekarang = get_localized_date($current_lang);
     </div>
 
     <!-- Dashboard UI & Live Clock Scripts -->
+    <script src="assets/js/table-tools.js?v=20261118a"></script>
     <script src="assets/js/dashboard.js?v=20261025c"></script>
 </body>
 </html>

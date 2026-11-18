@@ -219,9 +219,9 @@ $billing_info = [
                 <div class="flex items-center space-x-2">
                     <span class="w-1.5 h-3.5 bg-orange-500 rounded-full"></span>
                     <h3 class="text-[12.5px] font-extrabold text-slate-900 tracking-tight">Monitoring Faktur Operasional</h3>
-                    <span class="text-[10px] text-slate-400 font-semibold">(<?= count($invoices) ?> data)</span>
+                    <span id="invoiceRowCountBadge" class="text-[10px] text-slate-400 font-semibold">(<?= count($invoices) ?> data)</span>
                 </div>
-                <div class="flex items-center space-x-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <div class="relative">
                         <input type="text" id="searchInvoiceInput" onkeyup="filterInvoices()" placeholder="Cari invoice / kontainer / pelanggan..." class="pl-7 pr-2.5 py-1 border border-slate-200 rounded-lg text-[11px] focus:ring-1 focus:ring-orange-500 focus:border-orange-500 w-full sm:w-64 bg-white text-slate-800 placeholder-slate-400">
                         <i class="fa-solid fa-search absolute left-2.5 top-2 text-slate-400 text-[10px]"></i>
@@ -232,12 +232,19 @@ $billing_info = [
                         <option value="menunggu">Menunggu</option>
                         <option value="overdue">Overdue</option>
                     </select>
+                    <select id="billingLimitSelect" data-limit-target="#billingInvoicesTable" data-limit-callback="filterInvoices" data-count-target="#invoiceRowCountBadge" data-count-unit="faktur" class="border border-slate-200 rounded-lg text-[11px] font-bold px-2.5 py-1 bg-white text-slate-700 focus:ring-1 focus:ring-orange-500 focus:border-orange-500">
+                        <option value="10" selected>Tampil: 10</option>
+                        <option value="25">Tampil: 25</option>
+                        <option value="50">Tampil: 50</option>
+                        <option value="all">Semua</option>
+                    </select>
                 </div>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse" id="billingInvoicesTable">
                     <thead>
                         <tr class="bg-slate-50 text-slate-500 text-[9.5px] font-bold uppercase tracking-wider border-b border-slate-200/80">
+                            <th class="px-2.5 py-1.5 text-center w-10">No</th>
                             <th class="px-3 py-1.5">No. Invoice &amp; Kontainer</th>
                             <th class="px-3 py-1.5">Tanggal</th>
                             <th class="px-3 py-1.5">Pelanggan</th>
@@ -248,8 +255,9 @@ $billing_info = [
                         </tr>
                     </thead>
                     <tbody class="text-[11.5px] text-slate-700 divide-y divide-slate-100">
-                        <?php foreach($invoices as $inv): ?>
+                        <?php foreach($invoices as $idx => $inv): ?>
                         <tr class="invoice-row hover:bg-orange-50/30 transition-colors" data-no="<?= strtolower($inv['no']) ?>" data-pelanggan="<?= strtolower($inv['pelanggan']) ?>" data-ctr="<?= strtolower($inv['ctr'] ?? '') ?>" data-status="<?= strtolower($inv['status']) ?>">
+                            <td class="px-2.5 py-1.5 text-center font-mono text-slate-400" data-row-num><?= $idx + 1 ?></td>
                             <td class="px-3 py-1.5">
                                 <span class="font-bold text-orange-600 hover:text-orange-700 block text-[11.5px] cursor-pointer" onclick="openInvoiceModal('<?= $inv['no'] ?>', '<?= htmlspecialchars(addslashes($inv['pelanggan'])) ?>', <?= $inv['nilai'] ?>, '<?= $inv['status'] ?>')"><?= $inv['no'] ?></span>
                                 <?php if (!empty($inv['ctr'])): ?>
@@ -489,16 +497,18 @@ $billing_info = [
             </div>
             
             <div class="lg:col-span-2 space-y-3">
-                <!-- Log JSON-RPC Live -->
-                <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
-                    <div class="flex items-center justify-between mb-2">
+                <!-- Log JSON-RPC Live (Collapsed Clean View) -->
+                <details class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
                         <h3 class="text-[12px] font-extrabold text-slate-900 flex items-center">
                             <i class="fa-solid fa-code text-orange-600 mr-2 text-[11px]"></i>JSON-RPC Payload Log (Live Handshake)
                         </h3>
-                        <span class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[9.5px] font-mono font-bold">Standard RPC-2.0</span>
-                    </div>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        <span class="flex items-center gap-2">
+                            <span class="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded text-[9.5px] font-mono font-bold">RPC-2.0</span>
+                            <i class="fa-solid fa-chevron-down text-[10px] text-slate-400 transition-transform group-open:rotate-180"></i>
+                        </span>
+                    </summary>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-slate-100">
                         <div>
                             <div class="flex justify-between items-center mb-1">
                                 <span class="text-[9.5px] font-bold text-slate-500 uppercase tracking-wider">Request Payload</span>
@@ -535,7 +545,7 @@ $billing_info = [
                             </div>
                         </div>
                     </div>
-                </div>
+                </details>
 
                 <!-- Preview Invoices Hasil Sinkronisasi -->
                 <div id="odoo-synced-box" class="bg-white rounded-xl shadow-2xs border border-slate-200/80 p-3.5">
@@ -543,13 +553,21 @@ $billing_info = [
                         <h3 class="text-[12px] font-extrabold text-slate-900 flex items-center">
                             <i class="fa-solid fa-receipt text-orange-600 mr-2 text-[11px]"></i>Invoice Terhubung Odoo (`account.move`)
                         </h3>
-                        <span class="text-[10px] text-slate-400 font-semibold">Live Mirroring YMS &harr; Odoo</span>
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] text-slate-400 font-semibold hidden sm:inline">Live Mirroring YMS &harr; Odoo</span>
+                            <select id="odooSyncLimitSelect" data-limit-target="#odooSyncedTable" data-observe-body="1" class="border border-slate-200 rounded-lg text-[10.5px] font-bold px-2 py-0.5 bg-slate-50 text-slate-700">
+                                <option value="10" selected>Tampil: 10</option>
+                                <option value="25">Tampil: 25</option>
+                                <option value="all">Semua</option>
+                            </select>
+                        </div>
                     </div>
 
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-[11px]">
+                        <table class="w-full text-left border-collapse text-[11px]" id="odooSyncedTable">
                             <thead>
                                 <tr class="bg-slate-50 text-slate-500 uppercase tracking-wider border-b border-slate-200/80 text-[9.5px] font-bold">
+                                    <th class="px-2 py-1.5 text-center w-9">No</th>
                                     <th class="px-2.5 py-1.5">No. Invoice Odoo</th>
                                     <th class="px-2.5 py-1.5">Customer / Partner</th>
                                     <th class="px-2.5 py-1.5">Layanan Logistik</th>
@@ -559,6 +577,7 @@ $billing_info = [
                             </thead>
                             <tbody id="odoo-synced-tbody" class="divide-y divide-slate-100 text-slate-700">
                                 <tr class="hover:bg-orange-50/30">
+                                    <td class="px-2 py-1 text-center font-mono text-slate-400" data-row-num>1</td>
                                     <td class="px-2.5 py-1 font-mono font-bold text-orange-600">INV/2026/00001</td>
                                     <td class="px-2.5 py-1 font-bold text-slate-800">PT Samudera Pratama Mandiri</td>
                                     <td class="px-2.5 py-1 text-slate-500">Penumpukan &amp; Lo-Lo 20FT</td>
@@ -566,6 +585,7 @@ $billing_info = [
                                     <td class="px-2.5 py-1 text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9.5px]">PAID</span></td>
                                 </tr>
                                 <tr class="hover:bg-orange-50/30">
+                                    <td class="px-2 py-1 text-center font-mono text-slate-400" data-row-num>2</td>
                                     <td class="px-2.5 py-1 font-mono font-bold text-orange-600">INV/2026/00002</td>
                                     <td class="px-2.5 py-1 font-bold text-slate-800">PT Unilever Indonesia Tbk</td>
                                     <td class="px-2.5 py-1 text-slate-500">Reefer Power &amp; Monitoring</td>
@@ -573,6 +593,7 @@ $billing_info = [
                                     <td class="px-2.5 py-1 text-center"><span class="px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[9.5px]">PAID</span></td>
                                 </tr>
                                 <tr class="hover:bg-orange-50/30">
+                                    <td class="px-2 py-1 text-center font-mono text-slate-400" data-row-num>3</td>
                                     <td class="px-2.5 py-1 font-mono font-bold text-orange-600">INV/2026/00003</td>
                                     <td class="px-2.5 py-1 font-bold text-slate-800">PT Astra Honda Motor</td>
                                     <td class="px-2.5 py-1 text-slate-500">Stripping CFS &amp; Gate Inbound</td>
@@ -1077,7 +1098,7 @@ $billing_info = [
                 resPayload.textContent = JSON.stringify(data.response_payload, null, 2);
 
                 if (data.invoices && data.invoices.length > 0) {
-                    tbody.innerHTML = data.invoices.map(inv => {
+                    tbody.innerHTML = data.invoices.map((inv, idx) => {
                         let statusBadge = '';
                         if (inv.payment_state === 'paid' || inv.payment_state === 'in_payment') {
                             statusBadge = '<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-bold text-[10px]">PAID</span>';
@@ -1097,6 +1118,7 @@ $billing_info = [
 
                         return `
                             <tr class="hover:bg-blue-50/40 transition-colors">
+                                <td class="px-2 py-2 text-center font-mono text-slate-400" data-row-num>${idx + 1}</td>
                                 <td class="p-3 font-mono font-bold text-blue-700">${inv.name}</td>
                                 <td class="p-3 font-medium">${inv.partner_id ? inv.partner_id[1] : '-'}</td>
                                 <td class="p-3 text-gray-600 text-[11px]">${inv.invoice_date || '-'} <span class="text-gray-400">s/d</span> ${dueDateStr}</td>
@@ -1133,8 +1155,12 @@ $billing_info = [
             const matchQ = !q || no.includes(q) || pel.includes(q) || ctr.includes(q);
             const matchS = !st || s.includes(st);
 
-            r.style.display = (matchQ && matchS) ? '' : 'none';
+            r.dataset.filteredOut = (matchQ && matchS) ? '0' : '1';
         });
+
+        if (window.CIDPTableTools) {
+            window.CIDPTableTools.apply('#billingInvoicesTable');
+        }
     }
 
     // URL Deep-Linking Initializer

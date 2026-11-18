@@ -201,6 +201,13 @@ $total_containers = count($containers);
                 <option value="empty">Empty Box</option>
             </select>
 
+            <select id="containerLimitSelect" data-limit-target="#containerTable" data-limit-callback="filterContainers" data-count-target="#rowCountDisplay" data-count-unit="Kontainer" class="px-2 py-1 bg-white border border-slate-200 rounded-lg text-[11px] font-bold text-slate-700 focus:outline-none focus:ring-1 focus:ring-orange-500">
+                <option value="10" selected>Tampil: 10</option>
+                <option value="25">Tampil: 25</option>
+                <option value="50">Tampil: 50</option>
+                <option value="all">Semua</option>
+            </select>
+
             <button onclick="resetFilter()" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-semibold rounded-lg transition cursor-pointer">
                 <i class="fa-solid fa-rotate-left mr-1 text-[10px]"></i> Reset
             </button>
@@ -225,6 +232,7 @@ $total_containers = count($containers);
             <table class="w-full text-left border-collapse min-w-[720px]" id="containerTable">
                 <thead>
                     <tr class="bg-slate-50 text-slate-500 text-[9.5px] font-bold uppercase tracking-wider border-b border-slate-200/80">
+                        <th class="py-2 px-2.5 font-semibold text-center w-10">No</th>
                         <th class="py-2 px-3 font-semibold">Nomor Kontainer</th>
                         <th class="py-2 px-3 font-semibold">Pemilik / Pengirim</th>
                         <th class="py-2 px-3 font-semibold">Posisi di Yard</th>
@@ -234,7 +242,7 @@ $total_containers = count($containers);
                     </tr>
                 </thead>
                 <tbody class="text-[11.5px] divide-y divide-slate-100">
-                    <?php foreach ($containers as $c): ?>
+                    <?php foreach ($containers as $idx => $c): ?>
                         <?php
                         $badge_cargo = 'bg-blue-50 text-blue-700 border-blue-200';
                         if ($c['cargo_type'] === 'reefer') $badge_cargo = 'bg-cyan-50 text-cyan-700 border-cyan-200';
@@ -277,6 +285,9 @@ $total_containers = count($containers);
                             data-type="<?= strtolower($c['cargo_type']) ?>"
                             data-rfid="<?= strtolower($c['rfid_tag']) ?>">
                             
+                            <!-- No -->
+                            <td class="py-1.5 px-2.5 text-center font-mono text-slate-400" data-row-num><?= $idx + 1 ?></td>
+
                             <!-- Nomor Kontainer -->
                             <td class="py-1.5 px-3 whitespace-nowrap">
                                 <div class="flex items-center space-x-1.5">
@@ -429,15 +440,15 @@ $total_containers = count($containers);
                         </div>
                         <div class="bg-blue-50/50 p-3 rounded-xl border border-blue-100">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-gray-900">1. Keberangkatan Asal & Masuk Gerbang (Gate-In)</span>
+                                <span class="font-bold text-gray-900">1. Asal &amp; Gate-In</span>
                                 <span class="text-[10px] text-gray-400 font-mono" id="m_gate_time">2026-09-19 08:30 WIB</span>
                             </div>
                             <p class="text-gray-600 mt-1">
-                                Kargo berasal dari <strong class="text-gray-900" id="m_origin">Pelabuhan Tanjung Priok</strong>, diangkut armada truk <strong class="text-blue-700 font-mono" id="m_truck">B 9182 TE</strong> melalui <strong class="text-gray-800" id="m_lane">Gate 01 Lane A</strong>.
+                                <strong class="text-gray-900" id="m_origin">Pelabuhan Tanjung Priok</strong> &bull; <strong class="text-blue-700 font-mono" id="m_truck">B 9182 TE</strong> (<strong class="text-gray-800" id="m_lane">Gate 01 Lane A</strong>)
                             </p>
-                            <div class="mt-2 text-[10px] text-gray-500 flex items-center space-x-3">
-                                <span><i class="fa-solid fa-scale-balanced mr-1 text-blue-500"></i>VGM Otomatis: Terverifikasi</span>
-                                <span><i class="fa-solid fa-qrcode mr-1 text-purple-500"></i>RFID & OCR: Valid</span>
+                            <div class="mt-1.5 text-[10px] text-gray-500 flex items-center space-x-3">
+                                <span><i class="fa-solid fa-scale-balanced mr-1 text-blue-500"></i>VGM: Terverifikasi</span>
+                                <span><i class="fa-solid fa-qrcode mr-1 text-purple-500"></i>RFID/OCR: Valid</span>
                             </div>
                         </div>
                     </div>
@@ -449,12 +460,10 @@ $total_containers = count($containers);
                         </div>
                         <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-gray-900">2. Pembongkaran dari Truk (Lift-Off Operasional)</span>
-                                <span class="text-[10px] text-gray-400 font-mono">15 menit setelah Gate-In</span>
+                                <span class="font-bold text-gray-900">2. Lift-Off Lapangan</span>
+                                <span class="text-[10px] text-gray-400 font-mono">+15 menit Gate-In</span>
                             </div>
-                            <p class="text-gray-600 mt-1">
-                                Diangkat dari sasis truk oleh alat berat <strong class="text-blue-700" id="m_equipment">RS-01</strong>. Corner casting terkunci dengan aman ke spreader otomatis.
-                            </p>
+                            <p class="text-gray-600 mt-1">Alat berat: <strong class="text-blue-700" id="m_equipment">RS-01</strong></p>
                         </div>
                     </div>
 
@@ -465,18 +474,15 @@ $total_containers = count($containers);
                         </div>
                         <div class="bg-emerald-50/60 p-3 rounded-xl border border-emerald-200">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-emerald-900">3. Posisi Penumpukan Lapangan Saat Ini</span>
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">LOKASI AKTIF</span>
+                                <span class="font-bold text-emerald-900">3. Posisi Yard Aktif</span>
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800">AKTIF</span>
                             </div>
-                            <div class="mt-2 flex items-center space-x-2">
-                                <span class="text-gray-700">Koordinat 3D Yard:</span>
-                                <span class="font-mono font-bold text-sm bg-white px-2.5 py-1 rounded border border-emerald-300 text-emerald-800" id="m_yard_pos">
+                            <div class="mt-1.5 flex items-center flex-wrap gap-2">
+                                <span class="font-mono font-bold text-xs bg-white px-2.5 py-1 rounded border border-emerald-300 text-emerald-800" id="m_yard_pos">
                                     Blok A / Bay 01 / Row 01 / Tier 01
                                 </span>
+                                <span class="text-gray-600">Inap: <strong class="text-gray-900" id="m_dwell">1 hari 4 jam</strong> &bull; <span id="m_commodity">Automotive Spare Parts</span></span>
                             </div>
-                            <p class="text-gray-600 mt-2">
-                                Lama Inap: <strong class="text-gray-900" id="m_dwell">1 hari 4 jam</strong>. Komoditas: <span class="text-gray-700" id="m_commodity">Automotive Spare Parts</span>.
-                            </p>
                         </div>
                     </div>
 
@@ -487,12 +493,10 @@ $total_containers = count($containers);
                         </div>
                         <div class="bg-gray-50 p-3 rounded-xl border border-gray-100">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-gray-900">4. Kliring Dokumen & Segel Bea Cukai</span>
-                                <span class="text-[10px] text-emerald-600 font-bold">Resmi Disetujui (SPPB)</span>
+                                <span class="font-bold text-gray-900">4. Kliring Pabean (CEISA)</span>
+                                <span class="text-[10px] text-emerald-600 font-bold">SPPB Disetujui</span>
                             </div>
-                            <p class="text-gray-600 mt-1">
-                                Nomor segel kontainer: <strong class="text-gray-800 font-mono" id="m_seal">SN-JKT-102938</strong>. Terintegrasi dengan CEISA Bea Cukai.
-                            </p>
+                            <p class="text-gray-600 mt-1">Segel: <strong class="text-gray-800 font-mono" id="m_seal">SN-JKT-102938</strong></p>
                         </div>
                     </div>
 
@@ -503,12 +507,10 @@ $total_containers = count($containers);
                         </div>
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
                             <div class="flex items-center justify-between">
-                                <span class="font-bold text-gray-900">5. Rencana Pengeluaran & Moda Intermodal Keluar</span>
+                                <span class="font-bold text-gray-900">5. Rencana Keluar</span>
                                 <span class="text-[10px] text-blue-600 font-semibold">Terjadwal</span>
                             </div>
-                            <p class="text-gray-700 mt-1">
-                                Tujuan berikutnya: <strong class="text-[#0170b9]" id="m_destination">KA Logistik (Rel Siding ➔ Surabaya)</strong>.
-                            </p>
+                            <p class="text-gray-700 mt-1">Tujuan: <strong class="text-[#0170b9]" id="m_destination">KA Logistik (Rel Siding ➔ Surabaya)</strong></p>
                         </div>
                     </div>
 
@@ -690,7 +692,6 @@ function filterContainers() {
     const typeVal = document.getElementById('filterType').value.toLowerCase();
 
     const rows = document.querySelectorAll('#containerTable tbody tr.container-row');
-    let visibleCount = 0;
 
     rows.forEach(row => {
         const container = row.getAttribute('data-container') || '';
@@ -703,15 +704,12 @@ function filterContainers() {
         const matchBlock = (!blockVal || block === blockVal);
         const matchType = (!typeVal || type === typeVal);
 
-        if (matchSearch && matchBlock && matchType) {
-            row.style.display = '';
-            visibleCount++;
-        } else {
-            row.style.display = 'none';
-        }
+        row.dataset.filteredOut = (matchSearch && matchBlock && matchType) ? '0' : '1';
     });
 
-    document.getElementById('rowCountDisplay').innerText = `Menampilkan ${visibleCount} Kontainer`;
+    if (window.CIDPTableTools) {
+        window.CIDPTableTools.apply('#containerTable');
+    }
 }
 
 function resetFilter() {
