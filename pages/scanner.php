@@ -59,8 +59,8 @@ if (isset($pdo)) {
         </div>
 
         <div class="flex items-center gap-1.5 flex-shrink-0">
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white font-bold text-[11px] rounded-lg transition flex items-center gap-1 shadow-2xs">
-                <i class="fa-solid fa-cube text-[10px] text-amber-400"></i><span>Simulator 3D</span>
+            <a href="dashboard.php?page=twin" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white font-bold text-[11px] rounded-lg transition flex items-center gap-1 shadow-2xs" title="Pantau Digital Twin 3D">
+                <i class="fa-solid fa-cube text-[10px] text-amber-400"></i><span>Digital Twin 3D</span>
             </a>
         </div>
     </div>
@@ -358,9 +358,9 @@ if (isset($pdo)) {
                         <i class="fa-solid fa-bookmark text-[11px]"></i>
                         <span>Simpan ke Log Pemeriksaan QA</span>
                     </button>
-                    <a id="btnGoToDenah" href="dashboard.php?page=denah" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-gray-700 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5">
-                        <i class="fa-solid fa-map-location-dot text-[11px] text-[#0170b9]"></i>
-                        <span>Tinjau Posisi di Denah 35 Ha</span>
+                    <a id="btnGoToDenah" href="dashboard.php?page=twin" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-gray-700 text-xs font-bold rounded-xl transition-all flex items-center justify-center space-x-1.5">
+                        <i class="fa-solid fa-cubes text-[11px] text-[#0170b9]"></i>
+                        <span>Pantau Kawasan di Digital Twin 3D</span>
                     </a>
                 </div>
             </div>
@@ -911,11 +911,11 @@ function handleDecodedCode(rawText, formatName = 'AUTO') {
                 <a href="dashboard.php?page=kontainer&search=${encodeURIComponent(matchedContainer.container_number)}&open=1" class="px-2.5 py-1 bg-white hover:bg-[#0170b9] text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
                     <i class="fa-solid fa-boxes-stacked mr-1 text-[#0170b9]"></i>Lacak Perjalanan
                 </a>
-                <a href="dashboard.php?page=simulator&focus_box=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-gray-950 rounded-lg text-[11px] font-bold transition flex items-center shadow-2xs">
-                    <i class="fa-solid fa-cube mr-1"></i>Sorot 3D Twin
+                <a href="dashboard.php?page=twin&focus_box=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-gray-950 rounded-lg text-[11px] font-bold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-cube mr-1"></i>Sorot Twin 3D
                 </a>
-                <a href="dashboard.php?page=denah&highlight_block=${encodeURIComponent(matchedContainer.block)}" class="px-2.5 py-1 bg-white hover:bg-blue-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
-                    <i class="fa-solid fa-map-location-dot mr-1 text-blue-500"></i>Denah 2D
+                <a href="dashboard.php?page=yard&block=${encodeURIComponent(matchedContainer.block === 'R' ? 'REEFER' : (matchedContainer.block === 'RAIL' ? 'D' : matchedContainer.block))}&focus_box=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-white hover:bg-blue-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-grip mr-1 text-blue-500"></i>Matriks Yard
                 </a>
                 <a href="dashboard.php?page=billing&search=${encodeURIComponent(matchedContainer.container_number)}" class="px-2.5 py-1 bg-white hover:bg-emerald-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg text-[11px] font-semibold transition flex items-center shadow-2xs">
                     <i class="fa-solid fa-file-invoice-dollar mr-1 text-emerald-600"></i>Faktur Billing
@@ -1014,17 +1014,46 @@ function copyRawCode() {
     const text = document.getElementById('inspectRawText').textContent;
     if (!text) return;
     navigator.clipboard.writeText(text).then(() => {
-        alert('Kode berhasil disalin ke clipboard: ' + text);
+        if (window.cidpToast) cidpToast('Kode Disalin', text, 'success');
     });
 }
 
-function logCurrentScan() {
-    alert('Hasil audit optik berhasil dicatat ke dalam Log QA Terminal YMS.');
+async function logCurrentScan() {
+    const code = (document.getElementById('inspectRawText')?.textContent || '').trim();
+    if (!code) {
+        if (window.cidpToast) cidpToast('Belum Ada Hasil Pindai', 'Pilih sampel atau pindai barcode/QR terlebih dahulu.', 'warning');
+        return;
+    }
+    try {
+        const res = await fetch('api/ingest_event.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_type: 'HANDHELD_AIDC_SCAN',
+                source_device: 'AIDC-OPTICAL-SCANNER',
+                payload: {
+                    code: code,
+                    format: document.getElementById('inspectFormatBadge')?.textContent || 'AUTO'
+                }
+            })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            const dec = data.decision_summary || {};
+            if (window.cidpToast) {
+                cidpToast('Audit AIDC Tercatat (' + (dec.verdict || 'OK') + ')', (dec.reason || data.tri_flow?.information || 'Data scan terkirim ke api/ingest_event.php.'), 'success');
+            }
+        } else {
+            if (window.cidpToast) cidpToast('Gagal Catat Audit AIDC', data.error || data.message || 'Ditolak ingest API', 'warning');
+        }
+    } catch (err) {
+        if (window.cidpToast) cidpToast('Kesalahan Jaringan Scanner', err.message, 'error');
+    }
 }
 
 function exportScanLogCSV() {
     if (!scanLog || scanLog.length === 0) {
-        alert('Belum ada data scan untuk diekspor.');
+        if (window.cidpToast) cidpToast('Log Kosong', 'Belum ada data scan untuk diekspor.', 'warning');
         return;
     }
 

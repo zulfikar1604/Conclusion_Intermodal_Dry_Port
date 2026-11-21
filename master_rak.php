@@ -33,17 +33,21 @@ $sektor = strtoupper(trim($sektor));
 // Eksekusi Query menggunakan PDO (Opsi A - Standar Proyek CIDP)
 try {
     if (!empty($blok) && !empty($sektor)) {
-        $stmt = $pdo->prepare("SELECT id, blok, bagian, rak, status, pallet_sscc, commodity_name, updated_at 
-                               FROM master_lokasi 
-                               WHERE blok = ? AND bagian = ? 
-                               ORDER BY rak ASC");
+        $stmt = $pdo->prepare("SELECT ml.id, ml.blok, ml.bagian, ml.rak, ml.status, ml.pallet_sscc, ml.commodity_name, ml.updated_at,
+                                      cp.container_origin, cp.consignee, cp.gross_weight_kg, cp.cbm, cp.carton_count, cp.customs_status
+                               FROM master_lokasi ml
+                               LEFT JOIN cfs_pallets cp ON cp.pallet_sscc = ml.pallet_sscc AND cp.status IN ('IN_RACK','STAGING_OUT','HOLD')
+                               WHERE ml.blok = ? AND ml.bagian = ? 
+                               ORDER BY ml.rak ASC");
         $stmt->execute([$blok, $sektor]);
         $slots = $stmt->fetchAll(PDO::FETCH_ASSOC);
     } else {
         // Ambil beberapa sampel awal jika tanpa parameter
-        $stmt = $pdo->query("SELECT id, blok, bagian, rak, status, pallet_sscc, commodity_name, updated_at 
-                             FROM master_lokasi 
-                             ORDER BY blok ASC, bagian ASC, rak ASC 
+        $stmt = $pdo->query("SELECT ml.id, ml.blok, ml.bagian, ml.rak, ml.status, ml.pallet_sscc, ml.commodity_name, ml.updated_at,
+                                    cp.container_origin, cp.consignee, cp.gross_weight_kg, cp.cbm, cp.carton_count, cp.customs_status
+                             FROM master_lokasi ml
+                             LEFT JOIN cfs_pallets cp ON cp.pallet_sscc = ml.pallet_sscc AND cp.status IN ('IN_RACK','STAGING_OUT','HOLD')
+                             ORDER BY ml.blok ASC, ml.bagian ASC, ml.rak ASC 
                              LIMIT 24");
         $slots = $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
@@ -137,7 +141,16 @@ try {
                                 <span class="text-xs font-bold text-slate-900 block truncate" title="<?= htmlspecialchars($s['commodity_name'] ?? 'Palet Kargo LCL') ?>">
                                     <?= htmlspecialchars($s['commodity_name'] ?? 'Palet Kargo LCL') ?>
                                 </span>
-                                <span class="text-[9.5px] font-mono text-emerald-700 mt-0.5 block">SSCC Verified</span>
+                                <span class="text-[9.5px] font-mono text-[#0170b9] mt-0.5 block">SSCC: <?= htmlspecialchars($s['pallet_sscc'] ?: '-') ?></span>
+                                <?php if (!empty($s['container_origin'])): ?>
+                                    <span class="text-[9.5px] font-mono text-slate-600 block">Ex: <?= htmlspecialchars($s['container_origin']) ?> &bull; <?= number_format((float)($s['gross_weight_kg'] ?? 0), 0, ',', '.') ?> kg</span>
+                                <?php endif; ?>
+                                <?php if (!empty($s['consignee'])): ?>
+                                    <span class="text-[9.5px] text-slate-500 block truncate"><?= htmlspecialchars($s['consignee']) ?></span>
+                                <?php endif; ?>
+                                <span class="text-[9px] font-mono font-bold <?= (($s['customs_status'] ?? 'CLEARED') === 'CLEARED') ? 'text-emerald-700' : 'text-rose-700' ?> mt-0.5 block">
+                                    <?= htmlspecialchars($s['customs_status'] ?? 'SSCC Verified') ?>
+                                </span>
                             <?php else: ?>
                                 <span class="text-[11px] font-semibold text-emerald-600 flex items-center gap-1">
                                     <i class="fa-solid fa-circle-check text-[10px]"></i> Slot Tersedia

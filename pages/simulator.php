@@ -43,6 +43,10 @@ require_once __DIR__ . '/layout_master.php';
                 <h1 class="text-base sm:text-lg font-extrabold text-slate-900 tracking-tight">Simulator 3D — Visualisasi Arus Barang End-to-End</h1>
             </div>
             <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <a href="dashboard.php?page=twin" class="px-3 py-1.5 bg-[#0170b9] hover:bg-blue-700 text-white font-bold text-[11px] rounded-xl shadow-2xs transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-arrow-left text-[10px]"></i>
+                    <span>Kembali ke Digital Twin (Data Nyata)</span>
+                </a>
                 <span class="px-3 py-1.5 bg-slate-900 text-emerald-400 font-mono font-bold text-[11px] rounded-xl border border-slate-800 flex items-center gap-1.5 shadow-2xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span>ARUS OTONOM 35 HA AKTIF</span>
@@ -352,21 +356,21 @@ require_once __DIR__ . '/layout_master.php';
         </div>
 
         <!-- Floating HUD: CAD Engineering Title Block (Etiket Gambar Teknik Sipil) -->
-        <div id="cadTitleBlock" class="absolute top-14 right-3.5 pointer-events-auto bg-white/95 border border-slate-200 text-slate-800 shadow-md rounded-xl p-3 text-[10px] font-mono text-slate-300 space-y-1.5 hidden md:block max-w-[280px] z-20 transition-all duration-300">
-            <div class="flex items-center justify-between pb-1 border-b border-slate-700 font-bold text-white">
-                <span class="text-blue-400 flex items-center gap-1"><i class="fa-solid fa-compass-drafting"></i>CIDP 35 HA TWIN</span>
+        <div id="cadTitleBlock" class="absolute top-14 right-3.5 pointer-events-auto bg-white/95 border border-slate-200 text-slate-700 shadow-md rounded-xl p-3 text-[10px] font-mono space-y-1.5 hidden md:block max-w-[280px] z-20 transition-all duration-300">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-200 font-bold text-slate-800">
+                <span class="text-blue-700 flex items-center gap-1"><i class="fa-solid fa-compass-drafting"></i>CIDP 35 HA TWIN</span>
                 <div class="flex items-center gap-1.5">
-                    <span class="text-[8.5px] bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 px-1 py-0.2 rounded">AS-BUILT</span>
-                    <button onclick="toggleCADTitleBlock()" class="text-slate-400 hover:text-white text-xs px-1" title="Tutup Etiket"><i class="fa-solid fa-xmark"></i></button>
+                    <span class="text-[8.5px] bg-emerald-50 text-emerald-700 border border-emerald-200 px-1 py-0.2 rounded">AS-BUILT</span>
+                    <button onclick="toggleCADTitleBlock()" class="text-slate-400 hover:text-slate-700 text-xs px-1" title="Tutup Etiket"><i class="fa-solid fa-xmark"></i></button>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-x-2 gap-y-0.5 text-[9.5px]">
-                <div><span class="text-slate-500">DWG NO:</span> <span class="text-white font-bold">CIDP-35HA-2026</span></div>
-                <div><span class="text-slate-500">SKALA:</span> <span class="text-amber-400 font-bold">1:2.000</span></div>
-                <div><span class="text-slate-500">PROYEKSI:</span> <span id="cadProjectionLabelDetail" class="text-emerald-400 font-bold">PERSPEKTIF 3D</span></div>
-                <div><span class="text-slate-500">DATUM:</span> <span class="text-white font-bold">EL +0.00 M</span></div>
-                <div class="col-span-2 truncate"><span class="text-slate-500">KOORDINAT:</span> UTM 48S (107°08'E 06°18'S)</div>
-                <div class="col-span-2 truncate"><span class="text-slate-500">KONSULTAN:</span> Conclusion Supply Chain</div>
+                <div><span class="text-slate-500">DWG NO:</span> <span class="text-slate-900 font-bold">CIDP-35HA-2026</span></div>
+                <div><span class="text-slate-500">SKALA:</span> <span class="text-amber-700 font-bold">1:2.000</span></div>
+                <div><span class="text-slate-500">PROYEKSI:</span> <span id="cadProjectionLabelDetail" class="text-emerald-700 font-bold">PERSPEKTIF 3D</span></div>
+                <div><span class="text-slate-500">DATUM:</span> <span class="text-slate-900 font-bold">EL +0.00 M</span></div>
+                <div class="col-span-2 truncate text-slate-600"><span class="text-slate-500">KOORDINAT:</span> UTM 48S (107°08'E 06°18'S)</div>
+                <div class="col-span-2 truncate text-slate-600"><span class="text-slate-500">KONSULTAN:</span> Conclusion Supply Chain</div>
             </div>
         </div>
 
@@ -375,7 +379,7 @@ require_once __DIR__ . '/layout_master.php';
             <div class="bg-white/95 border border-cyan-400 text-slate-800 px-3.5 py-1.5 rounded-full shadow-md flex items-center space-x-2 text-xs font-mono">
                 <span class="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-ping shrink-0"></span>
                 <span class="text-cyan-300 font-bold uppercase text-[10px] shrink-0"><i class="fa-solid fa-crosshairs mr-1"></i>Arah 3D:</span>
-                <span class="text-white font-bold truncate max-w-[200px] sm:max-w-xs" id="hudTargetText">Smart Gate Inbound Lane 1</span>
+                <span class="text-white font-bold truncate max-w-[200px] sm:max-w-xs" id="hudTargetText">Plaza Gate-In 6 Lajur (IN-01..06)</span>
                 <span class="px-1.5 py-0.2 rounded bg-cyan-500/20 text-cyan-200 border border-cyan-400/30 text-[9.5px] shrink-0" id="hudTargetHw">HW-01</span>
                 <span class="text-slate-400 text-[9.5px] hidden sm:inline shrink-0" id="hudTargetCoord">X: -10.0, Z: 55.0</span>
                 <button onclick="dismissTargetPill()" class="text-slate-400 hover:text-white ml-1 text-xs shrink-0" title="Tutup">
@@ -543,7 +547,7 @@ require_once __DIR__ . '/layout_master.php';
         <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px]">
             <div class="flex items-center space-x-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <span class="font-bold uppercase tracking-wider text-cyan-300 font-mono">Live Arus Barang &amp; SCADA Telemetry Feed (480m × 230m Yard)</span>
+                <span class="font-bold uppercase tracking-wider text-cyan-300 font-mono">Live Arus Barang &amp; SCADA Telemetry Feed (480m × 296m Yard • 10 Lajur Gate)</span>
             </div>
             <div class="flex items-center space-x-3">
                 <span class="hidden sm:inline text-[10px] font-mono text-slate-400">6 Armada Tol • 5 E-RTG • 4 Reach Stacker • 2 Forklift • KA Pasoso</span>
@@ -1083,6 +1087,36 @@ let truckBoxMesh = null;        // Container on truck trailer chassis
 let trainMesh = null;
 let boomBarrierMesh = null;
 let outboundBarrierMesh = null; // Outbound boom barrier
+window.boomBarriers = {}; // Registry semua 10 palang (IN-01..06 & OUT-01..04)
+
+function getGateLanePos(code, fallbackX) {
+    const lanes = (typeof CIDP_LAYOUT !== 'undefined' && Array.isArray(CIDP_LAYOUT.gate_lanes)) ? CIDP_LAYOUT.gate_lanes : [];
+    const found = lanes.find(l => l.code === code);
+    if (found) return { x: Number(found.x), z: Number(found.z) };
+    const gIn = LW('f_gate_in');
+    return { x: fallbackX, z: gIn ? gIn.z : 118 };
+}
+
+function getAllGateLanes() {
+    if (typeof CIDP_LAYOUT !== 'undefined' && Array.isArray(CIDP_LAYOUT.gate_lanes) && CIDP_LAYOUT.gate_lanes.length) {
+        return CIDP_LAYOUT.gate_lanes;
+    }
+    const gIn = LW('f_gate_in');
+    const z = gIn ? gIn.z : 118;
+    const defs = [
+        { code: 'IN-01', direction: 'INBOUND', lane_num: 1, has_weighbridge: true, x: -56.0, z },
+        { code: 'IN-02', direction: 'INBOUND', lane_num: 2, has_weighbridge: true, x: -64.5, z },
+        { code: 'IN-03', direction: 'INBOUND', lane_num: 3, has_weighbridge: true, x: -73.0, z },
+        { code: 'IN-04', direction: 'INBOUND', lane_num: 4, has_weighbridge: false, x: -81.5, z },
+        { code: 'IN-05', direction: 'INBOUND', lane_num: 5, has_weighbridge: false, x: -90.0, z },
+        { code: 'IN-06', direction: 'INBOUND', lane_num: 6, has_weighbridge: true, x: -98.5, z },
+        { code: 'OUT-01', direction: 'OUTBOUND', lane_num: 1, has_weighbridge: false, x: -116.0, z },
+        { code: 'OUT-02', direction: 'OUTBOUND', lane_num: 2, has_weighbridge: false, x: -124.5, z },
+        { code: 'OUT-03', direction: 'OUTBOUND', lane_num: 3, has_weighbridge: false, x: -133.0, z },
+        { code: 'OUT-04', direction: 'OUTBOUND', lane_num: 4, has_weighbridge: false, x: -141.5, z }
+    ];
+    return defs;
+}
 let floodlightLights = [];
 
 let currentLighting = 'day';
@@ -1427,7 +1461,7 @@ function buildTerminalEnvironment() {
     buildRailSiding();
     relocEnd(__mRail, 'rail_siding', 0, -48, true);
 
-    // 4. Gate Complex (Gate-In 2 Lanes, Weighbridge 80T, OCR, ANPR, Barrier, Security, Rest Area)
+    // 4. Gate Complex (10 Lajur: 6 Gate-In & 4 Gate-Out, 4 Weighbridge 80T, OCR, ANPR, 10 Barrier, Security, Rest Area)
     buildGateComplex();
 
     // 5. Administration, Datacenter NOC, Masjid, Canteen, Clinic & Damkar
@@ -1487,28 +1521,28 @@ function buildCivilPavementsAndRoadNetwork() {
     cadGridGroup.name = "CadGridAxesLayer";
     scene.add(cadGridGroup);
 
-    // Base 35 Hektar Ground Floor: Rigid Pavement K-450 (Skala diperluas proporsional 660x420m)
-    const groundGeo = new THREE.PlaneGeometry(660, 420);
+    // Base 35 Hektar Ground Floor: Rigid Pavement K-450 (Skala diperluas proporsional 680x510m agar Tol Utara & Siding Selatan utuh)
+    const groundGeo = new THREE.PlaneGeometry(680, 510);
     const groundMat = new THREE.MeshStandardMaterial({
-        map: getRigidPavementTexture(28, 20),
+        map: getRigidPavementTexture(28, 24),
         color: 0xffffff,
         roughness: 0.9,
         metalness: 0.05
     });
     const ground = new THREE.Mesh(groundGeo, groundMat);
     ground.rotation.x = -Math.PI / 2;
-    ground.position.y = 0;
+    ground.position.set(0, 0, 22);
     ground.receiveShadow = true;
     pavementGroup.add(ground);
 
     // CAD axis grid (grid sumbu 5 unit) - layer 'gridAxes'
-    const grid = new THREE.GridHelper(640, 128, 0x94a3b8, 0xcbd5e1);
-    grid.position.y = 0.03;
+    const grid = new THREE.GridHelper(680, 136, 0x94a3b8, 0xcbd5e1);
+    grid.position.set(0, 0.03, 22);
     grid.material.transparent = true;
     grid.material.opacity = 0.32;
     cadGridGroup.add(grid);
 
-    // Concrete Apron Platforms for Each Zone (Block-Bay-Row Diperlebar & Koridor Rapi)
+    // Concrete Apron Platforms for Each Zone (Block-Bay-Row & Koridor Gate-Yard ±78-94m Rapi)
     const aprons = [
         // Core Container Stacking Yard Apron (Blok A-D + Empty/Reefer/DG + Spine)
         { w: 396, d: 112, x: 0, z: 0, color: 0xe2e8f0 },
@@ -1516,12 +1550,12 @@ function buildCivilPavementsAndRoadNetwork() {
         { w: 54, d: 104, x: LW('f_cfs').x, z: 0, color: 0xedf2f7 },
         // Customs KPPBC, X-Ray & Behandle Apron (kolom TIMUR)
         { w: 54, d: 104, x: LW('f_kppbc').x, z: 12, color: 0xedf2f7 },
-        // Administration HQ, Datacenter NOC (UTARA-TENGAH)
-        { w: 100, d: 44, x: (LW('f_datacenter').x + LW('f_parking_staff').x) / 2, z: 78, color: 0xf1f5f9 },
-        // Fasum: Masjid, Kantin, Klinik, Damkar, Genset (BARAT LAUT)
-        { w: 94, d: 46, x: LW('f_kantin').x + 26, z: 74, color: 0xf1f5f9 },
-        // Gate Complex & Truck Queuing Approach Apron (TIMUR LAUT)
-        { w: 92, d: 48, x: (LW('f_gate_in').x + LW('f_security_gate').x) / 2, z: 83, color: 0xe2e8f0 },
+        // Administration HQ, Datacenter NOC (UTARA-TENGAH N=118)
+        { w: 100, d: 44, x: (LW('f_datacenter').x + LW('f_parking_staff').x) / 2, z: 110, color: 0xf1f5f9 },
+        // Fasum: Masjid, Kantin, Klinik, Damkar, Genset (BARAT LAUT N=92..118)
+        { w: 94, d: 54, x: LW('f_kantin').x + 26, z: 105, color: 0xf1f5f9 },
+        // Plaza Gate 10 Lajur, Security, Driver Rest & Antrian Pre-Gate (TIMUR LAUT)
+        { w: 164, d: 74, x: -112, z: 108, color: 0xe2e8f0 },
         // Reefer Cold Chain Specialized Apron (3 Bays)
         { w: 48, d: 36, x: LW('f_reefer_racks').x, z: LW('f_reefer_racks').z, color: 0xe0f2fe },
         // Rail Siding Intermodal Loading Apron (South Perimeter)
@@ -1549,20 +1583,14 @@ function buildCivilPavementsAndRoadNetwork() {
     const dashGeoH = new THREE.BoxGeometry(3.5, 0.02, 0.35);
     const dashGeoV = new THREE.BoxGeometry(0.35, 0.02, 3.5);
 
-    const gInX  = LW('f_gate_in').x;
-    const gOutX = LW('f_gate_out').x;
-    const gTopZ = LW('f_gate_in').z + 28;
+    const gTopZ = ((typeof CIDP_LAYOUT !== 'undefined' && CIDP_LAYOUT.meta) ? CIDP_LAYOUT.meta.fence_half_d : 148) + 16;
     const roadMarkings = [
-        // North Cross Boulevard (Jalan arteri utara penghubung Gate, Yard & Customs)
+        // North Cross Boulevard (Jalan arteri utara penghubung Gate Buffer, Yard & Customs)
         { sx: -190, ex: 190, z: 47, orient: 'h' },
         // Central Yard Spine Road (Jalan tengah yard 2-lajur antara Blok Utara & Selatan + Reefer/DG)
         { sx: -183, ex: 126.5, z: 0, orient: 'h' },
         // South Haul Boulevard (Jalan selatan sejajar Rail Siding Ramp)
         { sx: -190, ex: 190, z: -47, orient: 'h' },
-        // Gate Inbound Corridor (Lane 1)
-        { sz: gTopZ, ez: 47, x: gInX, orient: 'v' },
-        // Gate Outbound Corridor (Lane 2)
-        { sz: gTopZ, ez: 47, x: gOutX, orient: 'v' },
         // Central Transfer Boulevard (Blok A/C <-> Blok B/D)
         { sz: 47, ez: -47, x: 0, orient: 'v' },
         // Mid-East Corridor (Blok B/D <-> Reefer/DG)
@@ -1574,6 +1602,10 @@ function buildCivilPavementsAndRoadNetwork() {
         // CFS Corridor (Empty Depot <-> CFS Warehouse)
         { sz: 47, ez: -47, x: 183, orient: 'v' }
     ];
+    // Tambahkan marka koridor untuk seluruh 10 lajur Plaza Gate (6 Inbound + 4 Outbound) menuju North Cross Boulevard (Z=47)
+    getAllGateLanes().forEach(l => {
+        roadMarkings.push({ sz: gTopZ, ez: 47, x: l.x, orient: 'v' });
+    });
 
     const dashPositionsH = [];
     const dashPositionsV = [];
@@ -2128,97 +2160,202 @@ function buildFreightTrain(zPos) {
     scene.add(trainMesh);
 }
 
-// 4. Gate Complex (Gate-In, Weighbridge 80T, OCR, ANPR, Barrier, Security, Rest Area)
+// 4. Gate Complex (Plaza 10 Lajur: 6 Gate-In + 4 Gate-Out, 4 Timbangan SOLAS 80T, OCR, ANPR, 10 Barrier, Security, Rest Area)
+function createGatePavementBadge(code, sublabel, isIn) {
+    const cv = document.createElement('canvas');
+    cv.width = 256;
+    cv.height = 128;
+    const ctx = cv.getContext('2d');
+    ctx.fillStyle = isIn ? '#0c4a6e' : '#7f1d1d';
+    ctx.fillRect(0, 0, 256, 128);
+    ctx.strokeStyle = isIn ? '#38bdf8' : '#fda4af';
+    ctx.lineWidth = 6;
+    ctx.strokeRect(4, 4, 248, 120);
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 48px Consolas, monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText(code, 128, 62);
+    ctx.fillStyle = isIn ? '#7dd3fc' : '#fecdd3';
+    ctx.font = 'bold 24px Consolas, monospace';
+    ctx.fillText(sublabel, 128, 102);
+    const tex = new THREE.CanvasTexture(cv);
+    tex.anisotropy = 4;
+    const mesh = new THREE.Mesh(
+        new THREE.PlaneGeometry(3.4, 2.0),
+        new THREE.MeshBasicMaterial({ map: tex, transparent: false })
+    );
+    mesh.rotation.x = -Math.PI / 2;
+    mesh.rotation.z = Math.PI; // terbaca jelas dari kamera selatan menghadap utara
+    return mesh;
+}
+
+function setGateBarrierOpenRatio(barEntry, tOpen) {
+    if (!barEntry || !barEntry.mesh) return;
+    const clamped = Math.max(0, Math.min(1, tOpen));
+    barEntry.isOpen = clamped > 0.35;
+    const ang = clamped * 1.22;
+    barEntry.mesh.rotation.x = 0;
+    if (barEntry.hingeSide < 0) {
+        barEntry.mesh.rotation.z = (Math.PI / 2) - ang;
+        barEntry.mesh.position.x = (barEntry.laneX - 2.2) + 2.2 * Math.cos(ang);
+    } else {
+        barEntry.mesh.rotation.z = (Math.PI / 2) + ang;
+        barEntry.mesh.position.x = (barEntry.laneX + 2.2) - 2.2 * Math.cos(ang);
+    }
+    barEntry.mesh.position.y = 1.2 + 2.2 * Math.sin(ang);
+}
+
+function animateGateBarrier(code, open, durationMs) {
+    const barEntry = window.boomBarriers && window.boomBarriers[code];
+    if (!barEntry) return;
+    const fromVal = { t: barEntry.t || 0 };
+    const targetT = open ? 1 : 0;
+    new TWEEN.Tween(fromVal)
+        .to({ t: targetT }, durationMs || dur(500))
+        .easing(open ? TWEEN.Easing.Back.Out : TWEEN.Easing.Quadratic.In)
+        .onUpdate(() => {
+            barEntry.t = fromVal.t;
+            setGateBarrierOpenRatio(barEntry, fromVal.t);
+        })
+        .start();
+}
+
 function buildGateComplex() {
+    const lanes = getAllGateLanes();
+    const inLanes = lanes.filter(l => l.direction === 'INBOUND');
+    const outLanes = lanes.filter(l => l.direction === 'OUTBOUND');
     const gateZ = LW('f_gate_in').z;
-    const laneInX = LW('f_gate_in').x;    // Lane 1 Inbound (-60)
-    const laneOutX = LW('f_gate_out').x;  // Lane 2 Outbound (-50)
-    const gateCenterX = (laneInX + laneOutX) / 2; // -55
-    const barrierZ = gateZ - 9;           // 67
+    const barrierZ = gateZ - 11;
 
-    // Inbound & Outbound Gate Portal Gantry (Steel Overhead Structure)
-    const gantryMat = new THREE.MeshStandardMaterial({ color: 0x004b87, metalness: 0.6, roughness: 0.3 });
-    
-    // Gantry Columns (Span across both Lane 1 & Lane 2)
-    const colGeo = new THREE.BoxGeometry(1.2, 8.0, 1.2);
-    const colLeft = new THREE.Mesh(colGeo, gantryMat);
-    colLeft.position.set(laneInX - 4.5, 4.0, gateZ);
-    scene.add(colLeft);
+    const minX = Math.min(...lanes.map(l => l.x)); // -141.5
+    const maxX = Math.max(...lanes.map(l => l.x)); // -56.0
+    const plazaCenterX = (minX + maxX) / 2;         // -98.75
+    const inCenterX = inLanes.reduce((s, l) => s + l.x, 0) / Math.max(1, inLanes.length);
+    const outCenterX = outLanes.reduce((s, l) => s + l.x, 0) / Math.max(1, outLanes.length);
+    const medianX = (Math.min(...inLanes.map(l => l.x)) + Math.max(...outLanes.map(l => l.x))) / 2; // -107.25
 
-    const colMid = new THREE.Mesh(colGeo, gantryMat);
-    colMid.position.set(gateCenterX, 4.0, gateZ);
-    scene.add(colMid);
+    const gantryMat = new THREE.MeshStandardMaterial({ color: 0x004b87, metalness: 0.55, roughness: 0.35 });
+    const canopyMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.4, roughness: 0.5 });
+    const islandMat = new THREE.MeshStandardMaterial({ color: 0xcbd5e1, roughness: 0.75 });
+    const scaleMat  = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.25 });
+    const curbMat   = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.45 });
+    const barrierBaseMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.4 });
+    const poleMat   = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
 
-    const colRight = new THREE.Mesh(colGeo, gantryMat);
-    colRight.position.set(laneOutX + 4.5, 4.0, gateZ);
-    scene.add(colRight);
+    const colGeo         = new THREE.BoxGeometry(0.95, 7.8, 1.1);
+    const scaleGeo       = new THREE.BoxGeometry(3.6, 0.16, 18.0);
+    const curbGeo        = new THREE.BoxGeometry(0.28, 0.34, 18.0);
+    const ledDispGeo     = new THREE.BoxGeometry(2.8, 1.0, 0.35);
+    const islandGeo      = new THREE.BoxGeometry(1.5, 0.32, 16.0);
+    const boothGeo       = new THREE.BoxGeometry(1.2, 3.0, 2.4);
+    const barrierBaseGeo = new THREE.CylinderGeometry(0.32, 0.38, 1.35, 14);
+    const poleGeo        = new THREE.CylinderGeometry(0.08, 0.08, 4.4, 12);
 
-    // Overhead Portal Crossbeam
-    const beam = new THREE.Mesh(new THREE.BoxGeometry(22.0, 1.6, 1.6), gantryMat);
-    beam.position.set(gateCenterX, 8.0, gateZ);
-    scene.add(beam);
+    // Kanopi Baja Megah 10 Lajur Gate (Bentang 96.5m)
+    const canopySpan = (maxX - minX) + 11.0;
+    const canopy = new THREE.Mesh(new THREE.BoxGeometry(canopySpan, 0.75, 8.8), gantryMat);
+    canopy.position.set(plazaCenterX, 7.8, gateZ);
+    canopy.castShadow = true;
+    scene.add(canopy);
 
-    // Signboard on Gantry
-    createBlockLabelSprite('MAIN GATE & JEMBATAN TIMBANG SOLAS 80T (LANE 1 IN • LANE 2 OUT)', gateCenterX, 10.2, gateZ);
+    const roofDeck = new THREE.Mesh(new THREE.BoxGeometry(canopySpan - 1.2, 0.35, 7.6), canopyMat);
+    roofDeck.position.set(plazaCenterX, 8.3, gateZ);
+    scene.add(roofDeck);
 
-    // Weighbridge Pit & Real-World 18m SOLAS Steel Scale Platform (Lane 1, Inbound)
-    // Real-world scale: Length 18.0m (along traffic Z), Width 3.8m (across lane X)
-    const scaleGeo = new THREE.BoxGeometry(3.8, 0.15, 18.0);
-    const scaleMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.8, roughness: 0.25 });
-    const scale = new THREE.Mesh(scaleGeo, scaleMat);
-    scale.position.set(laneInX, 0.08, gateZ);
-    scale.receiveShadow = true;
-    scene.add(scale);
+    // List LED Neon Kanopi: Cyan untuk Zona Inbound (6 Lajur) & Rose-Amber untuk Outbound (4 Lajur)
+    const inFasciaW = (Math.max(...inLanes.map(l => l.x)) - Math.min(...inLanes.map(l => l.x))) + 8.0;
+    const inFascia = new THREE.Mesh(new THREE.BoxGeometry(inFasciaW, 0.38, 0.25), new THREE.MeshBasicMaterial({ color: 0x0ea5e9 }));
+    inFascia.position.set(inCenterX, 7.75, gateZ - 4.45);
+    scene.add(inFascia);
 
-    // Weighbridge Yellow/Black Hazard Safety Curbs (Left & Right)
-    const curbGeo = new THREE.BoxGeometry(0.3, 0.35, 18.0);
-    const curbMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.5 });
-    const curbL = new THREE.Mesh(curbGeo, curbMat);
-    curbL.position.set(laneInX - 2.0, 0.18, gateZ);
-    scene.add(curbL);
+    const outFasciaW = (Math.max(...outLanes.map(l => l.x)) - Math.min(...outLanes.map(l => l.x))) + 8.0;
+    const outFascia = new THREE.Mesh(new THREE.BoxGeometry(outFasciaW, 0.38, 0.25), new THREE.MeshBasicMaterial({ color: 0xf43f5e }));
+    outFascia.position.set(outCenterX, 7.75, gateZ - 4.45);
+    scene.add(outFascia);
 
-    const curbR = new THREE.Mesh(curbGeo, curbMat);
-    curbR.position.set(laneInX + 2.0, 0.18, gateZ);
-    scene.add(curbR);
+    // Kabin Pengawas & Edge Cluster di Median Pemisah Inbound <-> Outbound
+    const supCabin = new THREE.Mesh(new THREE.BoxGeometry(4.2, 4.0, 9.5), new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.4 }));
+    supCabin.position.set(medianX, 2.0, gateZ);
+    supCabin.castShadow = true;
+    scene.add(supCabin);
 
-    // Digital Weighbridge Indicator Display on Gantry (Lane 1)
-    const ledDispGeo = new THREE.BoxGeometry(2.8, 1.2, 0.4);
-    const ledDispMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
-    const ledDisp = new THREE.Mesh(ledDispGeo, ledDispMat);
-    ledDisp.position.set(laneInX, 6.2, gateZ);
-    scene.add(ledDisp);
+    const outerColL = new THREE.Mesh(colGeo, gantryMat);
+    outerColL.position.set(minX - 4.5, 3.9, gateZ);
+    scene.add(outerColL);
+    const outerColR = new THREE.Mesh(colGeo, gantryMat);
+    outerColR.position.set(maxX + 4.5, 3.9, gateZ);
+    scene.add(outerColR);
 
-    // Inbound Boom Barrier Pole (Lane 1, Animated Palang Pintu Otomatis)
-    const barrierBaseGeo = new THREE.CylinderGeometry(0.35, 0.4, 1.4, 16);
-    const barrierBaseMat = new THREE.MeshStandardMaterial({ color: 0xf59e0b });
-    const bBaseIn = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
-    bBaseIn.position.set(laneInX - 2.2, 0.7, barrierZ);
-    scene.add(bBaseIn);
+    createBlockLabelSprite('6 GATE-IN (IN-01..06) • 4 TIMBANGAN SOLAS 80T', inCenterX, 11.0, gateZ);
+    createBlockLabelSprite('4 GATE-OUT (OUT-01..04) • CLEARANCE CEISA', outCenterX, 11.0, gateZ);
 
-    const poleGeo = new THREE.CylinderGeometry(0.08, 0.08, 4.4, 12);
-    const poleMat = new THREE.MeshBasicMaterial({ color: 0xdc2626 });
-    boomBarrierMesh = new THREE.Mesh(poleGeo, poleMat);
-    boomBarrierMesh.rotation.z = Math.PI / 2;
-    boomBarrierMesh.position.set(laneInX, 1.2, barrierZ);
-    scene.add(boomBarrierMesh);
+    window.boomBarriers = {};
 
-    // Outbound Boom Barrier Pole (Lane 2, Animated Palang Pintu Keluar)
-    const bBaseOut = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
-    bBaseOut.position.set(laneOutX + 2.2, 0.7, barrierZ);
-    scene.add(bBaseOut);
+    lanes.forEach((lane, idx) => {
+        const isIn = (lane.direction === 'INBOUND');
+        const ledColor = isIn ? (lane.has_weighbridge ? 0x10b981 : 0x38bdf8) : 0xf43f5e;
 
-    outboundBarrierMesh = new THREE.Mesh(poleGeo, poleMat);
-    outboundBarrierMesh.rotation.z = Math.PI / 2;
-    outboundBarrierMesh.position.set(laneOutX, 1.2, barrierZ);
-    scene.add(outboundBarrierMesh);
+        // Pulau Beton Pemisah & Kolom Gantry di tepi lajur
+        if (idx > 0 && lanes[idx - 1].direction === lane.direction) {
+            const sepX = (lanes[idx - 1].x + lane.x) / 2;
+            const sepIsland = new THREE.Mesh(islandGeo, islandMat);
+            sepIsland.position.set(sepX, 0.16, gateZ - 1.5);
+            scene.add(sepIsland);
 
-    // Outbound Lane Display
-    const outDispMat = new THREE.MeshBasicMaterial({ color: 0x06b6d4 });
-    const outDisp = new THREE.Mesh(ledDispGeo, outDispMat);
-    outDisp.position.set(laneOutX, 6.2, gateZ);
-    scene.add(outDisp);
+            const sepCol = new THREE.Mesh(colGeo, gantryMat);
+            sepCol.position.set(sepX, 3.9, gateZ);
+            scene.add(sepCol);
+        }
 
-    createBlockLabelSprite('OUTBOUND GATE (CHECKOUT & E-SEAL)', laneOutX, 7.5, barrierZ);
+        // Pos Mikro Reader / Interkom tiap lajur
+        const booth = new THREE.Mesh(boothGeo, islandMat);
+        booth.position.set(lane.x + (isIn ? -2.85 : 2.85), 1.5, gateZ - 1.0);
+        scene.add(booth);
+
+        // Panel Display Overhead VMS per lajur
+        const disp = new THREE.Mesh(ledDispGeo, new THREE.MeshBasicMaterial({ color: ledColor }));
+        disp.position.set(lane.x, 6.4, gateZ);
+        scene.add(disp);
+
+        // Marka Kode Lajur pada perkerasan selatan kanopi
+        const badge = createGatePavementBadge(
+            lane.code,
+            isIn ? (lane.has_weighbridge ? '80T SOLAS' : 'FAST OCR') : 'EXIT CEISA',
+            isIn
+        );
+        badge.position.set(lane.x, 0.10, gateZ + 11.5);
+        scene.add(badge);
+
+        // Jembatan Timbang Baja 18m 80T (Hanya pada IN-01, IN-02, IN-03, IN-06 sesuai SSoT)
+        if (lane.has_weighbridge) {
+            const scale = new THREE.Mesh(scaleGeo, scaleMat);
+            scale.position.set(lane.x, 0.09, gateZ + 1.0);
+            scale.receiveShadow = true;
+            scene.add(scale);
+
+            const curbL = new THREE.Mesh(curbGeo, curbMat);
+            curbL.position.set(lane.x - 1.95, 0.17, gateZ + 1.0);
+            scene.add(curbL);
+            const curbR = new THREE.Mesh(curbGeo, curbMat);
+            curbR.position.set(lane.x + 1.95, 0.17, gateZ + 1.0);
+            scene.add(curbR);
+        }
+
+        // Palang Pintu Otomatis (Boom Barrier) independen per lajur di Z = barrierZ
+        const hingeSide = isIn ? -1 : 1;
+        const bBase = new THREE.Mesh(barrierBaseGeo, barrierBaseMat);
+        bBase.position.set(lane.x + hingeSide * 2.2, 0.68, barrierZ);
+        scene.add(bBase);
+
+        const pole = new THREE.Mesh(poleGeo, poleMat);
+        pole.rotation.z = Math.PI / 2;
+        pole.position.set(lane.x, 1.2, barrierZ);
+        scene.add(pole);
+
+        window.boomBarriers[lane.code] = { mesh: pole, laneX: lane.x, hingeSide, isOpen: false, t: 0 };
+        if (lane.code === 'IN-01') boomBarrierMesh = pole;
+        if (lane.code === 'OUT-01') outboundBarrierMesh = pole;
+    });
 
     const __mSec = relocBegin(null);
     // Security Post 24 Jam (fac_f_security_gate)
@@ -2246,22 +2383,22 @@ function buildGateComplex() {
     relocEnd(__mRest, 'f_driver_rest', -80, 38);
     const __mQ = relocBegin(null);
     // Truck Queuing Parking Yard (fac_f_truck_queue)
-    const queueGeo = new THREE.BoxGeometry(18, 0.1, 14);
+    const queueGeo = new THREE.BoxGeometry(28, 0.1, 18);
     const queueMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.9 });
     const queueYard = new THREE.Mesh(queueGeo, queueMat);
     queueYard.position.set(-80, 0.08, 54);
     scene.add(queueYard);
 
     // Striped queue parking lines
-    for (let qx = -87; qx <= -73; qx += 3.5) {
-        const lineGeo = new THREE.BoxGeometry(0.15, 0.02, 12);
+    for (let qx = -91; qx <= -69; qx += 3.5) {
+        const lineGeo = new THREE.BoxGeometry(0.15, 0.02, 15);
         const lineMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
         const line = new THREE.Mesh(lineGeo, lineMat);
         line.position.set(qx, 0.14, 54);
         scene.add(line);
     }
 
-    createBlockLabelSprite('PARKIR TRUK ANTRIAN (40 TRAILER)', -80, 6.0, 54);
+    createBlockLabelSprite('PARKIR TRUK ANTRIAN (HOLDING YARD)', -80, 6.0, 54);
     relocEnd(__mQ, 'f_truck_queue', -80, 54);
 }
 
@@ -3274,18 +3411,16 @@ function buildStylizedTrees() {
     }
 
     const treePositions = [
-        // North Perimeter Green Lawn (Di kanan-kiri gerbang Z=106, bersih dari jalur truk Gate X=-68..-42 & Gedung Utara)
-        { x: -195, z: 106, s: 1.15 },
-        { x: -150, z: 106, s: 1.25 },
-        { x: -105, z: 106, s: 1.1 },
-        { x: -74,  z: 106, s: 1.2 },
-        { x: -36,  z: 106, s: 1.15 },
-        { x: -10,  z: 106, s: 1.05 },
-        { x: 25,   z: 106, s: 1.25 },
-        { x: 65,   z: 106, s: 1.15 },
-        { x: 110,  z: 106, s: 1.2 },
-        { x: 155,  z: 106, s: 1.1 },
-        { x: 195,  z: 106, s: 1.2 },
+        // North Perimeter Green Lawn (Di kanan-kiri gerbang Z=138, bersih dari Plaza Gate 10 Lajur X=-150..-48 & Gedung Utara)
+        { x: -195, z: 138, s: 1.15 },
+        { x: -162, z: 138, s: 1.25 },
+        { x: -34,  z: 138, s: 1.15 },
+        { x: -10,  z: 138, s: 1.05 },
+        { x: 25,   z: 138, s: 1.25 },
+        { x: 65,   z: 138, s: 1.15 },
+        { x: 110,  z: 138, s: 1.2 },
+        { x: 155,  z: 138, s: 1.1 },
+        { x: 195,  z: 138, s: 1.2 },
         // West Perimeter Green Verge (Di belakang CFS/M&R X=+232)
         { x: 232,  z: 36,  s: 1.2 },
         { x: 232,  z: 12,  s: 1.05 },
@@ -3491,14 +3626,15 @@ function buildEngineeringDimensionLeaders() {
 
     // 3. Dimensi lain (CFS & jalan haul) tetap dipertahankan
     createDimensionLineZ(40, -40, LW('f_cfs').x + 18, '← 80.00 M CFS & M&R LOGISTICS COMPLEX →', 0x0284c7);
-    createDimensionLine(LW('f_gate_in').x - 5, LW('f_gate_out').x + 5, 47, '← 18.00 M MAIN ACCESS ARTERIAL →', 0x10b981);
+    createDimensionLine(-145, -52, 47, '← 93.00 M PLAZA 10 LAJUR GATE (6 IN • 4 OUT) →', 0x10b981);
+    createDimensionLineZ(40, LW('f_gate_in').z, -43, '← 78.00 M KORIDOR GATE ↔ CONTAINER YARD →', 0x0ea5e9);
 
     // 4. Elevation marks (duga)
     createCADLeaderElevation(0, 0.16, 47, 'EL +0.16 M (TOP SLAB PEKERASAN)');
     createCADLeaderElevation(LW('blok_b').x, 10.6, LW('blok_b').z, 'EL +10.60 M (MAX TIER 4 HOIST LIMIT)');
 
     // 5. Benchmark Datum Geodetik
-    createDatumBenchmarkMarker(-135, 0.5, 96);
+    createDatumBenchmarkMarker(-42, 0.5, 134);
 
     technicalDimensionsGroup.visible = cadLayers.dimensions && showTechnicalDimensions;
 }
@@ -4162,8 +4298,9 @@ function spawnTruckModel() {
     truckMesh.add(box);
     truckBoxMesh = box; // Assign to global truckBoxMesh
 
-    // Standby Highway Position (Lane 1 Approach)
-    truckMesh.position.set(-49, 0, 75);
+    const in1Init = getGateLanePos('IN-01', -56);
+    const startInitZ = (CIDP_LAYOUT.meta ? CIDP_LAYOUT.meta.fence_half_d : 148) + 16;
+    truckMesh.position.set(in1Init.x, 0, startInitZ);
     truckMesh.rotation.y = Math.PI / 2; // Facing north toward Gate-In
     scene.add(truckMesh);
 }
@@ -5187,24 +5324,27 @@ function triggerGateIn(type = 'drop_off') {
         truckBoxMesh.visible = !isPickup;
     }
 
-    // Posisi awal di jalan raya pendekatan (Highway Approach Lane 1: X = -49, Z = 75)
-    truckMesh.position.set(-49, 0, 75);
-    truckMesh.rotation.set(0, Math.PI / 2, 0); // Menghadap Utara (-Z) ke arah Gate-In
+    const in1 = getGateLanePos('IN-01', -56);
+    const startZ = (CIDP_LAYOUT.meta ? CIDP_LAYOUT.meta.fence_half_d : 148) + 16;
+
+    // Posisi awal di jalan raya pendekatan Tol Utara (Approach Lajur IN-01)
+    truckMesh.position.set(in1.x, 0, startZ);
+    truckMesh.rotation.set(0, Math.PI / 2, 0); // Menghadap Selatan ke arah Gerbang Gate-In
 
     // Stage 1 HUD & Kamera
-    showOpFlowHUD(1, '1. GATE-IN & JEMBATAN TIMBANG SOLAS 80T', isPickup 
-        ? 'Truk sasis kosong tiba di gerbang, pemindaian e-Pass supir & verifikasi bobot tara...'
-        : 'Truk kontainer tiba di gerbang, identifikasi OCR ISO 6346 & timbangan 80T...');
-    focusLocation('vgm', `Gate Inbound & Jembatan Timbang 80T [${misiText}]`, { x: -45, y: 0, z: 52 }, `GATE-IN • ${misiText}`);
-    logTicker(`[ANPR & RFID] Mendeteksi armada mendekati Inbound Gate Lane 1 (${misiText})...`);
+    showOpFlowHUD(1, '1. GATE-IN (IN-01) & JEMBATAN TIMBANG SOLAS 80T', isPickup 
+        ? 'Truk sasis kosong tiba di Plaza Gate-In IN-01, pemindaian e-Pass supir & verifikasi bobot tara...'
+        : 'Truk kontainer tiba di Plaza Gate-In IN-01, identifikasi OCR ISO 6346 & timbangan 80T...');
+    focusLocation('vgm', `Gate Inbound IN-01 & Jembatan Timbang 80T [${misiText}]`, { x: in1.x, y: 0, z: in1.z }, `GATE-IN • ${misiText}`);
+    logTicker(`[ANPR & RFID] Mendeteksi armada mendekati Plaza Inbound Gate IN-01 (${misiText})...`);
 
-    // 1A. Truk melaju dari jalan raya ke atas platform jembatan timbang 18m (Z = 75 -> 52)
+    // 1A. Truk melaju dari jalan tol ke atas platform jembatan timbang 18m (Z = 164 -> 118)
     new TWEEN.Tween(truckMesh.position)
-        .to({ z: 52 }, dur(1600))
+        .to({ z: in1.z }, dur(1800))
         .easing(TWEEN.Easing.Quadratic.Out)
         .onComplete(() => {
             playSimSound('brake'); // Suara rem angin psssh
-            logTicker(`[WEIGHBRIDGE 80T] Truk berhenti di atas timbangan SOLAS (Sandbox Read-Only)...`);
+            logTicker(`[WEIGHBRIDGE 80T] Truk berhenti di atas timbangan SOLAS lajur IN-01 (Sandbox Read-Only)...`);
 
             setTimeout(() => {
                 playSimSound('beep'); // Beep konfirmasi penimbangan
@@ -5227,28 +5367,18 @@ function triggerGateIn(type = 'drop_off') {
                     ? `${trk.license_plate}: Sasis Kosong (Tare ${trk.tare_weight.toLocaleString()} kg). Izin Pick-Up Sandbox Valid!`
                     : `${trk.license_plate} (${trk.company}): Gross ${trk.gross_weight.toLocaleString()} kg, VGM Net ${trk.vgm_net.toLocaleString()} kg - SOLAS PASS!`;
                 showToast(`Gate-In Sandbox ${misiText}`, desc, 'success');
-                logTicker(`[SANDBOX GATE-IN] Plat ${trk.license_plate}: Gross ${trk.gross_weight}kg, Status: ${trk.vgm_status} (Data DB asli aman).`);
+                logTicker(`[SANDBOX GATE-IN] Plat ${trk.license_plate} (Lajur IN-01): Gross ${trk.gross_weight}kg, Status: ${trk.vgm_status} (Data DB asli aman).`);
 
-                // 1B. Angkat Palang Pintu Gerbang Masuk (Boom Barrier Inbound)
-                if (boomBarrierMesh) {
-                    playSimSound('barrier');
-                    new TWEEN.Tween(boomBarrierMesh.rotation)
-                        .to({ x: -Math.PI / 2.5 }, dur(600))
-                        .easing(TWEEN.Easing.Quadratic.Out)
-                        .start();
-                }
+                // 1B. Angkat Palang Pintu Gerbang Masuk Lajur IN-01
+                playSimSound('barrier');
+                animateGateBarrier('IN-01', true, dur(550));
 
-                // 1C. Truk melaju melintasi palang masuk (Z = 52 -> 43 -> 28) ke jalan sirkulasi internal
+                // 1C. Truk melaju melintasi palang & koridor buffer ±78m menuju jalan sirkulasi CY (Z = 118 -> 28)
                 new TWEEN.Tween(truckMesh.position)
-                    .to({ z: 28 }, dur(1500))
+                    .to({ z: 28 }, dur(2500))
                     .easing(TWEEN.Easing.Quadratic.InOut)
                     .onComplete(() => {
-                        if (boomBarrierMesh) {
-                            new TWEEN.Tween(boomBarrierMesh.rotation)
-                                .to({ x: 0 }, dur(500))
-                                .easing(TWEEN.Easing.Quadratic.In)
-                                .start();
-                        }
+                        animateGateBarrier('IN-01', false, dur(500));
                         runStage2_DriveToYard(type, trk);
                     })
                     .start();
@@ -5522,62 +5652,58 @@ function runStage3_ReachStackerOperation(type, truckData) {
 function runStage4_DriveToGateOut(type, truckData) {
     const isPickup = (type === 'pick_up');
     const misiText = isPickup ? 'PICK-UP' : 'DROP-OFF';
+    const in1 = getGateLanePos('IN-01', -56);
+    const out1 = getGateLanePos('OUT-01', -116);
+    const barrierZ = out1.z - 11;
+    const fenceHalfD = CIDP_LAYOUT.meta ? CIDP_LAYOUT.meta.fence_half_d : 148;
+    const hwyInZ = fenceHalfD + 16;
+    const hwyOutZ = fenceHalfD + 24;
 
-    showOpFlowHUD(4, '4. GATE-OUT & PENYELESAIAN MISI', isPickup
-        ? 'Truk bermuatan kontainer impor menuju Outbound Gate, validasi e-Seal & berangkat ke jalan tol...'
-        : 'Truk sasis kosong menuju Outbound Gate setelah menyelesaikan proses penurunan kontainer...');
+    showOpFlowHUD(4, '4. GATE-OUT (OUT-01) & PENYELESAIAN MISI', isPickup
+        ? 'Truk bermuatan kontainer impor melintasi koridor buffer menuju Plaza Outbound Gate OUT-01 & berangkat ke jalan tol...'
+        : 'Truk sasis kosong menuju Plaza Outbound Gate OUT-01 setelah menyelesaikan proses penurunan kontainer...');
 
-    focusLocation('vgm', 'Gerbang Keluar (Outbound Gate & Pemeriksaan Akhir)', { x: -41, y: 0, z: 43 }, 'OUTBOUND GATE');
-    logTicker(`[GATE-OUT] Truk ${truckData.license_plate} bergerak dari yard penumpukan menuju Outbound Gate Lane 2...`);
+    focusLocation('vgm', 'Gerbang Keluar Outbound Gate OUT-01 & Clearance CEISA', { x: out1.x, y: 0, z: barrierZ }, 'OUTBOUND GATE');
+    logTicker(`[GATE-OUT] Truk ${truckData.license_plate} bergerak dari yard menuju koridor Plaza Outbound Gate OUT-01...`);
 
-    // 4A. Truk berputar menghadap Barat (rotasi Y: 0 -> Math.PI)
+    // 4A. Truk berputar menghadap Timur / Koridor Gate-Out (rotasi Y: 0 -> Math.PI)
     new TWEEN.Tween(truckMesh.rotation)
         .to({ y: Math.PI }, dur(500))
         .easing(TWEEN.Easing.Quadratic.InOut)
         .onComplete(() => {
-            // 4B. Truk melaju di jalan sirkulasi ke koridor gerbang keluar Lane 2 (X: targetX -> -41)
+            // 4B. Truk melaju di jalan sirkulasi ke lajur keluar OUT-01
             new TWEEN.Tween(truckMesh.position)
-                .to({ x: -41, z: 28 }, dur(1800))
+                .to({ x: out1.x, z: 28 }, dur(2000))
                 .easing(TWEEN.Easing.Quadratic.InOut)
                 .onComplete(() => {
-                    // 4C. Truk berputar ke arah Selatan / Gerbang Keluar (rotasi Y: Math.PI -> -Math.PI / 2)
+                    // 4C. Truk berputar menghadap Utara menuju Gerbang Keluar (+Z)
                     new TWEEN.Tween(truckMesh.rotation)
                         .to({ y: -Math.PI / 2 }, dur(500))
                         .easing(TWEEN.Easing.Quadratic.InOut)
                         .onComplete(() => {
-                            // 4D. Truk melaju ke posisi pos palang keluar (Z: 28 -> 43)
+                            // 4D. Truk melaju melewati koridor buffer menuju pos palang OUT-01 (Z: 28 -> barrierZ)
                             new TWEEN.Tween(truckMesh.position)
-                                .to({ z: 43 }, dur(1200))
+                                .to({ z: barrierZ }, dur(2200))
                                 .easing(TWEEN.Easing.Quadratic.Out)
                                 .onComplete(() => {
                                     playSimSound('brake');
-                                    logTicker(`[OUTBOUND GATE] Memindai e-Pass keluar & verifikasi surat jalan elektronik (Sandbox)...`);
+                                    logTicker(`[OUTBOUND GATE OUT-01] Memindai e-Pass keluar & verifikasi surat jalan elektronik (Sandbox)...`);
 
                                     setTimeout(() => {
                                         playSimSound('beep');
-                                        if (outboundBarrierMesh) {
-                                            playSimSound('barrier');
-                                            new TWEEN.Tween(outboundBarrierMesh.rotation)
-                                                .to({ x: -Math.PI / 2.5 }, dur(600))
-                                                .easing(TWEEN.Easing.Quadratic.Out)
-                                                .start();
-                                        }
+                                        playSimSound('barrier');
+                                        animateGateBarrier('OUT-01', true, dur(550));
 
                                         new TWEEN.Tween(truckMesh.position)
-                                            .to({ z: 85 }, dur(2000))
+                                            .to({ z: hwyOutZ }, dur(2200))
                                             .easing(TWEEN.Easing.Quadratic.In)
                                             .onComplete(() => {
-                                                if (outboundBarrierMesh) {
-                                                    new TWEEN.Tween(outboundBarrierMesh.rotation)
-                                                        .to({ x: 0 }, dur(500))
-                                                        .easing(TWEEN.Easing.Quadratic.In)
-                                                        .start();
-                                                }
+                                                animateGateBarrier('OUT-01', false, dur(500));
 
                                                 showToast(`Misi Sandbox ${misiText} Selesai!`, `Visualisasi 3D selesai (Mode Read-Only, data DB nyata tidak diubah).`, 'success');
-                                                logTicker(`[SANDBOX SELESAI] Truk ${truckData.license_plate} melewati Gate-Out 3D.`);
+                                                logTicker(`[SANDBOX SELESAI] Truk ${truckData.license_plate} keluar melalui Gate-Out OUT-01.`);
 
-                                                truckMesh.position.set(-49, 0, 75);
+                                                truckMesh.position.set(in1.x, 0, hwyInZ);
                                                 truckMesh.rotation.set(0, Math.PI / 2, 0);
                                                 if (truckBoxMesh) truckBoxMesh.visible = true;
 
@@ -5607,42 +5733,40 @@ function triggerGateOut() {
     if (!truckMesh || isAnimating) return;
     isAnimating = true;
 
-    showOpFlowHUD(4, '4. GATE-OUT ARMADA MANDIRI', 'Truk di dalam terminal menuju Outbound Gate (Sandbox Read-Only)...');
-    focusLocation('vgm', 'Gate Outbound: Pemeriksaan Akhir & Barrier Keluar', { x: -41, y: 0, z: 43 }, 'GATE-OUT TERMINAL');
-    logTicker(`[GATE-OUT] Truk menyelesaikan operasional dan menuju gerbang keluar Lane 2...`);
+    const in1 = getGateLanePos('IN-01', -56);
+    const out1 = getGateLanePos('OUT-01', -116);
+    const barrierZ = out1.z - 11;
+    const fenceHalfD = CIDP_LAYOUT.meta ? CIDP_LAYOUT.meta.fence_half_d : 148;
+    const hwyInZ = fenceHalfD + 16;
+    const hwyOutZ = fenceHalfD + 24;
 
-    truckMesh.position.set(-41, 0, 28);
+    showOpFlowHUD(4, '4. GATE-OUT ARMADA MANDIRI (OUT-01)', 'Truk di dalam terminal melintasi koridor buffer menuju Outbound Gate OUT-01 (Sandbox Read-Only)...');
+    focusLocation('vgm', 'Gate Outbound OUT-01: Pemeriksaan Akhir & Barrier Keluar', { x: out1.x, y: 0, z: barrierZ }, 'GATE-OUT TERMINAL');
+    logTicker(`[GATE-OUT] Truk menyelesaikan operasional dan menuju gerbang keluar OUT-01...`);
+
+    truckMesh.position.set(out1.x, 0, 28);
     truckMesh.rotation.set(0, -Math.PI / 2, 0);
 
     new TWEEN.Tween(truckMesh.position)
-        .to({ z: 43 }, dur(1200))
+        .to({ z: barrierZ }, dur(2200))
         .easing(TWEEN.Easing.Quadratic.InOut)
         .onComplete(() => {
             playSimSound('brake');
             setTimeout(() => {
                 playSimSound('beep');
                 const simPlate = 'B 9481 UIX';
-                showToast('Gate-Out Sandbox Selesai', `Truk ${simPlate} disimulasikan keluar (Mode Read-Only).`, 'success');
-                logTicker(`[SANDBOX GATE-OUT] Truk ${simPlate} melewati Outbound Gate 3D tanpa mengubah database.`);
+                showToast('Gate-Out Sandbox Selesai', `Truk ${simPlate} disimulasikan keluar melalui OUT-01 (Mode Read-Only).`, 'success');
+                logTicker(`[SANDBOX GATE-OUT] Truk ${simPlate} melewati Outbound Gate OUT-01 3D tanpa mengubah database.`);
 
-                if (outboundBarrierMesh) {
-                    playSimSound('barrier');
-                    new TWEEN.Tween(outboundBarrierMesh.rotation)
-                        .to({ x: -Math.PI / 2.5 }, dur(600))
-                        .easing(TWEEN.Easing.Quadratic.Out)
-                        .start();
-                }
+                playSimSound('barrier');
+                animateGateBarrier('OUT-01', true, dur(550));
 
                 new TWEEN.Tween(truckMesh.position)
-                    .to({ z: 85 }, dur(2000))
+                    .to({ z: hwyOutZ }, dur(2200))
                     .easing(TWEEN.Easing.Quadratic.In)
                     .onComplete(() => {
-                        if (outboundBarrierMesh) {
-                            new TWEEN.Tween(outboundBarrierMesh.rotation)
-                                .to({ x: 0 }, dur(500))
-                                .start();
-                        }
-                        truckMesh.position.set(-49, 0, 75);
+                        animateGateBarrier('OUT-01', false, dur(500));
+                        truckMesh.position.set(in1.x, 0, hwyInZ);
                         truckMesh.rotation.set(0, Math.PI / 2, 0);
                         if (truckBoxMesh) truckBoxMesh.visible = true;
 
@@ -5664,7 +5788,7 @@ function triggerRailDischarge() {
     if (!rtg || isAnimating) return;
 
     isAnimating = true;
-    focusLocation('rail', 'Alih Muat Kereta Api Logistik (RTG-01 Crane)', { x: 18, y: 0, z: -46 }, 'RTG-01 & RAIL');
+    focusLocation('rail', 'Alih Muat Kereta Api Logistik (RTG-01 Crane)', { x: 18, y: 0, z: LW('rail_siding').z }, 'RTG-01 & RAIL');
     logTicker(`[RTG-01] Memulai alih muat kontainer dari Rangkaian Kereta Api...`);
 
     const trolley = rtg.getObjectByName('rtgTrolley');
@@ -5802,8 +5926,17 @@ function triggerRailDischarge() {
 // =============================================================================
 // RESET SIMULATION
 // =============================================================================
-function resetSimulation() {
-    if (!confirm('Muat ulang snapshot 3D Sandbox dari database MySQL saat ini? (Tidak mengubah atau menghapus data nyata)')) return;
+async function resetSimulation() {
+    if (window.cidpConfirm) {
+        const ok = await window.cidpConfirm({
+            title: 'Reset Snapshot 3D Sandbox',
+            message: 'Muat ulang snapshot 3D Sandbox dari database MySQL saat ini? (Tidak mengubah atau menghapus data nyata)',
+            confirmText: 'Ya, Muat Ulang',
+            cancelText: 'Tidak, Batal',
+            tone: 'primary'
+        });
+        if (!ok) return;
+    }
 
     if (window.trainContainerBoxes) {
         Object.values(window.trainContainerBoxes).forEach(b => { if (b) b.visible = true; });
@@ -5850,20 +5983,20 @@ function setCameraView(preset) {
 
     switch(preset) {
         case 'plan':
-            targetPos = { x: 0, y: 385, z: -0.01 };
-            targetLook = { x: 0, y: 0, z: 8 };
+            targetPos = { x: 0, y: 425, z: -0.01 };
+            targetLook = { x: 0, y: 0, z: 20 };
             activateBtn('btnCamPlan');
             setProjectionText('ORTOGRAFIK 2D (CAD PLAN - UTARA DI ATAS)');
             break;
         case 'iso':
-            targetPos = { x: 205, y: 168, z: -242 };
-            targetLook = { x: 0, y: 0, z: 10 };
+            targetPos = { x: 225, y: 185, z: -265 };
+            targetLook = { x: 0, y: 0, z: 18 };
             activateBtn('btnCamIso');
             setProjectionText('AKSONOMETRI ISOMETRIK 45° BIM');
             break;
         case 'overview':
-            targetPos = { x: 0, y: 192, z: -298 };
-            targetLook = { x: 0, y: 0, z: 10 };
+            targetPos = { x: 0, y: 218, z: -332 };
+            targetLook = { x: 0, y: 0, z: 20 };
             activateBtn('btnCamOverview');
             setProjectionText('PERSPEKTIF DRONE 3D (MENYOROT UTARA)');
             break;
@@ -5874,17 +6007,19 @@ function setCameraView(preset) {
             setProjectionText('DETAIL ZONA 6 (KANTOR UTAMA MTI & NOC UTARA)');
             break;
         case 'gate':
-            targetPos = { x: (LW('f_gate_in').x + LW('f_gate_out').x) / 2, y: 28, z: LW('f_gate_in').z - 36 };
-            targetLook = { x: (LW('f_gate_in').x + LW('f_gate_out').x) / 2, y: 2, z: LW('f_gate_in').z };
+            targetPos = { x: (LW('f_gate_in').x + LW('f_gate_out').x) / 2, y: 46, z: 32 };
+            targetLook = { x: (LW('f_gate_in').x + LW('f_gate_out').x) / 2, y: 2, z: LW('f_gate_in').z - 4 };
             activateBtn('btnCamGate');
-            setProjectionText('DETAIL ZONA 1 (GATE COMPLEX UTARA)');
+            setProjectionText('DETAIL ZONA 1 (PLAZA 10 LAJUR GATE & KORIDOR BUFFER)');
             break;
-        case 'vgm':
-            targetPos = { x: LW('f_gate_in').x, y: 18, z: LW('f_gate_in').z - 26 };
-            targetLook = { x: LW('f_gate_in').x, y: 1.5, z: LW('f_gate_in').z };
+        case 'vgm': {
+            const in1 = getGateLanePos('IN-01', -56);
+            targetPos = { x: in1.x - 10, y: 22, z: in1.z - 32 };
+            targetLook = { x: in1.x - 8, y: 1.5, z: in1.z };
             activateBtn('btnCamGate');
-            setProjectionText('DETAIL WEIGHBRIDGE VGM (80T)');
+            setProjectionText('DETAIL WEIGHBRIDGE VGM 80T (LAJUR IN-01..03 & IN-06)');
             break;
+        }
         case 'yard':
             targetPos = { x: 0, y: 74, z: -108 };
             targetLook = { x: 0, y: 2, z: 0 };
@@ -6386,15 +6521,17 @@ function testSensorAction(type) {
 
             // HW-01 ANPR
             if (type === 'hw01_anpr' || type === 'anpr') {
-                focusLocation('gate', 'Kamera ANPR Lane 1 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-01 ANPR');
+                const in1 = getGateLanePos('IN-01', -56);
+                focusLocation('gate', 'Kamera ANPR Lajur IN-01..06 (Plaza Gate-In)', { x: in1.x, y: 0, z: in1.z }, 'HW-01 ANPR');
                 const anprEl = document.getElementById('sensorAnprVal');
                 if (anprEl) anprEl.innerText = `${data.plate} (${data.confidence})`;
-                logTicker(`[SANDBOX HW-01 ANPR] Kamera memindai plat truk ${data.plate} di Gate Lane 1 (Mode Read-Only)`);
+                logTicker(`[SANDBOX HW-01 ANPR] Kamera memindai plat truk ${data.plate} di Plaza Gate-In IN-01..06 (Mode Read-Only)`);
                 showToast('HW-01 ANPR (Sandbox)', `Plat ${data.plate} terdeteksi (${data.confidence})`, 'success');
             }
             // HW-02 OCR
             else if (type === 'hw02_ocr' || type === 'ocr') {
-                focusLocation('gate', 'Portal Optik OCR ISO 6346 (Gate Inbound)', { x: -45, y: 0, z: 52 }, 'HW-02 OCR');
+                const in1 = getGateLanePos('IN-01', -56);
+                focusLocation('gate', 'Portal Optik OCR ISO 6346 (Gate Inbound IN-01..06)', { x: in1.x, y: 0, z: in1.z }, 'HW-02 OCR');
                 const ocrEl = document.getElementById('sensorOcrVal');
                 if (ocrEl) ocrEl.innerText = `${data.container_number} (${data.iso_code.split(' ')[0]})`;
                 logTicker(`[SANDBOX HW-02 OCR] Portal membaca kontainer ${data.container_number} | ISO ${data.iso_code} | Check Digit: VALID`);
@@ -6402,7 +6539,8 @@ function testSensorAction(type) {
             }
             // HW-03 VGM
             else if (type === 'hw03_vgm' || type === 'vgm') {
-                focusLocation('vgm', 'Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: -49, y: 0, z: 52 }, 'HW-03 TIMBANGAN');
+                const in1 = getGateLanePos('IN-01', -56);
+                focusLocation('vgm', 'Jembatan Timbang 80T & Sertifikat SOLAS VGM (IN-01..03, IN-06)', { x: in1.x, y: 0, z: in1.z }, 'HW-03 TIMBANGAN');
                 const vgmEl = document.getElementById('sensorVgmVal');
                 if (vgmEl) vgmEl.innerText = `Net ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg (PASS)`;
                 logTicker(`[SANDBOX HW-03 VGM] Bruto ${Number(data.vgm.gross_weight).toLocaleString('id-ID')} kg, Net ${Number(data.vgm.net_vgm).toLocaleString('id-ID')} kg -> #${data.vgm.certificate_no}`);
@@ -6410,7 +6548,8 @@ function testSensorAction(type) {
             }
             // HW-04 RFID
             else if (type === 'hw04_rfid' || type === 'rfid') {
-                focusLocation('gate', 'Antena UHF RFID Hopeland 20m (Gate Lane 1)', { x: -45, y: 0, z: 52 }, 'HW-04 RFID');
+                const in1 = getGateLanePos('IN-01', -56);
+                focusLocation('gate', 'Antena UHF RFID Hopeland 20m (Gate IN-01..06)', { x: in1.x, y: 0, z: in1.z }, 'HW-04 RFID');
                 const rfidEl = document.getElementById('sensorRfidVal');
                 if (rfidEl) rfidEl.innerText = `${data.rfid_tag.slice(0, 12)}... (AUTH)`;
                 logTicker(`[SANDBOX HW-04 RFID] Hopeland 20m mendeteksi tag armada ${data.rfid_tag} (${data.driver}) -> ${data.e_wallet_status}`);
@@ -6418,7 +6557,8 @@ function testSensorAction(type) {
             }
             // HW-05 VMS
             else if (type === 'hw05_vms' || type === 'vms') {
-                focusLocation('gate', 'VMS LED Variable Message Sign (Gate Display)', { x: -45, y: 0, z: 52 }, 'HW-05 VMS');
+                const inCenter = LW('f_gate_in');
+                focusLocation('gate', 'VMS LED Variable Message Sign (Plaza Gate-In 6 Lajur)', { x: inCenter.x, y: 0, z: inCenter.z }, 'HW-05 VMS');
                 const vmsEl = document.getElementById('sensorVmsVal');
                 if (vmsEl) vmsEl.innerText = data.display_text;
                 logTicker(`[SANDBOX HW-05 VMS] LED Gate menampilkan: "${data.display_text}" -> ${data.tat_impact}`);
@@ -6426,10 +6566,11 @@ function testSensorAction(type) {
             }
             // HW-06 Edge AI PC
             else if (type === 'hw06_edge' || type === 'edge') {
-                focusLocation('gate', 'Advantech Edge AI PC & Palang Otomatis (12ms)', { x: -45, y: 0, z: 52 }, 'HW-06 EDGE PC');
+                const in1 = getGateLanePos('IN-01', -56);
+                focusLocation('gate', 'Advantech Edge AI PC & Palang Otomatis 10 Lajur (12ms)', { x: in1.x, y: 0, z: in1.z - 11 }, 'HW-06 EDGE PC');
                 const edgeEl = document.getElementById('sensorEdgeVal');
                 if (edgeEl) edgeEl.innerText = `OPEN (${data.latency} / 1.2s)`;
-                logTicker(`[SANDBOX HW-06 EDGE] Advantech ARK-3532 memproses interlock gerbang dalam ${data.latency}.`);
+                logTicker(`[SANDBOX HW-06 EDGE] Advantech ARK-3532 memproses interlock 10 lajur gerbang dalam ${data.latency}.`);
                 showToast('HW-06 Edge AI PC (Sandbox)', `Palang Pintu Terbuka (Latency ${data.latency})`, 'success');
             }
             // HW-07 RTK GNSS
@@ -6469,7 +6610,7 @@ function testSensorAction(type) {
             }
             // HW-10 Rail Axle Counter
             else if (type === 'hw10_axle' || type === 'axle') {
-                focusLocation('rail', 'Frauscher Axle Counter SIL 4 (Jalur Rel Siding)', { x: 0, y: 0, z: -46 }, 'HW-10 AXLE COUNTER');
+                focusLocation('rail', 'Frauscher Axle Counter SIL 4 (Jalur Rel Siding)', { x: 0, y: 0, z: LW('rail_siding').z }, 'HW-10 AXLE COUNTER');
                 const axleEl = document.getElementById('sensorAxleVal');
                 if (axleEl) axleEl.innerText = `${data.axle.axle_count} As Roda (${data.axle.train.split(' ')[0]} ${data.axle.train.split(' ')[1]})`;
                 logTicker(`[SANDBOX HW-10 AXLE] Frauscher RSR123 mendeteksi 126 gandar KA 2518 (SIL 4 verified).`);
@@ -6477,7 +6618,7 @@ function testSensorAction(type) {
             }
             // HW-11 Smart E-Seal CEISA 4.0
             else if (type === 'hw11_eseal' || type === 'eseal') {
-                focusLocation('rail', 'Jointech JT701 Smart E-Seal & CEISA 4.0 Bea Cukai', { x: 0, y: 0, z: -46 }, 'HW-11 SMART E-SEAL');
+                focusLocation('rail', 'Jointech JT701 Smart E-Seal & CEISA 4.0 Bea Cukai', { x: 0, y: 0, z: LW('rail_siding').z }, 'HW-11 SMART E-SEAL');
                 const sealEl = document.getElementById('sensorSealVal');
                 const sppbEl = document.getElementById('sensorSppbVal');
                 if (sealEl) sealEl.innerText = `${data.eseal.wire_status} (#${data.eseal.seal_id})`;
@@ -6487,7 +6628,8 @@ function testSensorAction(type) {
             }
             // Kombinasi ANPR + OCR
             else if (type === 'anpr_ocr') {
-                focusLocation('gate', 'Portal Gabungan ANPR & OCR ISO 6346 (Gate Lane 1)', { x: -45, y: 0, z: 52 }, 'HW-01 & HW-02');
+                const in1 = getGateLanePos('IN-01', -56);
+                focusLocation('gate', 'Portal Gabungan ANPR & OCR ISO 6346 (Gate IN-01..06)', { x: in1.x, y: 0, z: in1.z }, 'HW-01 & HW-02');
                 const anprEl = document.getElementById('sensorAnprVal');
                 const ocrEl = document.getElementById('sensorOcrVal');
                 if (anprEl) anprEl.innerText = `${data.anpr.plate} (${data.anpr.confidence})`;
@@ -6621,17 +6763,19 @@ function testTruckStep(step) {
     }
 
     if (step === 1) {
-        // TAHAP 1: Gerbang Inbound & Pindai Plat ANPR / RFID
-        showOpFlowHUD(1, '1. GERBANG INBOUND (ANPR & RFID)', 'Truk armada mendekati gerbang Lane 1. Loop aspal mendeteksi kendaraan, kamera ANPR membaca plat B 9481 UEK, dan antena RFID memverifikasi e-Pass supir...');
-        focusLocation('gate', 'Tahap 1: Gerbang Inbound & Pindai Plat ANPR/RFID', { x: -49, y: 0, z: 52 }, 'HW-01 & HW-04');
+        // TAHAP 1: Gerbang Inbound (Lajur IN-01..06) & Pindai Plat ANPR / RFID
+        const in1 = getGateLanePos('IN-01', -56);
+        const startZ = (CIDP_LAYOUT.meta ? CIDP_LAYOUT.meta.fence_half_d : 148) + 16;
+        showOpFlowHUD(1, '1. GERBANG INBOUND 6 LAJUR (ANPR & RFID)', 'Truk armada mendekati plaza Gate-In lajur IN-01. Loop aspal mendeteksi kendaraan, kamera ANPR membaca plat B 9481 UEK, dan antena RFID memverifikasi e-Pass supir...');
+        focusLocation('gate', 'Tahap 1: Gerbang Inbound IN-01 & Pindai Plat ANPR/RFID', { x: in1.x, y: 0, z: in1.z }, 'HW-01 & HW-04');
         
         if (truckMesh) {
-            truckMesh.position.set(-49, 0, 70);
+            truckMesh.position.set(in1.x, 0, startZ);
             truckMesh.rotation.set(0, -Math.PI / 2, 0);
             if (truckBoxMesh) truckBoxMesh.visible = true;
 
             new TWEEN.Tween(truckMesh.position)
-                .to({ z: 52 }, dur(1000))
+                .to({ z: in1.z + 6 }, dur(1000))
                 .easing(TWEEN.Easing.Quadratic.Out)
                 .onComplete(() => {
                     playSimSound('brake');
@@ -6646,18 +6790,19 @@ function testTruckStep(step) {
 
     } else if (step === 2) {
         // TAHAP 2: Portal Optik OCR Box ISO 6346
-        showOpFlowHUD(1, '2. PORTAL OPTIK OCR BOX ISO 6346', 'Truk melaju perlahan melewati gantry portal OCR. 4 kamera multi-sudut membaca nomor seri kontainer ISO 6346 & tipe ukuran High Cube 45G1...');
-        focusLocation('gate', 'Tahap 2: Portal OCR Box ISO 6346 (Gate Inbound)', { x: -49, y: 0, z: 46 }, 'HW-02 OCR');
+        const in1 = getGateLanePos('IN-01', -56);
+        showOpFlowHUD(1, '2. PORTAL OPTIK OCR BOX ISO 6346', 'Truk melaju perlahan melewati gantry portal OCR lajur IN-01. 4 kamera multi-sudut membaca nomor seri kontainer ISO 6346 & tipe ukuran High Cube 45G1...');
+        focusLocation('gate', 'Tahap 2: Portal OCR Box ISO 6346 (Gate IN-01)', { x: in1.x, y: 0, z: in1.z }, 'HW-02 OCR');
 
         if (truckMesh) {
-            if (truckMesh.position.z > 60 || truckMesh.position.z < 35) {
-                truckMesh.position.set(-49, 0, 52);
+            if (truckMesh.position.z > in1.z + 25 || truckMesh.position.z < in1.z - 20) {
+                truckMesh.position.set(in1.x, 0, in1.z + 6);
             }
             truckMesh.rotation.set(0, -Math.PI / 2, 0);
             if (truckBoxMesh) truckBoxMesh.visible = true;
 
             new TWEEN.Tween(truckMesh.position)
-                .to({ z: 46 }, dur(900))
+                .to({ z: in1.z }, dur(900))
                 .easing(TWEEN.Easing.Quadratic.InOut)
                 .onComplete(() => {
                     testSensorAction('hw02_ocr');
@@ -6668,19 +6813,20 @@ function testTruckStep(step) {
         }
 
     } else if (step === 3) {
-        // TAHAP 3: Jembatan Timbang 80 Ton SOLAS VGM
-        showOpFlowHUD(1, '3. TIMBANGAN JEMBATAN 80T (SOLAS VGM)', 'Truk berhenti tepat di platform timbangan baja 80T. Sensor strain gauge menimbang Bruto 32.500 kg, Tara 4.100 kg, dan menerbitkan sertifikat Net VGM 28.400 kg...');
-        focusLocation('vgm', 'Tahap 3: Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: -49, y: 0, z: 38 }, 'HW-03 VGM');
+        // TAHAP 3: Jembatan Timbang 80 Ton SOLAS VGM (Lajur IN-01/02/03/06)
+        const in1 = getGateLanePos('IN-01', -56);
+        showOpFlowHUD(1, '3. TIMBANGAN JEMBATAN 80T (SOLAS VGM)', 'Truk berhenti tepat di platform timbangan baja 80T lajur IN-01. Sensor strain gauge menimbang Bruto 32.500 kg, Tara 4.100 kg, dan menerbitkan sertifikat Net VGM 28.400 kg...');
+        focusLocation('vgm', 'Tahap 3: Jembatan Timbang 80T & Sertifikat SOLAS VGM', { x: in1.x, y: 0, z: in1.z - 5 }, 'HW-03 VGM');
 
         if (truckMesh) {
-            if (truckMesh.position.z > 55 || truckMesh.position.z < 30) {
-                truckMesh.position.set(-49, 0, 46);
+            if (truckMesh.position.z > in1.z + 18 || truckMesh.position.z < in1.z - 22) {
+                truckMesh.position.set(in1.x, 0, in1.z);
             }
             truckMesh.rotation.set(0, -Math.PI / 2, 0);
             if (truckBoxMesh) truckBoxMesh.visible = true;
 
             new TWEEN.Tween(truckMesh.position)
-                .to({ z: 38 }, dur(900))
+                .to({ z: in1.z - 6 }, dur(900))
                 .easing(TWEEN.Easing.Quadratic.InOut)
                 .onComplete(() => {
                     playSimSound('brake');
@@ -6692,37 +6838,28 @@ function testTruckStep(step) {
         }
 
     } else if (step === 4) {
-        // TAHAP 4: Buka Palang Otomatis & Panduan Rute VMS LED
-        showOpFlowHUD(2, '4. INTERLOCK PALANG & PANDUAN VMS', 'Edge AI PC memvalidasi izin masuk dalam latensi 12ms. Palang gerbang otomatis terbuka, display VMS LED menyala memandu armada menuju Blok A...');
-        focusLocation('gate', 'Tahap 4: Edge AI PC Interlock & Panduan VMS LED', { x: -49, y: 0, z: 30 }, 'HW-05 & HW-06');
+        // TAHAP 4: Buka Palang Otomatis & Panduan Rute VMS LED + Melintasi Koridor Buffer ±78m
+        const in1 = getGateLanePos('IN-01', -56);
+        showOpFlowHUD(2, '4. INTERLOCK PALANG & PANDUAN VMS', 'Edge AI PC memvalidasi izin masuk dalam latensi 12ms. Palang gerbang lajur IN-01 otomatis terbuka, display VMS LED menyala memandu armada melintasi koridor buffer menuju Blok A...');
+        focusLocation('gate', 'Tahap 4: Edge AI PC Interlock & Panduan VMS LED (IN-01)', { x: in1.x, y: 0, z: in1.z - 11 }, 'HW-05 & HW-06');
 
         if (truckMesh) {
-            truckMesh.position.set(-49, 0, 38);
+            truckMesh.position.set(in1.x, 0, in1.z - 6);
             truckMesh.rotation.set(0, -Math.PI / 2, 0);
             if (truckBoxMesh) truckBoxMesh.visible = true;
 
-            // 4A. Angkat palang pintu gerbang masuk
-            if (boomBarrierMesh) {
-                playSimSound('barrier');
-                new TWEEN.Tween(boomBarrierMesh.rotation)
-                    .to({ x: -Math.PI / 2.5 }, dur(500))
-                    .easing(TWEEN.Easing.Quadratic.Out)
-                    .start();
-            }
+            // 4A. Angkat palang pintu gerbang masuk lajur IN-01
+            playSimSound('barrier');
+            animateGateBarrier('IN-01', true, dur(500));
 
-            // 4B. Truk melaju melewati palang ke jalan terminal
+            // 4B. Truk melaju melewati palang & koridor buffer ke jalan terminal CY (Z: 112 -> 28)
             setTimeout(() => {
                 new TWEEN.Tween(truckMesh.position)
-                    .to({ z: 28 }, dur(1100))
+                    .to({ z: 28 }, dur(2000))
                     .easing(TWEEN.Easing.Quadratic.InOut)
                     .onComplete(() => {
-                        // Tutup kembali palang gerbang
-                        if (boomBarrierMesh) {
-                            new TWEEN.Tween(boomBarrierMesh.rotation)
-                                .to({ x: 0 }, dur(500))
-                                .easing(TWEEN.Easing.Quadratic.In)
-                                .start();
-                        }
+                        // Tutup kembali palang gerbang IN-01
+                        animateGateBarrier('IN-01', false, dur(500));
                         testSensorAction('hw06_edge');
                         setTimeout(() => testSensorAction('hw05_vms'), 700);
                     })
@@ -6853,23 +6990,23 @@ function testTrainStep(step) {
 
     if (step === 1) {
         showOpFlowHUD(1, '1. REL SIDING KA & AXLE COUNTER SIL 4', 'Rangkaian Kereta Api Logistik melintas di atas rel siding. Sensor Frauscher SIL 4 mencacah gandar roda secara akurat untuk verifikasi integritas rangkaian...');
-        focusLocation('rail', 'Tahap 1: Rel Siding KA & Frauscher Axle Counter SIL 4', { x: 18, y: 0, z: -46 }, 'HW-10 AXLE');
+        focusLocation('rail', 'Tahap 1: Rel Siding KA & Frauscher Axle Counter SIL 4', { x: 18, y: 0, z: LW('rail_siding').z }, 'HW-10 AXLE');
         testSensorAction('hw10_axle');
 
     } else if (step === 2) {
         showOpFlowHUD(2, '2. PINDAI NIRKABEL SMART E-SEAL', 'Reader nirkabel memverifikasi status segel elektronik Jointech JT701 pada peti kemas gerbong datar KA: STATUS SECURE / TAMPER-PROOF (0 Deteksi Putus)...');
-        focusLocation('rail', 'Tahap 2: Pindai Nirkabel Smart E-Seal Jointech JT701', { x: 18, y: 0, z: -46 }, 'HW-11 E-SEAL');
+        focusLocation('rail', 'Tahap 2: Pindai Nirkabel Smart E-Seal Jointech JT701', { x: 18, y: 0, z: LW('rail_siding').z }, 'HW-11 E-SEAL');
         testSensorAction('hw11_eseal');
 
     } else if (step === 3) {
         showOpFlowHUD(2, '3. KLIRENS PABEAN CEISA 4.0 BEA CUKAI', 'Gateway pabean Ditjen Bea Cukai menerbitkan SPPB Jalur Hijau (#SPPB-86434/KPU.01/2026). Jaminan pabean dirilis otomatis dan kontainer siap dibongkar...');
-        focusLocation('rail', 'Tahap 3: Klirens Pabean CEISA 4.0 Bea Cukai Jalur Hijau', { x: 18, y: 0, z: -46 }, 'CEISA 4.0');
+        focusLocation('rail', 'Tahap 3: Klirens Pabean CEISA 4.0 Bea Cukai Jalur Hijau', { x: 18, y: 0, z: LW('rail_siding').z }, 'CEISA 4.0');
         logTicker('[CEISA 4.0 Bea Cukai] Gateway pabean menerbitkan SPPB Jalur Hijau (#SPPB-86434/KPU.01/2026). Jaminan pabean dirilis.');
         showToast('CEISA 4.0 Bea Cukai', 'SPPB Jalur Hijau Terbit & Jaminan Pabean Dirilis', 'success');
 
     } else if (step === 4) {
         showOpFlowHUD(3, '4. RTG CRANE SPREADER HOISTING', 'RTG Crane (RTG-01) menggerakkan spreader teleskopik tepat di atas peti kemas gerbong KA, mengunci 4 pin twistlock, dan mengangkat box ke ketinggian gantry...');
-        focusLocation('rail', 'Tahap 4: RTG Crane Spreader Twistlock & Hoisting', { x: 18, y: 0, z: -46 }, 'RTG-01 & HW-08');
+        focusLocation('rail', 'Tahap 4: RTG Crane Spreader Twistlock & Hoisting', { x: 18, y: 0, z: LW('rail_siding').z }, 'RTG-01 & HW-08');
         testSensorAction('hw08_twistlock');
         toggleTwistlockSim();
 
@@ -6901,7 +7038,7 @@ function testTrainStep(step) {
 
     } else if (step === 6) {
         showOpFlowHUD(4, '6. PENERBITAN RAIL MANIFEST & ESG FREIGHT', 'Manifest perjalanan KA-LOG-JKT-SMG tervalidasi. Freight KA Rp 1.850.000/TEU diterbitkan ke modul Billing, reduksi jejak karbon ESG tercatat 78%...');
-        focusLocation('rail', 'Tahap 6: Penerbitan Rail Manifest & Tagihan Freight', { x: 0, y: 0, z: -46 }, 'RAIL FREIGHT');
+        focusLocation('rail', 'Tahap 6: Penerbitan Rail Manifest & Tagihan Freight', { x: 0, y: 0, z: LW('rail_siding').z }, 'RAIL FREIGHT');
         logTicker('[RAIL MANIFEST] KA-LOG-JKT-SMG 48 TEU tervalidasi. Freight KA: Rp 1.850.000/TEU. Reduksi jejak karbon ESG: 78%.');
         showToast('Rail Freight Terkonfirmasi', 'Biaya Rel Rp 1.850.000/TEU & Audit ESG Tercatat', 'success');
     }

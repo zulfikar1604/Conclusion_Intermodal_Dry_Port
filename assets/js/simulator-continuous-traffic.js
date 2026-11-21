@@ -121,19 +121,53 @@
 
     function getGateMetrics() {
         const hasLW = (typeof LW === 'function');
-        const gIn  = hasLW ? LW('f_gate_in')   : { x: -60, z: 86 };
-        const gOut = hasLW ? LW('f_gate_out')  : { x: -50, z: 86 };
-        const rail = hasLW ? LW('rail_siding') : { x: 0,   z: -82 };
+        const gIn  = hasLW ? LW('f_gate_in')   : { x: -77,  z: 118 };
+        const gOut = hasLW ? LW('f_gate_out')  : { x: -129, z: 118 };
+        const rail = hasLW ? LW('rail_siding') : { x: 0,    z: -82 };
         const fenceHalfW = (typeof CIDP_LAYOUT !== 'undefined' && CIDP_LAYOUT.meta) ? CIDP_LAYOUT.meta.fence_half_w : 240;
-        const fenceHalfD = (typeof CIDP_LAYOUT !== 'undefined' && CIDP_LAYOUT.meta) ? CIDP_LAYOUT.meta.fence_half_d : 115;
+        const fenceHalfD = (typeof CIDP_LAYOUT !== 'undefined' && CIDP_LAYOUT.meta) ? CIDP_LAYOUT.meta.fence_half_d : 148;
+        const gateZ = Number(gIn.z || 118);
+        const lanes = (typeof getAllGateLanes === 'function')
+            ? getAllGateLanes()
+            : ((typeof CIDP_LAYOUT !== 'undefined' && Array.isArray(CIDP_LAYOUT.gate_lanes) && CIDP_LAYOUT.gate_lanes.length)
+                ? CIDP_LAYOUT.gate_lanes
+                : [
+                    { code: 'IN-01', direction: 'INBOUND', lane_num: 1, has_weighbridge: true, x: -56.0, z: gateZ },
+                    { code: 'IN-02', direction: 'INBOUND', lane_num: 2, has_weighbridge: true, x: -64.5, z: gateZ },
+                    { code: 'IN-03', direction: 'INBOUND', lane_num: 3, has_weighbridge: true, x: -73.0, z: gateZ },
+                    { code: 'IN-04', direction: 'INBOUND', lane_num: 4, has_weighbridge: false, x: -81.5, z: gateZ },
+                    { code: 'IN-05', direction: 'INBOUND', lane_num: 5, has_weighbridge: false, x: -90.0, z: gateZ },
+                    { code: 'IN-06', direction: 'INBOUND', lane_num: 6, has_weighbridge: true, x: -98.5, z: gateZ },
+                    { code: 'OUT-01', direction: 'OUTBOUND', lane_num: 1, has_weighbridge: false, x: -116.0, z: gateZ },
+                    { code: 'OUT-02', direction: 'OUTBOUND', lane_num: 2, has_weighbridge: false, x: -124.5, z: gateZ },
+                    { code: 'OUT-03', direction: 'OUTBOUND', lane_num: 3, has_weighbridge: false, x: -133.0, z: gateZ },
+                    { code: 'OUT-04', direction: 'OUTBOUND', lane_num: 4, has_weighbridge: false, x: -141.5, z: gateZ }
+                ]);
+        const laneX = (code, fb) => {
+            const found = lanes.find(l => l.code === code);
+            return found ? Number(found.x) : fb;
+        };
+        const minX = Math.min(...lanes.map(l => Number(l.x)));
+        const maxX = Math.max(...lanes.map(l => Number(l.x)));
         return {
-            inX: gIn.x,
-            outX: gOut.x,
-            gateZ: gIn.z,
-            barrierZ: gIn.z - 9,
+            lanes,
+            laneX,
+            inX: laneX('IN-01', -56.0),
+            outX: laneX('OUT-01', -116.0),
+            inCenterX: Number(gIn.x || -77.25),
+            outCenterX: Number(gOut.x || -128.75),
+            plazaCenterX: (minX + maxX) / 2,
+            gateZ,
+            barrierZ: gateZ - 11,
             railZ: rail.z,
-            fenceHalfW: fenceHalfW,
-            fenceHalfD: fenceHalfD
+            fenceHalfW,
+            fenceHalfD,
+            hwyCenterZ: fenceHalfD + 22,
+            hwyInZ: fenceHalfD + 16,
+            hwyOutZ: fenceHalfD + 28,
+            vergeZ: fenceHalfD + 4,
+            openL: minX - 6.5, // -148.0
+            openR: maxX + 8.0  // -48.0
         };
     }
 
@@ -169,7 +203,7 @@
         if (typeof scene === 'undefined' || !scene) return;
 
         const gm = getGateMetrics();
-        const gateMidX = (gm.inX + gm.outX) / 2; // -55
+        const gateMidX = gm.plazaCenterX; // -98.75 (pusat simetri Plaza 10 Lajur)
 
         const mapGroup = new THREE.Group();
         mapGroup.name = 'EnhancedPortRoadAndMapLayer';
@@ -194,61 +228,72 @@
         addAsphaltStrip(318, 16.0, -30, 0.0);     // Central Dual-Lane Yard Spine (Z=-8..+8: North lane +4.5, South lane -4.5; berhenti di X=+129 agar tidak memotong Empty Depot)
         addAsphaltStrip(378, 10.5, 0, -47.0);     // South Haul Boulevard (Z=-47, sejajar selatan Blok C/D)
         addAsphaltStrip(22.0, 22.0, 4.0, -57.5);  // Spur Apron ke Rail Siding Ramp (X=4, Z=-47..-68)
-        addAsphaltStrip(22.0, 74, gateMidX, 82);  // Koridor Gate Masuk/Keluar (X=-60 & X=-50, Z=45..119)
+        // Koridor Megah Plaza Gate 10 Lajur (6 In + 4 Out) + Buffer Boulevard ke North Cross Z=47
+        const plazaAspW = Math.abs(gm.openR - gm.openL) + 4; // 104m lebar aspal plaza
+        const plazaAspD = (gm.hwyInZ - 47.0);                // 117m bentang koridor (Z=47..164)
+        addAsphaltStrip(plazaAspW, plazaAspD, gateMidX, 47.0 + plazaAspD / 2);
         addAsphaltStrip(13.5, 100, 0, 0.0);       // Central Transfer Boulevard (X=0, celah 14m Blok A/C <-> B/D)
         addAsphaltStrip(10.5, 100, -126.5, 0.0);  // Mid-East Avenue (X=-126.5, celah 11m Blok B/D <-> Reefer/Blok E)
         addAsphaltStrip(13.0, 100, -183.0, 0.0);  // Eastern Haul Road (X=-183, Reefer/Blok E <-> Bea Cukai X-Ray)
         addAsphaltStrip(10.5, 100, 126.5, 0.0);   // Mid-West Avenue (X=+126.5, celah 11m Blok A/C <-> Empty Depot)
         addAsphaltStrip(13.5, 100, 183.0, 0.0);   // CFS Logistics Avenue (X=+183, Empty Depot <-> CFS Warehouse)
 
-        // Panah Arah di Permukaan Jalan Gate-In / Gate-Out & Boulevard
+        // Panah Arah di Permukaan Jalan Seluruh 10 Lajur Gate (Pre-Gate & Buffer Koridor)
         const addRoadArrow = (x, z, rotY) => {
             const grp = new THREE.Group();
-            const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.48, 0.01, 2.5), whiteLineMat);
+            const shaft = new THREE.Mesh(new THREE.BoxGeometry(0.42, 0.01, 2.3), whiteLineMat);
             grp.add(shaft);
-            const head = new THREE.Mesh(new THREE.ConeGeometry(0.9, 1.5, 3), whiteLineMat);
+            const head = new THREE.Mesh(new THREE.ConeGeometry(0.82, 1.4, 3), whiteLineMat);
             head.rotation.x = Math.PI / 2;
             head.rotation.y = Math.PI / 6;
-            head.position.z = 1.6;
+            head.position.z = 1.5;
             grp.add(head);
             grp.position.set(x, 0.138, z);
             grp.rotation.y = rotY;
             mapGroup.add(grp);
         };
-        [104, 62].forEach(az => addRoadArrow(gm.inX, az, Math.PI));  // Gate-In (-Z)
-        [62, 104].forEach(az => addRoadArrow(gm.outX, az, 0));       // Gate-Out (+Z)
+        gm.lanes.forEach(lane => {
+            const rotY = (lane.direction === 'INBOUND') ? Math.PI : 0; // IN menghadap Selatan (-Z), OUT menghadap Utara (+Z)
+            addRoadArrow(lane.x, gm.gateZ + 22, rotY);
+            addRoadArrow(lane.x, 76, rotY);
+        });
 
-        // Marka pemisah lajur tengah Central Spine (Z=0.0) & Jalan Tol (Z=129 & Z=141) -> 1 InstancedMesh!
+        // Marka pemisah lajur tengah Central Spine (Z=0.0) & Jalan Tol (Z=hwyInZ & Z=hwyOutZ) -> 1 InstancedMesh!
         const dashGeoH = new THREE.BoxGeometry(3.4, 0.01, 0.25);
         const hDashPos = [];
         for (let x = -183; x <= 126.5; x += 7.5) hDashPos.push([x, 0.136, 0.0]);
 
-        // B. JALAN TOL / ARTERI PELABUHAN 4-LAJUR (Z = 123..147, lebar penuh 640m)
-        addAsphaltStrip(640, 24, 0, 135, highwayMat);
+        // B. JALAN TOL / ARTERI PELABUHAN 4-LAJUR (Z = hwyCenterZ ± 12, lebar penuh 640m)
+        addAsphaltStrip(640, 24, 0, gm.hwyCenterZ, highwayMat);
 
-        // Bahu Hijau Berumput di luar Pagar Utara (Z = 119, membuka koridor gerbang X = -68..-42)
-        const greenL = new THREE.Mesh(new THREE.BoxGeometry(252, 0.14, 7.2), grassMat);
-        greenL.position.set(-194, 0.07, 119);
+        // Bahu Hijau Berumput di luar Pagar Utara (membuka koridor Plaza 10 Lajur openL..-48)
+        const leftVWidth  = gm.openL - (-320); // 172m
+        const rightVWidth = 320 - gm.openR;    // 368m
+        const leftVCenter = -320 + leftVWidth / 2;
+        const rightVCenter = gm.openR + rightVWidth / 2;
+
+        const greenL = new THREE.Mesh(new THREE.BoxGeometry(leftVWidth, 0.14, 7.2), grassMat);
+        greenL.position.set(leftVCenter, 0.07, gm.vergeZ);
         mapGroup.add(greenL);
-        const greenR = new THREE.Mesh(new THREE.BoxGeometry(362, 0.14, 7.2), grassMat);
-        greenR.position.set(139, 0.07, 119);
+        const greenR = new THREE.Mesh(new THREE.BoxGeometry(rightVWidth, 0.14, 7.2), grassMat);
+        greenR.position.set(rightVCenter, 0.07, gm.vergeZ);
         mapGroup.add(greenR);
 
-        // Jersey Barrier Pemisah Tol (Z = 135) dengan bukaan persimpangan Gate (-68 .. -42)
-        const medianL = new THREE.Mesh(new THREE.BoxGeometry(252, 0.9, 0.95), curbMat);
-        medianL.position.set(-194, 0.45, 135);
+        // Jersey Barrier Pemisah Tol (Z = hwyCenterZ) dengan bukaan persimpangan Gate Plaza (openL .. openR)
+        const medianL = new THREE.Mesh(new THREE.BoxGeometry(leftVWidth, 0.9, 0.95), curbMat);
+        medianL.position.set(leftVCenter, 0.45, gm.hwyCenterZ);
         medianL.castShadow = true;
         mapGroup.add(medianL);
 
-        const medianR = new THREE.Mesh(new THREE.BoxGeometry(362, 0.9, 0.95), curbMat);
-        medianR.position.set(139, 0.45, 135);
+        const medianR = new THREE.Mesh(new THREE.BoxGeometry(rightVWidth, 0.9, 0.95), curbMat);
+        medianR.position.set(rightVCenter, 0.45, gm.hwyCenterZ);
         medianR.castShadow = true;
         mapGroup.add(medianR);
 
-        // Marka lajur tol (Inbound Z=129.0 & Outbound Z=141.0) masuk ke batch InstancedMesh yang sama
+        // Marka lajur tol (Inbound hwyInZ & Outbound hwyOutZ)
         for (let hx = -305; hx <= 305; hx += 8.5) {
-            hDashPos.push([hx, 0.136, 129.0]);
-            hDashPos.push([hx, 0.136, 141.0]);
+            hDashPos.push([hx, 0.136, gm.hwyInZ]);
+            hDashPos.push([hx, 0.136, gm.hwyOutZ]);
         }
         if (hDashPos.length) {
             const hDashInst = new THREE.InstancedMesh(dashGeoH, whiteLineMat, hDashPos.length);
@@ -264,9 +309,12 @@
             mapGroup.add(hDashInst);
         }
 
-        const shoulderEdge = new THREE.Mesh(new THREE.BoxGeometry(640, 0.01, 0.25), yellowLineMat);
-        shoulderEdge.position.set(0, 0.136, 123.5);
-        mapGroup.add(shoulderEdge);
+        const shoulderL = new THREE.Mesh(new THREE.BoxGeometry(leftVWidth, 0.01, 0.25), yellowLineMat);
+        shoulderL.position.set(leftVCenter, 0.136, gm.hwyCenterZ - 11.5);
+        mapGroup.add(shoulderL);
+        const shoulderR = new THREE.Mesh(new THREE.BoxGeometry(rightVWidth, 0.01, 0.25), yellowLineMat);
+        shoulderR.position.set(rightVCenter, 0.136, gm.hwyCenterZ - 11.5);
+        mapGroup.add(shoulderR);
 
         // Lampu PJU Ganda Jalan Tol (Geometri & Material Berbagi)
         const poleMat = new THREE.MeshStandardMaterial({ color: 0x64748b, metalness: 0.7, roughness: 0.3 });
@@ -276,34 +324,32 @@
         const pjuBulbGeo = new THREE.BoxGeometry(0.6, 0.16, 0.9);
         for (let lx = -250; lx <= 250; lx += 55) {
             const pole = new THREE.Mesh(pjuPoleGeo, poleMat);
-            pole.position.set(lx, 4.9, 135);
+            pole.position.set(lx, 4.9, gm.hwyCenterZ);
             mapGroup.add(pole);
             const arm = new THREE.Mesh(pjuArmGeo, poleMat);
-            arm.position.set(lx, 9.6, 135);
+            arm.position.set(lx, 9.6, gm.hwyCenterZ);
             mapGroup.add(arm);
             [-2.5, 2.5].forEach(lz => {
                 const bulb = new THREE.Mesh(pjuBulbGeo, bulbMat);
-                bulb.position.set(lx, 9.45, 135 + lz);
+                bulb.position.set(lx, 9.45, gm.hwyCenterZ + lz);
                 mapGroup.add(bulb);
             });
         }
 
         if (typeof createBlockLabelSprite === 'function') {
-            createBlockLabelSprite('JALAN TOL ARTERI PELABUHAN (EXIT CIDP DRY PORT ↙)', -120, 11.8, 128);
-            createBlockLabelSprite('AKSES TOL CIKAMPEK & TANJUNG PRIOK ↗', 70, 11.8, 142);
+            createBlockLabelSprite('JALAN TOL ARTERI PELABUHAN (EXIT CIDP DRY PORT ↙)', -120, 11.8, gm.hwyInZ - 1);
+            createBlockLabelSprite('AKSES TOL CIKAMPEK & TANJUNG PRIOK ↗', 70, 11.8, gm.hwyOutZ + 1);
         }
 
-        // C. BUKA PAGAR UTARA (Z = fenceHalfD = 115) & PASANG GAPURA GERBANG UTAMA
+        // C. BUKA PAGAR UTARA (Z = fenceHalfD = 148) & PASANG GAPURA GERBANG UTAMA 10 LAJUR
         const perimGroup = scene.getObjectByName('PerimeterAndSecurity');
         if (perimGroup && perimGroup.children.length > 0) {
             const oldNorth = perimGroup.children[0];
             if (oldNorth && oldNorth.geometry && oldNorth.geometry.parameters && oldNorth.geometry.parameters.width > 300) {
                 oldNorth.visible = false;
                 const fenceMat = oldNorth.material;
-                const openL = gm.inX - 8;   // -68
-                const openR = gm.outX + 8;  // -42
-                const leftW = openL - (-gm.fenceHalfW);
-                const rightW = gm.fenceHalfW - openR;
+                const leftW = gm.openL - (-gm.fenceHalfW);
+                const rightW = gm.fenceHalfW - gm.openR;
                 if (leftW > 0) {
                     const nfL = new THREE.Mesh(new THREE.BoxGeometry(leftW, 2.5, 0.1), fenceMat);
                     nfL.position.set(-gm.fenceHalfW + leftW / 2, 1.25, gm.fenceHalfD);
@@ -311,7 +357,7 @@
                 }
                 if (rightW > 0) {
                     const nfR = new THREE.Mesh(new THREE.BoxGeometry(rightW, 2.5, 0.1), fenceMat);
-                    nfR.position.set(openR + rightW / 2, 1.25, gm.fenceHalfD);
+                    nfR.position.set(gm.openR + rightW / 2, 1.25, gm.fenceHalfD);
                     perimGroup.add(nfR);
                 }
             }
@@ -319,28 +365,29 @@
 
         const pillarMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.4, metalness: 0.3 });
         const orangeMat = new THREE.MeshStandardMaterial({ color: 0xea580c, roughness: 0.3 });
-        [gm.inX - 7.5, gm.outX + 7.5].forEach(px => {
-            const pCol = new THREE.Mesh(new THREE.BoxGeometry(1.5, 8.6, 1.8), pillarMat);
-            pCol.position.set(px, 4.3, gm.fenceHalfD);
+        [gm.openL + 0.5, gm.openR - 0.5].forEach(px => {
+            const pCol = new THREE.Mesh(new THREE.BoxGeometry(1.6, 8.8, 1.9), pillarMat);
+            pCol.position.set(px, 4.4, gm.fenceHalfD);
             pCol.castShadow = true;
             mapGroup.add(pCol);
         });
-        const archW = Math.abs(gm.outX - gm.inX) + 17;
-        const archBeam = new THREE.Mesh(new THREE.BoxGeometry(archW, 1.9, 2.0), pillarMat);
-        archBeam.position.set(gateMidX, 8.4, gm.fenceHalfD);
+        const archW = Math.abs(gm.openR - gm.openL) + 1.0;
+        const archCenter = (gm.openL + gm.openR) / 2;
+        const archBeam = new THREE.Mesh(new THREE.BoxGeometry(archW, 2.0, 2.1), pillarMat);
+        archBeam.position.set(archCenter, 8.6, gm.fenceHalfD);
         archBeam.castShadow = true;
         mapGroup.add(archBeam);
 
-        const archStripe = new THREE.Mesh(new THREE.BoxGeometry(archW + 0.1, 0.36, 2.1), orangeMat);
-        archStripe.position.set(gateMidX, 7.6, gm.fenceHalfD);
+        const archStripe = new THREE.Mesh(new THREE.BoxGeometry(archW + 0.2, 0.38, 2.2), orangeMat);
+        archStripe.position.set(archCenter, 7.7, gm.fenceHalfD);
         mapGroup.add(archStripe);
 
         if (typeof createBlockLabelSprite === 'function') {
-            createBlockLabelSprite('GERBANG UTAMA CIDP 35 HA SMART DRY PORT', gateMidX, 11.2, gm.fenceHalfD);
+            createBlockLabelSprite('GERBANG UTAMA CIDP 35 HA • 6 GATE-IN & 4 GATE-OUT', archCenter, 11.4, gm.fenceHalfD);
         }
 
-        // D. Sensor Laser Scan Curtain & Status LED Gate
-        const beamGeo = new THREE.PlaneGeometry(4.2, 6.2);
+        // D. Sensor Laser Scan Curtain & Status LED Gate (Semua 10 Lajur)
+        const beamGeo = new THREE.PlaneGeometry(3.8, 6.0);
         const makeBeam = (colorHex, x, z) => {
             const mat = new THREE.MeshBasicMaterial({
                 color: colorHex,
@@ -351,23 +398,31 @@
                 depthWrite: false
             });
             const m = new THREE.Mesh(beamGeo, mat);
-            m.position.set(x, 3.2, z);
+            m.position.set(x, 3.1, z);
             mapGroup.add(m);
             return m;
         };
-        state.scanBeams.inGate  = makeBeam(0x06b6d4, gm.inX, gm.gateZ);
-        state.scanBeams.outGate = makeBeam(0x10b981, gm.outX, gm.gateZ);
-        state.scanBeams.xray    = makeBeam(0xf59e0b, -183, 24);
-
-        const ledMatIn  = new THREE.MeshBasicMaterial({ color: 0x22c55e });
-        const ledMatOut = new THREE.MeshBasicMaterial({ color: 0x22c55e });
-        const ledIn = new THREE.Mesh(new THREE.SphereGeometry(0.48, 12, 12), ledMatIn);
-        ledIn.position.set(gm.inX, 7.6, gm.gateZ);
-        mapGroup.add(ledIn);
-        const ledOut = new THREE.Mesh(new THREE.SphereGeometry(0.48, 12, 12), ledMatOut);
-        ledOut.position.set(gm.outX, 7.6, gm.gateZ);
-        mapGroup.add(ledOut);
-        state.gateLeds = { inMat: ledMatIn, outMat: ledMatOut };
+        state.scanBeams.lanes = {};
+        state.gateLeds = { lanes: {}, inMat: null, outMat: null };
+        const ledGeo = new THREE.SphereGeometry(0.42, 10, 10);
+        gm.lanes.forEach(lane => {
+            const isIn = (lane.direction === 'INBOUND');
+            state.scanBeams.lanes[lane.code] = makeBeam(isIn ? 0x06b6d4 : 0x10b981, lane.x, gm.gateZ);
+            const ledMat = new THREE.MeshBasicMaterial({ color: 0x22c55e });
+            const ledMesh = new THREE.Mesh(ledGeo, ledMat);
+            ledMesh.position.set(lane.x, 7.6, gm.gateZ);
+            mapGroup.add(ledMesh);
+            state.gateLeds.lanes[lane.code] = ledMat;
+            if (lane.code === 'IN-01') {
+                state.scanBeams.inGate = state.scanBeams.lanes[lane.code];
+                state.gateLeds.inMat = ledMat;
+            }
+            if (lane.code === 'OUT-01') {
+                state.scanBeams.outGate = state.scanBeams.lanes[lane.code];
+                state.gateLeds.outMat = ledMat;
+            }
+        });
+        state.scanBeams.xray = makeBeam(0xf59e0b, -183, 24);
 
         // E. Zona Transfer Yard Hologram Halo Ring (Tepat di titik berhenti truk!)
         const haloCoords = [
@@ -623,141 +678,151 @@
     // =========================================================================
     function buildFleetAgents() {
         const gm = getGateMetrics();
-        const inX = gm.inX;    // -60
-        const outX = gm.outX;  // -50
-        const gateZ = gm.gateZ;// 86
+        const gateZ = gm.gateZ;      // 118
+        const hwyInZ = gm.hwyInZ;    // 164
+        const hwyOutZ = gm.hwyOutZ;  // 176
+        const laneX = gm.laneX;
+        const in1 = laneX('IN-01', -56.0),  in2 = laneX('IN-02', -64.5),  in3 = laneX('IN-03', -73.0);
+        const in4 = laneX('IN-04', -81.5),  in5 = laneX('IN-05', -90.0),  in6 = laneX('IN-06', -98.5);
+        const out1 = laneX('OUT-01', -116.0), out2 = laneX('OUT-02', -124.5), out3 = laneX('OUT-03', -133.0), out4 = laneX('OUT-04', -141.5);
 
         const externalTruckConfigs = [
             {
-                // TRK-01: Masuk Tol -> Gate-In -> Blok A (dibantu RTG-02!) -> keluar Mid-West X=126.5 -> North Cross Z=47 -> Gate-Out
+                // TRK-01: IN-01 (80T VGM) -> Koridor Buffer -> Blok A (RTG-02) -> OUT-01
                 id: 'TRK-01', label: 'B 9481 UIX', company: 'Samudera Logistik',
-                iconType: 'truck', usePrimary: true, startWp: 2, speed: 15.8,
-                startPos: { x: inX, z: 108, ry: Math.PI / 2 }, startLoaded: true,
+                iconType: 'truck', usePrimary: true, startWp: 2, speed: 16.5,
+                startPos: { x: in1, z: 140, ry: Math.PI / 2 }, startLoaded: true,
                 waypoints: [
-                    { x: -265,  z: 129.0, pause: 0,   action: 'load',    badge: 'TOL MENUJU CIDP',    theme: 'blue' },
-                    { x: inX,   z: 129.0, pause: 0,   badge: 'OFF-RAMP GATE-IN', theme: 'blue' },
-                    { x: inX,   z: gateZ, pause: 1.5, action: 'inGate',  badge: 'VGM 32.4T • ANPR',  theme: 'emerald', log: '[GATE-IN] B 9481 UIX lolos Timbang SOLAS 32.4T & OCR.' },
-                    { x: inX,   z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',  theme: 'blue' },
-                    { x: 4.0,   z: 47.0,  pause: 0,   badge: 'BOULEVARD TENGAH', theme: 'blue' },
-                    { x: 4.0,   z: 4.5,   pause: 0,   badge: 'JALUR BAWAH RTG',  theme: 'amber' },
-                    { x: 64.0,  z: 4.5,   pause: 3.4, action: 'unload',  assistEq: 'RTG-02', assistMode: 'dropoff', badge: 'LIFT-OFF • RTG-02', theme: 'amber', log: '[YARD BLOK A] RTG-02 mengangkat kontainer dari B 9481 UIX ke 8x8 stack.' },
-                    { x: 126.5, z: 4.5,   pause: 0,   badge: 'MID-WEST AVE',     theme: 'slate' },
-                    { x: 126.5, z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',  theme: 'purple' },
-                    { x: outX,  z: 47.0,  pause: 0,   badge: 'MENUJU GATE-OUT',  theme: 'purple' },
-                    { x: outX,  z: gateZ, pause: 1.2, action: 'outGate', badge: 'GATE-OUT • SPPB',   theme: 'purple', completeLoop: true, log: '[GATE-OUT] B 9481 UIX keluar melalui jalur Gate-Out ke Tol.' },
-                    { x: outX,  z: 141.0, pause: 0,   badge: 'ON-RAMP TOL',      theme: 'slate' },
-                    { x: -265,  z: 141.0, pause: 0,   action: 'warpToStart', badge: 'JALAN TOL',     theme: 'slate' }
+                    { x: -265,  z: hwyInZ, pause: 0,   action: 'load',    badge: 'TOL MENUJU CIDP',     theme: 'blue' },
+                    { x: in1,   z: hwyInZ, pause: 0,   badge: 'OFF-RAMP IN-01',      theme: 'blue' },
+                    { x: in1,   z: gateZ,  pause: 1.4, action: 'inGate',  laneCode: 'IN-01', badge: 'IN-01 • VGM 32.4T', theme: 'emerald', log: '[GATE IN-01] B 9481 UIX lolos Timbang SOLAS 32.4T & OCR.' },
+                    { x: in1,   z: 76.0,   pause: 0,   badge: 'KORIDOR BUFFER',      theme: 'blue' },
+                    { x: in1,   z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',     theme: 'blue' },
+                    { x: 4.0,   z: 47.0,   pause: 0,   badge: 'BOULEVARD TENGAH',    theme: 'blue' },
+                    { x: 4.0,   z: 4.5,    pause: 0,   badge: 'JALUR BAWAH RTG',     theme: 'amber' },
+                    { x: 64.0,  z: 4.5,    pause: 3.4, action: 'unload',  assistEq: 'RTG-02', assistMode: 'dropoff', badge: 'LIFT-OFF • RTG-02', theme: 'amber', log: '[YARD BLOK A] RTG-02 mengangkat kontainer dari B 9481 UIX ke 8x8 stack.' },
+                    { x: 126.5, z: 4.5,    pause: 0,   badge: 'MID-WEST AVE',        theme: 'slate' },
+                    { x: 126.5, z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',     theme: 'purple' },
+                    { x: out1,  z: 47.0,   pause: 0,   badge: 'MENUJU OUT-01',       theme: 'purple' },
+                    { x: out1,  z: gateZ,  pause: 1.2, action: 'outGate', laneCode: 'OUT-01', badge: 'OUT-01 • SPPB OK', theme: 'purple', completeLoop: true, log: '[GATE OUT-01] B 9481 UIX keluar melalui Plaza OUT-01 ke Tol.' },
+                    { x: out1,  z: hwyOutZ,pause: 0,   badge: 'ON-RAMP TOL',         theme: 'slate' },
+                    { x: -265,  z: hwyOutZ,pause: 0,   action: 'warpToStart', badge: 'JALAN TOL',   theme: 'slate' }
                 ]
             },
             {
-                // TRK-02: Pick-Up Blok B dibantu RTG-03! -> Keluar Mid-East X=-126.5 -> North Cross Z=47 -> Gate-Out
+                // TRK-02: IN-04 (Fast OCR) -> Koridor Buffer -> Blok B Pick-Up (RTG-03) -> OUT-02
                 id: 'TRK-02', label: 'B 9120 KLP', company: 'PT Dunex Express',
                 iconType: 'chassis', cabColor: 0xea580c, containerColor: 0x059669, containerNo: 'EGLU7718294',
-                startWp: 6, speed: 15.2,
+                startWp: 7, speed: 15.8,
                 startPos: { x: -24, z: 4.5, ry: Math.PI }, startLoaded: false,
                 waypoints: [
-                    { x: -265,   z: 129.0, pause: 0,   action: 'unload',  badge: 'SASIS DARI TOL',     theme: 'amber' },
-                    { x: inX,    z: 129.0, pause: 0,   badge: 'APPROACH GATE-IN',  theme: 'amber' },
-                    { x: inX,    z: gateZ, pause: 1.4, action: 'inGate',  badge: 'TARE 14.2T • DO OK', theme: 'emerald', log: '[GATE-IN] B 9120 KLP (Sasis Pick-Up) verifikasi e-DO.' },
-                    { x: inX,    z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'amber' },
-                    { x: -4.0,   z: 47.0,  pause: 0,   badge: 'BOULEVARD SELATAN', theme: 'amber' },
-                    { x: -4.0,   z: 4.5,   pause: 0,   badge: 'MASUK BAY BLOK B',  theme: 'amber' },
-                    { x: -64.0,  z: 4.5,   pause: 3.4, action: 'load',    assistEq: 'RTG-03', assistMode: 'pickup', badge: 'LIFT-ON • RTG-03', theme: 'emerald', log: '[YARD BLOK B] RTG-03 menurunkan box impor ke sasis B 9120 KLP.' },
-                    { x: -126.5, z: 4.5,   pause: 0,   badge: 'MID-EAST AVE',      theme: 'purple' },
-                    { x: -126.5, z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'purple' },
-                    { x: outX,   z: 47.0,  pause: 0,   badge: 'JALUR GATE-OUT',    theme: 'purple' },
-                    { x: outX,   z: gateZ, pause: 1.2, action: 'outGate', badge: 'E-SEAL • SPPB OK',   theme: 'purple', completeLoop: true, log: '[GATE-OUT] B 9120 KLP keluar membawa muatan ke Tol.' },
-                    { x: outX,   z: 141.0, pause: 0,   badge: 'MERGING TOL',       theme: 'slate' },
-                    { x: -265,   z: 141.0, pause: 0,   action: 'warpToStart', badge: 'TOL CIKAMPEK',   theme: 'slate' }
+                    { x: -265,   z: hwyInZ, pause: 0,   action: 'unload',  badge: 'SASIS DARI TOL',     theme: 'amber' },
+                    { x: in4,    z: hwyInZ, pause: 0,   badge: 'APPROACH IN-04',     theme: 'amber' },
+                    { x: in4,    z: gateZ,  pause: 1.2, action: 'inGate',  laneCode: 'IN-04', badge: 'IN-04 • FAST DO', theme: 'emerald', log: '[GATE IN-04] B 9120 KLP (Sasis Fast OCR) verifikasi e-DO.' },
+                    { x: in4,    z: 76.0,   pause: 0,   badge: 'KORIDOR BUFFER',     theme: 'amber' },
+                    { x: in4,    z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'amber' },
+                    { x: -4.0,   z: 47.0,   pause: 0,   badge: 'BOULEVARD SELATAN',  theme: 'amber' },
+                    { x: -4.0,   z: 4.5,    pause: 0,   badge: 'MASUK BAY BLOK B',   theme: 'amber' },
+                    { x: -64.0,  z: 4.5,    pause: 3.4, action: 'load',    assistEq: 'RTG-03', assistMode: 'pickup', badge: 'LIFT-ON • RTG-03', theme: 'emerald', log: '[YARD BLOK B] RTG-03 menurunkan box impor ke sasis B 9120 KLP.' },
+                    { x: -126.5, z: 4.5,    pause: 0,   badge: 'MID-EAST AVE',       theme: 'purple' },
+                    { x: -126.5, z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'purple' },
+                    { x: out2,   z: 47.0,   pause: 0,   badge: 'JALUR OUT-02',       theme: 'purple' },
+                    { x: out2,   z: gateZ,  pause: 1.2, action: 'outGate', laneCode: 'OUT-02', badge: 'OUT-02 • E-SEAL', theme: 'purple', completeLoop: true, log: '[GATE OUT-02] B 9120 KLP keluar membawa muatan ke Tol.' },
+                    { x: out2,   z: hwyOutZ,pause: 0,   badge: 'MERGING TOL',        theme: 'slate' },
+                    { x: -265,   z: hwyOutZ,pause: 0,   action: 'warpToStart', badge: 'TOL CIKAMPEK', theme: 'slate' }
                 ]
             },
             {
-                // TRK-03: Reefer -> dibantu RS-03 di Koridor Mid-East (-126.5, 24) -> X-Ray Bea Cukai (-183, 24) -> South Haul (-47) -> Central Blvd (+4) -> North Cross -> Gate-Out
+                // TRK-03: IN-06 (80T Heavy Reefer) -> Reefer R-02 (RS-03) -> X-Ray Bea Cukai -> OUT-04
                 id: 'TRK-03', label: 'B 9802 WPA', company: 'ColdChain Logistics',
                 iconType: 'reefer', cabColor: 0x0891b2, containerColor: 0xf8fafc, containerNo: 'ONEU9181483', cargoType: 'reefer', fixedCargoColor: 0xf8fafc,
-                startWp: 1, speed: 14.5,
-                startPos: { x: -145, z: 129.0, ry: 0 }, startLoaded: true,
+                startWp: 1, speed: 15.0,
+                startPos: { x: -165, z: hwyInZ, ry: 0 }, startLoaded: true,
                 waypoints: [
-                    { x: -265,   z: 129.0, pause: 0,   action: 'load',    badge: 'REEFER DARI TOL',    theme: 'cyan' },
-                    { x: inX,    z: 129.0, pause: 0,   badge: 'OFF-RAMP REEFER',   theme: 'cyan' },
-                    { x: inX,    z: gateZ, pause: 1.4, action: 'inGate',  badge: 'VGM + SUHU -20°C',  theme: 'emerald', log: '[GATE-IN] Reefer B 9802 WPA tervalidasi -20.0°C.' },
-                    { x: inX,    z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'cyan' },
-                    { x: -126.5, z: 47.0,  pause: 0,   badge: 'KE ZONA REEFER',    theme: 'cyan' },
-                    { x: -126.5, z: 24.0,  pause: 2.8, action: 'unload',  assistEq: 'RS-03', assistMode: 'dropoff', badge: 'RS-03 PLUG -20°C', theme: 'cyan', log: '[REEFER ZONE] RS-03 menurunkan boks Reefer ke Rack 380V.' },
-                    { x: -126.5, z: 47.0,  pause: 0,   badge: 'KE CUSTOMS X-RAY',  theme: 'amber' },
-                    { x: -183.0, z: 47.0,  pause: 0,   badge: 'EASTERN HAUL AVE',  theme: 'amber' },
-                    { x: -183.0, z: 24.0,  pause: 1.8, action: 'xray',    badge: 'X-RAY 6 MeV SCAN',  theme: 'rose', log: '[CEISA X-RAY] Pindai X-Ray 6 MeV bersih: JALUR HIJAU.' },
-                    { x: -183.0, z: -47.0, pause: 0,   badge: 'SOUTH HAUL AVE',    theme: 'purple' },
-                    { x: 4.0,    z: -47.0, pause: 0,   badge: 'BOULEVARD UTARA',   theme: 'purple' },
-                    { x: 4.0,    z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'purple' },
-                    { x: outX,   z: 47.0,  pause: 0,   badge: 'MENUJU GATE-OUT',   theme: 'purple' },
-                    { x: outX,   z: gateZ, pause: 1.2, action: 'outGate', badge: 'REEFER GATE-OUT',   theme: 'purple', completeLoop: true },
-                    { x: outX,   z: 141.0, pause: 0,   badge: 'MASUK JALAN TOL',   theme: 'slate' },
-                    { x: -265,   z: 141.0, pause: 0,   action: 'warpToStart', badge: 'TOL MENUJU PORT',theme: 'slate' }
+                    { x: -265,   z: hwyInZ, pause: 0,   action: 'load',    badge: 'REEFER DARI TOL',    theme: 'cyan' },
+                    { x: in6,    z: hwyInZ, pause: 0,   badge: 'OFF-RAMP IN-06',     theme: 'cyan' },
+                    { x: in6,    z: gateZ,  pause: 1.4, action: 'inGate',  laneCode: 'IN-06', badge: 'IN-06 • -20°C VGM', theme: 'emerald', log: '[GATE IN-06] Reefer B 9802 WPA lolos VGM -20.0°C.' },
+                    { x: in6,    z: 76.0,   pause: 0,   badge: 'KORIDOR BUFFER',     theme: 'cyan' },
+                    { x: in6,    z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'cyan' },
+                    { x: -126.5, z: 47.0,   pause: 0,   badge: 'KE ZONA REEFER',     theme: 'cyan' },
+                    { x: -126.5, z: 24.0,   pause: 2.8, action: 'unload',  assistEq: 'RS-03', assistMode: 'dropoff', badge: 'RS-03 PLUG -20°C', theme: 'cyan', log: '[REEFER ZONE] RS-03 menurunkan boks Reefer ke Rack 380V.' },
+                    { x: -126.5, z: 47.0,   pause: 0,   badge: 'KE CUSTOMS X-RAY',   theme: 'amber' },
+                    { x: -183.0, z: 47.0,   pause: 0,   badge: 'EASTERN HAUL AVE',   theme: 'amber' },
+                    { x: -183.0, z: 24.0,   pause: 1.8, action: 'xray',    badge: 'X-RAY 6 MeV SCAN',   theme: 'rose', log: '[CEISA X-RAY] Pindai X-Ray 6 MeV bersih: JALUR HIJAU.' },
+                    { x: -183.0, z: -47.0,  pause: 0,   badge: 'SOUTH HAUL AVE',     theme: 'purple' },
+                    { x: 4.0,    z: -47.0,  pause: 0,   badge: 'BOULEVARD UTARA',    theme: 'purple' },
+                    { x: 4.0,    z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'purple' },
+                    { x: out4,   z: 47.0,   pause: 0,   badge: 'MENUJU OUT-04',      theme: 'purple' },
+                    { x: out4,   z: gateZ,  pause: 1.2, action: 'outGate', laneCode: 'OUT-04', badge: 'OUT-04 • REEFER OUT', theme: 'purple', completeLoop: true },
+                    { x: out4,   z: hwyOutZ,pause: 0,   badge: 'MASUK JALAN TOL',    theme: 'slate' },
+                    { x: -265,   z: hwyOutZ,pause: 0,   action: 'warpToStart', badge: 'TOL MENUJU PORT', theme: 'slate' }
                 ]
             },
             {
-                // TRK-04: Sudah keluar di jalur Gate-Out di awal -> Drop-Off Blok D (-64, -4.5) dibantu E-RTG RTG-05!
+                // TRK-04: IN-02 (80T VGM) -> Koridor Buffer -> Blok D (RTG-05) -> OUT-01
                 id: 'TRK-04', label: 'B 9633 EKO', company: 'Evergreen Freight',
                 iconType: 'truck', cabColor: 0x15803d, containerColor: 0x007a3d, containerNo: 'EGLU8810294',
-                startWp: 9, speed: 15.6,
-                startPos: { x: outX, z: 64, ry: -Math.PI / 2 }, startLoaded: true,
+                startWp: 11, speed: 16.2,
+                startPos: { x: out1, z: 72, ry: -Math.PI / 2 }, startLoaded: true,
                 waypoints: [
-                    { x: -265,   z: 129.0, pause: 0,   action: 'load',    badge: 'DARI JALAN TOL',    theme: 'emerald' },
-                    { x: inX,    z: 129.0, pause: 0,   badge: 'MASUK GATE-IN',     theme: 'blue' },
-                    { x: inX,    z: gateZ, pause: 1.4, action: 'inGate',  badge: 'VGM 28.9T • OK',    theme: 'emerald', log: '[GATE-IN] B 9633 EKO (Evergreen) terdeteksi ANPR & Timbang.' },
-                    { x: inX,    z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'blue' },
-                    { x: -4.0,   z: 47.0,  pause: 0,   badge: 'BOULEVARD SELATAN', theme: 'blue' },
-                    { x: -4.0,   z: -4.5,  pause: 0,   badge: 'JALUR RTG BLOK D',  theme: 'amber' },
-                    { x: -64.0,  z: -4.5,  pause: 3.4, action: 'unload',  assistEq: 'RTG-05', assistMode: 'dropoff', badge: 'LIFT-OFF • RTG-05', theme: 'purple', log: '[YARD BLOK D] RTG-05 mengangkat box buffer dari B 9633 EKO ke 8x8 stack.' },
-                    { x: -126.5, z: -4.5,  pause: 0,   badge: 'MID-EAST AVE',      theme: 'purple' },
-                    { x: -126.5, z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'purple' },
-                    { x: outX,   z: 47.0,  pause: 0,   badge: 'JALUR GATE-OUT',    theme: 'purple' },
-                    { x: outX,   z: gateZ, pause: 1.2, action: 'outGate', badge: 'GATE-OUT • CLEARED',theme: 'purple', completeLoop: true, log: '[GATE-OUT] B 9633 EKO keluar Gate-Out menuju Tol.' },
-                    { x: outX,   z: 141.0, pause: 0,   badge: 'MERGING JALAN TOL', theme: 'slate' },
-                    { x: -265,   z: 141.0, pause: 0,   action: 'warpToStart', badge: 'JALAN TOL',     theme: 'slate' }
+                    { x: -265,   z: hwyInZ, pause: 0,   action: 'load',    badge: 'DARI JALAN TOL',     theme: 'emerald' },
+                    { x: in2,    z: hwyInZ, pause: 0,   badge: 'MASUK IN-02',        theme: 'blue' },
+                    { x: in2,    z: gateZ,  pause: 1.4, action: 'inGate',  laneCode: 'IN-02', badge: 'IN-02 • VGM 28.9T', theme: 'emerald', log: '[GATE IN-02] B 9633 EKO (Evergreen) terdeteksi ANPR & Timbang.' },
+                    { x: in2,    z: 76.0,   pause: 0,   badge: 'KORIDOR BUFFER',     theme: 'blue' },
+                    { x: in2,    z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'blue' },
+                    { x: -4.0,   z: 47.0,   pause: 0,   badge: 'BOULEVARD SELATAN',  theme: 'blue' },
+                    { x: -4.0,   z: -4.5,   pause: 0,   badge: 'JALUR RTG BLOK D',   theme: 'amber' },
+                    { x: -64.0,  z: -4.5,   pause: 3.4, action: 'unload',  assistEq: 'RTG-05', assistMode: 'dropoff', badge: 'LIFT-OFF • RTG-05', theme: 'purple', log: '[YARD BLOK D] RTG-05 mengangkat box buffer dari B 9633 EKO.' },
+                    { x: -126.5, z: -4.5,   pause: 0,   badge: 'MID-EAST AVE',       theme: 'purple' },
+                    { x: -126.5, z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'purple' },
+                    { x: out1,   z: 47.0,   pause: 0,   badge: 'JALUR OUT-01',       theme: 'purple' },
+                    { x: out1,   z: gateZ,  pause: 1.2, action: 'outGate', laneCode: 'OUT-01', badge: 'OUT-01 • CLEARED', theme: 'purple', completeLoop: true, log: '[GATE OUT-01] B 9633 EKO keluar menuju Jalan Tol.' },
+                    { x: out1,   z: hwyOutZ,pause: 0,   badge: 'MERGING JALAN TOL',  theme: 'slate' },
+                    { x: -265,   z: hwyOutZ,pause: 0,   action: 'warpToStart', badge: 'JALAN TOL',    theme: 'slate' }
                 ]
             },
             {
-                // TRK-05: Drop-Off Empty Depot di X=126.5, Z=12 dibantu RS-01, kembali lurus lewat Mid-West X=126.5 -> North Cross Z=47 -> Gate-Out
+                // TRK-05: IN-05 (Fast OCR) -> Empty Depot (RS-01) -> OUT-03
                 id: 'TRK-05', label: 'B 9215 HPN', company: 'Hapag-Lloyd Trans',
                 iconType: 'truck', cabColor: 0xb91c1c, containerColor: 0xe05615, containerNo: 'HLCU4419201',
-                startWp: 4, speed: 15.0,
+                startWp: 5, speed: 15.5,
                 startPos: { x: 40, z: 47.0, ry: 0 }, startLoaded: true,
                 waypoints: [
-                    { x: -265,  z: 129.0, pause: 0,   action: 'load',    badge: 'TOL MENUJU PORT',   theme: 'blue' },
-                    { x: inX,   z: 129.0, pause: 0,   badge: 'APPROACH GATE-IN',  theme: 'blue' },
-                    { x: inX,   z: gateZ, pause: 1.4, action: 'inGate',  badge: 'VGM 31.1T • PASS',  theme: 'emerald' },
-                    { x: inX,   z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'blue' },
-                    { x: 126.5, z: 47.0,  pause: 0,   badge: 'MID-WEST AVE',      theme: 'amber' },
-                    { x: 126.5, z: 12.0,  pause: 2.8, action: 'unload',  assistEq: 'RS-01', assistMode: 'dropoff', badge: 'RS-01 EMPTY DEPOT', theme: 'amber', log: '[EMPTY DEPOT] RS-01 membongkar peti kemas B 9215 HPN ke Empty Yard.' },
-                    { x: 126.5, z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'purple' },
-                    { x: outX,  z: 47.0,  pause: 0,   badge: 'JALUR GATE-OUT',    theme: 'purple' },
-                    { x: outX,  z: gateZ, pause: 1.2, action: 'outGate', badge: 'SPPB CLEARED OUT',  theme: 'purple', completeLoop: true },
-                    { x: outX,  z: 141.0, pause: 0,   badge: 'ON-RAMP TOL',       theme: 'slate' },
-                    { x: -265,  z: 141.0, pause: 0,   action: 'warpToStart', badge: 'TOL CIKAMPEK',  theme: 'slate' }
+                    { x: -265,  z: hwyInZ, pause: 0,   action: 'load',    badge: 'TOL MENUJU PORT',    theme: 'blue' },
+                    { x: in5,   z: hwyInZ, pause: 0,   badge: 'APPROACH IN-05',     theme: 'blue' },
+                    { x: in5,   z: gateZ,  pause: 1.2, action: 'inGate',  laneCode: 'IN-05', badge: 'IN-05 • FAST PASS', theme: 'emerald' },
+                    { x: in5,   z: 76.0,   pause: 0,   badge: 'KORIDOR BUFFER',     theme: 'blue' },
+                    { x: in5,   z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'blue' },
+                    { x: 126.5, z: 47.0,   pause: 0,   badge: 'MID-WEST AVE',       theme: 'amber' },
+                    { x: 126.5, z: 12.0,   pause: 2.8, action: 'unload',  assistEq: 'RS-01', assistMode: 'dropoff', badge: 'RS-01 EMPTY DEPOT', theme: 'amber', log: '[EMPTY DEPOT] RS-01 membongkar peti kemas B 9215 HPN ke Empty Yard.' },
+                    { x: 126.5, z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'purple' },
+                    { x: out3,  z: 47.0,   pause: 0,   badge: 'JALUR OUT-03',       theme: 'purple' },
+                    { x: out3,  z: gateZ,  pause: 1.2, action: 'outGate', laneCode: 'OUT-03', badge: 'OUT-03 • SPPB OK', theme: 'purple', completeLoop: true },
+                    { x: out3,  z: hwyOutZ,pause: 0,   badge: 'ON-RAMP TOL',        theme: 'slate' },
+                    { x: -265,  z: hwyOutZ,pause: 0,   action: 'warpToStart', badge: 'TOL CIKAMPEK', theme: 'slate' }
                 ]
             },
             {
-                // TRK-06: Pick-Up Blok C (64, -4.5) dibantu E-RTG RTG-04! Kemudian keluar Mid-West X=126.5 -> North Cross Z=47 -> Gate-Out
+                // TRK-06: IN-03 (80T VGM) -> Blok C Pick-Up (RTG-04) -> OUT-02
                 id: 'TRK-06', label: 'B 9504 MKS', company: 'Maersk Nusantara',
                 iconType: 'chassis', cabColor: 0x0369a1, containerColor: 0x0090c0, containerNo: 'MSKU7710294',
-                startWp: 9, speed: 15.4,
+                startWp: 10, speed: 16.0,
                 startPos: { x: 15, z: 47.0, ry: Math.PI }, startLoaded: true,
                 waypoints: [
-                    { x: -265,  z: 129.0, pause: 0,   action: 'unload',  badge: 'SASIS DARI TOL',    theme: 'amber' },
-                    { x: inX,   z: 129.0, pause: 0,   badge: 'MASUK GATE-IN',     theme: 'amber' },
-                    { x: inX,   z: gateZ, pause: 1.4, action: 'inGate',  badge: 'TARE 14.0T • ANPR', theme: 'emerald' },
-                    { x: inX,   z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'amber' },
-                    { x: -4.0,  z: 47.0,  pause: 0,   badge: 'BOULEVARD SELATAN', theme: 'amber' },
-                    { x: -4.0,  z: -4.5,  pause: 0,   badge: 'JALUR RTG BLOK C',  theme: 'amber' },
-                    { x: 64.0,  z: -4.5,  pause: 3.4, action: 'load',    assistEq: 'RTG-04', assistMode: 'pickup', badge: 'LIFT-ON • RTG-04', theme: 'emerald', log: '[YARD BLOK C] RTG-04 menurunkan kontainer domestik ke sasis B 9504 MKS.' },
-                    { x: 126.5, z: -4.5,  pause: 0,   badge: 'MID-WEST AVE',      theme: 'purple' },
-                    { x: 126.5, z: 47.0,  pause: 0,   badge: 'NORTH CROSS AVE',   theme: 'purple' },
-                    { x: outX,  z: 47.0,  pause: 0,   badge: 'JALUR GATE-OUT',    theme: 'purple' },
-                    { x: outX,  z: gateZ, pause: 1.2, action: 'outGate', badge: 'GATE-OUT • DO OK',  theme: 'purple', completeLoop: true, log: '[GATE-OUT] B 9504 MKS melewati jalur Gate-Out menuju Tol.' },
-                    { x: outX,  z: 141.0, pause: 0,   badge: 'ON-RAMP TOL',       theme: 'slate' },
-                    { x: -265,  z: 141.0, pause: 0,   action: 'warpToStart', badge: 'TOL PRIOK',     theme: 'slate' }
+                    { x: -265,  z: hwyInZ, pause: 0,   action: 'unload',  badge: 'SASIS DARI TOL',     theme: 'amber' },
+                    { x: in3,   z: hwyInZ, pause: 0,   badge: 'MASUK IN-03',        theme: 'amber' },
+                    { x: in3,   z: gateZ,  pause: 1.4, action: 'inGate',  laneCode: 'IN-03', badge: 'IN-03 • TARE 14.0T', theme: 'emerald' },
+                    { x: in3,   z: 76.0,   pause: 0,   badge: 'KORIDOR BUFFER',     theme: 'amber' },
+                    { x: in3,   z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'amber' },
+                    { x: -4.0,  z: 47.0,   pause: 0,   badge: 'BOULEVARD SELATAN',  theme: 'amber' },
+                    { x: -4.0,  z: -4.5,   pause: 0,   badge: 'JALUR RTG BLOK C',   theme: 'amber' },
+                    { x: 64.0,  z: -4.5,   pause: 3.4, action: 'load',    assistEq: 'RTG-04', assistMode: 'pickup', badge: 'LIFT-ON • RTG-04', theme: 'emerald', log: '[YARD BLOK C] RTG-04 menurunkan kontainer domestik ke sasis B 9504 MKS.' },
+                    { x: 126.5, z: -4.5,   pause: 0,   badge: 'MID-WEST AVE',       theme: 'purple' },
+                    { x: 126.5, z: 47.0,   pause: 0,   badge: 'NORTH CROSS AVE',    theme: 'purple' },
+                    { x: out2,  z: 47.0,   pause: 0,   badge: 'JALUR OUT-02',       theme: 'purple' },
+                    { x: out2,  z: gateZ,  pause: 1.2, action: 'outGate', laneCode: 'OUT-02', badge: 'OUT-02 • DO OK', theme: 'purple', completeLoop: true, log: '[GATE-OUT] B 9504 MKS melewati Plaza OUT-02 menuju Tol.' },
+                    { x: out2,  z: hwyOutZ,pause: 0,   badge: 'ON-RAMP TOL',        theme: 'slate' },
+                    { x: -265,  z: hwyOutZ,pause: 0,   action: 'warpToStart', badge: 'TOL PRIOK',   theme: 'slate' }
                 ]
             }
         ];
@@ -1041,10 +1106,12 @@
         }
 
         if (wp.action === 'inGate') {
-            state.scanBeams.inGateFlash = wp.pause || 1.4;
+            if (wp.laneCode) state.scanBeams['lane_' + wp.laneCode] = wp.pause || 1.4;
+            else state.scanBeams.inGateFlash = wp.pause || 1.4;
             state.totalGateInCount++;
         } else if (wp.action === 'outGate') {
-            state.scanBeams.outGateFlash = wp.pause || 1.2;
+            if (wp.laneCode) state.scanBeams['lane_' + wp.laneCode] = wp.pause || 1.2;
+            else state.scanBeams.outGateFlash = wp.pause || 1.2;
             state.totalGateOutCount++;
         } else if (wp.action === 'xray') {
             state.scanBeams.xrayFlash = wp.pause || 1.8;
@@ -1400,37 +1467,51 @@
     function updateGatesAndEffects(dt, nowMs) {
         const gm = getGateMetrics();
         if (!isManualActionRunning()) {
-            let inNeeded = false;
-            let outNeeded = false;
-            for (let i = 0; i < state.trucks.length; i++) {
-                const p = state.trucks[i].mesh.position;
-                if (Math.abs(p.x - gm.inX) < 5.0 && p.z >= gm.barrierZ - 8 && p.z <= gm.gateZ + 8) inNeeded = true;
-                if (Math.abs(p.x - gm.outX) < 5.0 && p.z >= gm.barrierZ - 8 && p.z <= gm.gateZ + 8) outNeeded = true;
+            const laneMap = (typeof window !== 'undefined' && window.boomBarriers) ? window.boomBarriers : {};
+            if (!state.barrierState.lanes) state.barrierState.lanes = {};
+
+            for (let li = 0; li < gm.lanes.length; li++) {
+                const lane = gm.lanes[li];
+                let needed = false;
+                for (let ti = 0; ti < state.trucks.length; ti++) {
+                    const p = state.trucks[ti].mesh.position;
+                    if (Math.abs(p.x - lane.x) < 4.0 && p.z >= gm.barrierZ - 8 && p.z <= gm.gateZ + 9) {
+                        needed = true;
+                        break;
+                    }
+                }
+                const prev = state.barrierState.lanes[lane.code] || 0;
+                const next = lerp(prev, needed ? 1 : 0, dt * 6.0);
+                state.barrierState.lanes[lane.code] = next;
+
+                const entry = laneMap[lane.code];
+                if (entry && typeof setGateBarrierOpenRatio === 'function') {
+                    entry.t = next;
+                    setGateBarrierOpenRatio(entry, next);
+                } else {
+                    const isIn = (lane.direction === 'INBOUND');
+                    if (lane.code === 'IN-01' && typeof boomBarrierMesh !== 'undefined' && boomBarrierMesh) {
+                        const ang = next * 1.22;
+                        boomBarrierMesh.rotation.x = 0;
+                        boomBarrierMesh.rotation.z = (Math.PI / 2) - ang;
+                        boomBarrierMesh.position.x = (lane.x - 2.2) + 2.2 * Math.cos(ang);
+                        boomBarrierMesh.position.y = 1.2 + 2.2 * Math.sin(ang);
+                    } else if (lane.code === 'OUT-01' && typeof outboundBarrierMesh !== 'undefined' && outboundBarrierMesh) {
+                        const ang = next * 1.22;
+                        outboundBarrierMesh.rotation.x = 0;
+                        outboundBarrierMesh.rotation.z = (Math.PI / 2) + ang;
+                        outboundBarrierMesh.position.x = (lane.x + 2.2) - 2.2 * Math.cos(ang);
+                        outboundBarrierMesh.position.y = 1.2 + 2.2 * Math.sin(ang);
+                    }
+                    void isIn;
+                }
+
+                const ledMat = state.gateLeds.lanes && state.gateLeds.lanes[lane.code];
+                if (ledMat) {
+                    const busyColor = (lane.direction === 'INBOUND') ? 0xf59e0b : 0x38bdf8;
+                    ledMat.color.setHex(needed ? busyColor : 0x22c55e);
+                }
             }
-
-            state.barrierState.inOpen  = lerp(state.barrierState.inOpen,  inNeeded  ? 1 : 0, dt * 6.0);
-            state.barrierState.outOpen = lerp(state.barrierState.outOpen, outNeeded ? 1 : 0, dt * 6.0);
-
-            if (typeof boomBarrierMesh !== 'undefined' && boomBarrierMesh) {
-                const t = state.barrierState.inOpen;
-                const ang = t * 1.22;
-                boomBarrierMesh.rotation.x = 0;
-                boomBarrierMesh.rotation.z = (Math.PI / 2) - ang;
-                boomBarrierMesh.position.x = (gm.inX - 2.2) + 2.2 * Math.cos(ang);
-                boomBarrierMesh.position.y = 1.2 + 2.2 * Math.sin(ang);
-            }
-
-            if (typeof outboundBarrierMesh !== 'undefined' && outboundBarrierMesh) {
-                const t = state.barrierState.outOpen;
-                const ang = t * 1.22;
-                outboundBarrierMesh.rotation.x = 0;
-                outboundBarrierMesh.rotation.z = (Math.PI / 2) + ang;
-                outboundBarrierMesh.position.x = (gm.outX + 2.2) - 2.2 * Math.cos(ang);
-                outboundBarrierMesh.position.y = 1.2 + 2.2 * Math.sin(ang);
-            }
-
-            if (state.gateLeds.inMat)  state.gateLeds.inMat.color.setHex(inNeeded  ? 0xf59e0b : 0x22c55e);
-            if (state.gateLeds.outMat) state.gateLeds.outMat.color.setHex(outNeeded ? 0x38bdf8 : 0x22c55e);
         }
 
         const pulseBeam = (mesh, key) => {
@@ -1445,6 +1526,12 @@
         pulseBeam(state.scanBeams.inGate,  'inGateFlash');
         pulseBeam(state.scanBeams.outGate, 'outGateFlash');
         pulseBeam(state.scanBeams.xray,    'xrayFlash');
+        if (state.scanBeams.lanes) {
+            Object.keys(state.scanBeams.lanes).forEach(code => {
+                const key = 'lane_' + code;
+                pulseBeam(state.scanBeams.lanes[code], key);
+            });
+        }
 
         for (let i = 0; i < state.bayHalos.length; i++) {
             const h = state.bayHalos[i];
@@ -1784,7 +1871,7 @@
             state.initialized = true;
             state.lastTimeMs = performance.now();
             syncControlButtonsUI();
-            emitTrafficLog('[TRAFFIC v4.1] Peta 480m x 230m (Instanced GPU) aktif: 5 E-RTG + 4 RS + 8 Truk kontinu.', true);
+            emitTrafficLog('[TRAFFIC v4.1] Peta 480m x 296m • Plaza 10 Lajur Gate (6 In / 4 Out) aktif: 5 E-RTG + 4 RS + 8 Truk kontinu.', true);
         },
 
         update: function (timeMs) {

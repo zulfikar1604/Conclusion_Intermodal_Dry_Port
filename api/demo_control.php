@@ -267,6 +267,7 @@ try {
 
             $pdo->commit();
 
+            cfs_sync_master_lokasi($pdo);
             cidp_set_bcp_state(false, 'Reset database ke mode Primary Online normal.');
             @unlink(cidp_rate_cache_file());
             get_live_twin_state($pdo, true);

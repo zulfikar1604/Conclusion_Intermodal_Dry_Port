@@ -22,39 +22,41 @@
 // mengikuti denah.php. Ukuran bangunan 3D tetap memakai ukuran riil model.
 // =============================================================================
 
+require_once __DIR__ . '/../api/gate_lanes_helper.php';
+
 $CIDP_LAYOUT = [
     'meta' => [
         'convention'  => 'E=timur(+kanan), N=utara(+atas); world.x=-E, world.z=N',
         'site_width'  => 480,   // meter, timur-barat  (pagar perimeter YANG DIMODELKAN di 3D)
-        'site_depth'  => 230,   // meter, utara-selatan
+        'site_depth'  => 296,   // meter, utara-selatan (diperluas agar koridor Gate <-> Yard lapang)
         'denah_width' => 500,   // meter, lebar kawasan
-        'denah_depth' => 320,   // meter, panjang kawasan
+        'denah_depth' => 380,   // meter, panjang kawasan
         'fence_half_w'=> 240,
-        'fence_half_d'=> 115,
+        'fence_half_d'=> 148,
         'rail_length' => 340,   // panjang rel siding yang dimodelkan (m)
     ],
 
     // id => [label, E, N]
     'facilities' => [
-        // ---- Zona Gate (timur laut, N=86) ---------------------------------
-        'f_gate_in'        => ['Gatehouse Inbound (Lane 1)',   60,  86],
-        'f_gate_out'       => ['Gatehouse Outbound (Lane 2)',  50,  86],
-        'f_security_gate'  => ['Security Post 24 Jam',         34,  86],
-        'f_driver_rest'    => ['Rest Area Driver',             34,  66],
-        'f_truck_queue'    => ['Parkir Antrian Truk',         154,  86],
+        // ---- Zona Gate 10 Lajur (6 In / 4 Out) di utara N=118 -> koridor ±78-94m ke CY (N=24) ----
+        'f_gate_in'        => ['Plaza Gate-In (6 Lajur IN-01..06)',   77, 118],
+        'f_gate_out'       => ['Plaza Gate-Out (4 Lajur OUT-01..04)', 129, 118],
+        'f_security_gate'  => ['Security Post 24 Jam',                  38, 114],
+        'f_driver_rest'    => ['Rest Area Driver',                      36,  90],
+        'f_truck_queue'    => ['Parkir Antrian Truk (Pre-Gate)',       174,  96],
 
-        // ---- Zona Kantor (utara-tengah, N=86), urut barat -> timur ---------
-        'f_datacenter'     => ['Datacenter / NOC',            -48,  86],
-        'f_admin_office'   => ['Kantor Utama PT MTI',         -26,  86],
-        'f_meeting_room'   => ['Ruang Meeting & Training',     -4,  86],
-        'f_parking_staff'  => ['Parkir Karyawan & Tamu',       16,  86],
+        // ---- Zona Kantor (utara-tengah, N=118), urut barat -> timur ---------
+        'f_datacenter'     => ['Datacenter / NOC',                     -48, 118],
+        'f_admin_office'   => ['Kantor Utama PT MTI',                  -26, 118],
+        'f_meeting_room'   => ['Ruang Meeting & Training',              -4, 118],
+        'f_parking_staff'  => ['Parkir Karyawan & Tamu',                16, 118],
 
-        // ---- Zona Fasum (barat laut) -------------------------------------
-        'f_genset_shelter' => ['Genset Shelter 1.500 kVA',   -205,  86],
-        'f_musholla'       => ['Masjid Al-Hidayah',          -178,  86],
-        'f_kantin'         => ['Kantin & Koperasi',          -150,  86],
-        'f_klinik'         => ['Klinik P3K',                 -178,  66],
-        'f_damkar'         => ['Pos Damkar',                 -150,  66],
+        // ---- Zona Fasum (barat laut, N=92..118) ------------------------------
+        'f_genset_shelter' => ['Genset Shelter 1.500 kVA',            -205, 118],
+        'f_musholla'       => ['Masjid Al-Hidayah',                   -178, 118],
+        'f_kantin'         => ['Kantin & Koperasi',                   -150, 118],
+        'f_klinik'         => ['Klinik P3K',                          -178,  92],
+        'f_damkar'         => ['Pos Damkar',                          -150,  92],
 
         // ---- Kolom Barat: M&R (utara) - CFS - Transit (selatan) -----------
         'f_workshop_mr'    => ['M&R Workshop',               -212,  24],
@@ -83,11 +85,38 @@ $CIDP_LAYOUT = [
 ];
 
 /** Daftar fasilitas dalam format kompak untuk JavaScript: id => {e, n, label}. */
+function cidp_gate_lanes_for_layout(float $gateN = 118.0): array {
+    $inE  = [1 => 56.0, 2 => 64.5, 3 => 73.0, 4 => 81.5, 5 => 90.0, 6 => 98.5];
+    $outE = [1 => 116.0, 2 => 124.5, 3 => 133.0, 4 => 141.5];
+    $lanes = [];
+    foreach (cidp_gate_lane_catalog() as $code => $meta) {
+        $dirRaw = strtoupper((string)($meta['direction'] ?? ''));
+        $isIn = ($dirRaw === 'IN' || $dirRaw === 'INBOUND' || strpos((string)$code, 'IN-') === 0);
+        $num  = (int)$meta['lane_num'];
+        $e    = $isIn ? ($inE[$num] ?? (56.0 + ($num - 1) * 8.5)) : ($outE[$num] ?? (116.0 + ($num - 1) * 8.5));
+        $lanes[] = [
+            'code'            => $code,
+            'direction'       => $isIn ? 'INBOUND' : 'OUTBOUND',
+            'lane_num'        => $num,
+            'name'            => $meta['name'],
+            'short_name'      => $meta['short_name'],
+            'has_weighbridge' => !empty($meta['has_weighbridge']),
+            'e'               => $e,
+            'n'               => $gateN,
+            'x'               => -$e,
+            'z'               => $gateN,
+        ];
+    }
+    return $lanes;
+}
+
 function cidp_layout_for_js(array $layout): array {
-    $out = ['meta' => $layout['meta'], 'facilities' => []];
+    $out = ['meta' => $layout['meta'], 'facilities' => [], 'gate_lanes' => []];
     foreach ($layout['facilities'] as $id => $f) {
         $out['facilities'][$id] = ['label' => $f[0], 'e' => $f[1], 'n' => $f[2]];
     }
+    $gateN = isset($layout['facilities']['f_gate_in'][2]) ? (float)$layout['facilities']['f_gate_in'][2] : 118.0;
+    $out['gate_lanes'] = cidp_gate_lanes_for_layout($gateN);
     return $out;
 }
 

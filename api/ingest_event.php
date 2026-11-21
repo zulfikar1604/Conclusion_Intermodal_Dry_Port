@@ -13,6 +13,7 @@ require_once __DIR__ . '/preadvice_helper.php';
 require_once __DIR__ . '/oauth_helper.php';
 global $pdo;
 ensure_integration_schema($pdo);
+cidp_ensure_gate_schema($pdo);
 
 // Accept internal $_POST (when included by edge_simulator / demo_control) or JSON payload
 $raw_input = '';
@@ -41,6 +42,8 @@ if (empty($data) || empty($data['event_type'])) {
             'CONTAINER_LIFT',
             'CONTAINER_STACK',
             'CUSTOMS_CEISA',
+            'XRAY_SCAN_RESULT',
+            'ESEAL_TELEMETRY',
             'REEFER_TELEMETRY',
             'PAYMENT_SETTLED',
             'YARD_RELOCATION',
@@ -48,10 +51,12 @@ if (empty($data) || empty($data['event_type'])) {
             'CFS_PALLET_SCAN',
             'CFS_STRIPPING_COMPLETE',
             'CFS_PALLET_DISPATCH',
+            'HANDHELD_AIDC_SCAN',
             'CUSTOMS_INSPECTION',
             'REEFER_PLUGIN',
-            'REEFER_TELEMETRY',
+            'RAIL_AXLE_COUNTER',
             'RAIL_LOADING',
+            'RAIL_UNLOADING',
             'TRUCK_GATE_OUT'
         ]
     ], JSON_PRETTY_PRINT);
@@ -76,16 +81,18 @@ if ($dup_resp !== false) {
     return;
 }
 
-// Event selain EQUIPMENT_MOVE wajib membawa identitas dari sensor (tidak ada nilai default/dummy)
+// Event selain EQUIPMENT_MOVE / RAIL_AXLE_COUNTER / HANDHELD_AIDC_SCAN wajib membawa identitas dari sensor
 $needs_container = ['TRUCK_WEIGHBRIDGE', 'CONTAINER_LIFT', 'CONTAINER_STACK', 'CUSTOMS_CEISA', 'PAYMENT_SETTLED',
     'YARD_RELOCATION', 'CFS_STRIPPING_START', 'CFS_PALLET_SCAN', 'CFS_STRIPPING_COMPLETE', 'CUSTOMS_INSPECTION',
-    'REEFER_PLUGIN', 'REEFER_TELEMETRY', 'RAIL_LOADING', 'TRUCK_GATE_OUT'];
+    'XRAY_SCAN_RESULT', 'ESEAL_TELEMETRY', 'REEFER_PLUGIN', 'REEFER_TELEMETRY', 'RAIL_LOADING', 'RAIL_UNLOADING', 'TRUCK_GATE_OUT'];
 
 $tri_flow_log = [
     'physical' => '',
     'information' => '',
     'financial' => ''
 ];
+$thresholds = cidp_get_thresholds($pdo);
+$decision_summary = null;
 
 try {
     // =========================================================================
@@ -313,16 +320,23 @@ try {
             // Pre-advice -> ARRIVED
             $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED', arrived_at = NOW() WHERE id = ?")->execute([$pre['id']]);
 
+            $gate_lane = cidp_pick_gate_lane($pdo, 'IN', [
+                'lane'       => $p['gate_lane'] ?? $p['lane_id'] ?? $p['lane'] ?? null,
+                'cargo_type' => $pre['cargo_type'] ?? 'dry',
+                'block'      => $pre['target_block'] ?? 'A',
+                'job_type'   => $pre['job_type'] ?? 'drop_off',
+            ]);
+
             // Truk: dari "scheduled" (di luar) menjadi "at_gate" (di dalam proses dry port)
             $t_check = $pdo->prepare("SELECT id FROM trucks WHERE license_plate = ?");
             $t_check->execute([$plate]);
             $tid = $t_check->fetchColumn();
             if ($tid) {
-                $pdo->prepare("UPDATE trucks SET container_number = ?, driver_name = ?, company = ?, status = 'at_gate', gate_in_time = NOW() WHERE id = ?")
-                    ->execute([$container_no, $pre['driver_name'], $pre['company'], $tid]);
+                $pdo->prepare("UPDATE trucks SET container_number = ?, driver_name = ?, company = ?, status = 'at_gate', gate_lane = ?, gate_in_time = NOW() WHERE id = ?")
+                    ->execute([$container_no, $pre['driver_name'], $pre['company'], $gate_lane, $tid]);
             } else {
-                $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, job_type, do_number, container_number, target_block, status, gate_in_time) VALUES (?,?,?,?,?,?,?,?, 'at_gate', NOW())")
-                    ->execute([$plate, $pre['rfid_tag'], $pre['driver_name'], $pre['company'], $pre['job_type'], $pre['do_number'], $container_no, $pre['target_block']]);
+                $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, job_type, do_number, container_number, target_block, status, gate_lane, gate_in_time) VALUES (?,?,?,?,?,?,?,?, 'at_gate', ?, NOW())")
+                    ->execute([$plate, $pre['rfid_tag'], $pre['driver_name'], $pre['company'], $pre['job_type'], $pre['do_number'], $container_no, $pre['target_block'], $gate_lane]);
             }
 
             // Kontainer: dari "expected" (di luar) menjadi "in_transit" di GATE
@@ -336,12 +350,12 @@ try {
                     ->execute([$container_no, $pre['iso_code'], $pre['size_type'], $pre['cargo_type'], $pre['rfid_tag'], $pre['owner_company']]);
             }
 
-            // Log event
-            $ev_ins = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes, billable_amount) VALUES ('GATE_IN', ?, 'OUTSIDE', 'GATE', ?, 0)");
-            $ev_ins->execute([$container_no, "Truk {$plate} terdeteksi di Gate Inbound oleh OCR & RFID (pre-gate {$pre['pre_gate_code']})"]);
+            // Log event dengan kode lajur spesifik (IN-01..IN-06)
+            $ev_ins = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, to_block, notes, billable_amount) VALUES ('GATE_IN', ?, ?, 'OUTSIDE', 'GATE', ?, 0)");
+            $ev_ins->execute([$container_no, $gate_lane, "[{$gate_lane}] Truk {$plate} terdeteksi OCR & RFID di Gate Inbound (pre-gate {$pre['pre_gate_code']})"]);
 
-            $tri_flow_log['physical'] = "Truk {$plate} tiba di Gate Inbound; Palang Barrier Gate Terbuka";
-            $tri_flow_log['information'] = "OCR membaca pelat {$plate} & kontainer {$container_no}; cocok dengan pre-advice {$pre['pre_gate_code']} ({$pre['source']})";
+            $tri_flow_log['physical'] = "Truk {$plate} tiba di {$gate_lane}; Palang Barrier {$gate_lane} Terbuka";
+            $tri_flow_log['information'] = "OCR {$gate_lane} membaca pelat {$plate} & kontainer {$container_no}; cocok dengan pre-advice {$pre['pre_gate_code']} ({$pre['source']})";
             $tri_flow_log['financial'] = "Verifikasi izin masuk terminal tervalidasi (Tanpa penalti)";
             break;
 
@@ -351,45 +365,61 @@ try {
         case 'TRUCK_WEIGHBRIDGE':
             $plate = $p['truck_plate'] ?? '';
             $container_no = $p['container_number'] ?? '';
-            $weight_gross = (float)($p['weight_gross'] ?? 34850.0);
+            $raw_gross = (float)($p['weight_gross'] ?? 34850.0);
+            $weight_gross = max(0.0, $raw_gross + (float)$thresholds['vgm_zero_offset_kg']);
             $weigh_fee = 75000.0;
+            $tolPct = max(0.5, (float)$thresholds['vgm_tolerance_pct']);
+            $maxGross = max(10000.0, (float)$thresholds['vgm_max_gross_kg']);
 
-            // Cek apakah ada anomali selisih berat SOLAS VGM (> 5%) atau Overload (> 35 Ton) yang belum di-override
+            // Cek apakah ada anomali selisih berat SOLAS VGM (> threshold%) atau Overload (> maxGross) yang belum di-override
             $paWb = $pdo->prepare("SELECT * FROM preadvice WHERE container_number = ? OR (truck_plate = ? AND ? <> '') ORDER BY id DESC LIMIT 1");
             $paWb->execute([$container_no, $plate, $plate]);
             $preWb = $paWb->fetch(PDO::FETCH_ASSOC);
-            if ($preWb) {
-                $isWbResolved = (($preWb['resolution_status'] ?? 'NONE') === 'OVERRIDDEN_APPROVED');
-                if (!$isWbResolved && ($preWb['anomaly_code'] ?? '') === 'VGM_OVERWEIGHT') {
-                    $weight_gross = (float)($preWb['actual_weight_kg'] ?: 39250.0);
-                    $declW = (float)($preWb['declared_weight_kg'] ?: 26000.0);
+            $declCheck = (float)($p['declared_weight_kg'] ?? ($preWb['declared_weight_kg'] ?? 0));
+            $isDynamicBreach = ($weight_gross > $maxGross) || ($declCheck > 0 && abs(($weight_gross - $declCheck) / $declCheck) * 100.0 > $tolPct);
+            if ($preWb || $isDynamicBreach) {
+                $isWbResolved = ($preWb && (($preWb['resolution_status'] ?? 'NONE') === 'OVERRIDDEN_APPROVED'));
+                if (!$isWbResolved && (($preWb['anomaly_code'] ?? '') === 'VGM_OVERWEIGHT' || $isDynamicBreach)) {
+                    if ($preWb && ($preWb['anomaly_code'] ?? '') === 'VGM_OVERWEIGHT' && empty($p['weight_gross'])) {
+                        $weight_gross = (float)($preWb['actual_weight_kg'] ?: 39250.0);
+                    }
+                    $declW = (float)($declCheck > 0 ? $declCheck : (($preWb['declared_weight_kg'] ?? 0) ?: 26000.0));
                     $diffPct = round((($weight_gross - $declW) / max(1.0, $declW)) * 100, 1);
                     $catMeta = cidp_get_anomaly_meta('VGM_OVERWEIGHT') ?: [];
                     $anomMeta = array_merge($catMeta, [
-                        'pre_gate_code'      => $preWb['pre_gate_code'],
+                        'pre_gate_code'      => $preWb['pre_gate_code'] ?? null,
                         'anomaly_code'       => 'VGM_OVERWEIGHT',
-                        'anomaly_title'      => $preWb['anomaly_title'] ?: ($catMeta['anomaly_title'] ?? 'Selisih Berat Timbangan SOLAS VGM > 5%'),
+                        'anomaly_title'      => ($preWb['anomaly_title'] ?? '') ?: "Deviasi / Beban Timbangan SOLAS VGM > {$tolPct}%",
                         'anomaly_stage'      => 'WEIGHBRIDGE',
-                        'anomaly_notes'      => $preWb['anomaly_notes'] ?: "Berat aktual Jembatan Timbang 80T tercatat " . number_format($weight_gross, 0, ',', '.') . " kg vs deklarasi manifest " . number_format($declW, 0, ',', '.') . " kg (Selisih +{$diffPct}%).",
-                        'truck_plate'        => $preWb['truck_plate'] ?: $plate,
+                        'anomaly_notes'      => ($preWb['anomaly_notes'] ?? '') ?: "Sensor Load-Cell 80T mencatat berat aktual " . number_format($weight_gross, 0, ',', '.') . " kg vs deklarasi manifest " . number_format($declW, 0, ',', '.') . " kg (Deviasi {$diffPct}%, batas toleransi ±{$tolPct}% / maks {$maxGross} kg).",
+                        'truck_plate'        => ($preWb['truck_plate'] ?? '') ?: $plate,
                         'container_number'   => $container_no,
                         'declared_weight_kg' => $declW,
                         'actual_weight_kg'   => $weight_gross,
                         'discrepancy_pct'    => $diffPct,
-                        'driver_name'        => $preWb['driver_name'],
-                        'company'            => $preWb['company'],
-                        'owner_company'      => $preWb['owner_company'],
+                        'driver_name'        => $preWb['driver_name'] ?? '',
+                        'company'            => $preWb['company'] ?? '',
+                        'owner_company'      => $preWb['owner_company'] ?? '',
                         'interlock_state'    => 'WEIGHBRIDGE_HOLD_RS02_LOCKED'
                     ]);
                     throw new IngestRejection(
-                        "[INTERLOCK TIMBANGAN 80T — VGM_OVERWEIGHT] Berat aktual " . number_format($weight_gross, 0, ',', '.') . " kg melampaui deklarasi B/L " . number_format($declW, 0, ',', '.') . " kg (+{$diffPct}% > batas SOLAS ±5%). Work Order Reach Stacker RS-02 diblokir!",
+                        "[INTERLOCK TIMBANGAN 80T — VGM_OVERWEIGHT] Berat aktual " . number_format($weight_gross, 0, ',', '.') . " kg melampaui batas toleransi ±{$tolPct}% / maks {$maxGross} kg ({$diffPct}%). Work Order Reach Stacker diblokir!",
                         $anomMeta
                     );
                 }
             }
 
-            $stmt = $pdo->prepare("UPDATE trucks SET weight_gross = ?, status = 'in_yard' WHERE license_plate = ?");
-            $stmt->execute([$weight_gross, $plate]);
+            $wb_lane = cidp_pick_gate_lane($pdo, 'IN', [
+                'lane'       => $p['gate_lane'] ?? $p['lane_id'] ?? null,
+                'cargo_type' => $preWb['cargo_type'] ?? 'dry',
+                'block'      => $preWb['target_block'] ?? 'A',
+            ]);
+            if (!empty($wb_lane) && !in_array($wb_lane, ['IN-01', 'IN-02', 'IN-03', 'IN-06'], true)) {
+                $wb_lane = 'IN-01';
+            }
+
+            $stmt = $pdo->prepare("UPDATE trucks SET weight_gross = ?, status = 'in_yard', gate_lane = COALESCE(gate_lane, ?) WHERE license_plate = ?");
+            $stmt->execute([$weight_gross, $wb_lane, $plate]);
 
             // Update container gross weight
             $c_upd = $pdo->prepare("UPDATE containers SET gross_weight_kg = ? WHERE container_number = ?");
@@ -401,12 +431,18 @@ try {
             $inv_stmt->execute([$inv_no, $container_no, $weigh_fee]);
 
             // Log event
-            $ev_ins = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes, billable_amount) VALUES ('WEIGHBRIDGE_VGM', ?, ?, ?)");
-            $ev_ins->execute([$container_no, "Penimbangan SOLAS VGM: " . number_format($weight_gross, 0) . " kg", $weigh_fee]);
+            $ev_ins = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('WEIGHBRIDGE_VGM', ?, ?, ?, ?)");
+            $ev_ins->execute([$container_no, $wb_lane, "[{$wb_lane}] Penimbangan SOLAS VGM 80T: " . number_format($weight_gross, 0) . " kg (Offset: {$thresholds['vgm_zero_offset_kg']} kg)", $weigh_fee]);
 
-            $tri_flow_log['physical'] = "Truk {$plate} ditimbang di Jembatan Timbang 80T (Berat: " . number_format($weight_gross, 0) . " kg)";
+            $tri_flow_log['physical'] = "Truk {$plate} ditimbang di Jembatan Timbang 80T {$wb_lane} (Berat: " . number_format($weight_gross, 0) . " kg)";
             $tri_flow_log['information'] = "Sertifikat SOLAS VGM diterbitkan secara digital untuk {$container_no}";
             $tri_flow_log['financial'] = "Biaya Timbang Rp " . number_format($weigh_fee, 0, ',', '.') . " terakrual pada invoice {$inv_no}";
+            $decision_summary = [
+                'verdict' => 'PASS_VGM_CERTIFIED',
+                'rule'    => "SOLAS VGM Load-Cell Check (Toleransi ±{$tolPct}%, Maks {$maxGross} kg)",
+                'reason'  => "Berat terukur " . number_format($weight_gross, 0) . " kg lolos toleransi kalibrasi.",
+                'next_action' => "Lanjutkan angkat Reach Stacker ke koordinat Yard."
+            ];
             break;
 
         // =====================================================================
@@ -468,10 +504,24 @@ try {
         case 'CONTAINER_STACK':
             $eq_id = $p['equipment_id'] ?? 'RS-02';
             $container_no = $p['container_number'] ?? '';
-            $block = strtoupper($p['block'] ?? 'B');
-            $bay = $p['bay'] ?? '08';
-            $row = $p['row'] ?? '03';
-            $tier = $p['tier'] ?? '02';
+            $useAutoSlot = !empty($p['auto_slot']) || empty($p['block']);
+            $slotReason = 'Koordinat DGPS RTK ditentukan langsung oleh operator spreader.';
+            if ($useAutoSlot) {
+                $cq = $pdo->prepare("SELECT container_number, cargo_type, size_type, customs_status, gross_weight_kg FROM containers WHERE container_number = ? LIMIT 1");
+                $cq->execute([$container_no]);
+                $cRowInfo = $cq->fetch(PDO::FETCH_ASSOC) ?: ['container_number' => $container_no];
+                $rec = cidp_recommend_yard_slot($pdo, $cRowInfo, !empty($p['block']) ? (string)$p['block'] : null);
+                $block = $rec['block'];
+                $bay   = $rec['bay'];
+                $row   = $rec['row'];
+                $tier  = $rec['tier'];
+                $slotReason = $rec['reason'];
+            } else {
+                $block = strtoupper(trim((string)$p['block']));
+                $bay = yard_format_coord($p['bay'] ?? '08');
+                $row = yard_format_coord($p['row'] ?? '03');
+                $tier = yard_format_coord($p['tier'] ?? '02');
+            }
 
             // Equipment becomes idle/operating without container
             $stmt = $pdo->prepare("UPDATE equipment SET status = 'idle', current_container = NULL, last_block = ?, last_updated = NOW() WHERE equipment_id = ?");
@@ -484,11 +534,17 @@ try {
             // Log event
             $slot_str = "{$block}-{$bay}-{$row}-{$tier}";
             $ev_ins = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, to_block, to_bay, to_row, to_tier, notes, billable_amount) VALUES ('STACKING', ?, ?, ?, ?, ?, ?, ?, 0)");
-            $ev_ins->execute([$container_no, $eq_id, $block, $bay, $row, $tier, "Kontainer berhasil ditumpuk di {$slot_str}"]);
+            $ev_ins->execute([$container_no, $eq_id, $block, $bay, $row, $tier, "Kontainer berhasil ditumpuk di {$slot_str} ({$slotReason})"]);
 
             $tri_flow_log['physical'] = "Kontainer {$container_no} terpasang di Blok {$block} (Slot: {$slot_str})";
-            $tri_flow_log['information'] = "Akurasi slot spasial 100%; Penghitungan Dwell Time (t0) aktif";
+            $tri_flow_log['information'] = "Akurasi slot spasial 100%; Penghitungan Dwell Time (t0) aktif ({$thresholds['free_dwell_days']} hari gratis)";
             $tri_flow_log['financial'] = "Masa bebas penumpukan hari ke-1 dimulai (Argo progresif siap jalan)";
+            $decision_summary = [
+                'verdict' => $useAutoSlot ? 'AUTO_SLOTTED_OPTIMAL' : 'STACKED_BY_DGPS',
+                'rule'    => 'Yard Auto-Slotting Engine (Customs/Cargo/Gravity Weight Tier)',
+                'reason'  => $slotReason,
+                'next_action' => "Kontainer siap dipantau pada Matriks Yard {$slot_str} & Digital Twin 3D."
+            ];
             break;
 
         // =====================================================================
@@ -531,6 +587,7 @@ try {
             if ($status === 'SPPB_CLEARED') {
                 $pdo->prepare("UPDATE cfs_pallets SET customs_status = 'CLEARED', status = 'IN_RACK' WHERE container_origin = ? AND status IN ('IN_RACK','HOLD')")->execute([$container_no]);
                 $pdo->prepare("UPDATE cfs_jobs SET customs_status = 'SPPB_CLEARED', status = IF(status = 'HOLD', 'IN_PROGRESS', status) WHERE container_number = ?")->execute([$container_no]);
+                cfs_sync_master_lokasi($pdo);
             }
 
             // Log event
@@ -566,18 +623,24 @@ try {
         // =====================================================================
         case 'YARD_RELOCATION':
             $eq_id = trim($p['equipment_id'] ?? '');
-            $tb = strtoupper(trim($p['to_block'] ?? '')); $tbay = $p['to_bay'] ?? ''; $trow = $p['to_row'] ?? ''; $ttier = $p['to_tier'] ?? '';
-            if ($eq_id === '' || $tb === '' || $tbay === '' || $trow === '' || $ttier === '') {
+            $tb = strtoupper(trim($p['to_block'] ?? ''));
+            $tbayRaw = $p['to_bay'] ?? '';
+            $trowRaw = $p['to_row'] ?? '';
+            $ttierRaw = $p['to_tier'] ?? '';
+            if ($eq_id === '' || $tb === '' || $tbayRaw === '' || $trowRaw === '' || $ttierRaw === '') {
                 throw new IngestRejection('Relokasi wajib membawa equipment_id dan slot tujuan (block, bay, row, tier).');
             }
+            $tbay = yard_format_coord($tbayRaw);
+            $trow = yard_format_coord($trowRaw);
+            $ttier = yard_format_coord($ttierRaw);
             $cur = $pdo->prepare("SELECT block, bay, row, tier, status FROM containers WHERE container_number = ?");
             $cur->execute([$container_no = $p['container_number']]);
             $cr = $cur->fetch(PDO::FETCH_ASSOC);
             if ($cr['status'] !== 'in_yard') {
                 throw new IngestRejection("Kontainer {$container_no} tidak berada di yard (status {$cr['status']}); relokasi ditolak.");
             }
-            $occ = $pdo->prepare("SELECT container_number FROM containers WHERE status='in_yard' AND block = ? AND bay = ? AND row = ? AND tier = ? AND container_number <> ?");
-            $occ->execute([$tb, $tbay, $trow, $ttier, $container_no]);
+            $occ = $pdo->prepare("SELECT container_number FROM containers WHERE status='in_yard' AND UPPER(TRIM(COALESCE(block,''))) = ? AND CAST(COALESCE(NULLIF(bay,''),'0') AS UNSIGNED) = ? AND CAST(COALESCE(NULLIF(`row`,''),'0') AS UNSIGNED) = ? AND CAST(COALESCE(NULLIF(tier,''),'0') AS UNSIGNED) = ? AND container_number <> ?");
+            $occ->execute([$tb, (int)$tbay, (int)$trow, (int)$ttier, $container_no]);
             if ($o = $occ->fetchColumn()) {
                 throw new IngestRejection("Slot tujuan {$tb}-{$tbay}-{$trow}-{$ttier} sudah terisi oleh {$o}.");
             }
@@ -656,11 +719,14 @@ try {
             if ($kg <= 0) throw new IngestRejection('Berat palet dari timbangan wajib > 0.');
             $cat = in_array(($p['category'] ?? ''), ['machinery','electronics','fmcg','textile','automotive','general'], true) ? $p['category'] : 'general';
             $cust = ($job['customs_status'] === 'SPPB_CLEARED') ? 'CLEARED' : (in_array($job['customs_status'], ['RED_LANE_CHECK','RED_LANE'], true) ? 'RED_LANE' : 'HOLD');
+            $allocRack = cfs_allocate_or_validate_rack($pdo, $p['rack_location'] ?? 'AISLE-B-02-L1', true);
+            if (!$allocRack['ok']) throw new IngestRejection($allocRack['message'] ?? 'Seluruh slot rak Gudang CFS penuh.');
+            $rackLoc = $allocRack['code'];
             $pdo->prepare("INSERT INTO cfs_pallets (job_id, pallet_sscc, container_origin, commodity_name, consignee, category, carton_count, gross_weight_kg, cbm, rack_location, customs_status, status, entry_date) VALUES (?,?,?,?,?,?,?,?,?,?,?, 'IN_RACK', NOW())")
-                ->execute([$job['id'], $sscc, $container_no, $p['commodity_name'] ?? null, $p['consignee'] ?? null, $cat, (int)($p['carton_count'] ?? 0), $kg, (float)($p['cbm'] ?? 0), $p['rack_location'] ?? null, $cust]);
+                ->execute([$job['id'], $sscc, $container_no, $p['commodity_name'] ?? null, $p['consignee'] ?? null, $cat, (int)($p['carton_count'] ?? 0), $kg, (float)($p['cbm'] ?? 0), $rackLoc, $cust]);
             $pdo->prepare("UPDATE cfs_jobs SET total_packages = COALESCE(total_packages,0) + ?, total_weight_kg = COALESCE(total_weight_kg,0) + ?, total_cbm = COALESCE(total_cbm,0) + ? WHERE id = ?")
                 ->execute([(int)($p['carton_count'] ?? 0), $kg, (float)($p['cbm'] ?? 0), $job['id']]);
-            $rackLoc = strtoupper(trim($p['rack_location'] ?? 'AISLE-B-02-L1'));
+            cfs_sync_master_lokasi($pdo);
             $aisleCoords = [
                 'AISLE-A' => [75.0, 232.0], 'AISLE-B' => [115.0, 232.0],
                 'AISLE-C' => [75.0, 308.0], 'AISLE-D' => [115.0, 308.0],
@@ -674,8 +740,8 @@ try {
             $pdo->prepare("UPDATE equipment SET status = 'carrying', current_container = ?, last_block = 'CFS', gps_x = ?, gps_y = ?, last_updated = NOW() WHERE equipment_id = 'FL-04'")
                 ->execute([$shortPal, $rkXY[0], $rkXY[1]]);
             $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('CFS_PALLET_IN', ?, 'FL-04', ?, 0)")
-                ->execute([$container_no, "Palet SSCC {$sscc} (" . number_format($kg, 0) . " kg) ditimbang FL-01 & disusun FL-04 ke rak " . ($p['rack_location'] ?? '-')]);
-            $tri_flow_log['physical'] = "Palet {$sscc} ditimbang (" . number_format($kg, 0) . " kg) dan ditempatkan di rak " . ($p['rack_location'] ?? '-');
+                ->execute([$container_no, "Palet SSCC {$sscc} (" . number_format($kg, 0) . " kg) ditimbang FL-01 & disusun FL-04 ke rak {$rackLoc}"]);
+            $tri_flow_log['physical'] = "Palet {$sscc} ditimbang (" . number_format($kg, 0) . " kg) dan ditempatkan di rak {$rackLoc}";
             $tri_flow_log['information'] = "Scanner GS1-128 membaca SSCC-18 valid; stok cfs_pallets & job {$job['job_number']} bertambah otomatis";
             $tri_flow_log['financial'] = "Palet tercatat untuk penagihan CFS saat job selesai (status pabean: {$cust})";
             break;
@@ -718,6 +784,7 @@ try {
             if ($pal['status'] !== 'IN_RACK') throw new IngestRejection("Palet {$sscc} berstatus {$pal['status']}; dispatch ditolak.");
             if ($pal['customs_status'] !== 'CLEARED') throw new IngestRejection("Palet {$sscc} belum CLEARED bea cukai ({$pal['customs_status']}); keluar gudang ditolak (interlock).");
             $pdo->prepare("UPDATE cfs_pallets SET status = 'DISPATCHED' WHERE id = ?")->execute([$pal['id']]);
+            cfs_sync_master_lokasi($pdo);
             $container_no = $pal['container_origin'];
             $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'CFS', gps_x = 148.0, gps_y = 392.0, last_updated = NOW() WHERE equipment_id = 'FL-04'")
                 ->execute(['OUT-' . substr($sscc, -4)]);
@@ -758,6 +825,7 @@ try {
             }
             $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes, billable_amount) VALUES ('CUSTOMS_INSPECTION', ?, ?, 0)")
                 ->execute([$container_no, $note . (empty($p['notes']) ? '' : ' - ' . $p['notes'])]);
+            cfs_sync_master_lokasi($pdo);
             break;
 
         // =====================================================================
@@ -795,18 +863,25 @@ try {
             $supply = (float)$p['supply_temp_c'];
             $kw = (float)$p['power_kw'];
             $interval_h = ((float)($p['interval_minutes'] ?? 60)) / 60.0;
-            $alarm = abs($supply - $set_t) > 2.0;
+            $maxDevC = max(0.5, (float)$thresholds['reefer_max_deviation_c']);
+            $alarm = abs($supply - $set_t) > $maxDevC;
             $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, power_kw, status) VALUES (?,?,?,?,?,?)")
                 ->execute([$container_no, $first['socket_id'], $set_t, $supply, $kw, $alarm ? 'ALARM' : 'NORMAL']);
             $kwh_fee = round($kw * $interval_h * 2500.0, 2);
             $inv_no = accrue_billing($pdo, $container_no, 'Listrik & Monitoring Reefer', 'reefer_power_amount', $kwh_fee);
             if ($alarm) {
                 $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes, billable_amount) VALUES ('REEFER_ALARM', ?, ?, 0)")
-                    ->execute([$container_no, "ALARM suhu: suplai {$supply} C vs set point {$set_t} C (soket {$first['socket_id']})"]);
+                    ->execute([$container_no, "ALARM suhu: suplai {$supply} C vs set point {$set_t} C (soket {$first['socket_id']}, deviasi > {$maxDevC} C)"]);
             }
             $tri_flow_log['physical'] = "Soket {$first['socket_id']}: suplai {$supply} C, daya {$kw} kW" . ($alarm ? ' - ALARM penyimpangan suhu' : '');
             $tri_flow_log['information'] = "Sampel telemetri tersimpan (set point {$set_t} C); status " . ($alarm ? 'ALARM' : 'NORMAL');
             $tri_flow_log['financial'] = "Listrik reefer Rp " . number_format($kwh_fee, 0, ',', '.') . " terakrual pada {$inv_no}";
+            $decision_summary = [
+                'verdict' => $alarm ? 'ALARM_INSPECT_COMPRESSOR_ATS' : 'TEMP_WITHIN_SPEC',
+                'rule'    => "LoRaWAN SHT40 Threshold (Maks Deviasi ±{$maxDevC}°C)",
+                'reason'  => "Selisih aktual " . round(abs($supply - $set_t), 1) . "°C terhadap setpoint {$set_t}°C.",
+                'next_action' => $alarm ? "Kirim teknisi pendingin ke soket {$first['socket_id']} & siapkan backup ATS Genset!" : "Lanjutkan logging HACCP periodik."
+            ];
             break;
 
         // =====================================================================
@@ -847,7 +922,7 @@ try {
         // =====================================================================
         case 'TRUCK_GATE_OUT':
             $container_no = $p['container_number'];
-            $gs = $pdo->prepare("SELECT customs_status, status, owner_company FROM containers WHERE container_number = ?");
+            $gs = $pdo->prepare("SELECT customs_status, status, owner_company, cargo_type, block FROM containers WHERE container_number = ?");
             $gs->execute([$container_no]);
             $crow = $gs->fetch(PDO::FETCH_ASSOC);
             $pend = $pdo->prepare("SELECT COUNT(*), COALESCE(SUM(total_amount),0) FROM billing_invoices WHERE container_number = ? AND payment_status <> 'PAID'");
@@ -883,14 +958,215 @@ try {
                 throw new IngestRejection("[INTERLOCK GATE-OUT] Gate-out ditolak untuk {$container_no}: {$reasonStr}.", $anomMeta);
             }
 
+            $gate_out_lane = cidp_pick_gate_lane($pdo, 'OUT', [
+                'lane'       => $p['gate_lane'] ?? $p['lane_id'] ?? $p['lane'] ?? null,
+                'cargo_type' => $crow['cargo_type'] ?? 'dry',
+                'block'      => $crow['block'] ?? '',
+                'job_type'   => 'pick_up',
+            ]);
+
             $pdo->prepare("UPDATE containers SET status = 'gate_out', block = 'OUTSIDE', bay = NULL, row = NULL, tier = NULL, gate_out_time = NOW() WHERE container_number = ?")->execute([$container_no]);
-            $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ? AND status <> 'gate_out'")->execute([$container_no]);
-            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes, billable_amount) VALUES ('GATE_OUT', ?, 'YARD', 'OUTSIDE', 'Gate-out terotorisasi: SPPB cleared & tagihan lunas', 0)")
-                ->execute([$container_no]);
-            $tri_flow_log['physical'] = "Palang gate-out terbuka; truk dan kontainer {$container_no} meninggalkan dry port";
+            $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_lane = ?, gate_out_time = NOW() WHERE container_number = ? AND status <> 'gate_out'")->execute([$gate_out_lane, $container_no]);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, to_block, notes, billable_amount) VALUES ('GATE_OUT', ?, ?, 'YARD', 'OUTSIDE', ?, 0)")
+                ->execute([$container_no, $gate_out_lane, "[{$gate_out_lane}] Gate-out terotorisasi: SPPB cleared & tagihan lunas"]);
+            $tri_flow_log['physical'] = "Palang {$gate_out_lane} terbuka; truk dan kontainer {$container_no} meninggalkan dry port";
             $tri_flow_log['information'] = "Interlock lolos: SPPB_CLEARED dan semua tagihan PAID; e-Gate Pass tercatat";
             $tri_flow_log['financial'] = "Siklus tagihan kontainer ditutup";
             break;
+        // =====================================================================
+        // 17. RAIL_AXLE_COUNTER (Sensor Gandar Induktif Frauscher RSR180 SIL 4)
+        // =====================================================================
+        case 'RAIL_AXLE_COUNTER':
+            $train_code = trim($p['train_code'] ?? 'KA 2518');
+            $track_id = trim($p['track_id'] ?? 'TRACK-01');
+            $expectedAxles = max(4, (int)($p['expected_axles'] ?? $thresholds['rail_expected_axles']));
+            $detectedAxles = (int)($p['detected_axles'] ?? $expectedAxles);
+            $speedKmh = (float)($p['speed_kmh'] ?? 12.4);
+
+            if ($detectedAxles !== $expectedAxles) {
+                throw new IngestRejection(
+                    "[INTERLOCK SIL 4 — RAIL_AXLE_MISMATCH] Sensor Frauscher di {$track_id} menghitung {$detectedAxles} gandar vs manifes {$expectedAxles} gandar ({$train_code}). Penguncian sinyal rel diaktifkan!",
+                    [
+                        'anomaly_code'    => 'RAIL_AXLE_MISMATCH',
+                        'anomaly_title'   => "Selisih Jumlah Gandar Rangkaian KA ({$detectedAxles}/{$expectedAxles})",
+                        'anomaly_stage'   => 'RAIL_SIDING',
+                        'interlock_state' => 'RAIL_SIGNAL_LOCKED_RED'
+                    ]
+                );
+            }
+
+            $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, to_block, notes, billable_amount) VALUES ('RAIL_AXLE_COUNTER', 'FRAUSCHER-RSR180', 'RAIL', ?, 0)")
+                ->execute(["[{$track_id}] Sensor Frauscher SIL-4 memverifikasi {$detectedAxles}/{$expectedAxles} gandar {$train_code} pada {$speedKmh} km/jam (0 Discrepancy)."]);
+            $tri_flow_log['physical'] = "Rangkaian {$train_code} melintasi {$track_id} dengan {$detectedAxles} as roda utuh";
+            $tri_flow_log['information'] = "Verifikasi Frauscher RSR180 SIL-4 PASS (Zero Discrepancy Rule)";
+            $tri_flow_log['financial'] = "Otorisasi bongkar/muat RMGC & RS dibuka";
+            $decision_summary = [
+                'verdict' => 'SIL4_INTERLOCK_RELEASED',
+                'rule'    => "Frauscher Axle Integrity Check (Target {$expectedAxles} as roda)",
+                'reason'  => "Terdeteksi tepat {$detectedAxles} gandar pada kecepatan langsir {$speedKmh} km/jam.",
+                'next_action' => "Izinkan RMGC / Reach Stacker memulai bongkar/muat di {$track_id}."
+            ];
+            break;
+
+        // =====================================================================
+        // 18. RAIL_UNLOADING (Bongkar Kontainer dari Gerbong KA ke Buffer Yard)
+        // =====================================================================
+        case 'RAIL_UNLOADING':
+            $container_no = $p['container_number'];
+            $train_code = trim($p['train_code'] ?? 'KA 2518');
+            $eq_id = trim($p['equipment_id'] ?? 'RTG-01');
+            $cInf = $pdo->prepare("SELECT * FROM containers WHERE container_number = ? LIMIT 1");
+            $cInf->execute([$container_no]);
+            $cData = $cInf->fetch(PDO::FETCH_ASSOC) ?: ['container_number' => $container_no];
+            $recSlot = cidp_recommend_yard_slot($pdo, $cData, !empty($p['to_block']) ? strtoupper((string)$p['to_block']) : 'D');
+
+            $pdo->prepare("UPDATE containers SET status = 'in_yard', block = ?, bay = ?, row = ?, tier = ?, gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?")
+                ->execute([$recSlot['block'], $recSlot['bay'], $recSlot['row'], $recSlot['tier'], $container_no]);
+            $pdo->prepare("UPDATE trains SET loaded_wagons = GREATEST(0, loaded_wagons - 1) WHERE train_code = ? OR train_code LIKE CONCAT(?, ' %')")->execute([$train_code, $train_code]);
+            $inv_no = accrue_billing($pdo, $container_no, "Lift-Off Bongkar KA ({$train_code})", 'lolo_amount', 325000.0);
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, to_block, to_bay, to_row, to_tier, notes, billable_amount) VALUES ('RAIL_UNLOADING', ?, ?, 'RAIL', ?, ?, ?, ?, ?, 325000)")
+                ->execute([$container_no, $eq_id, $recSlot['block'], $recSlot['bay'], $recSlot['row'], $recSlot['tier'], "Bongkar KA {$train_code} ke {$recSlot['code']} ({$recSlot['reason']})"]);
+
+            $tri_flow_log['physical'] = "Kontainer {$container_no} dibongkar {$eq_id} dari {$train_code} ke {$recSlot['code']}";
+            $tri_flow_log['information'] = "Slot gerbong KA terbebas; posisi buffer yard {$recSlot['code']} aktif";
+            $tri_flow_log['financial'] = "Lift-off intermodal Rp 325.000 terakrual pada {$inv_no}";
+            $decision_summary = [
+                'verdict' => 'DISCHARGED_TO_BUFFER_YARD',
+                'rule'    => 'Rail-to-Yard Auto-Slotting + Intermodal Lo-Lo Trigger',
+                'reason'  => $recSlot['reason'],
+                'next_action' => "Siapkan armada trailer/kliring untuk distribusi keluar."
+            ];
+            break;
+
+        // =====================================================================
+        // 19. XRAY_SCAN_RESULT (Hi-Co Gantry X-Ray 6 MeV Zona 5 Bea Cukai)
+        // =====================================================================
+        case 'XRAY_SCAN_RESULT':
+            $container_no = $p['container_number'];
+            $scanMode = strtoupper(trim((string)($p['scan_result'] ?? ($p['result'] ?? 'CLEAR'))));
+            $isAnomaly = in_array($scanMode, ['ANOMALY', 'SUSPICIOUS', 'CONTRABAND'], true);
+
+            if ($isAnomaly) {
+                $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK', block = 'E' WHERE container_number = ?")->execute([$container_no]);
+                $note = "Gantry X-Ray 6 MeV mendeteksi anomali densitas kargo -> Dialihkan ke Jalur Merah / Behandle Blok E.";
+                $tri_flow_log['physical'] = "Kontainer {$container_no} ditahan di kanopi Behandle Zona 5 / Blok E";
+                $tri_flow_log['information'] = "Status kepabeanan berubah otomatis menjadi RED_LANE_CHECK";
+                $tri_flow_log['financial'] = "Interlock gate-out aktif selama pemeriksaan fisik SPJM";
+                $decision_summary = [
+                    'verdict' => 'HOLD_PHYSICAL_BEHANDLE',
+                    'rule'    => 'Hi-Co X-Ray 6 MeV Density Anomaly Interlock',
+                    'reason'  => "Citra radiografi menunjukkan muatan tidak sesuai manifest ({$scanMode}).",
+                    'next_action' => "Laksanakan stripping pemeriksaan fisik & input LHP PFPB."
+                ];
+            } else {
+                $pdo->prepare("UPDATE containers SET customs_status = 'SPPB_CLEARED' WHERE container_number = ?")->execute([$container_no]);
+                $note = "Gantry X-Ray 6 MeV bersih (Homogenous & Match) -> Rilis SPPB_CLEARED.";
+                $tri_flow_log['physical'] = "Kontainer {$container_no} lolos pemindaian X-Ray Zona 5";
+                $tri_flow_log['information'] = "Verifikasi citra bersih; status menjadi SPPB_CLEARED";
+                $tri_flow_log['financial'] = "Siap pelunasan & pelepasan Gate-Out";
+                $decision_summary = [
+                    'verdict' => 'XRAY_CLEAR_SPPB_RELEASE',
+                    'rule'    => 'Hi-Co X-Ray Non-Intrusive Inspection Clear',
+                    'reason'  => "Densitas citra radiografi sesuai manifest pemberitahuan.",
+                    'next_action' => "Kontainer dapat dirilis keluar atau dimuat ke KA Outbound."
+                ];
+            }
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('XRAY_SCAN_6MEV', ?, 'XRAY-6MEV-Z5', ?, 0)")
+                ->execute([$container_no, $note]);
+            break;
+
+        // =====================================================================
+        // 20. ESEAL_TELEMETRY (Smart GPS E-Seal Jointech JT701)
+        // =====================================================================
+        case 'ESEAL_TELEMETRY':
+            $container_no = $p['container_number'];
+            $sealId = trim((string)($p['seal_id'] ?? 'JT701-ID-8821'));
+            $wireStatus = strtoupper(trim((string)($p['wire_status'] ?? 'INTACT')));
+            $geofenceOk = isset($p['geofence_ok']) ? (bool)$p['geofence_ok'] : true;
+            $isBreach = ($wireStatus === 'BROKEN_TAMPERED' || !$geofenceOk);
+
+            if ($isBreach) {
+                $pdo->prepare("UPDATE containers SET customs_status = 'RED_LANE_CHECK', seal_number = ? WHERE container_number = ?")
+                    ->execute(["TAMPER-{$sealId}", $container_no]);
+                $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('ESEAL_TAMPER_ALARM', ?, ?, ?, 0)")
+                    ->execute([$container_no, $sealId, "ALARM E-SEAL {$sealId}: wire={$wireStatus}, geofence=" . ($geofenceOk ? 'OK' : 'DEVIATION') . " -> Auto Lock RED_LANE_CHECK!"]);
+                $tri_flow_log['physical'] = "Segel elektronik {$sealId} pada {$container_no} memicu alarm tampering koridor";
+                $tri_flow_log['information'] = "Status pabean dikunci ke RED_LANE_CHECK & notifikasi Bea Cukai terbit";
+                $tri_flow_log['financial'] = "Rilis Gate-Out diblokir sampai inspeksi LHP selesai";
+                $decision_summary = [
+                    'verdict' => 'SECURITY_LOCK_HOLD',
+                    'rule'    => 'PER-09/BC/2020 PLP E-Seal Wire & Geofence Integrity',
+                    'reason'  => "Terdeteksi anomali segel ({$wireStatus}) / deviasi rute GPS.",
+                    'next_action' => "Arahkan ke Bay Behandle untuk pemeriksaan fisik Bea Cukai."
+                ];
+            } else {
+                $actionNote = ($wireStatus === 'UNLOCKED')
+                    ? "Remote Unlock sah dalam geofence CIDP (SPPB verified)."
+                    : "Ping GPS koridor aman; kawat segel {$sealId} utuh (INTACT).";
+                $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('ESEAL_OK', ?, ?, ?, 0)")
+                    ->execute([$container_no, $sealId, $actionNote]);
+                $tri_flow_log['physical'] = "Kontainer {$container_no} ({$sealId}) terverifikasi di geofence CIDP";
+                $tri_flow_log['information'] = $actionNote;
+                $tri_flow_log['financial'] = "Kepatuhan transit PLP terjaga (tanpa penalti pelanggaran segel)";
+                $decision_summary = [
+                    'verdict' => 'ESEAL_GEOFENCE_VERIFIED',
+                    'rule'    => 'Jointech JT701 Tamper-Proof Telemetry Check',
+                    'reason'  => $actionNote,
+                    'next_action' => "Izinkan proses bongkar / penumpukan reguler."
+                ];
+            }
+            break;
+
+        // =====================================================================
+        // 21. HANDHELD_AIDC_SCAN (Scanner Optik SSCC-18, GS1-128 & ISO 6346)
+        // =====================================================================
+        case 'HANDHELD_AIDC_SCAN':
+            $code = strtoupper(trim((string)($p['code'] ?? '')));
+            if ($code === '') throw new IngestRejection('Payload HANDHELD_AIDC_SCAN wajib membawa field code.');
+            $digitsOnly = preg_replace('/\D/', '', $code);
+            $matchedType = 'UNKNOWN';
+            $matchedRef = $code;
+            $verdict = 'UNREGISTERED_CODE';
+            $reason = "Kode {$code} terbaca scanner optik namun belum cocok dengan record YMS/WMS.";
+            $nextAction = 'Periksa atau daftarkan Pre-Advice terlebih dahulu.';
+
+            $palStmt = $pdo->prepare("SELECT id, pallet_sscc, container_origin, rack_location, customs_status, status FROM cfs_pallets WHERE pallet_sscc = ? LIMIT 1");
+            $palStmt->execute([$digitsOnly !== '' ? $digitsOnly : $code]);
+            $pal = $palStmt->fetch(PDO::FETCH_ASSOC);
+
+            if ($pal) {
+                $matchedType = 'GS1_SSCC18_PALLET';
+                $matchedRef = $pal['container_origin'];
+                $verdict = 'PALLET_VERIFIED_IN_WMS';
+                $reason = "SSCC-18 cocok di Gudang CFS ({$pal['rack_location']} • Status: {$pal['status']} • Pabean: {$pal['customs_status']}).";
+                $nextAction = $pal['customs_status'] === 'CLEARED' ? 'Siap dispatch ke truk.' : 'Tunggu kliring Bea Cukai sebelum dispatch.';
+            } else {
+                $boxStmt = $pdo->prepare("SELECT id, container_number, status, block, bay, row, tier, customs_status FROM containers WHERE container_number = ? OR seal_number = ? LIMIT 1");
+                $boxStmt->execute([$code, $code]);
+                $box = $boxStmt->fetch(PDO::FETCH_ASSOC);
+                if ($box) {
+                    $matchedType = 'ISO6346_CONTAINER';
+                    $matchedRef = $box['container_number'];
+                    $verdict = ($box['status'] === 'expected') ? 'EXPECTED_PRE_ADVICE_MATCH' : 'CONTAINER_VERIFIED_IN_DB';
+                    $pos = trim("{$box['block']}-{$box['bay']}-{$box['row']}-{$box['tier']}", '-');
+                    $reason = "Kontainer terverifikasi (Status: {$box['status']}, Lokasi: {$pos}, Pabean: {$box['customs_status']}).";
+                    $nextAction = ($box['status'] === 'expected') ? 'Eksekusi Gate-In ANPR/VGM.' : 'Lanjutkan tracking ke Digital Twin / Yard.';
+                }
+            }
+
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes, billable_amount) VALUES ('AIDC_SCAN_AUDIT', ?, 'HANDHELD-AIDC', ?, 0)")
+                ->execute([$matchedType === 'UNKNOWN' ? null : $matchedRef, "Scanner AIDC [{$matchedType}]: {$code} -> {$verdict} ({$reason})"]);
+            $tri_flow_log['physical'] = "Perangkat scanner optik memindai {$code}";
+            $tri_flow_log['information'] = "{$verdict}: {$reason}";
+            $tri_flow_log['financial'] = "Audit trail kualitas identifikasi AIDC tercatat";
+            $decision_summary = [
+                'verdict' => $verdict,
+                'rule'    => "AIDC GS1/ISO 6346 Optical Cross-Check ({$matchedType})",
+                'reason'  => $reason,
+                'next_action' => $nextAction
+            ];
+            break;
+
         default:
             throw new Exception("Unhandled event type: {$event_type}");
     }
@@ -908,10 +1184,20 @@ try {
         'oauth_verified' => $oauth_verified,
         'timestamp' => date('c'),
         'tri_flow' => $tri_flow_log,
+        'decision_summary' => $decision_summary ?: [
+            'verdict' => 'EVENT_PROCESSED',
+            'rule' => "Standard Event Handler ({$event_type})",
+            'reason' => $tri_flow_log['information'] ?: 'Event valid dan tersinkron ke basis data YMS.',
+            'next_action' => 'Pantau status terbaru di Control Tower & Digital Twin.'
+        ],
+        'thresholds_applied' => $thresholds,
+        'raw_payload_echo' => $p,
         'state_summary' => [
             'containers_in_yard' => $new_state['physical']['containers_in_yard'],
             'total_revenue_accrued_idr' => $new_state['financial']['total_revenue_accrued_idr'],
-            'sppb_cleared' => $new_state['information']['customs']['sppb_cleared']
+            'sppb_cleared' => $new_state['information']['customs']['sppb_cleared'],
+            'active_inbound_lanes' => $new_state['physical']['gate']['active_inbound_lanes'] ?? [],
+            'active_outbound_lanes' => $new_state['physical']['gate']['active_outbound_lanes'] ?? []
         ]
     ];
 

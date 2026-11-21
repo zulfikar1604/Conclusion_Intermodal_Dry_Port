@@ -7,29 +7,32 @@
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/gate_lanes_helper.php';
+cidp_ensure_gate_schema($pdo);
+$gate_lanes_catalog = cidp_gate_lane_catalog();
+$inbound_lanes_list = array_values(array_filter($gate_lanes_catalog, fn($l) => $l['direction'] === 'IN'));
+$outbound_lanes_list = array_values(array_filter($gate_lanes_catalog, fn($l) => $l['direction'] === 'OUT'));
 
-// Ambil data truk dari database
+// Ambil data truk dari database (termasuk Pre-Advice 'scheduled' di luar terminal)
 $raw_trucks = [];
 try {
-    $stmt = $pdo->query("SELECT * FROM trucks WHERE status != 'scheduled' ORDER BY id ASC");
+    $stmt = $pdo->query("SELECT * FROM trucks ORDER BY (status = 'scheduled') DESC, id ASC");
     $raw_trucks = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $raw_trucks = [];
 }
 
-// Data Gerbang, Posisi Lapangan & Alat Berat
-$lanes = [
-    'Gate 01 (Lane A - Inbound Heavy)',
-    'Gate 02 (Lane B - Fast Track Empty)',
-    'Gate 01 (Lane C - Reefer Priority)'
-];
+// Data Gerbang 6-In / 4-Out, Posisi Lapangan & Alat Berat
+$lanes_in  = array_map(fn($l) => $l['name'], $inbound_lanes_list);
+$lanes_out = array_map(fn($l) => $l['name'], $outbound_lanes_list);
 
 $yard_locations = [
+    'scheduled' => 'Di Luar Terminal (Manifest Pre-Advice EDI)',
     'loading' => 'Slot Blok B / Bay 08 (Proses Lift-Off oleh RS-02)',
-    'in_yard' => 'Jalur Sirkulasi Blok A (Menuju Slot A-01-01)',
-    'at_gate' => 'Jembatan Timbang Gate 01 (Sedang Ditimbang)',
+    'in_yard' => 'Jalur Sirkulasi Blok A / Koridor Buffer Gate–Yard',
+    'at_gate' => 'Kompleks Gate-In & Jembatan Timbang VGM 80T',
     'queuing' => 'Jalur Antrian Pra-Gerbang Luar (Pre-Gate Buffer)',
-    'gate_out' => 'Gate Out Lane 01 (Selesai Keluar Menuju Tol)'
+    'gate_out' => 'Plaza Gate-Out (Selesai Keluar Menuju Tol)'
 ];
 
 $assigned_rs = [
@@ -47,7 +50,19 @@ foreach ($raw_trucks as $idx => $t) {
     $t['unit_model'] = 'Highway Drayage Prime Mover';
     $t['do_number'] = $t['do_number'] ?? ('DO-2026/CIDP/' . str_pad($idx + 101, 4, '0', STR_PAD_LEFT));
     $t['driver_sim'] = $t['driver_sim'] ?? ('SIM B2 Umum #' . (982100 + $idx));
-    $t['gate_lane'] = $lanes[$idx % count($lanes)];
+    $resolvedInCode = !empty($t['gate_lane'])
+        ? cidp_normalize_gate_lane($t['gate_lane'], 'IN')
+        : $inbound_lanes_list[$idx % count($inbound_lanes_list)]['code'];
+    $resolvedOutCode = !empty($t['gate_out_lane'])
+        ? cidp_normalize_gate_lane($t['gate_out_lane'], 'OUT')
+        : $outbound_lanes_list[$idx % count($outbound_lanes_list)]['code'];
+    if (($t['status'] ?? '') === 'scheduled') {
+        $t['gate_lane'] = 'Menunggu Sensor ANPR (6 Gate-In)';
+    } elseif (($t['status'] ?? '') === 'gate_out') {
+        $t['gate_lane'] = $gate_lanes_catalog[$resolvedOutCode]['name'] ?? $resolvedOutCode;
+    } else {
+        $t['gate_lane'] = $gate_lanes_catalog[$resolvedInCode]['name'] ?? $resolvedInCode;
+    }
     $t['current_location'] = $yard_locations[$t['status']] ?? 'Area Lapangan';
     $t['handling_equipment'] = (!empty($t['container_number'])) ? $assigned_rs[$idx % count($assigned_rs)] : 'Menunggu Penugasan';
 
@@ -306,6 +321,7 @@ $total_trucks = count($trucks);
 
             <select id="filterStatus" onchange="filterTrucks()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-700 focus:outline-none focus:ring-1 focus:ring-orange-500">
                 <option value="">Semua Status Operasi</option>
+                <option value="scheduled">Pre-Advice (Luar Terminal)</option>
                 <option value="in_yard">Di Lapangan / Langsir</option>
                 <option value="loading">Bongkar/Muat</option>
                 <option value="at_gate">Jembatan Timbang</option>
@@ -373,6 +389,8 @@ $total_trucks = count($trucks);
                             $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200"><span class="w-1.5 h-1.5 rounded-full bg-blue-500 mr-1 animate-pulse"></span>Di Lapangan</span>';
                         } elseif ($t['status'] === 'at_gate') {
                             $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200"><span class="w-1.5 h-1.5 rounded-full bg-amber-500 mr-1 animate-ping"></span>Jembatan Timbang</span>';
+                        } elseif ($t['status'] === 'scheduled') {
+                            $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200"><span class="w-1.5 h-1.5 rounded-full bg-indigo-500 mr-1"></span>Pre-Advice (Luar)</span>';
                         } elseif ($t['status'] === 'queuing') {
                             $badge_status = '<span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">Antrian Pra-Gate</span>';
                         } elseif ($t['status'] === 'gate_out') {
@@ -534,6 +552,12 @@ $total_trucks = count($trucks);
                             <!-- Tombol Aksi Detail & Aksi Pintas Lintas Modul -->
                             <td class="py-1.5 px-3 text-right whitespace-nowrap">
                                 <div class="inline-flex items-center space-x-1" onclick="event.stopPropagation()">
+                                    <?php if (($t['status'] ?? '') === 'scheduled'): ?>
+                                    <button type="button" onclick="triggerTruckAnprArrival('<?= htmlspecialchars($t['license_plate'], ENT_QUOTES) ?>', '<?= htmlspecialchars($t['container_number'] ?? '', ENT_QUOTES) ?>')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold rounded transition shadow-2xs inline-flex items-center space-x-1 cursor-pointer" title="Trigger Kamera ANPR &amp; RFID Gate-In">
+                                        <i class="fa-solid fa-satellite-dish text-[9px]"></i>
+                                        <span>Trigger Gate ANPR</span>
+                                    </button>
+                                    <?php endif; ?>
                                     <button onclick="showGatePassModal(<?= $json_pass ?>)" class="px-2 py-1 bg-slate-100 hover:bg-orange-500 text-slate-700 hover:text-white text-[11px] font-bold rounded transition shadow-2xs inline-flex items-center space-x-1" title="Lihat Detail Tiket Armada">
                                         <i class="fa-solid fa-file-lines text-[9px]"></i>
                                         <span>Milestone</span>
@@ -542,15 +566,15 @@ $total_trucks = count($trucks);
                                     <a href="dashboard.php?page=kontainer&search=<?= urlencode($t['container_number']) ?>" class="w-6 h-6 rounded bg-blue-50 hover:bg-blue-600 text-blue-600 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lacak Kontainer <?= $t['container_number'] ?>">
                                         <i class="fa-solid fa-boxes-stacked"></i>
                                     </a>
-                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($t['container_number']) ?>" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat di Simulasi 3D">
+                                    <a href="dashboard.php?page=twin&focus_box=<?= urlencode($t['container_number']) ?>" class="w-6 h-6 rounded bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Sorot di Digital Twin 3D">
                                         <i class="fa-solid fa-cube"></i>
                                     </a>
                                     <a href="dashboard.php?page=billing&search=<?= urlencode($t['container_number']) ?>" class="w-6 h-6 rounded bg-emerald-50 hover:bg-emerald-600 text-emerald-700 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Cek Faktur Billing">
                                         <i class="fa-solid fa-file-invoice-dollar"></i>
                                     </a>
                                     <?php endif; ?>
-                                    <a href="dashboard.php?page=denah&fac_id=f_gate_in" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat Gerbang di Denah">
-                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    <a href="dashboard.php?page=twin&view=gate" class="w-6 h-6 rounded bg-slate-100 hover:bg-slate-700 text-slate-600 hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat Gerbang di Digital Twin 3D">
+                                        <i class="fa-solid fa-archway"></i>
                                     </a>
                                 </div>
                             </td>
@@ -787,13 +811,13 @@ $total_trucks = count($trucks);
                     <i class="fa-solid fa-boxes-stacked mr-1 text-[#0170b9]"></i>Lacak Kontainer
                 </a>
                 <a id="btnTrk3D" href="#" class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold rounded-lg transition flex items-center shadow-2xs hidden">
-                    <i class="fa-solid fa-cube mr-1"></i>Simulasi 3D
+                    <i class="fa-solid fa-cube mr-1"></i>Digital Twin 3D
                 </a>
                 <a id="btnTrkBilling" href="#" class="px-3 py-1 bg-white hover:bg-emerald-600 text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs hidden">
                     <i class="fa-solid fa-file-invoice-dollar mr-1 text-emerald-600"></i>Faktur Billing
                 </a>
-                <a href="dashboard.php?page=denah&fac_id=f_gate_in" class="px-3 py-1 bg-white hover:bg-slate-700 text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
-                    <i class="fa-solid fa-map-location-dot mr-1 text-blue-500"></i>Denah Gerbang
+                <a href="dashboard.php?page=twin&view=gate" class="px-3 py-1 bg-white hover:bg-slate-700 text-slate-700 hover:text-white border border-slate-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
+                    <i class="fa-solid fa-archway mr-1 text-blue-500"></i>Gerbang Twin 3D
                 </a>
             </div>
         </div>
@@ -931,7 +955,7 @@ function showGatePassModal(data) {
         }
         if (btn3) {
             btn3.classList.remove('hidden');
-            btn3.href = `dashboard.php?page=simulator&focus_box=${encodeURIComponent(data.container_number)}`;
+            btn3.href = `dashboard.php?page=twin&focus_box=${encodeURIComponent(data.container_number)}`;
         }
         if (btnB) {
             btnB.classList.remove('hidden');
@@ -1037,36 +1061,89 @@ function closeAddTruckModal() {
     document.getElementById('addTruckModal').classList.add('hidden');
 }
 
-function submitAddTruck(e) {
+async function submitAddTruck(e) {
     e.preventDefault();
     const form = e.target;
+    const plateVal = (form.querySelector('[name="license_plate"]')?.value || '').trim();
+    if (window.cidpConfirm) {
+        const ok = await window.cidpConfirm({
+            title: 'Konfirmasi Registrasi Armada',
+            target: plateVal || 'Armada Baru',
+            message: 'Simpan registrasi truk masuk ini ke antrean gerbang dry port?',
+            confirmText: 'Ya, Daftarkan',
+            cancelText: 'Tidak, Batal',
+            tone: 'primary'
+        });
+        if (!ok) return;
+    }
+
     const formData = new FormData(form);
-    
-    fetch('api/crud.php?action=add_truck', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            alert('Truk berhasil diregistrasi!');
-            location.reload();
+    try {
+        const res = await fetch('api/crud.php?action=add_truck', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            closeAddTruckModal();
+            form.reset();
+            if (window.cidpSoftRefreshContent) {
+                await window.cidpSoftRefreshContent({
+                    title: 'Pre-Advice Truk Terdaftar (Status Scheduled)',
+                    message: data.message || `Armada ${plateVal || ''} tercatat di luar terminal dan menunggu trigger ANPR Gate.`,
+                    type: 'success'
+                });
+            }
         } else {
-            alert('Gagal: ' + data.message);
+            if (window.cidpToast) cidpToast('Gagal Mendaftarkan Pre-Advice', data.message || 'Terjadi kesalahan', 'error');
         }
-    })
-    .catch(err => {
+    } catch (err) {
         console.error(err);
-        alert('Terjadi kesalahan.');
-    });
+        if (window.cidpToast) cidpToast('Terjadi Kesalahan', err.message || 'Koneksi gagal', 'error');
+    }
+}
+
+async function triggerTruckAnprArrival(plate, ctrNo) {
+    try {
+        const res = await fetch('api/ingest_event.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_type: 'TRUCK_GATE_ARRIVAL',
+                source_device: 'ANPR-GATE-CAM',
+                payload: {
+                    truck_plate: plate,
+                    container_number: ctrNo
+                }
+            })
+        });
+        const data = await res.json();
+        if (res.ok && data.success) {
+            if (window.cidpSoftRefreshContent) {
+                await window.cidpSoftRefreshContent({
+                    title: 'ANPR Gate-In Berhasil (' + plate + ')',
+                    message: (data.decision_summary?.reason || data.tri_flow?.information || 'Truk memasuki gerbang terminal.'),
+                    type: 'success'
+                });
+            }
+        } else {
+            if (window.cidpToast) cidpToast('Interlock ANPR Gate (' + plate + ')', data.error || data.message || 'Ditahan DLQ.', 'warning');
+            if (window.cidpSoftRefreshContent) await window.cidpSoftRefreshContent();
+        }
+    } catch (err) {
+        if (window.cidpToast) cidpToast('Gagal Memicu ANPR', err.message, 'error');
+    }
 }
 </script>
 
-<!-- Add Truck Modal -->
+<!-- Add Truck Modal (Pre-Advice Feed) -->
 <div id="addTruckModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden animate-fadeIn border border-gray-100">
         <div class="bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600 text-white p-4 flex items-center justify-between">
-            <h3 class="font-bold text-lg">Registrasi Truk Masuk</h3>
+            <div>
+                <h3 class="font-bold text-base">Pre-Advice Kedatangan Truk (Pra-Gate)</h3>
+                <p class="text-[11px] text-orange-100">Status awal <code>scheduled</code> (di luar terminal) hingga kamera ANPR aktif.</p>
+            </div>
             <button onclick="closeAddTruckModal()" class="text-white hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
         </div>
         <form onsubmit="submitAddTruck(event)" class="p-5 space-y-3.5">
@@ -1116,6 +1193,16 @@ function submitAddTruck(e) {
                     <label class="block text-xs font-bold text-gray-700 mb-1">No. DO / SPPB Bea Cukai</label>
                     <input type="text" name="do_number" placeholder="mis: DO-2026-09-001" class="w-full border border-gray-200 p-2 rounded-lg text-xs font-mono focus:ring-2 focus:ring-indigo-500">
                 </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">Lajur Gate-In Tujuan (6 Gate-In)</label>
+                <select name="gate_lane" class="w-full border border-gray-200 p-2 rounded-lg text-xs font-mono font-bold bg-white focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Otomatis (Distribusi 6 Gate-In)</option>
+                    <?php foreach ($inbound_lanes_list as $il): ?>
+                        <option value="<?= htmlspecialchars($il['code']) ?>"><?= htmlspecialchars($il['name']) ?></option>
+                    <?php endforeach; ?>
+                </select>
             </div>
 
             <div class="pt-3 flex justify-end space-x-2 border-t border-gray-100">

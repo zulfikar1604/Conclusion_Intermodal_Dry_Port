@@ -6,6 +6,8 @@
  */
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/preadvice_helper.php';
+require_once __DIR__ . '/gate_lanes_helper.php';
 
 define('TWIN_CACHE_FILE', __DIR__ . '/../cache/twin_state.json');
 
@@ -85,6 +87,8 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         ];
     }
 
+    cidp_ensure_gate_schema($pdo);
+
     // Active Trucks
     $trucks = [];
     try {
@@ -136,9 +140,10 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
             $bStat = $ctr_billing_map[$cn] ?? 'NO_INVOICE';
             $rfInfo = $reefer_latest_map[$cn] ?? null;
             $cStat = $c['customs_status'] ?? 'PENDING';
-            $isHold = in_array($cStat, ['RED_LANE_CHECK', 'INSPECTION', 'RED_LINE'], true) || ($rfInfo && $rfInfo['status'] === 'ALARM');
+            $isHold = in_array($cStat, ['RED_LANE_CHECK', 'INSPECTION', 'RED_LINE', 'DOC_HOLD', 'VGM_HOLD'], true) || ($rfInfo && $rfInfo['status'] === 'ALARM');
+            $isInboundUnload = ($c['status'] === 'in_transit') || in_array($cStat, ['PLP_TRANSIT', 'PENDING', 'IMPORT_ARRIVED', 'GATE_IN'], true);
             $isReadyOut = ($cStat === 'SPPB_CLEARED' && in_array($bStat, ['PAID', 'NO_INVOICE'], true));
-            $roleFlow = $isHold ? 'hold' : ($c['status'] === 'in_transit' ? 'unload_in' : ($isReadyOut ? 'load_out' : 'stored'));
+            $roleFlow = $isHold ? 'hold' : ($isInboundUnload ? 'unload_in' : ($isReadyOut ? 'load_out' : 'stored'));
 
             $item = [
                 'id' => $c['id'],
@@ -262,46 +267,58 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         }
     } catch (Exception $e) {}
 
+    // Live 6-Block CFS Rack Occupancy Matrix (master_lokasi JOIN cfs_pallets)
+    $cfs_rack_grid = [];
+    $cfs_rack_stats = ['total_blocks' => 6, 'total_sectors' => 0, 'total_slots' => 0, 'filled' => 0, 'empty' => 0, 'occupancy_pct' => 0.0];
+    try {
+        $ml_stmt = $pdo->query("SELECT ml.blok, ml.bagian, ml.rak, ml.status, ml.pallet_sscc, ml.commodity_name, cp.container_origin, cp.consignee, cp.gross_weight_kg, cp.cbm, cp.carton_count, cp.customs_status, cp.status AS pallet_status FROM master_lokasi ml LEFT JOIN cfs_pallets cp ON cp.pallet_sscc = ml.pallet_sscc AND cp.status IN ('IN_RACK','STAGING_OUT','HOLD') ORDER BY ml.blok ASC, ml.bagian ASC, ml.rak ASC");
+        $sectorKeys = [];
+        while ($mr = $ml_stmt->fetch(PDO::FETCH_ASSOC)) {
+            $b = (string)$mr['blok'];
+            $sec = strtoupper(trim($mr['bagian']));
+            $rk = (int)$mr['rak'];
+            $isTerisi = (strtolower(trim($mr['status'])) === 'terisi');
+            $sectorKeys[$b . '|' . $sec] = true;
+            $cfs_rack_stats['total_slots']++;
+            if ($isTerisi) $cfs_rack_stats['filled']++;
+            else $cfs_rack_stats['empty']++;
+            $cfs_rack_grid[$b][$sec][(string)$rk] = [
+                'rak' => $rk,
+                'code' => sprintf('AISLE-%s-%02d-L%d', $sec, (int)$b, $rk),
+                'filled' => $isTerisi,
+                'pallet_sscc' => $mr['pallet_sscc'] ?: null,
+                'commodity_name' => $mr['commodity_name'] ?: null,
+                'container_origin' => $mr['container_origin'] ?: null,
+                'consignee' => $mr['consignee'] ?: null,
+                'weight_kg' => (float)($mr['gross_weight_kg'] ?? 0),
+                'cbm' => (float)($mr['cbm'] ?? 0),
+                'cartons' => (int)($mr['carton_count'] ?? 0),
+                'customs_status' => $mr['customs_status'] ?: 'CLEARED',
+                'pallet_status' => $mr['pallet_status'] ?: ($isTerisi ? 'IN_RACK' : 'KOSONG')
+            ];
+        }
+        $cfs_rack_stats['total_blocks'] = max(6, count($cfs_rack_grid));
+        $cfs_rack_stats['total_sectors'] = count($sectorKeys);
+        $cfs_rack_stats['occupancy_pct'] = $cfs_rack_stats['total_slots'] > 0
+            ? round(($cfs_rack_stats['filled'] / $cfs_rack_stats['total_slots']) * 100, 1)
+            : 0.0;
+    } catch (Exception $e) {}
+
     $preadvice_queue = [];
     try {
         $pq = $pdo->query("SELECT pre_gate_code, truck_plate, container_number, cargo_type, target_block, status FROM preadvice WHERE status = 'SCHEDULED' ORDER BY id ASC LIMIT 6");
         $preadvice_queue = $pq->fetchAll(PDO::FETCH_ASSOC);
     } catch (Exception $e) {}
 
-    // Gatehouse & Weighbridge status
-    $gate_status = [
-        'inbound_barrier' => 'CLOSED', // or OPEN
-        'outbound_barrier' => 'CLOSED',
-        'weighbridge_active_kg' => 0.0,
-        'weighbridge_truck' => null,
-        'current_ocr_plate' => null,
-        'current_ocr_container' => null
-    ];
-    if (!empty($trucks)) {
-        foreach ($trucks as $trk) {
-            if ($trk['status'] === 'at_gate') {
-                $gate_status['inbound_barrier'] = 'OPEN';
-                $gate_status['weighbridge_active_kg'] = (float)($trk['weight_gross'] ?? 34850.0);
-                $gate_status['weighbridge_truck'] = $trk['license_plate'];
-                $gate_status['current_ocr_plate'] = $trk['license_plate'];
-                $gate_status['current_ocr_container'] = $trk['container_number'];
-                break;
-            }
-        }
-    }
-
     // 2. ALIRAN INFORMASI (Information Flow: RFID, OCR, CEISA 4.0, Reefer Telematics, Logs)
     $recent_events = [];
     try {
-        $ev_stmt = $pdo->query("SELECT * FROM yard_events ORDER BY id DESC LIMIT 10");
+        $ev_stmt = $pdo->query("SELECT * FROM yard_events ORDER BY id DESC LIMIT 12");
         $recent_events = $ev_stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (!empty($recent_events[0]) && ($recent_events[0]['event_type'] ?? '') === 'GATE_OUT') {
-            $evTs = strtotime($recent_events[0]['created_at'] ?? 'now');
-            if (($timestamp - $evTs) <= 15) {
-                $gate_status['outbound_barrier'] = 'OPEN';
-            }
-        }
     } catch (Exception $e) {}
+
+    // Gatehouse & Weighbridge 10-Lane Status (6 Gate-In + 4 Gate-Out)
+    $gate_status = cidp_build_gate_twin_state($pdo, $trucks, $recent_events, $timestamp);
 
     $customs_summary = [
         'total_audited' => max($containers_count, 1),
@@ -311,12 +328,14 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         'last_ceisa_sync' => $time_iso
     ];
     try {
+        $c_tot = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status != 'expected'")->fetchColumn();
         $c_clr = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status != 'expected' AND customs_status = 'SPPB_CLEARED'")->fetchColumn();
         $c_red = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status != 'expected' AND customs_status IN ('INSPECTION', 'RED_LINE', 'RED_LANE_CHECK')")->fetchColumn();
+        $customs_summary['total_audited'] = max($c_tot, 1);
         $customs_summary['sppb_cleared'] = $c_clr;
         $customs_summary['red_line_inspection'] = $c_red;
         if ($customs_summary['total_audited'] > 0) {
-            $customs_summary['clearance_rate_pct'] = round(($c_clr / $customs_summary['total_audited']) * 100, 1);
+            $customs_summary['clearance_rate_pct'] = min(100.0, round(($c_clr / $customs_summary['total_audited']) * 100, 1));
         }
     } catch (Exception $e) {}
 
@@ -336,79 +355,107 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
     } catch (Exception $e) {}
 
     $equipment_queues = [
-        'RS-01'  => ['id' => 'RS-01',  'zone' => 'Blok A • Ekspor',     'color' => 'sky',     'jobs' => []],
-        'RS-02'  => ['id' => 'RS-02',  'zone' => 'Blok B • Gate Hub',   'color' => 'orange',  'jobs' => []],
-        'RS-03'  => ['id' => 'RS-03',  'zone' => 'Reefer 380V & DG',    'color' => 'cyan',    'jobs' => []],
-        'RTG-01' => ['id' => 'RTG-01', 'zone' => 'Rail Siding Pasoso',  'color' => 'emerald', 'jobs' => []]
+        'RS-01'  => ['id' => 'RS-01',  'zone' => 'Blok A & C • Ekspor',  'color' => 'sky',     'cam' => 'yard',   'total_moves' => 0, 'jobs' => []],
+        'RS-02'  => ['id' => 'RS-02',  'zone' => 'Blok B & Gate Hub',    'color' => 'orange',  'cam' => 'gate',   'total_moves' => 0, 'jobs' => []],
+        'RS-03'  => ['id' => 'RS-03',  'zone' => 'Reefer 380V & DG',     'color' => 'cyan',    'cam' => 'reefer', 'total_moves' => 0, 'jobs' => []],
+        'RTG-01' => ['id' => 'RTG-01', 'zone' => 'Rail Siding Pasoso',   'color' => 'emerald', 'cam' => 'rail',   'total_moves' => 0, 'jobs' => []],
+        'FL-CFS' => ['id' => 'FL-01',  'zone' => 'Gudang CFS & Rampa',   'color' => 'teal',    'cam' => 'cfs',    'total_moves' => 0, 'jobs' => []]
     ];
 
-    // Map equipment carried containers & active transit/yard/rail items into work queues
-    foreach ($equipment_queues as $eqId => &$qMeta) {
+    $pushQueueJob = function (string $eqKey, array $job) use (&$equipment_queues) {
+        if (!isset($equipment_queues[$eqKey])) return;
+        $equipment_queues[$eqKey]['total_moves']++;
+        if (count($equipment_queues[$eqKey]['jobs']) < 7) {
+            $equipment_queues[$eqKey]['jobs'][] = $job;
+        }
+    };
+
+    // Map equipment carried containers & active transit/yard/rail/CFS items into work queues
+    foreach (['RS-01', 'RS-02', 'RS-03', 'RTG-01', 'FL-01', 'FL-03', 'FL-04'] as $eqId) {
         $eqItem = $equipment[$eqId] ?? null;
         if ($eqItem && !empty($eqItem['carried_container'])) {
-            $qMeta['jobs'][] = [
+            $qKey = str_starts_with($eqId, 'FL-') ? 'FL-CFS' : $eqId;
+            $pushQueueJob($qKey, [
                 'container' => $eqItem['carried_container'],
                 'slot' => $eqItem['last_block'] ?: 'YARD',
+                'block' => $eqItem['last_block'] ?: 'B',
                 'mode' => 'ACTIVE',
-                'label' => 'Carrying ' . $eqItem['carried_container']
-            ];
+                'label' => 'Carrying ' . substr($eqItem['carried_container'], 0, 7)
+            ]);
         }
     }
-    unset($qMeta);
 
     foreach ($in_transit_containers as $it) {
-        $eqTarget = ($it['type'] === 'reefer' || $it['type'] === 'dg') ? 'RS-03' : (($it['block'] === 'A') ? 'RS-01' : 'RS-02');
-        $equipment_queues[$eqTarget]['jobs'][] = [
+        $eqTarget = ($it['type'] === 'reefer' || $it['type'] === 'dg') ? 'RS-03' : (($it['block'] === 'A' || $it['block'] === 'C') ? 'RS-01' : 'RS-02');
+        $pushQueueJob($eqTarget, [
             'container' => $it['container_number'],
             'slot' => ($it['block'] ?: 'GATE') . ' IN',
+            'block' => $it['block'] ?: 'B',
             'mode' => 'ACTIVE',
             'label' => 'Unload ' . substr($it['container_number'], 0, 7)
-        ];
+        ]);
     }
     foreach ($active_slots as $sl) {
         $blk = strtoupper($sl['block'] ?? 'A');
-        $eqTarget = ($blk === 'REEFER' || $blk === 'E' || $blk === 'DG') ? 'RS-03' : (($blk === 'A' || $blk === 'C') ? 'RS-01' : 'RS-02');
-        $mode = ($sl['role_flow'] === 'load_out') ? 'READY_LOAD' : (($sl['role_flow'] === 'hold') ? 'HOLD' : 'DONE');
-        $slotAddr = $blk . '-' . str_pad((string)($sl['bay'] ?? 1), 2, '0', STR_PAD_LEFT);
-        if (count($equipment_queues[$eqTarget]['jobs']) < 6) {
-            $equipment_queues[$eqTarget]['jobs'][] = [
-                'container' => $sl['container_number'],
-                'slot' => $slotAddr,
-                'mode' => $mode,
-                'label' => $slotAddr . ' ' . ($sl['role_flow'] === 'load_out' ? 'LOAD' : ($sl['role_flow'] === 'hold' ? 'HOLD' : 'IN'))
-            ];
+        if ($blk === 'CFS') {
+            $eqTarget = 'FL-CFS';
+            $slotAddr = 'RAMP-' . ($sl['bay'] ?: 'D1');
+            $mode = ($sl['role_flow'] === 'load_out') ? 'READY_LOAD' : 'ACTIVE';
+        } else {
+            $eqTarget = ($blk === 'REEFER' || $blk === 'E' || $blk === 'DG') ? 'RS-03' : (($blk === 'A' || $blk === 'C') ? 'RS-01' : 'RS-02');
+            $mode = ($sl['role_flow'] === 'load_out') ? 'READY_LOAD' : (($sl['role_flow'] === 'hold') ? 'HOLD' : (($sl['role_flow'] === 'unload_in') ? 'ACTIVE' : 'DONE'));
+            $slotAddr = $blk . '-' . str_pad((string)($sl['bay'] ?? 1), 2, '0', STR_PAD_LEFT);
+        }
+        $pushQueueJob($eqTarget, [
+            'container' => $sl['container_number'],
+            'slot' => $slotAddr,
+            'block' => $blk,
+            'mode' => $mode,
+            'label' => $slotAddr . ' ' . ($sl['role_flow'] === 'load_out' ? 'LOAD' : ($sl['role_flow'] === 'hold' ? 'HOLD' : ($sl['role_flow'] === 'unload_in' ? 'DISCH' : 'IN')))
+        ]);
+    }
+    foreach ($cfs_jobs as $cj) {
+        if ($cj['status'] !== 'COMPLETED') {
+            $rmp = strtoupper($cj['dock_ramp'] ?? 'D1');
+            $pushQueueJob('FL-CFS', [
+                'container' => $cj['container_number'],
+                'slot' => 'CFS ' . $rmp,
+                'block' => 'CFS',
+                'mode' => $cj['status'] === 'HOLD' ? 'HOLD' : 'ACTIVE',
+                'label' => $rmp . ' ' . ($cj['job_type'] === 'STUFFING' ? 'STUFF' : 'STRIP')
+            ]);
         }
     }
     foreach ($trains as $tr) {
         $isLoad = ($tr['status'] === 'loading');
-        $equipment_queues['RTG-01']['jobs'][] = [
+        $isDone = ($tr['status'] === 'scheduled');
+        $pushQueueJob('RTG-01', [
             'container' => $tr['train_code'],
             'slot' => ($tr['loaded_wagons'] ?? 0) . '/' . ($tr['total_wagons'] ?? 30) . ' Gerbong',
-            'mode' => $isLoad ? 'ACTIVE' : 'QUEUED',
-            'label' => $tr['train_code'] . ($isLoad ? ' LOAD' : ' DISCH')
-        ];
+            'block' => 'RAIL',
+            'mode' => $isLoad ? 'ACTIVE' : ($isDone ? 'QUEUED' : 'ACTIVE'),
+            'label' => preg_replace('/\s+\(.*\)/', '', $tr['train_code']) . ($isLoad ? ' LOAD' : ' DISCH')
+        ]);
     }
     foreach ($on_rail_containers as $rc) {
-        if (count($equipment_queues['RTG-01']['jobs']) < 6) {
-            $equipment_queues['RTG-01']['jobs'][] = [
-                'container' => $rc['container_number'],
-                'slot' => $rc['bay'] ?: 'PPCW',
-                'mode' => 'READY_LOAD',
-                'label' => ($rc['bay'] ?: 'PPCW') . ' ' . substr($rc['container_number'], 0, 6)
-            ];
-        }
+        $pushQueueJob('RTG-01', [
+            'container' => $rc['container_number'],
+            'slot' => $rc['bay'] ?: 'PPCW',
+            'block' => 'RAIL',
+            'mode' => 'READY_LOAD',
+            'label' => ($rc['bay'] ?: 'PPCW') . ' ' . substr($rc['container_number'], 0, 4)
+        ]);
     }
     foreach ($preadvice_queue as $pq) {
         $blk = strtoupper($pq['target_block'] ?: 'B');
         $eqTarget = ($blk === 'REEFER' || $blk === 'E') ? 'RS-03' : (($blk === 'A' || $blk === 'C') ? 'RS-01' : 'RS-02');
-        if (count($equipment_queues[$eqTarget]['jobs']) < 6) {
-            $equipment_queues[$eqTarget]['jobs'][] = [
-                'container' => $pq['container_number'],
-                'slot' => 'PRE-' . $blk,
-                'mode' => 'QUEUED',
-                'label' => $blk . ' ETA (' . substr($pq['container_number'], 0, 4) . ')'
-            ];
-        }
+        $pushQueueJob($eqTarget, [
+            'container' => $pq['container_number'],
+            'slot' => 'PRE-' . $blk,
+            'block' => $blk,
+            'mode' => 'QUEUED',
+            'label' => $blk . ' ETA (' . substr($pq['container_number'], 0, 4) . ')'
+        ]);
     }
 
     // 3. ALIRAN FINANSIAL (Financial Flow: Real-Time Accruals, Tariffs, Invoices)
@@ -469,6 +516,101 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
         }
     } catch (Exception $e) {}
 
+    // Real-Time Yard Occupancy Matrix (Blok -> Bay -> Row -> Tier SSoT)
+    $yard_matrix_catalog = yard_block_catalog();
+    $yard_matrix_grid = [];
+    $yard_bay_counts = [];
+    $yard_block_summary = [];
+    foreach ($yard_matrix_catalog as $blkCode => $cfg) {
+        $yard_matrix_grid[$blkCode] = [];
+        $yard_bay_counts[$blkCode] = [];
+        $yard_block_summary[$blkCode] = [
+            'code' => $blkCode,
+            'name' => $cfg['name'],
+            'zone' => $cfg['zone'],
+            'color' => $cfg['color'],
+            'equipment' => $cfg['equipment'],
+            'bays' => (int)$cfg['bays'],
+            'rows' => (int)$cfg['rows'],
+            'tiers' => (int)$cfg['tiers'],
+            'total_slots' => (int)$cfg['bays'] * (int)$cfg['rows'] * (int)$cfg['tiers'],
+            'occupied' => 0,
+            'teus' => 0,
+            'hold_count' => 0,
+            'reefer_count' => 0
+        ];
+    }
+
+    $yard_occupied_cy = 0;
+    $yard_teus = 0;
+    $yard_hold_count = 0;
+    foreach ($active_slots as $sl) {
+        $blk = strtoupper(trim((string)($sl['block'] ?? '')));
+        if ($blk === 'RAIL') $blk = 'D';
+        if (!isset($yard_matrix_catalog[$blk])) continue;
+
+        $bayNum  = max(1, (int)($sl['bay'] ?? 1));
+        $rowNum  = max(1, (int)($sl['row'] ?? 1));
+        $tierNum = max(1, (int)($sl['tier'] ?? 1));
+        $bayStr  = yard_format_coord($bayNum);
+        $rowStr  = yard_format_coord($rowNum);
+        $tierStr = yard_format_coord($tierNum);
+
+        if ($bayNum > $yard_block_summary[$blk]['bays']) {
+            $yard_block_summary[$blk]['bays'] = $bayNum;
+            $yard_matrix_catalog[$blk]['bays'] = $bayNum;
+        }
+        if ($rowNum > $yard_block_summary[$blk]['rows']) {
+            $yard_block_summary[$blk]['rows'] = $rowNum;
+            $yard_matrix_catalog[$blk]['rows'] = $rowNum;
+        }
+        if ($tierNum > $yard_block_summary[$blk]['tiers']) {
+            $yard_block_summary[$blk]['tiers'] = $tierNum;
+            $yard_matrix_catalog[$blk]['tiers'] = $tierNum;
+        }
+
+        $yard_matrix_grid[$blk][$bayStr][$rowStr][$tierStr] = $sl;
+        $yard_bay_counts[$blk][$bayStr] = ($yard_bay_counts[$blk][$bayStr] ?? 0) + 1;
+
+        $is20 = (stripos((string)($sl['size_type'] ?? ''), '20') !== false);
+        $teuAdd = $is20 ? 1 : 2;
+        $yard_block_summary[$blk]['occupied']++;
+        $yard_block_summary[$blk]['teus'] += $teuAdd;
+        if (($sl['role_flow'] ?? '') === 'hold' || in_array(strtoupper((string)($sl['customs'] ?? '')), ['RED_LANE_CHECK', 'RED_LINE', 'INSPECTION', 'DOC_HOLD', 'VGM_HOLD'], true)) {
+            $yard_block_summary[$blk]['hold_count']++;
+            $yard_hold_count++;
+        }
+        if (!empty($sl['reefer']) || strtolower((string)($sl['type'] ?? '')) === 'reefer' || $blk === 'REEFER') {
+            $yard_block_summary[$blk]['reefer_count']++;
+        }
+
+        $yard_occupied_cy++;
+        $yard_teus += $teuAdd;
+    }
+
+    $yard_total_slots = 0;
+    foreach ($yard_block_summary as &$bSum) {
+        $bSum['total_slots'] = $bSum['bays'] * $bSum['rows'] * $bSum['tiers'];
+        $bSum['occupancy_pct'] = $bSum['total_slots'] > 0 ? round(($bSum['occupied'] / $bSum['total_slots']) * 100, 1) : 0.0;
+        $yard_total_slots += $bSum['total_slots'];
+    }
+    unset($bSum);
+
+    $yard_matrix_stats = [
+        'total_blocks' => count($yard_matrix_catalog),
+        'total_slots' => $yard_total_slots,
+        'occupied_yard_slots' => $yard_occupied_cy,
+        'empty_yard_slots' => max(0, $yard_total_slots - $yard_occupied_cy),
+        'occupancy_pct' => $yard_total_slots > 0 ? round(($yard_occupied_cy / $yard_total_slots) * 100, 1) : 0.0,
+        'teus_in_yard' => $yard_teus,
+        'hold_count' => $yard_hold_count,
+        'gate_staging_count' => count($in_transit_containers),
+        'cfs_dock_count' => count($cfs_containers),
+        'on_rail_count' => count($on_rail_containers),
+        'bay_counts' => $yard_bay_counts,
+        'blocks' => $yard_block_summary
+    ];
+
     $state = [
         'system' => [
             'app' => 'CIDP Digital Twin Monitoring Engine',
@@ -486,9 +628,14 @@ function get_live_twin_state(PDO $pdo, bool $force_refresh = false): array {
             'expected_count' => $expected_count,
             'blocks_distribution' => $blocks,
             'active_slots' => $active_slots,
+            'yard_matrix_catalog' => $yard_matrix_catalog,
+            'yard_matrix_grid' => $yard_matrix_grid,
+            'yard_matrix_stats' => $yard_matrix_stats,
             'cfs_pallets' => $cfs_pallets,
             'cfs_containers' => $cfs_containers,
             'cfs_summary' => $cfs_summary,
+            'cfs_rack_grid' => $cfs_rack_grid,
+            'cfs_rack_stats' => $cfs_rack_stats,
             'in_transit_containers' => $in_transit_containers,
             'on_rail_containers' => $on_rail_containers,
             'trains' => $trains,

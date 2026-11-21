@@ -7,6 +7,8 @@
 
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/connection.php';
+require_once __DIR__ . '/gate_lanes_helper.php';
+cidp_ensure_gate_schema($pdo);
 
 api_init_headers();
 
@@ -280,16 +282,22 @@ try {
                 $vgm_status = 'SOLAS VERIFIED (PASS)';
             }
 
+            $gate_lane = cidp_pick_gate_lane($pdo, 'IN', [
+                'lane'     => $_GET['lane'] ?? $_POST['lane'] ?? $input['lane'] ?? null,
+                'job_type' => $jobType,
+                'block'    => $queuingTrk['target_block'] ?? ($is_pickup ? 'B' : 'A'),
+            ]);
+
             $pdo->beginTransaction();
 
             if ($truck_id) {
-                $upd = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW() WHERE id = ?");
-                $upd->execute([$truck_id]);
+                $upd = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_lane = ?, gate_in_time = NOW() WHERE id = ?");
+                $upd->execute([$gate_lane, $truck_id]);
             } else {
-                $ins = $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, job_type, container_number, status, gate_in_time) 
-                                      VALUES (?, ?, ?, ?, ?, ?, 'in_yard', NOW())");
+                $ins = $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, job_type, container_number, status, gate_lane, gate_in_time) 
+                                      VALUES (?, ?, ?, ?, ?, ?, 'in_yard', ?, NOW())");
                 $rfid = 'RFID-TRK-' . rand(100, 999);
-                $ins->execute([$randPlate, $rfid, $randDriver, $randCompany, $jobType, $containerNo]);
+                $ins->execute([$randPlate, $rfid, $randDriver, $randCompany, $jobType, $containerNo, $gate_lane]);
                 $truck_id = $pdo->lastInsertId();
             }
 
@@ -370,21 +378,22 @@ try {
             $misiText = $is_pickup ? 'PICK-UP (Ambil Barang)' : 'DROP-OFF (Antar Barang)';
             $stmtLog = $pdo->prepare("INSERT INTO yard_events 
                 (event_type, container_number, equipment_id, operator_name, billable_amount, notes) 
-                VALUES ('GATE_IN', ?, 'GATE-01', 'Petugas Gerbang Timbangan', 50000, ?)");
-            $stmtLog->execute([$containerNo ?? 'TRUK-KOSONG', "Truk {$randPlate} ({$randDriver}) Gate-In [{$misiText}]. Timbang: Gross {$gross}kg, Tare {$tare}kg. Status: {$vgm_status}."]);
+                VALUES ('GATE_IN', ?, ?, 'Petugas Gerbang Timbangan', 50000, ?)");
+            $stmtLog->execute([$containerNo ?? 'TRUK-KOSONG', $gate_lane, "[{$gate_lane}] Truk {$randPlate} ({$randDriver}) Gate-In [{$misiText}]. Timbang: Gross {$gross}kg, Tare {$tare}kg. Status: {$vgm_status}."]);
             $event_id = $pdo->lastInsertId();
 
             $pdo->commit();
 
             echo json_encode([
                 'success' => true,
-                'message' => "Truk {$randPlate} berhasil Gate-In melalui Gate 1 ({$misiText})!",
+                'message' => "Truk {$randPlate} berhasil Gate-In melalui {$gate_lane} ({$misiText})!",
                 'truck' => [
                     'id' => $truck_id,
                     'license_plate' => $randPlate,
                     'driver_name' => $randDriver,
                     'company' => $randCompany,
                     'job_type' => $jobType,
+                    'gate_lane' => $gate_lane,
                     'container_number' => $containerNo,
                     'gross_weight' => $gross,
                     'tare_weight' => $tare,
@@ -409,27 +418,34 @@ try {
             }
 
             $is_pickup = ($trk['job_type'] === 'pick_up');
+            $gate_out_lane = cidp_pick_gate_lane($pdo, 'OUT', [
+                'lane'              => $_GET['lane'] ?? $_POST['lane'] ?? $input['lane'] ?? null,
+                'job_type'          => $trk['job_type'] ?? 'pick_up',
+                'block'             => $trk['target_block'] ?? '',
+                'empty_chassis_out' => !$is_pickup,
+            ]);
             $pdo->beginTransaction();
 
-            $upd = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE id = ?");
-            $upd->execute([$trk['id']]);
+            $upd = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_lane = ?, gate_out_time = NOW() WHERE id = ?");
+            $upd->execute([$gate_out_lane, $trk['id']]);
 
             if ($is_pickup && !empty($trk['container_number'])) {
                 $updC = $pdo->prepare("UPDATE containers SET status = 'gate_out', gate_out_time = NOW() WHERE container_number = ?");
                 $updC->execute([$trk['container_number']]);
             }
 
-            $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes) VALUES ('GATE_OUT', ?, ?)");
+            $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes) VALUES ('GATE_OUT', ?, ?, ?)");
             $actNotes = $is_pickup 
-                ? "Truk {$trk['license_plate']} GATE-OUT membawa kontainer {$trk['container_number']} keluar dari dry port (Pick-Up Selesai)."
-                : "Truk {$trk['license_plate']} GATE-OUT sasis kosong setelah menurunkan kontainer di yard (Drop-Off Selesai).";
-            $stmtLog->execute([$trk['container_number'], $actNotes]);
+                ? "[{$gate_out_lane}] Truk {$trk['license_plate']} GATE-OUT membawa kontainer {$trk['container_number']} keluar dari dry port (Pick-Up Selesai)."
+                : "[{$gate_out_lane}] Truk {$trk['license_plate']} GATE-OUT sasis kosong setelah menurunkan kontainer di yard (Drop-Off Selesai).";
+            $stmtLog->execute([$trk['container_number'], $gate_out_lane, $actNotes]);
 
             $pdo->commit();
 
+            $trk['gate_out_lane'] = $gate_out_lane;
             echo json_encode([
                 'success' => true,
-                'message' => "Truk {$trk['license_plate']} berhasil Gate-Out (" . ($is_pickup ? "Membawa Kontainer Keluar" : "Sasis Kosong") . ")!",
+                'message' => "Truk {$trk['license_plate']} berhasil Gate-Out lewat {$gate_out_lane} (" . ($is_pickup ? "Membawa Kontainer Keluar" : "Sasis Kosong") . ")!",
                 'truck' => $trk
             ]);
             break;
@@ -578,19 +594,20 @@ try {
             $plates = ['B 9481 UEK', 'B 7712 SCK', 'D 9921 XY', 'L 8182 PO', 'B 3341 JKT', 'B 9204 TKL'];
             $randPlate = $plates[array_rand($plates)];
             $accuracy = rand(991, 999) / 10;
+            $anprLane = cidp_normalize_gate_lane($_GET['lane'] ?? $_POST['lane'] ?? $input['lane'] ?? ('IN-0' . rand(1, 6)), 'IN');
 
             $stmt = $pdo->prepare("INSERT INTO yard_events (event_type, equipment_id, operator_name, billable_amount, notes) 
-                                   VALUES ('ANPR_CAPTURE', 'HW-01-ANPR', 'ANPR Auto Trigger', 50000, ?)");
-            $stmt->execute(["[HW-01 ANPR] Kamera mendeteksi truk {$randPlate} (Akurasi {$accuracy}%). Pas Masuk Truk diterbitkan."]);
+                                   VALUES ('ANPR_CAPTURE', ?, 'ANPR Auto Trigger', 50000, ?)");
+            $stmt->execute([$anprLane, "[HW-01 ANPR @ {$anprLane}] Kamera mendeteksi truk {$randPlate} (Akurasi {$accuracy}%). Pas Masuk Truk diterbitkan."]);
 
             echo json_encode([
                 'success' => true,
                 'hw_id' => 'HW-01',
                 'name' => 'Kamera ANPR Gerbang',
-                'message' => "HW-01 ANPR membaca plat {$randPlate} (Tingkat Keyakinan {$accuracy}%)",
+                'message' => "HW-01 ANPR ({$anprLane}) membaca plat {$randPlate} (Tingkat Keyakinan {$accuracy}%)",
                 'plate' => $randPlate,
                 'confidence' => $accuracy . '%',
-                'lane' => 'Inbound Lane 1',
+                'lane' => $anprLane,
                 'billing' => [
                     'charge_name' => 'Pas Masuk Truk (Gate Pass)',
                     'amount' => 50000

@@ -338,13 +338,13 @@
                             <i class="fa-solid fa-gear text-xs text-gray-400 group-hover:text-orange-600 transition-colors w-4 text-center"></i>
                             <span class="font-medium"><?= __('profile_settings', 'Pengaturan Akun & Sistem') ?></span>
                         </a>
-                        <a href="dashboard.php?page=simulator" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors group">
+                        <a href="dashboard.php?page=integration" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors group">
                             <i class="fa-solid fa-tower-broadcast text-xs text-gray-400 group-hover:text-orange-600 transition-colors w-4 text-center"></i>
                             <span class="font-medium"><?= __('profile_sim_panel', 'Panel Simulasi IoT & Sensor') ?></span>
                         </a>
-                        <a href="dashboard.php?page=denah" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors group">
-                            <i class="fa-solid fa-map-location-dot text-xs text-gray-400 group-hover:text-orange-600 transition-colors w-4 text-center"></i>
-                            <span class="font-medium"><?= __('profile_site_plan', 'Site Plan Denah Terminal 35 Ha') ?></span>
+                        <a href="dashboard.php?page=twin" class="flex items-center space-x-2.5 px-3 py-2 rounded-xl hover:bg-orange-50 text-gray-700 hover:text-orange-600 transition-colors group">
+                            <i class="fa-solid fa-cubes text-xs text-gray-400 group-hover:text-orange-600 transition-colors w-4 text-center"></i>
+                            <span class="font-medium"><?= __('profile_site_plan', 'Digital Twin 3D (Data Nyata)') ?></span>
                         </a>
 
                         <div class="my-1.5 border-t border-gray-100"></div>

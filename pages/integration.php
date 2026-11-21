@@ -1178,7 +1178,16 @@ async function triggerActivity(type, extraQuery = '') {
 }
 
 async function resetDemoDatabase() {
-    if (!confirm('Reset seluruh antrean ke status awal?')) return;
+    if (window.cidpConfirm) {
+        const ok = await window.cidpConfirm({
+            title: 'Konfirmasi Reset Antrean Sandbox',
+            message: 'Reset seluruh antrean simulasi integrasi ke status awal?',
+            confirmText: 'Ya, Reset',
+            cancelText: 'Tidak, Batal',
+            tone: 'danger'
+        });
+        if (!ok) return;
+    }
     const r = await fetch('api/demo_control.php?action=reset');
     const d = await r.json();
     document.getElementById('activityTargetContainer').value = '';

@@ -219,6 +219,29 @@ function ensure_integration_schema(PDO $pdo): void {
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         KEY idx_cn (container_number)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS system_thresholds (
+        setting_key VARCHAR(60) PRIMARY KEY,
+        setting_value VARCHAR(160) NOT NULL,
+        description VARCHAR(255) NULL,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    $defThresholds = [
+        'vgm_tolerance_pct'      => ['5.0', 'Batas toleransi selisih berat SOLAS VGM (%)'],
+        'vgm_max_gross_kg'       => ['35000', 'Batas berat kotor maksimal kontainer (kg)'],
+        'anpr_min_confidence'    => ['85', 'Ambang batas keyakinan minimal OCR/ANPR (%)'],
+        'reefer_max_deviation_c' => ['2.0', 'Deviasi maksimal suhu Reefer vs Setpoint (C)'],
+        'reefer_thermal_trip_c'  => ['85.0', 'Ambang batas alarm overheat kamera termal HW-16 (C)'],
+        'free_dwell_days'        => ['3', 'Masa bebas penumpukan kontainer di yard (hari)'],
+        'rail_expected_axles'    => ['126', 'Jumlah gandar standar 1 rangkaian KA 30 gerbong + loko'],
+        'ats_switch_max_sec'     => ['10.0', 'Batas waktu alih daya ATS genset darurat (detik)'],
+        'vgm_zero_offset_kg'     => ['0.0', 'Kalibrasi zero tare offset timbangan 80T (kg)'],
+    ];
+    $insTh = $pdo->prepare("INSERT IGNORE INTO system_thresholds (setting_key, setting_value, description) VALUES (?, ?, ?)");
+    foreach ($defThresholds as $tk => $tv) {
+        $insTh->execute([$tk, $tv[0], $tv[1]]);
+    }
     // Tambah status "belum masuk" pada truk & kontainer (tidak mengubah nilai lama)
     $t = $pdo->query("SHOW COLUMNS FROM trucks LIKE 'status'")->fetch();
     if ($t && strpos($t['Type'], "'scheduled'") === false) {
@@ -373,7 +396,208 @@ function ensure_integration_schema(PDO $pdo): void {
                 }
             }
         }
+
+        // Rekonsiliasi awal master_lokasi agar selalu selaras SSoT dengan cfs_pallets (tanpa ghost row lama)
+        cfs_ensure_master_lokasi_grid($pdo);
+        $staleCnt = (int)$pdo->query("SELECT COUNT(*) FROM master_lokasi WHERE status = 'terisi' AND (pallet_sscc IS NULL OR pallet_sscc = '')")->fetchColumn();
+        if ($staleCnt > 0) {
+            cfs_sync_master_lokasi($pdo);
+        }
     } catch (Throwable $e) {}
+}
+
+/**
+ * Parse format lokasi rak gudang CFS (contoh: 'AISLE-E-02-L1' atau 'BLOK2-E-R1')
+ * menjadi koordinat kanonik ['blok' => '1..6', 'bagian' => 'A..F', 'rak' => 1..4, 'code' => 'AISLE-E-02-L1'].
+ */
+function cfs_parse_rack_location(?string $rack_loc): ?array {
+    $raw = strtoupper(trim((string)$rack_loc));
+    if ($raw === '') return null;
+
+    if (preg_match('/AISLE-([A-F])-0?([1-6])-L([1-4])/i', $raw, $m)) {
+        $bagian = strtoupper($m[1]);
+        $blok   = (string)intval($m[2]);
+        $rak    = intval($m[3]);
+    } elseif (preg_match('/BLOK-?([1-6])-([A-F])-R?([1-4])/i', $raw, $m)) {
+        $blok   = (string)intval($m[1]);
+        $bagian = strtoupper($m[2]);
+        $rak    = intval($m[3]);
+    } elseif (preg_match('/^([A-F])([1-6])[-_ ]?R?([1-4])$/i', $raw, $m)) {
+        $bagian = strtoupper($m[1]);
+        $blok   = (string)intval($m[2]);
+        $rak    = intval($m[3]);
+    } else {
+        return null;
+    }
+
+    return [
+        'blok'   => $blok,
+        'bagian' => $bagian,
+        'rak'    => $rak,
+        'code'   => sprintf('AISLE-%s-%02d-L%d', $bagian, (int)$blok, $rak),
+    ];
+}
+
+/**
+ * Pastikan seluruh 144 slot kanonik Gudang CFS (Blok 1..6 x Sektor A..F x Level R1..R4) tersedia di master_lokasi.
+ */
+function cfs_ensure_master_lokasi_grid(PDO $pdo): void {
+    try {
+        $pdo->exec("CREATE TABLE IF NOT EXISTS master_lokasi (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            blok VARCHAR(10) NOT NULL,
+            bagian VARCHAR(20) NOT NULL,
+            rak INT NOT NULL,
+            status VARCHAR(20) NOT NULL DEFAULT 'kosong',
+            pallet_sscc VARCHAR(35) NULL,
+            commodity_name VARCHAR(150) NULL,
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+            KEY idx_blok_bagian_rak (blok, bagian, rak)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+        $existingCnt = (int)$pdo->query("SELECT COUNT(*) FROM master_lokasi")->fetchColumn();
+        if ($existingCnt >= 144) return;
+
+        $existingMap = [];
+        $stAll = $pdo->query("SELECT blok, bagian, rak FROM master_lokasi");
+        while ($r = $stAll->fetch(PDO::FETCH_ASSOC)) {
+            $existingMap[$r['blok'] . '|' . strtoupper($r['bagian']) . '|' . (int)$r['rak']] = true;
+        }
+
+        $ins = $pdo->prepare("INSERT INTO master_lokasi (blok, bagian, rak, status, pallet_sscc, commodity_name) VALUES (?, ?, ?, 'kosong', NULL, NULL)");
+        foreach (['1', '2', '3', '4', '5', '6'] as $b) {
+            foreach (['A', 'B', 'C', 'D', 'E', 'F'] as $sec) {
+                for ($rk = 1; $rk <= 4; $rk++) {
+                    $k = $b . '|' . $sec . '|' . $rk;
+                    if (!isset($existingMap[$k])) {
+                        $ins->execute([$b, $sec, $rk]);
+                    }
+                }
+            }
+        }
+    } catch (Throwable $e) {}
+}
+
+/**
+ * Sinkronisasi penuh Single Source of Truth (SSoT):
+ * Memetakan setiap palet aktif di cfs_pallets (IN_RACK / STAGING_OUT / HOLD) langsung ke slot master_lokasi.
+ */
+function cfs_sync_master_lokasi(PDO $pdo): void {
+    try {
+        cfs_ensure_master_lokasi_grid($pdo);
+        $pdo->exec("UPDATE master_lokasi SET status = 'kosong', pallet_sscc = NULL, commodity_name = NULL");
+
+        $pallets = $pdo->query("SELECT id, pallet_sscc, commodity_name, rack_location FROM cfs_pallets WHERE status IN ('IN_RACK', 'STAGING_OUT', 'HOLD') ORDER BY id ASC")->fetchAll(PDO::FETCH_ASSOC);
+        $used = [];
+        $updSlot = $pdo->prepare("UPDATE master_lokasi SET status = 'terisi', pallet_sscc = ?, commodity_name = ? WHERE blok = ? AND bagian = ? AND rak = ?");
+        $updPalLoc = $pdo->prepare("UPDATE cfs_pallets SET rack_location = ? WHERE id = ?");
+
+        foreach ($pallets as $p) {
+            $parsed = cfs_parse_rack_location($p['rack_location'] ?? '');
+            if (!$parsed) {
+                $parsed = ['blok' => '1', 'bagian' => 'A', 'rak' => 1, 'code' => 'AISLE-A-01-L1'];
+            }
+            $slotKey = $parsed['blok'] . '|' . $parsed['bagian'] . '|' . $parsed['rak'];
+
+            // Hindari bentrok 2 palet di 1 rak level yang sama saat rekonsiliasi
+            if (isset($used[$slotKey])) {
+                $foundFree = null;
+                for ($tryRak = 1; $tryRak <= 4; $tryRak++) {
+                    $tk = $parsed['blok'] . '|' . $parsed['bagian'] . '|' . $tryRak;
+                    if (!isset($used[$tk])) {
+                        $foundFree = ['blok' => $parsed['blok'], 'bagian' => $parsed['bagian'], 'rak' => $tryRak];
+                        break;
+                    }
+                }
+                if (!$foundFree) {
+                    foreach (['1','2','3','4','5','6'] as $tb) {
+                        for ($tr = 1; $tr <= 4; $tr++) {
+                            $tk = $tb . '|' . $parsed['bagian'] . '|' . $tr;
+                            if (!isset($used[$tk])) {
+                                $foundFree = ['blok' => $tb, 'bagian' => $parsed['bagian'], 'rak' => $tr];
+                                break 2;
+                            }
+                        }
+                    }
+                }
+                if ($foundFree) {
+                    $parsed = [
+                        'blok'   => $foundFree['blok'],
+                        'bagian' => $foundFree['bagian'],
+                        'rak'    => $foundFree['rak'],
+                        'code'   => sprintf('AISLE-%s-%02d-L%d', $foundFree['bagian'], (int)$foundFree['blok'], $foundFree['rak'])
+                    ];
+                    $slotKey = $parsed['blok'] . '|' . $parsed['bagian'] . '|' . $parsed['rak'];
+                    $updPalLoc->execute([$parsed['code'], $p['id']]);
+                }
+            }
+
+            $used[$slotKey] = true;
+            $updSlot->execute([
+                $p['pallet_sscc'],
+                mb_substr((string)($p['commodity_name'] ?: 'Kargo LCL Terverifikasi'), 0, 145),
+                $parsed['blok'],
+                $parsed['bagian'],
+                $parsed['rak']
+            ]);
+        }
+    } catch (Throwable $e) {}
+}
+
+/**
+ * Validasi ketersediaan slot rak di master_lokasi (anti-bentrok).
+ * Bila $auto_fallback = true dan slot terisi, otomatis mencari level/blok kosong terdekat di sektor yang sama.
+ */
+function cfs_allocate_or_validate_rack(PDO $pdo, ?string $requested_rack, bool $auto_fallback = true): array {
+    cfs_ensure_master_lokasi_grid($pdo);
+    $parsed = cfs_parse_rack_location($requested_rack) ?: ['blok' => '1', 'bagian' => 'A', 'rak' => 1, 'code' => 'AISLE-A-01-L1'];
+
+    $chk = $pdo->prepare("SELECT status, pallet_sscc FROM master_lokasi WHERE blok = ? AND bagian = ? AND rak = ? LIMIT 1");
+    $chk->execute([$parsed['blok'], $parsed['bagian'], $parsed['rak']]);
+    $cur = $chk->fetch(PDO::FETCH_ASSOC);
+
+    if (!$cur || strtolower(trim((string)$cur['status'])) !== 'terisi') {
+        return ['ok' => true, 'code' => $parsed['code'], 'parsed' => $parsed, 'fallback_used' => false];
+    }
+
+    if (!$auto_fallback) {
+        return [
+            'ok' => false,
+            'code' => $parsed['code'],
+            'occupied_by' => $cur['pallet_sscc'] ?: 'PALET-AKTIF',
+            'message' => "Slot {$parsed['code']} sudah terisi oleh SSCC " . ($cur['pallet_sscc'] ?: '-') . "."
+        ];
+    }
+
+    // 1) Cari level kosong pada blok & sektor yang sama
+    $stSame = $pdo->prepare("SELECT blok, bagian, rak FROM master_lokasi WHERE blok = ? AND bagian = ? AND status <> 'terisi' ORDER BY rak ASC LIMIT 1");
+    $stSame->execute([$parsed['blok'], $parsed['bagian']]);
+    $free = $stSame->fetch(PDO::FETCH_ASSOC);
+
+    // 2) Cari di blok lain dalam sektor yang sama
+    if (!$free) {
+        $stSec = $pdo->prepare("SELECT blok, bagian, rak FROM master_lokasi WHERE bagian = ? AND status <> 'terisi' ORDER BY blok ASC, rak ASC LIMIT 1");
+        $stSec->execute([$parsed['bagian']]);
+        $free = $stSec->fetch(PDO::FETCH_ASSOC);
+    }
+
+    // 3) Cari di seluruh gudang
+    if (!$free) {
+        $free = $pdo->query("SELECT blok, bagian, rak FROM master_lokasi WHERE status <> 'terisi' ORDER BY blok ASC, bagian ASC, rak ASC LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    }
+
+    if (!$free) {
+        return ['ok' => false, 'code' => $parsed['code'], 'occupied_by' => $cur['pallet_sscc'], 'message' => 'Seluruh 144 slot rak Gudang CFS penuh (100% terisi).'];
+    }
+
+    $newCode = sprintf('AISLE-%s-%02d-L%d', strtoupper($free['bagian']), (int)$free['blok'], (int)$free['rak']);
+    return [
+        'ok' => true,
+        'code' => $newCode,
+        'parsed' => ['blok' => (string)$free['blok'], 'bagian' => strtoupper($free['bagian']), 'rak' => (int)$free['rak'], 'code' => $newCode],
+        'fallback_used' => true,
+        'requested_code' => $parsed['code']
+    ];
 }
 
 /** Check digit ISO 6346 (Modulo 11). Input 10 karakter pertama (4 huruf + 6 angka). */
@@ -538,4 +762,335 @@ function accrue_billing(PDO $pdo, string $container_no, string $service, string 
     $pdo->prepare("INSERT INTO billing_invoices (invoice_number, container_number, customer_name, service_type, $field, total_amount, payment_status, payment_method, created_at) VALUES (?,?,?,?,?,?, 'PENDING', 'Bank Transfer (Mandiri H2H)', NOW())")
         ->execute([$no, $container_no, $customer, $service, $amount, $amount]);
     return $no;
+}
+
+// =============================================================================
+// YARD OCCUPANCY MATRIX SSoT HELPERS (BLOK - BAY - ROW - TIER)
+// =============================================================================
+function yard_block_catalog(): array {
+    return [
+        'A'      => ['code' => 'A',      'name' => 'Blok A — Laden Ekspor',        'zone' => 'LADEN_EXP',   'bays' => 10, 'rows' => 4, 'tiers' => 4, 'color' => 'blue',    'equipment' => 'RS-01 / RTG-02'],
+        'B'      => ['code' => 'B',      'name' => 'Blok B — Laden Impor',         'zone' => 'LADEN_IMP',   'bays' => 10, 'rows' => 4, 'tiers' => 4, 'color' => 'sky',     'equipment' => 'RS-02 / RTG-03'],
+        'C'      => ['code' => 'C',      'name' => 'Blok C — Domestik Fast-Turn',  'zone' => 'DOMESTIC',    'bays' => 10, 'rows' => 4, 'tiers' => 4, 'color' => 'emerald', 'equipment' => 'RS-04 / RTG-04'],
+        'D'      => ['code' => 'D',      'name' => 'Blok D — Buffer Siding KA',    'zone' => 'BUFFER_RAIL', 'bays' => 10, 'rows' => 4, 'tiers' => 4, 'color' => 'purple',  'equipment' => 'RS-03 / RTG-05'],
+        'E'      => ['code' => 'E',      'name' => 'Blok E — Karantina / Behandle','zone' => 'QUARANTINE',  'bays' => 6,  'rows' => 4, 'tiers' => 4, 'color' => 'rose',    'equipment' => 'RS-02'],
+        'DG'     => ['code' => 'DG',     'name' => 'Blok DG — Hazard IMDG B3',     'zone' => 'DG_HAZARD',   'bays' => 4,  'rows' => 4, 'tiers' => 3, 'color' => 'red',     'equipment' => 'RS-02'],
+        'EMPTY'  => ['code' => 'EMPTY',  'name' => 'Blok Empty — Depo Kosong',     'zone' => 'EMPTY_DEPO',  'bays' => 6,  'rows' => 4, 'tiers' => 4, 'color' => 'slate',   'equipment' => 'RS-04'],
+        'REEFER' => ['code' => 'REEFER', 'name' => 'Blok Reefer — Cold Chain',     'zone' => 'REEFER_380V', 'bays' => 4,  'rows' => 4, 'tiers' => 3, 'color' => 'cyan',    'equipment' => 'RS-03'],
+    ];
+}
+
+function yard_format_coord($val): string {
+    $n = max(1, (int)$val);
+    return sprintf('%02d', $n);
+}
+
+function yard_normalize_block_key(?string $raw): string {
+    $b = strtoupper(trim((string)$raw));
+    if ($b === 'RAIL') return 'D';
+    $cat = yard_block_catalog();
+    return isset($cat[$b]) ? $b : 'A';
+}
+
+function yard_validate_slot(PDO $pdo, string $block, int $bay, int $row, int $tier, ?string $excludeContainer = null): array {
+    $cat = yard_block_catalog();
+    $blkKey = strtoupper(trim($block));
+    if (!isset($cat[$blkKey])) {
+        return [
+            'ok' => false,
+            'code' => '',
+            'conflict_container' => null,
+            'gravity_warning' => null,
+            'message' => "Blok Yard '{$blkKey}' tidak terdaftar dalam tata letak CY standar."
+        ];
+    }
+
+    $cfg = $cat[$blkKey];
+    $maxBay  = max(12, (int)$cfg['bays']);
+    $maxRow  = max(6, (int)$cfg['rows']);
+    $maxTier = max(5, (int)$cfg['tiers']);
+    if ($bay < 1 || $bay > $maxBay || $row < 1 || $row > $maxRow || $tier < 1 || $tier > $maxTier) {
+        return [
+            'ok' => false,
+            'code' => '',
+            'conflict_container' => null,
+            'gravity_warning' => null,
+            'message' => "Koordinat slot di luar batas Blok {$blkKey} (Bay 1–{$maxBay}, Row 1–{$maxRow}, Tier 1–{$maxTier})."
+        ];
+    }
+
+    $bayStr  = yard_format_coord($bay);
+    $rowStr  = yard_format_coord($row);
+    $tierStr = yard_format_coord($tier);
+    $code    = "{$blkKey}-B{$bayStr}-R{$rowStr}-T{$tierStr}";
+
+    $sql = "SELECT container_number FROM containers
+            WHERE status = 'in_yard'
+              AND UPPER(TRIM(COALESCE(block,''))) = ?
+              AND CAST(COALESCE(NULLIF(bay,''), '0') AS UNSIGNED) = ?
+              AND CAST(COALESCE(NULLIF(`row`,''), '0') AS UNSIGNED) = ?
+              AND CAST(COALESCE(NULLIF(tier,''), '0') AS UNSIGNED) = ?";
+    $params = [$blkKey, $bay, $row, $tier];
+    if ($excludeContainer !== null && trim($excludeContainer) !== '') {
+        $sql .= " AND container_number <> ?";
+        $params[] = strtoupper(trim($excludeContainer));
+    }
+    $sql .= " LIMIT 1";
+
+    $st = $pdo->prepare($sql);
+    $st->execute($params);
+    $conflict = $st->fetchColumn();
+    if ($conflict) {
+        return [
+            'ok' => false,
+            'code' => $code,
+            'conflict_container' => (string)$conflict,
+            'gravity_warning' => null,
+            'message' => "ANTI-BENTROK: Slot {$code} sudah ditempati oleh peti kemas {$conflict}!"
+        ];
+    }
+
+    $gravityWarning = null;
+    if ($tier > 1) {
+        $stBelow = $pdo->prepare("SELECT CAST(COALESCE(NULLIF(tier,''), '0') AS UNSIGNED) AS t
+            FROM containers
+            WHERE status = 'in_yard'
+              AND UPPER(TRIM(COALESCE(block,''))) = ?
+              AND CAST(COALESCE(NULLIF(bay,''), '0') AS UNSIGNED) = ?
+              AND CAST(COALESCE(NULLIF(`row`,''), '0') AS UNSIGNED) = ?
+              AND CAST(COALESCE(NULLIF(tier,''), '0') AS UNSIGNED) < ?");
+        $stBelow->execute([$blkKey, $bay, $row, $tier]);
+        $occupiedBelow = array_map('intval', $stBelow->fetchAll(PDO::FETCH_COLUMN));
+        $missing = [];
+        for ($t = 1; $t < $tier; $t++) {
+            if (!in_array($t, $occupiedBelow, true)) $missing[] = "T" . yard_format_coord($t);
+        }
+        if (!empty($missing)) {
+            $gravityWarning = "Catatan Stabilitas Stacking: Level di bawahnya (" . implode(', ', $missing) . ") masih kosong pada {$blkKey}-B{$bayStr}-R{$rowStr}.";
+        }
+    }
+
+    return [
+        'ok' => true,
+        'block' => $blkKey,
+        'bay' => $bayStr,
+        'row' => $rowStr,
+        'tier' => $tierStr,
+        'code' => $code,
+        'conflict_container' => null,
+        'gravity_warning' => $gravityWarning,
+        'message' => "Slot {$code} tersedia."
+    ];
+}
+
+/** Ambil seluruh parameter kalibrasi threshold hardware & rule keputusan dari DB */
+function cidp_get_thresholds(PDO $pdo): array {
+    $defaults = [
+        'vgm_tolerance_pct'      => 5.0,
+        'vgm_max_gross_kg'       => 35000.0,
+        'anpr_min_confidence'    => 85.0,
+        'reefer_max_deviation_c' => 2.0,
+        'reefer_thermal_trip_c'  => 85.0,
+        'free_dwell_days'        => 3,
+        'rail_expected_axles'    => 126,
+        'ats_switch_max_sec'     => 10.0,
+        'vgm_zero_offset_kg'     => 0.0,
+    ];
+    try {
+        $rows = $pdo->query("SELECT setting_key, setting_value FROM system_thresholds")->fetchAll(PDO::FETCH_KEY_PAIR);
+        foreach ($defaults as $k => $v) {
+            if (isset($rows[$k]) && is_numeric($rows[$k])) {
+                $defaults[$k] = is_int($v) ? (int)$rows[$k] : (float)$rows[$k];
+            }
+        }
+    } catch (Throwable $e) {}
+    return $defaults;
+}
+
+/** Simpan pembaruan parameter kalibrasi threshold ke database */
+function cidp_save_thresholds(PDO $pdo, array $updates): array {
+    ensure_integration_schema($pdo);
+    $stmt = $pdo->prepare("INSERT INTO system_thresholds (setting_key, setting_value) VALUES (?, ?) ON DUPLICATE KEY UPDATE setting_value = VALUES(setting_value), updated_at = NOW()");
+    foreach ($updates as $k => $v) {
+        if ($v === null || $v === '') continue;
+        $stmt->execute([(string)$k, (string)$v]);
+    }
+    return cidp_get_thresholds($pdo);
+}
+
+/**
+ * Mesin Rekomendasi Slot Yard Otomatis (Anti-Bentrok & Minimalkan Shifting/CRP)
+ * Menentukan blok & koordinat Bay-Row-Tier terbaik berdasarkan pabean, jenis kargo, dan berat kotor.
+ */
+function cidp_recommend_yard_slot(PDO $pdo, array $container, ?string $preferredBlock = null): array {
+    $customs = strtoupper(trim((string)($container['customs_status'] ?? '')));
+    $cargo   = strtolower(trim((string)($container['cargo_type'] ?? 'dry')));
+    $size    = strtoupper(trim((string)($container['size_type'] ?? '40FT')));
+    $weight  = (float)($container['gross_weight_kg'] ?? 20000);
+    $ctrNo   = strtoupper(trim((string)($container['container_number'] ?? '')));
+
+    $blk = strtoupper(trim((string)$preferredBlock));
+    $reasonParts = [];
+
+    if ($blk === '') {
+        if (in_array($customs, ['RED_LANE_CHECK', 'RED_LANE', 'DOC_HOLD'], true)) {
+            $blk = 'E';
+            $reasonParts[] = "Status pabean {$customs} -> isolasi Blok E (Behandle/Karantina)";
+        } elseif ($cargo === 'reefer' || strpos($size, 'R') !== false) {
+            $blk = 'REEFER';
+            $reasonParts[] = "Kargo Reefer -> zona daya listrik 380V (Blok REEFER)";
+        } elseif ($cargo === 'dg') {
+            $blk = 'DG';
+            $reasonParts[] = "Kargo Dangerous Goods IMO -> zona bunding aman (Blok DG)";
+        } elseif ($cargo === 'empty') {
+            $blk = 'EMPTY';
+            $reasonParts[] = "Empty Reposition -> zona depot kosong (Blok EMPTY)";
+        } elseif (strpos($size, '20') !== false) {
+            $blk = 'B';
+            $reasonParts[] = "Kontainer 20ft dry/impor -> Blok B";
+        } else {
+            $blk = 'A';
+            $reasonParts[] = "Kontainer 40ft/HC reguler -> Blok A";
+        }
+    } else {
+        $reasonParts[] = "Penempatan ke Blok {$blk} ({$cargo})";
+    }
+
+    $cat = yard_block_catalog();
+    $cfg = $cat[$blk] ?? $cat['A'];
+    $maxBay  = min(10, max(4, (int)$cfg['bays']));
+    $maxRow  = min(4, max(2, (int)$cfg['rows']));
+    $maxTier = min(4, max(2, (int)$cfg['tiers']));
+
+    $tierOrder = ($weight >= 24000) ? range(1, $maxTier) : array_merge(range(1, $maxTier));
+    if ($weight >= 24000) {
+        $reasonParts[] = "berat ≥ 24t (prioritas Tier rendah agar stabil & minim CRP)";
+    }
+
+    for ($tIdx = 0; $tIdx < count($tierOrder); $tIdx++) {
+        $t = $tierOrder[$tIdx];
+        for ($b = 1; $b <= $maxBay; $b++) {
+            for ($r = 1; $r <= $maxRow; $r++) {
+                $val = yard_validate_slot($pdo, $blk, $b, $r, $t, $ctrNo);
+                if ($val['ok'] && empty($val['gravity_warning'])) {
+                    return [
+                        'ok'     => true,
+                        'block'  => $val['block'],
+                        'bay'    => $val['bay'],
+                        'row'    => $val['row'],
+                        'tier'   => $val['tier'],
+                        'code'   => $val['code'],
+                        'reason' => implode('; ', $reasonParts) . " — slot {$val['code']} kosong & terbebas double-handling."
+                    ];
+                }
+            }
+        }
+    }
+
+    return [
+        'ok'     => false,
+        'block'  => $blk,
+        'bay'    => '01',
+        'row'    => '01',
+        'tier'   => '01',
+        'code'   => "{$blk}-B01-R01-T01",
+        'reason' => "Fallback slot {$blk}-B01-R01-T01 (kapasitas blok hampir penuh)."
+    ];
+}
+
+/**
+ * Mesin Rekomendasi Keputusan Operasional Terpadu (Control Tower Decision Engine)
+ * Mengolah status aktual sensor & database menjadi tindakan prioritas berbasis aturan.
+ */
+function cidp_build_decision_report(PDO $pdo): array {
+    $th = cidp_get_thresholds($pdo);
+    $freeDays = max(1, (int)$th['free_dwell_days']);
+    $decisions = [];
+
+    try {
+        // 1. Reefer ALARM keputusan darurat suhu/ATS
+        $rfAlms = $pdo->query("SELECT container_number, socket_id, set_temp_c, supply_temp_c FROM reefer_telemetry WHERE status = 'ALARM' ORDER BY id DESC LIMIT 3")->fetchAll(PDO::FETCH_ASSOC);
+        if (!empty($rfAlms)) {
+            $first = $rfAlms[0];
+            $decisions[] = [
+                'priority' => 'critical',
+                'source'   => 'Sensor Suhu LoRaWAN + ATS',
+                'title'    => count($rfAlms) . " Alarm Suhu Reefer (> ±{$th['reefer_max_deviation_c']}°C)",
+                'reason'   => "{$first['container_number']} ({$first['socket_id']}) terbaca {$first['supply_temp_c']}°C vs setpoint {$first['set_temp_c']}°C.",
+                'action'   => 'Inspeksi kompresor segera & verifikasi backup ATS Genset.',
+                'href'     => 'dashboard.php?page=reefer',
+                'cta'      => 'Tangani Reefer'
+            ];
+        }
+
+        // 2. Kontainer HOLD / Jalur Merah / E-Seal Tamper
+        $redCnt = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status NOT IN ('gate_out','expected') AND customs_status IN ('RED_LANE_CHECK','DOC_HOLD')")->fetchColumn();
+        if ($redCnt > 0) {
+            $decisions[] = [
+                'priority' => 'high',
+                'source'   => 'CEISA 4.0 + X-Ray + JT701 E-Seal',
+                'title'    => "{$redCnt} Box Terkunci Interlock Pabean",
+                'reason'   => 'Status RED_LANE_CHECK / DOC_HOLD terdeteksi pada manifest pabean/segel.',
+                'action'   => 'Prioritaskan pemindahan Blok E untuk X-Ray 6 MeV / input LHP Behandle.',
+                'href'     => 'dashboard.php?page=customs',
+                'cta'      => 'Buka Bea Cukai'
+            ];
+        }
+
+        // 3. Antrean DLQ Anomali Gate/Sensor
+        $dlqCnt = (int)$pdo->query("SELECT COUNT(*) FROM integration_dlq WHERE status = 'QUARANTINED'")->fetchColumn();
+        if ($dlqCnt > 0) {
+            $decisions[] = [
+                'priority' => 'high',
+                'source'   => 'ANPR + Weighbridge 80T + DLQ',
+                'title'    => "{$dlqCnt} Payload Anomali di Karantina DLQ",
+                'reason'   => "Payload gagal aturan (deviasi VGM > {$th['vgm_tolerance_pct']}%, e-DO expired, atau mismatch OCR).",
+                'action'   => 'Putuskan SOP Putar Balik (Turn-Back) atau Verifikasi & Override.',
+                'href'     => 'dashboard.php?page=integration',
+                'cta'      => 'Resolusi DLQ'
+            ];
+        }
+
+        // 4. Demurrage / Overstay vs Masa Bebas
+        $overStay = (int)$pdo->query("SELECT COUNT(*) FROM containers WHERE status = 'in_yard' AND gate_in_time IS NOT NULL AND DATEDIFF(NOW(), gate_in_time) > {$freeDays}")->fetchColumn();
+        if ($overStay > 0) {
+            $decisions[] = [
+                'priority' => 'medium',
+                'source'   => 'Timer Dwell Time YMS vs Billing',
+                'title'    => "{$overStay} Box Melewati Free Time (> {$freeDays} Hari)",
+                'reason'   => "Dwell time melampaui batas free storage {$freeDays} hari dan mulai terkena argo progresif.",
+                'action'   => 'Dorong percepatan Gate-Out / muat KA Outbound & validasi tagihan penumpukan.',
+                'href'     => 'dashboard.php?page=yard',
+                'cta'      => 'Kelola Yard'
+            ];
+        }
+
+        // 5. Antrean Truk Gate vs Pilihan Moda Rel
+        $gateQueue = (int)$pdo->query("SELECT COUNT(*) FROM trucks WHERE status IN ('queuing','at_gate')")->fetchColumn();
+        if ($gateQueue >= 4) {
+            $decisions[] = [
+                'priority' => 'medium',
+                'source'   => 'ANPR Gate + Frauscher Siding',
+                'title'    => "Kepadatan Gate Terdeteksi ({$gateQueue} Truk Antre)",
+                'reason'   => 'Volume truk di kompleks gerbang tinggi; potensi bottleneck buffer.',
+                'action'   => 'Aktifkan seluruh 6 lajur Gate-In dan alihkan muatan ekspor siap ke Siding KA.',
+                'href'     => 'dashboard.php?page=gate',
+                'cta'      => 'Atur Gate'
+            ];
+        }
+    } catch (Throwable $e) {}
+
+    if (empty($decisions)) {
+        $decisions[] = [
+            'priority' => 'ok',
+            'source'   => 'Seluruh Sensor 4-Layer',
+            'title'    => 'Operasi Seluruh Zona Sehat & Terkendali',
+            'reason'   => 'Tidak ada pelanggaran ambang batas VGM, suhu Reefer, segel JT701, ataupun DLQ aktif.',
+            'action'   => 'Pertahankan dispatch standar dan pantau stream telemetri masuk.',
+            'href'     => 'dashboard.php?page=twin',
+            'cta'      => 'Pantau Live 3D'
+        ];
+    }
+
+    return $decisions;
 }

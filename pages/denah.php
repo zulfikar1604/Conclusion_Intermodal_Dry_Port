@@ -24,9 +24,9 @@ $zones_data = [
         'icon' => 'fa-door-open',
         'color' => '#0284c7',
         'facilities' => [
-            ['id' => 'f_gate_in', 'nama' => 'Gatehouse Inbound', 'desc' => 'Pos kontrol masuk 2 lane dilengkapi Kamera ANPR, OCR Portal, RFID Reader, dan Industrial Edge AI PC.', 'icon' => 'fa-arrow-right-to-bracket', 'hw_id' => 2, 'hw_nama' => 'Kamera OCR Kontainer Portal & ANPR', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
-            ['id' => 'f_gate_out', 'nama' => 'Gatehouse Outbound', 'desc' => 'Pos kontrol keluar 2 lane dengan pembacaan e-Pass dan palang barrier gate otomatis.', 'icon' => 'fa-arrow-right-from-bracket', 'hw_id' => 9, 'hw_nama' => 'Automatic Barrier Gate & ANPR', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
-            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station', 'desc' => 'Bangunan jembatan timbang kendaraan kapasitas 80 ton bersertifikasi SOLAS VGM.', 'icon' => 'fa-scale-balanced', 'hw_id' => 6, 'hw_nama' => 'Weighbridge / VGM Scale 80t', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
+            ['id' => 'f_gate_in', 'nama' => 'Plaza Gate-In (6 Lajur IN-01..06)', 'desc' => 'Plaza gerbang masuk 6 lajur (IN-01..06) dilengkapi Kamera ANPR, OCR Portal, UHF RFID, Edge AI PC, dan 4 timbangan SOLAS 80T.', 'icon' => 'fa-arrow-right-to-bracket', 'hw_id' => 2, 'hw_nama' => 'Kamera OCR Kontainer Portal & ANPR', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
+            ['id' => 'f_gate_out', 'nama' => 'Plaza Gate-Out (4 Lajur OUT-01..04)', 'desc' => 'Plaza gerbang keluar 4 lajur (OUT-01..04) dengan verifikasi e-Pass CEISA dan palang barrier otomatis independen.', 'icon' => 'fa-arrow-right-from-bracket', 'hw_id' => 9, 'hw_nama' => 'Automatic Barrier Gate & ANPR', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
+            ['id' => 'f_weighbridge', 'nama' => 'Weighbridge Station 80T (4 Lajur)', 'desc' => '4 unit jembatan timbang baja 18m berkapasitas 80 ton bersertifikasi SOLAS VGM pada lajur IN-01, IN-02, IN-03 & IN-06.', 'icon' => 'fa-scale-balanced', 'hw_id' => 6, 'hw_nama' => 'Weighbridge / VGM Scale 80t', 'img' => 'assets/img/facilities/gatehouse_in.jpg'],
             ['id' => 'f_security_gate', 'nama' => 'Security Post 24 Jam', 'desc' => 'Pos keamanan gerbang utama, verifikasi dokumen surat jalan, dan penerbitan izin masuk.', 'icon' => 'fa-shield-halved', 'hw_id' => 7, 'hw_nama' => 'Long-Range UHF RFID Reader', 'img' => 'assets/img/facilities/security_gate.jpg'],
             ['id' => 'f_truck_queue', 'nama' => 'Parkir Truk Antrian', 'desc' => 'Area parkir tunggu (queuing yard) berkapasitas 40 truk trailer untuk mencegah antrean di jalan arteri.', 'icon' => 'fa-truck-moving', 'hw_id' => 17, 'hw_nama' => 'GPS Tracker Truck & Fleet', 'img' => 'assets/img/facilities/security_gate.jpg']
         ]
@@ -713,36 +713,50 @@ foreach ($zones_data as $z) {
                 <text x="818" y="150" fill="#16a34a" font-family="'Consolas', monospace" font-size="5.5" text-anchor="middle">AC &amp; WATER</text>
             </g>
 
-            <!-- Gatehouse Portal Complex (Kolom F, x=845..950) -->
+            <!-- Gatehouse Portal Complex 10 Lajur (6 In / 4 Out, Kolom F, x=845..950) -->
             <g id="gateLanes">
                 <rect x="845" y="50" width="105" height="140" fill="none" stroke="#0284c7" stroke-width="2" stroke-dasharray="8 4" rx="3"/>
                 <rect x="845" y="50" width="105" height="20" fill="#0284c7" rx="2"/>
-                <text x="897" y="63" fill="#ffffff" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">GATEHOUSE PORTAL COMPLEX</text>
+                <text x="897.5" y="63" fill="#ffffff" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">GATE PLAZA 6 IN • 4 OUT</text>
 
-                <!-- Lane 1 Inbound -->
+                <!-- 6 Lajur Inbound (IN-01..IN-06, x=848..906) -->
                 <g id="fac_f_gate_in" onclick="showFacilityDetails('f_gate_in', event)">
-                    <rect x="855" y="73" width="40" height="113" fill="url(#asphaltFill)" stroke="#38bdf8" stroke-width="1"/>
-                    <text x="862" y="150" fill="#38bdf8" font-size="7.5" font-family="'Consolas', monospace" font-weight="bold" transform="rotate(-90 862 150)">LANE 1 INBOUND (TRUK)</text>
-                    <polygon points="875,115 871,125 879,125" fill="#38bdf8"/>
+                    <rect x="848" y="73" width="58" height="113" fill="url(#asphaltFill)" stroke="#38bdf8" stroke-width="1"/>
+                    <text x="877" y="83" fill="#7dd3fc" font-size="5.5" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">IN-01..IN-06 (6 IN)</text>
+                    <!-- 6 Lajur Strip -->
+                    <rect x="850" y="87" width="8" height="95" fill="#0f172a" stroke="#0ea5e9" stroke-width="0.6"/>
+                    <rect x="859" y="87" width="8" height="95" fill="#0f172a" stroke="#0ea5e9" stroke-width="0.6"/>
+                    <rect x="868" y="87" width="8" height="95" fill="#0f172a" stroke="#0ea5e9" stroke-width="0.6"/>
+                    <rect x="877" y="87" width="8" height="95" fill="#0f172a" stroke="#38bdf8" stroke-width="0.6"/>
+                    <rect x="886" y="87" width="8" height="95" fill="#0f172a" stroke="#38bdf8" stroke-width="0.6"/>
+                    <rect x="895" y="87" width="8" height="95" fill="#0f172a" stroke="#0ea5e9" stroke-width="0.6"/>
+                    <polygon points="877,114 873,104 881,104" fill="#38bdf8"/>
                 </g>
 
-                <!-- Weighbridge 80t -->
+                <!-- 4 Weighbridge 80T SOLAS (IN-01, IN-02, IN-03, IN-06) -->
                 <g id="fac_f_weighbridge" onclick="showFacilityDetails('f_weighbridge', event)">
-                    <rect x="858" y="130" width="34" height="35" fill="url(#hatchReinforced)" stroke="#0f172a" stroke-width="1.8"/>
-                    <rect x="856" y="130" width="2" height="35" fill="#facc15"/>
-                    <rect x="892" y="130" width="2" height="35" fill="#facc15"/>
-                    <text x="875" y="151" fill="#0f172a" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">WB 80T</text>
+                    <rect x="850" y="130" width="8" height="32" fill="url(#hatchReinforced)" stroke="#facc15" stroke-width="0.9"/>
+                    <rect x="859" y="130" width="8" height="32" fill="url(#hatchReinforced)" stroke="#facc15" stroke-width="0.9"/>
+                    <rect x="868" y="130" width="8" height="32" fill="url(#hatchReinforced)" stroke="#facc15" stroke-width="0.9"/>
+                    <rect x="895" y="130" width="8" height="32" fill="url(#hatchReinforced)" stroke="#facc15" stroke-width="0.9"/>
+                    <rect x="849" y="164" width="56" height="10" fill="#fef08a" stroke="#0f172a" stroke-width="0.7" rx="1"/>
+                    <text x="877" y="171.5" fill="#0f172a" font-family="'Consolas', monospace" font-size="5.5" font-weight="bold" text-anchor="middle">4× WB 80T SOLAS</text>
                 </g>
 
-                <!-- Lane 2 Outbound -->
+                <!-- Island Divider Median Supervisor -->
+                <rect x="907" y="75" width="4" height="109" fill="#e2e8f0" stroke="#64748b" stroke-width="0.8"/>
+
+                <!-- 4 Lajur Outbound (OUT-01..OUT-04, x=912..947) -->
                 <g id="fac_f_gate_out" onclick="showFacilityDetails('f_gate_out', event)">
-                    <rect x="905" y="73" width="40" height="113" fill="url(#asphaltFill)" stroke="#f87171" stroke-width="1"/>
-                    <text x="930" y="135" fill="#f87171" font-size="7.5" font-family="'Consolas', monospace" font-weight="bold" transform="rotate(-90 930 135)">LANE 2 OUTBOUND</text>
-                    <polygon points="925,125 929,115 921,115" fill="#f87171"/>
+                    <rect x="912" y="73" width="35" height="113" fill="url(#asphaltFill)" stroke="#f87171" stroke-width="1"/>
+                    <text x="929.5" y="83" fill="#fda4af" font-size="5" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">OUT-01..04</text>
+                    <rect x="914" y="87" width="7" height="95" fill="#0f172a" stroke="#f87171" stroke-width="0.6"/>
+                    <rect x="922" y="87" width="7" height="95" fill="#0f172a" stroke="#f87171" stroke-width="0.6"/>
+                    <rect x="930" y="87" width="7" height="95" fill="#0f172a" stroke="#f87171" stroke-width="0.6"/>
+                    <rect x="938" y="87" width="7" height="95" fill="#0f172a" stroke="#f87171" stroke-width="0.6"/>
+                    <polygon points="929.5,112 933.5,122 925.5,122" fill="#f87171"/>
+                    <text x="929.5" y="171" fill="#fecdd3" font-size="5" font-family="'Consolas', monospace" font-weight="bold" text-anchor="middle">4 EXIT</text>
                 </g>
-
-                <!-- Island Divider -->
-                <rect x="898" y="78" width="4" height="105" fill="#e2e8f0" stroke="#94a3b8" stroke-width="0.8"/>
             </g>
 
             <!-- Truck Queue / Holding Yard (Kolom G, x=960..1150) -->

@@ -7,6 +7,9 @@
 require_once __DIR__ . '/../config/app.php';
 require_once __DIR__ . '/../config/connection.php';
 require_once __DIR__ . '/twin_state_helper.php';
+require_once __DIR__ . '/preadvice_helper.php';
+cidp_ensure_gate_schema($pdo);
+ensure_integration_schema($pdo);
 
 api_init_headers();
 
@@ -46,29 +49,64 @@ try {
             break;
 
         case 'add_container':
-            $container_number = $_POST['container_number'] ?? $input['container_number'] ?? null;
-            $size_type = $_POST['size_type'] ?? $input['size_type'] ?? null;
-            if (!$container_number || !$size_type) {
+            $container_number = strtoupper(trim((string)($_POST['container_number'] ?? $input['container_number'] ?? '')));
+            $size_type = trim((string)($_POST['size_type'] ?? $input['size_type'] ?? '40FT HIGH CUBE'));
+            if ($container_number === '' || $size_type === '') {
                 response(false, null, "container_number and size_type are required");
             }
-            
-            $iso_code = $_POST['iso_code'] ?? $input['iso_code'] ?? null;
-            $cargo_type = $_POST['cargo_type'] ?? $input['cargo_type'] ?? null;
-            $rfid_tag = $_POST['rfid_tag'] ?? $input['rfid_tag'] ?? null;
-            $sscc_code = $_POST['sscc_code'] ?? $input['sscc_code'] ?? null;
-            $gross_weight_kg = $_POST['gross_weight_kg'] ?? $input['gross_weight_kg'] ?? null;
-            $owner_company = $_POST['owner_company'] ?? $input['owner_company'] ?? null;
-            $seal_number = $_POST['seal_number'] ?? $input['seal_number'] ?? null;
-            $customs_status = $_POST['customs_status'] ?? $input['customs_status'] ?? null;
-            $block = $_POST['block'] ?? $input['block'] ?? null;
-            $bay = $_POST['bay'] ?? $input['bay'] ?? null;
-            $row = $_POST['row'] ?? $input['row'] ?? null;
-            $tier = $_POST['tier'] ?? $input['tier'] ?? null;
-            
-            $stmt = $pdo->prepare("INSERT INTO containers (container_number, size_type, iso_code, cargo_type, rfid_tag, sscc_code, gross_weight_kg, owner_company, seal_number, customs_status, block, bay, `row`, tier, status, gate_in_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'in_yard', NOW())");
-            $stmt->execute([$container_number, $size_type, $iso_code, $cargo_type, $rfid_tag, $sscc_code, $gross_weight_kg, $owner_company, $seal_number, $customs_status, $block, $bay, $row, $tier]);
-            
-            response(true, ["id" => $pdo->lastInsertId()], "Container added successfully");
+
+            $iso_code = $_POST['iso_code'] ?? $input['iso_code'] ?? (strpos($size_type, '20') !== false ? '22G1' : (stripos($size_type, 'REEFER') !== false ? '45R1' : '45G1'));
+            $cargo_type = strtolower(trim((string)($_POST['cargo_type'] ?? $input['cargo_type'] ?? 'dry')));
+            $rfid_tag = trim((string)($_POST['rfid_tag'] ?? $input['rfid_tag'] ?? ('RF-' . substr($container_number, -6))));
+            $sscc_code = trim((string)($_POST['sscc_code'] ?? $input['sscc_code'] ?? ''));
+            $gross_weight_kg = (float)($_POST['gross_weight_kg'] ?? $input['gross_weight_kg'] ?? 24500);
+            $owner_company = trim((string)($_POST['owner_company'] ?? $input['owner_company'] ?? 'PT Samudera Logistik Prima'));
+            $seal_number = trim((string)($_POST['seal_number'] ?? $input['seal_number'] ?? ('SL-' . str_pad((string)rand(10000, 99999), 5, '0'))));
+            $customs_status = trim((string)($_POST['customs_status'] ?? $input['customs_status'] ?? 'SPPB_CLEARED'));
+            $truck_plate = strtoupper(trim((string)($_POST['truck_plate'] ?? $input['truck_plate'] ?? ('B ' . rand(8000, 9999) . ' TE'))));
+            $do_number = trim((string)($_POST['do_number'] ?? $input['do_number'] ?? ('DO-' . date('Ymd') . '-' . rand(100, 999))));
+            $job_type = trim((string)($_POST['job_type'] ?? $input['job_type'] ?? 'drop_off'));
+            $anomaly_code = trim((string)($_POST['anomaly_code'] ?? $input['anomaly_code'] ?? ''));
+
+            // Zero-Entry Guarantee: data yang didaftarkan sebelum kedatangan SELALU berstatus 'expected' (di luar terminal)
+            // dan tanpa koordinat Yard (koordinat baru diisi oleh sensor DGPS Reach Stacker saat Stacking).
+            $stmt = $pdo->prepare("INSERT INTO containers (container_number, size_type, iso_code, cargo_type, rfid_tag, sscc_code, gross_weight_kg, owner_company, seal_number, customs_status, block, bay, `row`, tier, status, gate_in_time) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'OUTSIDE', NULL, NULL, NULL, 'expected', NULL) ON DUPLICATE KEY UPDATE size_type=VALUES(size_type), cargo_type=VALUES(cargo_type), gross_weight_kg=VALUES(gross_weight_kg), owner_company=VALUES(owner_company), seal_number=VALUES(seal_number), customs_status=VALUES(customs_status), block='OUTSIDE', bay=NULL, `row`=NULL, tier=NULL, status='expected', gate_in_time=NULL");
+            $stmt->execute([$container_number, $size_type, $iso_code, $cargo_type, $rfid_tag, $sscc_code, $gross_weight_kg, $owner_company, $seal_number, $customs_status]);
+            $cid = $pdo->lastInsertId();
+
+            $preCode = 'PA-' . strtoupper(substr(md5($container_number . microtime(true)), 0, 6));
+            $targetBlock = ($cargo_type === 'reefer') ? 'REEFER' : (($cargo_type === 'dg') ? 'DG' : (($cargo_type === 'empty') ? 'EMPTY' : (strpos($size_type, '20') !== false ? 'B' : 'A')));
+            $anomMeta = ($anomaly_code !== '') ? cidp_get_anomaly_meta($anomaly_code) : null;
+            $actualW = ($anomaly_code === 'VGM_OVERWEIGHT') ? round($gross_weight_kg * 1.35, 2) : $gross_weight_kg;
+
+            $paStmt = $pdo->prepare("INSERT INTO preadvice (pre_gate_code, truck_plate, rfid_tag, driver_name, company, job_type, do_number, container_number, iso_code, size_type, cargo_type, owner_company, target_block, eta, status, source, declared_weight_kg, actual_weight_kg, seal_number, actual_seal_ocr, anomaly_code, anomaly_title, anomaly_stage, anomaly_notes) VALUES (?, ?, ?, 'Driver Pre-Advice', ?, ?, ?, ?, ?, ?, ?, ?, ?, DATE_ADD(NOW(), INTERVAL 30 MINUTE), 'SCHEDULED', 'EDI-COPARN-FEED', ?, ?, ?, ?, ?, ?, ?, ?)");
+            $paStmt->execute([
+                $preCode,
+                $truck_plate,
+                $rfid_tag,
+                $owner_company,
+                in_array($job_type, ['drop_off', 'pick_up'], true) ? $job_type : 'drop_off',
+                $do_number,
+                $container_number,
+                $iso_code,
+                $size_type,
+                in_array($cargo_type, ['dry', 'reefer', 'dg', 'empty'], true) ? $cargo_type : 'dry',
+                $owner_company,
+                $targetBlock,
+                $gross_weight_kg,
+                $actualW,
+                $seal_number,
+                ($anomaly_code === 'SEAL_TAMPERED') ? 'TAMPERED-BROKEN' : $seal_number,
+                $anomaly_code !== '' ? $anomaly_code : null,
+                $anomMeta['anomaly_title'] ?? null,
+                $anomMeta['anomaly_stage'] ?? null,
+                $anomMeta['anomaly_notes'] ?? null
+            ]);
+
+            $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes) VALUES ('PRE_ADVICE_REGISTERED', ?, 'EXTERNAL', 'OUTSIDE', ?)")
+                ->execute([$container_number, "Manifest Pre-Advice eksternal {$preCode} diterima (status expected di luar terminal, menunggu trigger ANPR/OCR {$truck_plate})."]);
+
+            response(true, ["id" => $cid, "pre_gate_code" => $preCode, "status" => "expected"], "Manifest Pre-Advice {$container_number} ({$preCode}) terdaftar di luar terminal dan siap di-trigger oleh hardware Gate ANPR.");
             break;
 
         case 'update_container':
@@ -152,29 +190,39 @@ try {
             break;
             
         case 'add_truck':
-            $license_plate = $_POST['license_plate'] ?? $input['license_plate'] ?? null;
-            $driver_name = $_POST['driver_name'] ?? $input['driver_name'] ?? null;
-            $company = $_POST['company'] ?? $input['company'] ?? null;
+            $license_plate = strtoupper(trim((string)($_POST['license_plate'] ?? $input['license_plate'] ?? '')));
+            $driver_name = trim((string)($_POST['driver_name'] ?? $input['driver_name'] ?? ''));
+            $company = trim((string)($_POST['company'] ?? $input['company'] ?? ''));
             $job_type = $_POST['job_type'] ?? $input['job_type'] ?? 'drop_off';
-            $container_number = $_POST['container_number'] ?? $input['container_number'] ?? null;
-            $do_number = $_POST['do_number'] ?? $input['do_number'] ?? null;
-            $rfid_tag = $_POST['rfid_tag'] ?? $input['rfid_tag'] ?? null;
-            
-            if (!$license_plate || !$driver_name || !$company) {
+            $container_number = strtoupper(trim((string)($_POST['container_number'] ?? $input['container_number'] ?? '')));
+            $do_number = trim((string)($_POST['do_number'] ?? $input['do_number'] ?? ('DO-' . date('Ymd') . '-' . rand(100, 999))));
+            $rfid_tag = trim((string)($_POST['rfid_tag'] ?? $input['rfid_tag'] ?? ('RF-TRK-' . rand(1000, 9999))));
+            $target_block = strtoupper(trim((string)($_POST['target_block'] ?? $input['target_block'] ?? 'A')));
+
+            if ($license_plate === '' || $driver_name === '' || $company === '') {
                 response(false, null, "license_plate, driver_name, and company are required");
             }
-            
-            $stmt = $pdo->prepare("INSERT INTO trucks (license_plate, driver_name, company, job_type, container_number, do_number, rfid_tag, status, gate_in_time) VALUES (?, ?, ?, ?, ?, ?, ?, 'queuing', NOW())");
-            $stmt->execute([$license_plate, $driver_name, $company, $job_type, $container_number, $do_number, $rfid_tag]);
-            
-            // Also log to yard_events
+
+            // Truk terdaftar sebagai 'scheduled' (belum menyentuh portal Gate — gate_lane & gate_in_time baru terisi oleh sensor ANPR)
+            $stmt = $pdo->prepare("INSERT INTO trucks (license_plate, driver_name, company, job_type, container_number, do_number, rfid_tag, status, gate_lane, gate_in_time) VALUES (?, ?, ?, ?, ?, ?, ?, 'scheduled', NULL, NULL)");
+            $stmt->execute([$license_plate, $driver_name, $company, $job_type, $container_number !== '' ? $container_number : null, $do_number, $rfid_tag]);
+            $trkId = $pdo->lastInsertId();
+
+            $preCode = 'PA-' . strtoupper(substr(md5($license_plate . microtime(true)), 0, 6));
+            if ($container_number !== '') {
+                $pdo->prepare("INSERT IGNORE INTO containers (container_number, size_type, iso_code, cargo_type, rfid_tag, gross_weight_kg, owner_company, seal_number, customs_status, block, status) VALUES (?, '40FT HIGH CUBE', '45G1', 'dry', ?, 25500, ?, ?, 'SPPB_CLEARED', 'OUTSIDE', 'expected')")
+                    ->execute([$container_number, $rfid_tag, $company, 'SL-' . rand(10000, 99999)]);
+            }
+            $pdo->prepare("INSERT INTO preadvice (pre_gate_code, truck_plate, rfid_tag, driver_name, company, job_type, do_number, container_number, iso_code, size_type, cargo_type, owner_company, target_block, eta, status, source) VALUES (?, ?, ?, ?, ?, ?, ?, ?, '45G1', '40FT HIGH CUBE', 'dry', ?, ?, DATE_ADD(NOW(), INTERVAL 20 MINUTE), 'SCHEDULED', 'TMS-PRE-ADVICE')")
+                ->execute([$preCode, $license_plate, $rfid_tag, $driver_name, $company, in_array($job_type, ['drop_off', 'pick_up'], true) ? $job_type : 'drop_off', $do_number, $container_number !== '' ? $container_number : ('CONT' . rand(1000000, 9999999)), $company, $target_block]);
+
             try {
                 $jobDesc = ($job_type === 'pick_up') ? 'Ambil Kontainer (Pick-Up / Impor)' : 'Antar Kontainer (Drop-Off / Ekspor)';
-                $evtStmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes) VALUES ('TRUCK_ARRIVAL', ?, ?)");
-                $evtStmt->execute([$container_number, "Truk {$license_plate} ({$driver_name} - {$company}) tiba di Pre-Gate. Misi: {$jobDesc}."]);
+                $evtStmt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, notes) VALUES ('TRUCK_PREADVICE', ?, 'EXTERNAL', 'SCHEDULED', ?)");
+                $evtStmt->execute([$container_number !== '' ? $container_number : null, "Pre-Advice {$preCode}: Truk {$license_plate} ({$driver_name} - {$company}) terdaftar di luar gerbang. Misi: {$jobDesc}."]);
             } catch (Exception $e) {}
 
-            response(true, ["id" => $pdo->lastInsertId()], "Truck added successfully");
+            response(true, ["id" => $trkId, "pre_gate_code" => $preCode, "status" => "scheduled"], "Pre-Advice Truk {$license_plate} ({$preCode}) terdaftar; siap di-trigger kamera ANPR Gate.");
             break;
             
         case 'update_truck':
@@ -334,6 +382,12 @@ try {
             $is_reefer = (stripos($container_no, 'R') !== false || stripos($plate, '9144') !== false);
             if ($is_reefer) $block = 'REEFER';
 
+            $gate_lane = cidp_pick_gate_lane($pdo, 'IN', [
+                'lane'       => $_POST['gate_lane'] ?? $_POST['lane_id'] ?? $input['gate_lane'] ?? $input['lane_id'] ?? null,
+                'cargo_type' => $is_reefer ? 'reefer' : 'dry',
+                'block'      => $block,
+            ]);
+
             $pdo->beginTransaction();
 
             // 1. Cek atau Buat Truk
@@ -342,13 +396,13 @@ try {
             $trk = $stmtTrk->fetch(PDO::FETCH_ASSOC);
 
             if ($trk) {
-                $updTrk = $pdo->prepare("UPDATE trucks SET status = 'in_yard', container_number = ?, gate_in_time = NOW(), gate_out_time = NULL WHERE id = ?");
-                $updTrk->execute([$container_no, $trk['id']]);
+                $updTrk = $pdo->prepare("UPDATE trucks SET status = 'in_yard', container_number = ?, gate_lane = ?, gate_in_time = NOW(), gate_out_time = NULL WHERE id = ?");
+                $updTrk->execute([$container_no, $gate_lane, $trk['id']]);
                 $truck_id = $trk['id'];
             } else {
                 $rfid = 'RFID-TRK-' . rand(100, 999);
-                $insTrk = $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, container_number, status, gate_in_time) VALUES (?, ?, ?, ?, ?, 'in_yard', NOW())");
-                $insTrk->execute([$plate, $rfid, $driver, $company, $container_no]);
+                $insTrk = $pdo->prepare("INSERT INTO trucks (license_plate, rfid_tag, driver_name, company, container_number, status, gate_lane, gate_in_time) VALUES (?, ?, ?, ?, ?, 'in_yard', ?, NOW())");
+                $insTrk->execute([$plate, $rfid, $driver, $company, $container_no, $gate_lane]);
                 $truck_id = $pdo->lastInsertId();
             }
 
@@ -374,10 +428,10 @@ try {
                 $container_id = $pdo->lastInsertId();
             }
 
-            // 3. Catat ke yard_events
-            $evtMsg = "GATE-IN LANE 1: ANPR capture {$plate} MATCHED. OCR ISO 6346 {$container_no} VERIFIED. Timbangan 80T: {$gross_weight} kg (VGM SOLAS PASS). Barrier Gate OPEN. Alokasi Yard: Blok {$block}.";
-            $stmtEvt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, to_block, to_bay, to_row, to_tier, operator_name, billable_amount, notes) VALUES ('GATE_IN', ?, 'GATE-IN-L1', ?, '01', '01', '01', 'Petugas Gerbang & Timbangan', 50000.00, ?)");
-            $stmtEvt->execute([$container_no, $block, $evtMsg]);
+            // 3. Catat ke yard_events dengan kode lajur spesifik (IN-01..IN-06)
+            $evtMsg = "GATE-IN {$gate_lane}: ANPR capture {$plate} MATCHED. OCR ISO 6346 {$container_no} VERIFIED. Timbangan 80T: {$gross_weight} kg (VGM SOLAS PASS). Barrier Gate OPEN. Alokasi Yard: Blok {$block}.";
+            $stmtEvt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, to_block, to_bay, to_row, to_tier, operator_name, billable_amount, notes) VALUES ('GATE_IN', ?, ?, ?, '01', '01', '01', 'Petugas Gerbang & Timbangan', 50000.00, ?)");
+            $stmtEvt->execute([$container_no, $gate_lane, $block, $evtMsg]);
 
             $pdo->commit();
 
@@ -386,11 +440,12 @@ try {
                 'container_id' => $container_id,
                 'plate' => $plate,
                 'container' => $container_no,
+                'gate_lane' => $gate_lane,
                 'gross_weight' => $gross_weight,
                 'block' => $block,
                 'status' => 'in_yard',
                 'gate_in_time' => date('Y-m-d H:i:s')
-            ], "Gate-In terintegrasi sensor berhasil dicatat ke database!");
+            ], "Gate-In ({$gate_lane}) terintegrasi sensor berhasil dicatat ke database!");
             break;
 
         case 'advance_truck_status':
@@ -406,8 +461,14 @@ try {
             $is_pickup = ($trk['job_type'] === 'pick_up');
 
             if ($next_status === 'gate_out') {
-                $upd = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE id = ?");
-                $upd->execute([$id]);
+                $gate_out_lane = cidp_pick_gate_lane($pdo, 'OUT', [
+                    'lane'              => $_POST['gate_out_lane'] ?? $input['gate_out_lane'] ?? null,
+                    'job_type'          => $trk['job_type'] ?? 'drop_off',
+                    'block'             => $trk['target_block'] ?? '',
+                    'empty_chassis_out' => !$is_pickup,
+                ]);
+                $upd = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_lane = ?, gate_out_time = NOW() WHERE id = ?");
+                $upd->execute([$gate_out_lane, $id]);
 
                 // Jika truk bertugas Pick-Up, maka kontainer ikut keluar dari dry port!
                 if ($is_pickup && !empty($trk['container_number'])) {
@@ -416,12 +477,12 @@ try {
                 }
 
                 // Log event
-                $stmtEvt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes) VALUES ('GATE_OUT', ?, ?)");
+                $stmtEvt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes) VALUES ('GATE_OUT', ?, ?, ?)");
                 $actNotes = $is_pickup 
-                    ? "Truk {$trk['license_plate']} GATE-OUT membawa kontainer {$trk['container_number']} keluar dari dry port (Pick-Up Selesai)."
-                    : "Truk {$trk['license_plate']} GATE-OUT sasis kosong setelah menurunkan kontainer di yard (Drop-Off Selesai).";
-                $stmtEvt->execute([$trk['container_number'], $actNotes]);
-                $msg = "Truk {$trk['license_plate']} berhasil Gate-Out (" . ($is_pickup ? "Membawa Kontainer {$trk['container_number']} Keluar" : "Sasis Kosong") . ").";
+                    ? "[{$gate_out_lane}] Truk {$trk['license_plate']} GATE-OUT membawa kontainer {$trk['container_number']} keluar dari dry port (Pick-Up Selesai)."
+                    : "[{$gate_out_lane}] Truk {$trk['license_plate']} GATE-OUT sasis kosong setelah menurunkan kontainer di yard (Drop-Off Selesai).";
+                $stmtEvt->execute([$trk['container_number'], $gate_out_lane, $actNotes]);
+                $msg = "Truk {$trk['license_plate']} berhasil Gate-Out di {$gate_out_lane} (" . ($is_pickup ? "Membawa Kontainer {$trk['container_number']} Keluar" : "Sasis Kosong") . ").";
             } elseif ($next_status === 'queuing') {
                 // Truk masuk antrian lagi untuk ritase baru
                 $upd = $pdo->prepare("UPDATE trucks SET status = 'queuing', gate_in_time = NULL, gate_out_time = NULL WHERE id = ?");
@@ -442,8 +503,11 @@ try {
                 $stmtEvt->execute([$liftType, $trk['container_number'], $liftNotes]);
                 $msg = "Truk {$trk['license_plate']} proses " . ($is_pickup ? "Lift-On (Ambil Kontainer)" : "Lift-Off (Bongkar Kontainer)") . ".";
             } elseif ($next_status === 'in_yard') {
-                $upd = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = IFNULL(gate_in_time, NOW()) WHERE id = ?");
-                $upd->execute([$id]);
+                $gate_lane = !empty($trk['gate_lane'])
+                    ? cidp_normalize_gate_lane($trk['gate_lane'], 'IN')
+                    : cidp_pick_gate_lane($pdo, 'IN', ['job_type' => $trk['job_type'] ?? 'drop_off', 'block' => $trk['target_block'] ?? '']);
+                $upd = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_lane = COALESCE(gate_lane, ?), gate_in_time = IFNULL(gate_in_time, NOW()) WHERE id = ?");
+                $upd->execute([$gate_lane, $id]);
 
                 // Jika drop-off, pastikan kontainer status in_yard
                 if (!$is_pickup && !empty($trk['container_number'])) {
@@ -451,9 +515,9 @@ try {
                     $updCtr->execute([$trk['container_number']]);
                 }
 
-                $stmtEvt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, notes) VALUES ('GATE_IN', ?, ?)");
-                $stmtEvt->execute([$trk['container_number'], "Truk {$trk['license_plate']} masuk ke terminal yard (" . ($is_pickup ? "Ambil Barang / Pick-Up" : "Antar Barang / Drop-Off") . ")."]);
-                $msg = "Truk {$trk['license_plate']} status diubah ke In-Yard (" . ($is_pickup ? "Pick-Up" : "Drop-Off") . ").";
+                $stmtEvt = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, notes) VALUES ('GATE_IN', ?, ?, ?)");
+                $stmtEvt->execute([$trk['container_number'], $gate_lane, "[{$gate_lane}] Truk {$trk['license_plate']} masuk ke terminal yard (" . ($is_pickup ? "Ambil Barang / Pick-Up" : "Antar Barang / Drop-Off") . ")."]);
+                $msg = "Truk {$trk['license_plate']} status diubah ke In-Yard lewat {$gate_lane} (" . ($is_pickup ? "Pick-Up" : "Drop-Off") . ").";
             } else {
                 response(false, null, "Status tidak valid");
             }

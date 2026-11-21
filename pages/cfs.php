@@ -109,31 +109,45 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
             $action_alert = ['type' => 'error', 'title' => 'Gagal Menutup Job Order', 'msg' => $e->getMessage()];
         }
     } elseif ($cfs_action === 'add_pallet') {
-        $sscc      = trim($_POST['pallet_sscc'] ?? '00189912001' . rand(100000000, 999999999));
+        $sscc      = trim($_POST['pallet_sscc'] ?? '');
+        if ($sscc === '') {
+            $b17 = '0018991200' . str_pad((string)mt_rand(1000000, 9999999), 7, '0', STR_PAD_LEFT);
+            $sscc = $b17 . gs1_check_digit($b17);
+        }
         $commodity = trim($_POST['commodity_name'] ?? 'Kargo Umum LCL');
         $consignee = trim($_POST['consignee'] ?? 'PT Penerima Logistik');
         $category  = trim($_POST['category'] ?? 'general');
         $cartons   = intval($_POST['carton_count'] ?? 20);
         $weight    = floatval($_POST['gross_weight_kg'] ?? 400.0);
         $cbm       = floatval($_POST['cbm'] ?? 1.2);
-        $rack      = trim($_POST['rack_location'] ?? 'AISLE-A-01-L1');
+        $rackReq   = trim($_POST['rack_location'] ?? 'AISLE-A-01-L1');
         $ctr_orig  = strtoupper(trim($_POST['container_origin'] ?? 'MSKU8821940'));
 
         try {
             if (isset($pdo)) {
+                $alloc = cfs_allocate_or_validate_rack($pdo, $rackReq, true);
+                if (!$alloc['ok']) {
+                    throw new Exception($alloc['message'] ?? 'Slot rak Gudang CFS penuh.');
+                }
+                $rack = $alloc['code'];
+
                 $stmt = $pdo->prepare("
-                    INSERT INTO cfs_pallets (pallet_sscc, container_origin, commodity_name, consignee, category, carton_count, gross_weight_kg, cbm, rack_location, status, entry_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'IN_RACK', NOW())
+                    INSERT INTO cfs_pallets (pallet_sscc, container_origin, commodity_name, consignee, category, carton_count, gross_weight_kg, cbm, rack_location, customs_doc, customs_status, status, entry_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'SPPB-CEISA', 'CLEARED', 'IN_RACK', NOW())
                 ");
                 $stmt->execute([$sscc, $ctr_orig, $commodity, $consignee, $category, $cartons, $weight, $cbm, $rack]);
                 $pdo->prepare("UPDATE cfs_jobs SET total_packages = total_packages + 1, total_weight_kg = total_weight_kg + ?, total_cbm = total_cbm + ? WHERE container_number = ? AND status = 'IN_PROGRESS'")->execute([$weight, $cbm, $ctr_orig]);
                 accrue_billing($pdo, $ctr_orig, "CFS LCL Pallet Handling ($sscc)", 'cfs_amount', 35000);
+                cfs_sync_master_lokasi($pdo);
                 get_live_twin_state($pdo, true);
+            } else {
+                $rack = $rackReq;
             }
+            $noteFb = !empty($alloc['fallback_used']) ? " (Slot {$rackReq} penuh; otomatis dialihkan ke slot kosong {$rack})" : "";
             $action_alert = [
                 'type' => 'success',
-                'title' => 'Palet Baru Teregistrasi (GS1 SSCC)',
-                'msg' => "Palet dengan nomor SSCC <strong>$sscc</strong> berhasil ditempatkan di <strong>$rack</strong>."
+                'title' => 'Palet Baru Teregistrasi (GS1 SSCC & Master Lokasi SSoT)',
+                'msg' => "Palet dengan nomor SSCC <strong>$sscc</strong> berhasil ditempatkan di <strong>$rack</strong>{$noteFb}. Layout Gudang 6 Blok langsung ter-update."
             ];
         } catch (Exception $e) {
             $action_alert = [
@@ -219,30 +233,45 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
         $cartons   = intval($_POST['carton_count'] ?? 36);
         $weight    = floatval($_POST['gross_weight_kg'] ?? 485.5);
         $cbm       = floatval($_POST['cbm'] ?? 1.35);
-        $rack      = trim($_POST['rack_location'] ?? 'AISLE-B-04-L1');
-        $sscc      = '0018991200' . rand(1000000000, 9999999999);
+        $rackReq   = trim($_POST['rack_location'] ?? 'AISLE-B-04-L1');
+        $b17       = '0018991200' . str_pad((string)mt_rand(1000000, 9999999), 7, '0', STR_PAD_LEFT);
+        $sscc      = $b17 . gs1_check_digit($b17);
 
         try {
             if (isset($pdo)) {
+                $alloc = cfs_allocate_or_validate_rack($pdo, $rackReq, true);
+                if (!$alloc['ok']) {
+                    throw new Exception($alloc['message'] ?? 'Seluruh slot rak Gudang CFS penuh.');
+                }
+                $rack = $alloc['code'];
+
                 $stmt = $pdo->prepare("
-                    INSERT INTO cfs_pallets (pallet_sscc, container_origin, commodity_name, consignee, category, carton_count, gross_weight_kg, cbm, rack_location, status, entry_date)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'IN_RACK', NOW())
+                    INSERT INTO cfs_pallets (pallet_sscc, container_origin, commodity_name, consignee, category, carton_count, gross_weight_kg, cbm, rack_location, customs_doc, customs_status, status, entry_date)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'SPPB-CEISA', 'CLEARED', 'IN_RACK', NOW())
                 ");
                 $stmt->execute([$sscc, $ctr_orig, $commodity, $consignee, $category, $cartons, $weight, $cbm, $rack]);
                 $pdo->prepare("UPDATE cfs_jobs SET total_packages = total_packages + 1, total_weight_kg = total_weight_kg + ?, total_cbm = total_cbm + ? WHERE container_number = ? AND status = 'IN_PROGRESS'")->execute([$weight, $cbm, $ctr_orig]);
                 accrue_billing($pdo, $ctr_orig, "CFS LCL Pallet Handling ($sscc)", 'cfs_amount', 35000);
+                cfs_sync_master_lokasi($pdo);
+
+                $shortPal = 'SSCC-' . substr($sscc, -4);
+                $pdo->prepare("UPDATE equipment SET status = 'operating', current_container = ?, last_block = 'CFS', gps_x = 136.0, gps_y = 236.0, last_updated = NOW() WHERE equipment_id = 'FL-01'")->execute([$shortPal]);
+                $pdo->prepare("UPDATE equipment SET status = 'carrying', current_container = ?, last_block = 'CFS', gps_x = 92.0, gps_y = 308.0, last_updated = NOW() WHERE equipment_id = 'FL-04'")->execute([$shortPal]);
 
                 $stmtLog = $pdo->prepare("
-                    INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at)
-                    VALUES ('PALLET_WEIGHED', ?, 'HW-21 Floor Scale 3T', 35000, ?, NOW())
+                    INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes, created_at)
+                    VALUES ('PALLET_WEIGHED', ?, 'FL-01', 'HW-21 Floor Scale 3T', 35000, ?, NOW())
                 ");
-                $stmtLog->execute([$ctr_orig, "Penimbangan & pengukuran CBM palet SSCC $sscc ($weight kg / $cbm CBM)"]);
+                $stmtLog->execute([$ctr_orig, "Penimbangan & pengukuran CBM palet SSCC $sscc ($weight kg / $cbm CBM) -> masuk rak $rack"]);
                 get_live_twin_state($pdo, true);
+            } else {
+                $rack = $rackReq;
             }
+            $noteFb = !empty($alloc['fallback_used']) ? " (dialihkan ke slot kosong)" : "";
             $action_alert = [
                 'type' => 'success',
                 'title' => '⚡ HW-21 Floor Scale & 3D Pallet Dimensioner Terpicu',
-                'msg' => "Sensor membaca bobot kargo <strong>{$weight} kg</strong> dan kubikasi <strong>{$cbm} CBM</strong> ($cartons karton). Label GS1 SSCC <strong>(00) $sscc</strong> diterbitkan dan palet otomatis dialokasikan ke <strong>$rack</strong> di database!"
+                'msg' => "Sensor membaca bobot kargo <strong>{$weight} kg</strong> dan kubikasi <strong>{$cbm} CBM</strong> ($cartons karton). Label GS1 SSCC <strong>(00) $sscc</strong> diterbitkan ke rak <strong>$rack</strong>{$noteFb} dan menyala di Layout Gudang 6 Blok!"
             ];
         } catch (Exception $e) {
             $action_alert = [
@@ -253,21 +282,41 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['cfs_action
         }
     } elseif ($cfs_action === 'trigger_hht_scan') {
         $sscc      = trim($_POST['pallet_sscc'] ?? '');
-        $target_rk = trim($_POST['target_rack'] ?? 'AISLE-E-02-L2');
+        $targetReq = trim($_POST['target_rack'] ?? 'AISLE-E-02-L2');
 
         try {
             if (isset($pdo) && !empty($sscc)) {
-                $stmtUp = $pdo->prepare("UPDATE cfs_pallets SET rack_location = ?, status = 'IN_RACK' WHERE pallet_sscc = ?");
-                $stmtUp->execute([$target_rk, $sscc]);
+                $alloc = cfs_allocate_or_validate_rack($pdo, $targetReq, true);
+                if (!$alloc['ok']) {
+                    throw new Exception($alloc['message'] ?? 'Seluruh slot rak Gudang CFS penuh.');
+                }
+                $target_rk = $alloc['code'];
 
-                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, operator_name, notes, created_at) VALUES ('HHT_TALLY_SCAN', 'HW-19 Zebra TC26', ?, NOW())");
-                $stmtLog->execute(["Pemindaian barcode SSCC $sscc oleh HHT Zebra TC26. Palet diverifikasi masuk rak $target_rk."]);
+                $chkExist = $pdo->prepare("SELECT id, container_origin FROM cfs_pallets WHERE pallet_sscc = ? LIMIT 1");
+                $chkExist->execute([$sscc]);
+                $exRow = $chkExist->fetch(PDO::FETCH_ASSOC);
+                if ($exRow) {
+                    $pdo->prepare("UPDATE cfs_pallets SET rack_location = ?, status = 'IN_RACK' WHERE id = ?")->execute([$target_rk, $exRow['id']]);
+                    $relCtr = $exRow['container_origin'] ?: 'ONEU6612988';
+                } else {
+                    $relCtr = 'ONEU6612988';
+                    $pdo->prepare("INSERT INTO cfs_pallets (pallet_sscc, container_origin, commodity_name, consignee, category, carton_count, gross_weight_kg, cbm, rack_location, customs_doc, customs_status, status, entry_date) VALUES (?, ?, 'Kargo Scan HHT Zebra', 'Customer LCL CIDP', 'general', 24, 420.0, 1.25, ?, 'SPPB-CEISA', 'CLEARED', 'IN_RACK', NOW())")
+                        ->execute([$sscc, $relCtr, $target_rk]);
+                }
+
+                cfs_sync_master_lokasi($pdo);
+                $pdo->prepare("UPDATE equipment SET status = 'carrying', current_container = ?, last_block = 'CFS', gps_x = 92.0, gps_y = 308.0, last_updated = NOW() WHERE equipment_id = 'FL-04'")->execute(['SSCC-' . substr($sscc, -4)]);
+
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, notes, created_at) VALUES ('HHT_TALLY_SCAN', ?, 'FL-04', 'HW-19 Zebra TC26', ?, NOW())");
+                $stmtLog->execute([$relCtr, "Pemindaian barcode SSCC $sscc oleh HHT Zebra TC26. Palet diverifikasi masuk rak $target_rk."]);
                 get_live_twin_state($pdo, true);
+            } else {
+                $target_rk = $targetReq;
             }
             $action_alert = [
                 'type' => 'success',
                 'title' => '⚡ HW-19 Handheld Barcode Scanner (HHT) Terpicu',
-                'msg' => "Barcode GS1 SSCC <strong>$sscc</strong> berhasil dipindai via laser optic. Status palet terverifikasi masuk ke rak <strong>$target_rk</strong> dan log tally telah dicatat."
+                'msg' => "Barcode GS1 SSCC <strong>$sscc</strong> berhasil dipindai via laser optic. Status palet terverifikasi masuk ke rak <strong>$target_rk</strong> di Master Lokasi."
             ];
         } catch (Exception $e) {
             $action_alert = [
@@ -386,6 +435,7 @@ foreach ($blok_list as $b) {
 
 $emptySlot = $totalSlot - $filledSlot;
 $occupancy = $totalSlot > 0 ? round(($filledSlot / $totalSlot) * 100, 1) : 0;
+$cfs_initial_twin = (isset($pdo) && $pdo instanceof PDO) ? get_live_twin_state($pdo, true) : [];
 
 // Fallback Data Demo jika database masih kosong
 if (false && empty($cfs_jobs)) {
@@ -966,7 +1016,7 @@ $active_docks_count = 4;
                         <button onclick="openTallyModal('<?= $dock_id ?>', '<?= $dock['ctr'] ?>', '<?= $dock['status'] ?>')" class="px-2 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-[10px] font-bold rounded-lg transition text-center" title="Update Progres Tally">
                             <i class="fa-solid fa-plus-minus mr-1"></i> Tally
                         </button>
-                        <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin menyelesaikan dan menutup Job Order di Rampa <?= $dock_id ?>?');">
+                        <form method="POST" data-confirm="Apakah Anda yakin ingin menyelesaikan dan menutup Job Order di Rampa <?= htmlspecialchars($dock_id) ?>?" data-confirm-title="Konfirmasi Tutup Job Order CFS" data-confirm-target="Rampa <?= htmlspecialchars($dock_id) ?>" data-confirm-tone="warning">
                             <input type="hidden" name="cfs_action" value="complete_job">
                             <input type="hidden" name="job_id" value="<?= ($dock_id === 'D1' ? 1 : ($dock_id === 'D2' ? 2 : ($dock_id === 'D4' ? 3 : 4))) ?>">
                             <button type="submit" class="w-full px-2 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-bold rounded-lg transition text-center shadow-xs">
@@ -1061,12 +1111,14 @@ $active_docks_count = 4;
                         $status_badge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                         if ($p['status'] === 'STAGING_OUT') $status_badge = 'bg-blue-50 text-blue-700 border-blue-200';
                         if ($p['status'] === 'HOLD') $status_badge = 'bg-red-50 text-red-700 border-red-200';
+                        if ($p['status'] === 'DISPATCHED') $status_badge = 'bg-slate-100 text-slate-500 border-slate-200';
 
                         $customs_badge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
                         if ($p['customs_status'] === 'RED_LANE') $customs_badge = 'bg-red-50 text-red-700 border-red-200';
                         if ($p['customs_status'] === 'HOLD') $customs_badge = 'bg-amber-50 text-amber-700 border-amber-200';
                     ?>
-                    <tr class="hover:bg-orange-50/40 transition-colors pallet-row" 
+                    <tr class="hover:bg-orange-50/40 transition-colors pallet-row"
+                        data-sscc="<?= htmlspecialchars($p['pallet_sscc']) ?>"
                         data-aisle="<?= substr($p['rack_location'], 0, 7) ?>" 
                         data-category="<?= $p['category'] ?>"
                         data-search="<?= strtolower($p['pallet_sscc'] . ' ' . $p['commodity_name'] . ' ' . $p['consignee'] . ' ' . ($p['container_origin'] ?? '') . ' ' . $p['rack_location']) ?>">
@@ -1099,7 +1151,7 @@ $active_docks_count = 4;
 
                         <!-- Rack Location -->
                         <td class="py-3 px-3.5 text-center">
-                            <span class="px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 font-mono font-bold text-[11px]">
+                            <span class="px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 font-mono font-bold text-[11px]" data-rack-badge>
                                 <?= $p['rack_location'] ?>
                             </span>
                         </td>
@@ -1125,7 +1177,7 @@ $active_docks_count = 4;
 
                         <!-- Rack Status -->
                         <td class="py-3 px-3.5 text-center">
-                            <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold border <?= $status_badge ?>">
+                            <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold border <?= $status_badge ?>" data-status-badge>
                                 <?= str_replace('_', ' ', $p['status']) ?>
                             </span>
                         </td>
@@ -1133,10 +1185,18 @@ $active_docks_count = 4;
                         <!-- Action -->
                         <td class="py-3 px-3.5 text-center">
                             <div class="flex items-center justify-center space-x-1">
-                                <button onclick="showGs1LabelModal('<?= $p['pallet_sscc'] ?>', '<?= htmlspecialchars(addslashes($p['commodity_name'])) ?>', '<?= htmlspecialchars(addslashes($p['consignee'])) ?>', '<?= $p['rack_location'] ?>', '<?= $p['carton_count'] ?>', '<?= $p['gross_weight_kg'] ?>')" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-orange-50 hover:text-orange-600 text-gray-600 transition flex items-center justify-center text-xs cursor-pointer" title="Cetak Label Barcode GS1-128">
+                                <?php if ($p['status'] === 'IN_RACK' || $p['status'] === 'STAGING_OUT'): ?>
+                                    <button type="button" onclick="openRelocatePalletModal('<?= htmlspecialchars($p['pallet_sscc']) ?>', '<?= htmlspecialchars($p['rack_location']) ?>', '<?= htmlspecialchars(addslashes($p['commodity_name'])) ?>')" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0170b9] transition flex items-center justify-center text-xs cursor-pointer" title="Pindahkan Slot Rak (Relokasi Real-Time)">
+                                        <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                                    </button>
+                                    <button type="button" onclick="cfsQuickDispatch('<?= htmlspecialchars($p['pallet_sscc']) ?>')" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition flex items-center justify-center text-xs cursor-pointer" title="Keluarkan / Dispatch Palet Keluar Gudang">
+                                        <i class="fa-solid fa-truck-ramp-box"></i>
+                                    </button>
+                                <?php endif; ?>
+                                <button type="button" onclick="showGs1LabelModal('<?= $p['pallet_sscc'] ?>', '<?= htmlspecialchars(addslashes($p['commodity_name'])) ?>', '<?= htmlspecialchars(addslashes($p['consignee'])) ?>', '<?= $p['rack_location'] ?>', '<?= $p['carton_count'] ?>', '<?= $p['gross_weight_kg'] ?>')" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-orange-50 hover:text-orange-600 text-gray-600 transition flex items-center justify-center text-xs cursor-pointer" title="Cetak Label Barcode GS1-128">
                                     <i class="fa-solid fa-print"></i>
                                 </button>
-                                <button onclick="openScannerPage('<?= $p['pallet_sscc'] ?>')" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-purple-50 hover:text-purple-600 text-gray-600 transition flex items-center justify-center text-xs" title="Verifikasi dengan Scanner GS1">
+                                <button type="button" onclick="openScannerPage('<?= $p['pallet_sscc'] ?>')" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-purple-50 hover:text-purple-600 text-gray-600 transition flex items-center justify-center text-xs cursor-pointer" title="Verifikasi dengan Scanner GS1">
                                     <i class="fa-solid fa-qrcode"></i>
                                 </button>
                             </div>
@@ -1686,12 +1746,16 @@ $active_docks_count = 4;
             }
         </style>
 
-        <!-- Header & Kontrol Denah Master Plan Arsitektur & Sipil (Sesuai Denah 35 Ha) -->
+        <!-- Header & Kontrol Denah Master Plan Arsitektur & Sipil (Real-Time SSoT) -->
         <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 mb-4 pb-3 border-b border-gray-200">
             <div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-blue-50 text-[#0170b9] border border-blue-200">
                         DWG: CIDP-CFS-STR-01 &bull; REV. 2.4
+                    </span>
+                    <span id="cfsLiveStreamBadge" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span id="cfsLiveStreamText">Live SSE Sync (SSoT)</span>
                     </span>
                     <h3 class="text-sm sm:text-base font-bold text-gray-800 uppercase tracking-tight flex items-center gap-2">
                         <i class="fa-solid fa-warehouse text-[#0170b9]"></i>
@@ -1699,21 +1763,30 @@ $active_docks_count = 4;
                     </h3>
                 </div>
                 <p class="text-xs text-gray-500 mt-0.5">
-                    50 × 80 m &bull; 6 Blok Rak &bull; Rampa D1–D5
+                    50 &times; 80 m &bull; 6 Blok &times; 6 Sektor (A–F) &times; 4 Level Rak &bull; Klik sektor untuk inspeksi R1–R4, putaway cepat, atau dispatch
                 </p>
             </div>
 
-            <!-- View Mode Switcher -->
-            <div class="flex items-center gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200">
-                <button type="button" id="btnViewGrid" onclick="switchWarehouseView('grid')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-[#0170b9] text-white shadow-xs">
-                    <i class="fa-solid fa-table-cells-large"></i>
-                    <span>Master Layout 6 Blok</span>
-                </button>
-                <button type="button" id="btnViewCad" onclick="switchWarehouseView('cad')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-transparent text-gray-700 hover:bg-white">
-                    <i class="fa-solid fa-compass-drafting"></i>
-                    <span>Blueprint CAD (50x80m)</span>
-                </button>
+            <!-- Pintasan Operasional Gudang & Digital Twin -->
+            <div class="flex items-center gap-2 flex-wrap">
+                <a href="master_rak.php" target="_blank" class="px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">
+                    <i class="fa-solid fa-table-list text-[#0170b9]"></i>
+                    <span>Master Rak (144 Slot)</span>
+                </a>
+                <a href="dashboard.php?page=twin&view=cfs" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-[#0170b9] hover:bg-blue-700 text-white shadow-xs">
+                    <i class="fa-solid fa-cubes"></i>
+                    <span>Pantau 3D Gudang di Digital Twin</span>
+                </a>
             </div>
+        </div>
+
+        <!-- Live Update Toast Banner inside Warehouse Layout -->
+        <div id="cfsLayoutToast" class="hidden mb-3 p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center justify-between gap-2 animate-fadeIn">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-orange-500"></i>
+                <span id="cfsLayoutToastMsg" class="font-semibold">Mutasi slot rak gudang terdeteksi real-time.</span>
+            </div>
+            <button type="button" onclick="document.getElementById('cfsLayoutToast').classList.add('hidden')" class="text-emerald-700 hover:text-emerald-950 font-bold text-xs cursor-pointer">&times;</button>
         </div>
 
         <!-- ===================================================================== -->
@@ -1749,36 +1822,36 @@ $active_docks_count = 4;
                         <!-- FLOW STRIP -->
                         <div class="flow-strip">
                             <div class="flow-step"><i class="fas fa-arrow-circle-down text-emerald-600"></i> INBOUND</div>
-                            <div class="flow-arrow">→</div>
+                            <div class="flow-arrow">&rarr;</div>
                             <div class="flow-step"><i class="fas fa-search text-cyan-600"></i> CHECK / RECEIVE</div>
-                            <div class="flow-arrow">→</div>
+                            <div class="flow-arrow">&rarr;</div>
                             <div class="flow-step"><i class="fas fa-warehouse text-amber-500"></i> STORAGE</div>
-                            <div class="flow-arrow">→</div>
+                            <div class="flow-arrow">&rarr;</div>
                             <div class="flow-step"><i class="fas fa-hand-paper text-purple-600"></i> PICK + PACK</div>
-                            <div class="flow-arrow">→</div>
+                            <div class="flow-arrow">&rarr;</div>
                             <div class="flow-step"><i class="fas fa-truck text-emerald-600"></i> OUTBOUND</div>
                         </div>
 
                         <!-- MAIN FORKLIFT CORRIDOR -->
                         <div class="forklift-corridor">
-                            <div class="lane-label">Forklift Corridor / Jalur Forklift</div>
+                            <div class="lane-label">Forklift Corridor / Jalur Forklift (FL-01, FL-03, FL-04)</div>
                         </div>
 
                         <!-- STORAGE 6 BLOK -->
                         <div class="storage-zone">
                             <div class="storage-zone-title">
-                                <span>Storage Zone - 6 Main Blocks (Blok 6 Reserved for Expansion)</span>
+                                <span>Storage Zone - 6 Main Blocks (Klik Sektor A–F untuk Inspeksi &amp; Operasi Rak Live)</span>
                             </div>
 
-                            <div class="storage-grid">
+                            <div class="storage-grid" id="cfsMasterStorageGrid">
                                 <?php foreach ($blok_list as $b): ?>
                                     <?php $isReserveBlock = ($b === '6'); ?>
-                                    <div class="blok-wrapper">
+                                    <div class="blok-wrapper" data-blok-wrap="<?= htmlspecialchars($b); ?>">
                                         <div class="blok-title">BLOK <?= htmlspecialchars($b); ?></div>
 
                                         <div class="blok-meta">
                                             <?php if ($isReserveBlock): ?>
-                                                <div class="meta-chip reserve">Expansion Ready</div>
+                                                <div class="meta-chip reserve">Expansion / Staging</div>
                                             <?php endif; ?>
                                         </div>
 
@@ -1804,23 +1877,27 @@ $active_docks_count = 4;
                                                 }
 
                                                 $searchCode = $s . $b;
-                                                $titleText = "Blok {$b} - Sektor {$s} ({$filledCount}/{$maxRak} terisi)";
+                                                $titleText = "Blok {$b} - Sektor {$s} ({$filledCount}/{$maxRak} terisi) • Klik untuk inspeksi R1–R{$maxRak}";
                                             ?>
                                                 <a
+                                                    id="cfsRackUnit-<?= htmlspecialchars($b); ?>-<?= htmlspecialchars($s); ?>"
+                                                    data-blok="<?= htmlspecialchars($b); ?>"
+                                                    data-sektor="<?= htmlspecialchars($s); ?>"
                                                     href="master_rak.php?search=<?= urlencode($searchCode); ?>"
+                                                    onclick="openCfsSectorModal('<?= htmlspecialchars($b); ?>', '<?= htmlspecialchars($s); ?>'); return false;"
                                                     class="rack-unit <?= $stateClass; ?>"
                                                     title="<?= htmlspecialchars($titleText); ?>"
                                                 >
                                                     <span class="unit-name"><?= htmlspecialchars($s); ?></span>
 
-                                                    <div class="stack-dots">
+                                                    <div class="stack-dots" id="cfsRackDots-<?= htmlspecialchars($b); ?>-<?= htmlspecialchars($s); ?>">
                                                         <?php foreach ($levels as $r => $isFilled): ?>
-                                                            <div class="dot <?= ($isFilled) ? 'fill' : ''; ?>"></div>
+                                                            <div class="dot <?= ($isFilled) ? 'fill' : ''; ?>" data-rak="<?= (int)$r ?>"></div>
                                                         <?php endforeach; ?>
                                                     </div>
 
                                                     <div class="unit-code">R1 - R<?= $maxRak; ?></div>
-                                                    <div class="unit-count"><?= $filledCount; ?>/<?= $maxRak; ?></div>
+                                                    <div class="unit-count" id="cfsRackCount-<?= htmlspecialchars($b); ?>-<?= htmlspecialchars($s); ?>"><?= $filledCount; ?>/<?= $maxRak; ?></div>
                                                 </a>
                                             <?php endforeach; ?>
                                         </div>
@@ -1862,7 +1939,7 @@ $active_docks_count = 4;
                     <!-- LEGEND & REAL-TIME SUMMARY -->
                     <div class="legend-panel">
                         <div class="legend-card">
-                            <div class="legend-title">Keterangan Layout &amp; Status Rak</div>
+                            <div class="legend-title">Keterangan Layout &amp; Status Rak (Real-Time SSoT)</div>
                             <div class="legend-list">
                                 <div class="legend-item">
                                     <span class="legend-badge badge-red"></span>
@@ -1906,31 +1983,31 @@ $active_docks_count = 4;
 
                             <div class="summary-grid">
                                 <div class="summary-box">
-                                    <div class="summary-value"><?= $totalBlok; ?></div>
+                                    <div class="summary-value" id="cfsSumBlok"><?= $totalBlok; ?></div>
                                     <div class="summary-label">Blok</div>
                                 </div>
 
                                 <div class="summary-box">
-                                    <div class="summary-value"><?= $totalSektor; ?></div>
+                                    <div class="summary-value" id="cfsSumSektor"><?= $totalSektor; ?></div>
                                     <div class="summary-label">Sektor</div>
                                 </div>
 
                                 <div class="summary-box">
-                                    <div class="summary-value"><?= $filledSlot; ?></div>
+                                    <div class="summary-value text-rose-600" id="cfsSumTerisi"><?= $filledSlot; ?></div>
                                     <div class="summary-label">Terisi</div>
                                 </div>
 
                                 <div class="summary-box">
-                                    <div class="summary-value"><?= $emptySlot; ?></div>
+                                    <div class="summary-value text-emerald-700" id="cfsSumKosong"><?= $emptySlot; ?></div>
                                     <div class="summary-label">Kosong</div>
                                 </div>
                             </div>
 
                             <div class="occupancy-bar-wrap">
                                 <div class="occupancy-bar">
-                                    <div class="occupancy-fill"></div>
+                                    <div class="occupancy-fill" id="cfsOccBarFill"></div>
                                 </div>
-                                <div class="occupancy-text">
+                                <div class="occupancy-text" id="cfsOccText">
                                     Occupancy Rate: <strong><?= number_format($occupancy, 1); ?>%</strong> dari total <?= $totalSlot; ?> slot level
                                 </div>
                             </div>
@@ -1939,718 +2016,6 @@ $active_docks_count = 4;
                 </div>
             </div>
         </div><!-- /warehouseGridView -->
-
-        <!-- ===================================================================== -->
-        <!-- VIEW 2: CAD BLUEPRINT ARSITEKTUR & REKAYASA SIPIL (50.000 x 80.000 mm) -->
-        <!-- ===================================================================== -->
-        <div id="cadViewContainer" class="hidden space-y-4">
-            <!-- Kontrol Lapisan Layer & Legenda Pin (Proporsi Denah 35 Ha) -->
-            <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-50 p-3 rounded-2xl border border-slate-200">
-                <!-- Legenda Pin Standar Denah -->
-                <div class="flex items-center space-x-3 text-[11px] text-gray-700">
-                    <span class="flex items-center">
-                        <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
-                        <strong class="text-emerald-700 mr-1">Live IoT:</strong> 3 Sensor
-                    </span>
-                    <span class="text-gray-300">|</span>
-                    <span class="flex items-center">
-                        <span class="w-2.5 h-2.5 rounded-full bg-blue-500 mr-1.5"></span>
-                        <strong class="text-[#0170b9] mr-1">Scanner/AI:</strong> 2 Titik
-                    </span>
-                </div>
-
-                <!-- Layer Toggles -->
-                <div class="flex items-center gap-1.5 text-[11px] font-semibold bg-white p-1 rounded-xl border border-gray-200 shadow-2xs">
-                    <label class="cursor-pointer px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1.5 text-gray-700 select-none">
-                        <input type="checkbox" id="layer-grid-chk" checked onchange="toggleCadLayer('layer-grid', this.checked)" class="accent-blue-600 rounded">
-                        <span>As Kolom &amp; Ukuran</span>
-                    </label>
-                    <label class="cursor-pointer px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1.5 text-gray-700 select-none">
-                        <input type="checkbox" id="layer-racks-chk" checked onchange="toggleCadLayer('layer-racks', this.checked)" class="accent-orange-600 rounded">
-                        <span>Racks Aisle A-F</span>
-                    </label>
-                    <label class="cursor-pointer px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1.5 text-gray-700 select-none">
-                        <input type="checkbox" id="layer-iot-chk" checked onchange="toggleCadLayer('layer-iot', this.checked)" class="accent-emerald-600 rounded">
-                        <span>Sensor Telemetri</span>
-                    </label>
-                    <label class="cursor-pointer px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1.5 text-gray-700 select-none">
-                        <input type="checkbox" id="layer-safety-chk" checked onchange="toggleCadLayer('layer-safety', this.checked)" class="accent-amber-600 rounded">
-                        <span>K3 &amp; Evakuasi</span>
-                    </label>
-                    <label class="cursor-pointer px-2 py-1 rounded hover:bg-gray-50 flex items-center gap-1.5 text-gray-700 select-none">
-                        <input type="checkbox" id="layer-footer-chk" checked onchange="toggleCadLayer('cadDrawingSheetFooter', this.checked)" class="accent-slate-700 rounded">
-                        <span>Etiket Kop CAD</span>
-                    </label>
-                </div>
-            </div>
-
-        <!-- Master Technical Drawing Canvas (Proporsi & Palet Warna Standar Denah 35 Ha) -->
-        <div id="cadDrawingContainer" class="bg-white rounded-2xl p-4 sm:p-5 shadow-lg border border-gray-200 overflow-x-auto transition-all relative">
-            
-            <!-- Floating Zoom Controls UI (Identik Denah 35 Ha) -->
-            <div class="absolute top-7 right-7 flex flex-col gap-1 z-10">
-                <button onclick="cfsMapZoom(0.15)" class="w-8 h-8 bg-white border border-gray-200 shadow-sm rounded-lg flex items-center justify-center text-[#0170b9] hover:bg-gray-50 transition" title="Perbesar (Zoom In)">
-                    <i class="fa-solid fa-plus text-xs"></i>
-                </button>
-                <button onclick="cfsMapZoom(-0.15)" class="w-8 h-8 bg-white border border-gray-200 shadow-sm rounded-lg flex items-center justify-center text-[#0170b9] hover:bg-gray-50 transition" title="Perkecil (Zoom Out)">
-                    <i class="fa-solid fa-minus text-xs"></i>
-                </button>
-                <button onclick="cfsMapReset()" class="w-8 h-8 bg-white border border-gray-200 shadow-sm rounded-lg flex items-center justify-center text-gray-600 hover:bg-gray-50 transition mt-0.5" title="Kembalikan Tampilan (Reset)">
-                    <i class="fa-solid fa-rotate-left text-xs"></i>
-                </button>
-            </div>
-
-            <svg id="cfsCadSvg" viewBox="0 0 1200 875" class="w-full min-w-[1000px] h-auto select-none transition-transform duration-100" xmlns="http://www.w3.org/2000/svg" onmousemove="updateCadHud(event)" onmouseleave="resetCadHud()">
-                <defs>
-                    <!-- Engineering Grid Patterns (Exact Denah 35 Ha Proportions) -->
-                    <pattern id="gridFine" width="10" height="10" patternUnits="userSpaceOnUse">
-                        <path d="M 10 0 L 0 0 0 10" fill="none" stroke="#e2e8f0" stroke-width="0.35"/>
-                    </pattern>
-                    <pattern id="gridMajor" width="50" height="50" patternUnits="userSpaceOnUse">
-                        <path d="M 50 0 L 0 0 0 50" fill="none" stroke="#cbd5e1" stroke-width="0.6"/>
-                    </pattern>
-                    
-                    <!-- Material Hatching Patterns (Exact Denah 35 Ha Proportions) -->
-                    <pattern id="hatchConcrete" width="8" height="8" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                        <line x1="0" y1="0" x2="0" y2="8" stroke="#cbd5e1" stroke-width="0.6"/>
-                    </pattern>
-                    <pattern id="hatchReinforced" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                        <line x1="0" y1="0" x2="0" y2="6" stroke="#94a3b8" stroke-width="0.6"/>
-                        <line x1="0" y1="0" x2="6" y2="0" stroke="#94a3b8" stroke-width="0.6"/>
-                    </pattern>
-                    <pattern id="asphaltFill" width="4" height="4" patternUnits="userSpaceOnUse">
-                        <rect width="4" height="4" fill="#334155"/>
-                        <circle cx="1" cy="1" r="0.4" fill="#475569"/>
-                        <circle cx="3" cy="3" r="0.4" fill="#1e293b"/>
-                    </pattern>
-                    <pattern id="asphaltLight" width="4" height="4" patternUnits="userSpaceOnUse">
-                        <rect width="4" height="4" fill="#475569"/>
-                        <circle cx="1.5" cy="1.5" r="0.4" fill="#64748b"/>
-                    </pattern>
-                    <pattern id="pavingTactile" width="6" height="6" patternUnits="userSpaceOnUse">
-                        <rect width="6" height="6" fill="#fef3c7"/>
-                        <circle cx="3" cy="3" r="1.1" fill="#d97706"/>
-                    </pattern>
-                    <pattern id="hazardStripe" width="12" height="12" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                        <rect width="6" height="12" fill="#facc15"/>
-                        <rect x="6" width="6" height="12" fill="#0f172a"/>
-                    </pattern>
-                    <pattern id="wireMeshHatch" width="6" height="6" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
-                        <line x1="0" y1="0" x2="6" y2="6" stroke="#ef4444" stroke-width="0.7" opacity="0.4"/>
-                        <line x1="6" y1="0" x2="0" y2="6" stroke="#ef4444" stroke-width="0.7" opacity="0.4"/>
-                    </pattern>
-
-                    <!-- Markers for Dimension Lines (Architectural 45 deg Tick) -->
-                    <marker id="cadTick" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-                        <path d="M 1 5 L 5 1" stroke="#0284c7" stroke-width="1.2"/>
-                    </marker>
-
-                    <!-- Filters for Live Telemetri (Identik Denah 35 Ha) -->
-                    <filter id="glowGreen" x="-30%" y="-30%" width="160%" height="160%">
-                        <feGaussianBlur stdDeviation="2.5" result="blur" />
-                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
-                    </filter>
-                </defs>
-
-                <!-- LAYER 0: Canvas Sheet Base & Pelat Lantai Beton Bertulang fc' 30 MPa -->
-                <rect width="1200" height="875" fill="#f8fafc" />
-                <rect width="1200" height="875" fill="url(#gridFine)" />
-                <rect width="1200" height="875" fill="url(#gridMajor)" />
-
-                <!-- Garis Tepi Format Lembar Gambar A1 (ISO 5457 CAD Sheet Margin) -->
-                <rect x="25" y="16" width="1150" height="843" fill="none" stroke="#0f172a" stroke-width="1.8" rx="2" />
-                <rect x="29" y="20" width="1142" height="835" fill="none" stroke="#94a3b8" stroke-width="0.6" rx="1" />
-
-                <!-- Dinding Keliling Bangunan Gudang 80.000 mm x 50.000 mm -->
-                <rect x="70" y="70" width="1080" height="540" fill="#ffffff" stroke="#0f172a" stroke-width="2.5" rx="3" />
-                <rect x="73" y="73" width="1074" height="534" fill="url(#hatchConcrete)" opacity="0.45" />
-
-                <!-- ============================================================= -->
-                <!-- LAYER 1: GARIS AS KOLOM STRUKTURAL & GARIS UKUR CAD (DIMENSI) -->
-                <!-- ============================================================= -->
-                <g id="layer-grid">
-                    <!-- Garis Ukur Dimensi Luar Atas: Bentang Total 80.000 mm -->
-                    <line x1="70" y1="24" x2="1150" y2="24" stroke="#0284c7" stroke-width="1" marker-start="url(#cadTick)" marker-end="url(#cadTick)"/>
-                    <text x="610" y="18" fill="#0284c7" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">BENTANG PANJANG BANGUNAN = 80.000 mm (80,00 M)</text>
-
-                    <!-- Garis Ukur Dimensi Luar Kiri: Bentang Total 50.000 mm -->
-                    <line x1="24" y1="70" x2="24" y2="610" stroke="#0284c7" stroke-width="1" marker-start="url(#cadTick)" marker-end="url(#cadTick)"/>
-                    <text x="18" y="340" fill="#0284c7" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle" transform="rotate(-90 18 340)">LEBAR BENTANG BERSIH = 50.000 mm (50,00 M)</text>
-
-                    <!-- Garis Sumbu As Kolom 1 s/d 9 (Sumbu X) -->
-                    <?php 
-                    $grid_x = [
-                        1 => 70, 2 => 205, 3 => 340, 4 => 475, 5 => 610, 
-                        6 => 745, 7 => 880, 8 => 1015, 9 => 1150
-                    ];
-                    foreach ($grid_x as $num => $gx): 
-                    ?>
-                        <!-- Lingkaran Bubble As Kolom Atas -->
-                        <circle cx="<?= $gx ?>" cy="48" r="9.5" fill="#ffffff" stroke="#94a3b8" stroke-width="0.9"/>
-                        <text x="<?= $gx ?>" y="51" fill="#475569" font-family="'Consolas', monospace" font-size="9" font-weight="bold" text-anchor="middle"><?= $num ?></text>
-
-                        <!-- Garis Sumbu Kolom Merah Strip-Titik (SNI Standard Drafting) -->
-                        <line x1="<?= $gx ?>" y1="58" x2="<?= $gx ?>" y2="610" stroke="#ef4444" stroke-width="0.75" stroke-dasharray="8 3 2 3" opacity="0.55"/>
-
-                        <!-- Dimensi Per Bay Kolom Antar As (10.000 mm) -->
-                        <?php if ($num < 9): $next_gx = $grid_x[$num + 1]; ?>
-                            <line x1="<?= $gx ?>" y1="36" x2="<?= $next_gx ?>" y2="36" stroke="#64748b" stroke-width="0.7" marker-start="url(#cadTick)" marker-end="url(#cadTick)"/>
-                            <text x="<?= ($gx + $next_gx) / 2 ?>" y="33" fill="#64748b" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">10.000</text>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-
-                    <!-- Garis Sumbu As Kolom A s/d F (Sumbu Y) -->
-                    <?php 
-                    $grid_y = [
-                        'A' => 70, 'B' => 178, 'C' => 286, 'D' => 394, 'E' => 502, 'F' => 610
-                    ];
-                    foreach ($grid_y as $let => $gy): 
-                    ?>
-                        <!-- Lingkaran Bubble As Kolom Kiri -->
-                        <circle cx="48" cy="<?= $gy ?>" r="9.5" fill="#ffffff" stroke="#94a3b8" stroke-width="0.9"/>
-                        <text x="48" y="<?= $gy + 3 ?>" fill="#475569" font-family="'Consolas', monospace" font-size="9" font-weight="bold" text-anchor="middle"><?= $let ?></text>
-
-                        <!-- Garis Sumbu Kolom Merah Horizontal -->
-                        <line x1="58" y1="<?= $gy ?>" x2="1150" y2="<?= $gy ?>" stroke="#ef4444" stroke-width="0.75" stroke-dasharray="8 3 2 3" opacity="0.55"/>
-
-                        <!-- Dimensi Per Bentang Bay Y (10.000 mm) -->
-                        <?php 
-                        $keys = array_keys($grid_y);
-                        $cur_idx = array_search($let, $keys);
-                        if ($cur_idx < count($keys) - 1):
-                            $next_let = $keys[$cur_idx + 1];
-                            $next_gy = $grid_y[$next_let];
-                        ?>
-                            <line x1="36" y1="<?= $gy ?>" x2="36" y2="<?= $next_gy ?>" stroke="#64748b" stroke-width="0.7" marker-start="url(#cadTick)" marker-end="url(#cadTick)"/>
-                            <text x="32" y="<?= ($gy + $next_gy) / 2 + 2 ?>" fill="#64748b" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="end">10.000</text>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-
-                    <!-- Profil Kolom Baja WF 400x200 di Setiap Titik Simpul Struktur -->
-                    <?php foreach ($grid_x as $gx): foreach ($grid_y as $gy): ?>
-                        <g transform="translate(<?= $gx ?>, <?= $gy ?>)">
-                            <path d="M -5 -7 L 5 -7 L 5 -5 L 1.5 -5 L 1.5 5 L 5 5 L 5 7 L -5 7 L -5 5 L -1.5 5 L -1.5 -5 L -5 -5 Z" fill="#0f172a" stroke="#334155" stroke-width="0.6"/>
-                        </g>
-                    <?php endforeach; endforeach; ?>
-                </g>
-
-                <!-- ============================================================= -->
-                <!-- LAYER 2: FASILITAS PENUNJANG & KANTOR PENGURUS GUDANG CFS    -->
-                <!-- ============================================================= -->
-                <g id="layer-facilities">
-                    <!-- 1. Pos Pengawas Hanggar Bea Cukai CEISA 4.0 (North-West, As 1-2, Y: 75-155) -->
-                    <rect x="75" y="75" width="120" height="80" fill="#ffffff" stroke="#dc2626" stroke-width="2" rx="2"/>
-                    <rect x="78" y="78" width="114" height="20" fill="#fee2e2" stroke="#dc2626" stroke-width="1" rx="1"/>
-                    <text x="135" y="92" fill="#991b1b" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">HANGGAR BEA CUKAI</text>
-                    <text x="135" y="115" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" text-anchor="middle">POS PENGAWAS CEISA 4.0</text>
-                    <text x="135" y="130" fill="#64748b" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">SEGEL ELEKTRONIK &amp; DOKUMEN</text>
-
-                    <!-- 2. Ruang Briefing K3 & Locker Tallyman (North-Center, As 4-6, Y: 75-155) -->
-                    <rect x="540" y="75" width="200" height="80" fill="#ffffff" stroke="#0170b9" stroke-width="1.8" rx="2"/>
-                    <rect x="543" y="78" width="194" height="20" fill="#e0f2fe" stroke="#0284c7" stroke-width="1" rx="1"/>
-                    <text x="640" y="92" fill="#0170b9" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">RUANG BRIEFING K3 &amp; TALLYMAN</text>
-                    <text x="640" y="115" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" text-anchor="middle">KAPASITAS 30 PERSONIL &bull; POS APD</text>
-                    <text x="640" y="130" fill="#64748b" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">REKONSILIASI FISIK CARGO TALLY</text>
-                    <!-- First Aid P3K Box -->
-                    <rect x="555" y="125" width="16" height="16" fill="#ffffff" stroke="#dc2626" stroke-width="1.2" rx="1"/>
-                    <rect x="561" y="128" width="4" height="10" fill="#dc2626"/>
-                    <rect x="558" y="131" width="10" height="4" fill="#dc2626"/>
-
-                    <!-- 3. Stasiun Pengisian Daya Forklift Listrik 380V (North-East, As 8-9, Y: 75-155) -->
-                    <rect x="1025" y="75" width="120" height="80" fill="#ffffff" stroke="#d97706" stroke-width="1.8" rx="2"/>
-                    <rect x="1028" y="78" width="114" height="20" fill="#fef3c7" stroke="#d97706" stroke-width="1" rx="1"/>
-                    <text x="1085" y="92" fill="#b45309" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">CHARGING BAY FORKLIFT</text>
-                    <text x="1085" y="115" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" text-anchor="middle">4 CHARGER CEPAT 380V/32A</text>
-                    <text x="1085" y="130" fill="#64748b" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">KAPASITAS 6 UNIT FORKLIFT</text>
-                </g>
-
-                <!-- ============================================================= -->
-                <!-- LAYER 3: JALUR EVAKUASI K3, SIRKULASI FORKLIFT & APAR/HYDRANT -->
-                <!-- ============================================================= -->
-                <g id="layer-safety">
-                    <!-- Jalur Sirkulasi Forklift & Pedestrian Utara (Y: 165 to 185) -->
-                    <rect x="75" y="165" width="1070" height="20" fill="url(#pavingTactile)" stroke="#f59e0b" stroke-width="1" rx="2"/>
-                    <text x="610" y="179" fill="#b45309" font-family="'Consolas', monospace" font-size="8" font-weight="bold" text-anchor="middle">JALUR UTAMA FORKLIFT &amp; PEDESTRIAN K3 &bull; KECEPATAN MAKS. 10 KM/JAM</text>
-
-                    <!-- Pintu Keluar Darurat (Exit Doors Dinding Barat & Timur) -->
-                    <!-- Barat -->
-                    <rect x="68" y="310" width="4" height="28" fill="#16a34a"/>
-                    <path d="M 68 310 A 28 28 0 0 1 96 338" fill="none" stroke="#16a34a" stroke-width="1.2" stroke-dasharray="2 2"/>
-                    <rect x="74" y="304" width="45" height="14" fill="#ecfdf5" stroke="#16a34a" stroke-width="1" rx="2"/>
-                    <text x="96" y="314" fill="#15803d" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">🚪 EXIT</text>
-
-                    <!-- Timur -->
-                    <rect x="1148" y="310" width="4" height="28" fill="#16a34a"/>
-                    <path d="M 1148 310 A 28 28 0 0 0 1120 338" fill="none" stroke="#16a34a" stroke-width="1.2" stroke-dasharray="2 2"/>
-                    <rect x="1100" y="304" width="45" height="14" fill="#ecfdf5" stroke="#16a34a" stroke-width="1" rx="2"/>
-                    <text x="1122" y="314" fill="#15803d" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold" text-anchor="middle">🚪 EXIT</text>
-
-                    <!-- Kotak Hydrant Gedung FHC-01 & FHC-02 -->
-                    <rect x="74" y="278" width="14" height="14" fill="#fee2e2" stroke="#dc2626" stroke-width="1.2" rx="1"/>
-                    <text x="81" y="288" fill="#991b1b" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">H</text>
-                    <text x="92" y="287" fill="#dc2626" font-family="'Consolas', monospace" font-size="6">FHC-01</text>
-
-                    <rect x="1132" y="278" width="14" height="14" fill="#fee2e2" stroke="#dc2626" stroke-width="1.2" rx="1"/>
-                    <text x="1139" y="288" fill="#991b1b" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">H</text>
-                    <text x="1128" y="287" fill="#dc2626" font-family="'Consolas', monospace" font-size="6" text-anchor="end">FHC-02</text>
-
-                    <!-- APAR 6kg di Tiang-Tiang Kolom -->
-                    <circle cx="205" cy="72" r="5" fill="#fee2e2" stroke="#dc2626" stroke-width="0.8"/>
-                    <text x="205" y="75" fill="#dc2626" font-size="5" text-anchor="middle">🧯</text>
-                    <circle cx="745" cy="72" r="5" fill="#fee2e2" stroke="#dc2626" stroke-width="0.8"/>
-                    <text x="745" y="75" fill="#dc2626" font-size="5" text-anchor="middle">🧯</text>
-                    <circle cx="205" cy="608" r="5" fill="#fee2e2" stroke="#dc2626" stroke-width="0.8"/>
-                    <text x="205" y="611" fill="#dc2626" font-size="5" text-anchor="middle">🧯</text>
-                    <circle cx="745" cy="608" r="5" fill="#fee2e2" stroke="#dc2626" stroke-width="0.8"/>
-                    <text x="745" y="611" fill="#dc2626" font-size="5" text-anchor="middle">🧯</text>
-                </g>
-
-                <!-- ============================================================= -->
-                <!-- LAYER 4: SELECTIVE PALLET RACKING AISLE A S/D AISLE F         -->
-                <!-- ============================================================= -->
-                <g id="layer-racks">
-                    <!-- Ukuran Lebar Gang Antar Rak (Forklift Reach Clearance) -->
-                    <line x1="235" y1="200" x2="235" y2="470" stroke="#0284c7" stroke-width="0.7" stroke-dasharray="3 3"/>
-                    <text x="240" y="340" fill="#0284c7" font-family="'Consolas', monospace" font-size="7" transform="rotate(-90 240 340)">GANG FORKLIFT = 3.500 mm (CLEARANCE REACH TRUCK)</text>
-
-                    <?php
-                    // Palet Warna & Proporsi Menyesuaikan pages/denah.php (Blok A, B, C, D, Reefer, Customs)
-                    $aisles_data = [
-                        'A' => ['name' => 'AISLE A', 'category' => 'Mesin & Traksi', 'client' => 'Blok 1', 'occupied' => 160, 'total' => 200, 'x' => 90,  'bg' => '#eff6ff', 'border' => '#3b82f6', 'header' => '#1d4ed8', 'pallet' => '#3b82f6', 'letter' => 'A'],
-                        'B' => ['name' => 'AISLE B', 'category' => 'Elektronik & High-Tech', 'client' => 'Blok 2', 'occupied' => 175, 'total' => 200, 'x' => 265, 'bg' => '#ecfeff', 'border' => '#06b6d4', 'header' => '#0891b2', 'pallet' => '#06b6d4', 'letter' => 'B'],
-                        'C' => ['name' => 'AISLE C', 'category' => 'FMCG Food & Flavor', 'client' => 'Blok 3', 'occupied' => 190, 'total' => 200, 'x' => 440, 'bg' => '#ecfdf5', 'border' => '#10b981', 'header' => '#047857', 'pallet' => '#10b981', 'letter' => 'C'],
-                        'D' => ['name' => 'AISLE D', 'category' => 'Tekstil & Garment Ekspor', 'client' => 'Blok 4', 'occupied' => 130, 'total' => 200, 'x' => 615, 'bg' => '#f5f3ff', 'border' => '#8b5cf6', 'header' => '#6d28d9', 'pallet' => '#8b5cf6', 'letter' => 'D'],
-                        'E' => ['name' => 'AISLE E', 'category' => 'Bahan Kimia Non-B3', 'client' => 'Blok 5', 'occupied' => 165, 'total' => 200, 'x' => 790, 'bg' => '#fffbeb', 'border' => '#d97706', 'header' => '#b45309', 'pallet' => '#d97706', 'letter' => 'E'],
-                        'F' => ['name' => 'AISLE F', 'category' => 'Karantina Jalur Merah', 'client' => 'Hanggar Bea Cukai CEISA', 'occupied' => 54,  'total' => 200, 'x' => 965, 'bg' => '#fef2f2', 'border' => '#dc2626', 'header' => '#991b1b', 'pallet' => '#dc2626', 'letter' => 'F']
-                    ];
-
-                    foreach ($aisles_data as $ak => $adata):
-                        $ax = $adata['x'];
-                        $is_customs = ($ak === 'F');
-                    ?>
-                    <!-- Aisle Group: Clickable untuk Memfilter Manifest LCL -->
-                    <g class="cursor-pointer group" onclick="filterAisleFromMap('AISLE-<?= $ak ?>')">
-                        <!-- Kotak Denah Area Rak (Proporsi Denah 35 Ha) -->
-                        <rect x="<?= $ax ?>" y="200" width="145" height="270" fill="<?= $adata['bg'] ?>" stroke="<?= $adata['border'] ?>" stroke-width="2" rx="3" class="transition group-hover:brightness-95"/>
-                        
-                        <!-- Huruf Watermark Transparan (Identik Denah Blok A/B/C/D) -->
-                        <text x="<?= $ax + 72 ?>" y="360" fill="<?= $adata['border'] ?>" font-family="'Consolas', monospace" font-size="64" font-weight="900" opacity="0.14" text-anchor="middle"><?= $adata['letter'] ?></text>
-
-                        <!-- Corner Protectors (Bumper Kuning K3 di Ujung Kaki Rak) -->
-                        <rect x="<?= $ax - 3 ?>" y="197" width="6" height="8" fill="#facc15" stroke="#0f172a" stroke-width="0.6"/>
-                        <rect x="<?= $ax + 142 ?>" y="197" width="6" height="8" fill="#facc15" stroke="#0f172a" stroke-width="0.6"/>
-                        <rect x="<?= $ax - 3 ?>" y="465" width="6" height="8" fill="#facc15" stroke="#0f172a" stroke-width="0.6"/>
-                        <rect x="<?= $ax + 142 ?>" y="465" width="6" height="8" fill="#facc15" stroke="#0f172a" stroke-width="0.6"/>
-
-                        <!-- Header Badge Aisle -->
-                        <rect x="<?= $ax + 5 ?>" y="205" width="135" height="24" fill="<?= $adata['header'] ?>" rx="2"/>
-                        <text x="<?= $ax + 72 ?>" y="217" fill="#ffffff" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle"><?= $adata['name'] ?></text>
-                        <text x="<?= $ax + 72 ?>" y="226" fill="#ffffff" font-family="'Consolas', monospace" font-size="6" text-anchor="middle"><?= $adata['category'] ?></text>
-
-                        <!-- Matriks Slot Palet Modular (7 Tingkat x 2 Bay Ganda) -->
-                        <?php for ($pr = 0; $pr < 7; $pr++): $py = 235 + ($pr * 30); ?>
-                            <!-- Left Bay -->
-                            <rect x="<?= $ax + 8 ?>" y="<?= $py ?>" width="60" height="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8" rx="1.5"/>
-                            <!-- EUR Pallets Slot -->
-                            <rect x="<?= $ax + 11 ?>" y="<?= $py + 3 ?>" width="24" height="18" fill="<?= $adata['pallet'] ?>" stroke="#ffffff" stroke-width="0.6" rx="1"/>
-                            <rect x="<?= $ax + 41 ?>" y="<?= $py + 3 ?>" width="24" height="18" fill="<?= ($pr % 3 === 0 && !$is_customs) ? '#f8fafc' : $adata['pallet'] ?>" stroke="<?= ($pr % 3 === 0 && !$is_customs) ? '#cbd5e1' : '#ffffff' ?>" stroke-width="0.6" stroke-dasharray="<?= ($pr % 3 === 0 && !$is_customs) ? '2 1' : 'none' ?>" rx="1"/>
-
-                            <!-- Right Bay -->
-                            <rect x="<?= $ax + 77 ?>" y="<?= $py ?>" width="60" height="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8" rx="1.5"/>
-                            <rect x="<?= $ax + 80 ?>" y="<?= $py + 3 ?>" width="24" height="18" fill="<?= $adata['pallet'] ?>" stroke="#ffffff" stroke-width="0.6" rx="1"/>
-                            <rect x="<?= $ax + 110 ?>" y="<?= $py + 3 ?>" width="24" height="18" fill="<?= ($pr % 2 === 1 && !$is_customs) ? '#f8fafc' : $adata['pallet'] ?>" stroke="<?= ($pr % 2 === 1 && !$is_customs) ? '#cbd5e1' : '#ffffff' ?>" stroke-width="0.6" stroke-dasharray="<?= ($pr % 2 === 1 && !$is_customs) ? '2 1' : 'none' ?>" rx="1"/>
-                        <?php endfor; ?>
-
-                        <!-- Aisle Footer: Client, Konfigurasi Stacking & Ketersediaan -->
-                        <rect x="<?= $ax + 5 ?>" y="442" width="135" height="24" fill="#ffffff" stroke="#cbd5e1" stroke-width="0.8" rx="2"/>
-                        <text x="<?= $ax + 72 ?>" y="449" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle"><?= $adata['client'] ?> &bull; <?= $adata['name'] ?></text>
-                        <text x="<?= $ax + 72 ?>" y="456.5" fill="#64748b" font-family="'Consolas', monospace" font-size="5.4" text-anchor="middle">10 Bay Panjang &bull; 5 Tier &bull; 2 Plt/Stack</text>
-                        <text x="<?= $ax + 72 ?>" y="463.5" font-family="'Consolas', monospace" font-size="5.8" font-weight="bold" text-anchor="middle">
-                            <tspan fill="<?= $adata['header'] ?>">Terisi: <?= $adata['occupied'] ?> Plt</tspan>
-                            <tspan fill="#94a3b8"> &bull; </tspan>
-                            <tspan fill="#16a34a">Bebas: <?= $adata['total'] - $adata['occupied'] ?> Plt</tspan>
-                        </text>
-                    </g>
-                    <?php endforeach; ?>
-
-                    <!-- Kandang Karantina Kawat Ram Bea Cukai (Aisle F) -->
-                    <rect x="960" y="195" width="155" height="280" fill="url(#wireMeshHatch)" stroke="#dc2626" stroke-width="1.8" stroke-dasharray="6 3" rx="4"/>
-                    <rect x="970" y="186" width="135" height="16" fill="#fee2e2" stroke="#dc2626" stroke-width="1" rx="2"/>
-                    <text x="1037" y="198" fill="#991b1b" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">⚠️ KANDANG KARANTINA JALUR MERAH</text>
-                </g>
-
-                <!-- ============================================================= -->
-                <!-- LAYER 5: ZONA STAGING BUFFER & TIMBANGAN LANTAI HW-21         -->
-                <!-- ============================================================= -->
-                <g id="layer-staging">
-                    <!-- Lantai Staging Inbound (Bongkar FCL ke Palet LCL) -->
-                    <rect x="90" y="495" width="220" height="70" fill="#f8fafc" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 3" rx="2"/>
-                    <text x="200" y="510" fill="#475569" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">ZONA STAGING PALET INBOUND (BONGKAR)</text>
-                    <?php for ($sb = 0; $sb < 5; $sb++): ?>
-                        <rect x="<?= 105 + ($sb * 40) ?>" y="525" width="30" height="22" fill="#eff6ff" stroke="#3b82f6" stroke-width="0.8" rx="2"/>
-                        <rect x="<?= 110 + ($sb * 40) ?>" y="529" width="20" height="14" fill="#3b82f6" rx="1"/>
-                    <?php endfor; ?>
-
-                    <!-- Lantai Staging Outbound (Konsolidasi Palet Siap Muat) -->
-                    <rect x="750" y="495" width="220" height="70" fill="#f8fafc" stroke="#94a3b8" stroke-width="1" stroke-dasharray="4 3" rx="2"/>
-                    <text x="860" y="510" fill="#475569" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">ZONA STAGING PALET OUTBOUND (MUAT)</text>
-                    <?php for ($sb = 0; $sb < 5; $sb++): ?>
-                        <rect x="<?= 765 + ($sb * 40) ?>" y="525" width="30" height="22" fill="#ecfdf5" stroke="#10b981" stroke-width="0.8" rx="2"/>
-                        <rect x="<?= 770 + ($sb * 40) ?>" y="529" width="20" height="14" fill="#10b981" rx="1"/>
-                    <?php endfor; ?>
-
-                    <!-- Timbangan Lantai Heavy Duty HW-21 (3 Ton) -->
-                    <g class="cursor-pointer group" onclick="openSensorTriggerModal('scale')">
-                        <rect x="500" y="505" width="120" height="55" fill="#f1f5f9" stroke="#0170b9" stroke-width="1.6" rx="2"/>
-                        <rect x="508" y="512" width="104" height="41" fill="#e2e8f0" stroke="#0284c7" stroke-width="1.2"/>
-                        <!-- 4 Titik Load Cell Sensor Sudut -->
-                        <circle cx="514" cy="518" r="2.5" fill="#0284c7"/>
-                        <circle cx="606" cy="518" r="2.5" fill="#0284c7"/>
-                        <circle cx="514" cy="547" r="2.5" fill="#0284c7"/>
-                        <circle cx="606" cy="547" r="2.5" fill="#0284c7"/>
-                        <!-- Display Digital Berat Riil -->
-                        <rect x="525" y="520" width="70" height="25" fill="#ffffff" stroke="#0284c7" stroke-width="1" rx="1"/>
-                        <text x="560" y="533" fill="#0170b9" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">HW-21: 485.0 kg</text>
-                        <text x="560" y="542" fill="#0284c7" font-family="'Consolas', monospace" font-size="6" font-weight="bold" text-anchor="middle">CBM 1.35 &bull; SCALE</text>
-                    </g>
-                </g>
-
-                <!-- ============================================================= -->
-                <!-- LAYER 6: RAMPA HIDROLIK DOKING D1-D5 & DERMAGA APRON TRUK     -->
-                <!-- ============================================================= -->
-                <g id="layer-docks">
-                    <!-- Apron Aspal Luar Gudang (Akses Manuver Truk Trailer) -->
-                    <rect x="70" y="665" width="1080" height="70" fill="url(#asphaltFill)" stroke="none"/>
-                    <line x1="70" y1="700" x2="1150" y2="700" stroke="#facc15" stroke-width="1.8" stroke-dasharray="8 6"/>
-                    <line x1="70" y1="665" x2="1150" y2="665" stroke="#ffffff" stroke-width="1.2"/>
-                    <text x="610" y="725" fill="#f8fafc" font-family="'Consolas', monospace" font-size="8" font-weight="bold" text-anchor="middle">← APRON DERMAGA TRUK TRAILER D1-D5 (SOUTH HAUL ROAD ACCESS) →</text>
-
-                    <?php
-                    $docks_draw = [
-                        'D1' => ['x' => 150, 'truck' => 'B 9841 TEI', 'ctr' => 'MSKU8821940', 'status' => 'STRIPPING', 'pct' => 82, 'active' => true, 'color' => '#d97706'],
-                        'D2' => ['x' => 350, 'truck' => 'B 9012 UXZ', 'ctr' => 'CMAU7718290', 'status' => 'STRIPPING', 'pct' => 45, 'active' => true, 'color' => '#d97706'],
-                        'D3' => ['x' => 550, 'truck' => '-',           'ctr' => 'SIAP DOKING', 'status' => 'STANDBY',   'pct' => 0,  'active' => false, 'color' => '#10b981'],
-                        'D4' => ['x' => 750, 'truck' => 'B 9411 KZA', 'ctr' => 'ONEU3391820', 'status' => 'STUFFING',  'pct' => 69, 'active' => true, 'color' => '#0284c7'],
-                        'D5' => ['x' => 950, 'truck' => 'B 9200 VBC', 'ctr' => 'TEMU2281093', 'status' => 'STUFFING',  'pct' => 90, 'active' => true, 'color' => '#0284c7']
-                    ];
-
-                    foreach ($docks_draw as $did => $dd):
-                        $dx = $dd['x'];
-                    ?>
-                    <!-- Dock Rampa Group -->
-                    <g class="cursor-pointer group" onclick="switchCfsTab('tab-rampa')">
-                        <!-- Ceruk Beton Rampa (Concrete Dock Pit) -->
-                        <rect x="<?= $dx ?>" y="605" width="115" height="55" fill="#f1f5f9" stroke="#64748b" stroke-width="1.4"/>
-                        <!-- Pelat Leveler Baja Hidrolik 15 Ton -->
-                        <rect x="<?= $dx + 5 ?>" y="610" width="105" height="42" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.2" rx="1"/>
-                        <rect x="<?= $dx + 15 ?>" y="652" width="85" height="8" fill="#94a3b8" stroke="#475569" stroke-width="0.8"/>
-                        
-                        <!-- Karet Bumper Penahan Benturan Truk (Heavy Rubber Bumpers) -->
-                        <rect x="<?= $dx - 8 ?>" y="650" width="10" height="15" fill="#0f172a"/>
-                        <rect x="<?= $dx + 113 ?>" y="650" width="10" height="15" fill="#0f172a"/>
-
-                        <!-- Label Nama Rampa & Tipe Pekerjaan -->
-                        <text x="<?= $dx + 57 ?>" y="625" fill="#0f172a" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">RAMPA <?= $did ?></text>
-                        <text x="<?= $dx + 57 ?>" y="636" fill="<?= $dd['color'] ?>" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle"><?= $dd['status'] ?></text>
-                        <text x="<?= $dx + 57 ?>" y="646" fill="#475569" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle"><?= $dd['ctr'] ?></text>
-
-                        <!-- Sinyal Lampu Lalu Lintas Doking Merah/Hijau -->
-                        <rect x="<?= $dx - 18 ?>" y="618" width="8" height="18" fill="#ffffff" stroke="#64748b" stroke-width="0.8" rx="1"/>
-                        <circle cx="<?= $dx - 14 ?>" cy="623" r="2.8" fill="<?= $dd['active'] ? '#ef4444' : '#cbd5e1' ?>"/>
-                        <circle cx="<?= $dx - 14 ?>" cy="631" r="2.8" fill="<?= $dd['active'] ? '#cbd5e1' : '#10b981' ?>"/>
-
-                        <!-- Truk Trailer Merapat vs Rampa Standby -->
-                        <?php if ($dd['active']): ?>
-                            <rect x="<?= $dx + 5 ?>" y="660" width="105" height="42" fill="#1e293b" stroke="#0f172a" stroke-width="1.2" rx="2"/>
-                            <text x="<?= $dx + 57 ?>" y="678" fill="#ffffff" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle"><?= $dd['truck'] ?></text>
-                            <text x="<?= $dx + 57 ?>" y="690" fill="#facc15" font-family="'Consolas', monospace" font-size="6.5" text-anchor="middle">Tally: <?= $dd['pct'] ?>% Selesai</text>
-                            <!-- Pipa Baja Pemandu Roda Truk (Yellow Wheel Guides) -->
-                            <line x1="<?= $dx - 5 ?>" y1="660" x2="<?= $dx - 5 ?>" y2="702" stroke="#facc15" stroke-width="2.5"/>
-                            <line x1="<?= $dx + 120 ?>" y1="660" x2="<?= $dx + 120 ?>" y2="702" stroke="#facc15" stroke-width="2.5"/>
-                        <?php else: ?>
-                            <rect x="<?= $dx + 5 ?>" y="660" width="105" height="24" fill="#ecfdf5" stroke="#10b981" stroke-width="1.2" stroke-dasharray="4 2" rx="2"/>
-                            <text x="<?= $dx + 57 ?>" y="675" fill="#059669" font-family="'Consolas', monospace" font-size="7" font-weight="bold" text-anchor="middle">STANDBY (SIAP DOKING)</text>
-                        <?php endif; ?>
-                    </g>
-                    <?php endforeach; ?>
-                </g>
-
-                <!-- ============================================================= -->
-                <!-- LAYER 7: TITIK SENSOR TELEMETRI IOT (PROPORSI DENAH 35 HA)    -->
-                <!-- ============================================================= -->
-                <g id="layer-iot">
-                    <!-- Sensor 1: HW-21 Floor Scale & Laser Dimensioner (Apron Tengah) -->
-                    <g class="cursor-pointer group" onclick="openSensorTriggerModal('scale')">
-                        <circle cx="560" cy="515" r="13" fill="none" stroke="#10b981" stroke-width="0.8" stroke-dasharray="3 2" class="animate-spin-slow"/>
-                        <circle cx="560" cy="515" r="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2" filter="url(#glowGreen)"/>
-                        <path d="M 549 515 L 571 515 M 560 504 L 560 526" stroke="#10b981" stroke-width="0.6"/>
-                        <text x="560" y="518" text-anchor="middle" fill="#065f46" font-size="8" font-family="'Consolas', monospace" font-weight="bold">21</text>
-                        <rect x="495" y="488" width="130" height="18" fill="#ffffff" stroke="#10b981" stroke-width="1" rx="3"/>
-                        <text x="560" y="500" fill="#065f46" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">HW-21: SCALE 3T [TRIGGER]</text>
-                    </g>
-
-                    <!-- Sensor 2: HW-19 Handheld Zebra TC26 RFID/Barcode (Aisle E) -->
-                    <g class="cursor-pointer group" onclick="openSensorTriggerModal('scanner')">
-                        <circle cx="862" cy="335" r="9" fill="#eef2ff" stroke="#4f46e5" stroke-width="1.8"/>
-                        <path d="M 852 335 L 872 335 M 862 325 L 862 345" stroke="#4f46e5" stroke-width="0.6"/>
-                        <text x="862" y="338" text-anchor="middle" fill="#312e81" font-size="7.5" font-family="'Consolas', monospace" font-weight="bold">19</text>
-                        <rect x="797" y="308" width="130" height="18" fill="#ffffff" stroke="#4f46e5" stroke-width="1" rx="3"/>
-                        <text x="862" y="320" fill="#312e81" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">HW-19: ZEBRA TC26 [PIN]</text>
-                    </g>
-
-                    <!-- Sensor 3: ENV-01 LoRaWAN Ambient Climate Node (Dinding Utara) -->
-                    <g class="cursor-pointer group" onclick="openSensorTriggerModal('env')">
-                        <circle cx="610" cy="90" r="13" fill="none" stroke="#10b981" stroke-width="0.8" stroke-dasharray="3 2" class="animate-spin-slow"/>
-                        <circle cx="610" cy="90" r="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2" filter="url(#glowGreen)"/>
-                        <path d="M 599 90 L 621 90 M 610 79 L 610 101" stroke="#10b981" stroke-width="0.6"/>
-                        <text x="610" y="93" text-anchor="middle" fill="#065f46" font-size="8" font-family="'Consolas', monospace" font-weight="bold">01</text>
-                        <rect x="545" y="103" width="130" height="18" fill="#ffffff" stroke="#10b981" stroke-width="1" rx="3"/>
-                        <text x="610" y="115" fill="#065f46" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">ENV-01: LoRaWAN 24.2°C</text>
-                    </g>
-
-                    <!-- Sensor 4: HW-18 CCTV AI Pabean Surveillance (Kandang Aisle F) -->
-                    <g class="cursor-pointer group" onclick="openSensorTriggerModal('cctv')">
-                        <circle cx="1037" cy="180" r="9" fill="#fee2e2" stroke="#dc2626" stroke-width="1.8"/>
-                        <path d="M 1027 180 L 1047 180 M 1037 170 L 1037 190" stroke="#dc2626" stroke-width="0.6"/>
-                        <text x="1037" y="183" text-anchor="middle" fill="#991b1b" font-size="7.5" font-family="'Consolas', monospace" font-weight="bold">18</text>
-                        <rect x="972" y="153" width="130" height="18" fill="#ffffff" stroke="#dc2626" stroke-width="1" rx="3"/>
-                        <text x="1037" y="165" fill="#991b1b" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">HW-18: CCTV AI CEISA</text>
-                    </g>
-
-                    <!-- Sensor 5: HW-06 Ultrasonic Dock Presence Sensor on Dock D3 -->
-                    <g class="cursor-pointer group" onclick="openSensorTriggerModal('dock', 'D3')">
-                        <circle cx="607" cy="610" r="13" fill="none" stroke="#10b981" stroke-width="0.8" stroke-dasharray="3 2" class="animate-spin-slow"/>
-                        <circle cx="607" cy="610" r="10" fill="#ecfdf5" stroke="#10b981" stroke-width="2" filter="url(#glowGreen)"/>
-                        <path d="M 596 610 L 618 610 M 607 599 L 607 621" stroke="#10b981" stroke-width="0.6"/>
-                        <text x="607" y="613" text-anchor="middle" fill="#065f46" font-size="8" font-family="'Consolas', monospace" font-weight="bold">06</text>
-                        <rect x="542" y="583" width="130" height="18" fill="#ffffff" stroke="#10b981" stroke-width="1" rx="3"/>
-                        <text x="607" y="595" fill="#065f46" font-family="'Consolas', monospace" font-size="7.5" font-weight="bold" text-anchor="middle">HW-06: SENSOR D3 [LIVE]</text>
-                    </g>
-                </g>
-
-                <!-- ============================================================= -->
-                <!-- LAYER 8: KOMPAS ROSE, SCALE BAR & KOP GAMBAR (ISO 7200)       -->
-                <!-- ============================================================= -->
-                <!-- Compass Rose (Identik Denah 35 Ha) -->
-                <g transform="translate(1120, 32)" class="select-none pointer-events-none">
-                    <circle cx="0" cy="0" r="18" fill="#ffffff" stroke="#0170b9" stroke-width="1.5" />
-                    <polygon points="0,0 0,-22 -5,-5" fill="#0170b9" />
-                    <polygon points="0,0 0,-22 5,-5" fill="#0284c7" />
-                    <polygon points="0,0 22,0 5,5" fill="#64748b" />
-                    <polygon points="0,0 -22,0 -5,-5" fill="#94a3b8" />
-                    <polygon points="0,0 0,22 5,5" fill="#94a3b8" />
-                    <circle cx="0" cy="0" r="3" fill="#f8fafc" stroke="#0170b9" stroke-width="1"/>
-                    <text x="0" y="-25" text-anchor="middle" fill="#0170b9" font-family="'Consolas', sans-serif" font-size="11" font-weight="900">U</text>
-                    <text x="0" y="-34" text-anchor="middle" fill="#64748b" font-family="'Consolas', sans-serif" font-size="6" font-weight="bold">NORTH</text>
-                </g>
-
-                <!-- Dedicated Engineering Sheet Footer Margin (Terletak di Bawah Apron & Rampa D1-D5, Tidak Menutupi Dermaga) -->
-                <g id="cadDrawingSheetFooter" class="select-none">
-                    <!-- Linear Scale Bar CAD (Identik Denah 35 Ha) -->
-                    <g transform="translate(70, 785)" font-family="'Consolas', monospace" font-size="7.5" fill="#0f172a">
-                        <line x1="0" y1="0" x2="200" y2="0" stroke="#0f172a" stroke-width="2" />
-                        <line x1="0" y1="-5" x2="0" y2="5" stroke="#0f172a" stroke-width="1.2" />
-                        <line x1="50" y1="-3" x2="50" y2="0" stroke="#0f172a" stroke-width="1" />
-                        <line x1="100" y1="-5" x2="100" y2="5" stroke="#0f172a" stroke-width="1.2" />
-                        <line x1="200" y1="-5" x2="200" y2="5" stroke="#0f172a" stroke-width="1.2" />
-                        <text x="-4" y="-7">0</text>
-                        <text x="44" y="-7">10m</text>
-                        <text x="94" y="-7">20m</text>
-                        <text x="188" y="-7">40m</text>
-                        <text x="0" y="16" fill="#475569" font-size="7" font-weight="bold">SKALA METRIK 1:200 @ A1 (1 DIVISI = 10m)</text>
-                        <text x="0" y="27" fill="#64748b" font-size="6.5">PEIL LANTAI &plusmn;0.000 MKL (EL. +2.450 MSL)</text>
-                    </g>
-
-                    <!-- Catatan Teknis Sipil & Spesifikasi Pelaksanaan (General Engineering Notes) -->
-                    <g transform="translate(340, 755)" font-family="'Consolas', monospace" font-size="6.5" fill="#475569">
-                        <rect width="485" height="98" fill="#ffffff" stroke="#cbd5e1" stroke-width="1" rx="3"/>
-                        <rect width="485" height="20" fill="#f1f5f9" stroke="#cbd5e1" stroke-width="0.8" rx="2"/>
-                        <text x="12" y="14" fill="#0170b9" font-size="7" font-weight="bold">CATATAN TEKNIS &amp; SPESIFIKASI STRUKTURAL (GENERAL NOTES)</text>
-                        <text x="12" y="34" fill="#334155">1. Pelat beton bertulang t=200 mm mutu fc' 30 MPa (K-350) + floor hardener Sika Chapdur 5 kg/m².</text>
-                        <text x="12" y="48" fill="#334155">2. Beban hidup merata: 50 kN/m² (5.0 T/m²). Beban terpusat rak footplate: maks. 65 kN per titik.</text>
-                        <text x="12" y="62" fill="#334155">3. Rampa D1-D5 dilengkapi Hydraulic Dock Leveler 15T, lip 400 mm, &amp; sensor ultrasonik HW-06.</text>
-                        <text x="12" y="76" fill="#334155">4. Dimensi dalam satuan mm. Toleransi kerataan lantai standar DIN 15185 Superflat.</text>
-                        <text x="12" y="90" fill="#059669" font-weight="bold">✓ Pintu darurat K3, jalur evakuasi, hidran FHC, &amp; sprinkler sesuai standar NFPA 13 &amp; 30.</text>
-                    </g>
-
-                    <!-- Kop Gambar Teknik ISO 7200 Resmi (Title Block CAD di Sudut Kanan Bawah) -->
-                    <g id="cadTitleBlock" transform="translate(845, 755)">
-                        <rect width="305" height="98" fill="#ffffff" stroke="#0170b9" stroke-width="1.8" rx="3"/>
-                        <rect width="305" height="22" fill="#0170b9" rx="2"/>
-                        <text x="152" y="15" fill="#ffffff" font-family="'Consolas', monospace" font-size="8.5" font-weight="bold" text-anchor="middle">CONCLUSION INTERMODAL DRY PORT (CIDP)</text>
-                        <line x1="0" y1="48" x2="305" y2="48" stroke="#cbd5e1" stroke-width="0.8"/>
-                        <line x1="0" y1="74" x2="305" y2="74" stroke="#cbd5e1" stroke-width="0.8"/>
-                        <line x1="185" y1="22" x2="185" y2="98" stroke="#cbd5e1" stroke-width="0.8"/>
-                        
-                        <!-- Kolom Kiri: Proyek, Judul, Engineer -->
-                        <text x="8" y="34" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" font-weight="bold">PROYEK: CIDP CFS WAREHOUSE</text>
-                        <text x="8" y="42" fill="#64748b" font-family="'Consolas', monospace" font-size="6">OPERATOR: PT MULTI TERMINAL INDONESIA</text>
-                        <text x="8" y="59" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" font-weight="bold">JUDUL: TATA LETAK ARSITEKTUR &amp; SIPIL</text>
-                        <text x="8" y="68" fill="#64748b" font-family="'Consolas', monospace" font-size="6">RAMPA D1-D5 &bull; RACKS AISLE A-F</text>
-                        <text x="8" y="85" fill="#0170b9" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">ENGINEER: ARMANSYAH M.</text>
-                        <text x="8" y="94" fill="#16a34a" font-family="'Consolas', monospace" font-size="6" font-weight="bold">STATUS: AS-BUILT APPROVED</text>
-
-                        <!-- Kolom Kanan: Skala, Tanggal, No. Dokumen (Bebas Tabrakan Teks) -->
-                        <text x="195" y="34" fill="#0f172a" font-family="'Consolas', monospace" font-size="7" font-weight="bold">SKALA: 1:200 @ A1</text>
-                        <text x="195" y="42" fill="#64748b" font-family="'Consolas', monospace" font-size="6">SATUAN: MILIMETER (mm)</text>
-                        <text x="195" y="59" fill="#0f172a" font-family="'Consolas', monospace" font-size="6.5" font-weight="bold">TGL: 30 SEP 2026</text>
-                        <text x="195" y="68" fill="#64748b" font-family="'Consolas', monospace" font-size="6">REVISI: REV. 2.4 FINAL</text>
-                        <text x="195" y="85" fill="#0170b9" font-family="'Consolas', monospace" font-size="7" font-weight="bold">DWG-CFS-STR-01</text>
-                        <text x="195" y="94" fill="#0f172a" font-family="'Consolas', monospace" font-size="6" font-weight="bold">fc' 30 MPa &bull; 50 kN/m²</text>
-                    </g>
-                </g>
-            </svg>
-        </div>
-
-        <!-- Real-Time Cursor Coordinate & Structural Inspector HUD Bar (Matching Denah 35 Ha Proportions) -->
-        <div class="mt-3 bg-white border border-gray-200 rounded-xl p-2.5 sm:px-4 text-xs font-mono text-gray-700 flex flex-col md:flex-row items-start md:items-center justify-between gap-2 shadow-xs">
-            <div class="flex items-center gap-3 flex-wrap">
-                <span class="flex items-center gap-1.5 font-bold text-[#0170b9]">
-                    <i class="fa-solid fa-crosshairs text-[11px] animate-spin text-[#0170b9]" style="animation-duration: 8s;"></i>
-                    <span id="cadHudCoords">X: 42.5 m | Y: 25.0 m</span>
-                </span>
-                <span class="text-gray-300 hidden sm:inline">&bull;</span>
-                <span id="cadHudGrid" class="text-amber-700 font-semibold">Grid: As D-4</span>
-                <span class="text-gray-300 hidden sm:inline">&bull;</span>
-                <span id="cadHudZone" class="text-emerald-700 font-medium">Zona: Selective Pallet Racking Aisle C (FMCG)</span>
-            </div>
-            <div class="flex items-center gap-3 text-[11px] text-gray-500 flex-wrap">
-                <span>Beban Rencana: <strong class="text-gray-800 font-mono">50 kN/m²</strong></span>
-                <span class="text-gray-300">&bull;</span>
-                <span>Elevasi: <strong class="text-gray-800 font-mono">&plusmn;0.000 MKL</strong></span>
-                <span class="text-gray-300">&bull;</span>
-                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>CAD Inspector Aktif</span>
-                </span>
-            </div>
-        </div>
-
-        <!-- Panel Rekayasa Racking: Parameter Realistis 200 Palet & Monitoring Ketersediaan -->
-        <div class="mt-4 bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
-            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 pb-3 border-b border-gray-100">
-                <div class="flex items-center space-x-2.5">
-                    <div class="w-9 h-9 rounded-xl bg-blue-50 text-[#0170b9] border border-blue-200 flex items-center justify-center text-base shrink-0">
-                        <i class="fa-solid fa-boxes-stacked"></i>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-xs sm:text-sm text-gray-900">Konfigurasi Rak (Aisle A–F)</h4>
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <div class="text-[11px] font-mono bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 text-slate-700">
-                        Total Kapasitas: <strong class="text-blue-700">1.200 Palet</strong> &bull; Tersedia: <strong class="text-emerald-600">326 Bebas</strong>
-                    </div>
-                    <select id="cfsAislesLimitSelect" data-limit-target="#cfsAislesTable" class="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-bold text-slate-700">
-                        <option value="10" selected>Tampil: 10</option>
-                        <option value="25">Tampil: 25</option>
-                        <option value="all">Semua</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- 4 Metrik Parameter Fisik Stacking Realistis -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block font-mono">1. Tumpuk Panjang (Bay)</span>
-                    <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-1 font-mono">10 Bay Memanjang</div>
-                    <p class="text-[10px] text-gray-500 mt-0.5">Bentang 27 m / baris</p>
-                </div>
-                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block font-mono">2. Susun per Stack / Beam</span>
-                    <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-1 font-mono">2 Palet / Stack</div>
-                    <p class="text-[10px] text-gray-500 mt-0.5">Standar EUR/ISO</p>
-                </div>
-                <div class="bg-slate-50/80 rounded-xl p-3 border border-slate-200/80">
-                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider block font-mono">3. Stacking Vertikal (Tier)</span>
-                    <div class="text-sm sm:text-base font-extrabold text-gray-900 mt-1 font-mono">5 Tingkat (Tier)</div>
-                    <p class="text-[10px] text-gray-500 mt-0.5">Tinggi rak ~7,5 m</p>
-                </div>
-                <div class="bg-blue-50/60 rounded-xl p-3 border border-blue-200">
-                    <span class="text-[10px] font-bold text-blue-700 uppercase tracking-wider block font-mono">4. Total Kapasitas 1 Blok</span>
-                    <div class="text-sm sm:text-base font-extrabold text-[#0170b9] mt-1 font-mono">200 Palet Slot</div>
-                    <p class="text-[10px] text-blue-900 mt-1 leading-snug">2 baris back-to-back</p>
-                </div>
-            </div>
-
-            <!-- Tabel Detail Ketersediaan Palet Real-Time per Blok -->
-            <div class="overflow-x-auto border border-gray-200 rounded-xl">
-                <table class="w-full text-left text-xs border-collapse" id="cfsAislesTable">
-                    <thead>
-                        <tr class="bg-slate-50 text-gray-600 font-bold uppercase text-[10px] font-mono border-b border-gray-200">
-                            <th class="py-2.5 px-2.5 text-center w-10">No</th>
-                            <th class="py-2.5 px-3">Blok &amp; Aisle</th>
-                            <th class="py-2.5 px-3">Kategori Komoditas</th>
-                            <th class="py-2.5 px-3 text-center">Formasi Racking</th>
-                            <th class="py-2.5 px-3 text-right">Kapasitas</th>
-                            <th class="py-2.5 px-3 text-right">Terisi (Occupied)</th>
-                            <th class="py-2.5 px-3 text-right">Tersedia (Available)</th>
-                            <th class="py-2.5 px-3 text-center">Okupansi (%)</th>
-                            <th class="py-2.5 px-3 text-center">Status Gudang</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-100 font-mono text-[11px]">
-                        <?php 
-                        $total_cap = 0; $total_occ = 0; $total_avl = 0; $a_idx = 0;
-                        foreach ($aisles_data as $ak => $ad): 
-                            $a_idx++;
-                            $cap = $ad['total'];
-                            $occ = $ad['occupied'];
-                            $avl = $cap - $occ;
-                            $pct = round(($occ / $cap) * 100, 1);
-                            $total_cap += $cap; $total_occ += $occ; $total_avl += $avl;
-                            
-                            $badge_color = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-                            $status_text = 'Tersedia Normal';
-                            if ($pct >= 90) { $badge_color = 'bg-rose-50 text-rose-700 border-rose-200'; $status_text = 'Hampir Penuh'; }
-                            elseif ($pct >= 80) { $badge_color = 'bg-amber-50 text-amber-700 border-amber-200'; $status_text = 'Padat Aktif'; }
-                            elseif ($pct < 40) { $badge_color = 'bg-blue-50 text-blue-700 border-blue-200'; $status_text = 'Kapasitas Longgar'; }
-                        ?>
-                        <tr class="hover:bg-slate-50/80 transition">
-                            <td class="py-2.5 px-2.5 text-center font-mono text-gray-400" data-row-num><?= $a_idx ?></td>
-                            <td class="py-2.5 px-3 font-bold text-gray-900">
-                                <span class="text-blue-700 font-bold"><?= $ad['client'] ?></span> 
-                                <span class="text-gray-400 font-normal">(<?= $ad['name'] ?>)</span>
-                            </td>
-                            <td class="py-2.5 px-3 font-sans text-gray-600"><?= $ad['category'] ?></td>
-                            <td class="py-2.5 px-3 text-center text-gray-500">10 Bay &times; 2 Sisi &times; 5 Tier</td>
-                            <td class="py-2.5 px-3 text-right font-bold text-gray-800"><?= $cap ?> Plt</td>
-                            <td class="py-2.5 px-3 text-right font-bold text-blue-600"><?= $occ ?> Plt</td>
-                            <td class="py-2.5 px-3 text-right font-bold text-emerald-600 bg-emerald-50/30"><?= $avl ?> Plt</td>
-                            <td class="py-2.5 px-3 text-center">
-                                <div class="flex items-center justify-center gap-1.5">
-                                    <div class="w-16 bg-gray-200 rounded-full h-1.5 overflow-hidden">
-                                        <div class="h-full rounded-full <?= $pct >= 90 ? 'bg-rose-500' : ($pct >= 80 ? 'bg-amber-500' : 'bg-emerald-500') ?>" style="width: <?= $pct ?>%"></div>
-                                    </div>
-                                    <span class="font-bold text-[10px]"><?= $pct ?>%</span>
-                                </div>
-                            </td>
-                            <td class="py-2.5 px-3 text-center">
-                                <span class="px-2 py-0.5 rounded text-[9.5px] font-bold border <?= $badge_color ?>"><?= $status_text ?></span>
-                            </td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                    <tfoot class="bg-slate-100/90 font-mono font-bold text-gray-900 border-t border-gray-200">
-                        <tr>
-                            <td class="py-2.5 px-3" colspan="4">TOTAL GUDANG CFS (6 BLOK/AISLE)</td>
-                            <td class="py-2.5 px-3 text-right"><?= $total_cap ?> Plt</td>
-                            <td class="py-2.5 px-3 text-right text-blue-700"><?= $total_occ ?> Plt</td>
-                            <td class="py-2.5 px-3 text-right text-emerald-700 bg-emerald-100/50"><?= $total_avl ?> Plt (Bebas)</td>
-                            <td class="py-2.5 px-3 text-center"><?= round(($total_occ / $total_cap) * 100, 1) ?>%</td>
-                            <td class="py-2.5 px-3 text-center text-emerald-700 text-[10px]">SIAP OPERASIONAL</td>
-                        </tr>
-                    </tfoot>
-                </table>
-            </div>
-        </div>
-
-        <!-- Ringkasan Teknis Gudang -->
-        <div class="flex flex-wrap items-center gap-2 mt-3 text-[11px] font-semibold text-slate-600">
-            <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200"><i class="fa-solid fa-cube text-[#0170b9] mr-1.5"></i>Lantai K-350 Superflat</span>
-            <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200"><i class="fa-solid fa-truck-ramp-box text-emerald-600 mr-1.5"></i>5 Rampa Hidrolik 15T (HW-06)</span>
-            <span class="px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200"><i class="fa-solid fa-fire-extinguisher text-rose-600 mr-1.5"></i>Hidran FHC-01..04 &amp; Jalur K3</span>
-        </div>
 
         <!-- KONSOL UJI SENSOR GUDANG CFS -->
         <div class="mt-5 bg-white rounded-2xl p-4 border border-gray-200 text-gray-800 shadow-sm">
@@ -2718,7 +2083,6 @@ $active_docks_count = 4;
                 </div>
             </div>
         </div>
-        </div><!-- /cadViewContainer -->
     </div>
 
     <!-- ===================================================================== -->
@@ -2811,7 +2175,7 @@ $active_docks_count = 4;
                                 <a href="dashboard.php?page=kontainer&search=<?= urlencode($job['container_number']) ?>" class="w-7 h-7 bg-blue-50 text-[#0170b9] hover:bg-[#0170b9] hover:text-white rounded-lg flex items-center justify-center transition shadow-2xs" title="Lacak Kontainer di Tracking Box">
                                     <i class="fa-solid fa-boxes-stacked text-xs"></i>
                                 </a>
-                                <a href="dashboard.php?page=simulator&view=cfs" class="w-7 h-7 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white rounded-lg flex items-center justify-center transition shadow-2xs" title="Lihat 3D Gudang CFS">
+                                <a href="dashboard.php?page=twin&view=cfs" class="w-7 h-7 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white rounded-lg flex items-center justify-center transition shadow-2xs" title="Lihat 3D Gudang CFS">
                                     <i class="fa-solid fa-cube text-xs"></i>
                                 </a>
                                 <a href="dashboard.php?page=billing&search=<?= urlencode($job['container_number']) ?>" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded-lg flex items-center justify-center transition shadow-2xs" title="Periksa Faktur Billing CFS">
@@ -2939,8 +2303,12 @@ $active_docks_count = 4;
             </button>
         </div>
 
-        <form method="POST" class="p-6 space-y-4">
+        <form method="POST" id="modalAddPalletForm" class="p-6 space-y-4">
             <input type="hidden" name="cfs_action" value="add_pallet">
+            <div id="addPalletLiveHint" class="hidden p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-[#0170b9] text-[11px] font-semibold flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-orange-500"></i>
+                <span id="addPalletLiveHintText">Mode Real-Time Layout: Palet langsung mengisi slot tanpa reload halaman.</span>
+            </div>
 
             <div>
                 <label class="block text-[11px] font-bold text-gray-700 mb-1">Nomor Palet SSCC-18 (GS1 Logistic Label)</label>
@@ -3175,6 +2543,141 @@ $active_docks_count = 4;
                 </button>
                 <button type="submit" class="px-4 py-1.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg shadow-sm transition">
                     Simpan Tally
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 4B: INSPEKTOR SEKTOR RAK GUDANG CFS REAL-TIME (R1–R4 SSoT)         -->
+<!-- ========================================================================= -->
+<div id="modalCfsSectorInspector" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full overflow-hidden border border-gray-100 transform transition-all text-xs">
+        <div class="bg-gradient-to-r from-[#0170b9] to-slate-900 p-5 text-white flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center text-lg shadow-inner">
+                    <i class="fa-solid fa-layer-group"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <h3 class="text-base font-extrabold leading-tight" id="inspSectorTitle">BLOK 1 • SEKTOR A</h3>
+                        <span id="inspSectorBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white font-mono">0/4 TERISI</span>
+                    </div>
+                    <p class="text-[11px] text-blue-100 mt-0.5" id="inspSectorSubtitle">Aisle A • Bay 01 • Inspeksi Level Rak R1–R4 Real-Time (SSoT)</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModal('modalCfsSectorInspector')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <div class="p-5 space-y-3 max-h-[70vh] overflow-y-auto">
+            <div id="inspActionAlert" class="hidden p-3 rounded-xl border text-xs font-semibold flex items-start gap-2"></div>
+
+            <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5 flex items-center justify-between text-[11px] text-slate-600">
+                <span><i class="fa-solid fa-database text-[#0170b9] mr-1"></i> Tersinkron langsung dengan <code class="font-mono font-bold text-slate-800">cfs_pallets</code> &amp; <code class="font-mono font-bold text-slate-800">master_lokasi</code></span>
+                <span class="font-mono font-bold text-slate-500">4 Level Vertikal (R1–R4)</span>
+            </div>
+
+            <div id="inspLevelsContainer" class="space-y-2.5"></div>
+        </div>
+
+        <div class="px-5 py-3.5 bg-slate-50 border-t border-gray-100 flex flex-wrap items-center justify-between gap-2">
+            <a id="inspMasterRakLink" href="master_rak.php" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-[#0170b9] hover:underline">
+                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                <span>Buka Log Lengkap di Master Rak</span>
+            </a>
+            <button type="button" onclick="closeModal('modalCfsSectorInspector')" class="px-4 py-1.5 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold rounded-xl transition cursor-pointer">
+                Tutup
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ========================================================================= -->
+<!-- MODAL 4C: RELOKASI SLOT RAK PALET (ANTI-BENTROK REAL-TIME)               -->
+<!-- ========================================================================= -->
+<div id="modalRelocatePallet" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden animate-fadeIn">
+    <div class="bg-white rounded-3xl shadow-2xl max-w-md w-full overflow-hidden border border-gray-100 transform transition-all text-xs">
+        <div class="bg-gradient-to-r from-indigo-700 to-[#0170b9] p-5 text-white flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-lg shadow-inner">
+                    <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                </div>
+                <div>
+                    <h3 class="text-base font-extrabold leading-tight">Relokasi Slot Rak Gudang</h3>
+                    <p class="text-[11px] text-blue-100">Mutasi Real-Time Forklift FL-04 &amp; Cek Anti-Bentrok</p>
+                </div>
+            </div>
+            <button type="button" onclick="closeModal('modalRelocatePallet')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <form onsubmit="submitRelocatePallet(event)" class="p-5 space-y-4">
+            <input type="hidden" id="relocInputSscc" value="">
+
+            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-1">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold uppercase text-slate-400">Palet Dipindahkan</span>
+                    <span id="relocSourceRack" class="px-2 py-0.5 rounded bg-slate-200 text-slate-800 font-mono font-bold text-[10px]">-</span>
+                </div>
+                <div id="relocSourceCommodity" class="font-bold text-slate-900 text-xs truncate">-</div>
+                <div id="relocSourceSscc" class="font-mono text-[11px] text-[#0170b9] font-bold">-</div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2.5">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Blok (01–06)</label>
+                    <select id="relocBlokSelect" onchange="syncRelocateTargetOptions()" class="w-full px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900">
+                        <option value="1">Blok 1 (Bay 01)</option>
+                        <option value="2">Blok 2 (Bay 02)</option>
+                        <option value="3">Blok 3 (Bay 03)</option>
+                        <option value="4">Blok 4 (Bay 04)</option>
+                        <option value="5">Blok 5 (Bay 05)</option>
+                        <option value="6">Blok 6 (Bay 06)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Sektor (A–F)</label>
+                    <select id="relocSektorSelect" onchange="syncRelocateTargetOptions()" class="w-full px-2.5 py-2 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900">
+                        <option value="A">Sektor A</option>
+                        <option value="B">Sektor B</option>
+                        <option value="C">Sektor C</option>
+                        <option value="D">Sektor D</option>
+                        <option value="E">Sektor E</option>
+                        <option value="F">Sektor F</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Level (R1–R4)</label>
+                    <select id="relocRakSelect" onchange="updateRelocateSlotPreview()" class="w-full px-2 py-2 bg-gray-50 border border-gray-200 rounded-xl font-bold text-gray-900">
+                        <option value="1">R1 (L1)</option>
+                        <option value="2">R2 (L2)</option>
+                        <option value="3">R3 (L3)</option>
+                        <option value="4">R4 (L4)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="p-3 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-2">
+                <div>
+                    <div class="text-[10px] font-bold text-slate-400 uppercase">Kode Slot Tujuan</div>
+                    <div id="relocPreviewCode" class="font-mono font-black text-slate-900 text-xs">AISLE-A-01-L1</div>
+                </div>
+                <span id="relocSlotStatusPill" class="px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">SLOT KOSONG</span>
+            </div>
+
+            <div id="relocErrorBox" class="hidden p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-[11px] font-semibold"></div>
+
+            <div class="pt-2 border-t border-gray-100 flex items-center justify-end gap-2">
+                <button type="button" onclick="closeModal('modalRelocatePallet')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition cursor-pointer">
+                    Batal
+                </button>
+                <button type="submit" id="btnSubmitRelocate" class="px-4 py-2 bg-[#0170b9] hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                    <i class="fa-solid fa-dolly"></i>
+                    <span>Eksekusi Pindah Rak</span>
                 </button>
             </div>
         </form>
@@ -3479,34 +2982,6 @@ function switchCfsTab(tabId) {
     }
 }
 
-// Warehouse View Mode Controller (Master Grid 6 Blok vs CAD Blueprint)
-function switchWarehouseView(mode) {
-    const gridView = document.getElementById('warehouseGridView');
-    const cadView = document.getElementById('cadViewContainer');
-    const btnGrid = document.getElementById('btnViewGrid');
-    const btnCad = document.getElementById('btnViewCad');
-
-    if (mode === 'grid') {
-        if (gridView) gridView.classList.remove('hidden');
-        if (cadView) cadView.classList.add('hidden');
-        if (btnGrid) {
-            btnGrid.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-[#0170b9] text-white shadow-xs';
-        }
-        if (btnCad) {
-            btnCad.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-transparent text-gray-700 hover:bg-white';
-        }
-    } else {
-        if (gridView) gridView.classList.add('hidden');
-        if (cadView) cadView.classList.remove('hidden');
-        if (btnCad) {
-            btnCad.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-[#0170b9] text-white shadow-xs';
-        }
-        if (btnGrid) {
-            btnGrid.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-transparent text-gray-700 hover:bg-white';
-        }
-    }
-}
-
 // Modal Handlers
 function openModal(id) {
     const m = document.getElementById(id);
@@ -3582,148 +3057,11 @@ function filterAisleFromMap(aisleKey) {
     }
 }
 
-// =========================================================================
-// CAD VISUALIZER & DIGITAL TWIN CONTROLS (INFORMATIKA & SIPIL)
-// =========================================================================
-function setCadTheme(theme) {
-    const container = document.getElementById('cadDrawingContainer');
-    if (!container) return;
-
-    // Reset theme classes
-    container.classList.remove('cad-blueprint-mode', 'cad-cyber-mode', 'cad-paper-mode');
-    
-    // Reset buttons
-    const btnBlueprint = document.getElementById('btn-theme-blueprint');
-    const btnCyber = document.getElementById('btn-theme-cyber');
-    const btnPaper = document.getElementById('btn-theme-paper');
-
-    [btnBlueprint, btnCyber, btnPaper].forEach(btn => {
-        if (btn) {
-            btn.className = 'cad-theme-btn px-2.5 py-1 rounded-lg transition text-gray-600 hover:text-gray-900 hover:bg-gray-200 flex items-center gap-1';
-        }
-    });
-
-    if (theme === 'cyber') {
-        container.classList.add('cad-cyber-mode');
-        if (btnCyber) btnCyber.className = 'cad-theme-btn px-2.5 py-1 rounded-lg transition bg-emerald-600 text-white shadow-xs flex items-center gap-1';
-    } else if (theme === 'paper') {
-        container.classList.add('cad-paper-mode');
-        if (btnPaper) btnPaper.className = 'cad-theme-btn px-2.5 py-1 rounded-lg transition bg-slate-800 text-white shadow-xs flex items-center gap-1';
-    } else {
-        container.classList.add('cad-blueprint-mode');
-        if (btnBlueprint) btnBlueprint.className = 'cad-theme-btn px-2.5 py-1 rounded-lg transition bg-blue-600 text-white shadow-xs flex items-center gap-1';
-    }
-}
-
-function toggleCadLayer(layerId, isChecked) {
-    const layer = document.getElementById(layerId);
-    if (layer) {
-        layer.style.display = isChecked ? 'inline' : 'none';
-    }
-}
-
-let cfsMapScale = 1;
-function cfsMapZoom(delta) {
-    cfsMapScale = Math.min(2.5, Math.max(0.6, cfsMapScale + delta));
-    const svg = document.getElementById('cfsCadSvg');
-    if (svg) {
-        svg.style.transform = `scale(${cfsMapScale})`;
-        svg.style.transformOrigin = 'center center';
-    }
-}
-
-function cfsMapReset() {
-    cfsMapScale = 1;
-    const svg = document.getElementById('cfsCadSvg');
-    if (svg) {
-        svg.style.transform = 'scale(1)';
-        svg.style.transformOrigin = 'center center';
-    }
-}
-
-function updateCadHud(e) {
-    const svg = document.getElementById('cfsCadSvg');
-    if (!svg) return;
-
-    const pt = svg.createSVGPoint();
-    pt.x = e.clientX;
-    pt.y = e.clientY;
-    const svgP = pt.matrixTransform(svg.getScreenCTM().inverse());
-
-    // SVG coordinates: building span X: 70 to 1150 (1080px = 80m), Y: 70 to 670 (600px = 50m)
-    const relX = Math.max(0, Math.min(1080, svgP.x - 70));
-    const relY = Math.max(0, Math.min(600, svgP.y - 70));
-
-    const xM = (relX / 1080 * 80).toFixed(1);
-    const yM = (relY / 600 * 50).toFixed(1);
-
-    // Calculate nearest Grid As
-    // X grids 1..9 (every 10m)
-    const gridXIdx = Math.min(9, Math.max(1, Math.round(relX / 135) + 1));
-    // Y grids A..F (every 10m)
-    const gridYLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
-    const gridYIdx = Math.min(5, Math.max(0, Math.round(relY / 120)));
-    const gridYLetter = gridYLetters[gridYIdx];
-
-    // Determine Zone
-    let zone = 'Area Operasional Terbuka';
-    const xVal = parseFloat(xM);
-    const yVal = parseFloat(yM);
-
-    if (svgP.y > 745) {
-        zone = 'Etiket Kop Gambar ISO 7200 &amp; Catatan Teknis Sipil';
-    } else if (yVal > 45) {
-        zone = 'Rampa Doking D1–D5 (Leveler Hidrolik 15T) &amp; Apron Aspal';
-    } else if (yVal > 35) {
-        if (xVal < 40) {
-            zone = 'Zona Staging Inbound & Timbangan HW-21';
-        } else {
-            zone = 'Zona Staging Outbound Konsolidasi LCL';
-        }
-    } else if (yVal < 10 && xVal < 18) {
-        zone = 'Ruang Pengawas Hanggar Bea Cukai CEISA';
-    } else if (yVal < 10 && xVal > 64) {
-        zone = 'Charging Bay Forklift Listrik (380V)';
-    } else if (yVal >= 10 && yVal <= 35) {
-        if (xVal >= 8 && xVal < 19) {
-            zone = 'Blok 1 (Aisle A): 200 Plt [10 Bay × 5 Tier] • 160 Terisi / 40 Tersedia';
-        } else if (xVal >= 19 && xVal < 30) {
-            zone = 'Blok 2 (Aisle B): 200 Plt [10 Bay × 5 Tier] • 175 Terisi / 25 Tersedia';
-        } else if (xVal >= 30 && xVal < 41) {
-            zone = 'Blok 3 (Aisle C): 200 Plt [10 Bay × 5 Tier] • 190 Terisi / 10 Tersedia';
-        } else if (xVal >= 41 && xVal < 52) {
-            zone = 'Blok 4 (Aisle D): 200 Plt [10 Bay × 5 Tier] • 130 Terisi / 70 Tersedia';
-        } else if (xVal >= 52 && xVal < 63) {
-            zone = 'Blok 5 (Aisle E): 200 Plt [10 Bay × 5 Tier] • 165 Terisi / 35 Tersedia';
-        } else if (xVal >= 63 && xVal < 76) {
-            zone = 'Aisle F (Karantina): 200 Plt [10 Bay × 5 Tier] • 54 Terisi / 146 Tersedia';
-        } else {
-            zone = 'Jalur Sirkulasi Forklift Utama (Lebar 3.500 mm)';
-        }
-    }
-
-    const hudCoords = document.getElementById('cadHudCoords');
-    const hudGrid = document.getElementById('cadHudGrid');
-    const hudZone = document.getElementById('cadHudZone');
-
-    if (hudCoords) hudCoords.innerText = `X: ${xM} m | Y: ${yM} m`;
-    if (hudGrid) hudGrid.innerText = (svgP.y > 745) ? 'Grid: Margin CAD' : `Grid: As ${gridYLetter}-${gridXIdx}`;
-    if (hudZone) hudZone.innerText = `Zona: ${zone}`;
-}
-
-function resetCadHud() {
-    const hudCoords = document.getElementById('cadHudCoords');
-    const hudGrid = document.getElementById('cadHudGrid');
-    const hudZone = document.getElementById('cadHudZone');
-
-    if (hudCoords) hudCoords.innerText = 'X: --.- m | Y: --.- m';
-    if (hudGrid) hudGrid.innerText = 'Grid: Area Bebas';
-    if (hudZone) hudZone.innerText = 'Zona: CFS Warehouse 4.000 m² (Arahkan kursor ke denah)';
-}
+window.cfsPalletsData = <?= json_encode($cfs_pallets) ?>;
 
 // Export CFS Inventory to Excel using SheetJS
 function exportCfsExcel() {
-    const pallets = <?= json_encode($cfs_pallets) ?>;
+    const pallets = window.cfsPalletsData || [];
     const exportData = pallets.map((p, idx) => ({
         "No": idx + 1,
         "No. Palet SSCC-18": p.pallet_sscc,
@@ -3833,12 +3171,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 1b. Handle warehouse view sub-mode (Master Grid vs CAD)
-    const viewParam = urlParams.get('view');
-    if (viewParam === 'cad') {
-        switchWarehouseView('cad');
-    }
-
     // 2. Handle search query (Container or Job Order or Pallet SSCC)
     if (searchParam) {
         if (!tabParam) {
@@ -3884,5 +3216,836 @@ document.addEventListener('DOMContentLoaded', function() {
     } else if (actionParam === 'assign_dock') {
         openModal('modalAssignDock');
     }
+
+    // 6. Real-Time 6-Block CFS Rack SSoT Layout & SSE Sync Engine
+    initCfsLiveSync();
 });
+
+// =========================================================================
+// REAL-TIME CFS WAREHOUSE 6-BLOK RACK SSoT ENGINE
+// =========================================================================
+let currentCfsTwinState = <?= json_encode($cfs_initial_twin, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+let activeInspectorCoords = null;
+let prevCfsRackOccupancy = null;
+let cfsToastTimer = null;
+let cfsEventSource = null;
+let cfsFallbackTimer = null;
+
+function escapeCfsHtml(val) {
+    return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function parseCfsRackCode(code) {
+    const m = String(code || '').trim().toUpperCase().match(/^AISLE-([A-F])-0?([1-6])-L([1-4])$/);
+    if (!m) return null;
+    return {
+        sektor: m[1],
+        blok: String(parseInt(m[2], 10)),
+        rak: String(parseInt(m[3], 10))
+    };
+}
+
+function formatCfsRackCode(blok, sektor, rak) {
+    const b = Math.max(1, Math.min(6, parseInt(blok, 10) || 1));
+    const s = String(sektor || 'A').toUpperCase().replace(/[^A-F]/g, '') || 'A';
+    const r = Math.max(1, Math.min(4, parseInt(rak, 10) || 1));
+    return `AISLE-${s}-0${b}-L${r}`;
+}
+
+function getCfsStatusBadgeClass(status) {
+    const st = String(status || '').toUpperCase();
+    if (st === 'STAGING_OUT') return 'bg-blue-50 text-blue-700 border-blue-200';
+    if (st === 'HOLD') return 'bg-red-50 text-red-700 border-red-200';
+    if (st === 'DISPATCHED') return 'bg-slate-100 text-slate-500 border-slate-200';
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+}
+
+function getCfsCustomsBadgeClass(status) {
+    const st = String(status || '').toUpperCase();
+    if (st === 'RED_LANE' || st === 'RED_LANE_CHECK') return 'bg-red-50 text-red-700 border-red-200';
+    if (st === 'HOLD') return 'bg-amber-50 text-amber-700 border-amber-200';
+    return 'bg-emerald-50 text-emerald-700 border-emerald-200';
+}
+
+function showCfsLayoutToast(message, tone = 'emerald') {
+    const toast = document.getElementById('cfsLayoutToast');
+    const msgEl = document.getElementById('cfsLayoutToastMsg');
+    if (!toast || !msgEl) return;
+
+    toast.className = tone === 'red'
+        ? 'mb-3 p-3 rounded-xl bg-red-50 border border-red-300 text-red-900 text-xs flex items-center justify-between gap-2 animate-fadeIn'
+        : 'mb-3 p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center justify-between gap-2 animate-fadeIn';
+    msgEl.textContent = message;
+
+    if (cfsToastTimer) clearTimeout(cfsToastTimer);
+    cfsToastTimer = setTimeout(() => {
+        toast.classList.add('hidden');
+    }, 6500);
+}
+
+function showInspectorAlert(message, tone = 'red') {
+    const el = document.getElementById('inspActionAlert');
+    if (!el) return;
+    el.className = tone === 'emerald'
+        ? 'p-3 rounded-xl border bg-emerald-50 border-emerald-200 text-emerald-800 text-xs font-semibold flex items-start gap-2'
+        : 'p-3 rounded-xl border bg-red-50 border-red-200 text-red-800 text-xs font-semibold flex items-start gap-2';
+    el.innerHTML = `<i class="fa-solid ${tone === 'emerald' ? 'fa-circle-check text-emerald-600' : 'fa-shield-halved text-red-600'} mt-0.5"></i><span>${escapeCfsHtml(message)}</span>`;
+}
+
+function hideInspectorAlert() {
+    const el = document.getElementById('inspActionAlert');
+    if (el) el.classList.add('hidden');
+}
+
+function buildManifestRowActionButtons(p) {
+    const sscc = escapeCfsHtml(p.pallet_sscc || '');
+    const rack = escapeCfsHtml(p.rack_location || '-');
+    const comm = escapeCfsHtml(p.commodity_name || '-');
+    const cons = escapeCfsHtml(p.consignee || '-');
+    const cartons = parseInt(p.carton_count || 0, 10) || 0;
+    const weight = parseFloat(p.gross_weight_kg || p.weight_kg || 0) || 0;
+    const isActiveRack = (p.status === 'IN_RACK' || p.status === 'STAGING_OUT');
+
+    let btns = '<div class="flex items-center justify-center space-x-1">';
+    if (isActiveRack) {
+        btns += `<button type="button" data-row-act="relocate" class="w-7 h-7 rounded-lg bg-blue-50 hover:bg-blue-100 text-[#0170b9] transition flex items-center justify-center text-xs cursor-pointer" title="Pindahkan Slot Rak (Relokasi Real-Time)"><i class="fa-solid fa-arrows-up-down-left-right"></i></button>`;
+        btns += `<button type="button" data-row-act="dispatch" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 transition flex items-center justify-center text-xs cursor-pointer" title="Keluarkan / Dispatch Palet Keluar Gudang"><i class="fa-solid fa-truck-ramp-box"></i></button>`;
+    }
+    btns += `<button type="button" data-row-act="gs1" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-orange-50 hover:text-orange-600 text-gray-600 transition flex items-center justify-center text-xs cursor-pointer" title="Cetak Label Barcode GS1-128"><i class="fa-solid fa-print"></i></button>`;
+    btns += `<button type="button" data-row-act="scanner" class="w-7 h-7 rounded-lg bg-gray-100 hover:bg-purple-50 hover:text-purple-600 text-gray-600 transition flex items-center justify-center text-xs cursor-pointer" title="Verifikasi dengan Scanner GS1"><i class="fa-solid fa-qrcode"></i></button>`;
+    btns += '</div>';
+    return { btns, sscc, rack, comm, cons, cartons, weight };
+}
+
+function attachManifestRowButtonHandlers(tr, p) {
+    const relBtn = tr.querySelector('[data-row-act="relocate"]');
+    const dspBtn = tr.querySelector('[data-row-act="dispatch"]');
+    const gs1Btn = tr.querySelector('[data-row-act="gs1"]');
+    const scnBtn = tr.querySelector('[data-row-act="scanner"]');
+
+    if (relBtn) relBtn.addEventListener('click', () => openRelocatePalletModal(p.pallet_sscc, p.rack_location, p.commodity_name));
+    if (dspBtn) dspBtn.addEventListener('click', () => cfsQuickDispatch(p.pallet_sscc));
+    if (gs1Btn) gs1Btn.addEventListener('click', () => showGs1LabelModal(p.pallet_sscc, p.commodity_name, p.consignee, p.rack_location, p.carton_count, p.gross_weight_kg || p.weight_kg || 0));
+    if (scnBtn) scnBtn.addEventListener('click', () => openScannerPage(p.pallet_sscc));
+}
+
+function syncManifestTableFromState(pallets) {
+    const tbody = document.querySelector('#palletTable tbody');
+    if (!tbody || !Array.isArray(pallets)) return;
+
+    const existingRows = new Map();
+    tbody.querySelectorAll('tr.pallet-row[data-sscc]').forEach(tr => {
+        existingRows.set(tr.getAttribute('data-sscc'), tr);
+    });
+
+    pallets.forEach(p => {
+        const sscc = String(p.pallet_sscc || '');
+        if (!sscc) return;
+        const rackLoc = String(p.rack_location || '-');
+        const stBadgeClass = getCfsStatusBadgeClass(p.status);
+        const custBadgeClass = getCfsCustomsBadgeClass(p.customs_status);
+        const searchBlob = `${sscc} ${p.commodity_name || ''} ${p.consignee || ''} ${p.container_origin || ''} ${rackLoc}`.toLowerCase();
+
+        let tr = existingRows.get(sscc);
+        if (tr) {
+            tr.dataset.aisle = rackLoc.slice(0, 7);
+            tr.dataset.search = searchBlob;
+
+            const rkEl = tr.querySelector('[data-rack-badge]');
+            if (rkEl) rkEl.textContent = rackLoc;
+
+            const stEl = tr.querySelector('[data-status-badge]');
+            if (stEl) {
+                stEl.className = `px-2 py-0.5 rounded-full text-[9.5px] font-bold border ${stBadgeClass}`;
+                stEl.setAttribute('data-status-badge', '');
+                stEl.textContent = String(p.status || 'IN_RACK').replace(/_/g, ' ');
+            }
+
+            const actCell = tr.querySelector('td:last-child');
+            if (actCell) {
+                const { btns } = buildManifestRowActionButtons(p);
+                actCell.innerHTML = btns;
+                attachManifestRowButtonHandlers(tr, p);
+            }
+        } else {
+            tr = document.createElement('tr');
+            tr.className = 'hover:bg-orange-50/40 transition-colors pallet-row bg-emerald-50/30';
+            tr.setAttribute('data-sscc', sscc);
+            tr.setAttribute('data-aisle', rackLoc.slice(0, 7));
+            tr.setAttribute('data-category', p.category || 'general');
+            tr.setAttribute('data-search', searchBlob);
+
+            const weight = parseFloat(p.gross_weight_kg || p.weight_kg || 0) || 0;
+            const cbm = parseFloat(p.cbm || p.volume_cbm || 0) || 0;
+            const cartons = parseInt(p.carton_count || 0, 10) || 0;
+            const { btns } = buildManifestRowActionButtons(p);
+
+            tr.innerHTML = `
+                <td class="py-3 px-2.5 text-center font-mono text-gray-400" data-row-num>1</td>
+                <td class="py-3 px-3.5">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-7 h-7 rounded-lg bg-orange-50 text-orange-600 flex items-center justify-center text-xs flex-shrink-0">
+                            <i class="fa-solid fa-barcode"></i>
+                        </div>
+                        <div>
+                            <span class="font-mono font-bold text-gray-900 block leading-tight text-[11.5px]">${escapeCfsHtml(sscc)}</span>
+                            <span class="text-[9.5px] text-gray-400 font-mono">(00) AI GS1-128</span>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-3 px-3.5 font-mono">
+                    <span class="font-bold text-gray-800 text-[11px] block">${escapeCfsHtml(p.container_origin || '-')}</span>
+                    <span class="text-[10px] text-gray-500 block">${escapeCfsHtml(p.customs_doc || 'SPPB-CEISA')}</span>
+                </td>
+                <td class="py-3 px-3.5 max-w-xs">
+                    <span class="font-bold text-gray-900 block truncate" title="${escapeCfsHtml(p.commodity_name || '')}">${escapeCfsHtml(p.commodity_name || '-')}</span>
+                    <span class="text-[10.5px] text-gray-500 block truncate">${escapeCfsHtml(p.consignee || '-')}</span>
+                </td>
+                <td class="py-3 px-3.5 text-center">
+                    <span class="px-2.5 py-1 bg-slate-100 border border-slate-200 rounded-lg text-slate-800 font-mono font-bold text-[11px]" data-rack-badge>${escapeCfsHtml(rackLoc)}</span>
+                </td>
+                <td class="py-3 px-3.5 text-right font-mono">
+                    <span class="font-bold text-gray-900 block">${cartons} Koli</span>
+                    <span class="text-[10.5px] text-gray-500 block">${weight.toFixed(1)} kg</span>
+                </td>
+                <td class="py-3 px-3.5 text-right font-mono">
+                    <span class="font-bold text-gray-800">${cbm.toFixed(2)}</span>
+                    <span class="text-[10px] text-gray-400 block">m³ (CBM)</span>
+                </td>
+                <td class="py-3 px-3.5 text-center">
+                    <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold border ${custBadgeClass}">${escapeCfsHtml(p.customs_status || 'CLEARED')}</span>
+                </td>
+                <td class="py-3 px-3.5 text-center">
+                    <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold border ${stBadgeClass}" data-status-badge>${escapeCfsHtml(String(p.status || 'IN_RACK').replace(/_/g, ' '))}</span>
+                </td>
+                <td class="py-3 px-3.5 text-center">${btns}</td>
+            `;
+            tbody.insertBefore(tr, tbody.firstChild);
+            attachManifestRowButtonHandlers(tr, p);
+        }
+    });
+
+    let rowIdx = 1;
+    tbody.querySelectorAll('tr.pallet-row [data-row-num]').forEach(cell => {
+        cell.textContent = String(rowIdx++);
+    });
+}
+
+function renderLiveCfsLayout(physical, toastHint = null) {
+    if (!physical || !physical.cfs_rack_grid) return;
+
+    if (!currentCfsTwinState || typeof currentCfsTwinState !== 'object') {
+        currentCfsTwinState = {};
+    }
+    currentCfsTwinState.physical = physical;
+
+    const grid = physical.cfs_rack_grid;
+    const stats = physical.cfs_rack_stats || {};
+    const nextOcc = {};
+    const changedSectors = new Set();
+    const changedDetails = [];
+
+    ['1', '2', '3', '4', '5', '6'].forEach(b => {
+        ['A', 'B', 'C', 'D', 'E', 'F'].forEach(s => {
+            const levels = (grid[b] && grid[b][s]) ? grid[b][s] : {};
+            const maxRak = Math.max(4, Object.keys(levels).length || 4);
+            let filledCount = 0;
+
+            for (let rIdx = 1; rIdx <= maxRak; rIdx++) {
+                const r = String(rIdx);
+                const slot = levels[r] || null;
+                const isFilled = Boolean(slot && slot.filled);
+                if (isFilled) filledCount++;
+
+                const occKey = `${b}-${s}-${r}`;
+                const occVal = isFilled ? String(slot.pallet_sscc || 'OCCUPIED') : '';
+                if (prevCfsRackOccupancy !== null && prevCfsRackOccupancy[occKey] !== occVal) {
+                    changedSectors.add(`${b}-${s}`);
+                    const slotCode = (slot && slot.code) ? slot.code : formatCfsRackCode(b, s, r);
+                    changedDetails.push((isFilled ? '+ Masuk ' : '- Keluar ') + slotCode);
+                }
+                nextOcc[occKey] = occVal;
+            }
+
+            const unitEl = document.getElementById(`cfsRackUnit-${b}-${s}`);
+            if (unitEl) {
+                unitEl.classList.remove('state-empty', 'state-partial', 'state-full');
+                const nextClass = filledCount === 0 ? 'state-empty' : (filledCount >= maxRak ? 'state-full' : 'state-partial');
+                unitEl.classList.add(nextClass);
+                unitEl.title = `Blok ${b} - Sektor ${s} (${filledCount}/${maxRak} terisi) • Klik untuk inspeksi R1–R${maxRak}`;
+            }
+
+            const countEl = document.getElementById(`cfsRackCount-${b}-${s}`);
+            if (countEl) {
+                countEl.textContent = `${filledCount}/${maxRak}`;
+            }
+
+            const dotsWrap = document.getElementById(`cfsRackDots-${b}-${s}`);
+            if (dotsWrap) {
+                dotsWrap.querySelectorAll('.dot').forEach(dot => {
+                    const rKey = String(dot.getAttribute('data-rak') || '');
+                    const slot = levels[rKey] || null;
+                    const isFilled = Boolean(slot && slot.filled);
+                    dot.classList.toggle('fill', isFilled);
+                    if (slot && slot.code) {
+                        dot.title = isFilled
+                            ? `R${rKey} (${slot.code}): ${slot.pallet_sscc || ''} - ${slot.commodity_name || ''}`
+                            : `R${rKey} (${slot.code}): Kosong`;
+                    }
+                });
+            }
+        });
+    });
+
+    prevCfsRackOccupancy = nextOcc;
+
+    // Visual glow ring for modified sectors
+    changedSectors.forEach(bs => {
+        const card = document.getElementById(`cfsRackUnit-${bs}`);
+        if (card) {
+            card.classList.add('ring-4', 'ring-orange-400', 'shadow-lg');
+            setTimeout(() => card.classList.remove('ring-4', 'ring-orange-400', 'shadow-lg'), 3500);
+        }
+    });
+
+    if (toastHint) {
+        showCfsLayoutToast(toastHint, 'emerald');
+    } else if (changedDetails.length > 0) {
+        showCfsLayoutToast('Sync Real-Time SSoT: ' + changedDetails.slice(0, 3).join(' | '), 'emerald');
+    }
+
+    // Update KPI Summary Counters
+    const elBlok = document.getElementById('cfsSumBlok');
+    const elSektor = document.getElementById('cfsSumSektor');
+    const elTerisi = document.getElementById('cfsSumTerisi');
+    const elKosong = document.getElementById('cfsSumKosong');
+    const elFill = document.getElementById('cfsOccBarFill');
+    const elText = document.getElementById('cfsOccText');
+
+    if (elBlok && stats.total_blocks !== undefined) elBlok.textContent = stats.total_blocks;
+    if (elSektor && stats.total_sectors !== undefined) elSektor.textContent = stats.total_sectors;
+    if (elTerisi && stats.filled !== undefined) elTerisi.textContent = stats.filled;
+    if (elKosong && stats.empty !== undefined) elKosong.textContent = stats.empty;
+
+    const occPct = Number(stats.occupancy_pct || 0);
+    if (elFill) elFill.style.width = `${Math.max(0, Math.min(100, occPct))}%`;
+    if (elText) {
+        const totalSlots = stats.total_slots ?? 144;
+        elText.innerHTML = `Occupancy Rate: <strong>${occPct.toFixed(1)}%</strong> dari total ${totalSlots} slot level`;
+    }
+
+    if (Array.isArray(physical.cfs_pallets)) {
+        syncManifestTableFromState(physical.cfs_pallets);
+    }
+
+    // Keep open inspector or relocate modal synchronized
+    const inspModal = document.getElementById('modalCfsSectorInspector');
+    if (inspModal && !inspModal.classList.contains('hidden') && activeInspectorCoords) {
+        renderInspectorLevels(activeInspectorCoords.blok, activeInspectorCoords.sektor);
+    }
+
+    const relModal = document.getElementById('modalRelocatePallet');
+    if (relModal && !relModal.classList.contains('hidden')) {
+        syncRelocateTargetOptions();
+    }
+}
+
+function renderInspectorLevels(blok, sektor) {
+    const b = String(blok);
+    const s = String(sektor).toUpperCase();
+    const grid = currentCfsTwinState?.physical?.cfs_rack_grid || {};
+    const levels = (grid[b] && grid[b][s]) ? grid[b][s] : {};
+
+    let filledCount = 0;
+    for (let i = 1; i <= 4; i++) {
+        if (levels[String(i)]?.filled) filledCount++;
+    }
+
+    const titleEl = document.getElementById('inspSectorTitle');
+    const subEl = document.getElementById('inspSectorSubtitle');
+    const badgeEl = document.getElementById('inspSectorBadge');
+    const linkEl = document.getElementById('inspMasterRakLink');
+    const container = document.getElementById('inspLevelsContainer');
+
+    if (titleEl) titleEl.textContent = `BLOK ${b} • SEKTOR ${s}`;
+    if (subEl) subEl.textContent = `Aisle ${s} • Bay 0${b} • Inspeksi Level Rak R1–R4 Real-Time (SSoT)`;
+    if (badgeEl) {
+        badgeEl.textContent = `${filledCount}/4 TERISI`;
+        badgeEl.className = filledCount >= 4
+            ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500 text-white font-mono'
+            : (filledCount > 0
+                ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-400 text-slate-900 font-mono'
+                : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400 text-slate-900 font-mono');
+    }
+    if (linkEl) linkEl.href = `master_rak.php?search=${encodeURIComponent(s + b)}`;
+    if (!container) return;
+
+    container.innerHTML = '';
+
+    for (let i = 1; i <= 4; i++) {
+        const r = String(i);
+        const slot = levels[r] || {
+            rak: i,
+            code: formatCfsRackCode(b, s, r),
+            filled: false,
+            pallet_sscc: null,
+            commodity_name: null,
+            container_origin: null,
+            consignee: null,
+            weight_kg: 0,
+            cbm: 0,
+            cartons: 0,
+            customs_status: 'CLEARED',
+            pallet_status: 'KOSONG'
+        };
+
+        const card = document.createElement('div');
+        if (slot.filled) {
+            const cust = String(slot.customs_status || 'CLEARED').toUpperCase();
+            const isHold = (cust === 'HOLD' || cust === 'RED_LANE' || cust === 'RED_LANE_CHECK');
+            card.className = isHold
+                ? 'p-3.5 rounded-2xl border-2 border-red-200 bg-red-50/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3'
+                : 'p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/30 flex flex-col sm:flex-row sm:items-center justify-between gap-3';
+
+            const custBadgeClass = getCfsCustomsBadgeClass(cust);
+            const stBadgeClass = getCfsStatusBadgeClass(slot.pallet_status);
+
+            card.innerHTML = `
+                <div class="space-y-1 min-w-0">
+                    <div class="flex items-center flex-wrap gap-1.5">
+                        <span class="px-2 py-0.5 rounded-lg bg-slate-900 text-white font-mono font-black text-[10px]">R${i}</span>
+                        <span class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 font-mono font-bold text-[#0170b9] text-[10.5px]">${escapeCfsHtml(slot.code)}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold border ${custBadgeClass}">Pabean: ${escapeCfsHtml(cust)}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold border ${stBadgeClass}">${escapeCfsHtml(String(slot.pallet_status || 'IN_RACK').replace(/_/g, ' '))}</span>
+                    </div>
+                    <div class="font-extrabold text-slate-900 text-xs truncate">${escapeCfsHtml(slot.commodity_name || 'Kargo LCL Terisi')}</div>
+                    <div class="text-[10.5px] text-slate-600 font-mono flex flex-wrap items-center gap-x-2 gap-y-0.5">
+                        <span>SSCC: <strong class="text-slate-900">${escapeCfsHtml(slot.pallet_sscc || '-')}</strong></span>
+                        <span>&bull; Ex: <strong>${escapeCfsHtml(slot.container_origin || '-')}</strong></span>
+                        <span>&bull; ${escapeCfsHtml(slot.consignee || '-')}</span>
+                    </div>
+                    <div class="text-[10px] text-slate-500 font-mono">
+                        ${parseInt(slot.cartons || 0, 10)} Koli &bull; ${Number(slot.weight_kg || 0).toFixed(1)} kg &bull; ${Number(slot.cbm || 0).toFixed(2)} CBM
+                    </div>
+                </div>
+                <div class="flex flex-wrap sm:flex-nowrap items-center gap-1.5 shrink-0">
+                    <button type="button" data-insp-act="relocate" class="px-2.5 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#0170b9] border border-blue-200 font-bold text-[11px] flex items-center gap-1 transition cursor-pointer">
+                        <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                        <span>Pindah Rak</span>
+                    </button>
+                    <button type="button" data-insp-act="dispatch" class="px-2.5 py-1.5 rounded-xl ${isHold ? 'bg-amber-50 hover:bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-600'} border font-bold text-[11px] flex items-center gap-1 transition cursor-pointer">
+                        <i class="fa-solid ${isHold ? 'fa-lock' : 'fa-truck-ramp-box'}"></i>
+                        <span>Dispatch Keluar</span>
+                    </button>
+                    <button type="button" data-insp-act="gs1" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-orange-50 text-slate-700 hover:text-orange-600 border border-slate-200 font-bold text-[11px] flex items-center gap-1 transition cursor-pointer" title="Cetak Label Barcode GS1-128">
+                        <i class="fa-solid fa-print"></i>
+                    </button>
+                </div>
+            `;
+
+            card.querySelector('[data-insp-act="relocate"]')?.addEventListener('click', () => {
+                openRelocatePalletModal(slot.pallet_sscc, slot.code, slot.commodity_name);
+            });
+            card.querySelector('[data-insp-act="dispatch"]')?.addEventListener('click', () => {
+                cfsQuickDispatch(slot.pallet_sscc);
+            });
+            card.querySelector('[data-insp-act="gs1"]')?.addEventListener('click', () => {
+                showGs1LabelModal(slot.pallet_sscc, slot.commodity_name || '-', slot.consignee || '-', slot.code, slot.cartons || 0, slot.weight_kg || 0);
+            });
+        } else {
+            card.className = 'p-3 rounded-2xl border border-dashed border-slate-300 bg-slate-50/70 flex items-center justify-between gap-3';
+            card.innerHTML = `
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <span class="px-2 py-0.5 rounded-lg bg-slate-200 text-slate-700 font-mono font-black text-[10px]">R${i}</span>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-mono font-bold text-slate-800 text-[11px]">${escapeCfsHtml(slot.code)}</span>
+                            <span class="px-2 py-0.5 rounded-full text-[9.5px] font-bold bg-slate-200/80 text-slate-600">RAK KOSONG</span>
+                        </div>
+                        <div class="text-[10.5px] text-slate-500">Slot tersedia — siap menerima putaway palet LCL / hasil stripping</div>
+                    </div>
+                </div>
+                <button type="button" data-insp-act="putaway" class="px-3 py-1.5 rounded-xl bg-[#0170b9] hover:bg-blue-700 text-white font-bold text-[11px] shadow-xs flex items-center gap-1.5 shrink-0 transition cursor-pointer">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Isi Slot Ini</span>
+                </button>
+            `;
+            card.querySelector('[data-insp-act="putaway"]')?.addEventListener('click', () => {
+                cfsQuickPutawayFromSlot(slot.code);
+            });
+        }
+
+        container.appendChild(card);
+    }
+}
+
+function openCfsSectorModal(blok, sektor) {
+    activeInspectorCoords = { blok: String(blok), sektor: String(sektor).toUpperCase() };
+    hideInspectorAlert();
+    renderInspectorLevels(activeInspectorCoords.blok, activeInspectorCoords.sektor);
+    openModal('modalCfsSectorInspector');
+}
+
+function cfsQuickPutawayFromSlot(code) {
+    closeModal('modalCfsSectorInspector');
+
+    const modal = document.getElementById('modalAddPallet');
+    const form = document.getElementById('modalAddPalletForm');
+    if (!modal || !form) return;
+
+    const rackSel = modal.querySelector('select[name="rack_location"]');
+    if (rackSel) {
+        let opt = Array.from(rackSel.options).find(o => o.value === code);
+        if (!opt) {
+            opt = document.createElement('option');
+            opt.value = code;
+            opt.textContent = `${code} (Slot Terpilih dari Layout)`;
+            rackSel.insertBefore(opt, rackSel.firstChild);
+        }
+        rackSel.value = code;
+    }
+
+    const hintEl = document.getElementById('addPalletLiveHint');
+    const hintTextEl = document.getElementById('addPalletLiveHintText');
+    if (hintEl && hintTextEl) {
+        hintEl.className = 'p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-[#0170b9] text-[11px] font-semibold flex items-center gap-2';
+        hintTextEl.textContent = `Slot Tujuan Terpilih: ${code} — langsung mengisi gudang & menyalakan indikator titik merah real-time.`;
+    }
+
+    form.dataset.ajaxMode = '1';
+    openModal('modalAddPallet');
+
+    const commInput = form.querySelector('input[name="commodity_name"]');
+    if (commInput) {
+        setTimeout(() => commInput.focus(), 80);
+    }
+}
+
+function openRelocatePalletModal(sscc, currentRack, commodity) {
+    const cleanSscc = String(sscc || '').trim();
+    const pallets = currentCfsTwinState?.physical?.cfs_pallets || [];
+    const livePal = pallets.find(p => String(p.pallet_sscc) === cleanSscc);
+    const actualRack = livePal?.rack_location || currentRack || 'AISLE-A-01-L1';
+    const actualComm = livePal?.commodity_name || commodity || '-';
+
+    document.getElementById('relocInputSscc').value = cleanSscc;
+    document.getElementById('relocSourceSscc').textContent = '(00) ' + cleanSscc;
+    document.getElementById('relocSourceCommodity').textContent = actualComm;
+    document.getElementById('relocSourceRack').textContent = 'Asal: ' + actualRack;
+
+    const errBox = document.getElementById('relocErrorBox');
+    if (errBox) errBox.classList.add('hidden');
+
+    const parsed = parseCfsRackCode(actualRack) || { blok: '1', sektor: 'A', rak: '1' };
+    const bSel = document.getElementById('relocBlokSelect');
+    const sSel = document.getElementById('relocSektorSelect');
+    if (bSel) bSel.value = parsed.blok;
+    if (sSel) sSel.value = parsed.sektor;
+
+    syncRelocateTargetOptions(true);
+    openModal('modalRelocatePallet');
+}
+
+function syncRelocateTargetOptions(autoPickEmpty = false) {
+    const bSel = document.getElementById('relocBlokSelect');
+    const sSel = document.getElementById('relocSektorSelect');
+    const rSel = document.getElementById('relocRakSelect');
+    if (!bSel || !sSel || !rSel) return;
+
+    const b = bSel.value;
+    const s = sSel.value;
+    const levels = currentCfsTwinState?.physical?.cfs_rack_grid?.[b]?.[s] || {};
+    let firstEmpty = null;
+
+    Array.from(rSel.options).forEach(opt => {
+        const r = opt.value;
+        const slot = levels[r];
+        const isFilled = Boolean(slot && slot.filled);
+        if (!isFilled && firstEmpty === null) firstEmpty = r;
+        const suffix = isFilled ? `[TERISI - ${String(slot.pallet_sscc || '').slice(-6)}]` : '[KOSONG]';
+        opt.textContent = `R${r} (L${r}) • ${suffix}`;
+    });
+
+    if (autoPickEmpty && firstEmpty !== null) {
+        rSel.value = firstEmpty;
+    }
+    updateRelocateSlotPreview();
+}
+
+function updateRelocateSlotPreview() {
+    const b = document.getElementById('relocBlokSelect')?.value || '1';
+    const s = document.getElementById('relocSektorSelect')?.value || 'A';
+    const r = document.getElementById('relocRakSelect')?.value || '1';
+    const code = formatCfsRackCode(b, s, r);
+
+    const codeEl = document.getElementById('relocPreviewCode');
+    const pillEl = document.getElementById('relocSlotStatusPill');
+    if (codeEl) codeEl.textContent = code;
+
+    const slot = currentCfsTwinState?.physical?.cfs_rack_grid?.[b]?.[s]?.[r];
+    if (pillEl) {
+        if (slot && slot.filled) {
+            pillEl.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-red-50 text-red-700 border border-red-200';
+            pillEl.textContent = `TERISI (${String(slot.pallet_sscc || '').slice(-6)})`;
+        } else {
+            pillEl.className = 'px-2.5 py-1 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+            pillEl.textContent = 'SLOT KOSONG — SIAP';
+        }
+    }
+}
+
+async function submitRelocatePallet(event) {
+    if (event) event.preventDefault();
+    const sscc = document.getElementById('relocInputSscc')?.value || '';
+    const b = document.getElementById('relocBlokSelect')?.value || '1';
+    const s = document.getElementById('relocSektorSelect')?.value || 'A';
+    const r = document.getElementById('relocRakSelect')?.value || '1';
+    const targetRack = formatCfsRackCode(b, s, r);
+
+    if (window.cidpConfirm) {
+        const ok = await window.cidpConfirm({
+            title: 'Konfirmasi Relokasi Palet CFS',
+            target: `${sscc} → ${targetRack}`,
+            message: `Pindahkan palet ${sscc} ke lokasi rak ${targetRack} melalui Forklift FL-04?`,
+            confirmText: 'Ya, Pindahkan',
+            cancelText: 'Tidak, Batal',
+            tone: 'warning'
+        });
+        if (!ok) return;
+    }
+
+    const errBox = document.getElementById('relocErrorBox');
+    const btn = document.getElementById('btnSubmitRelocate');
+    if (errBox) errBox.classList.add('hidden');
+    if (btn) {
+        btn.disabled = true;
+        btn.classList.add('opacity-70');
+    }
+
+    try {
+        const res = await fetch('api/cfs_action.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'relocate_pallet',
+                pallet_sscc: sscc,
+                target_rack: targetRack
+            })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            if (errBox) {
+                errBox.textContent = data.message || 'Gagal memindahkan slot rak.';
+                errBox.classList.remove('hidden');
+            }
+            return;
+        }
+
+        closeModal('modalRelocatePallet');
+        if (data.state && data.state.physical) {
+            renderLiveCfsLayout(data.state.physical, data.message);
+        }
+    } catch (err) {
+        if (errBox) {
+            errBox.textContent = 'Koneksi ke api/cfs_action.php gagal: ' + err.message;
+            errBox.classList.remove('hidden');
+        }
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.classList.remove('opacity-70');
+        }
+    }
+}
+
+async function cfsQuickDispatch(sscc) {
+    hideInspectorAlert();
+    try {
+        const res = await fetch('api/cfs_action.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: 'dispatch_pallet',
+                pallet_sscc: sscc
+            })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            const msg = data.message || 'Dispatch palet ditolak oleh sistem.';
+            const inspModal = document.getElementById('modalCfsSectorInspector');
+            if (inspModal && !inspModal.classList.contains('hidden')) {
+                showInspectorAlert(msg, 'red');
+            } else {
+                showCfsLayoutToast(msg, 'red');
+            }
+            return;
+        }
+
+        const inspModal = document.getElementById('modalCfsSectorInspector');
+        if (inspModal && !inspModal.classList.contains('hidden')) {
+            showInspectorAlert(data.message, 'emerald');
+        }
+        if (data.state && data.state.physical) {
+            renderLiveCfsLayout(data.state.physical, data.message);
+        }
+    } catch (err) {
+        showCfsLayoutToast('Koneksi gagal saat dispatch palet: ' + err.message, 'red');
+    }
+}
+
+function initCfsLiveSync() {
+    // Wrap closeModal once so canceling Quick Putaway clears ajaxMode flag cleanly
+    const origCloseModal = closeModal;
+    closeModal = function(id) {
+        origCloseModal(id);
+        if (id === 'modalAddPallet') {
+            const f = document.getElementById('modalAddPalletForm');
+            const h = document.getElementById('addPalletLiveHint');
+            if (f) delete f.dataset.ajaxMode;
+            if (h) h.classList.add('hidden');
+        }
+    };
+
+    // Intercept #modalAddPalletForm submit when launched via Layout '+ Isi Slot Ini'
+    const addForm = document.getElementById('modalAddPalletForm');
+    if (addForm && !addForm.dataset.boundAjax) {
+        addForm.dataset.boundAjax = '1';
+        addForm.addEventListener('submit', async function(e) {
+            if (addForm.dataset.ajaxMode !== '1') return;
+            e.preventDefault();
+
+            const submitBtn = addForm.querySelector('button[type="submit"]');
+            const hintEl = document.getElementById('addPalletLiveHint');
+            const hintText = document.getElementById('addPalletLiveHintText');
+            const fd = new FormData(addForm);
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-70');
+            }
+
+            try {
+                const res = await fetch('api/cfs_action.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'quick_putaway',
+                        container_origin: fd.get('container_origin') || 'MSKU8821940',
+                        category: fd.get('category') || 'general',
+                        commodity_name: fd.get('commodity_name') || 'Kargo LCL Konsolidasi',
+                        consignee: fd.get('consignee') || 'PT Penerima Logistik',
+                        carton_count: parseInt(fd.get('carton_count') || '20', 10),
+                        gross_weight_kg: parseFloat(fd.get('gross_weight_kg') || '450'),
+                        cbm: parseFloat(fd.get('cbm') || '1.25'),
+                        rack_location: fd.get('rack_location') || 'AISLE-A-01-L1',
+                        auto_fallback: false
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    if (hintEl && hintText) {
+                        hintEl.className = 'p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-[11px] font-semibold flex items-center gap-2';
+                        hintText.textContent = data.message || 'Gagal menempatkan palet ke slot rak.';
+                    }
+                    return;
+                }
+
+                // Clear commodity/consignee & generate new preview SSCC before closing
+                const commIn = addForm.querySelector('input[name="commodity_name"]');
+                const consIn = addForm.querySelector('input[name="consignee"]');
+                const ssccIn = addForm.querySelector('input[name="pallet_sscc"]');
+                if (commIn) commIn.value = '';
+                if (consIn) consIn.value = '';
+                if (ssccIn) ssccIn.value = '0018991200109' + String(Math.floor(1000000 + Math.random() * 8999999));
+
+                closeModal('modalAddPallet');
+                if (data.state && data.state.physical) {
+                    renderLiveCfsLayout(data.state.physical, data.message);
+                }
+            } catch (err) {
+                if (hintEl && hintText) {
+                    hintEl.className = 'p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-[11px] font-semibold flex items-center gap-2';
+                    hintText.textContent = 'Koneksi gagal: ' + err.message;
+                }
+            } finally {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-70');
+                }
+            }
+        });
+    }
+
+    // Seed initial occupancy map from PHP initial snapshot
+    if (currentCfsTwinState && currentCfsTwinState.physical) {
+        renderLiveCfsLayout(currentCfsTwinState.physical);
+    }
+
+    const startPollingFallback = () => {
+        if (cfsFallbackTimer) return;
+        cfsFallbackTimer = setInterval(async () => {
+            try {
+                const res = await fetch('api/stream_twin.php?poll=1');
+                if (!res.ok) return;
+                const payload = await res.json();
+                if (payload && payload.physical) {
+                    renderLiveCfsLayout(payload.physical);
+                }
+            } catch (e) { /* keep silent during background poll */ }
+        }, 5000);
+    };
+
+    const connectSse = () => {
+        if (typeof EventSource === 'undefined') {
+            startPollingFallback();
+            return;
+        }
+        if (cfsEventSource) {
+            try { cfsEventSource.close(); } catch (e) {}
+        }
+
+        const badge = document.getElementById('cfsLiveStreamBadge');
+        const badgeTxt = document.getElementById('cfsLiveStreamText');
+        const es = new EventSource('api/stream_twin.php');
+        cfsEventSource = es;
+
+        const handleSsePayload = (ev) => {
+            if (cfsFallbackTimer) {
+                clearInterval(cfsFallbackTimer);
+                cfsFallbackTimer = null;
+            }
+            if (badge && badgeTxt) {
+                badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                badgeTxt.textContent = 'Live SSE Sync (SSoT)';
+            }
+            try {
+                const data = JSON.parse(ev.data);
+                if (data && data.physical) {
+                    renderLiveCfsLayout(data.physical);
+                }
+            } catch (err) { /* ignore malformed chunk */ }
+        };
+
+        es.addEventListener('initial_state', handleSsePayload);
+        es.addEventListener('state_update', handleSsePayload);
+        es.addEventListener('reconnect_advisory', () => {
+            try { es.close(); } catch (e) {}
+            setTimeout(connectSse, 400);
+        });
+        es.onerror = () => {
+            if (badge && badgeTxt) {
+                badge.className = 'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200';
+                badgeTxt.textContent = 'Sync Polling (Fallback)';
+            }
+            startPollingFallback();
+        };
+    };
+
+    connectSse();
+}
 </script>

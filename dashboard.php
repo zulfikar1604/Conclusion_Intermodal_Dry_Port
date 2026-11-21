@@ -105,6 +105,10 @@ if (empty($avatar_initials)) {
 }
 
 $page = $_GET['page'] ?? 'beranda';
+if ($page === 'denah') {
+    header('Location: dashboard.php?page=twin');
+    exit;
+}
 
 // Badge & Deskripsi Akses Satu Pintu
 $current_badge = ($current_lang === 'en')
@@ -132,13 +136,19 @@ foreach ($menu_clusters as $c_name => $items) {
         $menu_items[$k] = $v;
     }
 }
+// Simulator 3D disematkan sebagai sub-mode di dalam Digital Twin (tidak memenuhi sidebar utama)
+$menu_items['simulator'] = ['icon' => 'fa-vr-cardboard', 'label' => __('menu_simulator', 'Tour Simulator 3D (Alur 35 Ha)'), 'zone' => 'EXEC'];
 
 // Active cluster for breadcrumb navigation
 $current_cluster = __('cluster_yms');
-foreach ($menu_clusters as $c_name => $c_items) {
-    if (isset($c_items[$page])) {
-        $current_cluster = $c_name;
-        break;
+if ($page === 'simulator') {
+    $current_cluster = __('cluster_executive');
+} else {
+    foreach ($menu_clusters as $c_name => $c_items) {
+        if (isset($c_items[$page])) {
+            $current_cluster = $c_name;
+            break;
+        }
     }
 }
 
@@ -254,7 +264,7 @@ $tanggal_sekarang = get_localized_date($current_lang);
     <link rel="stylesheet" href="assets/css/print-document.css">
     <script src="assets/js/print-engine.js"></script>
     <!-- CIDP Executive UX Layer (global: keterbacaan, kontras, tema grafik, ringkasan status) -->
-    <link rel="stylesheet" href="assets/css/executive-ux.css?v=20261118b">
+    <link rel="stylesheet" href="assets/css/executive-ux.css?v=20261120a">
     <script src="assets/js/executive-ux.js?v=20261118b"></script>
 </head>
 <body class="text-gray-800 antialiased min-h-screen h-[100dvh] w-full max-w-[100vw] overflow-hidden flex bg-cdp-light">
@@ -360,8 +370,6 @@ $tanggal_sekarang = get_localized_date($current_lang);
                     <?php include_once __DIR__ . '/pages/simulator.php'; ?>
                 <?php elseif ($page === 'gate'): ?>
                     <?php include_once __DIR__ . '/pages/gate.php'; ?>
-                <?php elseif ($page === 'denah'): ?>
-                    <?php include_once __DIR__ . '/pages/denah.php'; ?>
                 <?php elseif ($page === 'intermodal'): ?>
                     <?php include_once __DIR__ . '/pages/intermodal.php'; ?>
                 <?php elseif ($page === 'yard'): ?>
@@ -403,5 +411,6 @@ $tanggal_sekarang = get_localized_date($current_lang);
     <!-- Dashboard UI & Live Clock Scripts -->
     <script src="assets/js/table-tools.js?v=20261118a"></script>
     <script src="assets/js/dashboard.js?v=20261118b"></script>
+    <script src="assets/js/action-guard.js?v=20261120a"></script>
 </body>
 </html>

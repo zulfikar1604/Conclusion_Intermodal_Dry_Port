@@ -858,7 +858,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                         <a href="dashboard.php?page=kontainer&search=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-slate-100 text-slate-700 hover:bg-[#0170b9] hover:text-white rounded flex items-center justify-center transition" title="Lacak Kontainer di Tracking Box">
                                             <i class="fa-solid fa-boxes-stacked text-xs"></i>
                                         </a>
-                                        <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white rounded flex items-center justify-center transition" title="Lihat Posisi Fisik 3D">
+                                        <a href="dashboard.php?page=twin&focus_box=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white rounded flex items-center justify-center transition" title="Sorot Posisi Fisik di Digital Twin 3D">
                                             <i class="fa-solid fa-cube text-xs"></i>
                                         </a>
                                         <a href="dashboard.php?page=billing&search=<?= urlencode($doc['no_kontainer']) ?>" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white rounded flex items-center justify-center transition" title="Periksa Faktur & Billing">
@@ -871,7 +871,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                                 <i class="fa-solid fa-print text-xs"></i>
                                             </a>
                                             <!-- Quick Action: Tahan Jalur Merah -->
-                                            <form method="POST" onsubmit="return confirm('Apakah Anda yakin ingin MENAHAN kontainer <?= $doc['no_kontainer'] ?> ke Jalur Merah (Behandle / Hold)?');" class="inline">
+                                            <form method="POST" data-confirm="Apakah Anda yakin ingin MENAHAN kontainer <?= htmlspecialchars($doc['no_kontainer']) ?> ke Jalur Merah (Behandle / Hold)?" data-confirm-title="Konfirmasi Hold Jalur Merah" data-confirm-target="<?= htmlspecialchars($doc['no_kontainer']) ?>" data-confirm-tone="danger" class="inline">
                                                 <input type="hidden" name="customs_action" value="hold_red_lane">
                                                 <input type="hidden" name="container_number" value="<?= $doc['no_kontainer'] ?>">
                                                 <button type="submit" class="w-7 h-7 bg-rose-50 text-rose-700 hover:bg-rose-100 rounded flex items-center justify-center transition" title="Hold / Tahan ke Jalur Merah">
@@ -880,7 +880,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                                             </form>
                                         <?php elseif ($doc['status'] === 'SPJM_TERBIT' || $doc['status'] === 'DALAM_BEHANDLE'): ?>
                                             <!-- Quick Action: Rilis SPPB Hijau -->
-                                            <form method="POST" onsubmit="return confirm('Konfirmasi rilis SPPB Jalur Hijau untuk kontainer <?= $doc['no_kontainer'] ?>?');" class="inline">
+                                            <form method="POST" data-confirm="Konfirmasi rilis SPPB Jalur Hijau untuk kontainer <?= htmlspecialchars($doc['no_kontainer']) ?>?" data-confirm-title="Konfirmasi Rilis SPPB Hijau" data-confirm-target="<?= htmlspecialchars($doc['no_kontainer']) ?>" data-confirm-tone="primary" class="inline">
                                                 <input type="hidden" name="customs_action" value="release_sppb">
                                                 <input type="hidden" name="container_number" value="<?= $doc['no_kontainer'] ?>">
                                                 <button type="submit" class="w-7 h-7 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded flex items-center justify-center transition" title="Rilis SPPB (Jalur Hijau)">
@@ -1154,7 +1154,7 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                         <svg viewBox="0 0 700 240" class="w-full h-full" id="xraySvgVisual">
                             <!-- Container Outline -->
                             <rect x="50" y="30" width="600" height="170" rx="4" fill="#030712" stroke="#374151" stroke-width="2" stroke-dasharray="4 2" />
-                            <text x="60" y="50" fill="#9ca3af" font-family="monospace" font-size="11" font-weight="bold">PETI KEMAS: <tspan id="xraySvgContainerId">EITU9823102</tspan> &bull; HIGH-ENERGY SCAN 6 MeV</text>
+                            <text x="60" y="50" fill="#9ca3af" font-family="monospace" font-size="11" font-weight="bold">PETI KEMAS: <tspan id="xraySvgContainerId">MSKU9821450</tspan> &bull; HIGH-ENERGY SCAN 6 MeV</text>
 
                             <!-- Sinar Radiasi Grid & Density Layers -->
                             <!-- Material Pallet / Floor -->
@@ -1293,20 +1293,6 @@ $persen_merah = round(($count_merah / $total_docs) * 100, 1);
                         </div>
                         <span class="text-xs text-emerald-700 font-bold">Tersedia</span>
                     </div>
-                </div>
-
-                <!-- SOP 5 Langkah Pemeriksaan Behandle -->
-                <div class="p-3 bg-blue-50/60 rounded-xl border border-blue-100 text-xs space-y-1.5">
-                    <strong class="text-[#0170b9] font-bold block flex items-center">
-                        <i class="fa-solid fa-list-ol mr-1.5"></i>Alur Standar Pemeriksaan Fisik Pabean (SOP DJBC):
-                    </strong>
-                    <ol class="list-decimal list-inside text-[11px] text-gray-600 space-y-0.5">
-                        <li>Pemindahan Peti Kemas dari Stacking Yard ke Kanopi Behandle</li>
-                        <li>Pemotongan Segel Timah / E-Seal oleh Petugas PFPB</li>
-                        <li>Stripping Muatan 30% atau 100% didampingi Kuasa Importir</li>
-                        <li>Pencocokan Jumlah, Merk, Tipe, &amp; HS Code dengan PIB</li>
-                        <li>Penerbitan LHP Digital &amp; Pelepasan SPPB Jalur Merah</li>
-                    </ol>
                 </div>
             </div>
         </div>
@@ -1953,7 +1939,7 @@ UNZ+1+042819'</pre>
 <!-- ===================================================================== -->
 <script>
 // Data Lokal Dokumen Pabean (di-clone dari PHP untuk manipulasi interaktif)
-let customsData = <?= json_encode($customs_docs) ?>;
+var customsData = <?= json_encode($customs_docs) ?>;
 let activeBehandleId = 5;
 
 // Cetak Dokumen SPPB Resmi (Format Kertas A4 Resmi Bea Cukai & Bebas Layar Web)
@@ -2195,15 +2181,15 @@ function changeXRaySample() {
     if (val === 'sample_suspicious') {
         if (suspGroup) suspGroup.classList.remove('hidden');
         if (aiVerdict) aiVerdict.textContent = 'AI Verdict: Suspicious High-Density Object Detected!';
-        if (containerId) containerId.textContent = 'TEMU4561230';
+        if (containerId) containerId.textContent = 'ONEU6612988';
     } else if (val === 'sample_chemicals') {
         if (suspGroup) suspGroup.classList.add('hidden');
         if (aiVerdict) aiVerdict.textContent = 'AI Verdict: Liquid Dangerous Goods (B3) Confirmed';
-        if (containerId) containerId.textContent = 'EITU9823102';
+        if (containerId) containerId.textContent = 'COSU6019283';
     } else {
         if (suspGroup) suspGroup.classList.add('hidden');
         if (aiVerdict) aiVerdict.textContent = 'AI Verdict: Cargo Homogenous & Cleared';
-        if (containerId) containerId.textContent = 'MSKU7829104';
+        if (containerId) containerId.textContent = 'MSKU9821450';
     }
 }
 
@@ -2211,6 +2197,8 @@ function triggerXRayScan() {
     const laser = document.getElementById('xrayScanLaser');
     const statusOverlay = document.getElementById('xrayStatusOverlay');
     const btn = document.getElementById('btnStartXRay');
+    const sampleMode = document.getElementById('xraySampleSelect')?.value || 'sample_clean';
+    const ctrNo = (document.getElementById('xraySvgContainerId')?.textContent || 'MSKU9821450').trim();
 
     if (!laser) return;
     btn.disabled = true;
@@ -2221,25 +2209,56 @@ function triggerXRayScan() {
 
     if (statusOverlay) {
         statusOverlay.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block mr-1 animate-ping"></span>X-RAY AKTIF: 6 MeV SCANNING';
-        statusOverlay.className = 'absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border border-rose-500 text-[10px] font-mono text-rose-400';
+        statusOverlay.className = 'absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border border-rose-500 text-[10px] font-mono text-rose-600';
     }
 
     let pos = 0;
     const interval = setInterval(() => {
-        pos += 2;
-        laser.style.left = pos + '%';
+        pos += 4;
+        laser.style.left = Math.min(100, pos) + '%';
         if (pos >= 100) {
             clearInterval(interval);
-            setTimeout(() => {
+            setTimeout(async () => {
                 laser.classList.add('hidden');
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fa-solid fa-check mr-1 text-emerald-400"></i>Scan Selesai &bull; Ulangi';
-                
-                if (statusOverlay) {
-                    statusOverlay.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block mr-1"></span>PEMINDAIAN SELESAI (100%)';
-                    statusOverlay.className = 'absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border border-emerald-500 text-[10px] font-mono text-emerald-400';
+                const isAnomaly = sampleMode === 'sample_suspicious';
+                try {
+                    const res = await fetch('api/ingest_event.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            event_type: 'XRAY_SCAN_RESULT',
+                            source_device: 'GANTRY-XRAY-6MEV',
+                            payload: {
+                                container_number: ctrNo,
+                                scan_result: isAnomaly ? 'ANOMALY' : 'CLEAR'
+                            }
+                        })
+                    });
+                    const data = await res.json();
+                    const dec = data.decision_summary || {};
+                    if (!res.ok || !data.success) {
+                        if (statusOverlay) {
+                            statusOverlay.innerHTML = '<span class="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block mr-1"></span>REJECTED / DLQ HOLD';
+                            statusOverlay.className = 'absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border border-rose-500 text-rose-700 text-[10px] font-mono font-bold';
+                        }
+                        if (window.cidpToast) {
+                            window.cidpToast('Validasi X-Ray Ditolak (' + ctrNo + ')', data.error || data.message || 'Payload dialihkan ke karantina DLQ.', 'warning');
+                        }
+                        return;
+                    }
+                    if (statusOverlay) {
+                        statusOverlay.innerHTML = `<span class="w-1.5 h-1.5 rounded-full ${isAnomaly ? 'bg-rose-500' : 'bg-emerald-500'} inline-block mr-1"></span>${dec.verdict || (isAnomaly ? 'HOLD BEHANDLE' : 'SPPB CLEAR')}`;
+                        statusOverlay.className = `absolute top-2 right-2 bg-white/95 backdrop-blur px-2.5 py-1 rounded border ${isAnomaly ? 'border-rose-500 text-rose-700' : 'border-emerald-500 text-emerald-700'} text-[10px] font-mono font-bold`;
+                    }
+                    if (window.cidpToast) {
+                        window.cidpToast('Hasil X-Ray 6 MeV (' + ctrNo + ')', dec.reason || data.tri_flow?.information || 'Hasil pemindaian dikirim ke CEISA.', isAnomaly ? 'warning' : 'success');
+                    }
+                } catch (err) {
+                    if (window.cidpToast) window.cidpToast('X-Ray Selesai', 'Pemindaian selesai.', 'info');
                 }
-            }, 400);
+            }, 300);
         }
     }, 30);
 }
@@ -2248,13 +2267,34 @@ function triggerXRayScan() {
 function openBehandleModal(containerNo, importir, bay, goods) {
     document.getElementById('behModalContainer').textContent = containerNo;
     document.getElementById('behModalImportir').textContent = importir;
-    document.getElementById('behModalLocation').textContent = 'Lokasi: ' + bay + ' &bull; Komoditas: ' + goods;
+    document.getElementById('behModalLocation').textContent = 'Lokasi: ' + bay + ' • Komoditas: ' + goods;
     document.getElementById('modalBehandleAction').classList.remove('hidden');
 }
 
-function approveBehandleRelease() {
+async function approveBehandleRelease() {
+    const ctrNo = (document.getElementById('behModalContainer')?.textContent || '').trim();
     closeModal('modalBehandleAction');
-    alert('Laporan Hasil Pemeriksaan (LHP) fisik berhasil disetujui oleh Pejabat PFPB!\nStatus kontainer dialihkan menjadi: SPPB Rilis (Gate-Out Diizinkan).');
+    try {
+        const res = await fetch('api/ingest_event.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_type: 'CUSTOMS_CEISA',
+                source_device: 'KPPBC-PFPB-LHP',
+                payload: {
+                    container_number: ctrNo,
+                    customs_status: 'SPPB_CLEARED',
+                    force_sppb_override: true
+                }
+            })
+        });
+        const data = await res.json();
+        if (window.cidpToast) {
+            window.cidpToast('LHP Behandle Disetujui (' + ctrNo + ')', data.tri_flow?.information || 'Status kontainer dialihkan menjadi SPPB_CLEARED.', 'success');
+        }
+    } catch (err) {
+        if (window.cidpToast) window.cidpToast('LHP Behandle', 'Status diperbarui ke SPPB Rilis.', 'success');
+    }
     switchCustomsTab('tab-monitoring');
 }
 
@@ -2363,32 +2403,87 @@ function inspectBehandleDoc(docId) {
 }
 
 // Remote Unlock E-Seal
-function remoteUnlockESeal(sealId, containerNo) {
-    if (confirm('Konfirmasi Pembukaan Segel Elektronik (Remote Unlock):\nID e-Seal: ' + sealId + '\nPeti Kemas: ' + containerNo + '\n\nApakah kontainer telah diverifikasi memasuki batas geofence pabean CIDP?')) {
-        alert('Otorisasi pabean berhasil dikirimkan via sinyal RFID terenkripsi!\nStatus ' + sealId + ' kini: UNLOCKED (Segel Terbuka Sah).');
+async function remoteUnlockESeal(sealId, containerNo) {
+    const ok = window.cidpConfirm
+        ? await window.cidpConfirm({
+            title: 'Konfirmasi Pembukaan E-Seal (Remote Unlock)',
+            target: `${sealId} • ${containerNo}`,
+            message: 'Apakah kontainer telah diverifikasi memasuki batas geofence pabean CIDP dan siap dibuka segel elektroniknya?',
+            confirmText: 'Ya, Buka Segel',
+            cancelText: 'Tidak, Batal',
+            tone: 'warning'
+        })
+        : true;
+    if (ok) {
+        try {
+            const res = await fetch('api/ingest_event.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    event_type: 'ESEAL_TELEMETRY',
+                    source_device: 'JT701-GATEWAY',
+                    payload: { container_number: containerNo, seal_id: sealId, wire_status: 'UNLOCKED', geofence_ok: true }
+                })
+            });
+            const data = await res.json();
+            if (window.cidpToast) {
+                window.cidpToast('Otorisasi E-Seal Berhasil', data.decision_summary?.reason || `Sinyal terenkripsi terkirim untuk ${sealId}. Status kini UNLOCKED.`, 'success');
+            }
+        } catch (err) {
+            if (window.cidpToast) window.cidpToast('Otorisasi E-Seal Berhasil', `Status ${sealId} kini UNLOCKED.`, 'success');
+        }
     }
 }
 
 function viewESealLog(sealId, containerNo) {
-    alert("=== AUDIT LOG E-SEAL PABEAN DJBC ===\n" +
-          "ID Perangkat: " + sealId + "\n" +
-          "Kontainer: " + containerNo + "\n" +
-          "Status Terkini: UNLOCKED (Segel Terbuka Sah)\n" +
-          "Waktu Otorisasi: 29 September 2026, 08:30 WIB\n" +
-          "Petugas Otorisator: Pemeriksa Bea Cukai KPPBC Cikarang\n" +
-          "Integritas Geofence: 100% Sesuai Koridor Sah CIDP");
-}
-
-function simulateWireTamper() {
-    const box = document.getElementById('tamperResultBox');
-    if (box) {
-        box.className = 'p-3 bg-rose-50 rounded-lg border border-rose-300 text-[11px] font-mono text-rose-800 animate-pulse';
-        box.innerHTML = '<strong>&#9888; TAMPER ALARM TRIGGERED!</strong><br>Kawat segel diputus di luar area geofence sah (KM 31.4 Tol Jakarta-Cikampek). Sinyal darurat dikirim ke Portal CEISA &amp; Patroli Bea Cukai.';
+    if (window.cidpToast) {
+        window.cidpToast(`Audit Log ${sealId} (${containerNo})`, 'Integritas Geofence 100% koridor Tj. Priok <-> CIDP • KPPBC TMP Cikarang.', 'info');
     }
 }
 
-function resetWireStatus() {
+async function simulateWireTamper() {
     const box = document.getElementById('tamperResultBox');
+    const targetCtr = (typeof customsData !== 'undefined' && customsData[0]?.no_kontainer) ? customsData[0].no_kontainer : 'MSKU7829104';
+    try {
+        const res = await fetch('api/ingest_event.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_type: 'ESEAL_TELEMETRY',
+                source_device: 'JT701-GATEWAY',
+                payload: { container_number: targetCtr, seal_id: 'JT701-ID-8821', wire_status: 'BROKEN_TAMPERED', geofence_ok: false }
+            })
+        });
+        const data = await res.json();
+        if (box) {
+            box.className = 'p-3 bg-rose-50 rounded-lg border border-rose-300 text-[11px] font-mono text-rose-800 animate-pulse';
+            box.innerHTML = '<strong>&#9888; TAMPER ALARM TRIGGERED (' + targetCtr + ')!</strong><br>' + (data.decision_summary?.reason || 'Kawat segel putus di luar geofence sah. Dikunci otomatis ke RED_LANE_CHECK.');
+        }
+        if (window.cidpToast) {
+            window.cidpToast('SECURITY LOCK HOLD (' + targetCtr + ')', data.decision_summary?.next_action || 'Arahkan box ke Bay Behandle Bea Cukai.', 'warning');
+        }
+    } catch (err) {
+        if (box) {
+            box.className = 'p-3 bg-rose-50 rounded-lg border border-rose-300 text-[11px] font-mono text-rose-800';
+            box.innerHTML = '<strong>&#9888; TAMPER ALARM TRIGGERED!</strong>';
+        }
+    }
+}
+
+async function resetWireStatus() {
+    const box = document.getElementById('tamperResultBox');
+    const targetCtr = (typeof customsData !== 'undefined' && customsData[0]?.no_kontainer) ? customsData[0].no_kontainer : 'MSKU7829104';
+    try {
+        await fetch('api/ingest_event.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event_type: 'ESEAL_TELEMETRY',
+                source_device: 'JT701-GATEWAY',
+                payload: { container_number: targetCtr, seal_id: 'JT701-ID-8821', wire_status: 'INTACT', geofence_ok: true }
+            })
+        });
+    } catch (_) {}
     if (box) {
         box.className = 'p-3 bg-white rounded-lg border border-gray-200 text-[11px] font-mono text-gray-600';
         box.innerHTML = 'Status Kawat: <span class="text-emerald-600 font-bold">&#10003; Normal &bull; Tidak Ada Pelanggaran</span>';

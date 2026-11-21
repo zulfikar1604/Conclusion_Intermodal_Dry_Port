@@ -1,6 +1,6 @@
 <?php
 // =============================================================================
-// MODUL: MANAJEMEN CONTAINER YARD & 3D STACKING DIGITAL TWIN
+// MODUL: MANAJEMEN STACKING CONTAINER YARD REAL-TIME (YMS)
 // File: pages/yard.php
 // Proyek: Conclusion Intermodal Dry Port (CIDP) 35 Ha — Yard Management System
 // PIC: Juan Gamaliel (Yard Planner & Data Integration) & Armansyah Muchtarrom (IoT & RTK GNSS)
@@ -9,9 +9,9 @@
 $yard_info = [
     'pic'    => 'Juan Gamaliel & Armansyah Muchtarrom',
     'role'   => 'Yard Planning Specialist & IoT Infrastructure Specialist',
-    'desc'   => 'Digital Twin 3D Bay-Row-Tier, mitigasi Container Relocation Problem (CRP), dan telemetri RTK GNSS alat berat.',
+    'desc'   => 'Matriks Okupansi Yard Real-Time (Blok–Bay–Row–Tier), mitigasi Container Relocation Problem (CRP), dan telemetri RTK GNSS alat berat.',
     'icon'   => 'fa-boxes-stacked',
-    'status' => 'Digital Twin 3D Aktif & Terintegrasi RTK'
+    'status' => 'Matriks YMS Real-Time & RTK Terintegrasi'
 ];
 
 // Data KPI Yard Lapangan 15 Ha
@@ -77,34 +77,41 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['yard_actio
 
         if (!empty($ctr_num) && isset($pdo)) {
             try {
+                // Validasi slot tujuan & anti-bentrok SSoT
+                $val = yard_validate_slot($pdo, strtoupper($to_block), $to_bay, $to_row, $to_tier, $ctr_num);
+                if (!$val['ok']) {
+                    throw new Exception($val['message']);
+                }
+
                 // Ambil posisi lama
                 $stmtOld = $pdo->prepare("SELECT block, bay, `row`, tier FROM containers WHERE container_number = ? LIMIT 1");
                 $stmtOld->execute([$ctr_num]);
                 $oldPos = $stmtOld->fetch(PDO::FETCH_ASSOC);
                 $from_block = $oldPos['block'] ?? 'A';
-                $from_bay   = $oldPos['bay'] ?? '1';
-                $from_row   = $oldPos['row'] ?? '1';
-                $from_tier  = $oldPos['tier'] ?? '1';
+                $from_bay   = yard_format_coord($oldPos['bay'] ?? 1);
+                $from_row   = yard_format_coord($oldPos['row'] ?? 1);
+                $from_tier  = yard_format_coord($oldPos['tier'] ?? 1);
 
-                // Update posisi baru di containers
+                // Update posisi baru di containers (canonical zero-padded coordinates)
                 $stmtUp = $pdo->prepare("UPDATE containers SET block = ?, bay = ?, `row` = ?, tier = ?, status = 'in_yard' WHERE container_number = ?");
-                $stmtUp->execute([$to_block, $to_bay, $to_row, $to_tier, $ctr_num]);
+                $stmtUp->execute([$val['block'], $val['bay'], $val['row'], $val['tier'], $ctr_num]);
 
                 // Catat ke yard_events
                 $stmtEv = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, from_block, from_bay, from_row, from_tier, to_block, to_bay, to_row, to_tier, operator_name, notes, created_at) VALUES ('RELOCATION', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
-                $stmtEv->execute([$ctr_num, $equip_id, $from_block, $from_bay, $from_row, $from_tier, $to_block, $to_bay, $to_row, $to_tier, $operator, "Relokasi VMT oleh $equip_id ke Blok $to_block-$to_bay-$to_row-$to_tier"]);
+                $stmtEv->execute([$ctr_num, $equip_id, $from_block, $from_bay, $from_row, $from_tier, $val['block'], $val['bay'], $val['row'], $val['tier'], $operator, "Relokasi VMT oleh $equip_id ke {$val['code']}"]);
 
                 // Update equipment status & billing
                 $stmtEq = $pdo->prepare("UPDATE equipment SET current_container = ?, last_block = ?, status = 'operating', last_updated = NOW() WHERE equipment_id = ?");
-                $stmtEq->execute([$ctr_num, $to_block, $equip_id]);
-                accrue_billing($pdo, $ctr_num, "Relokasi Yard ($from_block -> $to_block)", 'lolo_amount', 200000);
+                $stmtEq->execute([$ctr_num, $val['block'], $equip_id]);
+                accrue_billing($pdo, $ctr_num, "Relokasi Yard ($from_block -> {$val['block']})", 'lolo_amount', 200000);
 
                 get_live_twin_state($pdo, true);
 
+                $warnNote = !empty($val['gravity_warning']) ? (' <br><span class="text-amber-700 font-semibold">' . htmlspecialchars($val['gravity_warning']) . '</span>') : '';
                 $yard_alert = [
                     'type' => 'success',
                     'title' => 'Relokasi Kontainer Berhasil (VMT RTK Synchronized)',
-                    'msg' => "Peti kemas <strong>$ctr_num</strong> berhasil dipindahkan oleh <strong>$equip_id</strong> ke <strong>Blok $to_block (Bay $to_bay &bull; Row $to_row &bull; Tier $to_tier)</strong>. Data tersinkronisasi di seluruh modul."
+                    'msg' => "Peti kemas <strong>$ctr_num</strong> berhasil dipindahkan oleh <strong>$equip_id</strong> ke <strong>Blok {$val['block']} (Bay {$val['bay']} &bull; Row {$val['row']} &bull; Tier {$val['tier']})</strong>. Data tersinkronisasi di seluruh modul.{$warnNote}"
                 ];
             } catch (Exception $e) {
                 $yard_alert = ['type' => 'error', 'title' => 'Gagal Relokasi Yard', 'msg' => $e->getMessage()];
@@ -146,40 +153,40 @@ $yard_containers = [
 
 // Sinkronisasi Data Nyata dari Basis Data MySQL (containers)
 $db_all_containers = [];
+$yard_initial_twin = [];
 if (isset($pdo)) {
     try {
-        $stmtC = $pdo->query("SELECT * FROM containers WHERE status IN ('in_yard', 'in_transit') ORDER BY id ASC");
+        $stmtC = $pdo->query("SELECT * FROM containers WHERE status = 'in_yard' ORDER BY id ASC");
         $rawYard = $stmtC->fetchAll(PDO::FETCH_ASSOC);
         $db_all_containers = $rawYard;
+        $validCyBlocks = array_keys(yard_block_catalog());
+
         if (true || !empty($rawYard)) {
             $yard_containers = [];
             $live_mapped = [];
             foreach ($rawYard as $c) {
-                $blkRaw = !empty($c['block']) ? strtoupper(trim($c['block'])) : 'A';
+                $blkRaw = !empty($c['block']) ? strtoupper(trim($c['block'])) : '';
+                if ($blkRaw === 'RAIL') $blkRaw = 'D';
+                // Kecualikan kontainer yang sedang di GATE/OUTSIDE/CFS agar tidak menumpuk palsu ke Blok A
+                if ($blkRaw === '' || !in_array($blkRaw, $validCyBlocks, true)) {
+                    continue;
+                }
+
                 $cargoType = strtolower(trim($c['cargo_type'] ?? 'dry'));
-                
-                // Klasifikasi Blok & Tipe Operasional Standar Yard Civil Engineering
-                if ($blkRaw === 'REEFER' || $cargoType === 'reefer') {
+                $blk = $blkRaw;
+
+                if ($blk === 'REEFER' || $cargoType === 'reefer') {
                     $tipe = 'reefer';
-                    $blk = 'Reefer';
-                } elseif ($blkRaw === 'DG' || $blkRaw === 'E' || $cargoType === 'dg') {
+                } elseif ($blk === 'DG' || $blk === 'E' || $cargoType === 'dg') {
                     $tipe = 'dg_hazard';
-                    $blk = 'E';
-                } elseif ($blkRaw === 'B') {
+                } elseif ($blk === 'B') {
                     $tipe = 'laden_imp';
-                    $blk = 'B';
-                } elseif ($blkRaw === 'C') {
+                } elseif ($blk === 'C' || $blk === 'EMPTY') {
                     $tipe = 'domestic';
-                    $blk = 'C';
-                } elseif ($blkRaw === 'D' || $blkRaw === 'RAIL') {
+                } elseif ($blk === 'D') {
                     $tipe = 'buffer_rail';
-                    $blk = 'D';
-                } elseif ($blkRaw === 'EMPTY') {
-                    $tipe = 'domestic';
-                    $blk = 'C';
                 } else {
                     $tipe = 'laden_exp';
-                    $blk = 'A';
                 }
 
                 $grossKg = (float)($c['gross_weight_kg'] ?? 24000);
@@ -203,7 +210,8 @@ if (isset($pdo)) {
                     'line'             => !empty($c['owner_company']) ? $c['owner_company'] : 'Shipping Carrier',
                     'pod'              => ($blk === 'B' ? 'Cikarang (IDCBI)' : ($blk === 'C' ? 'Surabaya (IDSUB)' : 'Rotterdam (NLRTM)')),
                     'dwell'            => '2 hari 6 jam',
-                    'pabean'           => ($c['customs_status'] === 'SPPB_CLEARED' ? 'SPPB Terbit (Hijau)' : ($c['customs_status'] === 'RED_LANE' ? 'Jalur Merah (Hold)' : 'Pemeriksaan Pabean')),
+                    'pabean'           => ($c['customs_status'] === 'SPPB_CLEARED' ? 'SPPB Terbit (Hijau)' : (in_array($c['customs_status'], ['RED_LANE', 'RED_LANE_CHECK', 'DOC_HOLD', 'VGM_HOLD'], true) ? 'Hold / Jalur Merah' : 'Pemeriksaan Pabean')),
+                    'customs_status'   => $c['customs_status'] ?? 'PENDING',
                     'seal'             => !empty($c['seal_number']) ? $c['seal_number'] : 'SEAL-OK',
                     'rtk'              => 'RS-01 (Akurasi 1.2cm)',
                     'is_live_db'       => true
@@ -231,6 +239,7 @@ if (isset($pdo)) {
                 } catch (Throwable $e) {}
             }
         }
+        $yard_initial_twin = get_live_twin_state($pdo, true);
     } catch (Exception $e) {}
 }
 
@@ -259,7 +268,7 @@ $vmt_job_orders = [
 </div>
 <?php endif; ?>
 
-<div class="space-y-2.5 animate-fadeIn pb-12">
+<div class="space-y-2.5 pb-12">
     <!-- Header Modul: Compact Executive Style (Aligned with Sidebar) -->
     <div class="bg-white rounded-xl px-3 py-2 shadow-2xs border border-slate-200/80 mb-2.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div class="flex items-center space-x-2.5">
@@ -268,11 +277,11 @@ $vmt_job_orders = [
             </div>
             <div>
                 <div class="flex flex-wrap items-center gap-1.5">
-                    <h1 class="text-[13px] font-extrabold tracking-tight text-slate-900">Manajemen Stacking Yard &amp; Digital Twin 3D</h1>
+                    <h1 class="text-[13px] font-extrabold tracking-tight text-slate-900">Manajemen Stacking Yard &amp; Matriks Okupansi (Blok–Bay–Row–Tier)</h1>
                     <span class="px-1.5 py-0.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded text-[9px] font-bold flex items-center">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span><?= $yard_info['status'] ?>
                     </span>
-                    <span class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold">
+                    <span id="yardHeaderBoxCount" class="px-1.5 py-0.5 bg-blue-50 text-blue-700 border border-blue-200 rounded text-[9px] font-bold">
                         MySQL Sync (<?= count($yard_containers) ?> Box)
                     </span>
                     <span class="px-1.5 py-0.5 bg-orange-50 text-orange-700 border border-orange-200 rounded text-[9px] font-bold">
@@ -282,7 +291,15 @@ $vmt_job_orders = [
             </div>
         </div>
 
-        <div class="flex items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
+        <div class="flex flex-wrap items-center gap-1.5 self-start sm:self-auto flex-shrink-0">
+            <a href="dashboard.php?page=twin&view=yard" class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-cubes text-[#0170b9] text-[10px]"></i>
+                <span>Digital Twin 3D</span>
+            </a>
+            <button type="button" onclick="openYardPutawayModal()" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
+                <i class="fa-solid fa-layer-group text-[10px]"></i>
+                <span>+ Stack Antrean</span>
+            </button>
             <button onclick="openModalYardRelocate()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center space-x-1.5 cursor-pointer">
                 <i class="fa-solid fa-arrows-up-down-left-right text-[10px]"></i>
                 <span>+ Relokasi (VMT)</span>
@@ -292,13 +309,13 @@ $vmt_job_orders = [
 
     <!-- KPI Micro-Cards (High-Density Executive Grid) -->
     <div class="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-5 gap-2 mb-2.5">
-        <?php foreach ($yard_kpis as $kpi): ?>
+        <?php foreach ($yard_kpis as $kIdx => $kpi): ?>
             <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
                 <div class="min-w-0 pr-2">
                     <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5"><?= $kpi['label'] ?></p>
                     <div class="flex items-baseline space-x-1">
-                        <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight truncate"><?= $kpi['val'] ?></h3>
-                        <span class="text-[9px] text-<?= $kpi['color'] ?>-600 font-bold"><?= $kpi['unit'] ?></span>
+                        <h3 id="yardKpiVal-<?= (int)$kIdx ?>" class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight truncate"><?= $kpi['val'] ?></h3>
+                        <span id="yardKpiUnit-<?= (int)$kIdx ?>" class="text-[9px] text-<?= $kpi['color'] ?>-600 font-bold"><?= $kpi['unit'] ?></span>
                     </div>
                     <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate"><?= $kpi['sub'] ?></p>
                 </div>
@@ -309,273 +326,141 @@ $vmt_job_orders = [
         <?php endforeach; ?>
     </div>
 
-    <!-- AREA UTAMA: 3D DIGITAL TWIN VIEWER & KONTROL STACKING -->
-    <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
-        
-        <!-- Kanvas 3D WebGL (Three.js) & Bay Matrix (Span 3 Kolom) -->
-        <div class="xl:col-span-3 bg-white rounded-2xl p-4 sm:p-5 shadow-xs border border-slate-200/80 space-y-4">
-            
-            <!-- Toolbar Pengendali Tampilan 3D & Filter Kategori -->
-            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                <div class="flex items-center space-x-2">
-                    <span class="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center">
-                        <i class="fa-solid fa-cube text-blue-400 mr-2"></i>
-                        Digital Twin Container Stacking &amp; Yard Infrastructure (3D WebGL)
+    <!-- ======================================================================= -->
+    <!-- MATRIKS OKUPANSI & PENAMPANG LAPANGAN REAL-TIME (BLOK - BAY - ROW - TIER) -->
+    <!-- ======================================================================= -->
+    <div id="yardMatrixSection" class="bg-white rounded-2xl p-4 sm:p-5 border border-slate-200/80 shadow-xs space-y-4">
+        <!-- Header & Live SSoT Status -->
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+            <div>
+                <div class="flex items-center flex-wrap gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] border border-blue-200 flex items-center justify-center text-xs">
+                        <i class="fa-solid fa-table-cells"></i>
                     </span>
-                    <span class="text-[10px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200 font-bold font-mono">
-                        PQC 40 MPa • Three.js r128
+                    <h2 class="text-sm sm:text-base font-extrabold text-slate-900 tracking-tight">
+                        Matriks Okupansi &amp; Penampang Yard Real-Time (Blok &ndash; Bay &ndash; Row &ndash; Tier)
+                    </h2>
+                    <span id="yardLiveStreamBadge" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <span id="yardLiveStreamText">Live SSE Sync (SSoT)</span>
                     </span>
                 </div>
-
-                <!-- Kontrol Sudut Kamera 3D Presets & Mode Siang/Malam -->
-                <div class="flex items-center space-x-1.5 text-xs">
-                    <!-- Day / Night Toggle -->
-                    <button id="btnToggleDayNight" onclick="toggleYardDayNight()" class="px-2.5 py-1 rounded bg-slate-100 hover:bg-slate-200 text-amber-700 text-[11px] font-semibold border border-slate-200 transition flex items-center gap-1" title="Beralih Pencahayaan Lapangan (Siang / Malam dengan Lampu Sorot Tower)">
-                        <i class="fa-solid fa-sun" id="iconDayNight"></i>
-                        <span id="textDayNight">Siang</span>
-                    </button>
-
-                    <span class="text-[11px] text-slate-400 mx-1"><i class="fa-solid fa-camera mr-1"></i>Preset:</span>
-                    <button onclick="setCameraView('iso')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200 transition" title="Tampak Isometrik 3D">
-                        <i class="fa-solid fa-cube mr-1"></i>Isometrik
-                    </button>
-                    <button onclick="setCameraView('top')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200 transition" title="Tampak Atas (Bird's Eye / Site Plan Layout)">
-                        <i class="fa-solid fa-arrows-up-to-line mr-1"></i>Tampak Atas
-                    </button>
-                    <button onclick="setCameraView('side')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200 transition" title="Tampak Samping (Profil Bay Melintang)">
-                        <i class="fa-solid fa-arrows-left-right mr-1"></i>Profil Bay
-                    </button>
-                    <button onclick="setCameraView('operator')" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium border border-slate-200 transition" title="Pandangan Operator Lapangan (Kabin Reach Stacker)">
-                        <i class="fa-solid fa-truck-monster mr-1"></i>Kabin RS
-                    </button>
-                    <button onclick="resetYardCamera()" class="px-2 py-1 rounded bg-slate-100 hover:bg-slate-200 text-slate-600 text-[11px] font-mono border border-slate-200 transition" title="Reset Kamera">
-                        <i class="fa-solid fa-rotate-left"></i>
-                    </button>
-                </div>
+                <p class="text-[11px] text-slate-500 mt-1">
+                    Klik <strong class="text-slate-700">Bay (B01–B10)</strong> atau <strong class="text-slate-700">Slot Matrix</strong> untuk inspeksi detail, relokasi VMT, atau stacking dari antrean Gate/Rail.
+                </p>
             </div>
 
-            <!-- Filter Kategori Kontainer & Simulasi Reshuffle -->
-            <div class="flex flex-wrap items-center justify-between gap-3 text-xs">
-                <!-- Filter Kategori Warna -->
-                <div class="flex flex-wrap items-center gap-1.5" id="containerFilterButtons">
-                    <span class="text-[11px] text-slate-400 mr-1 font-semibold">Tampilkan:</span>
-                    <button onclick="filter3DContainers('all')" class="cat-filter-btn px-2.5 py-1 rounded-lg text-[11px] font-bold bg-[#0170b9] text-white transition-all shadow-xs" data-cat="all">Semua Blok (Master)</button>
-                    <button onclick="filter3DContainers('laden_exp')" class="cat-filter-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 transition-all" data-cat="laden_exp">🔵 Blok A (Laden Ekspor)</button>
-                    <button onclick="filter3DContainers('laden_imp')" class="cat-filter-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition-all" data-cat="laden_imp">🔷 Blok B (Laden Impor)</button>
-                    <button onclick="filter3DContainers('domestic')" class="cat-filter-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all" data-cat="domestic">🟢 Blok C (Domestik)</button>
-                    <button onclick="filter3DContainers('buffer_rail')" class="cat-filter-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-purple-50 text-purple-700 hover:bg-purple-100 border border-purple-200 transition-all" data-cat="buffer_rail">🟣 Blok D (Siding KA)</button>
-                    <button onclick="filter3DContainers('dg_hazard')" class="cat-filter-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-rose-50 text-rose-700 hover:bg-rose-100 border border-rose-200 transition-all" data-cat="dg_hazard">🔴 Blok E (DG Hazard)</button>
-                    <button onclick="filter3DContainers('reefer')" class="cat-filter-btn px-2.5 py-1 rounded-lg text-[11px] font-medium bg-cyan-50 text-cyan-700 hover:bg-cyan-100 border border-cyan-200 transition-all" data-cat="reefer">❄️ Blok Reefer</button>
-                </div>
-
-                <!-- Tombol Simulasi Reshuffle (CRP) -->
-                <button onclick="simulateContainerRelocation()" id="btnSimulateCRP" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white transition-all shadow-md flex items-center space-x-1.5">
-                    <i class="fa-solid fa-arrows-split-up-and-left animate-spin" id="crpSpinIcon" style="display:none;"></i>
-                    <i class="fa-solid fa-dolly" id="crpStaticIcon"></i>
-                    <span>Simulasi Manuver Reshuffle (CRP)</span>
-                </button>
-            </div>
-
-            <!-- Viewport 3D Canvas Three.js (Expanded Height & Civil Eng HUD) -->
-            <div class="relative w-full h-[530px] rounded-xl overflow-hidden bg-gradient-to-b from-sky-50/60 to-slate-100 border border-slate-200/90 shadow-inner" id="threeCanvasContainer">
-                <canvas id="yard3DCanvas" class="w-full h-full block cursor-grab active:cursor-grabbing"></canvas>
-
-                <!-- Floating Civil Engineering HUD Badge (Top Right) -->
-                <div class="absolute top-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 text-[10px] text-slate-700 flex items-center space-x-2 pointer-events-none z-10 shadow-xs">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="font-mono font-bold text-emerald-400">PQC Rigid Pavement 350mm</span>
-                    <span class="text-slate-600">|</span>
-                    <span class="text-slate-300">Beban Gandar RS 80 Ton</span>
-                    <span class="text-slate-600">|</span>
-                    <span class="text-blue-300 font-mono">RTK &lt;1.4cm</span>
-                </div>
-
-                <!-- Floating 3D Navigation Guide (Bottom Left) -->
-                <div class="absolute bottom-3 left-3 bg-white/95 backdrop-blur-md px-3 py-1.5 rounded-lg border border-slate-200 text-[10px] text-slate-700 flex items-center space-x-3 pointer-events-none z-10 shadow-xs">
-                    <span><i class="fa-solid fa-computer-mouse text-blue-400 mr-1"></i>Klik Kiri + Geser: Putar 360°</span>
-                    <span><i class="fa-solid fa-arrows-up-down text-blue-400 mr-1"></i>Scroll: Zoom</span>
-                    <span><i class="fa-solid fa-hand-pointer text-amber-400 mr-1"></i>Klik Kontainer: Detail Manifest &amp; Beban</span>
-                </div>
-
-                <!-- Loading Overlay -->
-                <div id="threeLoadingOverlay" class="absolute inset-0 bg-white/90 flex flex-col items-center justify-center space-y-3 z-20 transition-opacity duration-300">
-                    <div class="w-10 h-10 border-3 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    <span class="text-xs text-slate-700 font-mono font-bold">Memuat Digital Twin Stacking Yard 3D...</span>
-                </div>
-            </div>
-
-            <!-- Petunjuk Arsitektur Bay-Row-Tier & Pavement Engineering -->
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
-                <div class="flex items-center space-x-2">
-                    <span class="w-7 h-7 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">BAY</span>
-                    <div>
-                        <span class="font-bold text-slate-800 text-xs block">Sumbu Memanjang (Bay)</span>
-                        <span class="text-[10px] text-slate-400">Modul 14m • Ganjil 20ft | Genap 40ft HC</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                    <span class="w-7 h-7 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">ROW</span>
-                    <div>
-                        <span class="font-bold text-slate-800 text-xs block">Sumbu Melintang (Row 01-06)</span>
-                        <span class="text-[10px] text-slate-400">Pitch 3.2m • Spreader Clearance 76cm</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                    <span class="w-7 h-7 rounded-lg bg-purple-50 border border-purple-200 text-purple-700 flex items-center justify-center font-bold font-mono text-xs flex-shrink-0">TIER</span>
-                    <div>
-                        <span class="font-bold text-slate-800 text-xs block">Elevasi Tumpuk (Tier 1-4)</span>
-                        <span class="text-[10px] text-slate-400">Tier 1 Dasar (Heavy) s/d Tier 4 Atas</span>
-                    </div>
-                </div>
-
-                <div class="flex items-center space-x-2">
-                    <span class="w-7 h-7 rounded-lg bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center font-bold font-mono text-xs flex-shrink-0"><i class="fa-solid fa-road"></i></span>
-                    <div>
-                        <span class="font-bold text-slate-800 text-xs block">Perkerasan Beton (PQC)</span>
-                        <span class="text-[10px] text-slate-400">K-450 fc' 40 MPa • Titik Kontak 250 kN</span>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
-        <!-- INSPECTOR DRAWER SAMPING: DETAIL MANIFEST & TELEMETRI KONTAINER -->
-        <div class="xl:col-span-1 bg-white rounded-2xl p-5 border border-gray-100 shadow-sm space-y-4" id="yardInspectorSidebar">
-            
-            <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div class="flex items-center space-x-2">
-                    <span class="w-2.5 h-2.5 rounded-full bg-blue-600 animate-pulse"></span>
-                    <span class="text-xs font-bold uppercase tracking-wider text-gray-700">Inspector Kontainer 3D</span>
-                </div>
-                <span id="yardBoxStatusBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200">
-                    LADEN EKSPOR
+            <!-- KPI & Staging Pills -->
+            <div class="flex flex-wrap items-center gap-1.5 text-[10.5px]">
+                <span class="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 font-bold text-slate-700">
+                    Gate Staging: <span id="yardGateStageCnt" class="font-mono text-[#0170b9]">0</span>
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 font-bold text-slate-700">
+                    Rampa CFS: <span id="yardCfsStageCnt" class="font-mono text-orange-600">0</span>
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 font-bold text-slate-700">
+                    On Rail KA: <span id="yardRailStageCnt" class="font-mono text-purple-700">0</span>
+                </span>
+                <span class="px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 font-bold text-red-700">
+                    Hold Pabean: <span id="yardHoldCnt" class="font-mono">0</span>
                 </span>
             </div>
-
-            <!-- Visual Nomor Kontainer & Tipe ISO -->
-            <div class="bg-slate-50 border border-slate-200 border-l-4 border-l-orange-500 rounded-xl p-3.5 text-slate-800 space-y-1 relative overflow-hidden">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-mono font-bold text-slate-500 uppercase tracking-widest">ISO 6346 CONTAINER ID</span>
-                    <span id="yardBoxLine" class="text-[10px] font-bold text-orange-700 bg-orange-50 border border-orange-200 px-2 py-0.5 rounded">Maersk Line</span>
-                </div>
-                <h3 id="yardBoxNumber" class="text-base font-mono font-black tracking-wider text-slate-900">MSKU 982145-8</h3>
-                <div class="flex items-center justify-between text-[11px] text-slate-600 pt-1 border-t border-slate-200 mt-2">
-                    <span id="yardBoxType">45G1 (40ft High Cube)</span>
-                    <span id="yardBoxWeight" class="font-mono text-emerald-700 font-bold">VGM: 28.450 kg</span>
-                </div>
-            </div>
-
-            <!-- Detail Spesifikasi Slot Stacking Lapangan -->
-            <div class="space-y-2.5 text-xs">
-                
-                <div class="bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
-                    <span class="text-[10px] uppercase font-bold text-gray-400 block">Koordinat Alokasi Stacking:</span>
-                    <p id="yardBoxCoord" class="font-mono font-bold text-gray-900 text-xs mt-0.5">
-                        BLOK A • BAY 01 • ROW 01 • TIER 1
-                    </p>
-                    <span class="text-[10px] text-gray-500 block mt-0.5">Tumpukan Dasar (Heavy Cargo Tier 1)</span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
-                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Status Kepabeanan:</span>
-                        <p id="yardBoxCustoms" class="font-semibold text-emerald-700 text-[11px] mt-0.5">Jalur Hijau (NPE)</p>
-                    </div>
-                    <div class="bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
-                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Nomor Segel (Seal):</span>
-                        <p id="yardBoxSeal" class="font-mono font-semibold text-gray-800 text-[11px] mt-0.5">ML-ID99214</p>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                    <div class="bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
-                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Tujuan / POD:</span>
-                        <p id="yardBoxPod" class="font-semibold text-gray-800 text-[11px] mt-0.5">Rotterdam (NLRTM)</p>
-                    </div>
-                    <div class="bg-gray-50/80 p-2.5 rounded-lg border border-gray-100">
-                        <span class="text-[10px] uppercase font-bold text-gray-400 block">Dwell Time:</span>
-                        <p id="yardBoxDwell" class="font-mono font-bold text-blue-700 text-[11px] mt-0.5">1 Hari 4 Jam</p>
-                    </div>
-                </div>
-
-                <!-- Analisis Struktur & Beban Perkerasan (Civil Engineering) -->
-                <div class="p-2.5 rounded-lg bg-slate-50 border border-slate-200/90 space-y-1.5">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] uppercase font-bold text-slate-700 flex items-center">
-                            <i class="fa-solid fa-ruler-combined mr-1 text-blue-600"></i>Analisis Beban Fondasi Yard:
-                        </span>
-                        <span class="text-[9px] font-mono text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200">K-450 PQC</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-1.5 text-[11px] pt-1">
-                        <div>
-                            <span class="text-[9px] text-slate-400 block font-semibold">Beban Titik Sudut:</span>
-                            <span id="yardBoxPointLoad" class="font-mono font-bold text-slate-800">69.8 kN / corner</span>
-                        </div>
-                        <div>
-                            <span class="text-[9px] text-slate-400 block font-semibold">Stabilitas Angin 120km/h:</span>
-                            <span id="yardBoxWind" class="font-mono font-bold text-emerald-700">SF 3.1 (Aman)</span>
-                        </div>
-                        <div>
-                            <span class="text-[9px] text-slate-400 block font-semibold">Kapasitas Pavement:</span>
-                            <span id="yardBoxPavement" class="font-mono font-bold text-slate-800">800 kN/m² (Aman)</span>
-                        </div>
-                        <div>
-                            <span class="text-[9px] text-slate-400 block font-semibold">Kategori Layer:</span>
-                            <span id="yardBoxLayer" class="font-mono font-bold text-blue-700">Tier 1 (Heavy Base)</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Telemetri Sensor RTK GNSS Alat Berat -->
-                <div class="p-2.5 rounded-lg bg-emerald-50/60 border border-emerald-100">
-                    <div class="flex items-center justify-between">
-                        <span class="text-[10px] uppercase font-bold text-emerald-800 flex items-center">
-                            <i class="fa-solid fa-satellite-dish mr-1 text-emerald-600"></i>RTK GNSS Telemetry:
-                        </span>
-                        <span class="text-[10px] font-mono text-emerald-700 font-bold">< 1.4 cm</span>
-                    </div>
-                    <p id="yardBoxRtk" class="text-[11px] font-mono text-emerald-950 font-semibold mt-1">
-                        Reach Stacker 01 (Bromma Spreader Locked)
-                    </p>
-                </div>
-
-            </div>
-
-            <!-- Tombol Aksi Penerbitan Job Order Work Order -->
-            <div class="pt-2 space-y-2">
-                <button onclick="dispatchWorkOrderFromInspector()" class="w-full py-2.5 bg-[#0170b9] hover:bg-[#004b87] text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-clipboard-list"></i>
-                    <span>Terbitkan Job Order Manuver (VMT)</span>
-                </button>
-                <button onclick="showBayMatrixView()" class="w-full py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-all flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-table-cells"></i>
-                    <span>Buka Matriks Penampang Bay 2D</span>
-                </button>
-            </div>
-
-            <!-- Inter-Module Teleport Toolbar -->
-            <div class="pt-2 border-t border-gray-100">
-                <span class="text-[10px] uppercase font-bold text-gray-400 block mb-1.5">Pintasan Antar-Modul:</span>
-                <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-                    <a id="btnYardLinkTrack" href="dashboard.php?page=kontainer" class="px-2 py-1.5 bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 font-bold rounded-lg border border-emerald-200 transition flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-route"></i> Lacak Siklus
-                    </a>
-                    <a id="btnYardLink3D" href="dashboard.php?page=simulator" class="px-2 py-1.5 bg-indigo-50 hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold rounded-lg border border-indigo-200 transition flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-cube"></i> Simulasi 3D
-                    </a>
-                    <a id="btnYardLinkDenah" href="dashboard.php?page=denah" class="px-2 py-1.5 bg-amber-50 hover:bg-amber-600 hover:text-white text-amber-700 font-bold rounded-lg border border-amber-200 transition flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-map-location-dot"></i> Denah 2D
-                    </a>
-                    <a id="btnYardLinkBill" href="dashboard.php?page=billing" class="px-2 py-1.5 bg-blue-50 hover:bg-blue-600 hover:text-white text-blue-700 font-bold rounded-lg border border-blue-200 transition flex items-center justify-center gap-1">
-                        <i class="fa-solid fa-file-invoice-dollar"></i> Faktur Billing
-                    </a>
-                </div>
-            </div>
-
         </div>
 
+        <!-- Summary Strip & Dynamic Progress Bar -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 items-center bg-slate-50/80 p-3 rounded-xl border border-slate-200/80">
+            <div class="bg-white rounded-lg p-2 border border-slate-200/70 text-center">
+                <div class="text-[9.5px] font-bold uppercase text-slate-400">Blok CY</div>
+                <div class="text-sm font-black font-mono text-slate-900" id="yardSumBlocks">8</div>
+            </div>
+            <div class="bg-white rounded-lg p-2 border border-slate-200/70 text-center">
+                <div class="text-[9.5px] font-bold uppercase text-slate-400">Slot Terisi</div>
+                <div class="text-sm font-black font-mono text-[#0170b9]" id="yardSumOccupied">0</div>
+            </div>
+            <div class="bg-white rounded-lg p-2 border border-slate-200/70 text-center">
+                <div class="text-[9.5px] font-bold uppercase text-slate-400">Slot Kosong</div>
+                <div class="text-sm font-black font-mono text-emerald-700" id="yardSumEmpty">928</div>
+            </div>
+            <div class="bg-white rounded-lg p-2 border border-slate-200/70 text-center">
+                <div class="text-[9.5px] font-bold uppercase text-slate-400">Total TEUs CY</div>
+                <div class="text-sm font-black font-mono text-indigo-700" id="yardSumTeus">0</div>
+            </div>
+            <div class="col-span-2 bg-white rounded-lg p-2.5 border border-slate-200/70">
+                <div class="flex items-center justify-between text-[10.5px] font-bold text-slate-700 mb-1">
+                    <span>Okupansi Matriks CY (Blok A–REEFER)</span>
+                    <span id="yardOccPctLabel" class="font-mono text-[#0170b9]">0.0%</span>
+                </div>
+                <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
+                    <div id="yardOccBarFill" class="h-full rounded-full bg-gradient-to-r from-[#0170b9] via-sky-500 to-emerald-500 transition-all duration-300" style="width: 0%;"></div>
+                </div>
+                <div id="yardOccText" class="text-[10px] text-slate-500 font-mono mt-1">Memuat sinkronisasi slot lapangan...</div>
+            </div>
+        </div>
+
+        <!-- Live Update Toast -->
+        <div id="yardMatrixToast" class="hidden p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center justify-between gap-2 animate-fadeIn">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-bolt text-orange-500"></i>
+                <span id="yardMatrixToastMsg" class="font-semibold">Mutasi posisi kontainer CY terdeteksi real-time.</span>
+            </div>
+            <button type="button" onclick="document.getElementById('yardMatrixToast').classList.add('hidden')" class="text-emerald-700 hover:text-emerald-950 font-bold text-sm cursor-pointer">&times;</button>
+        </div>
+
+        <!-- LAYER 1: HEATMAP 8 BLOK YARD & MINI-BAY SELECTOR -->
+        <div>
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-[11px] font-extrabold uppercase tracking-wider text-slate-600">
+                    <i class="fa-solid fa-layer-group text-orange-500 mr-1"></i> 1. Peta Okupansi Blok &amp; Bay (Klik Bay untuk Membuka Penampang Row &times; Tier)
+                </span>
+                <span class="text-[10px] text-slate-400 font-mono">Biru/Berwarna = Terisi &bull; Merah = Hold Pabean &bull; Abu = Kosong</span>
+            </div>
+            <div id="yardBlocksOverviewGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5"></div>
+        </div>
+
+        <!-- LAYER 2: CROSS-SECTION PENAMPANG BAY (ROW x TIER INTERAKTIF) -->
+        <div id="yardCrossSectionPanel" class="rounded-2xl border border-slate-200 bg-slate-50/70 p-4 space-y-3">
+            <!-- Toolbar Block & Bay Switcher -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-2.5 border-b border-slate-200/80 pb-3">
+                <div class="flex items-center flex-wrap gap-1.5" id="yardMatrixBlockTabs"></div>
+                <div class="flex items-center flex-wrap gap-1.5" id="yardMatrixBayPills"></div>
+            </div>
+
+            <!-- Cross-Section Title & Active Equipment -->
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2">
+                    <span id="yardActiveBayTitle" class="font-extrabold text-slate-900 text-sm">BLOK A &bull; BAY 01</span>
+                    <span id="yardActiveBayZone" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-[#0170b9] border border-blue-200">Laden Ekspor</span>
+                    <span id="yardActiveBayOcc" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white text-slate-700 border border-slate-200 font-mono">0/16 Slot</span>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div class="text-[11px] text-slate-500 font-mono" id="yardActiveBayEquip">
+                        <i class="fa-solid fa-truck-monster text-orange-500 mr-1"></i>Alat Penumpuk: RS-01 / RTG-02
+                    </div>
+                    <button type="button" onclick="showBayMatrixView()" class="px-2.5 py-1 bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-lg text-[10.5px] font-bold transition flex items-center gap-1 cursor-pointer">
+                        <i class="fa-solid fa-expand text-[#0170b9]"></i>
+                        <span>Pop-out Bay 2D</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Cross Section Grid -->
+            <div class="overflow-x-auto pb-1">
+                <div class="min-w-0 sm:min-w-[500px] space-y-2">
+                    <div class="flex items-center justify-between text-[10px] font-semibold text-slate-400 uppercase px-1">
+                        <span><i class="fa-solid fa-ship mr-1"></i>Sisi Laut / Rel Siding (Kiri)</span>
+                        <span>Penampang Vertikal (Tier Atas &rarr; Tanah &times; Row)</span>
+                        <span>Sisi Jalur Truk VMT (Kanan)<i class="fa-solid fa-truck ml-1"></i></span>
+                    </div>
+
+                    <div id="yardCrossSectionGrid" class="space-y-1.5"></div>
+
+                    <div class="h-2.5 bg-slate-700 rounded-full w-full shadow-inner flex items-center justify-center"></div>
+                    <div class="text-center text-[10px] text-slate-500 font-mono font-semibold">
+                        LANTAI BETON RIGID PAVEMENT (PQC K-450 fc&apos; 40 MPa) &bull; KAPASITAS BEBAN 800 kN/m&sup2;
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- ======================================================================= -->
@@ -673,7 +558,7 @@ $vmt_job_orders = [
 
     </div>
 
-    <!-- MODAL PENAMPANG 2D BAY MATRIX (ROW VS TIER) -->
+    <!-- MODAL PENAMPANG 2D BAY MATRIX (REAL-TIME SSoT DARI MYSQL) -->
     <div id="bayMatrixModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 animate-fadeIn">
         <div class="bg-white rounded-2xl max-w-4xl w-full p-6 shadow-2xl border border-gray-100 space-y-4">
             <div class="flex items-center justify-between border-b border-gray-100 pb-3">
@@ -682,1226 +567,801 @@ $vmt_job_orders = [
                         <i class="fa-solid fa-table-cells"></i>
                     </span>
                     <div>
-                        <h3 class="font-bold text-base text-gray-900">Penampang 2D Matrix &mdash; Blok A (Bay 01)</h3>
-                        <p class="text-xs text-gray-500">6 Row &times; 4 Tier (40ft HC)</p>
+                        <h3 id="bayMatrixModalTitle" class="font-bold text-base text-gray-900">Penampang 2D Matrix &mdash; Blok A (Bay 01)</h3>
+                        <p id="bayMatrixModalSub" class="text-xs text-gray-500">Data Real-Time SSoT &bull; Klik slot untuk inspeksi atau putaway</p>
                     </div>
                 </div>
-                <button onclick="closeBayMatrixModal()" class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex items-center justify-center">
+                <button onclick="closeBayMatrixModal()" class="w-8 h-8 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 flex items-center justify-center cursor-pointer">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
-            <!-- Grid Matriks Penampang 4 Tier x 6 Row -->
             <div class="overflow-x-auto pb-1">
-                <div class="space-y-3 min-w-[540px]">
-                <div class="flex items-center justify-between text-xs text-gray-500">
-                    <span>Sisi Laut / Rel KA (Kiri)</span>
-                    <span class="font-bold text-gray-700">BAY 01 (40ft High Cube Stacking)</span>
-                    <span>Sisi Darat / Jalan Truk (Kanan)</span>
+                <div id="bayMatrixModalBody" class="min-w-[540px] space-y-2"></div>
+            </div>
+
+            <div class="pt-2 border-t border-gray-100 flex items-center justify-between text-xs">
+                <span class="text-[11px] text-slate-500 font-mono">Tersinkronisasi langsung dengan tabel <code class="font-bold text-slate-700">containers</code> &amp; SSE SSoT.</span>
+                <button type="button" onclick="closeBayMatrixModal()" class="px-4 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition cursor-pointer">Tutup</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL INSPEKTOR SLOT YARD REAL-TIME -->
+    <div id="modalYardSlotInspector" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden animate-fadeIn">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 transform transition-all text-xs">
+            <div class="bg-gradient-to-r from-[#0170b9] to-slate-900 p-5 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-lg shadow-inner">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h3 id="ysInspCtr" class="text-base font-extrabold font-mono leading-tight">-</h3>
+                            <span id="ysInspBadge" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-white/20 text-white">-</span>
+                        </div>
+                        <p id="ysInspCoord" class="text-[11px] text-blue-100 font-mono mt-0.5">-</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalById('modalYardSlotInspector')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="p-5 space-y-3">
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Operator / Principal</div>
+                        <div id="ysInspOwner" class="font-bold text-slate-900 text-xs mt-0.5 truncate">-</div>
+                        <div id="ysInspSize" class="text-[10.5px] font-mono text-slate-500 mt-0.5">-</div>
+                    </div>
+                    <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-bold uppercase text-slate-400">Berat &amp; Status Pabean</div>
+                        <div id="ysInspWeight" class="font-bold font-mono text-slate-900 text-xs mt-0.5">-</div>
+                        <div id="ysInspCustoms" class="text-[10.5px] font-bold text-emerald-700 mt-0.5">-</div>
+                    </div>
                 </div>
 
-                <div class="grid grid-cols-6 gap-2 text-center text-xs">
-                    <!-- Header Row 01-06 -->
-                    <div class="font-mono font-bold text-slate-500">Row 01</div>
-                    <div class="font-mono font-bold text-slate-500">Row 02</div>
-                    <div class="font-mono font-bold text-slate-500">Row 03</div>
-                    <div class="font-mono font-bold text-slate-500">Row 04</div>
-                    <div class="font-mono font-bold text-slate-500">Row 05</div>
-                    <div class="font-mono font-bold text-slate-500">Row 06</div>
-
-                    <!-- Tier 4 (Paling Atas) -->
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T4)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T4)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T4)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T4)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T4)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T4)</div>
-
-                    <!-- Tier 3 -->
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T3)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T3)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T3)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T3)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T3)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T3)</div>
-
-                    <!-- Tier 2 -->
-                    <div class="h-16 rounded-lg bg-blue-700 text-white p-2 flex flex-col justify-between shadow-xs">
-                        <span class="font-mono font-bold text-[11px] block truncate">MSKU 341290-1</span>
-                        <span class="text-[9px] text-blue-200 font-mono">24.1t • Maersk</span>
-                    </div>
-                    <div class="h-16 rounded-lg bg-blue-700 text-white p-2 flex flex-col justify-between shadow-xs">
-                        <span class="font-mono font-bold text-[11px] block truncate">CMAU 883412-0</span>
-                        <span class="text-[9px] text-blue-200 font-mono">21.4t • CMA CGM</span>
-                    </div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T2)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T2)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T2)</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">KOSONG (T2)</div>
-
-                    <!-- Tier 1 (Paling Bawah - Ground) -->
-                    <div class="h-16 rounded-lg bg-[#0170b9] text-white p-2 flex flex-col justify-between shadow-xs border-b-2 border-orange-400">
-                        <span class="font-mono font-bold text-[11px] block truncate text-amber-300">MSKU 982145-8</span>
-                        <span class="text-[9px] text-blue-200 font-mono">28.5t • Heavy Tier 1</span>
-                    </div>
-                    <div class="h-16 rounded-lg bg-[#0170b9] text-white p-2 flex flex-col justify-between shadow-xs border-b-2 border-orange-400">
-                        <span class="font-mono font-bold text-[11px] block truncate text-amber-300">CMAU 771239-0</span>
-                        <span class="text-[9px] text-blue-200 font-mono">26.8t • Heavy Tier 1</span>
-                    </div>
-                    <div class="h-16 rounded-lg bg-[#0170b9] text-white p-2 flex flex-col justify-between shadow-xs border-b-2 border-orange-400">
-                        <span class="font-mono font-bold text-[11px] block truncate text-amber-300">SUDU 442109-8</span>
-                        <span class="text-[9px] text-blue-200 font-mono">29.1t • Heavy Tier 1</span>
-                    </div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">SLOT TERSEDIA</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">SLOT TERSEDIA</div>
-                    <div class="h-16 rounded-lg border border-dashed border-gray-200 bg-slate-50/50 flex items-center justify-center text-[10px] text-gray-400">SLOT TERSEDIA</div>
+                <div class="p-3 rounded-xl bg-blue-50/60 border border-blue-100 flex items-center justify-between text-[11px]">
+                    <span class="text-slate-600 font-semibold"><i class="fa-solid fa-satellite-dish text-emerald-600 mr-1"></i>Billing Status:</span>
+                    <span id="ysInspBilling" class="font-mono font-bold text-[#0170b9]">-</span>
                 </div>
 
-                <!-- Land Ground Indicator -->
-                <div class="h-2 bg-slate-400 rounded-full w-full"></div>
-                <div class="text-center text-[11px] text-gray-400 font-mono">LANTAI BETON YARD 15 HA (REINFORCED HEAVY CONCRETE 80 TONS)</div>
+                <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-gray-100">
+                    <a id="ysInspTrackLink" href="dashboard.php?page=kontainer" class="px-3 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold rounded-xl transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-route"></i>
+                        <span>Lacak Siklus</span>
+                    </a>
+                    <a id="ysInspTwinLink" href="dashboard.php?page=twin&view=yard" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-cubes text-[#0170b9]"></i>
+                        <span>Lihat di Twin 3D</span>
+                    </a>
+                    <button type="button" id="ysInspRelocBtn" class="px-3.5 py-2 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white font-bold rounded-xl shadow-xs transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-arrows-up-down-left-right"></i>
+                        <span>Relokasi VMT</span>
+                    </button>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- MODAL STACKING / PUTAWAY SLOT KOSONG YARD REAL-TIME -->
+    <div id="modalYardSlotPutaway" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 hidden animate-fadeIn">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-lg w-full overflow-hidden border border-gray-100 transform transition-all text-xs">
+            <div class="bg-gradient-to-r from-[#0170b9] to-indigo-700 p-5 text-white flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-white/15 flex items-center justify-center text-lg shadow-inner">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-base font-extrabold leading-tight">Stack / Tempatkan Peti Kemas ke Slot</h3>
+                        <p class="text-[11px] text-blue-100">Putaway dari Antrean Gate/Rail atau Pindahkan Kontainer Yard</p>
+                    </div>
+                </div>
+                <button type="button" onclick="closeModalById('modalYardSlotPutaway')" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <form onsubmit="submitYardPutaway(event)" class="p-5 space-y-4">
+                <div>
+                    <label class="block text-[11px] font-bold text-gray-700 mb-1">Pilih Kontainer (Antrean Gate / On-Rail / Yard) *</label>
+                    <select id="putawayContainerSelect" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl font-mono text-xs font-bold text-gray-900"></select>
+                    <span class="text-[10px] text-slate-500 mt-1 block">Kontainer <code>GATE / RAIL</code> memakai aksi <strong>Stacking Masuk CY</strong>; kontainer <code>YARD</code> memakai aksi <strong>Relokasi VMT</strong>.</span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Alat Eksekutor VMT</label>
+                        <select id="putawayEquipSelect" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs font-semibold">
+                            <option value="RS-01">RS-01 (Kalmar Reach Stacker)</option>
+                            <option value="RS-02">RS-02 (Kalmar Reach Stacker)</option>
+                            <option value="RS-03">RS-03 (Sany Reefer / Buffer)</option>
+                            <option value="RS-04">RS-04 (Kalmar Domestik)</option>
+                            <option value="RTG-02">RTG-02 (E-RTG Blok A)</option>
+                            <option value="RTG-03">RTG-03 (E-RTG Blok B)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-gray-700 mb-1">Operator VMT</label>
+                        <input type="text" id="putawayOperatorInput" value="Juan Gamaliel" class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-xs">
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-3.5 rounded-2xl border border-slate-200 space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[11px] font-bold text-[#0170b9] uppercase">Target Slot Penumpukan</span>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="applyAutoSlotRecommendation()" class="px-2 py-0.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[10px] font-bold transition cursor-pointer flex items-center gap-1" title="Pilih slot otomatis berdasarkan pabean, jenis kargo &amp; bobot untuk menekan reshuffle (CRP)">
+                                <i class="fa-solid fa-wand-magic-sparkles text-[9px]"></i>
+                                <span>Auto-Slot Optimal</span>
+                            </button>
+                            <span id="putawaySlotCodePreview" class="font-mono font-black text-slate-900 text-xs">A-B01-R01-T01</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-4 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Blok</label>
+                            <select id="putawayBlockSelect" onchange="updatePutawaySlotPreview()" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold">
+                                <option value="A">A</option>
+                                <option value="B">B</option>
+                                <option value="C">C</option>
+                                <option value="D">D</option>
+                                <option value="E">E</option>
+                                <option value="DG">DG</option>
+                                <option value="EMPTY">EMPTY</option>
+                                <option value="REEFER">REEFER</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Bay</label>
+                            <input type="number" id="putawayBayInput" onchange="updatePutawaySlotPreview()" oninput="updatePutawaySlotPreview()" min="1" max="12" value="1" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Row</label>
+                            <input type="number" id="putawayRowInput" onchange="updatePutawaySlotPreview()" oninput="updatePutawaySlotPreview()" min="1" max="6" value="1" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Tier</label>
+                            <input type="number" id="putawayTierInput" onchange="updatePutawaySlotPreview()" oninput="updatePutawaySlotPreview()" min="1" max="5" value="1" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                        </div>
+                    </div>
+                    <div id="putawaySlotStatusPill" class="px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">SLOT KOSONG — SIAP</div>
+                    <div id="putawayAutoSlotReason" class="hidden px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-indigo-50 text-indigo-800 border border-indigo-200"></div>
+                    <div id="putawayGravityHint" class="hidden px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200"></div>
+                </div>
+
+                <div id="putawayErrorBox" class="hidden p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-[11px] font-semibold"></div>
+
+                <div class="pt-2 border-t border-gray-100 flex items-center justify-end gap-2">
+                    <button type="button" onclick="closeModalById('modalYardSlotPutaway')" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition cursor-pointer">Batal</button>
+                    <button type="submit" id="btnSubmitYardPutaway" class="px-4 py-2 bg-[#0170b9] hover:bg-blue-700 text-white font-bold rounded-xl shadow-sm transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-check"></i>
+                        <span>Eksekusi Penumpukan</span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 
-<!-- DATASET JAVASCRIPT & THREE.JS 3D ENGINE -->
-<!-- CDN Three.js r128 & OrbitControls -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
-
+<!-- DATASET JAVASCRIPT & REAL-TIME SSoT ENGINE -->
 <script>
-// Data Kontainer Javascript dari Basis Data MySQL
-const containersData = <?= json_encode($yard_containers, JSON_PRETTY_PRINT) ?>;
+let currentYardTwinState = <?= json_encode($yard_initial_twin, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
 
-// Profil Branding Shipping Line & Warna ISO Kontainer
-const CARRIER_PROFILES = {
-    'Maersk Line':               { color: '#2b7a9e', brand: 'MAERSK', code: 'MSKU' },
-    'Mediterranean Shipping Co': { color: '#d4a017', brand: 'MSC', code: 'MSCU' },
-    'MSC Line':                  { color: '#d4a017', brand: 'MSC', code: 'MEDU' },
-    'CMA CGM':                   { color: '#0a2540', brand: 'CMA CGM', code: 'CMAU' },
-    'Evergreen Marine':          { color: '#006837', brand: 'EVERGREEN', code: 'EMCU' },
-    'Ocean Network Express':     { color: '#d61f69', brand: 'ONE', code: 'ONEU' },
-    'Hapag-Lloyd':               { color: '#ea580c', brand: 'HAPAG-LLOYD', code: 'HLCU' },
-    'COSCO Shipping':            { color: '#1e40af', brand: 'COSCO', code: 'COSU' },
-    'CNC Line':                  { color: '#1e3a8a', brand: 'CNC LINE', code: 'TCKU' },
-    'Hamburg Sud':               { color: '#be123c', brand: 'HAMBURG SUD', code: 'SUDU' },
-    'Spil Logistics':            { color: '#059669', brand: 'SPIL', code: 'SPNU' },
-    'Meratus Line':              { color: '#047857', brand: 'MERATUS', code: 'MRKU' },
-    'KAI Logistik':              { color: '#6d28d9', brand: 'KAI LOGISTIK', code: 'TEMU' },
-    'Tex Tainer':                { color: '#9a3412', brand: 'TEXTAINER', code: 'TEMU' },
-    'Trans Liner':               { color: '#0369a1', brand: 'TRANSLINER', code: 'TLLU' },
-    'Yang Ming Line':            { color: '#b91c1c', brand: 'YANG MING', code: 'YMLU' },
-    'NYK Line':                  { color: '#1e3a8a', brand: 'NYK LINE', code: 'NYKU' },
-    'K-Line':                    { color: '#dc2626', brand: 'K-LINE', code: 'KKFU' },
-    'Florens Container':         { color: '#c2410c', brand: 'FLORENS', code: 'FSCU' },
-    'Bertschi Global':           { color: '#b91c1c', brand: 'BERTSCHI DG', code: 'DGNU' }
-};
-
-// Tata Letak Geometri Blok Lapangan Penumpukan (Master Plan Teknik Sipil Yard 15 Ha)
-const BLOCK_LAYOUT = {
-    'A': { name: 'Blok A (Ekspor)', basePos: [-28, -20], bayCount: 3, rowCount: 4, type: 'laden_exp', label: 'BLOK A - LADEN EKSPOR [MAX 4 TIER]' },
-    'B': { name: 'Blok B (Impor)', basePos: [28, -20], bayCount: 3, rowCount: 4, type: 'laden_imp', label: 'BLOK B - LADEN IMPOR [CUSTOMS BONDED]' },
-    'C': { name: 'Blok C (Domestik)', basePos: [-28, 16], bayCount: 3, rowCount: 4, type: 'domestic', label: 'BLOK C - DOMESTIK [FAST TURN]' },
-    'D': { name: 'Blok D (KA Buffer)', basePos: [28, 16], bayCount: 3, rowCount: 4, type: 'buffer_rail', label: 'BLOK D - RAIL BUFFER SIDING' },
-    'E': { name: 'Blok E (DG Hazard)', basePos: [28, -48], bayCount: 3, rowCount: 3, type: 'dg_hazard', label: 'BLOK E - DG HAZARD (IMDG B3)' },
-    'Reefer': { name: 'Blok Reefer (Cold Chain)', basePos: [-28, -48], bayCount: 3, rowCount: 3, type: 'reefer', label: 'REEFER YARD [300 PLUGS 380V]' }
-};
-
-let scene, camera, renderer, controls;
-let containerMeshes = [];
-let beaconMeshes = [];
-let floodLights = [];
-let sunLight, ambientLight, hemiLight;
-let raycaster, mouse;
-let activeFilter = 'all';
-let isDayMode = true;
-let isAnimatingCRP = false;
-let selectedContainerMesh = null;
-const textureCache = {};
-
-// Generator Tekstur Prosedural Panel Dinding Corten Steel Bergelombang
-function getContainerSideTexture(carrierName, containerId, colorHex, is20ft) {
-    const key = `side_${carrierName}_${colorHex}_${is20ft ? '20' : '40'}`;
-    if (textureCache[key]) return textureCache[key];
-
-    const canvas = document.createElement('canvas');
-    canvas.width = is20ft ? 256 : 512;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-
-    // Cat Dasar Pelat Corten
-    ctx.fillStyle = colorHex;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Profil Gelombang Rusuk Vertikal (Corrugated Ribs)
-    const ribWidth = 14;
-    for (let x = 8; x < canvas.width - 8; x += ribWidth) {
-        const grad = ctx.createLinearGradient(x, 0, x + ribWidth, 0);
-        grad.addColorStop(0, 'rgba(255,255,255,0.22)');
-        grad.addColorStop(0.35, 'rgba(255,255,255,0.08)');
-        grad.addColorStop(0.65, 'rgba(0,0,0,0.25)');
-        grad.addColorStop(1, 'rgba(0,0,0,0.45)');
-        ctx.fillStyle = grad;
-        ctx.fillRect(x, 4, ribWidth - 2, canvas.height - 8);
-    }
-
-    // Balok Rangka Atas & Bawah (Top & Bottom Rails)
-    ctx.fillStyle = 'rgba(0,0,0,0.3)';
-    ctx.fillRect(0, 0, canvas.width, 6);
-    ctx.fillRect(0, canvas.height - 6, canvas.width, 6);
-
-    // Pelat Bantalan Sudut (Corner Casting Pads)
-    ctx.fillStyle = '#27272a';
-    const cw = 16, ch = 16;
-    ctx.fillRect(0, 0, cw, ch);
-    ctx.fillRect(canvas.width - cw, 0, cw, ch);
-    ctx.fillRect(0, canvas.height - ch, cw, ch);
-    ctx.fillRect(canvas.width - cw, canvas.height - ch, cw, ch);
-
-    // Lubang Twistlock Sudut Oval ISO 1161
-    ctx.fillStyle = '#09090b';
-    ctx.beginPath();
-    ctx.ellipse(8, 8, 4, 2.5, 0, 0, Math.PI * 2);
-    ctx.ellipse(canvas.width - 8, 8, 4, 2.5, 0, 0, Math.PI * 2);
-    ctx.ellipse(8, canvas.height - 8, 4, 2.5, 0, 0, Math.PI * 2);
-    ctx.ellipse(canvas.width - 8, canvas.height - 8, 4, 2.5, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Logo / Nama Brand Shipping Line
-    ctx.save();
-    ctx.fillStyle = '#ffffff';
-    ctx.shadowColor = 'rgba(0,0,0,0.7)';
-    ctx.shadowBlur = 5;
-    ctx.font = 'bold ' + (is20ft ? '18px' : '26px') + ' "Arial Black", Impact, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(carrierName.toUpperCase(), 24, canvas.height / 2);
-    ctx.restore();
-
-    // Blok Identifikasi ISO di Pojok Kanan Atas
-    ctx.save();
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 9px "Courier New", monospace';
-    ctx.textAlign = 'right';
-    ctx.fillText(containerId || 'CIDP-ISO', canvas.width - 20, 20);
-    ctx.font = '7px sans-serif';
-    ctx.fillText(is20ft ? '22G1 • MAX 30.480 KG' : '45G1 • MAX 32.500 KG', canvas.width - 20, 32);
-    ctx.fillText('TARE 3.820 KG • NET 28.680 KG', canvas.width - 20, 42);
-
-    // Pelat Persetujuan Keselamatan CSC (CSC Safety Plate)
-    ctx.fillStyle = '#eab308';
-    ctx.fillRect(canvas.width - 46, canvas.height - 24, 24, 14);
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 5px sans-serif';
-    ctx.fillText('CSC SAFETY', canvas.width - 24, canvas.height - 18);
-    ctx.restore();
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.anisotropy = 4;
-    textureCache[key] = tex;
-    return tex;
-}
-
-// Generator Tekstur Pintu Belakang Kontainer (Batang Pengunci & Segel)
-function getContainerDoorTexture(colorHex) {
-    const key = `door_${colorHex}`;
-    if (textureCache[key]) return textureCache[key];
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = colorHex;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Garis Pemisah Daun Pintu Tengah
-    ctx.fillStyle = '#18181b';
-    ctx.fillRect(62, 0, 4, canvas.height);
-
-    // 4 Batang Pengunci Vertikal Baja Galvanis (Locking Rods)
-    const rods = [22, 44, 84, 106];
-    rods.forEach(rx => {
-        ctx.fillStyle = '#d4d4d8';
-        ctx.fillRect(rx - 2, 4, 4, canvas.height - 8);
-        ctx.fillStyle = '#52525b';
-        ctx.fillRect(rx - 1, 4, 2, canvas.height - 8);
-        // Handle pegangan
-        ctx.fillStyle = '#eab308';
-        ctx.fillRect(rx - 3, 60, 6, 8);
-    });
-
-    // Stiker Hazard / Warning
-    ctx.fillStyle = '#eab308';
-    ctx.fillRect(14, 14, 20, 10);
-    ctx.fillStyle = '#000000';
-    ctx.font = 'bold 5px sans-serif';
-    ctx.fillText('WARNING', 16, 21);
-
-    const tex = new THREE.CanvasTexture(canvas);
-    textureCache[key] = tex;
-    return tex;
-}
-
-// Generator Tekstur Unit Pendingin Reefer (Kompresor & Kipas)
-function getReeferFrontTexture() {
-    const key = 'reefer_front';
-    if (textureCache[key]) return textureCache[key];
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#e2e8f0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Kisi-Kisi Udara Kondensor (Louver Fin)
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(16, 16, 96, 50);
-    for (let y = 20; y < 64; y += 4) {
-        ctx.fillStyle = '#94a3b8';
-        ctx.fillRect(18, y, 92, 2);
-    }
-
-    // Kipas Exhaust Twin
-    ctx.fillStyle = '#0f172a';
-    ctx.beginPath();
-    ctx.arc(42, 41, 14, 0, Math.PI * 2);
-    ctx.arc(86, 41, 14, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Box Kontrol Mikroprosesor & Layar Digital LED
-    ctx.fillStyle = '#1e293b';
-    ctx.fillRect(20, 78, 88, 38);
-    ctx.fillStyle = '#000000';
-    ctx.fillRect(28, 86, 48, 20);
-
-    // Display LED Suhu -20.5 C
-    ctx.fillStyle = '#22c55e';
-    ctx.font = 'bold 9px "Courier New", monospace';
-    ctx.fillText('-20.5 C', 32, 100);
-
-    // Lampu Indikator Power 380V
-    ctx.fillStyle = '#38bdf8';
-    ctx.beginPath();
-    ctx.arc(88, 96, 4, 0, Math.PI * 2);
-    ctx.fill();
-
-    const tex = new THREE.CanvasTexture(canvas);
-    textureCache[key] = tex;
-    return tex;
-}
-
-// Generator Tekstur Bahaya DG Hazard (Plakat Kelas 3 / 8)
-function getDGFrontTexture() {
-    const key = 'dg_front';
-    if (textureCache[key]) return textureCache[key];
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#dc2626';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Belah Ketupat Plakat IMO Class 3 (Flammable Liquid)
-    ctx.save();
-    ctx.translate(64, 64);
-    ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = '#ef4444';
-    ctx.fillRect(-28, -28, 56, 56);
-    ctx.lineWidth = 3;
-    ctx.strokeStyle = '#ffffff';
-    ctx.strokeRect(-26, -26, 52, 52);
-    ctx.restore();
-
-    ctx.fillStyle = '#ffffff';
-    ctx.font = 'bold 16px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText('3', 64, 80);
-    ctx.font = 'bold 7px sans-serif';
-    ctx.fillText('FLAMMABLE', 64, 52);
-
-    const tex = new THREE.CanvasTexture(canvas);
-    textureCache[key] = tex;
-    return tex;
-}
-
-// Generator Tekstur Atap Kontainer (Corrugated Roof)
-function getContainerRoofTexture(colorHex) {
-    const key = `roof_${colorHex}`;
-    if (textureCache[key]) return textureCache[key];
-
-    const canvas = document.createElement('canvas');
-    canvas.width = 256;
-    canvas.height = 64;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = colorHex;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Garis Gelombang Atap Melintang
-    for (let x = 6; x < canvas.width; x += 10) {
-        ctx.fillStyle = 'rgba(0,0,0,0.2)';
-        ctx.fillRect(x, 2, 3, canvas.height - 4);
-        ctx.fillStyle = 'rgba(255,255,255,0.15)';
-        ctx.fillRect(x + 3, 2, 2, canvas.height - 4);
-    }
-
-    const tex = new THREE.CanvasTexture(canvas);
-    textureCache[key] = tex;
-    return tex;
-}
-
-// Generator Tekstur Lantai Beton Kaku (Rigid PQC Concrete 6m x 6m Slab Joints)
-function getPavementTexture() {
-    const canvas = document.createElement('canvas');
-    canvas.width = 512;
-    canvas.height = 512;
-    const ctx = canvas.getContext('2d');
-
-    // Pelat Beton Abu-abu Industri PQC
-    ctx.fillStyle = '#475569';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Butiran Agregat Halus
-    for (let i = 0; i < 4000; i++) {
-        const x = Math.random() * canvas.width;
-        const y = Math.random() * canvas.height;
-        const c = Math.random() > 0.5 ? 255 : 0;
-        ctx.fillStyle = `rgba(${c},${c},${c},0.04)`;
-        ctx.fillRect(x, y, 2, 2);
-    }
-
-    // Garis Siar Dilatasi / Expansion Joint Sealing Polyurethane
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 3;
-    const step = 64;
-    for (let x = 0; x <= canvas.width; x += step) {
-        ctx.beginPath();
-        ctx.moveTo(x, 0);
-        ctx.lineTo(x, canvas.height);
-        ctx.stroke();
-    }
-    for (let y = 0; y <= canvas.height; y += step) {
-        ctx.beginPath();
-        ctx.moveTo(0, y);
-        ctx.lineTo(canvas.width, y);
-        ctx.stroke();
-    }
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.wrapS = THREE.RepeatWrapping;
-    tex.wrapT = THREE.RepeatWrapping;
-    tex.repeat.set(16, 16);
-    return tex;
-}
-
-// Inisialisasi Tampilan 3D Digital Twin Three.js
-function initThreeYard() {
-    const container = document.getElementById('threeCanvasContainer');
-    const canvas = document.getElementById('yard3DCanvas');
-
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-
-    // 1. Scene & Atmosfer Terang Realistis
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xd9e8f5); // Langit Siang Cerah Teknik Sipil
-    scene.fog = new THREE.FogExp2(0xcbd5e1, 0.005);
-
-    // 2. Kamera Perspektif
-    camera = new THREE.PerspectiveCamera(45, width / height, 1, 1000);
-    camera.position.set(55, 42, 60);
-
-    // 3. WebGL Renderer dengan Bayangan PCF Halus
-    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, powerPreference: 'high-performance' });
-    renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.shadowMap.enabled = true;
-    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-
-    // 4. OrbitControls
-    controls = new THREE.OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.05;
-    controls.maxPolarAngle = Math.PI / 2 - 0.04; // Mencegah masuk ke bawah perkerasan
-    controls.minDistance = 12;
-    controls.maxDistance = 180;
-    controls.target.set(0, 3, 0);
-
-    // 5. Pencahayaan Alami (Lighting Daylight & Sky)
-    hemiLight = new THREE.HemisphereLight(0xdbeafe, 0x64748b, 0.65);
-    scene.add(hemiLight);
-
-    sunLight = new THREE.DirectionalLight(0xfff8ee, 1.15);
-    sunLight.position.set(70, 90, 50);
-    sunLight.castShadow = true;
-    sunLight.shadow.mapSize.width = 2048;
-    sunLight.shadow.mapSize.height = 2048;
-    sunLight.shadow.camera.near = 1;
-    sunLight.shadow.camera.far = 260;
-    const d = 75;
-    sunLight.shadow.camera.left = -d;
-    sunLight.shadow.camera.right = d;
-    sunLight.shadow.camera.top = d;
-    sunLight.shadow.camera.bottom = -d;
-    sunLight.shadow.bias = -0.0005;
-    scene.add(sunLight);
-
-    ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
-    scene.add(ambientLight);
-
-    // 6. Bangun Infrastruktur Lapangan & Marka
-    buildPavementAndMarkings();
-    buildRailwayInfrastructure();
-    buildHighMastLightingTowers();
-    buildReeferCatwalkRacks();
-    buildDangerousGoodsBunding();
-    buildHeavyMachinery();
-
-    // 7. Bangun Tumpukan Peti Kemas Lapangan (Live DB + Operasional)
-    buildContainerYardStacks();
-
-    // 8. Raycaster Interaksi Seleksi Kontainer
-    raycaster = new THREE.Raycaster();
-    mouse = new THREE.Vector2();
-
-    // Sembunyikan Loading Overlay
-    const overlay = document.getElementById('threeLoadingOverlay');
-    if (overlay) {
-        overlay.style.opacity = '0';
-        setTimeout(() => { overlay.style.display = 'none'; }, 300);
-    }
-
-    // Event Listeners
-    window.addEventListener('resize', onWindowResize);
-    canvas.addEventListener('click', onCanvasClick);
-
-    // Jalankan Loop Render
-    animate();
-}
-
-// Bangun Perkerasan Kaku Beton (PQC) & Marka Lalu Lintas Lapangan
-function buildPavementAndMarkings() {
-    // 1. Pelat Lantai Utama Beton Semen (Rigid Pavement 240m x 220m)
-    const groundGeo = new THREE.PlaneGeometry(240, 220);
-    const groundMat = new THREE.MeshStandardMaterial({
-        map: getPavementTexture(),
-        roughness: 0.85,
-        metalness: 0.1
-    });
-    const ground = new THREE.Mesh(groundGeo, groundMat);
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    scene.add(ground);
-
-    // 2. Lajur Manuver Aspal Utama (Central Transfer Roadway 14m)
-    const roadGeo = new THREE.PlaneGeometry(170, 16);
-    const roadMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, roughness: 0.9, metalness: 0.05 });
-    const road = new THREE.Mesh(roadGeo, roadMat);
-    road.rotation.x = -Math.PI / 2;
-    road.position.set(0, 0.02, -2);
-    road.receiveShadow = true;
-    scene.add(road);
-
-    // Marka Garis Putus-Putus Kuning Lajur Jalan
-    const dashGroup = new THREE.Group();
-    for (let x = -80; x <= 80; x += 6) {
-        const dashGeo = new THREE.PlaneGeometry(3.5, 0.25);
-        const dashMat = new THREE.MeshBasicMaterial({ color: 0xfacc15 });
-        const dash = new THREE.Mesh(dashGeo, dashMat);
-        dash.rotation.x = -Math.PI / 2;
-        dash.position.set(x, 0.03, -2);
-        dashGroup.add(dash);
-    }
-    scene.add(dashGroup);
-
-    // Zebra Cross Keselamatan Operator Pejalan Kaki
-    for (let i = -6; i <= 6; i += 1.5) {
-        const zGeo = new THREE.PlaneGeometry(0.8, 5.5);
-        const zMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-        const zLine = new THREE.Mesh(zGeo, zMat);
-        zLine.rotation.x = -Math.PI / 2;
-        zLine.position.set(i, 0.03, -2);
-        scene.add(zLine);
-    }
-
-    // 3. Marka Batas Blok Stacking & Plakat Identifikasi
-    Object.keys(BLOCK_LAYOUT).forEach(bKey => {
-        const blk = BLOCK_LAYOUT[bKey];
-        const bw = 36, bd = 18;
-
-        // Garis Batas Kuning Reflektif Blok
-        const borderGeo = new THREE.PlaneGeometry(bw, bd);
-        const borderEdges = new THREE.EdgesGeometry(borderGeo);
-        const borderMat = new THREE.LineBasicMaterial({ color: 0xf59e0b, linewidth: 3 });
-        const borderMesh = new THREE.LineSegments(borderEdges, borderMat);
-        borderMesh.rotation.x = -Math.PI / 2;
-        borderMesh.position.set(blk.basePos[0], 0.03, blk.basePos[1]);
-        scene.add(borderMesh);
-
-        // Bollard Baja Pengaman di Sudut-Sudut Blok
-        const corners = [
-            [-bw / 2, -bd / 2],
-            [bw / 2, -bd / 2],
-            [-bw / 2, bd / 2],
-            [bw / 2, bd / 2]
-        ];
-        corners.forEach(c => {
-            const bGeo = new THREE.CylinderGeometry(0.2, 0.2, 1.2, 12);
-            const bMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.4 });
-            const bollard = new THREE.Mesh(bGeo, bMat);
-            bollard.position.set(blk.basePos[0] + c[0], 0.6, blk.basePos[1] + c[1]);
-            bollard.castShadow = true;
-            scene.add(bollard);
-        });
-
-        // Plakat Marka Tulisan Blok di Lantai Beton
-        const signCanvas = document.createElement('canvas');
-        signCanvas.width = 512;
-        signCanvas.height = 64;
-        const sctx = signCanvas.getContext('2d');
-        sctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
-        sctx.fillRect(0, 0, signCanvas.width, signCanvas.height);
-        sctx.lineWidth = 4;
-        sctx.strokeStyle = '#f59e0b';
-        sctx.strokeRect(2, 2, signCanvas.width - 4, signCanvas.height - 4);
-        sctx.fillStyle = '#f8fafc';
-        sctx.font = 'bold 22px "Arial Black", sans-serif';
-        sctx.textAlign = 'center';
-        sctx.fillText(blk.label, signCanvas.width / 2, 40);
-
-        const signTex = new THREE.CanvasTexture(signCanvas);
-        const signGeo = new THREE.PlaneGeometry(14, 1.7);
-        const signMat = new THREE.MeshBasicMaterial({ map: signTex, transparent: true });
-        const signMesh = new THREE.Mesh(signGeo, signMat);
-        signMesh.rotation.x = -Math.PI / 2;
-        signMesh.position.set(blk.basePos[0], 0.04, blk.basePos[1] + (blk.basePos[1] < -5 ? 10.5 : -10.5));
-        scene.add(signMesh);
-    });
-}
-
-// Bangun Jalur Rel Kereta Api Siding (Buffer Track Blok D)
-function buildRailwayInfrastructure() {
-    const railZ = 32;
-    const length = 150;
-
-    // Tanggul Balas Kerikil (Ballast Gravel Bed)
-    const ballastGeo = new THREE.BoxGeometry(length, 0.4, 6.0);
-    const ballastMat = new THREE.MeshStandardMaterial({ color: 0x334155, roughness: 0.95 });
-    const ballast = new THREE.Mesh(ballastGeo, ballastMat);
-    ballast.position.set(0, 0.2, railZ);
-    ballast.receiveShadow = true;
-    scene.add(ballast);
-
-    // Bantalan Beton Rel (Concrete Sleepers) Setiap 1.8 Meter
-    const sleeperGeo = new THREE.BoxGeometry(0.3, 0.2, 3.2);
-    const sleeperMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, roughness: 0.8 });
-    for (let x = -70; x <= 70; x += 1.8) {
-        const sleeper = new THREE.Mesh(sleeperGeo, sleeperMat);
-        sleeper.position.set(x, 0.45, railZ);
-        sleeper.receiveShadow = true;
-        scene.add(sleeper);
-    }
-
-    // 2 Batang Rel Baja Standard Gauge (Steel Rails)
-    const railMat = new THREE.MeshStandardMaterial({ color: 0xa1a1aa, roughness: 0.3, metalness: 0.85 });
-    const railLeftGeo = new THREE.BoxGeometry(length, 0.15, 0.1);
-    const railLeft = new THREE.Mesh(railLeftGeo, railMat);
-    railLeft.position.set(0, 0.6, railZ - 0.75);
-    scene.add(railLeft);
-
-    const railRight = new THREE.Mesh(railLeftGeo, railMat);
-    railRight.position.set(0, 0.6, railZ + 0.75);
-    scene.add(railRight);
-
-    // Penahan Ujung Rel (Hydraulic Buffer Stop Bumper)
-    const bumperGeo = new THREE.BoxGeometry(1.2, 1.4, 2.2);
-    const bumperMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.5 });
-    const bumper = new THREE.Mesh(bumperGeo, bumperMat);
-    bumper.position.set(72, 1.0, railZ);
-    scene.add(bumper);
-}
-
-// Bangun 4 Tiang Lampu Sorot Tower High-Mast 30m di Sudut-Sudut Yard
-function buildHighMastLightingTowers() {
-    const towerCoords = [
-        [-65, -55],
-        [65, -55],
-        [-65, 30],
-        [65, 30]
-    ];
-
-    towerCoords.forEach((tc, idx) => {
-        const towerGroup = new THREE.Group();
-
-        // Fondasi Beton Tapak
-        const baseGeo = new THREE.CylinderGeometry(1.2, 1.5, 1.5, 8);
-        const baseMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.9 });
-        const base = new THREE.Mesh(baseGeo, baseMat);
-        base.position.y = 0.75;
-        towerGroup.add(base);
-
-        // Tiang Baja Tapered 32 Meter
-        const mastGeo = new THREE.CylinderGeometry(0.35, 0.8, 30, 8);
-        const mastMat = new THREE.MeshStandardMaterial({ color: 0xd4d4d8, roughness: 0.4, metalness: 0.7 });
-        const mast = new THREE.Mesh(mastGeo, mastMat);
-        mast.position.y = 16.5;
-        towerGroup.add(mast);
-
-        // Platform Pemeliharaan Melingkar & Railing
-        const platGeo = new THREE.CylinderGeometry(2.0, 2.0, 0.4, 12);
-        const platMat = new THREE.MeshStandardMaterial({ color: 0x52525b, roughness: 0.6 });
-        const plat = new THREE.Mesh(platGeo, platMat);
-        plat.position.y = 31.5;
-        towerGroup.add(plat);
-
-        // Kepala Lampu Sorot LED Multi-Head
-        const headGeo = new THREE.BoxGeometry(0.8, 0.4, 0.4);
-        const headMat = new THREE.MeshStandardMaterial({ color: 0x18181b, emissive: 0xfef08a, emissiveIntensity: 0.6 });
-        for (let a = 0; a < Math.PI * 2; a += Math.PI / 4) {
-            const head = new THREE.Mesh(headGeo, headMat);
-            head.position.set(Math.cos(a) * 1.8, 32.2, Math.sin(a) * 1.8);
-            head.rotation.y = a;
-            towerGroup.add(head);
-        }
-
-        // Lampu Sorot Tembak (SpotLight untuk Mode Malam)
-        const spot = new THREE.SpotLight(0xfffaed, 0.4, 140, Math.PI / 3, 0.5, 1);
-        spot.position.set(0, 32, 0);
-        const targetObj = new THREE.Object3D();
-        targetObj.position.set(-tc[0] * 0.3, 0, -tc[1] * 0.3);
-        scene.add(targetObj);
-        spot.target = targetObj;
-        towerGroup.add(spot);
-        floodLights.push(spot);
-
-        towerGroup.position.set(tc[0], 0, tc[1]);
-        scene.add(towerGroup);
-    });
-}
-
-// Bangun Struktur Rangka Jembatan Catwalk Listrik di Blok Reefer
-function buildReeferCatwalkRacks() {
-    const rx = -28, rz = -48;
-    const catwalkGroup = new THREE.Group();
-
-    // Rangka Baja Catwalk Memanjang (Elevated Catwalk)
-    const walkGeo = new THREE.BoxGeometry(32, 0.25, 1.2);
-    const walkMat = new THREE.MeshStandardMaterial({ color: 0x64748b, roughness: 0.6, metalness: 0.6 });
-    const walk = new THREE.Mesh(walkGeo, walkMat);
-    walk.position.set(0, 3.4, 0);
-    catwalkGroup.add(walk);
-
-    // Tiang Penyangga Struktur Baja Catwalk
-    const postGeo = new THREE.CylinderGeometry(0.12, 0.12, 3.4, 8);
-    const postMat = new THREE.MeshStandardMaterial({ color: 0x475569, roughness: 0.5 });
-    for (let x = -15; x <= 15; x += 5) {
-        const post = new THREE.Mesh(postGeo, postMat);
-        post.position.set(x, 1.7, 0);
-        catwalkGroup.add(post);
-
-        // Box Stopkontak Listrik Industri 380V / 32A
-        const boxGeo = new THREE.BoxGeometry(0.5, 0.7, 0.4);
-        const boxMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.3 });
-        const box = new THREE.Mesh(boxGeo, boxMat);
-        box.position.set(x, 2.2, 0.65);
-        catwalkGroup.add(box);
-    }
-
-    catwalkGroup.position.set(rx, 0, rz - 8.5);
-    scene.add(catwalkGroup);
-}
-
-// Bangun Tanggul Pengaman Khusus (Bunding Retaining Wall) di Blok E Dangerous Goods
-function buildDangerousGoodsBunding() {
-    const ex = 28, ez = -48;
-    const bundGeo = new THREE.BoxGeometry(38, 0.5, 20);
-    const bundEdges = new THREE.EdgesGeometry(bundGeo);
-    const bundMat = new THREE.LineBasicMaterial({ color: 0xdc2626, linewidth: 3 });
-    const bundWire = new THREE.LineSegments(bundEdges, bundMat);
-    bundWire.position.set(ex, 0.25, ez);
-    scene.add(bundWire);
-}
-
-// Bangun Alat Berat (Reach Stacker Kalmar DRG450 & Truk Chassis)
-function buildHeavyMachinery() {
-    const rsGroup = new THREE.Group();
-
-    // Sasis Utama Reach Stacker (Warna Merah Kalmar)
-    const bodyGeo = new THREE.BoxGeometry(6.8, 1.8, 2.8);
-    const bodyMat = new THREE.MeshStandardMaterial({ color: 0xbe123c, roughness: 0.4 });
-    const body = new THREE.Mesh(bodyGeo, bodyMat);
-    body.position.set(0, 1.6, 0);
-    body.castShadow = true;
-    rsGroup.add(body);
-
-    // Counterweight Belakang
-    const cwGeo = new THREE.BoxGeometry(1.6, 1.8, 2.7);
-    const cwMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.8 });
-    const cw = new THREE.Mesh(cwGeo, cwMat);
-    cw.position.set(-3.2, 1.7, 0);
-    rsGroup.add(cw);
-
-    // 4 Roda Ban Karet Raksasa
-    const wheelGeo = new THREE.CylinderGeometry(0.85, 0.85, 0.6, 16);
-    const wheelMat = new THREE.MeshStandardMaterial({ color: 0x18181b, roughness: 0.9 });
-    const wheelPos = [
-        [-2.0, 0.85, 1.5],
-        [-2.0, 0.85, -1.5],
-        [2.2, 0.85, 1.5],
-        [2.2, 0.85, -1.5]
-    ];
-    wheelPos.forEach(wp => {
-        const w = new THREE.Mesh(wheelGeo, wheelMat);
-        w.rotation.x = Math.PI / 2;
-        w.position.set(wp[0], wp[1], wp[2]);
-        w.castShadow = true;
-        rsGroup.add(w);
-    });
-
-    // Kabin Operator dengan Kaca Tinted
-    const cabGeo = new THREE.BoxGeometry(1.8, 1.5, 1.6);
-    const cabMat = new THREE.MeshStandardMaterial({ color: 0x0284c7, roughness: 0.1, transparent: true, opacity: 0.7 });
-    const cab = new THREE.Mesh(cabGeo, cabMat);
-    cab.position.set(-0.5, 3.2, 0);
-    rsGroup.add(cab);
-
-    // Boom Teleskopik Mengarah ke Atas 35 Derajat
-    const boomGeo = new THREE.BoxGeometry(9.0, 0.7, 0.8);
-    const boomMat = new THREE.MeshStandardMaterial({ color: 0x991b1b, roughness: 0.5 });
-    const boom = new THREE.Mesh(boomGeo, boomMat);
-    boom.position.set(2.4, 4.2, 0);
-    boom.rotation.z = Math.PI / 6;
-    boom.castShadow = true;
-    rsGroup.add(boom);
-
-    // Spreader Bar Hidraulis Bromma di Ujung Boom
-    const spreaderGeo = new THREE.BoxGeometry(6.2, 0.4, 1.2);
-    const spreaderMat = new THREE.MeshStandardMaterial({ color: 0xfacc15, roughness: 0.3 });
-    const spreader = new THREE.Mesh(spreaderGeo, spreaderMat);
-    spreader.position.set(6.4, 6.2, 0);
-    spreader.castShadow = true;
-    rsGroup.add(spreader);
-
-    // Letakkan Reach Stacker di Lajur Jalan Samping Blok A
-    rsGroup.position.set(-10, 0, -5);
-    rsGroup.rotation.y = -Math.PI / 8;
-    scene.add(rsGroup);
-}
-
-// Bangun Seluruh Kubus Kontainer Lapangan (Live DB + Operasional Kepadatan 68.4%)
-function buildContainerYardStacks() {
-    containerMeshes = [];
-    beaconMeshes = [];
-
-    // Matriks Slot Terisi untuk Menghindari Tumpang Tindih Fisik
-    const occupiedSlots = {};
-
-    // 1. Tempatkan Kontainer Live dari MySQL Database
-    containersData.forEach(c => {
-        const blkKey = c.blok || 'A';
-        const blkInfo = BLOCK_LAYOUT[blkKey] || BLOCK_LAYOUT['A'];
-        const is20ft = c.iso.includes('20ft');
-        const isReefer = c.tipe === 'reefer';
-        const isDG = c.tipe === 'dg_hazard';
-
-        const bayIdx = ((c.bay - 1) % 3) - 1; // -1, 0, 1
-        const rowIdx = (c.row - 1) - 1.5;     // -1.5, -0.5, 0.5, 1.5
-        const tier = c.tier || 1;
-
-        const slotKey = `${blkKey}_${bayIdx}_${rowIdx}_${tier}`;
-        occupiedSlots[slotKey] = true;
-
-        const posX = blkInfo.basePos[0] + bayIdx * 13.0;
-        const posZ = blkInfo.basePos[1] + rowIdx * 3.1;
-        const boxH = is20ft ? 2.6 : 2.9;
-        const boxL = is20ft ? 6.1 : 12.2;
-        const boxW = 2.44;
-        const posY = (tier - 1) * boxH + (boxH / 2);
-
-        createContainerMesh(c, posX, posY, posZ, boxL, boxW, boxH, is20ft, isReefer, isDG, true);
-    });
-
-    // 2. Tumpukan Latar Operasional Lapangan (Mencerminkan Okupansi Nyata 68.4% / 10.260 TEUs)
-    const sampleCarriers = Object.keys(CARRIER_PROFILES);
-    Object.keys(BLOCK_LAYOUT).forEach(bKey => {
-        const blkInfo = BLOCK_LAYOUT[bKey];
-        for (let b = -1; b <= 1; b++) {
-            for (let r = -1.5; r <= 1.5; r += 1.0) {
-                // Tentukan tinggi tumpukan stabil (1 sampai 3 tier)
-                const maxStack = (Math.abs(b + r) % 2 === 0) ? 3 : 2;
-                for (let t = 1; t <= maxStack; t++) {
-                    const slotKey = `${bKey}_${b}_${r}_${t}`;
-                    if (occupiedSlots[slotKey]) continue;
-
-                    // Lewati beberapa slot agar terlihat realistis ada ruang operasi
-                    if (t > 1 && (b * r * t) % 3 === 0) continue;
-
-                    const isReefer = bKey === 'Reefer';
-                    const isDG = bKey === 'E';
-                    const is20ft = (bKey === 'C' || t === 3) && !isReefer;
-                    const cProfileKey = sampleCarriers[Math.abs(Math.floor(b * 3 + r * 5 + t * 7)) % sampleCarriers.length];
-                    const prof = CARRIER_PROFILES[cProfileKey] || CARRIER_PROFILES['Maersk Line'];
-
-                    const fakeId = prof.code + String(100000 + Math.abs(Math.floor((b + 5) * 8921 + r * 314 + t * 99)) % 899999) + '-' + (t % 9);
-                    const grossKg = 18000 + (4 - t) * 3500;
-
-                    const bgData = {
-                        id: fakeId,
-                        iso: is20ft ? '22G1 (20ft GP)' : '45G1 (40ft High Cube)',
-                        tipe: blkInfo.type,
-                        blok: bKey,
-                        bay: (b + 1) * 2 + 1,
-                        row: Math.round(r + 2.5),
-                        tier: t,
-                        berat: number_format_js(grossKg) + ' kg',
-                        gross_kg: grossKg,
-                        point_load: ((grossKg * 9.81 / 4) / 1000).toFixed(1) + ' kN / corner',
-                        pavement_status: 'PQC 800 kN/m² (Aman)',
-                        stability_factor: 'SF 3.2 (>1.5 BMKG)',
-                        layer_type: t === 1 ? 'Tier 1 (Heavy Base Foundation)' : 'Tier ' + t + ' (Intermediate)',
-                        line: cProfileKey,
-                        pod: bKey === 'B' ? 'Cikarang (IDCBI)' : 'Rotterdam (NLRTM)',
-                        dwell: '2 hari 4 jam',
-                        pabean: 'SPPB Terbit (Hijau)',
-                        seal: 'ID-SEAL-' + Math.floor(Math.random() * 8999 + 1000),
-                        rtk: 'Telemetri RTK GNSS Standar (1.4cm)',
-                        is_live_db: false
-                    };
-
-                    const posX = blkInfo.basePos[0] + b * 13.0;
-                    const posZ = blkInfo.basePos[1] + r * 3.1;
-                    const boxH = is20ft ? 2.6 : 2.9;
-                    const boxL = is20ft ? 6.1 : 12.2;
-                    const boxW = 2.44;
-                    const posY = (t - 1) * boxH + (boxH / 2);
-
-                    createContainerMesh(bgData, posX, posY, posZ, boxL, boxW, boxH, is20ft, isReefer, isDG, false);
-                }
-            }
-        }
-    });
-}
-
-// Buat Mesh Kotak Kontainer dengan 6 Material Berbeda (Corrugated Sidewalls & Door)
-function createContainerMesh(cData, x, y, z, length, width, height, is20ft, isReefer, isDG, isLiveDb) {
-    const geo = new THREE.BoxGeometry(length, height, width);
-
-    const carrierName = cData.line || 'Maersk Line';
-    const profile = CARRIER_PROFILES[carrierName] || { color: '#2b7a9e', brand: 'CIDP', code: 'CIDU' };
-    const colorHex = isReefer ? '#f1f5f9' : (isDG ? '#b91c1c' : profile.color);
-
-    const sideTex = getContainerSideTexture(profile.brand || carrierName, cData.id, colorHex, is20ft);
-    const doorTex = getContainerDoorTexture(colorHex);
-    const frontTex = isReefer ? getReeferFrontTexture() : (isDG ? getDGFrontTexture() : sideTex);
-    const roofTex = getContainerRoofTexture(colorHex);
-
-    const sideMat = new THREE.MeshStandardMaterial({ map: sideTex, roughness: 0.6, metalness: 0.25 });
-    const doorMat = new THREE.MeshStandardMaterial({ map: doorTex, roughness: 0.6, metalness: 0.25 });
-    const frontMat = new THREE.MeshStandardMaterial({ map: frontTex, roughness: 0.5, metalness: 0.3 });
-    const roofMat = new THREE.MeshStandardMaterial({ map: roofTex, roughness: 0.7, metalness: 0.2 });
-
-    // Urutan Sisi BoxGeometry Three.js: [+X (Door), -X (Front), +Y (Roof), -Y (Bottom), +Z (Side Right), -Z (Side Left)]
-    const materials = [
-        doorMat,
-        frontMat,
-        roofMat,
-        roofMat,
-        sideMat,
-        sideMat
-    ];
-
-    const mesh = new THREE.Mesh(geo, materials);
-    mesh.position.set(x, y, z);
-    mesh.castShadow = true;
-    mesh.receiveShadow = true;
-
-    mesh.userData = cData;
-    mesh.userData.defaultPosY = y;
-    mesh.userData.defaultColor = colorHex;
-    mesh.userData.isLiveDb = isLiveDb;
-
-    scene.add(mesh);
-    containerMeshes.push(mesh);
-
-    // Tambahkan Beacon RTK GNSS untuk Kontainer Database Nyata
-    if (isLiveDb) {
-        const beaconGeo = new THREE.OctahedronGeometry(0.55, 0);
-        const beaconMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8, wireframe: true });
-        const beacon = new THREE.Mesh(beaconGeo, beaconMat);
-        beacon.position.set(x, y + (height / 2) + 0.9, z);
-        scene.add(beacon);
-        beaconMeshes.push({ mesh: beacon, baseY: y + (height / 2) + 0.9, parentBox: mesh });
-    }
-}
-
-// Raycaster Handler Klik Kontainer
-function onCanvasClick(event) {
-    const canvas = document.getElementById('yard3DCanvas');
-    const rect = canvas.getBoundingClientRect();
-    mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-    mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-
-    raycaster.setFromCamera(mouse, camera);
-    const intersects = raycaster.intersectObjects(containerMeshes);
-
-    if (intersects.length > 0) {
-        selectContainerMesh(intersects[0].object);
-    }
-}
-
-// Sorot Kontainer Terpilih & Sinkronkan Panel Inspektur
-function selectContainerMesh(mesh) {
-    if (selectedContainerMesh) {
-        selectedContainerMesh.material.forEach(m => m.emissive.setHex(0x000000));
-    }
-
-    selectedContainerMesh = mesh;
-    // Beri Cahaya Emisi Emas
-    mesh.material.forEach(m => m.emissive.setHex(0x3b2d04));
-
-    const d = mesh.userData;
-    updateInspectorWithContainerData(d);
-
-    // Easing Kamera Perlahan ke Arah Kontainer
-    if (controls) {
-        controls.target.set(mesh.position.x, mesh.position.y, mesh.position.z);
-    }
-}
-
-// Perbarui Informasi di Sidebar Inspector & Analisis Teknik Sipil
-function updateInspectorWithContainerData(d) {
-    document.getElementById('yardBoxNumber').textContent = d.id;
-    document.getElementById('yardBoxLine').textContent = d.line;
-    document.getElementById('yardBoxType').textContent = d.iso;
-    document.getElementById('yardBoxWeight').textContent = "VGM: " + d.berat;
-    document.getElementById('yardBoxCoord').textContent = "BLOK " + d.blok + " • BAY " + String(d.bay).padStart(2, '0') + " • ROW " + String(d.row).padStart(2, '0') + " • TIER " + d.tier;
-    document.getElementById('yardBoxCustoms').textContent = d.pabean;
-    document.getElementById('yardBoxSeal').textContent = d.seal;
-    document.getElementById('yardBoxPod').textContent = d.pod;
-    document.getElementById('yardBoxDwell').textContent = d.dwell;
-    document.getElementById('yardBoxRtk').textContent = d.rtk;
-
-    // Parameter Teknik Sipil
-    const ptLoad = document.getElementById('yardBoxPointLoad');
-    if (ptLoad) ptLoad.textContent = d.point_load || '68.5 kN / corner';
-
-    const pPave = document.getElementById('yardBoxPavement');
-    if (pPave) pPave.textContent = d.pavement_status || '800 kN/m² (Aman)';
-
-    const pWind = document.getElementById('yardBoxWind');
-    if (pWind) pWind.textContent = d.stability_factor || 'SF 3.1 (Aman)';
-
-    const pLayer = document.getElementById('yardBoxLayer');
-    if (pLayer) pLayer.textContent = d.layer_type || ('Tier ' + d.tier + ' (Structural)');
-
-    // Badge Kategori
-    const badge = document.getElementById('yardBoxStatusBadge');
-    if (badge) {
-        if (d.tipe === 'laden_exp') {
-            badge.textContent = "LADEN EKSPOR";
-            badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-200";
-        } else if (d.tipe === 'laden_imp') {
-            badge.textContent = "LADEN IMPOR";
-            badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-50 text-sky-700 border border-sky-200";
-        } else if (d.tipe === 'domestic') {
-            badge.textContent = "DOMESTIK";
-            badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200";
-        } else if (d.tipe === 'buffer_rail') {
-            badge.textContent = "BUFFER REL KA";
-            badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200";
-        } else if (d.tipe === 'dg_hazard') {
-            badge.textContent = "DG HAZARDOUS";
-            badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700 border border-rose-200";
-        } else if (d.tipe === 'reefer') {
-            badge.textContent = "REEFER COLD CHAIN";
-            badge.className = "px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-50 text-cyan-700 border border-cyan-200";
-        }
-    }
-
-    // Dynamic Inter-Module Deep Links
-    const cleanId = (d.id || '').replace(/[^A-Z0-9]/g, '');
-    const linkTrack = document.getElementById('btnYardLinkTrack');
-    if (linkTrack) linkTrack.href = 'dashboard.php?page=kontainer&search=' + encodeURIComponent(cleanId) + '&open=1';
-
-    const link3D = document.getElementById('btnYardLink3D');
-    if (link3D) link3D.href = 'dashboard.php?page=simulator&focus_box=' + encodeURIComponent(cleanId);
-
-    const linkDenah = document.getElementById('btnYardLinkDenah');
-    if (linkDenah) linkDenah.href = 'dashboard.php?page=denah&highlight_block=' + (d.blok || 'A');
-
-    const linkBill = document.getElementById('btnYardLinkBill');
-    if (linkBill) linkBill.href = 'dashboard.php?page=billing&search=' + encodeURIComponent(cleanId);
-}
-
-// Beralih Antara Mode Siang & Malam (Lampu Sorot Tower High-Mast)
-function toggleYardDayNight() {
-    isDayMode = !isDayMode;
-
-    const icon = document.getElementById('iconDayNight');
-    const text = document.getElementById('textDayNight');
-
-    if (isDayMode) {
-        scene.background.setHex(0xd9e8f5);
-        scene.fog.color.setHex(0xcbd5e1);
-        hemiLight.intensity = 0.65;
-        sunLight.intensity = 1.15;
-        ambientLight.intensity = 0.4;
-        floodLights.forEach(fl => fl.intensity = 0.4);
-
-        if (icon) icon.className = "fa-solid fa-sun";
-        if (text) text.textContent = "Siang";
-    } else {
-        scene.background.setHex(0x090d16);
-        scene.fog.color.setHex(0x090d16);
-        hemiLight.intensity = 0.2;
-        sunLight.intensity = 0.15;
-        ambientLight.intensity = 0.15;
-        floodLights.forEach(fl => fl.intensity = 2.4);
-
-        if (icon) icon.className = "fa-solid fa-moon text-blue-400";
-        if (text) text.textContent = "Malam (50 Lux)";
-    }
-}
-
-// Kontrol Sudut Kamera Presets
-function setCameraView(preset) {
-    if (!controls || !camera) return;
-    if (preset === 'iso') {
-        camera.position.set(55, 42, 60);
-        controls.target.set(0, 3, 0);
-    } else if (preset === 'top') {
-        camera.position.set(0, 115, 0.1);
-        controls.target.set(0, 0, 0);
-    } else if (preset === 'side') {
-        camera.position.set(-82, 18, -18);
-        controls.target.set(-28, 6, -18);
-    } else if (preset === 'operator') {
-        camera.position.set(-6, 4.2, -5);
-        controls.target.set(-28, 6, -18);
-    }
-    controls.update();
-}
-
-function resetYardCamera() {
-    setCameraView('iso');
-}
-
-// Filter Kontainer Lapangan Berdasarkan Kategori
-function filter3DContainers(category) {
-    activeFilter = category;
-
-    document.querySelectorAll('.cat-filter-btn').forEach(btn => {
-        if (btn.getAttribute('data-cat') === category) {
-            btn.classList.add('bg-[#0170b9]', 'text-white', 'shadow-xs');
-            btn.classList.remove('bg-slate-100', 'text-slate-600');
-        } else {
-            btn.classList.remove('bg-[#0170b9]', 'text-white', 'shadow-xs');
-            btn.classList.add('bg-slate-100', 'text-slate-600');
-        }
-    });
-
-    containerMeshes.forEach(mesh => {
-        if (category === 'all' || mesh.userData.tipe === category) {
-            mesh.visible = true;
-        } else {
-            mesh.visible = false;
-        }
-    });
-
-    beaconMeshes.forEach(b => {
-        b.mesh.visible = (category === 'all' || b.parentBox.userData.tipe === category);
-    });
-}
-
-// Simulasi Manuver Reshuffle Kontainer (CRP)
-function simulateContainerRelocation() {
-    if (isAnimatingCRP) return;
-    isAnimatingCRP = true;
-
-    const btn = document.getElementById('btnSimulateCRP');
-    const spinIcon = document.getElementById('crpSpinIcon');
-    const staticIcon = document.getElementById('crpStaticIcon');
-    if (spinIcon) spinIcon.style.display = 'inline-block';
-    if (staticIcon) staticIcon.style.display = 'none';
-    if (btn) btn.disabled = true;
-
-    // Pilih kontainer tier atas untuk di-reshuffle
-    const topMesh = containerMeshes.find(m => m.userData.tier >= 2 && m.userData.blok === 'B') || containerMeshes[0];
-    if (!topMesh) {
-        isAnimatingCRP = false;
-        return;
-    }
-
-    selectContainerMesh(topMesh);
-
-    const initialY = topMesh.userData.defaultPosY;
-    const liftedY = initialY + 6.0;
-    const initialZ = topMesh.position.z;
-    const targetZ = initialZ + 3.1;
-
-    let step = 0;
-    const animInterval = setInterval(() => {
-        step++;
-        if (step <= 25) {
-            // Fase 1: Twistlock Lock & Lift
-            topMesh.position.y += (liftedY - initialY) / 25;
-        } else if (step <= 50) {
-            // Fase 2: Traverse Koridor Jalan
-            topMesh.position.z += (targetZ - initialZ) / 25;
-        } else if (step <= 75) {
-            // Fase 3: Lowering Soft Landing
-            topMesh.position.y -= (liftedY - initialY) / 25;
-        } else {
-            clearInterval(animInterval);
-            isAnimatingCRP = false;
-            if (spinIcon) spinIcon.style.display = 'none';
-            if (staticIcon) staticIcon.style.display = 'inline-block';
-            if (btn) btn.disabled = false;
-
-            alert("✅ Simulasi Reshuffle (CRP) Sukses!\nPeti kemas " + topMesh.userData.id + " berhasil dipindahkan ke Row terdekat dengan akurasi RTK GNSS 1.1 cm.\nSlot Tier bawah kini bebas hambatan tanpa penalti reshuffle.");
-        }
-    }, 35);
-}
-
-// Format Angka JS
 function number_format_js(num) {
     return Number(num).toLocaleString('id-ID');
 }
 
-// Animasi Loop Frame
-function animate() {
-    requestAnimationFrame(animate);
+// =========================================================================
+// REAL-TIME YARD OCCUPANCY MATRIX (BLOK - BAY - ROW - TIER SSoT ENGINE)
+// =========================================================================
+let selectedMatrixBlock = 'A';
+let selectedMatrixBay = '01';
+let prevYardSlotMap = null;
+let yardToastTimer = null;
+let yardEventSource = null;
+let yardFallbackTimer = null;
 
-    // Animasi Denyut Berputar Beacon RTK GNSS
-    const time = Date.now() * 0.003;
-    beaconMeshes.forEach(b => {
-        b.mesh.rotation.y += 0.03;
-        b.mesh.position.y = b.baseY + Math.sin(time) * 0.2;
+function closeModalById(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.add('hidden');
+}
+
+function escapeYardHtml(val) {
+    return String(val ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function pad2(v) {
+    return String(Math.max(1, parseInt(v, 10) || 1)).padStart(2, '0');
+}
+
+function normObj(v) {
+    return (v && typeof v === 'object' && !Array.isArray(v)) ? v : {};
+}
+
+function getYardBlockTheme(color) {
+    const map = {
+        blue:    { chip: 'bg-blue-600 text-white',    soft: 'bg-blue-50 text-blue-700 border-blue-200',       cell: 'bg-[#0170b9] text-white border-b-2 border-orange-400', mini: 'bg-blue-600 text-white' },
+        sky:     { chip: 'bg-sky-600 text-white',     soft: 'bg-sky-50 text-sky-700 border-sky-200',         cell: 'bg-sky-700 text-white border-b-2 border-sky-300',      mini: 'bg-sky-600 text-white' },
+        emerald: { chip: 'bg-emerald-600 text-white', soft: 'bg-emerald-50 text-emerald-700 border-emerald-200', cell: 'bg-emerald-700 text-white border-b-2 border-emerald-300', mini: 'bg-emerald-600 text-white' },
+        purple:  { chip: 'bg-purple-600 text-white',  soft: 'bg-purple-50 text-purple-700 border-purple-200', cell: 'bg-purple-700 text-white border-b-2 border-purple-300', mini: 'bg-purple-600 text-white' },
+        rose:    { chip: 'bg-rose-600 text-white',    soft: 'bg-rose-50 text-rose-700 border-rose-200',       cell: 'bg-rose-700 text-white border-b-2 border-rose-300',     mini: 'bg-rose-600 text-white' },
+        red:     { chip: 'bg-red-600 text-white',     soft: 'bg-red-50 text-red-700 border-red-200',         cell: 'bg-red-700 text-white border-b-2 border-amber-300',     mini: 'bg-red-600 text-white' },
+        slate:   { chip: 'bg-slate-600 text-white',   soft: 'bg-slate-100 text-slate-700 border-slate-300',   cell: 'bg-slate-700 text-white border-b-2 border-slate-400',   mini: 'bg-slate-600 text-white' },
+        cyan:    { chip: 'bg-cyan-600 text-white',    soft: 'bg-cyan-50 text-cyan-700 border-cyan-200',       cell: 'bg-cyan-700 text-white border-b-2 border-cyan-300',     mini: 'bg-cyan-600 text-white' }
+    };
+    return map[color] || map.blue;
+}
+
+function isCustomsHoldStatus(customs) {
+    const c = String(customs || '').toUpperCase();
+    return ['RED_LANE_CHECK', 'RED_LANE', 'RED_LINE', 'INSPECTION', 'DOC_HOLD', 'VGM_HOLD'].includes(c);
+}
+
+function showYardMatrixToast(msg, tone = 'emerald') {
+    const el = document.getElementById('yardMatrixToast');
+    const txt = document.getElementById('yardMatrixToastMsg');
+    if (!el || !txt) return;
+    el.className = tone === 'red'
+        ? 'p-3 rounded-xl bg-red-50 border border-red-300 text-red-900 text-xs flex items-center justify-between gap-2 animate-fadeIn'
+        : 'p-3 rounded-xl bg-emerald-50 border border-emerald-300 text-emerald-900 text-xs flex items-center justify-between gap-2 animate-fadeIn';
+    txt.textContent = msg;
+    if (yardToastTimer) clearTimeout(yardToastTimer);
+    yardToastTimer = setTimeout(() => el.classList.add('hidden'), 6500);
+}
+
+function selectYardMatrixSlot(blk, bayStr) {
+    selectedMatrixBlock = String(blk || 'A').toUpperCase();
+    selectedMatrixBay = pad2(bayStr || 1);
+    const phys = currentYardTwinState?.physical;
+    if (phys) {
+        renderYardBlockTabsAndMatrix(phys, new Set(), new Set());
+    }
+}
+
+function selectYardMatrixBlock(blk) {
+    let bCode = String(blk || 'A').toUpperCase();
+    if (bCode === 'R') bCode = 'REEFER';
+    if (bCode === 'RAIL') bCode = 'D';
+    const grid = normObj(currentYardTwinState?.physical?.yard_matrix_grid?.[bCode]);
+    const occupiedBays = Object.keys(grid).sort();
+    const firstBay = occupiedBays.length > 0 ? occupiedBays[0] : '01';
+    selectYardMatrixSlot(bCode, firstBay);
+}
+
+function openYardSlotInspector(slot) {
+    if (!slot) return;
+    const ctr = slot.container_number || '-';
+    const blk = String(slot.block || 'A').toUpperCase();
+    const bay = pad2(slot.bay || 1);
+    const row = pad2(slot.row || 1);
+    const tier = pad2(slot.tier || 1);
+    const isHold = isCustomsHoldStatus(slot.customs);
+
+    document.getElementById('ysInspCtr').textContent = ctr;
+    document.getElementById('ysInspCoord').textContent = `BLOK ${blk} • BAY ${bay} • ROW ${row} • TIER ${tier}`;
+    document.getElementById('ysInspOwner').textContent = slot.owner || '-';
+    document.getElementById('ysInspSize').textContent = slot.size_type || '40FT HIGH CUBE';
+    document.getElementById('ysInspWeight').textContent = (slot.weight ? number_format_js(Math.round(slot.weight)) : '0') + ' kg';
+    document.getElementById('ysInspBilling').textContent = slot.billing || 'NO_INVOICE';
+
+    const custEl = document.getElementById('ysInspCustoms');
+    custEl.textContent = slot.customs || 'PENDING';
+    custEl.className = isHold
+        ? 'text-[10.5px] font-bold text-red-700 mt-0.5'
+        : 'text-[10.5px] font-bold text-emerald-700 mt-0.5';
+
+    const badgeEl = document.getElementById('ysInspBadge');
+    badgeEl.textContent = isHold ? 'CUSTOMS HOLD' : (slot.customs || 'IN YARD');
+    badgeEl.className = isHold
+        ? 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-500 text-white'
+        : 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-400 text-slate-900';
+
+    const clean = ctr.replace(/[^A-Z0-9]/gi, '');
+    document.getElementById('ysInspTrackLink').href = 'dashboard.php?page=kontainer&search=' + encodeURIComponent(clean) + '&open=1';
+    const twinLink = document.getElementById('ysInspTwinLink');
+    if (twinLink) twinLink.href = 'dashboard.php?page=twin&focus_box=' + encodeURIComponent(clean);
+
+    document.getElementById('ysInspRelocBtn').onclick = () => {
+        closeModalById('modalYardSlotInspector');
+        closeBayMatrixModal();
+        openModalYardRelocate(ctr);
+    };
+
+    document.getElementById('modalYardSlotInspector')?.classList.remove('hidden');
+}
+
+function openYardPutawayModal(blk = null, bay = 1, row = 1, tier = 1) {
+    const sel = document.getElementById('putawayContainerSelect');
+    const phys = currentYardTwinState?.physical || {};
+    if (sel) {
+        sel.innerHTML = '';
+        const gateArr = Array.isArray(phys.in_transit_containers) ? phys.in_transit_containers : [];
+        const railArr = Array.isArray(phys.on_rail_containers) ? phys.on_rail_containers : [];
+        const yardArr = Array.isArray(phys.active_slots)
+            ? phys.active_slots.filter(s => !['CFS', 'GATE', 'OUTSIDE'].includes(String(s.block || '').toUpperCase()))
+            : [];
+
+        const addGroup = (label, arr, tag) => {
+            if (!arr.length) return;
+            const grp = document.createElement('optgroup');
+            grp.label = label;
+            arr.forEach(item => {
+                const o = document.createElement('option');
+                o.value = item.container_number;
+                o.dataset.mode = (item.status === 'in_yard') ? 'relocate_container' : 'stack_container';
+                const posInfo = item.status === 'in_yard'
+                    ? `(${item.block}-B${pad2(item.bay)}-R${pad2(item.row)}-T${pad2(item.tier)})`
+                    : `(${tag} • ${item.customs || 'IN_TRANSIT'})`;
+                o.textContent = `${item.container_number} — ${item.size_type || '40ft'} ${posInfo}`;
+                grp.appendChild(o);
+            });
+            sel.appendChild(grp);
+        };
+
+        addGroup('Antrean Gate / In-Transit (Stack Masuk CY)', gateArr, 'GATE');
+        addGroup('Antrean Rail Siding KA (Unloading ke CY)', railArr, 'RAIL');
+        addGroup('Kontainer Aktif di Yard (Pindah / Relokasi)', yardArr, 'YARD');
+
+        if (!sel.options.length) {
+            const o = document.createElement('option');
+            o.value = '';
+            o.textContent = 'Tidak ada kontainer tersedia';
+            sel.appendChild(o);
+        }
+    }
+
+    const bSel = document.getElementById('putawayBlockSelect');
+    const bayIn = document.getElementById('putawayBayInput');
+    const rowIn = document.getElementById('putawayRowInput');
+    const tierIn = document.getElementById('putawayTierInput');
+    if (bSel) bSel.value = String(blk || selectedMatrixBlock || 'A').toUpperCase();
+    if (bayIn) bayIn.value = parseInt(bay || selectedMatrixBay || 1, 10) || 1;
+    if (rowIn) rowIn.value = parseInt(row || 1, 10) || 1;
+    if (tierIn) tierIn.value = parseInt(tier || 1, 10) || 1;
+
+    document.getElementById('putawayErrorBox')?.classList.add('hidden');
+    updatePutawaySlotPreview();
+    document.getElementById('modalYardSlotPutaway')?.classList.remove('hidden');
+}
+
+function inspectSlotOccupancy(blk, bay, row, tier, excludeCtr = '') {
+    const bKey = String(blk || 'A').toUpperCase();
+    const bayS = pad2(bay);
+    const rowS = pad2(row);
+    const tierN = Math.max(1, parseInt(tier || 1, 10));
+    const tierS = pad2(tierN);
+    const code = `${bKey}-B${bayS}-R${rowS}-T${tierS}`;
+
+    const rowMap = normObj(currentYardTwinState?.physical?.yard_matrix_grid?.[bKey]?.[bayS]?.[rowS]);
+    const occupant = rowMap[tierS] || null;
+    const isConflict = occupant && String(occupant.container_number || '').toUpperCase() !== String(excludeCtr || '').toUpperCase();
+
+    const missingBelow = [];
+    for (let t = 1; t < tierN; t++) {
+        const tS = pad2(t);
+        if (!rowMap[tS]) missingBelow.push('T' + tS);
+    }
+
+    return { code, isConflict, occupant, missingBelow };
+}
+
+function updatePutawaySlotPreview() {
+    const blk = document.getElementById('putawayBlockSelect')?.value || 'A';
+    const bay = document.getElementById('putawayBayInput')?.value || 1;
+    const row = document.getElementById('putawayRowInput')?.value || 1;
+    const tier = document.getElementById('putawayTierInput')?.value || 1;
+    const sel = document.getElementById('putawayContainerSelect');
+    const ctr = sel ? sel.value : '';
+
+    const check = inspectSlotOccupancy(blk, bay, row, tier, ctr);
+    const codeEl = document.getElementById('putawaySlotCodePreview');
+    const pillEl = document.getElementById('putawaySlotStatusPill');
+    const gravEl = document.getElementById('putawayGravityHint');
+
+    if (codeEl) codeEl.textContent = check.code;
+    if (pillEl) {
+        if (check.isConflict) {
+            pillEl.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-red-50 text-red-700 border border-red-200';
+            pillEl.textContent = `SLOT TERISI OLEH ${check.occupant.container_number} — ANTI-BENTROK`;
+        } else {
+            pillEl.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+            pillEl.textContent = `SLOT KOSONG (${check.code}) — SIAP PENUMPUKAN`;
+        }
+    }
+    if (gravEl) {
+        if (check.missingBelow.length > 0 && !check.isConflict) {
+            gravEl.className = 'px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200';
+            gravEl.textContent = `Peringatan Stabilitas: Level di bawahnya (${check.missingBelow.join(', ')}) masih kosong — tumpukan disarankan mulai T01.`;
+            gravEl.classList.remove('hidden');
+        } else {
+            gravEl.classList.add('hidden');
+        }
+    }
+}
+
+async function applyAutoSlotRecommendation() {
+    const sel = document.getElementById('putawayContainerSelect');
+    const ctr = sel ? sel.value : '';
+    if (!ctr) return;
+    try {
+        const res = await fetch('api/yard_action.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'recommend_slot', container_number: ctr })
+        });
+        const data = await res.json();
+        const rec = data && data.recommendation;
+        if (rec) {
+            const bSel = document.getElementById('putawayBlockSelect');
+            const bayI = document.getElementById('putawayBayInput');
+            const rowI = document.getElementById('putawayRowInput');
+            const tierI = document.getElementById('putawayTierInput');
+            if (bSel) bSel.value = rec.block;
+            if (bayI) bayI.value = parseInt(rec.bay, 10) || 1;
+            if (rowI) rowI.value = parseInt(rec.row, 10) || 1;
+            if (tierI) tierI.value = parseInt(rec.tier, 10) || 1;
+            updatePutawaySlotPreview();
+            const recEl = document.getElementById('putawayAutoSlotReason');
+            if (recEl) {
+                recEl.textContent = 'Rekomendasi Keputusan Auto-Slotting: ' + rec.reason;
+                recEl.classList.remove('hidden');
+            }
+        }
+    } catch (err) {
+        if (window.cidpToast) cidpToast('Auto-Slot Gagal', err.message, 'error');
+    }
+}
+
+async function submitYardPutaway(event) {
+    if (event) event.preventDefault();
+    const sel = document.getElementById('putawayContainerSelect');
+    const ctr = sel ? sel.value : '';
+    const opt = sel && sel.selectedIndex >= 0 ? sel.options[sel.selectedIndex] : null;
+    const apiAction = opt?.dataset?.mode || 'stack_container';
+
+    const blk = document.getElementById('putawayBlockSelect')?.value || 'A';
+    const bay = parseInt(document.getElementById('putawayBayInput')?.value || '1', 10);
+    const row = parseInt(document.getElementById('putawayRowInput')?.value || '1', 10);
+    const tier = parseInt(document.getElementById('putawayTierInput')?.value || '1', 10);
+    const eqId = document.getElementById('putawayEquipSelect')?.value || 'RS-01';
+    const opName = document.getElementById('putawayOperatorInput')?.value || 'Juan Gamaliel';
+
+    if (window.cidpConfirm) {
+        const slotStr = `${blk}-B${String(bay).padStart(2, '0')}-R${String(row).padStart(2, '0')}-T${String(tier).padStart(2, '0')}`;
+        const ok = await window.cidpConfirm({
+            title: 'Konfirmasi Putaway / Relokasi Yard',
+            target: `${ctr} → ${slotStr}`,
+            message: `Tugaskan unit ${eqId} (${opName}) menempatkan peti kemas ${ctr} ke slot ${slotStr}?`,
+            confirmText: 'Ya, Eksekusi',
+            cancelText: 'Tidak, Batal',
+            tone: 'primary'
+        });
+        if (!ok) return;
+    }
+
+    const errEl = document.getElementById('putawayErrorBox');
+    const btn = document.getElementById('btnSubmitYardPutaway');
+    errEl?.classList.add('hidden');
+    if (btn) { btn.disabled = true; btn.classList.add('opacity-70'); }
+
+    try {
+        const res = await fetch('api/yard_action.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                action: apiAction,
+                container_number: ctr,
+                to_block: blk,
+                to_bay: bay,
+                to_row: row,
+                to_tier: tier,
+                equipment_id: eqId,
+                operator_name: opName
+            })
+        });
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+            if (errEl) {
+                errEl.textContent = data.message || 'Gagal menumpuk kontainer ke slot.';
+                errEl.classList.remove('hidden');
+            }
+            return;
+        }
+
+        closeModalById('modalYardSlotPutaway');
+        selectedMatrixBlock = blk;
+        selectedMatrixBay = pad2(bay);
+        const msg = data.gravity_warning ? `${data.message} (${data.gravity_warning})` : data.message;
+        if (data.state && data.state.physical) {
+            renderLiveYardMatrix(data.state.physical, msg, true);
+        }
+    } catch (err) {
+        if (errEl) {
+            errEl.textContent = 'Koneksi ke api/yard_action.php gagal: ' + err.message;
+            errEl.classList.remove('hidden');
+        }
+    } finally {
+        if (btn) { btn.disabled = false; btn.classList.remove('opacity-70'); }
+    }
+}
+
+function updateYardRelocateSlotPreview() {
+    const ctr = document.getElementById('relocateContainerSelect')?.value || '';
+    const blk = document.getElementById('relocateToBlock')?.value || 'A';
+    const bay = document.getElementById('relocateToBay')?.value || 1;
+    const row = document.getElementById('relocateToRow')?.value || 1;
+    const tier = document.getElementById('relocateToTier')?.value || 1;
+
+    const pill = document.getElementById('relocYardSlotPreview');
+    if (!pill) return;
+    const check = inspectSlotOccupancy(blk, bay, row, tier, ctr);
+    if (check.isConflict) {
+        pill.className = 'mt-2 px-2.5 py-1.5 rounded-xl text-[10.5px] font-bold bg-red-50 text-red-700 border border-red-200';
+        pill.textContent = `TERISI (${check.code} ditempati ${check.occupant.container_number}) — Pilih slot lain!`;
+    } else {
+        const gravTxt = check.missingBelow.length > 0 ? ` • Peringatan: ${check.missingBelow.join(', ')} kosong` : '';
+        pill.className = 'mt-2 px-2.5 py-1.5 rounded-xl text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        pill.textContent = `SLOT KOSONG (${check.code}) — SIAP VMT${gravTxt}`;
+    }
+}
+
+function renderBayCrossSectionHtml(blk, bayStr, changedSlotKeys = new Set(), compactModal = false) {
+    const cat = currentYardTwinState?.physical?.yard_matrix_catalog || {};
+    const cfg = cat[blk] || { rows: 4, tiers: 4, color: 'blue', name: 'Blok ' + blk, equipment: 'RS-01' };
+    const bayMap = normObj(currentYardTwinState?.physical?.yard_matrix_grid?.[blk]?.[bayStr]);
+
+    let maxRow = Math.max(4, parseInt(cfg.rows || 4, 10));
+    let maxTier = Math.max(4, parseInt(cfg.tiers || 4, 10));
+    Object.keys(bayMap).forEach(rK => {
+        maxRow = Math.max(maxRow, parseInt(rK, 10) || 4);
+        const rObj = normObj(bayMap[rK]);
+        Object.keys(rObj).forEach(tK => { maxTier = Math.max(maxTier, parseInt(tK, 10) || 4); });
     });
 
-    if (controls) controls.update();
-    if (renderer && scene && camera) renderer.render(scene, camera);
+    const theme = getYardBlockTheme(cfg.color);
+    const colsStyle = `grid-template-columns: 52px repeat(${maxRow}, minmax(0, 1fr));`;
+    let html = `<div class="grid gap-1.5 items-center text-center" style="${colsStyle}">`;
+    html += `<div class="text-[10px] font-mono font-bold text-slate-400 uppercase">Tier \\ Row</div>`;
+    for (let r = 1; r <= maxRow; r++) {
+        html += `<div class="text-[11px] font-mono font-bold text-slate-600 bg-white border border-slate-200 rounded-lg py-1">Row ${pad2(r)}</div>`;
+    }
+    html += `</div>`;
+
+    for (let t = maxTier; t >= 1; t--) {
+        const tierStr = pad2(t);
+        html += `<div class="grid gap-1.5 items-stretch" style="${colsStyle}">`;
+        html += `<div class="flex items-center justify-center rounded-lg bg-slate-200/70 text-slate-700 font-mono font-black text-[9.5px] leading-tight text-center px-0.5">T${tierStr}${t === 1 ? '<br>(GND)' : ''}</div>`;
+
+        for (let r = 1; r <= maxRow; r++) {
+            const rowStr = pad2(r);
+            const slot = bayMap[rowStr] ? bayMap[rowStr][tierStr] : null;
+            const slotKey = `${blk}-${bayStr}-${rowStr}-${tierStr}`;
+            const isChanged = changedSlotKeys.has(slotKey);
+            const ringCls = isChanged ? ' ring-4 ring-orange-400 shadow-lg' : '';
+
+            if (slot) {
+                const hold = isCustomsHoldStatus(slot.customs);
+                const cellCls = hold
+                    ? 'bg-red-600 text-white border-b-2 border-amber-300'
+                    : theme.cell;
+                const wtTon = (parseFloat(slot.weight || 0) / 1000).toFixed(1);
+                const custShort = hold ? 'HOLD' : String(slot.customs || 'SPPB').replace(/_/g, ' ');
+                const hCls = compactModal ? 'min-h-[68px]' : 'min-h-[82px]';
+
+                html += `
+                    <button type="button" data-slot-filled="${escapeYardHtml(slot.container_number)}" data-slot-blk="${blk}" data-slot-bay="${bayStr}" data-slot-row="${rowStr}" data-slot-tier="${tierStr}"
+                        class="${hCls} rounded-xl ${cellCls}${ringCls} p-2 flex flex-col justify-between gap-0.5 text-left shadow-xs hover:brightness-110 transition cursor-pointer relative overflow-hidden">
+                        <div class="flex items-center justify-between gap-1 w-full">
+                            <span class="font-mono font-black text-[11px] truncate">${escapeYardHtml(slot.container_number)}</span>
+                            ${hold ? '<i class="fa-solid fa-triangle-exclamation text-amber-300 text-[10px] shrink-0"></i>' : ''}
+                        </div>
+                        <div class="text-[9.5px] opacity-90 truncate w-full font-medium">${escapeYardHtml(slot.owner || '-')}</div>
+                        <div class="flex items-center justify-between gap-1 w-full text-[9px] font-mono opacity-95">
+                            <span class="shrink-0">${wtTon}t &bull; ${String(slot.size_type || '').includes('20') ? '20ft' : '40ft'}</span>
+                            <span class="px-1 rounded bg-black/25 truncate max-w-[66px]">${escapeYardHtml(custShort)}</span>
+                        </div>
+                    </button>
+                `;
+            } else {
+                const hCls = compactModal ? 'min-h-[68px]' : 'min-h-[82px]';
+                html += `
+                    <button type="button" data-slot-empty="${slotKey}" data-slot-blk="${blk}" data-slot-bay="${parseInt(bayStr, 10)}" data-slot-row="${r}" data-slot-tier="${t}"
+                        class="${hCls} rounded-xl border border-dashed border-slate-300 bg-white/80 hover:bg-blue-50/70 hover:border-[#0170b9] text-slate-400 hover:text-[#0170b9] flex flex-col items-center justify-center p-1.5 transition cursor-pointer group${ringCls}">
+                        <span class="text-[9.5px] font-mono font-bold group-hover:hidden">KOSONG (R${rowStr}-T${tierStr})</span>
+                        <span class="hidden group-hover:inline-flex items-center gap-1 text-[10px] font-bold"><i class="fa-solid fa-plus"></i> Stack T${tierStr}</span>
+                    </button>
+                `;
+            }
+        }
+        html += `</div>`;
+    }
+    return html;
 }
 
-function onWindowResize() {
-    const container = document.getElementById('threeCanvasContainer');
-    if (!container || !renderer || !camera) return;
-    const width = container.clientWidth;
-    const height = container.clientHeight;
-    camera.aspect = width / height;
-    camera.updateProjectionMatrix();
-    renderer.setSize(width, height);
+function bindCrossSectionSlotEvents(containerEl) {
+    if (!containerEl) return;
+    containerEl.querySelectorAll('[data-slot-filled]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const b = btn.getAttribute('data-slot-blk');
+            const bay = btn.getAttribute('data-slot-bay');
+            const r = btn.getAttribute('data-slot-row');
+            const t = btn.getAttribute('data-slot-tier');
+            const slot = currentYardTwinState?.physical?.yard_matrix_grid?.[b]?.[bay]?.[r]?.[t];
+            if (slot) openYardSlotInspector(slot);
+        });
+    });
+    containerEl.querySelectorAll('[data-slot-empty]').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const b = btn.getAttribute('data-slot-blk');
+            const bay = parseInt(btn.getAttribute('data-slot-bay') || '1', 10);
+            const r = parseInt(btn.getAttribute('data-slot-row') || '1', 10);
+            const t = parseInt(btn.getAttribute('data-slot-tier') || '1', 10);
+            openYardPutawayModal(b, bay, r, t);
+        });
+    });
 }
 
-// Buka Modal Penampang 2D
+function renderYardBlockTabsAndMatrix(physical, changedBayKeys = new Set(), changedSlotKeys = new Set()) {
+    const stats = physical.yard_matrix_stats || {};
+    const blocks = stats.blocks || {};
+    const bayCountsAll = stats.bay_counts || {};
+    const grid = physical.yard_matrix_grid || {};
+
+    if (!blocks[selectedMatrixBlock]) selectedMatrixBlock = 'A';
+    const curBlkSum = blocks[selectedMatrixBlock] || { name: 'Blok A', zone: 'LADEN_EXP', bays: 10, rows: 4, tiers: 4, equipment: 'RS-01', color: 'blue' };
+    const maxBayForBlk = Math.max(4, parseInt(curBlkSum.bays || 10, 10));
+    if (parseInt(selectedMatrixBay, 10) > maxBayForBlk) selectedMatrixBay = '01';
+
+    // Render Block Overview Cards (Layer 1)
+    const overviewEl = document.getElementById('yardBlocksOverviewGrid');
+    if (overviewEl) {
+        let cardsHtml = '';
+        Object.keys(blocks).forEach(bCode => {
+            const bs = blocks[bCode];
+            const theme = getYardBlockTheme(bs.color);
+            const isSelectedBlk = (bCode === selectedMatrixBlock);
+            const bCounts = normObj(bayCountsAll[bCode]);
+            const blkGrid = normObj(grid[bCode]);
+            const maxBays = Math.max(4, parseInt(bs.bays || 4, 10));
+
+            let bayTiles = '';
+            for (let b = 1; b <= maxBays; b++) {
+                const bayStr = pad2(b);
+                const cnt = parseInt(bCounts[bayStr] || 0, 10);
+                const isSelBay = isSelectedBlk && (bayStr === selectedMatrixBay);
+                const isChangedBay = changedBayKeys.has(`${bCode}-${bayStr}`);
+
+                // Detect any customs hold in this bay
+                let bayHold = false;
+                const bayData = normObj(blkGrid[bayStr]);
+                Object.values(bayData).forEach(rObj => {
+                    Object.values(normObj(rObj)).forEach(sl => {
+                        if (isCustomsHoldStatus(sl.customs)) bayHold = true;
+                    });
+                });
+
+                const tileCls = bayHold
+                    ? 'bg-red-600 text-white border-red-700'
+                    : (cnt > 0 ? `${theme.mini} border-transparent shadow-2xs` : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200');
+                const ring = isSelBay ? ' ring-2 ring-orange-500 ring-offset-1 scale-105' : (isChangedBay ? ' ring-2 ring-amber-400 animate-pulse' : '');
+
+                bayTiles += `
+                    <button type="button" onclick="selectYardMatrixSlot('${bCode}', '${bayStr}')"
+                        title="Blok ${bCode} Bay ${bayStr}: ${cnt} kontainer terisi"
+                        class="px-1.5 py-1 rounded-md border text-[9.5px] font-mono font-bold transition cursor-pointer flex items-center justify-between gap-1 ${tileCls}${ring}">
+                        <span>B${bayStr}</span>
+                        ${cnt > 0 ? `<span class="px-1 rounded bg-black/20 text-[8.5px]">${cnt}</span>` : ''}
+                    </button>
+                `;
+            }
+
+            cardsHtml += `
+                <div class="rounded-xl p-3 border transition-all bg-white ${isSelectedBlk ? 'border-[#0170b9] ring-2 ring-blue-100 shadow-xs' : 'border-slate-200 hover:border-slate-300'}">
+                    <div class="flex items-start justify-between gap-2 mb-2">
+                        <button type="button" onclick="selectYardMatrixBlock('${bCode}')" class="text-left cursor-pointer min-w-0">
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-1.5 py-0.5 rounded font-mono font-black text-[10px] ${theme.chip}">${escapeYardHtml(bCode)}</span>
+                                <span class="font-bold text-slate-800 text-[11px] truncate">${escapeYardHtml(bs.name.replace(/^Blok [^—]+—\s*/i, ''))}</span>
+                            </div>
+                        </button>
+                        <div class="flex items-center gap-1 shrink-0">
+                            ${bs.hold_count > 0 ? `<span class="px-1.5 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200 font-bold text-[9px]">${bs.hold_count} HOLD</span>` : ''}
+                            <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 font-mono font-bold text-[10px]">${bs.occupied}/${bs.total_slots}</span>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-5 gap-1">${bayTiles}</div>
+                </div>
+            `;
+        });
+        overviewEl.innerHTML = cardsHtml;
+    }
+
+    // Render Block Tabs in Cross Section
+    const tabsEl = document.getElementById('yardMatrixBlockTabs');
+    if (tabsEl) {
+        let tHtml = '';
+        Object.keys(blocks).forEach(bCode => {
+            const bs = blocks[bCode];
+            const active = (bCode === selectedMatrixBlock);
+            tHtml += `
+                <button type="button" onclick="selectYardMatrixBlock('${bCode}')"
+                    class="px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer ${active ? 'bg-[#0170b9] text-white shadow-xs' : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'}">
+                    ${escapeYardHtml(bCode)} <span class="font-mono opacity-80">(${bs.occupied})</span>
+                </button>
+            `;
+        });
+        tabsEl.innerHTML = tHtml;
+    }
+
+    // Render Bay Pills for Selected Block
+    const bayPillsEl = document.getElementById('yardMatrixBayPills');
+    const curBayCounts = normObj(bayCountsAll[selectedMatrixBlock]);
+    if (bayPillsEl) {
+        let pHtml = '';
+        for (let b = 1; b <= maxBayForBlk; b++) {
+            const bayStr = pad2(b);
+            const cnt = parseInt(curBayCounts[bayStr] || 0, 10);
+            const active = (bayStr === selectedMatrixBay);
+            pHtml += `
+                <button type="button" onclick="selectYardMatrixSlot('${selectedMatrixBlock}', '${bayStr}')"
+                    class="px-2 py-1 rounded-lg text-[10.5px] font-mono font-bold transition cursor-pointer ${active ? 'bg-orange-500 text-white shadow-xs' : (cnt > 0 ? 'bg-blue-50 text-[#0170b9] border border-blue-200 hover:bg-blue-100' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100')}">
+                    B${bayStr}${cnt > 0 ? ` (${cnt})` : ''}
+                </button>
+            `;
+        }
+        bayPillsEl.innerHTML = pHtml;
+    }
+
+    // Update Cross-Section Titles
+    const occCurBay = parseInt(curBayCounts[selectedMatrixBay] || 0, 10);
+    const maxBayCap = (parseInt(curBlkSum.rows || 4, 10) * parseInt(curBlkSum.tiers || 4, 10));
+    const titleEl = document.getElementById('yardActiveBayTitle');
+    const zoneEl = document.getElementById('yardActiveBayZone');
+    const occEl = document.getElementById('yardActiveBayOcc');
+    const eqEl = document.getElementById('yardActiveBayEquip');
+
+    if (titleEl) titleEl.textContent = `BLOK ${selectedMatrixBlock} • BAY ${selectedMatrixBay}`;
+    if (zoneEl) zoneEl.textContent = curBlkSum.name || 'Container Yard';
+    if (occEl) occEl.textContent = `${occCurBay}/${maxBayCap} Slot Terisi`;
+    if (eqEl) eqEl.innerHTML = `<i class="fa-solid fa-truck-monster text-orange-500 mr-1"></i>Alat Penumpuk: ${escapeYardHtml(curBlkSum.equipment || 'RS-01')}`;
+
+    const gridEl = document.getElementById('yardCrossSectionGrid');
+    if (gridEl) {
+        gridEl.innerHTML = renderBayCrossSectionHtml(selectedMatrixBlock, selectedMatrixBay, changedSlotKeys, false);
+        bindCrossSectionSlotEvents(gridEl);
+    }
+
+    // Also update Dynamic Modal Bay Matrix if currently open
+    const bayModal = document.getElementById('bayMatrixModal');
+    if (bayModal && !bayModal.classList.contains('hidden')) {
+        renderDynamicBayMatrixModal(selectedMatrixBlock, selectedMatrixBay, changedSlotKeys);
+    }
+}
+
+function renderDynamicBayMatrixModal(blk, bayStr, changedSlotKeys = new Set()) {
+    const titleEl = document.getElementById('bayMatrixModalTitle');
+    const subEl = document.getElementById('bayMatrixModalSub');
+    const bodyEl = document.getElementById('bayMatrixModalBody');
+    const cfg = currentYardTwinState?.physical?.yard_matrix_catalog?.[blk] || { name: 'Blok ' + blk, rows: 4, tiers: 4 };
+    if (titleEl) titleEl.textContent = `Penampang 2D Matrix — Blok ${blk} (Bay ${bayStr})`;
+    if (subEl) subEl.textContent = `${cfg.name} • ${cfg.rows || 4} Row × ${cfg.tiers || 4} Tier Real-Time SSoT`;
+    if (bodyEl) {
+        bodyEl.innerHTML = renderBayCrossSectionHtml(blk, bayStr, changedSlotKeys, true);
+        bindCrossSectionSlotEvents(bodyEl);
+    }
+}
+
 function showBayMatrixView() {
+    const blk = selectedMatrixBlock || 'A';
+    const bayStr = selectedMatrixBay || '01';
+    renderDynamicBayMatrixModal(blk === 'RAIL' ? 'D' : blk, bayStr);
     const m = document.getElementById('bayMatrixModal');
     if (m) m.classList.remove('hidden');
 }
@@ -1911,38 +1371,143 @@ function closeBayMatrixModal() {
     if (m) m.classList.add('hidden');
 }
 
-function dispatchWorkOrderFromInspector() {
-    const ctrId = selectedContainerMesh?.userData?.id || document.getElementById('yardBoxNumber')?.textContent?.trim() || '';
-    if (ctrId && ctrId !== '-' && typeof openModalYardRelocate === 'function') {
-        openModalYardRelocate(ctrId);
-    } else {
-        alert("✅ Perintah Kerja Berhasil Diterbitkan!\nInstruksi kerja dikirimkan secara nirkabel (WiFi 7) ke Vehicle Mounted Terminal (VMT) Reach Stacker terdekat dengan koordinat DGPS RTK.");
+function renderLiveYardMatrix(physical, toastHint = null, force3DRebuild = false) {
+    if (!physical || !physical.yard_matrix_catalog) return;
+    if (!currentYardTwinState || typeof currentYardTwinState !== 'object') currentYardTwinState = {};
+    currentYardTwinState.physical = physical;
+
+    const grid = physical.yard_matrix_grid || {};
+    const stats = physical.yard_matrix_stats || {};
+    const nextSlotMap = {};
+    const changedBayKeys = new Set();
+    const changedSlotKeys = new Set();
+    const changeNotes = [];
+
+    Object.keys(grid).forEach(blk => {
+        const blkObj = normObj(grid[blk]);
+        Object.keys(blkObj).forEach(bayS => {
+            const bayObj = normObj(blkObj[bayS]);
+            Object.keys(bayObj).forEach(rowS => {
+                const rowObj = normObj(bayObj[rowS]);
+                Object.keys(rowObj).forEach(tierS => {
+                    const sl = rowObj[tierS];
+                    if (!sl) return;
+                    const key = `${blk}-${bayS}-${rowS}-${tierS}`;
+                    const ctr = String(sl.container_number || '');
+                    nextSlotMap[key] = ctr;
+                    if (prevYardSlotMap !== null && prevYardSlotMap[key] !== ctr) {
+                        changedBayKeys.add(`${blk}-${bayS}`);
+                        changedSlotKeys.add(key);
+                        changeNotes.push(`+ ${ctr} -> ${key}`);
+                    }
+                });
+            });
+        });
+    });
+
+    if (prevYardSlotMap !== null) {
+        Object.keys(prevYardSlotMap).forEach(oldKey => {
+            if (!nextSlotMap[oldKey]) {
+                const parts = oldKey.split('-');
+                if (parts.length >= 2) changedBayKeys.add(`${parts[0]}-${parts[1]}`);
+                changedSlotKeys.add(oldKey);
+            }
+        });
     }
+
+    const hadChanges = (prevYardSlotMap !== null && changedSlotKeys.size > 0);
+    prevYardSlotMap = nextSlotMap;
+
+    // Update Summary Counters & KPI Micro-Cards
+    const occCnt = parseInt(stats.occupied_yard_slots ?? 0, 10);
+    const totalSlots = parseInt(stats.total_slots ?? 928, 10);
+    const emptyCnt = parseInt(stats.empty_yard_slots ?? (totalSlots - occCnt), 10);
+    const teus = parseInt(stats.teus_in_yard ?? 0, 10);
+    const occPct = Number(stats.occupancy_pct || 0);
+
+    const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+    setTxt('yardHeaderBoxCount', `MySQL Sync (${occCnt} Box)`);
+    setTxt('yardKpiVal-1', `${((teus / 15000) * 100).toFixed(2)}%`);
+    setTxt('yardKpiUnit-1', `(${teus} TEUs)`);
+    setTxt('yardGateStageCnt', stats.gate_staging_count ?? 0);
+    setTxt('yardCfsStageCnt', stats.cfs_dock_count ?? 0);
+    setTxt('yardRailStageCnt', stats.on_rail_count ?? 0);
+    setTxt('yardHoldCnt', stats.hold_count ?? 0);
+    setTxt('yardSumBlocks', stats.total_blocks ?? 8);
+    setTxt('yardSumOccupied', occCnt);
+    setTxt('yardSumEmpty', emptyCnt);
+    setTxt('yardSumTeus', teus);
+    setTxt('yardOccPctLabel', `${occPct.toFixed(1)}%`);
+
+    const fillEl = document.getElementById('yardOccBarFill');
+    if (fillEl) fillEl.style.width = `${Math.max(0, Math.min(100, occPct))}%`;
+    const occTextEl = document.getElementById('yardOccText');
+    if (occTextEl) occTextEl.textContent = `${occCnt} dari ${totalSlots} slot CY terisi aktif (${teus} TEUs across 8 Blok Yard)`;
+
+    // Refresh #relocateContainerSelect options dynamically
+    const relocSel = document.getElementById('relocateContainerSelect');
+    if (relocSel && Array.isArray(physical.active_slots)) {
+        const prevVal = relocSel.value;
+        const validCY = physical.active_slots.filter(s => !['CFS', 'GATE', 'OUTSIDE'].includes(String(s.block || '').toUpperCase()));
+        relocSel.innerHTML = '';
+        validCY.forEach(s => {
+            const o = document.createElement('option');
+            o.value = s.container_number;
+            o.textContent = `${s.container_number} (${s.size_type || '40ft'}) — Blok ${s.block} Bay ${pad2(s.bay)} Row ${pad2(s.row)} Tier ${pad2(s.tier)}`;
+            relocSel.appendChild(o);
+        });
+        if (prevVal) relocSel.value = prevVal;
+    }
+
+    renderYardBlockTabsAndMatrix(physical, changedBayKeys, changedSlotKeys);
+
+    // Sync open Putaway / Relocate preview badges if open
+    const putModal = document.getElementById('modalYardSlotPutaway');
+    if (putModal && !putModal.classList.contains('hidden')) updatePutawaySlotPreview();
+    const relModal = document.getElementById('modalRelocateYard');
+    if (relModal && !relModal.classList.contains('hidden')) updateYardRelocateSlotPreview();
+
+    if (toastHint) {
+        showYardMatrixToast(toastHint, 'emerald');
+    } else if (changeNotes.length > 0) {
+        showYardMatrixToast('Sync Real-Time CY SSoT: ' + changeNotes.slice(0, 3).join(' | '), 'emerald');
+    }
+
+    // State matriks & modal telah tersinkron langsung (3D terpusat di Digital Twin)
+}
+
+function dispatchWorkOrderFromInspector() {
+    openModalYardRelocate('');
 }
 
 // Universal Deep-Linking Handler
 function initYardDeepLinking() {
     const urlParams = new URLSearchParams(window.location.search);
-    const focusBox = urlParams.get('focus_box') || urlParams.get('ctr') || urlParams.get('search');
+    const focusBox = urlParams.get('focus_box') || urlParams.get('ctr') || urlParams.get('find') || urlParams.get('search');
     const blockParam = urlParams.get('block');
     const actionParam = urlParams.get('action');
 
-    if (focusBox && typeof containerMeshes !== 'undefined' && containerMeshes.length > 0) {
-        const cleanBox = focusBox.toUpperCase();
-        const found = containerMeshes.find(m => 
-            m.userData.id.toUpperCase() === cleanBox || 
-            m.userData.id.replace(/[^A-Z0-9]/g, '').toUpperCase() === cleanBox.replace(/[^A-Z0-9]/g, '')
+    if (blockParam) {
+        selectYardMatrixBlock(blockParam.toUpperCase());
+    }
+    if (focusBox) {
+        const cleanBox = focusBox.replace(/[^A-Z0-9]/gi, '').toUpperCase();
+        const foundSlot = (currentYardTwinState?.physical?.active_slots || []).find(s =>
+            String(s.container_number || '').replace(/[^A-Z0-9]/gi, '').toUpperCase() === cleanBox
         );
-        if (found) {
-            selectContainerMesh(found);
-            if (controls && camera) {
-                controls.target.copy(found.position);
-                camera.position.set(found.position.x + 15, found.position.y + 12, found.position.z + 18);
-                controls.update();
-            }
+        if (foundSlot && foundSlot.block && foundSlot.bay) {
+            const normBlk = foundSlot.block === 'RAIL' ? 'D' : String(foundSlot.block).toUpperCase();
+            selectYardMatrixSlot(normBlk, foundSlot.bay);
+            setTimeout(() => {
+                const cell = document.querySelector(`[data-slot-filled="${foundSlot.container_number}"]`);
+                if (cell) {
+                    cell.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    cell.classList.add('ring-4', 'ring-orange-400', 'shadow-lg');
+                    setTimeout(() => cell.classList.remove('ring-4', 'ring-orange-400', 'shadow-lg'), 4000);
+                }
+            }, 150);
         }
     }
-
     if (actionParam === 'relocate') {
         openModalYardRelocate(focusBox || '');
     }
@@ -1951,12 +1516,14 @@ function initYardDeepLinking() {
 // Modal Relokasi Kontainer VMT
 function openModalYardRelocate(prefillId = '') {
     const m = document.getElementById('modalRelocateYard');
+    document.getElementById('relocYardErrorBox')?.classList.add('hidden');
     if (m) {
         m.classList.remove('hidden');
         if (prefillId) {
             const sel = document.getElementById('relocateContainerSelect');
             if (sel) sel.value = prefillId;
         }
+        updateYardRelocateSlotPreview();
     }
 }
 
@@ -1965,20 +1532,127 @@ function closeModalYardRelocate() {
     if (m) m.classList.add('hidden');
 }
 
+function initYardLiveSync() {
+    // Wire AJAX VMT Relocation Form
+    const relocForm = document.getElementById('modalRelocateYardForm');
+    if (relocForm && !relocForm.dataset.boundAjax) {
+        relocForm.dataset.boundAjax = '1';
+        relocForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const fd = new FormData(relocForm);
+            const errBox = document.getElementById('relocYardErrorBox');
+            const btn = document.getElementById('btnSubmitYardReloc');
+            errBox?.classList.add('hidden');
+            if (btn) { btn.disabled = true; btn.classList.add('opacity-70'); }
+
+            try {
+                const res = await fetch('api/yard_action.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'relocate_container',
+                        container_number: fd.get('container_number') || '',
+                        equipment_id: fd.get('equipment_id') || 'RS-01',
+                        operator_name: fd.get('operator_name') || 'Juan Gamaliel',
+                        to_block: fd.get('to_block') || 'A',
+                        to_bay: parseInt(fd.get('to_bay') || '1', 10),
+                        to_row: parseInt(fd.get('to_row') || '1', 10),
+                        to_tier: parseInt(fd.get('to_tier') || '1', 10)
+                    })
+                });
+                const data = await res.json();
+                if (!res.ok || !data.success) {
+                    if (errBox) {
+                        errBox.textContent = data.message || 'Relokasi kontainer ditolak.';
+                        errBox.classList.remove('hidden');
+                    }
+                    return;
+                }
+                closeModalYardRelocate();
+                selectedMatrixBlock = String(fd.get('to_block') || 'A').toUpperCase();
+                selectedMatrixBay = pad2(fd.get('to_bay') || 1);
+                const msg = data.gravity_warning ? `${data.message} (${data.gravity_warning})` : data.message;
+                if (data.state && data.state.physical) {
+                    renderLiveYardMatrix(data.state.physical, msg, true);
+                }
+            } catch (err) {
+                if (errBox) {
+                    errBox.textContent = 'Koneksi ke api/yard_action.php gagal: ' + err.message;
+                    errBox.classList.remove('hidden');
+                }
+            } finally {
+                if (btn) { btn.disabled = false; btn.classList.remove('opacity-70'); }
+            }
+        });
+    }
+
+    if (currentYardTwinState && currentYardTwinState.physical) {
+        renderLiveYardMatrix(currentYardTwinState.physical);
+    }
+
+    const startFallback = () => {
+        if (yardFallbackTimer) return;
+        yardFallbackTimer = setInterval(async () => {
+            try {
+                const res = await fetch('api/stream_twin.php?poll=1');
+                if (!res.ok) return;
+                const payload = await res.json();
+                if (payload && payload.physical) renderLiveYardMatrix(payload.physical);
+            } catch (e) {}
+        }, 5000);
+    };
+
+    const connectSse = () => {
+        if (typeof EventSource === 'undefined') {
+            startFallback();
+            return;
+        }
+        if (yardEventSource) {
+            try { yardEventSource.close(); } catch (e) {}
+        }
+
+        const badge = document.getElementById('yardLiveStreamBadge');
+        const badgeTxt = document.getElementById('yardLiveStreamText');
+        const es = new EventSource('api/stream_twin.php');
+        yardEventSource = es;
+
+        const handleSse = (ev) => {
+            if (yardFallbackTimer) {
+                clearInterval(yardFallbackTimer);
+                yardFallbackTimer = null;
+            }
+            if (badge && badgeTxt) {
+                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200';
+                badgeTxt.textContent = 'Live SSE Sync (SSoT)';
+            }
+            try {
+                const payload = JSON.parse(ev.data);
+                if (payload && payload.physical) renderLiveYardMatrix(payload.physical);
+            } catch (err) {}
+        };
+
+        es.addEventListener('initial_state', handleSse);
+        es.addEventListener('state_update', handleSse);
+        es.addEventListener('reconnect_advisory', () => {
+            try { es.close(); } catch (e) {}
+            setTimeout(connectSse, 400);
+        });
+        es.onerror = () => {
+            if (badge && badgeTxt) {
+                badge.className = 'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-200';
+                badgeTxt.textContent = 'Sync Polling (Fallback)';
+            }
+            startFallback();
+        };
+    };
+
+    connectSse();
+}
+
 // Jalankan saat DOM siap
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof THREE !== 'undefined') {
-        initThreeYard();
-        setTimeout(initYardDeepLinking, 300);
-    } else {
-        const checkInterval = setInterval(() => {
-            if (typeof THREE !== 'undefined') {
-                clearInterval(checkInterval);
-                initThreeYard();
-                setTimeout(initYardDeepLinking, 300);
-            }
-        }, 100);
-    }
+    initYardLiveSync();
+    setTimeout(initYardDeepLinking, 150);
 });
 </script>
 
@@ -1995,17 +1669,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     <p class="text-[11px] text-blue-100">Sinkronisasi Posisi Bay-Row-Tier ke Basis Data &amp; Log Peristiwa</p>
                 </div>
             </div>
-            <button onclick="closeModalYardRelocate()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition">
+            <button onclick="closeModalYardRelocate()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-white flex items-center justify-center transition cursor-pointer">
                 <i class="fa-solid fa-xmark"></i>
             </button>
         </div>
 
-        <form method="POST" class="p-6 space-y-4">
+        <form method="POST" id="modalRelocateYardForm" class="p-6 space-y-4">
             <input type="hidden" name="yard_action" value="relocate_container">
 
             <div>
                 <label class="block text-[11px] font-bold text-gray-700 mb-1">Pilih Peti Kemas / Kontainer *</label>
-                <select name="container_number" id="relocateContainerSelect" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl font-mono text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-500">
+                <select name="container_number" id="relocateContainerSelect" onchange="updateYardRelocateSlotPreview()" required class="w-full px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl font-mono text-xs font-bold text-gray-900 focus:ring-2 focus:ring-blue-500">
                     <?php foreach ($yard_containers as $yc): ?>
                         <option value="<?= $yc['id'] ?>">
                             <?= $yc['id'] ?> (<?= $yc['iso'] ?>) — Blok <?= $yc['blok'] ?> Bay <?= $yc['bay'] ?> Row <?= $yc['row'] ?> Tier <?= $yc['tier'] ?>
@@ -2022,7 +1696,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         <option value="RS-01">RS-01 (Kalmar DRG450 - Budi Santoso)</option>
                         <option value="RS-02">RS-02 (Kalmar DRG450 - Agus Setiawan)</option>
                         <option value="RS-03">RS-03 (Sany SRSC45 - Rudi Hermawan)</option>
+                        <option value="RS-04">RS-04 (Kalmar DRG450 - Slamet Riyadi)</option>
                         <option value="RTG-01">RTG-01 (ZPMC 16-Wheel - Joko Susilo)</option>
+                        <option value="RTG-02">RTG-02 (Konecranes E-RTG - Hendra Wijaya)</option>
                     </select>
                 </div>
                 <div>
@@ -2039,36 +1715,40 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="grid grid-cols-4 gap-2">
                     <div>
                         <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Blok Yard *</label>
-                        <select name="to_block" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
+                        <select name="to_block" id="relocateToBlock" onchange="updateYardRelocateSlotPreview()" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-bold text-gray-800">
                             <option value="A">Blok A (Ekspor)</option>
                             <option value="B">Blok B (Impor)</option>
                             <option value="C">Blok C (Domestik)</option>
                             <option value="D">Blok D (KA Buffer)</option>
-                            <option value="E">Blok E (DG / Behandle)</option>
-                            <option value="REEFER">Blok Reefer (300 Plugs)</option>
-                            <option value="CFS">Blok CFS (Warehouse)</option>
+                            <option value="E">Blok E (Karantina)</option>
+                            <option value="DG">Blok DG (Hazard)</option>
+                            <option value="EMPTY">Blok Empty</option>
+                            <option value="REEFER">Blok Reefer</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Bay (1-12)</label>
-                        <input type="number" name="to_bay" value="2" min="1" max="12" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                        <input type="number" name="to_bay" id="relocateToBay" onchange="updateYardRelocateSlotPreview()" oninput="updateYardRelocateSlotPreview()" value="2" min="1" max="12" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Row (1-6)</label>
-                        <input type="number" name="to_row" value="3" min="1" max="6" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                        <input type="number" name="to_row" id="relocateToRow" onchange="updateYardRelocateSlotPreview()" oninput="updateYardRelocateSlotPreview()" value="1" min="1" max="6" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
                     </div>
                     <div>
                         <label class="block text-[10px] font-bold text-gray-600 mb-0.5">Tier (1-5)</label>
-                        <input type="number" name="to_tier" value="1" min="1" max="5" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
+                        <input type="number" name="to_tier" id="relocateToTier" onchange="updateYardRelocateSlotPreview()" oninput="updateYardRelocateSlotPreview()" value="1" min="1" max="5" class="w-full px-2 py-1.5 bg-white border border-gray-200 rounded-lg text-xs font-mono font-bold text-center">
                     </div>
                 </div>
+                <div id="relocYardSlotPreview" class="mt-2 px-2.5 py-1.5 rounded-xl text-[10.5px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">SLOT KOSONG — SIAP VMT</div>
             </div>
 
+            <div id="relocYardErrorBox" class="hidden p-2.5 rounded-xl bg-red-50 border border-red-200 text-red-800 text-[11px] font-semibold"></div>
+
             <div class="pt-3 border-t border-gray-100 flex items-center justify-end space-x-2">
-                <button type="button" onclick="closeModalYardRelocate()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition">
+                <button type="button" onclick="closeModalYardRelocate()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl transition cursor-pointer">
                     Batal
                 </button>
-                <button type="submit" class="px-5 py-2 bg-[#004b87] hover:bg-[#0170b9] text-white font-bold rounded-xl shadow-md transition flex items-center space-x-1.5">
+                <button type="submit" id="btnSubmitYardReloc" class="px-5 py-2 bg-[#004b87] hover:bg-[#0170b9] text-white font-bold rounded-xl shadow-md transition flex items-center space-x-1.5 cursor-pointer">
                     <i class="fa-solid fa-check"></i>
                     <span>Eksekusi Relokasi</span>
                 </button>

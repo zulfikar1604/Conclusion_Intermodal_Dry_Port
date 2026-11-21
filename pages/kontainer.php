@@ -6,9 +6,14 @@
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/gate_lanes_helper.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+cidp_ensure_gate_schema($pdo);
+ensure_integration_schema($pdo);
 
 // Ambil data kontainer dari database
 $containers = [];
+$expected_containers = [];
 $total_dry = 0;
 $total_reefer = 0;
 $total_dg = 0;
@@ -17,8 +22,15 @@ $total_empty = 0;
 try {
     $stmt = $pdo->query("SELECT * FROM containers WHERE status != 'expected' ORDER BY id ASC");
     $containers = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $stmtExp = $pdo->query("SELECT c.*, p.pre_gate_code, p.truck_plate, p.anomaly_code, p.status AS preadvice_status
+        FROM containers c
+        LEFT JOIN preadvice p ON p.container_number = c.container_number
+        WHERE c.status = 'expected'
+        ORDER BY c.id DESC");
+    $expected_containers = $stmtExp->fetchAll(PDO::FETCH_ASSOC);
 } catch (Exception $e) {
     $containers = [];
+    $expected_containers = [];
 }
 
 // Fallback dataset realistis jika database kosong
@@ -45,11 +57,15 @@ $destinations = [
     'Patimban Subang'
 ];
 
-$gate_lanes = [
-    'Gate 01 (Lane A)',
-    'Gate 02 (Lane B)',
-    'Gate 01 (Lane C)'
-];
+$gate_lanes_catalog = cidp_gate_lane_catalog();
+$inbound_lanes_list = array_values(array_filter($gate_lanes_catalog, fn($l) => $l['direction'] === 'IN'));
+$ctr_truck_lane_map = [];
+try {
+    $tl_stmt = $pdo->query("SELECT container_number, gate_lane FROM trucks WHERE container_number IS NOT NULL AND gate_lane IS NOT NULL ORDER BY id ASC");
+    foreach ($tl_stmt->fetchAll(PDO::FETCH_ASSOC) as $tlr) {
+        $ctr_truck_lane_map[strtoupper(trim((string)$tlr['container_number']))] = cidp_normalize_gate_lane($tlr['gate_lane'], 'IN');
+    }
+} catch (Exception $e) {}
 
 $truck_plates = ['B 9182 TE', 'B 1234 XY', 'D 5555 ZZ', 'B 7777 AB', 'L 8888 KL', 'B 9021 UJ', 'B 9481 FZ'];
 $reach_stackers = ['RS-01 (Budi S.)', 'RS-02 (Agus S.)', 'RS-03 (Rudi H.)', 'RTG-01 (Joko S.)'];
@@ -69,7 +85,12 @@ foreach ($containers as $idx => &$c) {
 
     $c['origin'] = $origins[$idx % count($origins)];
     $c['destination'] = $destinations[$idx % count($destinations)];
-    $c['inbound_gate'] = $gate_lanes[$idx % count($gate_lanes)];
+    $ctrKey = strtoupper(trim((string)($c['container_number'] ?? '')));
+    $laneCode = $ctr_truck_lane_map[$ctrKey]
+        ?? (($c['cargo_type'] === 'reefer' || $c['cargo_type'] === 'dg')
+            ? 'IN-06'
+            : ($c['cargo_type'] === 'empty' ? 'IN-05' : $inbound_lanes_list[$idx % count($inbound_lanes_list)]['code']));
+    $c['inbound_gate'] = $gate_lanes_catalog[$laneCode]['name'] ?? $laneCode;
     $c['inbound_truck'] = $truck_plates[$idx % count($truck_plates)];
     $c['handling_equipment'] = ($c['cargo_type'] === 'reefer') ? 'RS-03 (Rudi H.)' : $reach_stackers[$idx % count($reach_stackers)];
     $c['commodity'] = ($c['cargo_type'] === 'reefer') ? 'Frozen Seafood (-18.5°C)' : 
@@ -99,13 +120,13 @@ $total_containers = count($containers);
             </div>
         </div>
         <div class="flex items-center flex-wrap gap-1.5 flex-shrink-0">
-            <button onclick="showAddContainerModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1 shadow-xs cursor-pointer">
+            <button onclick="showAddContainerModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1 shadow-xs cursor-pointer" title="Simulasi Terima Manifest Pre-Advice Eksternal (Status expected di luar terminal)">
                 <i class="fa-solid fa-plus text-[10px]"></i>
-                <span>Tambah</span>
+                <span>+ Pre-Advice</span>
             </button>
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1">
+            <a href="dashboard.php?page=twin" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1" title="Pantau Posisi Kontainer di Digital Twin 3D">
                 <i class="fa-solid fa-cubes text-amber-400 text-[10px]"></i>
-                <span>Simulasi 3D</span>
+                <span>Digital Twin 3D</span>
             </a>
             <button onclick="exportKontainerExcel()" class="px-2 py-1 bg-emerald-50 border border-emerald-200 hover:bg-emerald-100 text-emerald-700 rounded-lg text-[11px] font-semibold transition flex items-center space-x-1 cursor-pointer">
                 <i class="fa-solid fa-file-excel text-[10px]"></i>
@@ -214,6 +235,51 @@ $total_containers = count($containers);
         </div>
     </div>
 
+    <?php if (!empty($expected_containers)): ?>
+    <!-- PRE-ADVICE EXTERNAL FEED QUEUE (ZERO-ENTRY: MENUNGGU TRIGGER HARDWARE GATE ANPR/OCR) -->
+    <div class="bg-white rounded-xl shadow-2xs border border-indigo-200/80 overflow-hidden mb-2.5">
+        <div class="px-3 py-2 border-b border-indigo-100 flex flex-wrap items-center justify-between gap-2 bg-indigo-50/60">
+            <div class="flex items-center space-x-2">
+                <span class="w-1.5 h-3.5 bg-indigo-600 rounded-full"></span>
+                <h3 class="font-extrabold text-slate-900 text-[12px] flex items-center gap-1.5">
+                    <i class="fa-solid fa-cloud-arrow-down text-indigo-600 text-[11px]"></i>
+                    <span>Manifest Pre-Advice Eksternal (Status <code class="font-mono text-indigo-700">expected</code> &bull; Di Luar Terminal)</span>
+                </h3>
+                <span class="px-2 py-0.5 rounded-full bg-white text-indigo-700 border border-indigo-200 text-[9.5px] font-bold">
+                    <?= count($expected_containers) ?> Box Siap Di-Trigger
+                </span>
+            </div>
+            <span class="text-[10px] text-slate-600 font-medium">Koordinat Yard diisi otomatis oleh DGPS &amp; Twistlock setelah Gate-In.</span>
+        </div>
+        <div class="p-2.5 flex flex-wrap gap-2">
+            <?php foreach (array_slice($expected_containers, 0, 8) as $ec): ?>
+            <div class="flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg border border-slate-200 bg-slate-50/70 text-[11px]">
+                <div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="font-mono font-bold text-indigo-700"><?= htmlspecialchars($ec['container_number']) ?></span>
+                        <?php if (!empty($ec['pre_gate_code'])): ?>
+                            <span class="font-mono text-[9.5px] px-1.5 py-0.2 rounded bg-white border border-slate-200 text-slate-600"><?= htmlspecialchars($ec['pre_gate_code']) ?></span>
+                        <?php endif; ?>
+                        <?php if (!empty($ec['anomaly_code'])): ?>
+                            <span class="text-[9px] px-1.5 py-0.2 rounded bg-rose-100 text-rose-700 font-bold"><?= htmlspecialchars($ec['anomaly_code']) ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="text-[10px] text-slate-500">
+                        Truk: <strong class="font-mono text-slate-700"><?= htmlspecialchars($ec['truck_plate'] ?? '-') ?></strong> &bull; <?= htmlspecialchars($ec['owner_company'] ?? '-') ?>
+                    </div>
+                </div>
+                <?php if (!empty($ec['pre_gate_code'])): ?>
+                <button type="button" onclick="triggerPreAdviceGateIn('<?= htmlspecialchars($ec['pre_gate_code'], ENT_QUOTES) ?>', '<?= htmlspecialchars($ec['container_number'], ENT_QUOTES) ?>')" class="px-2 py-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[10px] font-bold transition cursor-pointer flex items-center gap-1 shrink-0" title="Simulasikan kamera ANPR &amp; OCR membaca truk/kontainer ini di Gate-In">
+                    <i class="fa-solid fa-satellite-dish text-[9px]"></i>
+                    <span>Trigger Gate ANPR</span>
+                </button>
+                <?php endif; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+    <?php endif; ?>
+
     <!-- CLEAN & COMPACT CONTAINER TABLE -->
     <div class="bg-white rounded-xl shadow-2xs border border-slate-200/80 overflow-hidden">
         <div class="px-3 py-2 border-b border-slate-100 flex items-center justify-between bg-slate-50/40">
@@ -279,11 +345,11 @@ $total_containers = count($containers);
                         ?>
                         <tr class="hover:bg-orange-50/30 transition cursor-pointer container-row group" 
                             onclick='showJourneyModal(<?= $json_detail ?>)'
-                            data-container="<?= strtolower($c['container_number']) ?>" 
-                            data-owner="<?= strtolower($c['owner_company']) ?>"
-                            data-block="<?= strtoupper($c['block']) ?>"
-                            data-type="<?= strtolower($c['cargo_type']) ?>"
-                            data-rfid="<?= strtolower($c['rfid_tag']) ?>">
+                            data-container="<?= strtolower($c['container_number'] ?? '') ?>" 
+                            data-owner="<?= strtolower($c['owner_company'] ?? '') ?>"
+                            data-block="<?= strtoupper($c['block'] ?? '') ?>"
+                            data-type="<?= strtolower($c['cargo_type'] ?? '') ?>"
+                            data-rfid="<?= strtolower($c['rfid_tag'] ?? '') ?>">
                             
                             <!-- No -->
                             <td class="py-1.5 px-2.5 text-center font-mono text-slate-400" data-row-num><?= $idx + 1 ?></td>
@@ -345,12 +411,12 @@ $total_containers = count($containers);
                                         <i class="fa-solid fa-timeline text-[9px]"></i>
                                         <span>Milestone</span>
                                     </button>
-                                    <!-- Denah 2D -->
-                                    <a href="dashboard.php?page=denah&highlight_block=<?= urlencode($c['block']) ?>" class="w-6 h-6 rounded-md bg-blue-50 hover:bg-[#0170b9] text-[#0170b9] hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Sorot di Denah 2D (Blok <?= $c['block'] ?>)">
-                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    <!-- Matriks Yard -->
+                                    <a href="dashboard.php?page=yard&block=<?= urlencode(($c['block'] ?? '') === 'RAIL' ? 'D' : (($c['block'] ?? '') === 'R' ? 'REEFER' : ($c['block'] ?? 'A'))) ?>&focus_box=<?= urlencode($c['container_number'] ?? '') ?>" class="w-6 h-6 rounded-md bg-blue-50 hover:bg-[#0170b9] text-[#0170b9] hover:text-white flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat di Matriks Yard (Blok <?= htmlspecialchars($c['block'] ?? '-') ?>)">
+                                        <i class="fa-solid fa-grip"></i>
                                     </a>
-                                    <!-- 3D Simulator -->
-                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($c['container_number']) ?>" class="w-6 h-6 rounded-md bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-gray-950 flex items-center justify-center text-[10px] transition shadow-2xs" title="Lihat di Simulasi 3D">
+                                    <!-- Digital Twin 3D -->
+                                    <a href="dashboard.php?page=twin&focus_box=<?= urlencode($c['container_number']) ?>" class="w-6 h-6 rounded-md bg-amber-50 hover:bg-amber-500 text-amber-700 hover:text-gray-950 flex items-center justify-center text-[10px] transition shadow-2xs" title="Sorot di Digital Twin 3D">
                                         <i class="fa-solid fa-cube"></i>
                                     </a>
                                     <!-- Billing -->
@@ -607,11 +673,8 @@ $total_containers = count($containers);
                 <i class="fa-solid fa-compass mr-1.5 text-[#0170b9]"></i>Aksi Pintas Lintas Modul:
             </span>
             <div class="flex items-center space-x-2 flex-wrap gap-y-1.5" id="journeyActionShortcuts">
-                <a id="btnLinkDenah" href="#" class="px-3 py-1.5 bg-white hover:bg-[#0170b9] text-gray-700 hover:text-white border border-gray-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
-                    <i class="fa-solid fa-map-location-dot mr-1.5 text-blue-500"></i>Denah 2D 35 Ha
-                </a>
                 <a id="btnLink3D" href="#" class="px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-gray-950 font-bold rounded-lg transition flex items-center shadow-2xs">
-                    <i class="fa-solid fa-cube mr-1.5"></i>Simulasi 3D
+                    <i class="fa-solid fa-cube mr-1.5"></i>Digital Twin 3D
                 </a>
                 <a id="btnLinkBilling" href="#" class="px-3 py-1.5 bg-white hover:bg-emerald-600 text-gray-700 hover:text-white border border-gray-200 rounded-lg font-semibold transition flex items-center shadow-2xs">
                     <i class="fa-solid fa-file-invoice-dollar mr-1.5 text-emerald-600"></i>Faktur Billing
@@ -744,11 +807,8 @@ function showJourneyModal(data) {
     document.getElementById('m_gate_time').innerText = data.gate_in_time || '2026-09-19 08:30 WIB';
 
     // Konfigurasi Link Aksi Pintas Lintas Modul
-    const btnDenah = document.getElementById('btnLinkDenah');
-    if (btnDenah) btnDenah.href = `dashboard.php?page=denah&highlight_block=${encodeURIComponent(data.block)}`;
-
     const btn3D = document.getElementById('btnLink3D');
-    if (btn3D) btn3D.href = `dashboard.php?page=simulator&focus_box=${encodeURIComponent(data.container_number)}`;
+    if (btn3D) btn3D.href = `dashboard.php?page=twin&focus_box=${encodeURIComponent(data.container_number)}`;
 
     const btnBill = document.getElementById('btnLinkBilling');
     if (btnBill) btnBill.href = `dashboard.php?page=billing&search=${encodeURIComponent(data.container_number)}`;
@@ -876,41 +936,99 @@ function closeAddContainerModal() {
     document.getElementById('addContainerModal').classList.add('hidden');
 }
 
-function submitAddContainer(e) {
+async function submitAddContainer(e) {
     e.preventDefault();
     const form = e.target;
+    const ctrNum = (form.querySelector('[name="container_number"]')?.value || '').trim().toUpperCase();
+    if (window.cidpConfirm) {
+        const ok = await window.cidpConfirm({
+            title: 'Konfirmasi Feed Manifest Pre-Advice',
+            target: ctrNum || 'Manifest Baru',
+            message: 'Simulasikan pengiriman manifest eksternal (status expected di luar terminal) agar siap ditangkap sensor Gate ANPR/OCR?',
+            confirmText: 'Ya, Kirim Pre-Advice',
+            cancelText: 'Tidak, Batal',
+            tone: 'primary'
+        });
+        if (!ok) return;
+    }
+
     const formData = new FormData(form);
-    
-    fetch('api/crud.php?action=add_container', {
-        method: 'POST',
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if(data.success) {
-            alert('Kontainer berhasil ditambahkan!');
-            location.reload();
+    try {
+        const res = await fetch('api/crud.php?action=add_container', {
+            method: 'POST',
+            body: formData
+        });
+        const data = await res.json();
+        if (data.success) {
+            closeAddContainerModal();
+            form.reset();
+            if (window.cidpSoftRefreshContent) {
+                await window.cidpSoftRefreshContent({
+                    title: 'Pre-Advice Eksternal Terdaftar',
+                    message: data.message || `Kontainer ${ctrNum || ''} menunggu di luar terminal (expected) hingga di-trigger sensor Gate.`,
+                    type: 'success'
+                });
+            }
         } else {
-            alert('Gagal: ' + data.message);
+            if (window.cidpToast) cidpToast('Gagal Menyimpan Pre-Advice', data.message || 'Terjadi kesalahan', 'error');
         }
-    })
-    .catch(err => {
+    } catch (err) {
         console.error(err);
-        alert('Terjadi kesalahan.');
-    });
+        if (window.cidpToast) cidpToast('Terjadi Kesalahan', err.message || 'Koneksi gagal', 'error');
+    }
+}
+
+async function triggerPreAdviceGateIn(preCode, ctrNum) {
+    try {
+        const res = await fetch('api/edge_simulator.php?action=run_step&step_id=1&code=' + encodeURIComponent(preCode), {
+            method: 'POST'
+        });
+        const data = await res.json();
+        if (data && data.success) {
+            const tri = data.tri_flow || {};
+            if (window.cidpSoftRefreshContent) {
+                await window.cidpSoftRefreshContent({
+                    title: 'Trigger ANPR + OCR Berhasil (' + ctrNum + ')',
+                    message: (tri.information || 'Status berubah expected → in_transit di Gate. Silakan lanjut timbang VGM / Stack di Digital Twin.'),
+                    type: 'success'
+                });
+            }
+        } else {
+            if (window.cidpToast) {
+                cidpToast('Interlock Gate ANPR (' + ctrNum + ')', (data && (data.error || data.message)) || 'Payload dialihkan ke karantina DLQ.', 'warning');
+            }
+            if (window.cidpSoftRefreshContent) {
+                await window.cidpSoftRefreshContent();
+            }
+        }
+    } catch (err) {
+        if (window.cidpToast) cidpToast('Gagal Trigger Sensor', err.message, 'error');
+    }
 }
 </script>
 
-<!-- Add Container Modal -->
+<!-- Add Pre-Advice Container Modal (Simulasi Manifest Eksternal - Zero Entry Inside Yard) -->
 <div id="addContainerModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-gray-900/60 backdrop-blur-xs flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-2xl max-w-lg w-full overflow-hidden animate-fadeIn border border-gray-100">
-        <div class="bg-gradient-to-r from-[#0170b9] to-blue-600 text-white p-4 flex items-center justify-between">
-            <h3 class="font-bold text-lg">Tambah Kontainer Baru</h3>
+        <div class="bg-gradient-to-r from-[#0170b9] to-indigo-700 text-white p-4 flex items-center justify-between">
+            <div>
+                <h3 class="font-bold text-base">Simulasi Feed Manifest Eksternal (Pre-Advice)</h3>
+                <p class="text-[11px] text-blue-100">Status awal <code>expected</code> di luar dry port — pergerakan yard hanya via trigger sensor.</p>
+            </div>
             <button onclick="closeAddContainerModal()" class="text-white hover:text-gray-200"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <form onsubmit="submitAddContainer(event)" class="p-4 space-y-4">
-            <div><label class="block text-xs font-bold mb-1">Nomor Kontainer</label><input type="text" name="container_number" required placeholder="MSKU1234567" class="w-full border p-2 rounded text-xs"></div>
-            <div class="grid grid-cols-2 gap-4">
+        <form onsubmit="submitAddContainer(event)" class="p-4 space-y-3.5 text-xs">
+            <div class="p-2.5 rounded-xl bg-blue-50 border border-blue-200 text-blue-900 text-[11px] flex items-start gap-2">
+                <i class="fa-solid fa-satellite-dish text-[#0170b9] mt-0.5"></i>
+                <span><strong>Konsep Zero-Entry:</strong> Input ini memodelkan dokumen COPARN / Booking dari pelayaran luar. Koordinat <code>Blok-Bay-Row-Tier</code> sengaja dikosongkan dan baru diisi oleh <strong>DGPS Reach Stacker</strong> setelah melewati sensor Gate.</span>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs font-bold mb-1">Nomor Kontainer (ISO 6346)</label><input type="text" name="container_number" required placeholder="MSKU1234567" class="w-full border p-2 rounded text-xs font-mono uppercase"></div>
+                <div><label class="block text-xs font-bold mb-1">Plat Truk Pengangkut</label><input type="text" name="truck_plate" placeholder="B 9182 CID" class="w-full border p-2 rounded text-xs font-mono uppercase"></div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
                 <div><label class="block text-xs font-bold mb-1">Ukuran / Tipe</label><select name="size_type" class="w-full border p-2 rounded text-xs">
                     <option value="20FT STANDARD">20FT STANDARD</option>
                     <option value="40FT STANDARD">40FT STANDARD</option>
@@ -922,20 +1040,29 @@ function submitAddContainer(e) {
                     <option value="dry">Dry</option><option value="reefer">Reefer</option><option value="dg">DG</option><option value="empty">Empty</option>
                 </select></div>
             </div>
-            <div><label class="block text-xs font-bold mb-1">Pemilik / Perusahaan</label><input type="text" name="owner_company" class="w-full border p-2 rounded text-xs"></div>
-            <div class="grid grid-cols-2 gap-4">
-                <div><label class="block text-xs font-bold mb-1">Berat (kg)</label><input type="number" name="gross_weight_kg" class="w-full border p-2 rounded text-xs"></div>
-                <div><label class="block text-xs font-bold mb-1">No Segel</label><input type="text" name="seal_number" class="w-full border p-2 rounded text-xs"></div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div><label class="block text-xs font-bold mb-1">Pemilik / Shipper</label><input type="text" name="owner_company" placeholder="PT Samudera Logistik Prima" class="w-full border p-2 rounded text-xs"></div>
+                <div><label class="block text-xs font-bold mb-1">No. DO / Booking Pelayaran</label><input type="text" name="do_number" placeholder="DO-2026-0091" class="w-full border p-2 rounded text-xs font-mono"></div>
             </div>
-            <div class="grid grid-cols-4 gap-2">
-                <div><label class="block text-xs font-bold mb-1">Blok</label><select name="block" class="w-full border p-2 rounded text-xs"><option>A</option><option>B</option><option>C</option><option>D</option><option>E</option><option>REEFER</option><option>DG</option></select></div>
-                <div><label class="block text-xs font-bold mb-1">Bay</label><input type="number" name="bay" class="w-full border p-2 rounded text-xs" value="1"></div>
-                <div><label class="block text-xs font-bold mb-1">Row</label><input type="number" name="row" class="w-full border p-2 rounded text-xs" value="1"></div>
-                <div><label class="block text-xs font-bold mb-1">Tier</label><input type="number" name="tier" class="w-full border p-2 rounded text-xs" value="1"></div>
+
+            <div class="grid grid-cols-3 gap-2">
+                <div><label class="block text-xs font-bold mb-1">Deklarasi Berat (kg)</label><input type="number" name="gross_weight_kg" value="25400" class="w-full border p-2 rounded text-xs font-mono"></div>
+                <div><label class="block text-xs font-bold mb-1">No Segel</label><input type="text" name="seal_number" placeholder="SL-88210" class="w-full border p-2 rounded text-xs font-mono"></div>
+                <div>
+                    <label class="block text-xs font-bold mb-1">Uji Anomali Gate</label>
+                    <select name="anomaly_code" class="w-full border p-2 rounded text-xs">
+                        <option value="">Normal (Lolos)</option>
+                        <option value="VGM_OVERWEIGHT">Overweight VGM (&gt;5%)</option>
+                        <option value="SEAL_TAMPERED">Segel Putus</option>
+                        <option value="DOC_DO_EXPIRED">e-DO Kadaluarsa</option>
+                    </select>
+                </div>
             </div>
-            <div class="pt-4 flex justify-end space-x-2">
+
+            <div class="pt-3 border-t flex justify-end space-x-2">
                 <button type="button" onclick="closeAddContainerModal()" class="px-4 py-2 border rounded text-xs font-bold">Batal</button>
-                <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded text-xs font-bold">Simpan</button>
+                <button type="submit" class="px-4 py-2 bg-[#0170b9] text-white rounded text-xs font-bold">Kirim Pre-Advice (Expected)</button>
             </div>
         </form>
     </div>

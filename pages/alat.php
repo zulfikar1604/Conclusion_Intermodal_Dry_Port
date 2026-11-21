@@ -192,8 +192,8 @@ foreach ($equipment_list as $eq) {
             <button onclick="openDispatchModal()" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white text-[11px] font-bold rounded-lg shadow-xs transition flex items-center">
                 <i class="fa-solid fa-paper-plane mr-1 text-[10px]"></i> + Dispatch Job
             </button>
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Simulasi 3D
+            <a href="dashboard.php?page=twin&view=yard" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center" title="Pantau Posisi Alat MHE di Digital Twin 3D">
+                <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Digital Twin 3D
             </a>
             <button onclick="refreshEquipment()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center">
                 <i class="fa-solid fa-rotate mr-1 text-slate-500 text-[10px]" id="refreshIcon"></i> GPS
@@ -386,7 +386,7 @@ foreach ($equipment_list as $eq) {
                                 <i class="fa-solid fa-paper-plane mr-1 text-[9px]"></i>Tugaskan
                             </button>
                             <?php if ($is_operating): ?>
-                            <form method="POST" class="inline" onsubmit="return confirm('Lepas twistlock/beban unit <?= $eq['equipment_id'] ?> dan ubah status ke Standby?')">
+                            <form method="POST" class="inline" data-confirm="Lepas twistlock/beban unit <?= htmlspecialchars($eq['equipment_id']) ?> dan ubah status menjadi Standby?" data-confirm-title="Konfirmasi Lepas Beban Alat" data-confirm-target="<?= htmlspecialchars($eq['equipment_id']) ?>" data-confirm-tone="danger">
                                 <input type="hidden" name="alat_action" value="release_spreader">
                                 <input type="hidden" name="equipment_id" value="<?= htmlspecialchars($eq['equipment_id']) ?>">
                                 <button type="submit" class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded text-[10.5px] font-bold transition cursor-pointer" title="Lepas Muatan & Standby">
@@ -470,10 +470,10 @@ foreach ($equipment_list as $eq) {
                             <td class="py-1.5 px-3 whitespace-nowrap">
                                 <div class="flex items-center space-x-1.5">
                                     <span class="font-mono font-bold text-slate-900 bg-slate-100 px-1.5 py-0.5 rounded text-[11px]">
-                                        <?= htmlspecialchars($ev['equipment_id']) ?>
+                                        <?= htmlspecialchars($ev['equipment_id'] ?? '-') ?>
                                     </span>
                                     <span class="text-slate-700 font-medium text-xs">
-                                        <?= htmlspecialchars($ev['operator_name']) ?>
+                                        <?= htmlspecialchars($ev['operator_name'] ?? '-') ?>
                                     </span>
                                 </div>
                             </td>

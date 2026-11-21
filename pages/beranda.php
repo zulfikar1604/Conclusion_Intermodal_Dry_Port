@@ -13,8 +13,10 @@
 // =============================================================================
 
 require_once __DIR__ . '/../api/beranda_telemetry.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
 
 $beranda_data = build_beranda_telemetry($pdo ?? null, false);
+$beranda_decisions = (isset($pdo) && $pdo instanceof PDO) ? cidp_build_decision_report($pdo) : [];
 $kpi          = $beranda_data['kpi'];
 $perf         = $beranda_data['performance'];
 $fin          = $beranda_data['financial'];
@@ -285,6 +287,57 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                 </div>
             </div>
         </div>
+
+        <?php if (!empty($beranda_decisions)): ?>
+        <!-- ======================================================================= -->
+        <!-- 1.8 PANEL KEPUTUSAN OPERASIONAL (OLAHAN DATA HARDWARE -> REKOMENDASI)    -->
+        <!-- ======================================================================= -->
+        <div class="bg-white rounded-xl p-3.5 shadow-2xs border border-slate-200 space-y-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                    <span class="w-7 h-7 rounded-lg bg-slate-900 text-amber-400 flex items-center justify-center text-xs shrink-0">
+                        <i class="fa-solid fa-brain"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-xs sm:text-[13px] font-extrabold text-slate-900">Keputusan &amp; Rekomendasi Operasional (Sensor &amp; Rule Engine)</h3>
+                        <p class="text-[10.5px] text-slate-500">Hasil olahan telemetri LoRaWAN, Timbangan 80T, CEISA/E-Seal JT701, Dwell Time &amp; DLQ secara real-time.</p>
+                    </div>
+                </div>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    <?= count($beranda_decisions) ?> Keputusan Aktif
+                </span>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+                <?php foreach (array_slice($beranda_decisions, 0, 3) as $dec):
+                    $prioCls = $dec['priority'] === 'critical'
+                        ? 'border-rose-200 bg-rose-50/70'
+                        : ($dec['priority'] === 'high' ? 'border-amber-200 bg-amber-50/60' : ($dec['priority'] === 'medium' ? 'border-blue-200 bg-blue-50/50' : 'border-emerald-200 bg-emerald-50/60'));
+                    $badgeCls = $dec['priority'] === 'critical'
+                        ? 'bg-rose-600 text-white'
+                        : ($dec['priority'] === 'high' ? 'bg-amber-600 text-white' : ($dec['priority'] === 'medium' ? 'bg-[#0170b9] text-white' : 'bg-emerald-600 text-white'));
+                ?>
+                <div class="rounded-xl p-3 border <?= $prioCls ?> flex flex-col justify-between gap-2 text-xs">
+                    <div class="space-y-1">
+                        <div class="flex items-center justify-between gap-1.5">
+                            <span class="text-[9.5px] font-mono font-bold text-slate-600 truncate"><?= htmlspecialchars($dec['source']) ?></span>
+                            <span class="px-1.5 py-0.2 rounded text-[9px] font-extrabold uppercase <?= $badgeCls ?> shrink-0"><?= htmlspecialchars($dec['priority']) ?></span>
+                        </div>
+                        <div class="font-extrabold text-slate-900 text-xs leading-snug"><?= htmlspecialchars($dec['title']) ?></div>
+                        <p class="text-[11px] text-slate-600 leading-snug"><?= htmlspecialchars($dec['reason']) ?></p>
+                    </div>
+                    <div class="pt-1.5 border-t border-slate-200/70 flex items-center justify-between gap-2">
+                        <span class="text-[10.5px] font-semibold text-slate-800 truncate" title="<?= htmlspecialchars($dec['action']) ?>">
+                            <i class="fa-solid fa-arrow-right text-[9px] text-orange-600 mr-1"></i><?= htmlspecialchars($dec['action']) ?>
+                        </span>
+                        <a href="<?= htmlspecialchars($dec['href']) ?>" class="px-2 py-0.5 rounded-md bg-white hover:bg-slate-900 text-slate-800 hover:text-white border border-slate-300 text-[10px] font-bold whitespace-nowrap transition shrink-0">
+                            <?= htmlspecialchars($dec['cta']) ?>
+                        </a>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- ======================================================================= -->
         <!-- 2. TOP METRIC ROW (6 UNIFIED KPI CARDS - BALANCED & HIGH-CONTRAST)     -->
@@ -799,8 +852,8 @@ $date_display    = !empty($tanggal_sekarang) ? $tanggal_sekarang : $beranda_data
                         <a href="dashboard.php?page=twin" class="text-[9.5px] font-bold text-orange-600 hover:underline flex items-center gap-1">
                             <span>Twin 3D &rarr;</span>
                         </a>
-                        <a href="dashboard.php?page=denah" class="text-[9.5px] font-bold text-[#0170b9] hover:underline flex items-center gap-1">
-                            <span>GIS Denah &rarr;</span>
+                        <a href="dashboard.php?page=yard" class="text-[9.5px] font-bold text-[#0170b9] hover:underline flex items-center gap-1">
+                            <span>Yard Matrix &rarr;</span>
                         </a>
                     </div>
                 </div>

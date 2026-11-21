@@ -8,6 +8,15 @@
 // =============================================================================
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/../api/preadvice_helper.php';
+if (isset($pdo) && $pdo instanceof PDO) {
+    ensure_integration_schema($pdo);
+}
+$sys_th = isset($pdo) ? cidp_get_thresholds($pdo) : [
+    'vgm_tolerance_pct' => 5.0, 'vgm_max_gross_kg' => 35000.0, 'anpr_min_confidence' => 85,
+    'reefer_max_deviation_c' => 2.0, 'reefer_thermal_trip_c' => 85.0, 'free_dwell_days' => 3,
+    'rail_expected_axles' => 126, 'ats_switch_max_sec' => 10.0, 'vgm_zero_offset_kg' => 0.0
+];
 
 // Ambil info user yang sedang login dari session
 $cur_nama  = (!empty($_SESSION['nama']) && $_SESSION['nama'] !== 'Guest') ? $_SESSION['nama'] : 'Zulfikar Jafarudin Fatah';
@@ -70,8 +79,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         ];
     } elseif ($action === 'save_terminal_params') {
         $terminal_name = trim($_POST['terminal_name'] ?? 'Conclusion Intermodal Dry Port (CIDP)');
-        $dwell_target  = floatval($_POST['target_dwell'] ?? 3.0);
+        $dwell_target  = max(1, (int)round(floatval($_POST['target_dwell'] ?? 3)));
         $reefer_plugs  = intval($_POST['reefer_plugs'] ?? 300);
+        $hotspot_limit = floatval($_POST['reefer_hotspot_threshold'] ?? 85.0);
+        $vgm_tol_pct   = max(0.5, floatval($_POST['vgm_tolerance_pct'] ?? 5.0));
+
+        if (isset($pdo)) {
+            $sys_th = cidp_save_thresholds($pdo, [
+                'free_dwell_days'       => $dwell_target,
+                'reefer_thermal_trip_c' => $hotspot_limit,
+                'vgm_tolerance_pct'     => $vgm_tol_pct,
+            ]);
+        }
 
         if (isset($_POST['system_language']) && in_array($_POST['system_language'], ['id', 'en'])) {
             $_SESSION['lang'] = $_POST['system_language'];
@@ -81,8 +100,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
         $action_alert = [
             'type'  => 'success',
-            'title' => 'Parameter Fasilitas Terminal Berhasil Diperbarui',
-            'msg'   => "Konfigurasi fasilitas <strong>$terminal_name</strong> tersimpan. Target dwell time: <strong>{$dwell_target} hari</strong>, Titik steker reefer: <strong>{$reefer_plugs} plugs</strong> telah disinkronkan ke seluruh modul operasional."
+            'title' => 'Parameter Aturan & Threshold Tersimpan ke Database',
+            'msg'   => "Aturan aktif diperbarui di <code>system_thresholds</code>: Free Dwell <strong>{$dwell_target} hari</strong>, Trip Termal HW-16 <strong>{$hotspot_limit}°C</strong>, Toleransi SOLAS VGM <strong>±{$vgm_tol_pct}%</strong> — langsung dibaca oleh mesin keputusan sensor."
         ];
     } elseif ($action === 'add_user') {
         $new_name  = trim($_POST['user_name'] ?? '');
@@ -141,14 +160,24 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
             'msg'   => "Seluruh tabel basis data <code>cidp_yms</code> telah dioptimasi, indeks B-Tree dikalibrasi ulang, dan ruang penyimpanan dibebaskan secara otomatis."
         ];
     } elseif ($action === 'save_hardware_calibration') {
-        $anpr_conf   = intval($_POST['anpr_confidence'] ?? 95);
-        $ats_timer   = floatval($_POST['ats_timer'] ?? 8.0);
+        $anpr_conf   = intval($_POST['anpr_confidence'] ?? 85);
+        $ats_timer   = floatval($_POST['ats_timer'] ?? 10.0);
         $vgm_offset  = floatval($_POST['vgm_zero_offset'] ?? 0.0);
+        $rf_dev_c    = max(0.5, floatval($_POST['reefer_max_deviation_c'] ?? 2.0));
+
+        if (isset($pdo)) {
+            $sys_th = cidp_save_thresholds($pdo, [
+                'anpr_min_confidence'    => $anpr_conf,
+                'ats_switch_max_sec'     => $ats_timer,
+                'vgm_zero_offset_kg'     => $vgm_offset,
+                'reefer_max_deviation_c' => $rf_dev_c,
+            ]);
+        }
 
         $action_alert = [
             'type'  => 'success',
-            'title' => 'Kalibrasi Hardware & Sensor Lapangan Berhasil Disimpan',
-            'msg'   => "Ambang batas ANPR OCR: <strong>{$anpr_conf}%</strong>, Jembatan timbang Zero Offset: <strong>{$vgm_offset} kg</strong>, dan Timer ATS Genset: <strong>{$ats_timer}s</strong> telah diperbarui pada gateway Edge PC Advantech ARK-3532."
+            'title' => 'Kalibrasi Hardware & Rule Alarm Disimpan ke Database',
+            'msg'   => "Parameter aktif di <code>system_thresholds</code>: ANPR OCR Min <strong>{$anpr_conf}%</strong>, VGM Offset <strong>{$vgm_offset} kg</strong>, Deviasi Suhu Reefer Maks <strong>±{$rf_dev_c}°C</strong>, Timer ATS <strong>{$ats_timer}s</strong> — langsung diterapkan pada <code>api/ingest_event.php</code>."
         ];
     }
 }
@@ -431,9 +460,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
                         <span class="text-[10.5px] uppercase font-bold text-gray-400 block">Jalur Gerbang (Gate Lanes)</span>
                         <div class="flex items-baseline space-x-1 mt-1">
-                            <input type="text" name="gate_lanes" value="2 In / 2 Out" class="w-24 font-black text-lg text-gray-800 bg-white border border-gray-300 rounded px-1.5 py-0.5">
+                            <input type="text" name="gate_lanes" value="6 In / 4 Out" class="w-28 font-black text-lg text-gray-800 bg-white border border-gray-300 rounded px-1.5 py-0.5">
                         </div>
-                        <span class="text-[10px] text-gray-500 mt-1 block">OCR Portal + Jembatan Timbang</span>
+                        <span class="text-[10px] text-gray-500 mt-1 block">6 Portal OCR/ANPR + 4 Timbang 80T + 4 Outbound</span>
                     </div>
 
                     <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
@@ -461,12 +490,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Maksimal Dwell Time Peti Kemas:</label>
+                        <label class="block font-bold text-gray-700 mb-1">Masa Bebas Penumpukan (Free Dwell Time):</label>
                         <div class="flex">
-                            <input type="number" step="0.1" name="target_dwell" value="3.0" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg font-bold text-gray-800 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0170b9] outline-none">
+                            <input type="number" step="1" min="1" name="target_dwell" value="<?= htmlspecialchars((string)$sys_th['free_dwell_days']) ?>" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg font-bold text-gray-800 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0170b9] outline-none">
                             <span class="bg-gray-100 border border-l-0 border-gray-300 px-3 py-2 text-gray-600 font-bold rounded-r-lg">Hari</span>
                         </div>
-                        <span class="text-[10px] text-gray-400 mt-1 block">Standar Kemenhub: &lt; 3.0 Hari</span>
+                        <span class="text-[10px] text-gray-400 mt-1 block">Pemicu Rekomendasi Demurrage di Control Tower</span>
                     </div>
 
                     <div>
@@ -481,19 +510,19 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                     <div>
                         <label class="block font-bold text-gray-700 mb-1">Ambang Alarm Overheat Kompresor:</label>
                         <div class="flex">
-                            <input type="number" step="0.1" name="reefer_hotspot_threshold" value="85.0" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg font-bold text-red-600 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-red-500 outline-none">
+                            <input type="number" step="0.1" name="reefer_hotspot_threshold" value="<?= htmlspecialchars((string)$sys_th['reefer_thermal_trip_c']) ?>" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg font-bold text-red-600 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-red-500 outline-none">
                             <span class="bg-gray-100 border border-l-0 border-gray-300 px-3 py-2 text-gray-600 font-bold rounded-r-lg">°C</span>
                         </div>
                         <span class="text-[10px] text-gray-400 mt-1 block">Kamera Termal HW-16 Trip Limit</span>
                     </div>
 
                     <div>
-                        <label class="block font-bold text-gray-700 mb-1">Toleransi Berat SOLAS VGM:</label>
+                        <label class="block font-bold text-gray-700 mb-1">Toleransi Berat SOLAS VGM (%):</label>
                         <div class="flex">
-                            <input type="number" name="vgm_tolerance" value="500" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg font-bold text-gray-800 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0170b9] outline-none">
-                            <span class="bg-gray-100 border border-l-0 border-gray-300 px-3 py-2 text-gray-600 font-bold rounded-r-lg">± Kg</span>
+                            <input type="number" step="0.5" min="1" max="20" name="vgm_tolerance_pct" value="<?= htmlspecialchars((string)$sys_th['vgm_tolerance_pct']) ?>" class="w-full px-3 py-2 border border-gray-300 rounded-l-lg font-bold text-gray-800 bg-gray-50 focus:bg-white focus:ring-2 focus:ring-[#0170b9] outline-none">
+                            <span class="bg-gray-100 border border-l-0 border-gray-300 px-3 py-2 text-gray-600 font-bold rounded-r-lg">± %</span>
                         </div>
-                        <span class="text-[10px] text-gray-400 mt-1 block">Regulasi IMO MSC.1/Circ.1475</span>
+                        <span class="text-[10px] text-gray-400 mt-1 block">Dipakai rule VGM di ingest_event.php</span>
                     </div>
                 </div>
 
@@ -804,9 +833,9 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         <h3 class="font-bold text-base text-gray-900">Kalibrasi Sensor &amp; Perangkat IoT</h3>
                         <p class="text-xs text-gray-500 mt-0.5">Ambang OCR, zero offset timbangan &amp; saklar ATS.</p>
                     </div>
-                    <a href="dashboard.php?page=denah" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition flex items-center space-x-1">
-                        <i class="fa-solid fa-map-location-dot"></i>
-                        <span>Buka Peta Denah 35 Ha</span>
+                    <a href="dashboard.php?page=twin" class="px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 rounded-lg text-xs font-bold transition flex items-center space-x-1">
+                        <i class="fa-solid fa-cubes"></i>
+                        <span>Lihat Kawasan di Digital Twin 3D</span>
                     </a>
                 </div>
 
@@ -820,8 +849,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         <div>
                             <label class="block font-semibold text-gray-600 mb-1">Ambang Keyakinan OCR (Confidence %):</label>
                             <div class="flex items-center space-x-2">
-                                <input type="range" min="80" max="99" value="95" name="anpr_confidence" oninput="this.nextElementSibling.innerText = this.value + '%'" class="w-full">
-                                <span class="font-mono font-bold text-blue-700">95%</span>
+                                <input type="range" min="80" max="99" value="<?= htmlspecialchars((string)$sys_th['anpr_min_confidence']) ?>" name="anpr_confidence" oninput="this.nextElementSibling.innerText = this.value + '%'" class="w-full">
+                                <span class="font-mono font-bold text-blue-700"><?= htmlspecialchars((string)$sys_th['anpr_min_confidence']) ?>%</span>
                             </div>
                         </div>
                         <div>
@@ -838,7 +867,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         </div>
                         <div>
                             <label class="block font-semibold text-gray-600 mb-1">Zero Tare Calibration Offset (Kg):</label>
-                            <input type="number" step="0.1" name="vgm_zero_offset" value="0.0" class="w-full p-2 bg-white border border-gray-300 rounded font-mono font-bold text-gray-900">
+                            <input type="number" step="0.1" name="vgm_zero_offset" value="<?= htmlspecialchars((string)$sys_th['vgm_zero_offset_kg']) ?>" class="w-full p-2 bg-white border border-gray-300 rounded font-mono font-bold text-gray-900">
                         </div>
                         <div>
                             <label class="block font-semibold text-gray-600 mb-1">Sertifikasi Kalibrasi Badan Metrologi:</label>
@@ -846,20 +875,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
                         </div>
                     </div>
 
-                    <!-- ATS Genset Shelter -->
+                    <!-- ATS Genset Shelter & Reefer Threshold -->
                     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                         <div class="flex items-center space-x-2">
                             <span class="w-7 h-7 rounded-lg bg-amber-100 text-amber-800 flex items-center justify-center text-xs font-bold">HW-14</span>
-                            <span class="font-bold text-gray-900">ATS Genset Shelter 1.500 kVA</span>
+                            <span class="font-bold text-gray-900">ATS Genset &amp; Deviasi Reefer</span>
                         </div>
                         <div>
-                            <label class="block font-semibold text-gray-600 mb-1">Maksimal Waktu Alih Beban Daya (Detik):</label>
-                            <input type="number" step="0.1" name="ats_timer" value="8.0" class="w-full p-2 bg-white border border-gray-300 rounded font-mono font-bold text-amber-700">
+                            <label class="block font-semibold text-gray-600 mb-1">Maksimal Waktu Alih Daya ATS (Detik):</label>
+                            <input type="number" step="0.1" name="ats_timer" value="<?= htmlspecialchars((string)$sys_th['ats_switch_max_sec']) ?>" class="w-full p-2 bg-white border border-gray-300 rounded font-mono font-bold text-amber-700">
                             <span class="text-[10px] text-gray-400 mt-0.5 block">Standar WHO Cold Chain: &lt; 10 Detik</span>
                         </div>
                         <div>
-                            <label class="block font-semibold text-gray-600 mb-1">Jadwal Uji Pemanasan Mandiri:</label>
-                            <input type="text" value="Setiap Senin Pukul 08:00 WIB" class="w-full p-2 bg-white border border-gray-200 rounded text-gray-700" readonly>
+                            <label class="block font-semibold text-gray-600 mb-1">Batas Alarm Deviasi Suhu Reefer (± °C):</label>
+                            <input type="number" step="0.5" min="0.5" max="10" name="reefer_max_deviation_c" value="<?= htmlspecialchars((string)$sys_th['reefer_max_deviation_c']) ?>" class="w-full p-2 bg-white border border-gray-300 rounded font-mono font-bold text-cyan-700">
+                            <span class="text-[10px] text-gray-400 mt-0.5 block">Dipakai real-time oleh sensor LoRaWAN</span>
                         </div>
                     </div>
                 </div>
@@ -968,7 +998,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
     <!-- TAB 6: PENGATURAN BAHASA & LOKALISASI ANTARMUKA (LANGUAGE PREFERENCES)   -->
     <!-- ======================================================================= -->
     <div id="tab-language" class="settings-tab-content hidden space-y-6">
-        <form method="POST" action="dashboard.php?page=settings&tab=language" class="space-y-6">
+        <form method="POST" action="dashboard.php?page=settings&tab=language" data-full-reload="1" data-confirm="Terapkan bahasa antarmuka baru untuk seluruh modul sistem?" data-confirm-title="Konfirmasi Ubah Bahasa" data-confirm-tone="primary" class="space-y-6">
             <input type="hidden" name="action_type" value="save_language">
 
             <!-- Card Utama: Pilihan Bahasa Sistem -->
@@ -1196,15 +1226,25 @@ function closeAddUserModal() {
     document.getElementById('modalAddUser').classList.add('hidden');
 }
 
-function sendPasswordResetLink(email, name) {
+async function sendPasswordResetLink(email, name) {
     const token = Math.random().toString(36).substring(2, 10).toUpperCase();
     const resetUrl = window.location.origin + window.location.pathname.replace(/\/[^\/]*$/, '/') + 'login.php?action=reset&token=' + token;
     
-    if (confirm("Kirim Tautan Reset Password?\n\nPengguna: " + name + " (" + email + ")\nToken Keamanan: " + token + "\n\nKlik OK untuk menyalin tautan reset password ke clipboard.")) {
+    const ok = window.cidpConfirm
+        ? await window.cidpConfirm({
+            title: 'Konfirmasi Kirim Tautan Reset Password',
+            target: `${name} (${email})`,
+            message: `Buat tautan reset password dengan Token Keamanan ${token} dan salin ke clipboard?`,
+            confirmText: 'Ya, Buat & Salin',
+            cancelText: 'Tidak, Batal',
+            tone: 'warning'
+        })
+        : true;
+    if (ok) {
         navigator.clipboard.writeText(resetUrl).then(() => {
-            alert("✅ Tautan reset password berhasil disalin ke clipboard:\n" + resetUrl);
+            if (window.cidpToast) window.cidpToast('Tautan Reset Disalin', `Token ${token} disalin ke clipboard.`, 'success');
         }).catch(() => {
-            alert("Tautan reset password:\n" + resetUrl);
+            if (window.cidpToast) window.cidpToast('Tautan Reset Siap', resetUrl, 'info');
         });
     }
 }

@@ -10,6 +10,7 @@ header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
 
 require_once __DIR__ . '/../connection.php';
+require_once __DIR__ . '/gate_lanes_helper.php';
 
 $db = $pdo;
 if (!$db instanceof PDO) {
@@ -132,8 +133,11 @@ if ($c_stat === 'expected' || $blk === 'OUTSIDE' || $c_stat === 'scheduled') {
     $badge_color = 'slate';
     $badge_label = 'SCHEDULED (LUAR)';
 } elseif ($c_stat === 'in_transit' || $blk === 'GATE') {
-    $location_title = 'Gerbang Utama (Gate Inbound Lane 1)';
-    $location_detail = 'Sedang proses penimbangan Weighbridge 80T & verifikasi RFID/OCR';
+    $catalog = cidp_gate_lane_catalog();
+    $laneCode = cidp_normalize_gate_lane($res_truck['gate_lane'] ?? null, 'IN');
+    $laneLabel = $catalog[$laneCode]['name'] ?? "Gate-In ({$laneCode})";
+    $location_title = "Gerbang Utama ({$laneLabel})";
+    $location_detail = 'Sedang proses penimbangan Weighbridge 80T & verifikasi RFID/OCR (Plaza 6-In / 4-Out)';
     $zone_code = 'Z1';
     $zone_name = 'Zona Gate & Buffer Truk';
     $badge_color = 'amber';
@@ -160,8 +164,11 @@ if ($c_stat === 'expected' || $blk === 'OUTSIDE' || $c_stat === 'scheduled') {
     $badge_color = 'emerald';
     $badge_label = 'ON RAIL SIDING';
 } elseif ($c_stat === 'gate_out') {
-    $location_title = 'Gerbang Keluar (Gate Outbound)';
-    $location_detail = 'Pemeriksaan palang barrier selesai, telah meninggalkan kawasan terminal';
+    $catalog = cidp_gate_lane_catalog();
+    $outCode = cidp_normalize_gate_lane($res_truck['gate_out_lane'] ?? null, 'OUT');
+    $outLabel = $catalog[$outCode]['name'] ?? "Gate-Out ({$outCode})";
+    $location_title = "Gerbang Keluar ({$outLabel})";
+    $location_detail = 'Pemeriksaan palang barrier & interlock E-Seal selesai, telah meninggalkan kawasan terminal';
     $zone_code = 'GATE_OUT';
     $zone_name = 'Keluar Terminal';
     $badge_color = 'emerald';

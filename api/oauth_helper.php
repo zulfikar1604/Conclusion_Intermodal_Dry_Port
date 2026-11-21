@@ -45,7 +45,7 @@ function oauth_registered_clients(): array {
             'name'          => 'Kalmar Telemetry, DGPS RTK & Siding KA Gateway',
             'grant_type'    => 'client_credentials',
             'zone'          => 'YMS • Yard, Reefer & Rail',
-            'scopes'        => ['ingest:equipment', 'yard:stack', 'yard:relocate', 'reefer:telemetry', 'rail:load'],
+            'scopes'        => ['ingest:equipment', 'yard:stack', 'yard:relocate', 'reefer:telemetry', 'rail:load', 'rail:axle', 'rail:unload'],
             'endpoint'      => 'POST /api/ingest_event.php'
         ],
         'cidp-edge-cfs-wms' => [
@@ -54,7 +54,7 @@ function oauth_registered_clients(): array {
             'name'          => 'Scanner GS1 Honeywell & Timbangan Palet 3T CFS',
             'grant_type'    => 'client_credentials',
             'zone'          => 'WMS • Gudang Konsolidasi CFS',
-            'scopes'        => ['cfs:strip', 'cfs:pallet'],
+            'scopes'        => ['cfs:strip', 'cfs:pallet', 'aidc:scan'],
             'endpoint'      => 'POST /api/ingest_event.php'
         ],
         'djbc-ceisa40-h2h' => [
@@ -63,7 +63,7 @@ function oauth_registered_clients(): array {
             'name'          => 'Webhook CEISA 4.0 DJBC (Bea Cukai) & Gantry X-Ray',
             'grant_type'    => 'client_credentials',
             'zone'          => 'CUSTOMS • Kepabeanan DJBC',
-            'scopes'        => ['customs:sppb:write', 'customs:inspect'],
+            'scopes'        => ['customs:sppb:write', 'customs:inspect', 'customs:xray', 'customs:eseal'],
             'endpoint'      => 'POST /api/ingest_event.php (CUSTOMS_CEISA)'
         ],
         'erp-odoo-finance-sync' => [
@@ -84,9 +84,9 @@ function oauth_registered_clients(): array {
             'scopes'        => [
                 'ingest:gate', 'ingest:weighbridge', 'gate:out',
                 'ingest:equipment', 'yard:stack', 'yard:relocate',
-                'cfs:strip', 'cfs:pallet',
-                'customs:sppb:write', 'customs:inspect',
-                'reefer:telemetry', 'rail:load',
+                'cfs:strip', 'cfs:pallet', 'aidc:scan',
+                'customs:sppb:write', 'customs:inspect', 'customs:xray', 'customs:eseal',
+                'reefer:telemetry', 'rail:load', 'rail:axle', 'rail:unload',
                 'billing:settle', 'erp:invoice:sync',
                 'dashboard:read', 'simulator:control'
             ],
@@ -111,11 +111,16 @@ function oauth_event_scope_map(): array {
         'CFS_PALLET_SCAN'        => ['scope' => 'cfs:pallet',         'default_client' => 'cidp-edge-cfs-wms'],
         'CFS_STRIPPING_COMPLETE' => ['scope' => 'cfs:strip',          'default_client' => 'cidp-edge-cfs-wms'],
         'CFS_PALLET_DISPATCH'    => ['scope' => 'cfs:pallet',         'default_client' => 'cidp-edge-cfs-wms'],
+        'HANDHELD_AIDC_SCAN'     => ['scope' => 'aidc:scan',          'default_client' => 'cidp-edge-cfs-wms'],
         'CUSTOMS_INSPECTION'     => ['scope' => 'customs:inspect',    'default_client' => 'djbc-ceisa40-h2h'],
         'CUSTOMS_CEISA'          => ['scope' => 'customs:sppb:write', 'default_client' => 'djbc-ceisa40-h2h'],
+        'XRAY_SCAN_RESULT'       => ['scope' => 'customs:xray',       'default_client' => 'djbc-ceisa40-h2h'],
+        'ESEAL_TELEMETRY'        => ['scope' => 'customs:eseal',      'default_client' => 'djbc-ceisa40-h2h'],
         'REEFER_PLUGIN'          => ['scope' => 'reefer:telemetry',   'default_client' => 'cidp-edge-yard-fleet'],
         'REEFER_TELEMETRY'       => ['scope' => 'reefer:telemetry',   'default_client' => 'cidp-edge-yard-fleet'],
         'RAIL_LOADING'           => ['scope' => 'rail:load',          'default_client' => 'cidp-edge-yard-fleet'],
+        'RAIL_UNLOADING'         => ['scope' => 'rail:unload',        'default_client' => 'cidp-edge-yard-fleet'],
+        'RAIL_AXLE_COUNTER'      => ['scope' => 'rail:axle',          'default_client' => 'cidp-edge-yard-fleet'],
         'PAYMENT_SETTLED'        => ['scope' => 'billing:settle',     'default_client' => 'erp-odoo-finance-sync'],
     ];
 }

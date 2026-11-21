@@ -291,12 +291,12 @@ $billing_info = [
                                     <a href="dashboard.php?page=kontainer&search=<?= urlencode($inv['ctr']) ?>" class="w-6 h-6 rounded-md bg-slate-100 text-slate-700 hover:bg-slate-800 hover:text-white transition-colors flex items-center justify-center shadow-2xs" title="Lacak Kontainer di Tracking Box">
                                         <i class="fa-solid fa-boxes-stacked text-[10px]"></i>
                                     </a>
-                                    <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($inv['ctr']) ?>" class="w-6 h-6 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-colors flex items-center justify-center shadow-2xs" title="Lihat di Simulasi 3D">
+                                    <a href="dashboard.php?page=twin&focus_box=<?= urlencode($inv['ctr']) ?>" class="w-6 h-6 rounded-md bg-amber-50 text-amber-700 hover:bg-amber-600 hover:text-white transition-colors flex items-center justify-center shadow-2xs" title="Sorot Posisi Fisik di Digital Twin 3D">
                                         <i class="fa-solid fa-cube text-[10px]"></i>
                                     </a>
                                     <?php endif; ?>
                                     <?php if ($inv['status'] !== 'Lunas'): ?>
-                                    <form method="POST" onsubmit="return confirm('Konfirmasi pelunasan faktur <?= $inv['no'] ?>? Status komersial untuk Gate Out akan otomatis disetujui.');" class="inline">
+                                    <form method="POST" data-confirm="Konfirmasi pelunasan faktur <?= htmlspecialchars($inv['no']) ?>? Status komersial untuk Gate-Out akan otomatis disetujui." data-confirm-title="Konfirmasi Pelunasan Billing" data-confirm-target="<?= htmlspecialchars($inv['no']) ?>" data-confirm-tone="primary" class="inline">
                                         <input type="hidden" name="billing_action" value="pay_invoice">
                                         <input type="hidden" name="invoice_number" value="<?= $inv['no'] ?>">
                                         <button type="submit" class="w-6 h-6 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-600 hover:text-white transition-colors flex items-center justify-center shadow-2xs cursor-pointer" title="Konfirmasi Bayar (Set LUNAS)">

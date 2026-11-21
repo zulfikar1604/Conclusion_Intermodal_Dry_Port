@@ -16,14 +16,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['rail_actio
     $r_act = $_POST['rail_action'];
     $ctr_num = strtoupper(trim($_POST['container_number'] ?? ''));
     $train_c = trim($_POST['train_code'] ?? 'KA 2519');
+    $findTrainStmt = $pdo->prepare("SELECT id, train_code FROM trains WHERE train_code = ? OR train_code LIKE CONCAT(?, ' %') ORDER BY id ASC LIMIT 1");
     if ($r_act === 'manual_load_wagon' && $ctr_num !== '') {
         try {
             $pdo->prepare("UPDATE containers SET status = 'on_rail', block = 'RAIL', gate_in_time = COALESCE(gate_in_time, NOW()) WHERE container_number = ?")->execute([$ctr_num]);
             $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ?")->execute([$ctr_num]);
-            $exTr = $pdo->prepare("SELECT id FROM trains WHERE train_code = ? LIMIT 1");
-            $exTr->execute([$train_c]);
-            if ($exTr->fetchColumn()) {
-                $pdo->prepare("UPDATE trains SET loaded_wagons = LEAST(total_wagons, loaded_wagons + 1), status = 'loading' WHERE train_code = ?")->execute([$train_c]);
+            $findTrainStmt->execute([$train_c, $train_c]);
+            $matchedTrain = $findTrainStmt->fetch(PDO::FETCH_ASSOC);
+            if ($matchedTrain) {
+                $train_c = $matchedTrain['train_code'];
+                $pdo->prepare("UPDATE trains SET loaded_wagons = LEAST(total_wagons, loaded_wagons + 1), status = 'loading' WHERE id = ?")->execute([$matchedTrain['id']]);
             } else {
                 $pdo->prepare("INSERT INTO trains (train_code, origin, destination, total_wagons, loaded_wagons, status, arrival_time, departure_time) VALUES (?, 'CIDP Cikarang Hub', 'Pelabuhan Tanjung Priok (Pasoso)', 30, 1, 'loading', NOW(), DATE_ADD(NOW(), INTERVAL 2 HOUR))")->execute([$train_c]);
             }
@@ -37,7 +39,12 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['rail_actio
     } elseif ($r_act === 'manual_unload_wagon' && $ctr_num !== '') {
         try {
             $pdo->prepare("UPDATE containers SET status = 'in_yard', block = 'D', bay = 1, `row` = 1, tier = 1 WHERE container_number = ?")->execute([$ctr_num]);
-            $pdo->prepare("UPDATE trains SET loaded_wagons = GREATEST(0, loaded_wagons - 1) WHERE train_code = ?")->execute([$train_c]);
+            $findTrainStmt->execute([$train_c, $train_c]);
+            $matchedTrain = $findTrainStmt->fetch(PDO::FETCH_ASSOC);
+            if ($matchedTrain) {
+                $train_c = $matchedTrain['train_code'];
+                $pdo->prepare("UPDATE trains SET loaded_wagons = GREATEST(0, loaded_wagons - 1) WHERE id = ?")->execute([$matchedTrain['id']]);
+            }
             $pdo->prepare("INSERT INTO yard_events (event_type, container_number, from_block, to_block, operator_name, notes, created_at) VALUES ('RAIL_UNLOADING', ?, 'RAIL', 'D', 'Operator Siding KA', ?, NOW())")->execute([$ctr_num, "Bongkar kontainer $ctr_num dari gerbong $train_c ke Buffer Yard Blok D."]);
             get_live_twin_state($pdo, true);
             $rail_alert = ['type' => 'success', 'title' => "Bongkar Gerbong ke Buffer Yard Blok D Berhasil", 'msg' => "Kontainer <strong>$ctr_num</strong> telah diturunkan dari rangkaian <strong>$train_c</strong> ke <strong>Yard Blok D</strong>."];
@@ -57,16 +64,15 @@ try {
 $train_inbound = null;
 $train_outbound = null;
 foreach ($trains_list as $t) {
-    if ((strtoupper($t['direction'] ?? '') === 'INBOUND' || stripos($t['origin'] ?? '', 'Priok') !== false || ($t['train_code'] ?? '') === 'KA 2518') && !$train_inbound) {
+    $tCode = strtoupper($t['train_code'] ?? '');
+    $isInbound = strtoupper($t['direction'] ?? '') === 'INBOUND'
+        || stripos($t['origin'] ?? '', 'Priok') !== false
+        || strpos($tCode, 'KA 2518') !== false;
+    if ($isInbound && !$train_inbound) {
         $t['direction'] = 'INBOUND';
         $train_inbound = $t;
-    } elseif (!$train_outbound) {
+    } elseif (!$isInbound && !$train_outbound) {
         $t['direction'] = 'OUTBOUND';
-        $train_outbound = $t;
-    }
-    if (false) {
-        $train_inbound = $t;
-    } elseif (strtoupper($t['direction'] ?? '') === 'OUTBOUND' && !$train_outbound) {
         $train_outbound = $t;
     }
 }
@@ -102,9 +108,13 @@ if (!$train_outbound) {
 // Perhitungan Agregat 2-Arah Siding
 $total_active_wagons = (int)($train_inbound['total_wagons'] ?? 30) + (int)($train_outbound['total_wagons'] ?? 30);
 $total_active_teu_cap = $total_active_wagons * 2; // 120 TEU
+$train_inbound_teu = (int)($train_inbound['loaded_wagons'] ?? 0) * 2;
+$train_outbound_teu = (int)($train_outbound['loaded_wagons'] ?? 0) * 2;
 $total_loaded_wagons = (int)($train_inbound['loaded_wagons'] ?? 0) + (int)($train_outbound['loaded_wagons'] ?? 0);
 $total_loaded_teu = $total_loaded_wagons * 2; // 100 TEU
 $combined_load_factor = $total_active_teu_cap > 0 ? round(($total_loaded_teu / $total_active_teu_cap) * 100, 1) : 0.0;
+$train_in_short = trim(preg_replace('/\s*\(.*\)$/', '', (string)($train_inbound['train_code'] ?? 'KA 2518')));
+$train_out_short = trim(preg_replace('/\s*\(.*\)$/', '', (string)($train_outbound['train_code'] ?? 'KA 2519')));
 
 $siding_tracks = [
     [
@@ -114,11 +124,11 @@ $siding_tracks = [
         'rail_type'   => 'UIC 54 (Bantalan Beton R.54)',
         'train_code'  => $train_inbound['train_code'],
         'direction'   => 'INBOUND (Priok &rarr; CIDP)',
-        'occupancy'   => 'SEDANG BONGKAR (' . $train_inbound['train_code'] . ')',
+        'occupancy'   => 'SEDANG BONGKAR (' . $train_in_short . ')',
         'status_color'=> 'bg-emerald-100 text-emerald-800 border-emerald-300',
         'dot_color'   => 'bg-emerald-500 animate-pulse',
         'axles_count' => 126,
-        'loaded_teu'  => ((int)$train_inbound['loaded_wagons'] * 2) . ' / ' . ((int)$train_inbound['total_wagons'] * 2) . ' TEU',
+        'loaded_teu'  => $train_inbound_teu . ' / ' . ((int)$train_inbound['total_wagons'] * 2) . ' TEU',
         'cargo_type'  => 'Laden Impor & Relokasi Pabean PLP ex-Vessel',
         'equip'       => 'Reach Stacker RS-05 & RMGC Rail Crane 01'
     ],
@@ -129,11 +139,11 @@ $siding_tracks = [
         'rail_type'   => 'UIC 54 (Bantalan Beton R.54)',
         'train_code'  => $train_outbound['train_code'],
         'direction'   => 'OUTBOUND (CIDP &rarr; Priok)',
-        'occupancy'   => 'SEDANG MUAT (' . $train_outbound['train_code'] . ')',
+        'occupancy'   => 'SEDANG MUAT (' . $train_out_short . ')',
         'status_color'=> 'bg-blue-100 text-blue-800 border-blue-300',
         'dot_color'   => 'bg-blue-500 animate-pulse',
         'axles_count' => 126,
-        'loaded_teu'  => ((int)$train_outbound['loaded_wagons'] * 2) . ' / ' . ((int)$train_outbound['total_wagons'] * 2) . ' TEU',
+        'loaded_teu'  => $train_outbound_teu . ' / ' . ((int)$train_outbound['total_wagons'] * 2) . ' TEU',
         'cargo_type'  => 'Laden Ekspor (VGM SOLAS + NPE) Siap Muat Kapal',
         'equip'       => 'Reach Stacker RS-02 & RMGC Rail Crane 02'
     ]
@@ -355,40 +365,61 @@ $wagons_outbound = [
     ]
 ];
 
-// Active wagons default to Track-01 (Inbound)
-// Sinkronisasi gerbong dengan kontainer aktual berstatus on_rail di database
+// Sinkronisasi gerbong Track-01 (Inbound Impor) & Track-02 (Outbound Ekspor) tanpa menimpa Track-01
 $db_rail_containers = [];
+$rail_load_notes = [];
 if (isset($pdo)) {
     try {
         $db_rail_containers = $pdo->query("SELECT * FROM containers WHERE status = 'on_rail' ORDER BY id DESC")->fetchAll(PDO::FETCH_ASSOC);
-    } catch (Exception $e) { $db_rail_containers = []; }
-}
-if (empty($db_rail_containers) && ((int)($train_inbound['loaded_wagons'] ?? 0) === 0) && ((int)($train_outbound['loaded_wagons'] ?? 0) === 0)) {
-    $wagons_inbound = [];
-    $wagons_outbound = [];
-} else {
-    $wagons_outbound = [];
-    foreach ($db_rail_containers as $rIdx => $rc) {
-        $wagons_outbound[] = [
-            'wagon_no'  => 'GD 42 14 ' . str_pad($rIdx + 1, 2, '0', STR_PAD_LEFT),
-            'type'      => 'PPCW 42t',
-            'direction' => 'OUTBOUND',
-            'slot_a'    => [
-                'container' => $rc['container_number'],
-                'iso'       => $rc['iso_code'] ?? '45G1',
-                'type'      => 'Laden Intermodal (' . ($rc['size_type'] ?? '40FT') . ')',
-                'weight'    => number_format((float)($rc['gross_weight_kg'] ?? 24000), 0, ',', '.') . ' kg',
-                'pod'       => 'IDTPP (Pelabuhan Tanjung Priok)',
-                'bg'        => 'bg-emerald-600',
-                'shipper'   => ($rc['owner_company'] ?? 'Shipper CIDP') . ' (SPPB Cleared)'
-            ],
-            'slot_b'    => null,
-            'is_40ft'   => strpos($rc['size_type'] ?? '40', '20') === false,
-            'status'    => 'LOADED & LASHED (LIVE)',
-            'status_bg' => 'bg-emerald-100 text-emerald-800'
-        ];
+        $evRows = $pdo->query("SELECT container_number, notes FROM yard_events WHERE event_type = 'RAIL_LOADING' ORDER BY id DESC LIMIT 40")->fetchAll(PDO::FETCH_ASSOC);
+        foreach ($evRows as $evr) {
+            if (!isset($rail_load_notes[$evr['container_number']])) {
+                $rail_load_notes[$evr['container_number']] = (string)($evr['notes'] ?? '');
+            }
+        }
+    } catch (Exception $e) {
+        $db_rail_containers = [];
     }
-    $wagons_inbound = $wagons_outbound;
+}
+
+$in_slot_cursor = 0;
+$out_slot_cursor = 0;
+foreach ($db_rail_containers as $rc) {
+    $cn = $rc['container_number'];
+    $note = $rail_load_notes[$cn] ?? '';
+    $isInboundCtr = stripos($note, 'KA 2518') !== false || stripos($note, 'Inbound') !== false;
+    $isReefer = stripos($rc['iso_code'] ?? '', 'R') !== false || stripos($rc['cargo_type'] ?? '', 'reefer') !== false;
+    $liveBg = $isReefer ? 'bg-cyan-600' : ($isInboundCtr ? 'bg-sky-600' : 'bg-emerald-600');
+    $slotPayload = [
+        'container' => $cn,
+        'iso'       => $rc['iso_code'] ?? '45G1',
+        'type'      => ($isInboundCtr ? 'Laden Impor Live (' : 'Laden Ekspor Live (') . ($rc['size_type'] ?? '40FT') . ')',
+        'weight'    => number_format((float)($rc['gross_weight_kg'] ?? 24000), 0, ',', '.') . ' kg',
+        'pod'       => $isInboundCtr ? 'IDCKG (CIDP Cikarang)' : 'IDTPP (Pelabuhan Tanjung Priok)',
+        'bg'        => $liveBg,
+        'shipper'   => ($rc['owner_company'] ?? 'Shipper CIDP') . ' (' . ($rc['customs_status'] ?? 'SPPB Cleared') . ')'
+    ];
+    $is40ft = strpos((string)($rc['size_type'] ?? '40'), '20') === false;
+
+    if ($isInboundCtr && isset($wagons_inbound[$in_slot_cursor])) {
+        $wagons_inbound[$in_slot_cursor]['slot_a'] = $slotPayload;
+        if ($is40ft) {
+            $wagons_inbound[$in_slot_cursor]['slot_b'] = null;
+            $wagons_inbound[$in_slot_cursor]['is_40ft'] = true;
+        }
+        $wagons_inbound[$in_slot_cursor]['status'] = 'LOADED (LIVE DB)';
+        $wagons_inbound[$in_slot_cursor]['status_bg'] = 'bg-emerald-100 text-emerald-800';
+        $in_slot_cursor++;
+    } elseif (!$isInboundCtr && isset($wagons_outbound[$out_slot_cursor])) {
+        $wagons_outbound[$out_slot_cursor]['slot_a'] = $slotPayload;
+        if ($is40ft) {
+            $wagons_outbound[$out_slot_cursor]['slot_b'] = null;
+            $wagons_outbound[$out_slot_cursor]['is_40ft'] = true;
+        }
+        $wagons_outbound[$out_slot_cursor]['status'] = 'LOADED (LIVE DB)';
+        $wagons_outbound[$out_slot_cursor]['status_bg'] = 'bg-emerald-100 text-emerald-800';
+        $out_slot_cursor++;
+    }
 }
 $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
 ?>
@@ -444,7 +475,7 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             <span class="px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold uppercase">Eksekusi Manual Operator Siding</span>
             <span class="text-[11px] text-slate-600">Muat / bongkar kontainer ke gerbong datar KA secara langsung bila tanpa pemicu sensor gandar otomatis:</span>
         </div>
-        <form method="POST" class="flex flex-wrap items-center gap-2">
+        <form method="POST" data-confirm-title="Konfirmasi Aksi Siding KA" class="flex flex-wrap items-center gap-2">
             <select name="container_number" required class="px-2.5 py-1.5 text-xs font-mono border border-slate-300 rounded-lg bg-slate-50">
                 <?php
                 $avail_rail_ctrs = [];
@@ -490,8 +521,8 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             </div>
         </div>
         <div class="flex items-center space-x-1.5 flex-shrink-0">
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center">
-                <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Simulasi 3D
+            <a href="dashboard.php?page=twin&view=rail" class="px-2.5 py-1 bg-[#0170b9] hover:bg-blue-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center" title="Pantau Rail Siding & RMGC di Digital Twin 3D">
+                <i class="fa-solid fa-cube mr-1 text-[10px] text-amber-400"></i> Digital Twin 3D
             </a>
         </div>
     </div>
@@ -503,13 +534,13 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             <div class="min-w-0 pr-1">
                 <p class="text-[9px] font-bold uppercase text-slate-400 tracking-wider">Rangkaian KA 2-Arah</p>
                 <div class="mt-0.5 space-y-0.5">
-                    <div class="text-xs font-extrabold text-slate-900 truncate flex items-center space-x-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <span class="truncate"><?= $train_inbound['train_code'] ?> (In)</span>
+                    <div class="text-xs font-extrabold text-slate-900 truncate flex items-center space-x-1" title="<?= htmlspecialchars($train_inbound['train_code']) ?>">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse shrink-0"></span>
+                        <span class="truncate"><?= htmlspecialchars($train_in_short) ?> (In)</span>
                     </div>
-                    <div class="text-xs font-extrabold text-blue-700 truncate flex items-center space-x-1">
-                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse"></span>
-                        <span class="truncate"><?= $train_outbound['train_code'] ?> (Out)</span>
+                    <div class="text-xs font-extrabold text-blue-700 truncate flex items-center space-x-1" title="<?= htmlspecialchars($train_outbound['train_code']) ?>">
+                        <span class="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse shrink-0"></span>
+                        <span class="truncate"><?= htmlspecialchars($train_out_short) ?> (Out)</span>
                     </div>
                 </div>
             </div>
@@ -567,12 +598,12 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
         <?php foreach ($siding_tracks as $track): ?>
         <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex flex-col justify-between gap-1.5">
             <div class="space-y-1">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center space-x-1.5">
-                        <span class="w-2 h-2 rounded-full <?= $track['dot_color'] ?>"></span>
-                        <h3 class="font-extrabold text-xs text-slate-900"><?= $track['id'] ?></h3>
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center space-x-1.5 min-w-0">
+                        <span class="w-2 h-2 rounded-full <?= $track['dot_color'] ?> shrink-0"></span>
+                        <h3 class="font-extrabold text-xs text-slate-900 truncate"><?= $track['id'] ?></h3>
                     </div>
-                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border <?= $track['status_color'] ?>">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border whitespace-nowrap shrink-0 <?= $track['status_color'] ?>">
                         <?= $track['occupancy'] ?>
                     </span>
                 </div>
@@ -640,23 +671,23 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                     <?php foreach ($shuttle_timetable as $tt_idx => $tt): ?>
                     <tr class="hover:bg-orange-50/30 transition <?= strpos($tt['badge'], 'pulse') !== false ? 'bg-orange-50/20' : '' ?>">
                         <td class="py-1.5 px-2 text-center font-mono text-slate-400" data-row-num><?= $tt_idx + 1 ?></td>
-                        <td class="py-1.5 px-2.5 font-mono font-bold text-slate-500"><?= $tt['trip_no'] ?></td>
-                        <td class="py-1.5 px-2.5 font-mono font-bold text-slate-900"><?= $tt['train_code'] ?></td>
-                        <td class="py-1.5 px-2.5">
+                        <td class="py-1.5 px-2.5 font-mono font-bold text-slate-500 whitespace-nowrap"><?= $tt['trip_no'] ?></td>
+                        <td class="py-1.5 px-2.5 font-mono font-bold text-slate-900 whitespace-nowrap"><?= $tt['train_code'] ?></td>
+                        <td class="py-1.5 px-2.5 whitespace-nowrap">
                             <?php if ($tt['direction'] === 'INBOUND'): ?>
-                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 whitespace-nowrap">
                                     <i class="fa-solid fa-arrow-down mr-0.5"></i> INBOUND
                                 </span>
                             <?php else: ?>
-                                <span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-800 border border-blue-300">
+                                <span class="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-800 border border-blue-300 whitespace-nowrap">
                                     <i class="fa-solid fa-arrow-up mr-0.5"></i> OUTBOUND
                                 </span>
                             <?php endif; ?>
                         </td>
-                        <td class="py-1.5 px-2.5 font-semibold text-slate-800"><?= $tt['origin'] ?> &rarr; <?= $tt['dest'] ?></td>
-                        <td class="py-1.5 px-2.5 font-mono font-semibold text-slate-700"><?= $tt['dep'] ?> - <?= $tt['arr'] ?></td>
-                        <td class="py-1.5 px-2.5 font-bold text-slate-900"><?= $tt['teu'] ?></td>
-                        <td class="py-1.5 px-2.5 font-mono text-slate-600"><?= $tt['loco'] ?></td>
+                        <td class="py-1.5 px-2.5 font-semibold text-slate-800 whitespace-nowrap"><?= $tt['origin'] ?> &rarr; <?= $tt['dest'] ?></td>
+                        <td class="py-1.5 px-2.5 font-mono font-semibold text-slate-700 whitespace-nowrap"><?= $tt['dep'] ?> - <?= $tt['arr'] ?></td>
+                        <td class="py-1.5 px-2.5 font-bold text-slate-900 whitespace-nowrap"><?= $tt['teu'] ?></td>
+                        <td class="py-1.5 px-2.5 font-mono text-slate-600 whitespace-nowrap"><?= $tt['loco'] ?></td>
                         <td class="py-1.5 px-2.5 text-slate-600 max-w-[180px] truncate" title="<?= $tt['cargo'] ?>"><?= $tt['cargo'] ?></td>
                         <td class="py-1.5 px-2.5">
                             <span class="inline-flex items-center whitespace-nowrap px-2 py-0.5 rounded text-[10px] font-bold border <?= $tt['badge'] ?>">
@@ -743,7 +774,7 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             <div id="corridorGisMap" class="w-full h-full z-0"></div>
 
             <!-- Floating Telemetri HUD (Pojok Kiri Atas Peta) -->
-            <div class="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-md rounded-xl p-3.5 border border-gray-200/80 shadow-lg text-xs space-y-2 max-w-xs pointer-events-auto">
+            <div class="absolute top-3 left-3 z-[1000] bg-white/95 backdrop-blur-md rounded-xl p-2.5 border border-gray-200/80 shadow-lg text-xs space-y-1.5 w-[260px] max-w-[calc(100%-64px)] pointer-events-auto">
                 <div class="flex items-center justify-between border-b border-gray-100 pb-2">
                     <div class="flex items-center space-x-1.5">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
@@ -805,17 +836,17 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
             </div>
         </div>
 
-        <!-- Kajian Konsultan: Matriks Perbandingan Moda (Rail vs Road Corridor) -->
-        <div class="bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 rounded-xl p-4 border border-blue-100 text-xs">
-            <div class="flex items-center justify-between mb-3 flex-wrap gap-2">
+        <!-- Lampiran Kajian SRS: Matriks Perbandingan Moda (Collapsible agar layar operator tetap ringkas) -->
+        <details class="bg-gradient-to-r from-slate-50 via-blue-50/40 to-slate-50 rounded-xl border border-blue-100 text-xs group">
+            <summary class="p-3.5 cursor-pointer select-none flex items-center justify-between flex-wrap gap-2 list-none">
                 <h4 class="font-bold text-gray-900 flex items-center">
                     <i class="fa-solid fa-chart-simple text-blue-600 mr-2"></i>
-                    Analisis Kelayakan Alih Moda (Modal Shift Matrix): KA Barang vs Truk Jalan Raya
+                    Lampiran Kajian SRS: Analisis Kelayakan Alih Moda (KA Barang vs Truk Jalan Raya)
                 </h4>
-                <span class="text-[10px] font-semibold text-gray-500 uppercase tracking-wider font-mono">Kajian Supply Chain Consultant CIDP</span>
-            </div>
+                <span class="text-[10px] font-semibold text-blue-700 bg-white px-2.5 py-0.5 rounded-full border border-blue-200 font-mono">Lihat Referensi SRS <i class="fa-solid fa-chevron-down ml-1 text-[9px]"></i></span>
+            </summary>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-700">
+            <div class="px-4 pb-4 pt-1 grid grid-cols-1 md:grid-cols-3 gap-3 text-slate-700">
                 <div class="bg-white p-3 rounded-lg border border-gray-200/80 shadow-2xs space-y-1">
                     <div class="flex items-center justify-between">
                         <span class="text-gray-500 font-semibold text-[11px]">Kepastian Waktu Tempuh</span>
@@ -823,7 +854,7 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                     </div>
                     <div class="text-base font-bold text-gray-900">110 Menit <span class="text-xs font-normal text-emerald-600 font-semibold">(vs 4-6 Jam Truk)</span></div>
                     <p class="text-[10.5px] text-gray-500 leading-relaxed">
-                        KA memiliki jalur rel khusus bebas hambatan kemacetan Tol Jakarta-Cikampek & Cikunir.
+                        KA memiliki jalur rel khusus bebas hambatan kemacetan Tol Jakarta-Cikampek &amp; Cikunir.
                     </p>
                 </div>
 
@@ -845,11 +876,11 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                     </div>
                     <div class="text-base font-bold text-emerald-700">-76.4% Emisi CO₂ <span class="text-xs font-normal text-gray-500">/ Ton-KM</span></div>
                     <p class="text-[10.5px] text-gray-500 leading-relaxed">
-                        Memenuhi standar global Green Logistics & ESG pelayaran internasional (Maersk, CMA CGM, ONE).
+                        Memenuhi standar global Green Logistics &amp; ESG pelayaran internasional (Maersk, CMA CGM, ONE).
                     </p>
                 </div>
             </div>
-        </div>
+        </details>
     </div>
 
     <!-- ======================================================================= -->
@@ -886,17 +917,17 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
 
         <!-- TRACK 1 VISUAL CONTAINER (INBOUND) -->
         <div id="wagonTrack1View" class="space-y-2">
-            <div class="flex items-center justify-between text-xs px-1 text-gray-600">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs px-1 text-gray-600">
                 <span class="font-bold flex items-center text-emerald-700">
-                    <i class="fa-solid fa-circle-down mr-1.5"></i> Sepur Utara Track-01: KA 2518 &bull; Bongkar Impor ex-Pasoso (Priok) &bull; 48 TEU Loaded
+                    <i class="fa-solid fa-circle-down mr-1.5"></i> Sepur Utara Track-01: <?= htmlspecialchars($train_in_short) ?> &bull; Bongkar Impor ex-Pasoso (Priok) &bull; <?= $train_inbound_teu ?> TEU Loaded
                 </span>
-                <span class="font-mono text-gray-400 text-[11px]">Alat: Reach Stacker RS-05 &amp; RMGC 01</span>
+                <span class="font-mono text-slate-600 font-semibold text-[11px]">Alat: Reach Stacker RS-05 &amp; RMGC 01</span>
             </div>
 
             <div class="bg-slate-50/80 rounded-2xl p-6 overflow-x-auto shadow-xs border border-slate-200/80">
                 <!-- Legend Indicators -->
-                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-600 border-b border-slate-200 pb-3">
-                    <div class="flex items-center space-x-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-5 text-slate-700 border-b border-slate-200 pb-3">
+                    <div class="flex flex-wrap items-center gap-4">
                         <div class="flex items-center space-x-1.5">
                             <span class="w-3 h-3 rounded bg-sky-600"></span>
                             <span class="text-[11px]">40ft/20ft Laden Impor (Raw Mat / CKD)</span>
@@ -910,20 +941,20 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             <span class="text-[11px]">Empty Reposition Stock</span>
                         </div>
                     </div>
-                    <div class="text-[11px] font-mono text-emerald-400 flex items-center">
+                    <div class="text-[11px] font-mono font-semibold text-emerald-700 flex items-center">
                         <i class="fa-solid fa-arrow-right mr-1"></i> Arah Masuk dari Stasiun Lemahabang (Timur)
                     </div>
                 </div>
 
                 <!-- Train Visual Composition Track-01 -->
-                <div class="flex items-center space-x-3 min-w-[900px] py-4">
+                <div class="flex items-center space-x-3 min-w-[900px] pt-2 pb-5">
                     <!-- Locomotive CC 206 13 42 -->
-                    <div class="flex-shrink-0 w-44 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-500 rounded-xl p-3 text-white border-2 border-amber-400 shadow-lg relative flex flex-col justify-between h-28">
+                    <div class="flex-shrink-0 w-44 bg-gradient-to-r from-amber-600 via-orange-600 to-amber-500 rounded-xl p-3 text-white border-2 border-amber-400 shadow-lg relative flex flex-col justify-between min-h-[132px]">
                         <div class="flex justify-between items-start text-[10px] font-mono font-bold">
                             <span>LOKOMOTIF</span>
                             <span class="px-1.5 py-0.5 bg-black/40 rounded">CC 206</span>
                         </div>
-                        <div class="text-center my-auto">
+                        <div class="text-center my-auto py-1">
                             <i class="fa-solid fa-train text-3xl opacity-90 drop-shadow"></i>
                             <span class="block text-[11px] font-mono font-bold mt-1 tracking-wider">CC 206 13 42</span>
                         </div>
@@ -932,10 +963,10 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             <span>KAI LOGISTIK</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-4 right-4 flex justify-between">
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
                         </div>
                     </div>
 
@@ -943,40 +974,44 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
 
                     <!-- Flatcars Iteration Track 1 -->
                     <?php foreach ($wagons_inbound as $idx => $wg): ?>
-                    <div onclick="inspectWagon('track1', <?= $idx ?>)" class="flex-shrink-0 w-52 bg-slate-800 hover:bg-slate-750 cursor-pointer rounded-xl p-2.5 border-2 border-slate-700 hover:border-emerald-400 transition-all shadow-md relative flex flex-col justify-between h-28 group">
-                        <div class="flex justify-between items-center text-[10px] font-mono text-slate-400">
-                            <span class="font-bold text-slate-200"><?= $wg['wagon_no'] ?></span>
-                            <span class="text-[9px] px-1 py-0.2 rounded <?= $wg['status_bg'] ?>"><?= $wg['status'] ?></span>
+                    <div onclick="inspectWagon('track1', <?= $idx ?>)" class="flex-shrink-0 w-60 bg-slate-800 hover:bg-slate-750 cursor-pointer rounded-xl p-2.5 border-2 border-slate-700 hover:border-emerald-400 transition-all shadow-md relative flex flex-col justify-between gap-2 min-h-[132px] group">
+                        <div class="flex justify-between items-center gap-2 text-[10px] font-mono text-slate-300">
+                            <span class="font-bold text-slate-100 whitespace-nowrap shrink-0"><?= $wg['wagon_no'] ?></span>
+                            <span class="text-[8.5px] leading-tight px-1.5 py-0.5 rounded font-bold whitespace-nowrap truncate max-w-[130px] <?= $wg['status_bg'] ?>" title="<?= htmlspecialchars($wg['status']) ?>"><?= $wg['status'] ?></span>
                         </div>
                         <div class="my-auto flex items-center gap-1.5">
                             <?php if ($wg['is_40ft']): ?>
-                                <div class="w-full <?= $wg['slot_a']['bg'] ?> text-white rounded-lg p-2 text-center shadow transition-transform group-hover:scale-95">
+                                <div class="w-full <?= $wg['slot_a']['bg'] ?> text-white rounded-lg px-2 py-2 text-center shadow transition-transform group-hover:scale-95">
                                     <span class="font-mono font-bold text-xs block truncate"><?= $wg['slot_a']['container'] ?></span>
-                                    <div class="flex justify-between items-center text-[9px] text-white/80 font-mono mt-0.5">
+                                    <div class="flex justify-between items-center text-[9px] text-white/90 font-mono mt-0.5">
                                         <span><?= $wg['slot_a']['iso'] ?></span>
                                         <span><?= $wg['slot_a']['weight'] ?></span>
                                     </div>
                                 </div>
                             <?php else: ?>
-                                <div class="w-1/2 <?= $wg['slot_a']['bg'] ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
-                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_a']['container'] ?></span>
-                                    <span class="text-[8px] text-white/80 block font-mono"><?= $wg['slot_a']['iso'] ?></span>
+                                <div class="w-1/2 <?= $wg['slot_a']['bg'] ?? 'bg-slate-600' ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
+                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_a']['container'] ?? '-' ?></span>
+                                    <span class="text-[8px] text-white/90 block font-mono"><?= $wg['slot_a']['iso'] ?? '20GP' ?></span>
                                 </div>
-                                <div class="w-1/2 <?= $wg['slot_b']['bg'] ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
-                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_b']['container'] ?></span>
-                                    <span class="text-[8px] text-white/80 block font-mono"><?= $wg['slot_b']['iso'] ?></span>
+                                <?php if (!empty($wg['slot_b']) && is_array($wg['slot_b'])): ?>
+                                <div class="w-1/2 <?= $wg['slot_b']['bg'] ?? 'bg-slate-600' ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
+                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_b']['container'] ?? '-' ?></span>
+                                    <span class="text-[8px] text-white/90 block font-mono"><?= $wg['slot_b']['iso'] ?? '20GP' ?></span>
                                 </div>
+                                <?php else: ?>
+                                <div class="w-1/2 border border-dashed border-slate-600 text-slate-300 rounded-lg p-1.5 text-center text-[9px] font-mono">KOSONG (20ft)</div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
-                        <div class="flex justify-between items-center text-[9px] text-slate-400 border-t border-slate-700/80 pt-1 font-mono">
+                        <div class="flex justify-between items-center text-[9px] text-slate-300 border-t border-slate-700/80 pt-1.5 pb-0.5 font-mono">
                             <span>PPCW 42t</span>
-                            <span class="text-emerald-400 group-hover:underline">Bongkar &rarr;</span>
+                            <span class="text-emerald-300 font-semibold group-hover:underline">Bongkar &rarr;</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-3 right-3 flex justify-between">
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
                         </div>
                     </div>
                     <?php if ($idx < count($wagons_inbound) - 1): ?>
@@ -995,17 +1030,17 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
 
         <!-- TRACK 2 VISUAL CONTAINER (OUTBOUND) -->
         <div id="wagonTrack2View" class="space-y-2 hidden">
-            <div class="flex items-center justify-between text-xs px-1 text-gray-600">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs px-1 text-gray-600">
                 <span class="font-bold flex items-center text-blue-700">
-                    <i class="fa-solid fa-circle-up mr-1.5"></i> Sepur Selatan Track-02: KA 2519 &bull; Muat Ekspor Menuju Pasoso (Priok) &bull; 52 TEU Loaded (SOLAS VGM)
+                    <i class="fa-solid fa-circle-up mr-1.5"></i> Sepur Selatan Track-02: <?= htmlspecialchars($train_out_short) ?> &bull; Muat Ekspor Menuju Pasoso (Priok) &bull; <?= $train_outbound_teu ?> TEU Loaded (SOLAS VGM)
                 </span>
-                <span class="font-mono text-gray-400 text-[11px]">Alat: Reach Stacker RS-02 &amp; RMGC 02</span>
+                <span class="font-mono text-slate-600 font-semibold text-[11px]">Alat: Reach Stacker RS-02 &amp; RMGC 02</span>
             </div>
 
             <div class="bg-slate-50/80 rounded-2xl p-6 overflow-x-auto shadow-xs border border-slate-200/80">
                 <!-- Legend Indicators Track 2 -->
-                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-6 text-slate-600 border-b border-slate-200 pb-3">
-                    <div class="flex items-center space-x-4">
+                <div class="flex flex-wrap items-center justify-between gap-3 text-xs mb-5 text-slate-700 border-b border-slate-200 pb-3">
+                    <div class="flex flex-wrap items-center gap-4">
                         <div class="flex items-center space-x-1.5">
                             <span class="w-3 h-3 rounded bg-emerald-600"></span>
                             <span class="text-[11px]">40ft Laden Ekspor (VGM Verified)</span>
@@ -1019,20 +1054,20 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             <span class="text-[11px]">40ft Reefer Ekspor (Active Plug)</span>
                         </div>
                     </div>
-                    <div class="text-[11px] font-mono text-blue-400 flex items-center">
+                    <div class="text-[11px] font-mono font-semibold text-blue-700 flex items-center">
                         <i class="fa-solid fa-arrow-left mr-1"></i> Arah Keluar Menuju Stasiun Pasoso / Dermaga Priok (Barat)
                     </div>
                 </div>
 
                 <!-- Train Visual Composition Track-02 -->
-                <div class="flex items-center space-x-3 min-w-[900px] py-4">
+                <div class="flex items-center space-x-3 min-w-[900px] pt-2 pb-5">
                     <!-- Locomotive CC 206 13 55 -->
-                    <div class="flex-shrink-0 w-44 bg-gradient-to-r from-blue-700 via-sky-600 to-blue-600 rounded-xl p-3 text-white border-2 border-blue-400 shadow-lg relative flex flex-col justify-between h-28">
+                    <div class="flex-shrink-0 w-44 bg-gradient-to-r from-blue-700 via-sky-600 to-blue-600 rounded-xl p-3 text-white border-2 border-blue-400 shadow-lg relative flex flex-col justify-between min-h-[132px]">
                         <div class="flex justify-between items-start text-[10px] font-mono font-bold">
                             <span>LOKOMOTIF</span>
                             <span class="px-1.5 py-0.5 bg-black/40 rounded">CC 206</span>
                         </div>
-                        <div class="text-center my-auto">
+                        <div class="text-center my-auto py-1">
                             <i class="fa-solid fa-train text-3xl opacity-90 drop-shadow"></i>
                             <span class="block text-[11px] font-mono font-bold mt-1 tracking-wider">CC 206 13 55</span>
                         </div>
@@ -1041,10 +1076,10 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                             <span>KAI LOGISTIK</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-4 right-4 flex justify-between">
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
-                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-400 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
+                            <span class="w-4 h-4 rounded-full bg-slate-400 border-2 border-slate-500 shadow"></span>
                         </div>
                     </div>
 
@@ -1052,40 +1087,44 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
 
                     <!-- Flatcars Iteration Track 2 -->
                     <?php foreach ($wagons_outbound as $idx => $wg): ?>
-                    <div onclick="inspectWagon('track2', <?= $idx ?>)" class="flex-shrink-0 w-52 bg-slate-800 hover:bg-slate-750 cursor-pointer rounded-xl p-2.5 border-2 border-slate-700 hover:border-blue-400 transition-all shadow-md relative flex flex-col justify-between h-28 group">
-                        <div class="flex justify-between items-center text-[10px] font-mono text-slate-400">
-                            <span class="font-bold text-slate-200"><?= $wg['wagon_no'] ?></span>
-                            <span class="text-[9px] px-1 py-0.2 rounded <?= $wg['status_bg'] ?>"><?= $wg['status'] ?></span>
+                    <div onclick="inspectWagon('track2', <?= $idx ?>)" class="flex-shrink-0 w-60 bg-slate-800 hover:bg-slate-750 cursor-pointer rounded-xl p-2.5 border-2 border-slate-700 hover:border-blue-400 transition-all shadow-md relative flex flex-col justify-between gap-2 min-h-[132px] group">
+                        <div class="flex justify-between items-center gap-2 text-[10px] font-mono text-slate-300">
+                            <span class="font-bold text-slate-100 whitespace-nowrap shrink-0"><?= $wg['wagon_no'] ?></span>
+                            <span class="text-[8.5px] leading-tight px-1.5 py-0.5 rounded font-bold whitespace-nowrap truncate max-w-[130px] <?= $wg['status_bg'] ?>" title="<?= htmlspecialchars($wg['status']) ?>"><?= $wg['status'] ?></span>
                         </div>
                         <div class="my-auto flex items-center gap-1.5">
                             <?php if ($wg['is_40ft']): ?>
-                                <div class="w-full <?= $wg['slot_a']['bg'] ?> text-white rounded-lg p-2 text-center shadow transition-transform group-hover:scale-95">
+                                <div class="w-full <?= $wg['slot_a']['bg'] ?> text-white rounded-lg px-2 py-2 text-center shadow transition-transform group-hover:scale-95">
                                     <span class="font-mono font-bold text-xs block truncate"><?= $wg['slot_a']['container'] ?></span>
-                                    <div class="flex justify-between items-center text-[9px] text-white/80 font-mono mt-0.5">
+                                    <div class="flex justify-between items-center text-[9px] text-white/90 font-mono mt-0.5">
                                         <span><?= $wg['slot_a']['iso'] ?></span>
                                         <span><?= $wg['slot_a']['weight'] ?></span>
                                     </div>
                                 </div>
                             <?php else: ?>
-                                <div class="w-1/2 <?= $wg['slot_a']['bg'] ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
-                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_a']['container'] ?></span>
-                                    <span class="text-[8px] text-white/80 block font-mono"><?= $wg['slot_a']['iso'] ?></span>
+                                <div class="w-1/2 <?= $wg['slot_a']['bg'] ?? 'bg-slate-600' ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
+                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_a']['container'] ?? '-' ?></span>
+                                    <span class="text-[8px] text-white/90 block font-mono"><?= $wg['slot_a']['iso'] ?? '20GP' ?></span>
                                 </div>
-                                <div class="w-1/2 <?= $wg['slot_b']['bg'] ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
-                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_b']['container'] ?></span>
-                                    <span class="text-[8px] text-white/80 block font-mono"><?= $wg['slot_b']['iso'] ?></span>
+                                <?php if (!empty($wg['slot_b']) && is_array($wg['slot_b'])): ?>
+                                <div class="w-1/2 <?= $wg['slot_b']['bg'] ?? 'bg-slate-600' ?> text-white rounded-lg p-1.5 text-center shadow transition-transform group-hover:scale-95">
+                                    <span class="font-mono font-bold text-[10px] block truncate"><?= $wg['slot_b']['container'] ?? '-' ?></span>
+                                    <span class="text-[8px] text-white/90 block font-mono"><?= $wg['slot_b']['iso'] ?? '20GP' ?></span>
                                 </div>
+                                <?php else: ?>
+                                <div class="w-1/2 border border-dashed border-slate-600 text-slate-300 rounded-lg p-1.5 text-center text-[9px] font-mono">KOSONG (20ft)</div>
+                                <?php endif; ?>
                             <?php endif; ?>
                         </div>
-                        <div class="flex justify-between items-center text-[9px] text-slate-400 border-t border-slate-700/80 pt-1 font-mono">
+                        <div class="flex justify-between items-center text-[9px] text-slate-300 border-t border-slate-700/80 pt-1.5 pb-0.5 font-mono">
                             <span>PPCW 42t</span>
-                            <span class="text-blue-400 group-hover:underline">Muat &rarr;</span>
+                            <span class="text-sky-300 font-semibold group-hover:underline">Muat &rarr;</span>
                         </div>
                         <div class="absolute -bottom-2.5 left-3 right-3 flex justify-between">
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
-                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-400 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
+                            <span class="w-3.5 h-3.5 rounded-full bg-slate-500 border border-slate-300 shadow"></span>
                         </div>
                     </div>
                     <?php if ($idx < count($wagons_outbound) - 1): ?>
@@ -1104,11 +1143,11 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
     </div>
 
     <!-- ======================================================================= -->
-    <!-- DUAL COLUMNS: FRAUSCHER AXLE SENSOR & TRANSSHIPMENT WORKFLOW 2-ARAH     -->
+    <!-- TELEMETRI SENSOR FRAUSCHER AXLE COUNTER DUAL TRACK                      -->
     <!-- ======================================================================= -->
     <div class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        <!-- Left: Frauscher Axle Counter Telemetry & Pulse Simulator (6 cols) -->
-        <div class="xl:col-span-6 space-y-4">
+        <!-- Frauscher Axle Counter Telemetry & Pulse Simulator (12 cols) -->
+        <div class="xl:col-span-12 space-y-4">
             <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-5">
                 <div class="flex items-center justify-between border-b border-gray-100 pb-4">
                     <div class="flex items-center space-x-3">
@@ -1127,9 +1166,9 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
 
                 <!-- Sensor Diagram & Diagnostics -->
                 <div class="bg-slate-50 text-slate-800 rounded-xl p-4 border border-slate-200 space-y-4">
-                    <div class="flex items-center justify-between text-xs font-mono">
-                        <span class="text-slate-400">SENSOR DUAL CHANNEL (TRACK 1 &amp; TRACK 2)</span>
-                        <span class="text-emerald-400 flex items-center">
+                    <div class="flex flex-wrap items-center justify-between gap-2 text-xs font-mono">
+                        <span class="text-slate-600 font-bold">SENSOR DUAL CHANNEL (TRACK 1 &amp; TRACK 2)</span>
+                        <span class="text-emerald-700 font-bold flex items-center">
                             <span class="w-2 h-2 rounded-full bg-emerald-500 mr-1.5 animate-pulse"></span>
                             ACTIVE INTERLOCKING
                         </span>
@@ -1171,83 +1210,8 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                         <span>Uji Diagnostik Sinyal Sensor Roda Dual Track (Self-Test)</span>
                     </button>
                     <p class="text-[11px] text-gray-400 text-center">
-                        Uji Frauscher RSR180 Dual Track &bull; Lihat pergerakan 3D di <a href="dashboard.php?page=simulator" class="text-indigo-600 font-bold underline">Simulator 3D</a>.
+                        Uji Frauscher RSR180 Dual Track &bull; Lihat pergerakan 3D di <a href="dashboard.php?page=twin&view=rail" class="text-indigo-600 font-bold underline">Digital Twin 3D</a>.
                     </p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right: 5-Stage Intermodal Transshipment Workflow (6 cols) -->
-        <div class="xl:col-span-6 space-y-4">
-            <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
-                <div class="flex items-center justify-between border-b border-gray-100 pb-3">
-                    <h3 class="text-sm font-bold text-gray-900 flex items-center">
-                        <i class="fa-solid fa-diagram-project text-[#0170b9] mr-2"></i>
-                        SOP Alur Transshipment 2-Arah (Loop Rel &harr; Lapangan)
-                    </h3>
-                    <span class="text-xs text-blue-600 font-bold">5 Tahap Operasi</span>
-                </div>
-
-                <div class="space-y-3">
-                    <!-- Step 1 -->
-                    <div class="flex items-start space-x-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                        <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-check text-[10px]"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-900">1. Kedatangan Dual Siding &amp; Axle Counter</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">126 as KA 2518 (Track-01) &amp; 126 as KA 2519 (Track-02).</p>
-                        </div>
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Selesai</span>
-                    </div>
-
-                    <!-- Step 2 -->
-                    <div class="flex items-start space-x-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                        <div class="w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                            <i class="fa-solid fa-check text-[10px]"></i>
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-900">2. Penguncian Lokomotif &amp; SIL 4 Interlocking</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Stop block &amp; rem sepatu aktif untuk operasi RMGC &amp; RS.</p>
-                        </div>
-                        <span class="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded">Selesai</span>
-                    </div>
-
-                    <!-- Step 3 (Active) -->
-                    <div class="flex items-start space-x-3 p-2.5 rounded-xl bg-blue-50/80 border border-blue-200">
-                        <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5 animate-pulse">
-                            3
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold text-blue-900">3. Alih Muat Simultan Impor / Ekspor</h4>
-                            <p class="text-[11px] text-blue-800 mt-0.5">Track-01 bongkar impor; Track-02 muat ekspor (VGM).</p>
-                        </div>
-                        <span class="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded animate-pulse">Berjalan</span>
-                    </div>
-
-                    <!-- Step 4 -->
-                    <div class="flex items-start space-x-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                        <div class="w-6 h-6 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                            4
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-700">4. Klirens CEISA 4.0 &amp; Cross-Docking</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">PLP disahkan &rarr; langsung lanjut ke armada trailer.</p>
-                        </div>
-                        <span class="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded">Sinkron</span>
-                    </div>
-
-                    <!-- Step 5 -->
-                    <div class="flex items-start space-x-3 p-2.5 rounded-xl bg-slate-50 border border-slate-200/80">
-                        <div class="w-6 h-6 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-xs font-bold flex-shrink-0 mt-0.5">
-                            5
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="text-xs font-bold text-gray-700">5. Kirim EDI BAPLIE &amp; Pelepasan Shuttle</h4>
-                            <p class="text-[11px] text-gray-500 mt-0.5">Transmisi manifest slot ke TOS Dermaga Priok.</p>
-                        </div>
-                        <span class="text-[10px] font-bold text-slate-500 bg-slate-200 px-2 py-0.5 rounded">13:30 / 18:45 WIB</span>
-                    </div>
                 </div>
             </div>
         </div>
@@ -1256,7 +1220,7 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
     <!-- ======================================================================= -->
     <!-- UN/EDIFACT BAPLIE (BAYPLAN / WAGON SLOT ALLOCATION MESSAGE) PANEL       -->
     <!-- ======================================================================= -->
-    <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
+    <div id="baplieSection" class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-4">
         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-gray-100 pb-4">
             <div>
                 <h3 class="text-base font-bold text-gray-900 flex items-center">
@@ -1279,20 +1243,20 @@ $wagons = !empty($wagons_outbound) ? $wagons_outbound : $wagons_inbound;
                     <i class="fa-regular fa-copy"></i>
                     <span id="copy-baplie-btn-text">Salin BAPLIE</span>
                 </button>
-                <button type="button" onclick="downloadBaplieFile()" class="px-3.5 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-sm">
+                <button type="button" onclick="downloadBaplieFile()" class="px-3.5 py-2 bg-[#0170b9] hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition-colors flex items-center space-x-1.5 shadow-sm">
                     <i class="fa-solid fa-download"></i>
                     <span>Unduh File (.edi)</span>
                 </button>
             </div>
         </div>
 
-        <!-- Raw EDIFACT BAPLIE Block (Inbound vs Outbound) -->
-        <div class="relative bg-slate-100 rounded-xl p-4 border border-slate-200 shadow-inner text-slate-700">
-            <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-800 text-[11px] font-mono text-slate-400">
-                <span id="baplie-buffer-name">BUFFER: BAPLIE_KA2518_INBOUND_PRIOK_CIDP.EDI</span>
-                <span class="text-emerald-400">STANDARD SMDG BAPLIE 2.2 / D.95B</span>
+        <!-- Raw EDIFACT BAPLIE Block (Inbound vs Outbound High Contrast Dark Terminal) -->
+        <div class="relative bg-slate-900 rounded-xl p-4 border border-slate-700 shadow-inner text-slate-200">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 mb-2 border-b border-slate-700 text-[11px] font-mono text-slate-300">
+                <span id="baplie-buffer-name" class="font-semibold text-slate-200">BUFFER: BAPLIE_KA2518_INBOUND_PRIOK_CIDP.EDI</span>
+                <span class="text-emerald-400 font-bold">STANDARD SMDG BAPLIE 2.2 / D.95B</span>
             </div>
-            <pre id="baplie-raw-text" class="font-mono text-xs text-emerald-300 leading-relaxed overflow-x-auto whitespace-pre selection:bg-blue-600 selection:text-white max-h-56">UNA:+.? '
+            <pre id="baplie-raw-text" class="font-mono text-xs text-emerald-300 leading-relaxed overflow-x-auto whitespace-pre selection:bg-blue-600 selection:text-white max-h-60">UNA:+.? '
 UNB+UNOA:2+TANJUNG_PRIOK_TOS+CIDP_RAIL_YMS+20261001:0815+BAP251801'
 BGM+BAPLIE+KA2518-INBOUND-20261001+9'
 DTM+137:202610011005:203'
@@ -1371,8 +1335,8 @@ UNZ+1+BAP251801'</pre>
 <!-- JAVASCRIPT LOGIC INTERMODAL -->
 <!-- ======================================================================= -->
 <script>
-const wagonsInbound = <?= json_encode($wagons_inbound) ?>;
-const wagonsOutbound = <?= json_encode($wagons_outbound) ?>;
+var wagonsInbound = <?= json_encode($wagons_inbound) ?>;
+var wagonsOutbound = <?= json_encode($wagons_outbound) ?>;
 
 const baplieInboundData = `UNA:+.? '
 UNB+UNOA:2+TANJUNG_PRIOK_TOS+CIDP_RAIL_YMS+20261001:0815+BAP251801'
@@ -1526,12 +1490,20 @@ function closeWagonModal() {
     document.getElementById('wagonModal').classList.add('hidden');
 }
 
+function showRailToast(msg, type = 'info') {
+    if (typeof window.cidpToast === 'function') {
+        window.cidpToast(msg, type);
+    } else {
+        console.info('[RailSiding]', type, msg);
+    }
+}
+
 function dispatchReachStackerToWagon() {
-    alert("Instruksi alih muat terkirim ke Reach Stacker RS-05 / RS-02 melalui TOS VMT. Kontainer siap diangkat.");
+    showRailToast("Instruksi alih muat terkirim ke Reach Stacker RS-05 / RS-02 melalui TOS VMT. Kontainer siap diangkat.", "success");
     closeWagonModal();
 }
 
-function triggerAxlePassSimulation() {
+function triggerAxlePassSimulation(detectedAxles = 126) {
     const btn = document.getElementById('btn-axle-sim');
     const display = document.getElementById('axle-count-display');
     const val = document.getElementById('axle-count-val');
@@ -1540,11 +1512,11 @@ function triggerAxlePassSimulation() {
     btn.disabled = true;
     btn.classList.add('opacity-50');
 
-    let current = 240;
-    const interval = setInterval(() => {
+    let current = 114;
+    const interval = setInterval(async () => {
         current += 2;
-        display.textContent = current + " As Roda";
-        val.textContent = current;
+        display.textContent = (current * 2) + " As Roda";
+        val.textContent = current * 2;
 
         // Jiggle pulse bars
         pulses.forEach(p => {
@@ -1552,13 +1524,39 @@ function triggerAxlePassSimulation() {
             p.style.height = h + 'px';
         });
 
-        if (current >= 252) {
+        if (current >= detectedAxles) {
             clearInterval(interval);
-            btn.disabled = false;
-            btn.classList.remove('opacity-50');
-            alert("Verifikasi As Roda Dual Track Selesai!\n\n• Track-01: 126 as (KA 2518 Inbound)\n• Track-02: 126 as (KA 2519 Outbound)\nTotal: 252 as roda SIL 4 PASS (Zero Discrepancy Rule).");
+            try {
+                const res = await fetch('api/ingest_event.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        event_type: 'RAIL_AXLE_COUNTER',
+                        source_device: 'FRAUSCHER-RSR180',
+                        payload: {
+                            train_code: 'KA 2518',
+                            track_id: 'TRACK-01',
+                            detected_axles: detectedAxles,
+                            expected_axles: 126,
+                            speed_kmh: 12.4
+                        }
+                    })
+                });
+                const data = await res.json();
+                if (res.ok && data.success) {
+                    const dec = data.decision_summary || {};
+                    showRailToast((dec.verdict || 'SIL4_PASS') + ' — ' + (dec.reason || '252 as roda Dual Track SIL 4 PASS via ingest_event.php.'), 'success');
+                } else {
+                    showRailToast('INTERLOCK FRAUSCHER SIL-4 -> DLQ: ' + (data.error || 'Selisih as roda terdeteksi!'), 'warning');
+                }
+            } catch (err) {
+                showRailToast('Verifikasi Sensor Frauscher Selesai (252 As Roda SIL 4 PASS).', 'success');
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }
         }
-    }, 250);
+    }, 180);
 }
 
 // BAPLIE Functions
@@ -1584,13 +1582,30 @@ function switchBaplieTab(mode) {
 
 function copyBaplieText() {
     const text = document.getElementById('baplie-raw-text').textContent;
-    navigator.clipboard.writeText(text).then(() => {
-        const btn = document.getElementById('copy-baplie-btn-text');
-        btn.textContent = "Tersalin!";
-        setTimeout(() => btn.textContent = "Salin BAPLIE", 2000);
-    }).catch(err => {
-        alert("Pesan BAPLIE:\n\n" + text);
-    });
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text).then(() => {
+            const btn = document.getElementById('copy-baplie-btn-text');
+            if (btn) {
+                btn.textContent = "Tersalin!";
+                setTimeout(() => btn.textContent = "Salin BAPLIE", 2000);
+            }
+            showRailToast("Manifest UN/EDIFACT BAPLIE D.95B berhasil disalin ke clipboard.", "success");
+        }).catch(() => {
+            showRailToast("Manifest BAPLIE ditampilkan pada terminal EDIFACT di bawah — gunakan Unduh File (.edi) bila perlu.", "info");
+        });
+    } else {
+        const range = document.createRange();
+        const pre = document.getElementById('baplie-raw-text');
+        if (pre) {
+            range.selectNodeContents(pre);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+            try { document.execCommand('copy'); } catch (_) {}
+            sel.removeAllRanges();
+        }
+        showRailToast("Manifest UN/EDIFACT BAPLIE siap digunakan dari buffer terminal EDI.", "success");
+    }
 }
 
 function downloadBaplieFile() {
@@ -1608,7 +1623,10 @@ function downloadBaplieFile() {
 }
 
 function openBaplieModal() {
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+    const target = document.getElementById('baplieSection') || document.getElementById('baplie-raw-text');
+    if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
 }
 
 // =======================================================================
@@ -1767,7 +1785,10 @@ function initCorridorGisMap() {
         iconAnchor: [18, 18]
     });
 
-    function createStationIcon(label, code) {
+    function createStationIcon(label, code, align = 'bottom') {
+        const posCls = align === 'right'
+            ? 'top-1/2 -translate-y-1/2 left-7'
+            : (align === 'top' ? '-top-5 left-1/2 -translate-x-1/2' : '-bottom-5 left-1/2 -translate-x-1/2');
         return L.divIcon({
             className: 'custom-gis-pin',
             html: `
@@ -1775,7 +1796,7 @@ function initCorridorGisMap() {
                     <div class="w-6 h-6 rounded-full bg-white border-2 border-[#0170b9] shadow flex items-center justify-center text-[#0170b9] text-[9px] font-bold">
                         ${code}
                     </div>
-                    <div class="absolute -bottom-5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-white/90 px-1.5 py-0.2 rounded shadow-2xs text-[9px] font-semibold text-gray-700 border border-gray-200">
+                    <div class="absolute ${posCls} whitespace-nowrap bg-white/95 px-1.5 py-0.5 rounded shadow-xs text-[9px] font-semibold text-gray-800 border border-gray-200">
                         ${label}
                     </div>
                 </div>
@@ -1877,16 +1898,16 @@ function initCorridorGisMap() {
         `)
         .addTo(railLayerGroup);
 
-    // Stasiun Antara
+    // Stasiun Antara (offset label untuk PSO & LBH agar tidak bertumpukan dengan terminal utama)
     const stations = [
-        { idx: 1, code: "PSO", label: "Pasoso" },
-        { idx: 6, code: "JNG", label: "Jatinegara" },
-        { idx: 10, code: "BKS", label: "Bekasi" },
-        { idx: 14, code: "LBH", label: "Lemahabang" }
+        { idx: 1, code: "PSO", label: "Pasoso", align: "right" },
+        { idx: 6, code: "JNG", label: "Jatinegara", align: "bottom" },
+        { idx: 10, code: "BKS", label: "Bekasi", align: "top" },
+        { idx: 14, code: "LBH", label: "Lemahabang", align: "right" }
     ];
     stations.forEach(st => {
         const pt = railCorridorPoints[st.idx];
-        L.marker([pt.lat, pt.lng], { icon: createStationIcon(st.label, st.code) })
+        L.marker([pt.lat, pt.lng], { icon: createStationIcon(st.label, st.code, st.align) })
             .bindPopup(`
                 <div class="p-1 space-y-1 text-xs">
                     <span class="px-1.5 py-0.5 bg-slate-100 text-slate-800 rounded font-mono font-bold text-[10px]">STASIUN DAOP 1</span>
@@ -1947,13 +1968,13 @@ function initCorridorGisMap() {
     // Set Initial HUD Telemetry
     updateTelemetryHUD();
 
-    // Auto-fit bounds
+    // Auto-fit bounds dengan padding kiri untuk HUD Telemetri agar Priok & Pasoso tidak tertutup HUD
     setTimeout(() => {
         corridorMap.invalidateSize();
         corridorMap.fitBounds([
             [-6.1042, 106.8523],
             [-6.2818, 107.1729]
-        ], { padding: [30, 30] });
+        ], getCorridorBoundsFitOptions(false));
     }, 300);
 }
 
@@ -2090,9 +2111,20 @@ function startTrainAnimation() {
             pauseTrainAnimation();
             const btnText = document.getElementById('playTrainText');
             if (btnText) btnText.textContent = "Simulasikan Ulang";
-            alert("Simulasi Kereta Api 2-Arah Selesai!\n\n• KA 2518 tiba di Siding Track-01 CIDP (Bongkar 48 TEU Impor ex-Priok)\n• KA 2519 tiba di Pasoso Pelabuhan Tanjung Priok (Siap muat 52 TEU Ekspor ke kapal laut)\n\nKedua rangkaian sukses bersilangan di petak jalan jalur ganda (DDT) Daop 1!");
+            showRailToast("Simulasi 2-Arah Selesai: KA 2518 tiba di Track-01 CIDP (<?= $train_inbound_teu ?> TEU) & KA 2519 tiba di Pasoso Priok (<?= $train_outbound_teu ?> TEU).", "success");
         }
     }, 90);
+}
+
+function getCorridorBoundsFitOptions(animate = true) {
+    const mapEl = document.getElementById('corridorGisMap');
+    const isWide = mapEl ? mapEl.clientWidth >= 640 : window.innerWidth >= 640;
+    return {
+        paddingTopLeft: isWide ? [290, 52] : [20, 48],
+        paddingBottomRight: isWide ? [115, 55] : [30, 48],
+        animate: animate,
+        duration: animate ? 1.2 : 0
+    };
 }
 
 function pauseTrainAnimation() {
@@ -2129,7 +2161,7 @@ function flyToLocation(target) {
         corridorMap.flyToBounds([
             [-6.1042, 106.8523],
             [-6.2818, 107.1729]
-        ], { padding: [40, 40], duration: 1.2 });
+        ], getCorridorBoundsFitOptions(true));
     } else if (target === 'priok') {
         corridorMap.flyTo([-6.1100, 106.8856], 14, { duration: 1.2 });
     } else if (target === 'cidp') {

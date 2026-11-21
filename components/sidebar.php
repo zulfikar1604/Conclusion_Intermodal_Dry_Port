@@ -132,6 +132,11 @@ $menu_status_badges = [
    milik Tailwind maupun cache script lama.
    ============================================================================= */
 @media (min-width: 768px) {
+    #sidebar:not(.is-collapsed) {
+        width: clamp(244px, 18.5vw, 276px) !important;
+        min-width: clamp(244px, 18.5vw, 276px) !important;
+        max-width: clamp(244px, 18.5vw, 276px) !important;
+    }
     #sidebar.is-collapsed {
         width: 68px !important;
         min-width: 68px !important;
@@ -185,14 +190,14 @@ $menu_status_badges = [
         bottom: 0 !important;
         left: 0 !important;
         z-index: 50 !important;
-        width: min(272px, 84vw) !important;
-        max-width: 84vw !important;
+        width: min(292px, 86vw) !important;
+        max-width: 86vw !important;
     }
 }
 </style>
 
-<!-- Sidebar Navigasi & Pemantau Operasional (Latar Bersih + Sticky Footer) -->
-<aside id="sidebar" class="bg-white text-slate-700 flex-shrink-0 z-50 md:z-40 h-[100dvh] max-h-[100dvh] overflow-hidden sidebar-transition w-64 md:w-60 fixed inset-y-0 left-0 md:relative md:inset-auto transform -translate-x-full md:translate-x-0 transition-all duration-200 ease-in-out shadow-2xl md:shadow-none flex flex-col justify-between border-r border-slate-200/90 font-sans">
+<!-- Sidebar Navigasi & Pemantau Operasional (Latar Bersih + Lebar Dinamis Anti-Potong) -->
+<aside id="sidebar" class="bg-white text-slate-700 flex-shrink-0 z-50 md:z-40 h-[100dvh] max-h-[100dvh] overflow-hidden sidebar-transition w-[260px] fixed inset-y-0 left-0 md:relative md:inset-auto transform -translate-x-full md:translate-x-0 transition-all duration-200 ease-in-out shadow-2xl md:shadow-none flex flex-col justify-between border-r border-slate-200/90 font-sans">
 
     <!-- ======================================================================= -->
     <!-- TOP: LOGO HEADER + TOMBOL COLLAPSE SIDEBAR YANG TERLIHAT JELAS          -->
@@ -246,20 +251,19 @@ $menu_status_badges = [
                 <!-- Judul Grup = LABEL KATEGORI (bukan tombol): pita abu datar, tanpa hover/pointer,
                      garis aksen kiri & garis pemisah memanjang, agar jelas beda dari menu yang bisa diklik -->
                 <div class="sidebar-group-title logo-text select-none cursor-default flex items-center gap-1.5 mb-1.5 px-2 py-1 rounded-md bg-slate-100/90 border-l-[3px] <?= $theme['group_accent'] ?? 'border-slate-400' ?>" role="heading" aria-level="3">
-                    <span class="px-1.5 py-0.5 rounded text-[9px] leading-none font-black uppercase tracking-wide border <?= $theme['pill_bg'] ?>">
+                    <span class="px-1.5 py-0.5 rounded text-[9px] leading-none font-black uppercase tracking-wide border flex-shrink-0 <?= $theme['pill_bg'] ?>">
                         <?= htmlspecialchars($zone_code) ?>
                     </span>
-                    <span class="text-[10.5px] font-extrabold text-slate-500 uppercase tracking-[0.08em] truncate">
+                    <span class="text-[10.5px] font-extrabold text-slate-500 uppercase tracking-[0.06em] leading-tight whitespace-normal break-words">
                         <?= htmlspecialchars($cluster_title) ?>
                     </span>
                     <span class="flex-1 h-px bg-slate-300/70 ml-1"></span>
-                    <span class="text-[9px] font-bold text-slate-400 font-mono flex-shrink-0"><?= count($filtered_items) ?></span>
                 </div>
 
                 <!-- Daftar Item Menu dalam Zona -->
                 <div class="space-y-1">
                     <?php foreach ($filtered_items as $key => $item):
-                        $is_active = ($page === $key);
+                        $is_active = ($page === $key || ($key === 'twin' && $page === 'simulator'));
                         $badge = $menu_status_badges[$key] ?? null;
                         // Ikon khusus Reefer menggunakan warna es (cyan) agar langsung dikenali
                         $icon_box_idle = ($key === 'reefer')
@@ -267,12 +271,12 @@ $menu_status_badges = [
                             : $theme['icon_idle'];
                     ?>
                         <a href="dashboard.php?page=<?= $key ?>"
-                           class="sidebar-nav-item relative flex items-center justify-between px-2 py-1.5 rounded-xl transition-all duration-150 group <?= $is_active
+                           class="sidebar-nav-item relative flex items-center justify-between gap-1.5 px-2 py-1.5 rounded-xl transition-all duration-150 group <?= $is_active
                                ? 'bg-orange-50/90 text-slate-900 font-extrabold border border-orange-200/90 shadow-2xs before:content-[\'\'] before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:rounded-r-full before:bg-orange-600'
                                : 'text-slate-700 hover:text-slate-900 hover:bg-slate-50 border border-transparent font-semibold' ?>"
                            title="<?= htmlspecialchars($item['label']) ?><?= $badge ? ' • ' . htmlspecialchars($badge['text']) : '' ?>">
 
-                            <div class="sidebar-item-left flex items-center min-w-0 gap-2.5">
+                            <div class="sidebar-item-left flex items-center min-w-0 flex-1 gap-2">
                                 <!-- Kotak Ikon Berwarna Halus Sesuai Zona -->
                                 <span class="relative w-7 h-7 rounded-lg border flex items-center justify-center text-[12px] flex-shrink-0 transition-colors <?= $is_active
                                     ? 'bg-orange-500 text-white border-orange-600 shadow-2xs'
@@ -283,12 +287,12 @@ $menu_status_badges = [
                                         <span class="sidebar-collapsed-dot hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full ring-2 ring-white <?= $badge['dot'] ?>"></span>
                                     <?php endif; ?>
                                 </span>
-                                <span class="text-[12.5px] logo-text truncate tracking-tight leading-snug"><?= htmlspecialchars($item['label']) ?></span>
+                                <span class="text-[12px] logo-text tracking-tight leading-snug whitespace-normal break-words"><?= htmlspecialchars($item['label']) ?></span>
                             </div>
 
                             <!-- Indikator Status / Alert Operasional di Sisi Kanan -->
                             <?php if ($badge): ?>
-                                <span class="logo-text ml-1.5 inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-extrabold border flex-shrink-0 <?= $badge['class'] ?>">
+                                <span class="logo-text inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[9.5px] leading-none font-extrabold border whitespace-nowrap flex-shrink-0 <?= $badge['class'] ?>">
                                     <?php if (!empty($badge['dot'])): ?>
                                         <span class="w-1.5 h-1.5 rounded-full <?= $badge['dot'] ?>"></span>
                                     <?php endif; ?>
@@ -314,11 +318,11 @@ $menu_status_badges = [
                ? 'bg-orange-50 text-slate-900 font-extrabold border border-orange-200/90 shadow-2xs before:content-[\'\'] before:absolute before:left-0 before:top-1.5 before:bottom-1.5 before:w-1 before:rounded-r-full before:bg-orange-600'
                : 'bg-white text-slate-700 hover:text-slate-900 hover:bg-slate-100/80 border border-slate-200/80 font-semibold shadow-2xs' ?>"
            title="<?= __('menu_settings', 'Pengaturan Global') ?>">
-            <div class="sidebar-item-left flex items-center min-w-0 gap-2.5">
+            <div class="sidebar-item-left flex items-center min-w-0 flex-1 gap-2">
                 <span class="w-7 h-7 rounded-lg border flex items-center justify-center text-[12px] flex-shrink-0 <?= $is_settings_active ? 'bg-orange-500 text-white border-orange-600' : 'bg-slate-100 text-slate-600 border-slate-200/80 group-hover:text-orange-600' ?>">
                     <i class="fa-solid fa-sliders"></i>
                 </span>
-                <span class="text-[12px] logo-text truncate"><?= __('menu_settings', 'Pengaturan Global') ?></span>
+                <span class="text-[12px] logo-text leading-snug whitespace-normal break-words"><?= __('menu_settings', 'Pengaturan') ?></span>
             </div>
             <span class="logo-text text-[10px] font-bold text-slate-400 group-hover:text-slate-600 pr-0.5">
                 <i class="fa-solid fa-gear"></i>
@@ -353,13 +357,13 @@ $menu_status_badges = [
                 </svg>
             </div>
 
-            <div class="relative z-10 flex items-center justify-between gap-1">
-                <div class="min-w-0">
+            <div class="relative z-10 flex items-center justify-between gap-1.5">
+                <div class="min-w-0 flex-1">
                     <div class="flex items-center gap-1.5">
                         <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse flex-shrink-0"></span>
-                        <p class="text-[11px] font-extrabold text-slate-800 truncate"><?= __('sidebar_consultant', 'Conclusion Consultant') ?></p>
+                        <p class="text-[11px] font-extrabold text-slate-800 leading-tight whitespace-normal break-words"><?= __('sidebar_consultant', 'CIDP Consultant') ?></p>
                     </div>
-                    <p class="text-[9.5px] font-semibold text-slate-500 truncate pl-3"><?= __('sidebar_platform', 'Dry Port 35 Ha Platform') ?></p>
+                    <p class="text-[9.5px] font-semibold text-slate-500 leading-tight whitespace-normal pl-3 mt-0.5"><?= __('sidebar_platform', 'Dry Port 35 Ha') ?></p>
                 </div>
                 <button type="button" onclick="toggleBatikPattern()" class="text-[9px] font-bold text-orange-700 hover:text-orange-800 bg-orange-50/90 hover:bg-orange-100 border border-orange-200/80 px-1.5 py-0.5 rounded-md transition cursor-pointer flex items-center gap-1 flex-shrink-0" title="Ganti Ornamen Pojok (Kawung / Parang)">
                     <i class="fa-solid fa-gem text-orange-500 text-[8px]"></i>

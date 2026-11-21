@@ -27,33 +27,33 @@ if (!isset($current_lang)) {
 
 $GLOBALS['cidp_lang_dict'] = [
     'id' => [
-        // Clusters
-        'cluster_executive' => 'Ringkasan & Telemetri',
-        'cluster_spatial'   => 'Peta & Simulasi Spasial',
-        'cluster_tms'       => 'TMS • Transportasi',
-        'cluster_yms'       => 'YMS • Lapangan Yard',
-        'cluster_wms'       => 'WMS • Gudang CFS',
-        'cluster_finance'   => 'Regulasi & Finansial',
-        'cluster_system'    => 'Sistem & Konfigurasi',
+        // Clusters (Singkat & jelas untuk sidebar dinamis)
+        'cluster_executive' => 'Ringkasan',
+        'cluster_spatial'   => 'Peta & 3D',
+        'cluster_tms'       => 'Transportasi',
+        'cluster_yms'       => 'Lapangan (Yard)',
+        'cluster_wms'       => 'Gudang & Scan',
+        'cluster_finance'   => 'Pabean & Tagihan',
+        'cluster_system'    => 'Sistem',
 
-        // Menu Items
-        'menu_beranda'   => 'Cockpit Eksekutif',
-        'menu_twin'        => 'Digital Twin (Data Nyata)',
-        'menu_integration' => 'Integrasi Data & OAuth',
-        'menu_denah'     => 'Denah Master 35 Ha',
-        'menu_simulator' => 'Simulator 3D (Eksplorasi Fasilitas)',
-        'menu_gate'      => 'Gate & Timbangan VGM',
-        'menu_trucking'  => 'Trucking & Shunting',
-        'menu_intermodal'=> 'Rail Siding KA Pasoso',
-        'menu_yard'      => 'Yard & Stacking Block',
-        'menu_alat'      => 'Alat Berat & RTG GPS',
-        'menu_kontainer' => 'Inventori Kontainer',
-        'menu_reefer'    => 'Reefer Cold Chain',
-        'menu_cfs'       => 'Container Freight Station',
-        'menu_customs'   => 'Bea Cukai CEISA 4.0',
-        'menu_billing'   => 'Billing & ERP Odoo',
-        'menu_scanner'   => 'Scanner Optik AIDC',
-        'menu_settings'  => 'Pengaturan Global',
+        // Menu Items (Istilah umum, singkat, dan mudah dipahami)
+        'menu_beranda'     => 'Beranda Utama',
+        'menu_twin'        => 'Peta 3D (Live)',
+        'menu_integration' => 'Integrasi API',
+        'menu_denah'       => 'Denah 35 Ha',
+        'menu_simulator'   => 'Simulator 3D',
+        'menu_gate'        => 'Gerbang & Timbang',
+        'menu_trucking'    => 'Truk & Antrean',
+        'menu_intermodal'  => 'Rel Kereta Api',
+        'menu_yard'        => 'Lapangan Yard',
+        'menu_alat'        => 'Alat Berat',
+        'menu_kontainer'   => 'Data Kontainer',
+        'menu_reefer'      => 'Pendingin (Reefer)',
+        'menu_cfs'         => 'Gudang CFS',
+        'menu_customs'     => 'Bea Cukai',
+        'menu_billing'     => 'Tagihan & Bayar',
+        'menu_scanner'     => 'Scan QR / Box',
+        'menu_settings'    => 'Pengaturan',
 
         // Header & Global Shell
         'search_placeholder'   => 'Cari kontainer (Ctrl+K)...',
@@ -78,7 +78,7 @@ $GLOBALS['cidp_lang_dict'] = [
         'profile_role_shipper' => 'Klien Shipper',
         'profile_settings'     => 'Pengaturan Akun & Sistem',
         'profile_sim_panel'    => 'Panel Simulasi IoT & Sensor',
-        'profile_site_plan'    => 'Site Plan Denah Terminal 35 Ha',
+        'profile_site_plan'    => 'Digital Twin 3D (Data Nyata)',
         'profile_logout'       => 'Keluar dari Sistem',
         'profile_db_status'    => 'DB Terhubung',
 
@@ -89,11 +89,11 @@ $GLOBALS['cidp_lang_dict'] = [
         'logout_confirm'       => 'Ya, Keluar',
 
         // Sidebar Footer Card
-        'sidebar_pattern_kawung'=> 'Kawung Maritim',
-        'sidebar_pattern_parang'=> 'Parang Bahari',
+        'sidebar_pattern_kawung'=> 'Kawung',
+        'sidebar_pattern_parang'=> 'Parang',
         'sidebar_switch_btn'    => 'Ubah',
-        'sidebar_consultant'    => 'Conclusion Consultant',
-        'sidebar_platform'      => 'Platform Dry Port 35 Ha',
+        'sidebar_consultant'    => 'CIDP Consultant',
+        'sidebar_platform'      => 'Dry Port 35 Ha',
         'sidebar_online'        => 'ONLINE',
 
         // Cockpit Eksekutif (pages/beranda.php)
@@ -182,32 +182,32 @@ $GLOBALS['cidp_lang_dict'] = [
 
     'en' => [
         // Clusters
-        'cluster_executive' => 'Executive & Telemetry',
-        'cluster_spatial'   => 'Spatial Map & 3D Sim',
-        'cluster_tms'       => 'TMS • Transport',
-        'cluster_yms'       => 'YMS • Container Yard',
-        'cluster_wms'       => 'WMS • CFS Warehouse',
-        'cluster_finance'   => 'Compliance & Finance',
-        'cluster_system'    => 'System & Settings',
+        'cluster_executive' => 'Overview',
+        'cluster_spatial'   => 'Map & 3D',
+        'cluster_tms'       => 'Transport',
+        'cluster_yms'       => 'Container Yard',
+        'cluster_wms'       => 'Warehouse',
+        'cluster_finance'   => 'Customs & Billing',
+        'cluster_system'    => 'System',
 
         // Menu Items
-        'menu_beranda'   => 'Executive Cockpit',
-        'menu_twin'        => 'Digital Twin (Real Data)',
-        'menu_integration' => 'Integrasi Data & OAuth',
-        'menu_denah'     => '35 Ha Master Plan',
-        'menu_simulator' => '3D Simulator (Facility Tour)',
-        'menu_gate'      => 'Gate & VGM Weighbridge',
-        'menu_trucking'  => 'Trucking & Shunting',
-        'menu_intermodal'=> 'Pasoso Rail Siding',
-        'menu_yard'      => 'Yard & Stacking Blocks',
-        'menu_alat'      => 'Heavy Equipment & RTG GPS',
-        'menu_kontainer' => 'Container Inventory',
-        'menu_reefer'    => 'Reefer Cold Chain Hub',
-        'menu_cfs'       => 'Container Freight Station',
-        'menu_customs'   => 'Customs CEISA 4.0',
-        'menu_billing'   => 'Billing & ERP Odoo',
-        'menu_scanner'   => 'Optical AIDC Scanner',
-        'menu_settings'  => 'Global Settings',
+        'menu_beranda'     => 'Home Overview',
+        'menu_twin'        => '3D Live Map',
+        'menu_integration' => 'API Integration',
+        'menu_denah'       => '35 Ha Plan',
+        'menu_simulator'   => '3D Simulator',
+        'menu_gate'        => 'Gate & Scale',
+        'menu_trucking'    => 'Trucks & Queue',
+        'menu_intermodal'  => 'Rail Siding',
+        'menu_yard'        => 'Yard Blocks',
+        'menu_alat'        => 'Equipment',
+        'menu_kontainer'   => 'Containers',
+        'menu_reefer'      => 'Reefer Units',
+        'menu_cfs'         => 'CFS Warehouse',
+        'menu_customs'     => 'Customs',
+        'menu_billing'     => 'Billing & Pay',
+        'menu_scanner'     => 'QR Scanner',
+        'menu_settings'    => 'Settings',
 
         // Header & Global Shell
         'search_placeholder'   => 'Search container (Ctrl+K)...',
@@ -232,7 +232,7 @@ $GLOBALS['cidp_lang_dict'] = [
         'profile_role_shipper' => 'Shipper Client',
         'profile_settings'     => 'Account & System Settings',
         'profile_sim_panel'    => 'IoT & Sensor Simulation Panel',
-        'profile_site_plan'    => '35 Ha Terminal Site Plan',
+        'profile_site_plan'    => '3D Digital Twin (Live Data)',
         'profile_logout'       => 'Sign Out from System',
         'profile_db_status'    => 'DB Connected',
 
@@ -243,11 +243,11 @@ $GLOBALS['cidp_lang_dict'] = [
         'logout_confirm'       => 'Yes, Sign Out',
 
         // Sidebar Footer Card
-        'sidebar_pattern_kawung'=> 'Maritime Kawung',
-        'sidebar_pattern_parang'=> 'Oceanic Parang',
+        'sidebar_pattern_kawung'=> 'Kawung',
+        'sidebar_pattern_parang'=> 'Parang',
         'sidebar_switch_btn'    => 'Switch',
-        'sidebar_consultant'    => 'Conclusion Consultant',
-        'sidebar_platform'      => '35 Ha Dry Port Platform',
+        'sidebar_consultant'    => 'CIDP Consultant',
+        'sidebar_platform'      => 'Dry Port 35 Ha',
         'sidebar_online'        => 'ONLINE',
 
         // Cockpit Eksekutif (pages/beranda.php)
@@ -373,10 +373,6 @@ function get_localized_menu_clusters($lang = null): array {
             'twin'        => ['icon' => 'fa-tower-broadcast', 'label' => __('menu_twin'), 'zone' => 'EXEC'],
             'integration' => ['icon' => 'fa-network-wired', 'label' => __('menu_integration'), 'zone' => 'EXEC']
         ],
-        __('cluster_spatial') => [
-            'denah'     => ['icon' => 'fa-map-location-dot', 'label' => __('menu_denah'), 'zone' => 'GIS'],
-            'simulator' => ['icon' => 'fa-vr-cardboard', 'label' => __('menu_simulator'), 'zone' => 'GIS']
-        ],
         __('cluster_tms') => [
             'gate'       => ['icon' => 'fa-archway', 'label' => __('menu_gate'), 'zone' => 'TMS'],
             'trucking'   => ['icon' => 'fa-truck-front', 'label' => __('menu_trucking'), 'zone' => 'TMS'],
@@ -394,8 +390,7 @@ function get_localized_menu_clusters($lang = null): array {
         ],
         __('cluster_finance') => [
             'customs'  => ['icon' => 'fa-shield-halved', 'label' => __('menu_customs'), 'zone' => 'ERP'],
-            'billing'  => ['icon' => 'fa-file-invoice-dollar', 'label' => __('menu_billing'), 'zone' => 'ERP'],
-            'settings' => ['icon' => 'fa-sliders', 'label' => __('menu_settings'), 'zone' => 'SYS']
+            'billing'  => ['icon' => 'fa-file-invoice-dollar', 'label' => __('menu_billing'), 'zone' => 'ERP']
         ]
     ];
 }

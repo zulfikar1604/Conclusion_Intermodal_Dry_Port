@@ -9,7 +9,14 @@
 require_once __DIR__ . '/../connection.php';
 require_once __DIR__ . '/../api/preadvice_helper.php';
 require_once __DIR__ . '/../api/twin_state_helper.php';
-if (isset($pdo) && $pdo instanceof PDO) { ensure_integration_schema($pdo); }
+if (isset($pdo) && $pdo instanceof PDO) {
+    ensure_integration_schema($pdo);
+    cidp_ensure_gate_schema($pdo);
+}
+$gate_lanes_catalog = cidp_gate_lane_catalog();
+$inbound_lanes_list  = array_values(array_filter($gate_lanes_catalog, fn($l) => $l['direction'] === 'IN'));
+$outbound_lanes_list = array_values(array_filter($gate_lanes_catalog, fn($l) => $l['direction'] === 'OUT'));
+$vgm_lanes_list      = array_values(array_filter($inbound_lanes_list, fn($l) => !empty($l['has_weighbridge'])));
 
 // Handle Form Aksi POST (Dual-Clearance Gate Out Release)
 $gate_alert = null;
@@ -18,17 +25,22 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
         $truck_id = intval($_POST['truck_id'] ?? 0);
         $plate = trim($_POST['license_plate'] ?? '');
         $ctr_num = strtoupper(trim($_POST['container_number'] ?? ''));
+        $req_out_lane = trim($_POST['lane_id'] ?? $_POST['gate_out_lane'] ?? '');
 
         if (isset($pdo)) {
             try {
                 // 1. Validasi Pabean (SPPB_CLEARED)
                 $customsCleared = true;
                 $customsStatus = 'SPPB_CLEARED';
+                $ctrCargo = 'dry';
+                $ctrBlock = '';
                 if (!empty($ctr_num)) {
-                    $stmtCheckC = $pdo->prepare("SELECT customs_status FROM containers WHERE container_number = ? LIMIT 1");
+                    $stmtCheckC = $pdo->prepare("SELECT customs_status, cargo_type, block FROM containers WHERE container_number = ? LIMIT 1");
                     $stmtCheckC->execute([$ctr_num]);
                     $cData = $stmtCheckC->fetch(PDO::FETCH_ASSOC);
                     $customsStatus = $cData['customs_status'] ?? 'PENDING';
+                    $ctrCargo = $cData['cargo_type'] ?? 'dry';
+                    $ctrBlock = $cData['block'] ?? '';
                     $customsCleared = ($cData && $customsStatus === 'SPPB_CLEARED');
                 }
 
@@ -58,9 +70,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                         'msg' => "Armada <strong>$plate</strong> ($ctr_num) ditahan di gerbang keluar: " . implode(' &amp; ', $reasons) . ". Selesaikan validasi di modul Bea Cukai dan/atau Billing terlebih dahulu."
                     ];
                 } else {
+                    $out_lane = cidp_pick_gate_lane($pdo, 'OUT', [
+                        'lane'       => $req_out_lane,
+                        'cargo_type' => $ctrCargo,
+                        'block'      => $ctrBlock,
+                        'job_type'   => !empty($ctr_num) ? 'pick_up' : 'drop_off',
+                    ]);
+
                     // Update trucks status to gate_out
-                    $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_time = NOW() WHERE id = ? OR license_plate = ?");
-                    $stmtUpT->execute([$truck_id, $plate]);
+                    $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'gate_out', gate_out_lane = ?, gate_out_time = NOW() WHERE id = ? OR license_plate = ?");
+                    $stmtUpT->execute([$out_lane, $truck_id, $plate]);
 
                     // Update container status if present
                     if (!empty($ctr_num)) {
@@ -69,16 +88,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                         $pdo->prepare("UPDATE preadvice SET status = 'ARRIVED' WHERE container_number = ? OR truck_plate = ?")->execute([$ctr_num, $plate]);
                     }
 
-                    // Log audit event
-                    $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_OUT', ?, 'Petugas Gate Outbound', ?, NOW())");
-                    $stmtLog->execute([$ctr_num ?: '-', "Rilis Gate Out armada $plate membawa kontainer $ctr_num. Validasi Pabean: SPPB Lolos, Billing: Lunas."]);
+                    // Log audit event dengan kode lajur spesifik (OUT-01..OUT-04)
+                    $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, notes, created_at) VALUES ('GATE_OUT', ?, ?, 'Petugas Gate Outbound', ?, NOW())");
+                    $stmtLog->execute([$ctr_num ?: '-', $out_lane, "[{$out_lane}] Rilis Gate Out armada $plate membawa kontainer $ctr_num. Validasi Pabean: SPPB Lolos, Billing: Lunas."]);
 
                     get_live_twin_state($pdo, true);
 
                     $gate_alert = [
                         'type' => 'success',
-                        'title' => 'Rilis Gate Out Sukses — Barrier Gate Terbuka',
-                        'msg' => "Armada truk <strong>$plate</strong> dengan kontainer <strong>$ctr_num</strong> berhasil diproses keluar dari Dry Port. Palang keluar Lane 3 terbuka otomatis."
+                        'title' => "Rilis Gate Out Sukses — Palang {$out_lane} Terbuka",
+                        'msg' => "Armada truk <strong>$plate</strong> dengan kontainer <strong>$ctr_num</strong> berhasil diproses keluar melalui <strong>{$out_lane}</strong>. Palang keluar {$out_lane} terbuka otomatis."
                     ];
                 }
             } catch (Exception $e) {
@@ -88,23 +107,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
     } elseif ($_POST['gate_action'] === 'trigger_anpr_gate_in') {
         $plate = strtoupper(trim($_POST['license_plate'] ?? 'B 9812 UIK'));
         $ctr_num = strtoupper(trim($_POST['container_number'] ?? 'MSKU9821450'));
-        $lane = trim($_POST['lane_id'] ?? 'Lane 1 (Heavy Inbound)');
+        $lane_raw = trim($_POST['lane_id'] ?? 'IN-01');
         $driver = trim($_POST['driver_name'] ?? 'Bambang Supriyadi');
         $company = trim($_POST['company'] ?? 'PT Samudera Logistik');
 
         if (isset($pdo)) {
             try {
+                $lane = cidp_pick_gate_lane($pdo, 'IN', ['lane' => $lane_raw]);
+
                 // 1. Cek atau tambahkan truk
                 $stmtCheck = $pdo->prepare("SELECT id FROM trucks WHERE license_plate = ? LIMIT 1");
                 $stmtCheck->execute([$plate]);
                 $exTruck = $stmtCheck->fetch(PDO::FETCH_ASSOC);
 
                 if ($exTruck) {
-                    $stmtUp = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = 'Yard Blok A' WHERE id = ?");
-                    $stmtUp->execute([$exTruck['id']]);
+                    $stmtUp = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_lane = ?, gate_in_time = NOW(), destination = 'Yard Blok A' WHERE id = ?");
+                    $stmtUp->execute([$lane, $exTruck['id']]);
                 } else {
-                    $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, driver_name, company, container_number, target_block, status, job_type, destination, gate_in_time) VALUES (?, ?, ?, ?, 'A', 'in_yard', 'drop_off', 'Yard Blok A', NOW())");
-                    $stmtIns->execute([$plate, $driver, $company, $ctr_num ?: null]);
+                    $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, driver_name, company, container_number, target_block, status, gate_lane, job_type, destination, gate_in_time) VALUES (?, ?, ?, ?, 'A', 'in_yard', ?, 'drop_off', 'Yard Blok A', NOW())");
+                    $stmtIns->execute([$plate, $driver, $company, $ctr_num ?: null, $lane]);
                 }
 
                 // 2. Update atau masukkan status kontainer & akrual biaya
@@ -123,16 +144,16 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     accrue_billing($pdo, $ctr_num, 'Penumpukan Yard (Storage)', 'storage_amount', 275000);
                 }
 
-                // 3. Catat ke yard_events
-                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, 'HW-01 ANPR & OCR', ?, NOW())");
-                $stmtLog->execute([$ctr_num ?: '-', "Deteksi loop induksi & ANPR $lane. Plat: $plate, Box: $ctr_num. Barrier gate terbuka otomatis."]);
+                // 3. Catat ke yard_events dengan kode lajur spesifik (IN-01..IN-06)
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, ?, 'HW-01 ANPR & OCR', ?, NOW())");
+                $stmtLog->execute([$ctr_num ?: '-', $lane, "[{$lane}] Deteksi loop induksi & ANPR {$lane}. Plat: $plate, Box: $ctr_num. Barrier gate terbuka otomatis."]);
 
                 get_live_twin_state($pdo, true);
 
                 $gate_alert = [
                     'type' => 'success',
-                    'title' => "⚡ Sensor ANPR & Loop Detector $lane Terpicu",
-                    'msg' => "Sensor mendeteksi armada <strong>$plate</strong> melintasi induction loop. Kamera ANPR & OCR membaca nomor peti kemas <strong>$ctr_num</strong>. Palang gerbang masuk otomatis terangkat dan data armada tercatat <strong>in_yard</strong> di basis data!"
+                    'title' => "⚡ Sensor ANPR & Loop Detector {$lane} Terpicu",
+                    'msg' => "Sensor pada <strong>{$lane}</strong> mendeteksi armada <strong>$plate</strong> melintasi induction loop. Kamera ANPR & OCR membaca nomor peti kemas <strong>$ctr_num</strong>. Palang gerbang <strong>{$lane}</strong> otomatis terangkat dan data armada tercatat <strong>in_yard</strong>!"
                 ];
             } catch (Exception $e) {
                 $gate_alert = ['type' => 'error', 'title' => 'Gagal Proses ANPR', 'msg' => $e->getMessage()];
@@ -141,6 +162,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
     } elseif ($_POST['gate_action'] === 'trigger_weighbridge') {
         $plate = strtoupper(trim($_POST['license_plate'] ?? 'B 9812 UIK'));
         $ctr_num = strtoupper(trim($_POST['container_number'] ?? 'MSKU9821450'));
+        $wb_lane = cidp_pick_gate_lane($pdo, 'IN', ['lane' => trim($_POST['lane_id'] ?? 'IN-01')]);
+        if (!in_array($wb_lane, ['IN-01', 'IN-02', 'IN-03', 'IN-06'], true)) {
+            $wb_lane = 'IN-01';
+        }
         $gross = floatval($_POST['gross_weight_kg'] ?? 32450.0);
         $tare = floatval($_POST['tare_weight_kg'] ?? 4200.0);
         $net = max(0, $gross - $tare);
@@ -152,18 +177,18 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     accrue_billing($pdo, $ctr_num, 'Penimbangan Jembatan Timbang 80T SOLAS VGM', 'lolo_amount', 75000);
                 }
                 if (!empty($plate)) {
-                    $pdo->prepare("UPDATE trucks SET weight_gross = ?, weight_tare = ? WHERE license_plate = ?")->execute([$gross, $tare, $plate]);
+                    $pdo->prepare("UPDATE trucks SET weight_gross = ?, weight_tare = ?, gate_lane = COALESCE(gate_lane, ?) WHERE license_plate = ?")->execute([$gross, $tare, $wb_lane, $plate]);
                 }
 
-                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
-                $stmtLog->execute([$ctr_num ?: '-', "Penimbangan jembatan timbang Fangda 80T untuk $plate: Bruto {$gross} kg, Tara {$tare} kg, Netto {$net} kg. Status: SOLAS VGM Compliant."]);
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
+                $stmtLog->execute([$ctr_num ?: '-', $wb_lane, "[{$wb_lane}] Penimbangan jembatan timbang Fangda 80T untuk $plate: Bruto {$gross} kg, Tara {$tare} kg, Netto {$net} kg. Status: SOLAS VGM Compliant."]);
 
                 get_live_twin_state($pdo, true);
 
                 $gate_alert = [
                     'type' => 'success',
-                    'title' => "⚡ Sensor Jembatan Timbang 80T (HW-04) Terpicu",
-                    'msg' => "Sensor loadcell Fangda 80 Ton membaca bobot bruto: <strong>" . number_format($gross, 0) . " kg</strong> (Netto: <strong>" . number_format($net, 0) . " kg</strong>). Sertifikat digital <strong>SOLAS VGM Chapter VI</strong> berhasil diterbitkan, biaya VGM masuk Billing ERP!"
+                    'title' => "⚡ Sensor Jembatan Timbang 80T {$wb_lane} Terpicu",
+                    'msg' => "Sensor loadcell Fangda 80 Ton pada <strong>{$wb_lane}</strong> membaca bobot bruto: <strong>" . number_format($gross, 0) . " kg</strong> (Netto: <strong>" . number_format($net, 0) . " kg</strong>). Sertifikat digital <strong>SOLAS VGM Chapter VI</strong> berhasil diterbitkan!"
                 ];
             } catch (Exception $e) {
                 $gate_alert = ['type' => 'error', 'title' => 'Gagal Penimbangan', 'msg' => $e->getMessage()];
@@ -175,17 +200,21 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
         $ctr_num = strtoupper(trim($_POST['container_number'] ?? ''));
         $mission = trim($_POST['mission_type'] ?? 'drop_export');
         $target_block = strtoupper(trim($_POST['target_block'] ?? 'B'));
-        $lane = trim($_POST['lane_id'] ?? 'Lane 1 (Heavy Inbound)');
+        $lane = cidp_pick_gate_lane($pdo, 'IN', [
+            'lane'     => trim($_POST['lane_id'] ?? ''),
+            'block'    => $target_block,
+            'job_type' => (strpos($mission, 'pick') !== false || strpos($mission, 'release') !== false) ? 'pick_up' : 'drop_off',
+        ]);
         $gross = floatval($_POST['weight_gross'] ?? 32000.0);
         $tare = floatval($_POST['weight_tare'] ?? 14000.0);
         $net = max(0, $gross - $tare);
 
         if (isset($pdo)) {
             try {
-                // 1. Update status armada menjadi in_yard
+                // 1. Update status armada menjadi in_yard & simpan gate_lane
                 $dest = "Yard Blok " . $target_block;
-                $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = ? WHERE id = ? OR license_plate = ?");
-                $stmtUpT->execute([$dest, $truck_id, $plate]);
+                $stmtUpT = $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_lane = ?, gate_in_time = NOW(), destination = ? WHERE id = ? OR license_plate = ?");
+                $stmtUpT->execute([$lane, $dest, $truck_id, $plate]);
 
                 // 2. Jika membawa kontainer (Laden In / Empty Return / Dual Cycle), perbarui atau masukkan kontainer
                 if (!empty($ctr_num)) {
@@ -207,13 +236,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                     accrue_billing($pdo, $ctr_num, 'Penumpukan Yard (Storage Blok ' . $target_block . ')', 'storage_amount', 275000);
                 }
 
-                // 3. Catat audit event ke yard_events (ANPR Gate-In & SOLAS VGM)
-                $stmtLog1 = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, 'HW-01 ANPR & OCR', ?, NOW())");
-                $stmtLog1->execute([$ctr_num ?: '-', "Deteksi ANPR $lane untuk $plate (Misi: $mission). Palang masuk terbuka otomatis."]);
+                // 3. Catat audit event ke yard_events (ANPR Gate-In & SOLAS VGM) dengan equipment_id = $lane
+                $stmtLog1 = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, notes, created_at) VALUES ('GATE_IN_ANPR', ?, ?, 'HW-01 ANPR & OCR', ?, NOW())");
+                $stmtLog1->execute([$ctr_num ?: '-', $lane, "[{$lane}] Deteksi ANPR {$lane} untuk $plate (Misi: $mission). Palang masuk terbuka otomatis."]);
 
                 if ($gross > 0 && !empty($ctr_num)) {
-                    $stmtLog2 = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
-                    $stmtLog2->execute([$ctr_num, "SOLAS VGM Verified: Bruto " . number_format($gross, 0, ',', '.') . " kg, Tara " . number_format($tare, 0, ',', '.') . " kg, Netto " . number_format($net, 0, ',', '.') . " kg untuk $plate ke Blok $target_block."]);
+                    $stmtLog2 = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, equipment_id, operator_name, billable_amount, notes, created_at) VALUES ('VGM_WEIGHED', ?, ?, 'HW-04 Weighbridge 80T', 75000, ?, NOW())");
+                    $stmtLog2->execute([$ctr_num, $lane, "[{$lane}] SOLAS VGM Verified: Bruto " . number_format($gross, 0, ',', '.') . " kg, Tara " . number_format($tare, 0, ',', '.') . " kg, Netto " . number_format($net, 0, ',', '.') . " kg untuk $plate ke Blok $target_block."]);
                 }
 
                 get_live_twin_state($pdo, true);
@@ -230,7 +259,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                 $gate_alert = [
                     'type' => 'success',
                     'title' => "⚡ Sukses Gate-In 1-Click: $plate ($mission_label)",
-                    'msg' => "Armada <strong>$plate</strong> berhasil diproses masuk gerbang melalui <strong>$lane</strong>.<br>Kamera ANPR membaca plat nomor, jembatan timbang merekam bobot <strong>" . number_format($gross, 0, ',', '.') . " kg</strong> (SOLAS VGM Sah), dan tiket yard diterbitkan menuju <strong>Blok $target_block</strong>. Palang gerbang otomatis terangkat!"
+                    'msg' => "Armada <strong>$plate</strong> berhasil diproses masuk gerbang melalui <strong>$lane</strong>.<br>Kamera ANPR membaca plat nomor, jembatan timbang merekam bobot <strong>" . number_format($gross, 0, ',', '.') . " kg</strong> (SOLAS VGM Sah), dan tiket yard diterbitkan menuju <strong>Blok $target_block</strong>. Palang {$lane} otomatis terangkat!"
                 ];
             } catch (Exception $e) {
                 $gate_alert = ['type' => 'error', 'title' => 'Gagal Gate-In', 'msg' => $e->getMessage()];
@@ -241,10 +270,14 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
             try {
                 $stmtGetQ = $pdo->query("SELECT * FROM trucks WHERE status IN ('scheduled', 'queuing')");
                 $batch_list = $stmtGetQ->fetchAll(PDO::FETCH_ASSOC);
+                $inPool = ['IN-01', 'IN-02', 'IN-03', 'IN-04', 'IN-05', 'IN-06'];
                 $count = 0;
-                foreach ($batch_list as $bt) {
+                foreach ($batch_list as $bIdx => $bt) {
                     $b_dest = "Yard Blok " . ($bt['target_block'] ?: 'B');
-                    $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_in_time = NOW(), destination = ? WHERE id = ?")->execute([$b_dest, $bt['id']]);
+                    $bLane = !empty($bt['gate_lane'])
+                        ? cidp_normalize_gate_lane($bt['gate_lane'], 'IN')
+                        : $inPool[$bIdx % count($inPool)];
+                    $pdo->prepare("UPDATE trucks SET status = 'in_yard', gate_lane = ?, gate_in_time = NOW(), destination = ? WHERE id = ?")->execute([$bLane, $b_dest, $bt['id']]);
                     if (!empty($bt['container_number'])) {
                         $t_blk = $bt['target_block'] ?: 'B';
                         $stmtExC = $pdo->prepare("SELECT id FROM containers WHERE container_number = ? LIMIT 1");
@@ -264,7 +297,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
                 $gate_alert = [
                     'type' => 'success',
                     'title' => "⚡ Batch Gate-In Selesai ($count Armada)",
-                    'msg' => "Seluruh $count armada antrean terjadwal (Pre-Advice Queue) telah berhasil diproses masuk ke terminal yard sekaligus!"
+                    'msg' => "Seluruh $count armada antrean terjadwal (Pre-Advice Queue) telah didistribusikan ke 6 lajur Gate-In (`IN-01..IN-06`) dan diproses masuk terminal yard!"
                 ];
             } catch (Exception $e) {
                 $gate_alert = ['type' => 'error', 'title' => 'Gagal Batch Gate-In', 'msg' => $e->getMessage()];
@@ -275,13 +308,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST' && isset($_POST['gate_actio
             try {
                 $pdo->exec("DELETE FROM trucks WHERE license_plate IN ('B 9481 UIX', 'B 9120 KLP', 'B 9833 TRK', 'B 9502 PQR', 'B 9044 XZW')");
                 $demo_queuing = [
-                    ['B 9481 UIX', 'PT Samudera Pratama Logistik', 'Budi Santoso', 'drop_export', 'drop_off', 'MSKU9821450', 'B', 'Pabrik Cikarang Jababeka', 32450.00, 14200.00],
-                    ['B 9120 KLP', 'PT Dunex Express Indonesia', 'Bambang Supriyadi', 'pick_import', 'pick_up', NULL, 'A', 'Pabrik MM2100 Cibitung', 14200.00, 14200.00],
-                    ['B 9833 TRK', 'PT Cipta Krida Logistik', 'Dedi Suryanto', 'empty_return', 'drop_off', 'TEMU6543210', 'C', 'Pabrik KIIC Karawang', 16500.00, 14100.00],
-                    ['B 9502 PQR', 'PT Puninar Jaya', 'Hendra Setiawan', 'empty_release', 'pick_up', NULL, 'C', 'Pabrik EJIP Cikarang', 14100.00, 14100.00],
-                    ['B 9044 XZW', 'PT Kamadjaja Logistics', 'Wahyu Pratama', 'dual_cycle', 'drop_off', 'SUDU5544332', 'B', 'Pabrik GIIC Deltamas', 33100.00, 14300.00]
+                    ['B 9481 UIX', 'PT Samudera Pratama Logistik', 'Budi Santoso', 'drop_export', 'drop_off', 'MSKU9821450', 'B', 'Pabrik Cikarang Jababeka', 32450.00, 14200.00, 'IN-01'],
+                    ['B 9120 KLP', 'PT Dunex Express Indonesia', 'Bambang Supriyadi', 'pick_import', 'pick_up', NULL, 'A', 'Pabrik MM2100 Cibitung', 14200.00, 14200.00, 'IN-04'],
+                    ['B 9833 TRK', 'PT Cipta Krida Logistik', 'Dedi Suryanto', 'empty_return', 'drop_off', 'TEMU6543210', 'C', 'Pabrik KIIC Karawang', 16500.00, 14100.00, 'IN-05'],
+                    ['B 9502 PQR', 'PT Puninar Jaya', 'Hendra Setiawan', 'empty_release', 'pick_up', NULL, 'C', 'Pabrik EJIP Cikarang', 14100.00, 14100.00, 'IN-04'],
+                    ['B 9044 XZW', 'PT Kamadjaja Logistics', 'Wahyu Pratama', 'dual_cycle', 'drop_off', 'SUDU5544332', 'B', 'Pabrik GIIC Deltamas', 33100.00, 14300.00, 'IN-02']
                 ];
-                $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, company, driver_name, mission_type, job_type, container_number, target_block, destination, weight_gross, weight_tare, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queuing', NOW())");
+                $stmtIns = $pdo->prepare("INSERT INTO trucks (license_plate, company, driver_name, mission_type, job_type, container_number, target_block, destination, weight_gross, weight_tare, gate_lane, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'queuing', NOW())");
                 foreach ($demo_queuing as $row) {
                     $stmtIns->execute($row);
                 }
@@ -365,10 +398,10 @@ $hardware_list = [
         'spesifikasi' => 'Pembacaan plat nomor otomatis, capture kendaraan, outdoor IP67, integrasi barrier gate & YMS',
         'harga' => 16000000,
         'harga_label' => 'Rp 16.000.000',
-        'unit' => 4,
-        'unit_label' => '4 unit (2 In / 2 Out)',
-        'subtotal' => 64000000,
-        'subtotal_label' => 'Rp 64.000.000',
+        'unit' => 10,
+        'unit_label' => '10 unit (6 In / 4 Out)',
+        'subtotal' => 160000000,
+        'subtotal_label' => 'Rp 160.000.000',
         'link' => 'https://www.hikvision.com/id/products/parking-management/vehicle-access-control-management/anpr-cameras/ds-tcg406-e/'
     ],
     [
@@ -380,10 +413,10 @@ $hardware_list = [
         'spesifikasi' => 'Membaca nomor kontainer ISO 6346 (4 huruf + 7 angka), multi-angle recognition, integrasi gate system',
         'harga' => 55000000,
         'harga_label' => 'Rp 55.000.000',
-        'unit' => 4,
-        'unit_label' => '4 unit (2 Portal In)',
-        'subtotal' => 220000000,
-        'subtotal_label' => 'Rp 220.000.000',
+        'unit' => 6,
+        'unit_label' => '6 unit (6 Portal In)',
+        'subtotal' => 330000000,
+        'subtotal_label' => 'Rp 330.000.000',
         'link' => 'https://www.hikvision.com/id/products/ITS-Products/Checkpoint-Systems/Checkpoint-Capture-Units/ids-tcv300-a6i/'
     ],
     [
@@ -440,10 +473,10 @@ $hardware_list = [
         'spesifikasi' => 'Jembatan timbang kendaraan kapasitas 80 ton, digital load cell indicator, sertifikasi SOLAS VGM, integrasi YMS',
         'harga' => 267000000,
         'harga_label' => 'Rp 267.000.000',
-        'unit' => 2,
-        'unit_label' => '2 unit (Inbound Lanes)',
-        'subtotal' => 534000000,
-        'subtotal_label' => 'Rp 534.000.000',
+        'unit' => 4,
+        'unit_label' => '4 unit (IN-01..03 & IN-06)',
+        'subtotal' => 1068000000,
+        'subtotal_label' => 'Rp 1.068.000.000',
         'link' => 'https://cnfjkeda.en.made-in-china.com/product/aQRUXTBbvLYe/China-60-Ton-80-Ton-Weighbridge-Price-Electronic-Truck-Scale.html'
     ],
     [
@@ -455,10 +488,10 @@ $hardware_list = [
         'spesifikasi' => 'Frekuensi 860-960 MHz, jarak baca hingga 20 meter, identifikasi e-Pass driver & armada truk otomatis',
         'harga' => 3000000,
         'harga_label' => 'Rp 3.000.000',
-        'unit' => 4,
-        'unit_label' => '4 unit (Gate Lanes)',
-        'subtotal' => 12000000,
-        'subtotal_label' => 'Rp 12.000.000',
+        'unit' => 10,
+        'unit_label' => '10 unit (6 In / 4 Out)',
+        'subtotal' => 30000000,
+        'subtotal_label' => 'Rp 30.000.000',
         'link' => 'https://www.orbitadigital.com/en/access-controls/accessories/19689-uhf-reader-20m-access-reader-uhf-tag-access-range-up-to-20-m.html'
     ],
     [
@@ -485,10 +518,10 @@ $hardware_list = [
         'spesifikasi' => 'Palang otomatis 3 meter, motor DC brushless (kecepatan buka 1-1.5 detik), sensor loop detector, integrasi ANPR/RFID',
         'harga' => 60000000,
         'harga_label' => 'Rp 60.000.000',
-        'unit' => 4,
-        'unit_label' => '4 unit (2 In / 2 Out)',
-        'subtotal' => 240000000,
-        'subtotal_label' => 'Rp 240.000.000',
+        'unit' => 10,
+        'unit_label' => '10 unit (6 In / 4 Out)',
+        'subtotal' => 600000000,
+        'subtotal_label' => 'Rp 600.000.000',
         'link' => 'https://jutaigateopener.en.made-in-china.com/product/MObfpFLKLorl/China-Automatic-Barrier-Gate-with-Single-Bar-Gate-Arm-Barrier-Automatic-Parking-Gate-Barrier.html'
     ],
     [
@@ -500,10 +533,10 @@ $hardware_list = [
         'spesifikasi' => 'Menampilkan nomor gate, instruksi sopir ("SILAHKAN MASUK"), nomor kontainer, dan blok tujuan yard',
         'harga' => 47000000,
         'harga_label' => 'Rp 47.000.000',
-        'unit' => 4,
-        'unit_label' => '4 unit (Lanes)',
-        'subtotal' => 188000000,
-        'subtotal_label' => 'Rp 188.000.000',
+        'unit' => 10,
+        'unit_label' => '10 unit (6 In / 4 Out)',
+        'subtotal' => 470000000,
+        'subtotal_label' => 'Rp 470.000.000',
         'link' => 'https://chipshow.en.made-in-china.com/product/KYarZvkHyFhd/China-Sc-Smart-P6-67-Outdoor-LED-Display-for-Wall-Mounted-Advertising.html'
     ],
     [
@@ -809,12 +842,12 @@ foreach ($hardware_list as $item) {
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 mb-2.5">
         <div class="bg-white rounded-xl p-2.5 border border-slate-200/80 shadow-2xs flex items-center justify-between transition-all hover:border-orange-200">
             <div class="min-w-0 pr-2">
-                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Inbound Gate Lanes</p>
+                <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Plaza Gate Otomasi</p>
                 <div class="flex items-baseline space-x-1.5">
-                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">2 / 2 Lane</h3>
-                    <span class="text-[9px] text-emerald-600 font-bold">Aktif</span>
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">6 IN / 4 OUT</h3>
+                    <span class="text-[9px] text-emerald-600 font-bold">10 Lajur</span>
                 </div>
-                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Lane 1 (OCR) &amp; Lane 2 (e-Seal)</p>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">4 Timbang VGM 80T • 6 OCR In</p>
             </div>
             <div class="w-7 h-7 rounded-lg bg-blue-50 text-[#0170b9] flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
                 <i class="fa-solid fa-arrow-right-to-bracket"></i>
@@ -842,7 +875,7 @@ foreach ($hardware_list as $item) {
                     <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">26 Perangkat</h3>
                     <span class="text-[9px] text-indigo-600 font-bold"><?= $live_count ?> Live</span>
                 </div>
-                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Total 1.099 Unit di 35 Ha</p>
+                <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Total <?= number_format($total_unit, 0, ',', '.') ?> Unit di 35 Ha</p>
             </div>
             <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center text-[11px] flex-shrink-0 shadow-2xs">
                 <i class="fa-solid fa-server"></i>
@@ -853,7 +886,7 @@ foreach ($hardware_list as $item) {
             <div class="min-w-0 pr-2">
                 <p class="text-[9px] font-bold text-slate-400 uppercase tracking-wider truncate mb-0.5">Total CAPEX Hardware</p>
                 <div class="flex items-baseline space-x-1.5">
-                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">Rp 18,94 M</h3>
+                    <h3 class="text-[13.5px] font-extrabold text-slate-900 tracking-tight leading-tight">Rp <?= number_format($total_capex / 1000000000, 2, ',', '.') ?> M</h3>
                     <span class="text-[9px] text-slate-500 font-bold">6 Klaster</span>
                 </div>
                 <p class="text-[9px] text-slate-500 font-semibold mt-0.5 truncate">Investasi Fasilitas Dry Port</p>
@@ -875,9 +908,9 @@ foreach ($hardware_list as $item) {
                 <i class="fa-solid fa-plus text-[10px]"></i>
                 <span>Registrasi Pra-Gate</span>
             </button>
-            <a href="dashboard.php?page=simulator" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1.5 shadow-2xs">
+            <a href="dashboard.php?page=twin&view=gate" class="px-2.5 py-1 bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white rounded-lg text-[11px] font-bold transition flex items-center space-x-1.5 shadow-2xs" title="Pantau Gate Automasi di Digital Twin 3D">
                 <i class="fa-solid fa-cube text-[10px]"></i>
-                <span>Simulasi 3D</span>
+                <span>Digital Twin 3D</span>
             </a>
             <button onclick="printGateRekap()" class="px-2.5 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center cursor-pointer" title="Cetak Rekapitulasi Arus Gerbang Format Resmi A4">
                 <i class="fa-solid fa-print mr-1 text-[#0170b9] text-[10px]"></i> Cetak Rekap Resmi
@@ -897,7 +930,7 @@ foreach ($hardware_list as $item) {
         </button>
         <button onclick="switchGateTab('tab-katalog')" id="btn-tab-katalog" class="tab-btn flex-1 min-w-[120px] py-1.5 px-2.5 rounded-lg text-[11.5px] font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center justify-center space-x-1.5 cursor-pointer">
             <i class="fa-solid fa-list-check text-[11px]"></i>
-            <span>Katalog Hardware (26 Item)</span>
+            <span>Lampiran SRS: Katalog Hardware (26 Item)</span>
         </button>
         <button onclick="switchGateTab('tab-telemetri')" id="btn-tab-telemetri" class="tab-btn flex-1 min-w-[120px] py-1.5 px-2.5 rounded-lg text-[11.5px] font-medium transition-all text-slate-600 hover:text-orange-600 hover:bg-orange-50/70 flex items-center justify-center space-x-1.5 cursor-pointer">
             <i class="fa-solid fa-chart-line text-[11px]"></i>
@@ -913,60 +946,6 @@ foreach ($hardware_list as $item) {
     <!-- TAB 1: SIMULASI ALUR GATE & SENSOR INTERAKTIF -->
     <!-- ======================================================================= -->
     <div id="tab-simulasi" class="tab-content space-y-6">
-        <!-- Visual Alur 5 Tahap Gate-In -->
-        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
-            <h2 class="text-sm font-bold text-gray-800 uppercase tracking-wider mb-4 flex items-center">
-                <i class="fa-solid fa-diagram-project text-[#0170b9] mr-2"></i>
-                Alur Otomasi Gerbang Masuk (Inbound Lane 1)
-            </h2>
-            <div class="cidp-flow grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3">
-                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
-                    <span class="text-[10px] font-extrabold text-blue-600 bg-blue-100/70 px-2 py-0.5 rounded-md inline-block mb-2">TAHAP 1</span>
-                    <h3 class="text-xs font-bold text-gray-900">Kamera ANPR</h3>
-                    <p class="text-[11px] text-gray-500 mt-1">Capture plat nomor truk saat melintasi induction loop</p>
-                    <div class="mt-3 text-[11px] font-mono text-slate-700 bg-white p-1.5 rounded border border-slate-200">
-                        <i class="fa-solid fa-camera text-blue-500 mr-1"></i> DS-TCG406-E
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
-                    <span class="text-[10px] font-extrabold text-indigo-600 bg-indigo-100/70 px-2 py-0.5 rounded-md inline-block mb-2">TAHAP 2</span>
-                    <h3 class="text-xs font-bold text-gray-900">OCR Kontainer</h3>
-                    <p class="text-[11px] text-gray-500 mt-1">Ekstraksi nomor ISO 6346 (4 huruf + 7 angka) & tipe box</p>
-                    <div class="mt-3 text-[11px] font-mono text-slate-700 bg-white p-1.5 rounded border border-slate-200">
-                        <i class="fa-solid fa-expand text-indigo-500 mr-1"></i> iDS-TCV300-A6I
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
-                    <span class="text-[10px] font-extrabold text-emerald-600 bg-emerald-100/70 px-2 py-0.5 rounded-md inline-block mb-2">TAHAP 3</span>
-                    <h3 class="text-xs font-bold text-gray-900">Weighbridge 80t</h3>
-                    <p class="text-[11px] text-gray-500 mt-1">Penimbangan bobot riil & verifikasi batas VGM SOLAS</p>
-                    <div class="mt-3 text-[11px] font-mono text-slate-700 bg-white p-1.5 rounded border border-slate-200">
-                        <i class="fa-solid fa-scale-balanced text-emerald-500 mr-1"></i> Fangda 80 Ton
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
-                    <span class="text-[10px] font-extrabold text-purple-600 bg-purple-100/70 px-2 py-0.5 rounded-md inline-block mb-2">TAHAP 4</span>
-                    <h3 class="text-xs font-bold text-gray-900">Edge AI PC</h3>
-                    <p class="text-[11px] text-gray-500 mt-1">Validasi surat jalan, manifest EDI & booking tiket</p>
-                    <div class="mt-3 text-[11px] font-mono text-slate-700 bg-white p-1.5 rounded border border-slate-200">
-                        <i class="fa-solid fa-microchip text-purple-500 mr-1"></i> ARK-3532 Fanless
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3.5 relative overflow-hidden">
-                    <span class="text-[10px] font-extrabold text-amber-600 bg-amber-100/70 px-2 py-0.5 rounded-md inline-block mb-2">TAHAP 5</span>
-                    <h3 class="text-xs font-bold text-gray-900">LED & Palang</h3>
-                    <p class="text-[11px] text-gray-500 mt-1">Display arahan blok yard & barrier gate terbuka otomatis</p>
-                    <div class="mt-3 text-[11px] font-mono text-slate-700 bg-white p-1.5 rounded border border-slate-200">
-                        <i class="fa-solid fa-traffic-light text-amber-500 mr-1"></i> Palang Terbuka
-                    </div>
-                </div>
-            </div>
-        </div>
-
         <!-- ================================================================= -->
         <!-- ANTREAN TRUK TERJADWAL & PRA-GATE BOOKING (PRE-ADVICE QUEUE)     -->
         <!-- ================================================================= -->
@@ -987,7 +966,7 @@ foreach ($hardware_list as $item) {
                 </div>
                 <div class="flex items-center space-x-2 shrink-0">
                     <?php if (!empty($queuing_trucks)): ?>
-                    <form method="POST" onsubmit="return confirm('Proses seluruh armada antrean ke terminal yard sekaligus?');" class="inline">
+                    <form method="POST" data-confirm="Proses seluruh <?= count($queuing_trucks) ?> armada antrean ke terminal yard sekaligus?" data-confirm-title="Konfirmasi Batch Gate-In" data-confirm-tone="primary" class="inline">
                         <input type="hidden" name="gate_action" value="batch_gate_in">
                         <button type="submit" class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-1.5">
                             <i class="fa-solid fa-bolt-lightning text-amber-300"></i>
@@ -995,7 +974,7 @@ foreach ($hardware_list as $item) {
                         </button>
                     </form>
                     <?php endif; ?>
-                    <form method="POST" class="inline">
+                    <form method="POST" data-confirm="Muat ulang seluruh 5 skenario antrean armada pra-gate ke status awal?" data-confirm-title="Reset Antrean Demo" data-confirm-tone="danger" class="inline">
                         <input type="hidden" name="gate_action" value="reset_demo_queue">
                         <button type="submit" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold transition flex items-center space-x-1" title="Reset 5 skenario armada pra-gate">
                             <i class="fa-solid fa-rotate-left text-slate-500"></i>
@@ -1013,7 +992,7 @@ foreach ($hardware_list as $item) {
                 <h4 class="text-sm font-bold text-gray-800">Semua Antrean Telah Diproses</h4>
                 <p class="text-xs text-gray-500 mt-1">5 skenario armada sudah masuk atau selesai dilayani.</p>
                 <div class="mt-4 flex items-center justify-center space-x-2">
-                    <form method="POST" class="inline">
+                    <form method="POST" data-confirm="Muat ulang 5 skenario antrean armada pra-gate sekarang?" data-confirm-title="Muat Ulang Antrean" data-confirm-tone="warning" class="inline">
                         <input type="hidden" name="gate_action" value="reset_demo_queue">
                         <button type="submit" class="px-4 py-2 bg-[#0170b9] hover:bg-[#0170b9] text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center space-x-2">
                             <i class="fa-solid fa-arrows-rotate text-amber-400"></i>
@@ -1021,7 +1000,7 @@ foreach ($hardware_list as $item) {
                         </button>
                     </form>
                     <button onclick="showGatePassModal()" class="px-3.5 py-2 bg-white border border-gray-300 hover:bg-gray-50 text-gray-700 rounded-xl text-xs font-semibold transition">
-                        <i class="fa-solid fa-plus mr-1"></i>Input Truk Baru
+                        <i class="fa-solid fa-plus mr-1"></i>Daftar Pre-Advice Truk
                     </button>
                 </div>
             </div>
@@ -1034,7 +1013,7 @@ foreach ($hardware_list as $item) {
                         'badge_bg' => 'bg-blue-100 text-blue-800 border-blue-200',
                         'card_border' => 'hover:border-blue-400',
                         'icon' => 'fa-arrow-down-to-bracket text-blue-600',
-                        'lane' => 'Lane 1 (Heavy Inbound)',
+                        'lane' => 'IN-01',
                         'desc' => 'Truk bawa kontainer ekspor ex-pabrik. Ditimbang SOLAS VGM &amp; dialokasikan ke Blok B Ekspor.',
                         'btn_label' => '1-Click Gate-In Ekspor (VGM + Blok B)'
                     ],
@@ -1043,7 +1022,7 @@ foreach ($hardware_list as $item) {
                         'badge_bg' => 'bg-amber-100 text-amber-900 border-amber-200',
                         'card_border' => 'hover:border-amber-400',
                         'icon' => 'fa-arrow-up-from-bracket text-amber-600',
-                        'lane' => 'Lane 2 (Fast-Track / Empty)',
+                        'lane' => 'IN-04',
                         'desc' => 'Truk chassis kosong masuk ambil box impor di Blok A ex-kereta Priok. SPPB Bea Cukai lolos.',
                         'btn_label' => '1-Click Gate-In Ambil Impor (Blok A)'
                     ],
@@ -1052,7 +1031,7 @@ foreach ($hardware_list as $item) {
                         'badge_bg' => 'bg-slate-100 text-slate-800 border-slate-300',
                         'card_border' => 'hover:border-slate-400',
                         'icon' => 'fa-rotate-left text-slate-600',
-                        'lane' => 'Lane 2 (Fast-Track / Empty)',
+                        'lane' => 'IN-05',
                         'desc' => 'Kembalikan kontainer kosong setelah dibongkar di pabrik ke Depo Empty Blok C untuk stock.',
                         'btn_label' => '1-Click Gate-In Return Kosong (Blok C)'
                     ],
@@ -1061,7 +1040,7 @@ foreach ($hardware_list as $item) {
                         'badge_bg' => 'bg-cyan-100 text-cyan-900 border-cyan-200',
                         'card_border' => 'hover:border-cyan-400',
                         'icon' => 'fa-box-open text-cyan-600',
-                        'lane' => 'Lane 2 (Fast-Track / Empty)',
+                        'lane' => 'IN-04',
                         'desc' => 'Truk chassis kosong ambil box kosong dari Depo Blok C untuk stuffing ekspor barang pabrik.',
                         'btn_label' => '1-Click Gate-In Ambil Kosong (Blok C)'
                     ],
@@ -1070,7 +1049,7 @@ foreach ($hardware_list as $item) {
                         'badge_bg' => 'bg-purple-100 text-purple-900 border-purple-200',
                         'card_border' => 'hover:border-purple-400',
                         'icon' => 'fa-arrows-rotate text-purple-600',
-                        'lane' => 'Lane 1 (Heavy Inbound)',
+                        'lane' => 'IN-02',
                         'desc' => 'Efisiensi 100%: Drop box ekspor di Blok B lalu langsung ambil box impor di Blok A.',
                         'btn_label' => '1-Click Gate-In Dual Cycle (Blok B &amp; A)'
                     ]
@@ -1083,10 +1062,12 @@ foreach ($hardware_list as $item) {
                         'badge_bg' => 'bg-gray-100 text-gray-800 border-gray-200',
                         'card_border' => 'hover:border-gray-400',
                         'icon' => 'fa-truck text-gray-600',
-                        'lane' => 'Lane 1 (Inbound)',
+                        'lane' => 'IN-01',
                         'desc' => 'Misi operasional terjadwal dry port.',
                         'btn_label' => 'Proses Gate-In'
                     ];
+                    $qt_lane = !empty($qt['gate_lane']) ? cidp_normalize_gate_lane($qt['gate_lane'], 'IN') : $m_info['lane'];
+                    $m_info['lane'] = $qt_lane;
                     $has_box = !empty($qt['container_number']);
                 ?>
                 <div class="bg-white rounded-xl p-4 border border-gray-200/80 shadow-2xs <?= $m_info['card_border'] ?> transition-all flex flex-col justify-between space-y-3 relative group">
@@ -1189,7 +1170,7 @@ foreach ($hardware_list as $item) {
 
             <!-- 3 Trigger Action Cards -->
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 pt-1">
-                <!-- Trigger 1: ANPR & Induction Loop Lane 1 -->
+                <!-- Trigger 1: ANPR & Induction Loop (6 Gate-In Lanes) -->
                 <div class="bg-gradient-to-b from-amber-50/70 via-amber-50/20 to-white rounded-xl p-4 border-2 border-amber-300 hover:border-amber-500 hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -1197,14 +1178,18 @@ foreach ($hardware_list as $item) {
                                 <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                                 HW-01 &bull; ANPR &amp; LOOP
                             </span>
-                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Lane 1 Inbound</span>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">6 Gate-In (IN-01..06)</span>
                         </div>
                         <h4 class="text-xs font-extrabold text-slate-900 mt-2">ANPR &amp; Loop Gate-In</h4>
-                        <p class="text-[11px] text-slate-600 mt-1">Baca plat + ISO kontainer &bull; buka palang masuk.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Pilih lajur masuk (IN-01..06), baca plat + ISO kontainer &bull; buka palang masuk.</p>
                     </div>
                     <form method="POST" class="mt-4 pt-3 border-t border-amber-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="trigger_anpr_gate_in">
-                        <input type="hidden" name="lane_id" value="Lane 1 (Heavy Inbound)">
+                        <select name="lane_id" class="w-full px-2.5 py-1.5 bg-white border border-amber-300 focus:border-amber-500 rounded-lg text-[11px] font-mono font-bold text-slate-800">
+                            <?php foreach ($inbound_lanes_list as $il): ?>
+                                <option value="<?= htmlspecialchars($il['code']) ?>"><?= htmlspecialchars($il['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
                         <div class="grid grid-cols-2 gap-2">
                             <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-white border border-amber-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 rounded-lg text-xs font-mono font-extrabold text-slate-900 uppercase shadow-2xs" placeholder="Plat Truk">
                             <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-white border border-amber-300 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 rounded-lg text-xs font-mono font-extrabold text-blue-700 uppercase shadow-2xs" placeholder="No. Kontainer">
@@ -1216,7 +1201,7 @@ foreach ($hardware_list as $item) {
                     </form>
                 </div>
 
-                <!-- Trigger 2: Weighbridge 80 Ton (SOLAS VGM) -->
+                <!-- Trigger 2: Weighbridge 80 Ton (4 Timbangan SOLAS VGM) -->
                 <div class="bg-gradient-to-b from-emerald-50/70 via-emerald-50/20 to-white rounded-xl p-4 border-2 border-emerald-300 hover:border-emerald-500 hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -1224,13 +1209,18 @@ foreach ($hardware_list as $item) {
                                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                                 HW-04 &bull; WEIGHBRIDGE 80T
                             </span>
-                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Loadcell Otomatis</span>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">4 Deck VGM 80T</span>
                         </div>
                         <h4 class="text-xs font-extrabold text-slate-900 mt-2">Weighbridge 80T (SOLAS VGM)</h4>
-                        <p class="text-[11px] text-slate-600 mt-1">Timbang beban statis &bull; cetak sertifikat VGM.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Timbang beban statis di lajur VGM &bull; cetak sertifikat SOLAS.</p>
                     </div>
                     <form method="POST" class="mt-4 pt-3 border-t border-emerald-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="trigger_weighbridge">
+                        <select name="lane_id" class="w-full px-2.5 py-1.5 bg-white border border-emerald-300 focus:border-emerald-500 rounded-lg text-[11px] font-mono font-bold text-slate-800">
+                            <?php foreach ($vgm_lanes_list as $vl): ?>
+                                <option value="<?= htmlspecialchars($vl['code']) ?>"><?= htmlspecialchars($vl['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
                         <div class="grid grid-cols-2 gap-2">
                             <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-white border border-emerald-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-lg text-xs font-mono font-extrabold text-slate-900 uppercase shadow-2xs" placeholder="Plat Truk">
                             <input type="number" name="gross_weight_kg" value="32450" class="px-2.5 py-1.5 bg-white border border-emerald-300 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 rounded-lg text-xs font-mono font-extrabold text-emerald-800 text-right shadow-2xs" placeholder="Berat Bruto (kg)">
@@ -1242,7 +1232,7 @@ foreach ($hardware_list as $item) {
                     </form>
                 </div>
 
-                <!-- Trigger 3: Dual-Clearance Gate Outbound -->
+                <!-- Trigger 3: Dual-Clearance Gate Outbound (4 Gate-Out Lanes) -->
                 <div class="bg-gradient-to-b from-blue-50/70 via-blue-50/20 to-white rounded-xl p-4 border-2 border-blue-300 hover:border-blue-500 hover:shadow-md transition-all flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between mb-2">
@@ -1250,13 +1240,18 @@ foreach ($hardware_list as $item) {
                                 <span class="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
                                 HW-05 &bull; BARRIER GATE OUT
                             </span>
-                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">Lane 3 Outbound</span>
+                            <span class="px-2 py-0.5 bg-slate-100 text-slate-700 font-bold rounded text-[9.5px] font-mono border border-slate-200">4 Gate-Out (OUT-01..04)</span>
                         </div>
                         <h4 class="text-xs font-extrabold text-slate-900 mt-2">Gate-Out Dual Clearance</h4>
-                        <p class="text-[11px] text-slate-600 mt-1">Validasi SPPB CEISA + Billing Lunas &bull; buka palang keluar.</p>
+                        <p class="text-[11px] text-slate-600 mt-1">Validasi SPPB CEISA + Billing Lunas &bull; buka palang keluar (OUT-01..04).</p>
                     </div>
                     <form method="POST" class="mt-4 pt-3 border-t border-blue-200/70 space-y-2">
                         <input type="hidden" name="gate_action" value="release_gate_out">
+                        <select name="lane_id" class="w-full px-2.5 py-1.5 bg-white border border-blue-300 focus:border-blue-500 rounded-lg text-[11px] font-mono font-bold text-slate-800">
+                            <?php foreach ($outbound_lanes_list as $ol): ?>
+                                <option value="<?= htmlspecialchars($ol['code']) ?>"><?= htmlspecialchars($ol['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
                         <div class="grid grid-cols-2 gap-2">
                             <input type="text" name="license_plate" value="B 9812 UIK" class="px-2.5 py-1.5 bg-white border border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg text-xs font-mono font-extrabold text-slate-900 uppercase shadow-2xs" placeholder="Plat Truk">
                             <input type="text" name="container_number" value="MSKU9821450" class="px-2.5 py-1.5 bg-white border border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 rounded-lg text-xs font-mono font-extrabold text-blue-700 uppercase shadow-2xs" placeholder="No. Kontainer">
@@ -1270,157 +1265,88 @@ foreach ($hardware_list as $item) {
             </div>
         </div>
 
-        <!-- Live Gate Lanes Telemetry Feeds -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <!-- Lane 1: Inbound Heavy (OCR + Weighbridge 80t) -->
-            <div class="bg-gradient-to-b from-emerald-50/50 via-white to-white rounded-2xl p-5 shadow-sm border-2 border-emerald-300/80 hover:border-emerald-500 transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between pb-3 border-b border-emerald-100 mb-3">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-                            <span class="text-xs font-mono font-extrabold tracking-wider text-emerald-800 uppercase">Lane 1 (Inbound Heavy)</span>
-                        </div>
-                        <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full text-[10px] font-mono font-extrabold">ONLINE</span>
+        <?php
+        $gate_snapshot = get_live_twin_state($pdo, false);
+        $gate_live_lanes = $gate_snapshot['physical']['gate']['lanes'] ?? [];
+        ?>
+        <!-- Live Gate Plaza 10-Lane Telemetry Console (6 Gate-In + 4 Gate-Out) -->
+        <div class="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-sm space-y-4">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-xl bg-blue-50 text-[#0170b9] border border-blue-200 flex items-center justify-center text-sm">
+                        <i class="fa-solid fa-road"></i>
+                    </span>
+                    <div>
+                        <h3 class="text-sm font-extrabold text-slate-900">Monitor Telemetri Plaza Gate 10 Lajur (6 Gate-In &amp; 4 Gate-Out)</h3>
+                        <p class="text-[11px] text-slate-500">Status palang barrier, kamera ANPR/OCR ISO 6346, serta beban VGM SOLAS 80T secara real-time per lajur.</p>
                     </div>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                    <button type="button" onclick="filterGateLaneCards('all')" data-lane-filter="all" class="gate-lane-filter-btn px-2.5 py-1 rounded-lg bg-[#0170b9] text-white font-bold cursor-pointer">Semua (10)</button>
+                    <button type="button" onclick="filterGateLaneCards('IN')" data-lane-filter="IN" class="gate-lane-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-sky-50 hover:text-sky-700 font-bold cursor-pointer">6 Gate-In (IN-01..06)</button>
+                    <button type="button" onclick="filterGateLaneCards('OUT')" data-lane-filter="OUT" class="gate-lane-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-orange-50 hover:text-orange-700 font-bold cursor-pointer">4 Gate-Out (OUT-01..04)</button>
+                    <button type="button" onclick="refreshGateLanesLive()" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 font-bold cursor-pointer" title="Segarkan State Live 10 Lajur">
+                        <i class="fa-solid fa-rotate mr-1"></i>Sync
+                    </button>
+                </div>
+            </div>
 
-                    <div class="space-y-3">
-                        <div class="bg-white rounded-xl p-3 border border-amber-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-camera text-blue-600 mr-1.5"></i> Kamera ANPR</span>
-                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">LIVE FEED</span>
-                            </span>
-                            <span class="text-base font-mono font-black tracking-wider text-amber-600 block mt-1">
-                                <?= !empty($latest_truck['license_plate']) ? htmlspecialchars($latest_truck['license_plate']) : 'B 9182 TE' ?>
+            <div id="gateTenLaneGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+                <?php foreach ($gate_lanes_catalog as $code => $meta):
+                    $lst = $gate_live_lanes[$code] ?? [];
+                    $isIn = ($meta['direction'] === 'IN');
+                    $isOpen = (($lst['barrier'] ?? 'CLOSED') === 'OPEN');
+                    $plateTxt = !empty($lst['truck_plate']) ? $lst['truck_plate'] : ($isIn ? ($code === 'IN-01' && !empty($latest_truck['license_plate']) ? $latest_truck['license_plate'] : 'Siaga ANPR') : 'Siaga SPPB');
+                    $ctrTxt = !empty($lst['container_number']) ? $lst['container_number'] : 'Menunggu Truk';
+                    $wtKg = (float)($lst['weight_kg'] ?? 0);
+                    $wtTxt = !empty($meta['has_weighbridge']) ? ($wtKg > 0 ? number_format($wtKg, 0, ',', '.') . ' kg' : '0 kg (Zeroed)') : 'Auto Bypass';
+                    $borderCls = $isOpen
+                        ? 'border-emerald-400 bg-gradient-to-b from-emerald-50/70 to-white ring-1 ring-emerald-200'
+                        : ($isIn ? 'border-sky-200/90 bg-gradient-to-b from-sky-50/40 to-white hover:border-sky-400' : 'border-orange-200/90 bg-gradient-to-b from-orange-50/40 to-white hover:border-orange-400');
+                    $badgeCls = $isOpen ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : ($isIn ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-orange-100 text-orange-800 border-orange-200');
+                    $dotCls = $isOpen ? 'bg-emerald-500 animate-ping' : ($isIn ? 'bg-sky-500' : 'bg-orange-500');
+                ?>
+                <div data-gate-lane-card="<?= htmlspecialchars($code) ?>" data-lane-dir="<?= htmlspecialchars($meta['direction']) ?>" class="rounded-xl p-3.5 border-2 <?= $borderCls ?> shadow-2xs transition-all flex flex-col justify-between space-y-2.5">
+                    <div>
+                        <div class="flex items-center justify-between gap-1 pb-2 border-b border-slate-100">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span data-lane-dot class="w-2 h-2 rounded-full <?= $dotCls ?> shrink-0"></span>
+                                <span class="font-mono font-black text-xs text-slate-900"><?= htmlspecialchars($code) ?></span>
+                            </div>
+                            <span data-lane-status class="px-2 py-0.5 rounded-full text-[9.5px] font-mono font-extrabold border <?= $badgeCls ?>">
+                                <?= htmlspecialchars($lst['barrier'] ?? 'CLOSED') === 'OPEN' ? 'OPEN' : 'STANDBY' ?>
                             </span>
                         </div>
-
-                        <div class="bg-white rounded-xl p-3 border border-sky-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-expand text-indigo-600 mr-1.5"></i> OCR Container Gantry</span>
-                                <span class="text-[9px] bg-sky-100 text-sky-800 border border-sky-200 px-1.5 py-0.5 rounded font-mono font-bold">ISO 6346</span>
-                            </span>
-                            <span class="text-base font-mono font-black tracking-wider text-blue-700 block mt-1">
-                                <?= !empty($latest_truck['container_number']) ? htmlspecialchars($latest_truck['container_number']) : 'MSKU 782910-4' ?>
-                            </span>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-3 border border-emerald-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-scale-balanced text-emerald-600 mr-1.5"></i> Jembatan Timbang 80T</span>
-                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">VGM SOLAS</span>
-                            </span>
-                            <div class="flex items-center justify-between mt-1">
-                                <span class="text-sm font-mono font-black text-slate-900">32.450 kg</span>
-                                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold rounded">VERIFIED</span>
+                        <div class="text-[10.5px] font-bold text-slate-700 mt-1.5 truncate" title="<?= htmlspecialchars($meta['name']) ?>"><?= htmlspecialchars($meta['short_name']) ?></div>
+                        <div class="mt-2 space-y-1 text-[10.5px] font-mono bg-white rounded-lg p-2 border border-slate-100">
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-slate-400">Plat:</span>
+                                <span data-lane-plate class="font-bold text-slate-900 truncate"><?= htmlspecialchars($plateTxt) ?></span>
+                            </div>
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-slate-400">Box:</span>
+                                <span data-lane-ctr class="font-bold text-blue-700 truncate"><?= htmlspecialchars($ctrTxt) ?></span>
+                            </div>
+                            <div class="flex items-center justify-between gap-1">
+                                <span class="text-slate-400"><?= !empty($meta['has_weighbridge']) ? 'VGM 80T:' : 'Mode:' ?></span>
+                                <span data-lane-weight class="font-bold text-emerald-700 truncate"><?= htmlspecialchars($wtTxt) ?></span>
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-emerald-100 flex items-center justify-between text-xs">
-                    <span class="text-slate-500 font-semibold">Barrier Gate:</span>
-                    <span class="text-emerald-700 font-mono font-extrabold flex items-center gap-1"><i class="fa-solid fa-check-circle text-emerald-600"></i> NORMAL STANDBY</span>
-                </div>
-            </div>
-
-            <!-- Lane 2: Inbound Fast-Track / Empty & Reefer -->
-            <div class="bg-gradient-to-b from-cyan-50/50 via-white to-white rounded-2xl p-5 shadow-sm border-2 border-cyan-300/80 hover:border-cyan-500 transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between pb-3 border-b border-cyan-100 mb-3">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-cyan-500"></span>
-                            <span class="text-xs font-mono font-extrabold tracking-wider text-cyan-900 uppercase">Lane 2 (Fast-Track / Reefer)</span>
+                    <div class="flex items-center justify-between pt-1.5 border-t border-slate-100 text-[10px]">
+                        <div class="flex flex-wrap gap-1">
+                            <?php if (!empty($meta['has_weighbridge'])): ?>
+                                <span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 font-bold">80T VGM</span>
+                            <?php else: ?>
+                                <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-semibold"><?= $isIn ? 'Express' : 'Interlock' ?></span>
+                            <?php endif; ?>
                         </div>
-                        <span class="px-2.5 py-0.5 bg-cyan-100 text-cyan-800 border border-cyan-300 rounded-full text-[10px] font-mono font-extrabold">STANDBY</span>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="bg-white rounded-xl p-3 border border-cyan-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-tower-broadcast text-cyan-600 mr-1.5"></i> RFID UHF Reader</span>
-                                <span class="text-[9px] bg-cyan-100 text-cyan-800 border border-cyan-200 px-1.5 py-0.5 rounded font-mono font-bold">20 METERS</span>
-                            </span>
-                            <span class="text-sm font-mono font-black text-slate-900 block mt-1">
-                                TAG-CIDP-882104
-                            </span>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-3 border border-amber-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-lock text-amber-600 mr-1.5"></i> e-Seal Bea Cukai (CEISA 4.0)</span>
-                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">SECURE</span>
-                            </span>
-                            <span class="text-sm font-mono font-extrabold text-emerald-700 block mt-1">
-                                JT701-098231 • Lolos Inspeksi
-                            </span>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-3 border border-blue-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-snowflake text-blue-600 mr-1.5"></i> Monitoring Reefer Plug</span>
-                                <span class="text-[9px] bg-blue-100 text-blue-800 border border-blue-200 px-1.5 py-0.5 rounded font-mono font-bold">-20.5°C</span>
-                            </span>
-                            <span class="text-xs font-mono font-bold text-slate-700 block mt-1">
-                                PTI Pass • Jalur Prioritas C-01
-                            </span>
-                        </div>
+                        <a href="dashboard.php?page=twin&view=gate" class="text-[#0170b9] hover:underline font-bold flex items-center gap-1" title="Lihat Lajur di Digital Twin 3D">
+                            <i class="fa-solid fa-cube text-[9px]"></i> Twin 3D
+                        </a>
                     </div>
                 </div>
-
-                <div class="mt-4 pt-3 border-t border-cyan-100 flex items-center justify-between text-xs">
-                    <span class="text-slate-500 font-semibold">Barrier Gate:</span>
-                    <span class="text-slate-700 font-mono font-bold">CLOSED (AUTO DETECT)</span>
-                </div>
-            </div>
-
-            <!-- Lane 3: Outbound Gate-Out -->
-            <div class="bg-gradient-to-b from-indigo-50/50 via-white to-white rounded-2xl p-5 shadow-sm border-2 border-indigo-300/80 hover:border-indigo-500 transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between pb-3 border-b border-indigo-100 mb-3">
-                        <div class="flex items-center space-x-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-indigo-500"></span>
-                            <span class="text-xs font-mono font-extrabold tracking-wider text-indigo-900 uppercase">Lane 3 (Outbound Gate-Out)</span>
-                        </div>
-                        <span class="px-2.5 py-0.5 bg-indigo-100 text-indigo-800 border border-indigo-300 rounded-full text-[10px] font-mono font-extrabold">ONLINE</span>
-                    </div>
-
-                    <div class="space-y-3">
-                        <div class="bg-white rounded-xl p-3 border border-indigo-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-barcode text-indigo-600 mr-1.5"></i> Scanner Slip Keluar</span>
-                                <span class="text-[9px] bg-indigo-100 text-indigo-800 border border-indigo-200 px-1.5 py-0.5 rounded font-mono font-bold">QR CODE</span>
-                            </span>
-                            <span class="text-sm font-mono font-black text-slate-900 block mt-1">
-                                Verifikasi Surat Jalan &amp; Billing
-                            </span>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-3 border border-emerald-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-file-invoice text-emerald-600 mr-1.5"></i> Odoo ERP Status</span>
-                                <span class="text-[9px] bg-emerald-100 text-emerald-800 border border-emerald-200 px-1.5 py-0.5 rounded font-mono font-bold">SYNCED</span>
-                            </span>
-                            <span class="text-xs font-mono font-extrabold text-emerald-700 block mt-1">
-                                Invoicing &amp; Lift-On/Off Selesai
-                            </span>
-                        </div>
-
-                        <div class="bg-white rounded-xl p-3 border border-amber-200 shadow-2xs">
-                            <span class="text-[10px] text-slate-600 font-bold uppercase flex items-center justify-between">
-                                <span><i class="fa-solid fa-road text-amber-600 mr-1.5"></i> Akses Tol Otomatis</span>
-                                <span class="text-[9px] bg-amber-100 text-amber-800 border border-amber-200 px-1.5 py-0.5 rounded font-mono font-bold">KM 34 CIKARANG</span>
-                            </span>
-                            <span class="text-xs font-bold text-slate-700 block mt-1">
-                                Menuju Tol Jakarta - Cikampek
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="mt-4 pt-3 border-t border-indigo-100 flex items-center justify-between text-xs">
-                    <span class="text-slate-500 font-semibold">Barrier Gate:</span>
-                    <span class="text-emerald-700 font-mono font-extrabold flex items-center gap-1"><i class="fa-solid fa-check-circle text-emerald-600"></i> NORMAL STANDBY</span>
-                </div>
+                <?php endforeach; ?>
             </div>
         </div>
 
@@ -1444,7 +1370,7 @@ foreach ($hardware_list as $item) {
                         <option value="50">Tampil: 50</option>
                         <option value="all">Semua</option>
                     </select>
-                    <button onclick="location.reload()" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition" title="Segarkan Data">
+                    <button type="button" onclick="if(window.cidpSoftRefreshContent) { cidpSoftRefreshContent({ title: 'Data Disegarkan', message: 'Riwayat & antrean gerbang diperbarui tanpa reload halaman.', type: 'info' }); }" class="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded-lg transition cursor-pointer" title="Segarkan Data Tanpa Refresh">
                         <i class="fa-solid fa-rotate-right text-xs"></i>
                     </button>
                 </div>
@@ -1479,8 +1405,12 @@ foreach ($hardware_list as $item) {
                             $isOut = !empty($t['gate_out_time']) || $t['status'] === 'gate_out';
                             $isIn = $t['status'] === 'in_yard' || $t['status'] === 'loading';
                             $isQueue = $t['status'] === 'queuing';
-                            $lane = $isOut ? 'Lane 3 (Out)' : (($idx % 2 == 0) ? 'Lane 1 (In Heavy)' : 'Lane 2 (e-Seal)');
-                            $laneClass = $isOut ? 'bg-purple-50 text-purple-700' : 'bg-blue-50 text-blue-700';
+                            $fallbackIn  = 'IN-0' . (($idx % 6) + 1);
+                            $fallbackOut = 'OUT-0' . (($idx % 4) + 1);
+                            $lane = $isOut
+                                ? (!empty($t['gate_out_lane']) ? cidp_normalize_gate_lane($t['gate_out_lane'], 'OUT') : $fallbackOut)
+                                : (!empty($t['gate_lane']) ? cidp_normalize_gate_lane($t['gate_lane'], 'IN') : $fallbackIn);
+                            $laneClass = $isOut ? 'bg-orange-50 text-orange-700 border border-orange-200' : 'bg-blue-50 text-blue-700 border border-blue-200';
                             $mType = $t['mission_type'] ?? '';
                             if ($mType === 'drop_export') {
                                 $jobBadge = '<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-100 text-blue-800 border border-blue-200 flex items-center w-fit"><i class="fa-solid fa-arrow-down-to-bracket mr-1 text-blue-600"></i>Drop Ekspor</span>';
@@ -1546,7 +1476,7 @@ foreach ($hardware_list as $item) {
                                         $isCleared = ($cStat === 'SPPB_CLEARED' && $bStat === 'PAID');
                                     ?>
                                         <?php if ($isCleared): ?>
-                                        <form method="POST" onsubmit="return confirm('Pabean SPPB: Lolos. Billing ERP: Lunas. Konfirmasi buka palang rilis Gate Out untuk armada <?= $t['license_plate'] ?>?');" class="inline">
+                                        <form method="POST" data-confirm="Pabean SPPB: Lolos. Billing ERP: Lunas. Buka palang rilis Gate-Out untuk armada <?= htmlspecialchars($t['license_plate']) ?>?" data-confirm-title="Konfirmasi Rilis Gate-Out" data-confirm-target="<?= htmlspecialchars($t['license_plate']) ?>" data-confirm-tone="warning" class="inline">
                                             <input type="hidden" name="gate_action" value="release_gate_out">
                                             <input type="hidden" name="truck_id" value="<?= $t['id'] ?? 0 ?>">
                                             <input type="hidden" name="license_plate" value="<?= htmlspecialchars($t['license_plate']) ?>">
@@ -1960,8 +1890,8 @@ foreach ($hardware_list as $item) {
                             <td class="py-3 px-3.5 text-right font-mono font-bold text-blue-700"><?= $hw['subtotal_label'] ?></td>
                             <td class="py-3 px-3.5 text-center">
                                 <div class="flex items-center justify-center space-x-1">
-                                    <a href="dashboard.php?page=denah&hw_id=<?= $hw['no'] ?>" class="p-1.5 text-amber-600 hover:text-amber-800 rounded hover:bg-amber-50 transition-colors inline-block" title="Sorot Lokasi Sensor di Denah 2D">
-                                        <i class="fa-solid fa-map-location-dot"></i>
+                                    <a href="dashboard.php?page=twin&view=gate&hw_id=<?= $hw['no'] ?>" class="p-1.5 text-amber-600 hover:text-amber-800 rounded hover:bg-amber-50 transition-colors inline-block" title="Pantau Lokasi Sensor Gerbang di Digital Twin 3D">
+                                        <i class="fa-solid fa-cube"></i>
                                     </a>
                                     <a href="<?= htmlspecialchars($hw['link']) ?>" target="_blank" rel="noopener noreferrer" class="p-1.5 text-[#0170b9] hover:text-[#004b87] rounded hover:bg-blue-50 transition-colors inline-block" title="Buka tautan spesifikasi resmi">
                                         <i class="fa-solid fa-arrow-up-right-from-square"></i>
@@ -2553,9 +2483,19 @@ foreach ($hardware_list as $item) {
                     <input type="text" id="gp_company" required placeholder="misal: PT Samudera Raya Logistik" class="w-full text-xs border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-gray-700 mb-1">RFID / e-Tag Truk (Opsional)</label>
-                    <input type="text" id="gp_rfid_tag" placeholder="misal: RFID-99214" class="w-full text-xs font-mono border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+                    <label class="block text-xs font-bold text-gray-700 mb-1">Alokasi Lajur Gate-In (6 Lajur)</label>
+                    <select id="gp_gate_lane" class="w-full text-xs font-mono font-bold border border-gray-200 rounded-xl p-2.5 bg-white focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
+                        <option value="">Otomatis (Load-Balanced 6-In)</option>
+                        <?php foreach ($inbound_lanes_list as $il): ?>
+                            <option value="<?= htmlspecialchars($il['code']) ?>"><?= htmlspecialchars($il['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
                 </div>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-gray-700 mb-1">RFID / e-Tag Truk (Opsional)</label>
+                <input type="text" id="gp_rfid_tag" placeholder="misal: RFID-99214" class="w-full text-xs font-mono border border-gray-200 rounded-xl p-2.5 focus:outline-none focus:ring-2 focus:ring-[#0170b9]">
             </div>
 
             <div id="gp_dropoff_section" class="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-3">
@@ -2671,14 +2611,9 @@ function toggleGatePassFields() {
     }
 }
 
-function submitGatePass(e) {
+async function submitGatePass(e) {
     e.preventDefault();
-    const btn = document.getElementById('btnSubmitGP');
-    if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...';
-    }
-
+    const form = e.target;
     const jobType = document.querySelector('input[name="gp_job_type"]:checked')?.value || 'drop_off';
     const plate = document.getElementById('gp_license_plate').value.trim();
     const driver = document.getElementById('gp_driver_name').value.trim();
@@ -2687,42 +2622,66 @@ function submitGatePass(e) {
     const container = document.getElementById('gp_container_number').value.trim();
     const doNumber = document.getElementById('gp_do_number').value.trim();
 
+    if (window.cidpConfirm) {
+        const ok = await window.cidpConfirm({
+            title: 'Konfirmasi Terbitkan Gate Pass',
+            target: plate,
+            message: `Terbitkan Gate Pass untuk armada ${plate} (${company}) dan masukkan ke antrean Pra-Gate?`,
+            confirmText: 'Ya, Terbitkan',
+            cancelText: 'Tidak, Batal',
+            tone: 'primary'
+        });
+        if (!ok) return;
+    }
+
+    const btn = document.getElementById('btnSubmitGP');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Menyimpan...';
+    }
+
     const payload = {
         license_plate: plate,
         driver_name: driver,
         company: company,
         job_type: jobType,
+        gate_lane: document.getElementById('gp_gate_lane')?.value || '',
         rfid_tag: rfid,
         container_number: (jobType === 'drop_off') ? container : '',
         do_number: (jobType === 'pick_up') ? doNumber : ''
     };
 
-    fetch('api/crud.php?action=add_truck', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(data => {
+    try {
+        const r = await fetch('api/crud.php?action=add_truck', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const data = await r.json();
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-check"></i> Simpan & Terbitkan Gate Pass';
         }
-        if (data.status) {
+        if (data.success || data.status) {
             closeGatePassModal();
-            alert('Sukses! Gate Pass armada ' + plate + ' berhasil diterbitkan.\nStatus: Antrian Pra-Gate. Anda dapat menjalankan simulasi gerbang di Panel Simulasi 3D.');
-            location.reload();
+            if (form) form.reset();
+            if (window.cidpSoftRefreshContent) {
+                await window.cidpSoftRefreshContent({
+                    title: 'Gate Pass Terbit',
+                    message: `Armada ${plate} terdaftar di antrean Pra-Gate (${data.data?.gate_lane || 'Gate-In'}).`,
+                    type: 'success'
+                });
+            }
         } else {
-            alert('Gagal mendaftarkan armada: ' + (data.message || 'Terjadi kesalahan sistem'));
+            if (window.cidpToast) cidpToast('Gagal Mendaftarkan Armada', data.message || 'Terjadi kesalahan sistem', 'error');
         }
-    })
-    .catch(err => {
+    } catch (err) {
         if (btn) {
             btn.disabled = false;
             btn.innerHTML = '<i class="fa-solid fa-check"></i> Simpan & Terbitkan Gate Pass';
         }
-        alert('Gagal menghubungi server: ' + err.message);
-    });
+        if (window.cidpToast) cidpToast('Gagal Menghubungi Server', err.message, 'error');
+    }
 }
 
 function viewGatePassDetail(plate, contOrDo, driver) {
@@ -3292,6 +3251,50 @@ function getGateExportData() {
 function exportGateExcel() {
     const { headers, rows } = getGateExportData();
     CIDPExport.toExcel(headers, rows, 'DCSA Event Log', 'Laporan_Gate_DCSA');
+}
+
+function filterGateLaneCards(dir) {
+    document.querySelectorAll('.gate-lane-filter-btn').forEach(btn => {
+        const active = btn.dataset.laneFilter === dir;
+        btn.className = active
+            ? 'gate-lane-filter-btn px-2.5 py-1 rounded-lg bg-[#0170b9] text-white font-bold cursor-pointer'
+            : 'gate-lane-filter-btn px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 hover:bg-sky-50 hover:text-sky-700 font-bold cursor-pointer';
+    });
+    document.querySelectorAll('[data-gate-lane-card]').forEach(card => {
+        const match = (dir === 'all' || card.dataset.laneDir === dir);
+        card.classList.toggle('hidden', !match);
+    });
+}
+
+async function refreshGateLanesLive() {
+    try {
+        const res = await fetch('api/stream_twin.php?poll=1&force=1');
+        if (!res.ok) return;
+        const data = await res.json();
+        const lanes = data?.physical?.gate?.lanes || {};
+        Object.entries(lanes).forEach(([code, st]) => {
+            const card = document.querySelector(`[data-gate-lane-card="${code}"]`);
+            if (!card) return;
+            const isOpen = (st.barrier === 'OPEN');
+            const isIn = (st.direction === 'IN');
+            const statusEl = card.querySelector('[data-lane-status]');
+            const plateEl = card.querySelector('[data-lane-plate]');
+            const ctrEl = card.querySelector('[data-lane-ctr]');
+            const wtEl = card.querySelector('[data-lane-weight]');
+            const dotEl = card.querySelector('[data-lane-dot]');
+            if (statusEl) {
+                statusEl.textContent = isOpen ? 'OPEN' : 'STANDBY';
+                statusEl.className = `px-2 py-0.5 rounded-full text-[9.5px] font-mono font-extrabold border ${isOpen ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : (isIn ? 'bg-sky-100 text-sky-800 border-sky-200' : 'bg-orange-100 text-orange-800 border-orange-200')}`;
+            }
+            if (dotEl) dotEl.className = `w-2 h-2 rounded-full shrink-0 ${isOpen ? 'bg-emerald-500 animate-ping' : (isIn ? 'bg-sky-500' : 'bg-orange-500')}`;
+            if (plateEl && st.truck_plate) plateEl.textContent = st.truck_plate;
+            if (ctrEl && st.container_number) ctrEl.textContent = st.container_number;
+            if (wtEl && st.has_weighbridge) {
+                const kg = parseFloat(st.weight_kg || 0);
+                wtEl.textContent = kg > 0 ? `${Math.round(kg).toLocaleString('id-ID')} kg` : '0 kg (Zeroed)';
+            }
+        });
+    } catch (e) {}
 }
 
 function exportGatePDF() {

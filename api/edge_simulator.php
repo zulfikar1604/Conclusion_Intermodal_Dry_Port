@@ -141,19 +141,32 @@ switch ($action) {
         $res = null;
         switch ($step_id) {
             case 1:
+                $inLane = cidp_pick_gate_lane($pdo, 'IN', [
+                    'lane'       => $_GET['lane'] ?? $_POST['lane'] ?? null,
+                    'cargo_type' => $pre['cargo_type'] ?? 'dry',
+                    'block'      => $pre['target_block'] ?? 'A',
+                    'job_type'   => $pre['job_type'] ?? 'drop_off',
+                ]);
                 // Sensor hanya "melihat" plat/RFID/kontainer di gerbang; data master dicocokkan oleh ingest
                 $res = post_local_event('TRUCK_GATE_ARRIVAL', [
-                    'truck_plate' => $plate,
+                    'truck_plate'      => $plate,
                     'container_number' => $cn,
-                    'rfid_tag' => $pre['rfid_tag']
-                ], 'GATE-IN-LANE-01');
+                    'rfid_tag'         => $pre['rfid_tag'],
+                    'gate_lane'        => $inLane,
+                ], $inLane);
                 break;
             case 2:
+                $wbLane = cidp_pick_gate_lane($pdo, 'IN', [
+                    'lane'       => $_GET['lane'] ?? $_POST['lane'] ?? null,
+                    'cargo_type' => $pre['cargo_type'] ?? 'dry',
+                    'block'      => $pre['target_block'] ?? 'A',
+                ]);
                 $res = post_local_event('TRUCK_WEIGHBRIDGE', [
-                    'truck_plate' => $plate,
+                    'truck_plate'      => $plate,
                     'container_number' => $cn,
-                    'weight_gross' => round(mt_rand(26500, 34500) + mt_rand(0, 99) / 100, 2)
-                ], 'WEIGHBRIDGE-80T');
+                    'gate_lane'        => $wbLane,
+                    'weight_gross'     => round(mt_rand(26500, 34500) + mt_rand(0, 99) / 100, 2)
+                ], "WEIGHBRIDGE-80T-{$wbLane}");
                 break;
             case 3:
                 post_local_event('EQUIPMENT_MOVE', [
@@ -450,7 +463,12 @@ switch ($action) {
 
             case 'gate_out':
                 $c = sim_pick_container($pdo, "status = 'in_yard' AND customs_status = 'SPPB_CLEARED'", $want) ?: $fail('Tidak ada kontainer SPPB_CLEARED di yard untuk gate-out.');
-                $run('TRUCK_GATE_OUT', ['container_number' => $c['container_number']], 'GATE-OUT-LANE-01');
+                $outLane = cidp_pick_gate_lane($pdo, 'OUT', [
+                    'lane'       => $_GET['lane'] ?? $_POST['lane'] ?? null,
+                    'cargo_type' => $c['cargo_type'] ?? 'dry',
+                    'block'      => $c['block'] ?? '',
+                ]);
+                $run('TRUCK_GATE_OUT', ['container_number' => $c['container_number'], 'gate_lane' => $outLane], $outLane);
                 break;
 
             default:

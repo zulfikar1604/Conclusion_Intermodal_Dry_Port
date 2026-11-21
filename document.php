@@ -22,6 +22,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/connection.php';
 require_once __DIR__ . '/config/i18n.php';
+require_once __DIR__ . '/api/gate_lanes_helper.php';
 
 $allowed_types = ['invoice', 'gate_pass', 'sppb', 'cfs_tally', 'reefer_cert'];
 $type = trim($_GET['type'] ?? 'invoice');
@@ -223,9 +224,16 @@ if ($type === 'invoice') {
     $p_hash = abs(crc32($t_plate));
     $size_lbl = !empty($ctr_meta['size_type']) ? $ctr_meta['size_type'] . (!empty($ctr_meta['iso_code']) ? ' (' . $ctr_meta['iso_code'] . ')' : '') : '40FT HIGH CUBE (45G1)';
 
+    $gate_cat = cidp_gate_lane_catalog();
+    $is_gate_out_doc = (($truk['status'] ?? '') === 'gate_out' || !empty($truk['gate_out_lane']));
+    $lane_dir = $is_gate_out_doc ? 'OUT' : 'IN';
+    $lane_raw = $is_gate_out_doc ? ($truk['gate_out_lane'] ?? '') : ($truk['gate_lane'] ?? (($truk['job_type'] ?? '') === 'pick_up' ? 'IN-04' : 'IN-01'));
+    $lane_code = cidp_normalize_gate_lane($lane_raw, $lane_dir);
+    $lane_label = $gate_cat[$lane_code]['name'] ?? $lane_code;
+
     $doc_data = [
         'title' => 'SURAT JALAN & TANDA TERIMA ALAT (GATE PASS / EIR)',
-        'doc_no' => 'EIR-IN-' . date('Ymd') . '-' . str_pad(substr((string)$p_hash, 0, 4), 4, '0', STR_PAD_LEFT),
+        'doc_no' => 'EIR-' . $lane_dir . '-' . date('Ymd') . '-' . str_pad(substr((string)$p_hash, 0, 4), 4, '0', STR_PAD_LEFT),
         'transporter' => !empty($truk['company']) ? $truk['company'] : (!empty($truk['transporter']) ? $truk['transporter'] : 'PT Samudera Logistik Prima'),
         'license_plate' => $t_plate,
         'driver_name' => $driver,
@@ -234,7 +242,7 @@ if ($type === 'invoice') {
         'container_number' => $c_num,
         'seal_number' => !empty($ctr_meta['seal_number']) ? $ctr_meta['seal_number'] : 'SL-CIDP-' . str_pad(substr((string)abs(crc32($c_num)), 0, 5), 5, '0', STR_PAD_LEFT),
         'size_type' => $size_lbl,
-        'gate_lane' => (($truk['job_type'] ?? '') === 'pick_up') ? 'Gate 02 (Lane B - Outbound Heavy)' : 'Gate 01 (Lane A - Inbound Heavy)',
+        'gate_lane' => $lane_label,
         'weight_gross' => $gross,
         'weight_tare' => $tare,
         'weight_net' => $net,
@@ -1007,6 +1015,7 @@ function terbilangRupiah($n) {
                         <div><span class="text-slate-500">Pengemudi:</span> <strong class="text-slate-900"><?= htmlspecialchars($doc_data['driver_name']) ?></strong></div>
                         <div><span class="text-slate-500">Nomor SIM:</span> <span class="font-mono-code"><?= htmlspecialchars($doc_data['driver_sim']) ?></span></div>
                         <div><span class="text-slate-500">Tag RFID UHF:</span> <span class="font-mono-code text-purple-800 font-bold"><?= htmlspecialchars($doc_data['rfid_tid']) ?></span></div>
+                        <div><span class="text-slate-500">Lajur Gerbang:</span> <strong class="font-mono-code text-blue-800"><?= htmlspecialchars($doc_data['gate_lane']) ?></strong></div>
                         <div><span class="text-slate-500">Transporter:</span> <span class="text-slate-800 font-bold"><?= htmlspecialchars($doc_data['transporter']) ?></span></div>
                     </div>
 

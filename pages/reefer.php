@@ -96,37 +96,46 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $voltage     = floatval($_POST['voltage'] ?? 382.4);
         $humidity    = floatval($_POST['humidity'] ?? 89.5);
         $rssi        = trim($_POST['rssi'] ?? '-68 dBm');
+        $th          = isset($pdo) ? cidp_get_thresholds($pdo) : ['reefer_max_deviation_c' => 2.0];
+        $maxDevC     = max(0.5, (float)$th['reefer_max_deviation_c']);
+        $devVal      = round(abs($temp_actual - $setpoint), 1);
+        $isAlarmBool = $devVal > $maxDevC;
 
         if (isset($pdo) && !empty($ctr_num)) {
             try {
                 $stmtUp = $pdo->prepare("UPDATE containers SET customs_status = COALESCE(customs_status, 'SPPB_CLEARED') WHERE container_number = ?");
                 $stmtUp->execute([$ctr_num]);
-                $isAlm = abs($temp_actual - $setpoint) > 2.0 ? 'ALARM' : 'NORMAL';
+                $isAlm = $isAlarmBool ? 'ALARM' : 'NORMAL';
                 $pdo->prepare("INSERT INTO reefer_telemetry (container_number, socket_id, set_temp_c, supply_temp_c, power_kw, status, created_at) VALUES (?, ?, ?, ?, 6.10, ?, NOW())")->execute([$ctr_num, $slot_id, $setpoint, $temp_actual, $isAlm]);
 
-                // Catat ke yard_events
-                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES ('REEFER_TELEMETRY_PING', ?, 'REEFER', 'LoRaWAN SHT40 Gateway', ?, NOW())");
-                $stmtLog->execute([$ctr_num, "Paket Telemetri LoRaWAN 868MHz: Slot $slot_id, Temp {$temp_actual}°C (SP {$setpoint}°C), Tegangan {$voltage}V, Kelembaban {$humidity}% RH, Sinyal RSSI $rssi"]);
+                $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, container_number, to_block, operator_name, notes, created_at) VALUES (?, ?, 'REEFER', 'LoRaWAN SHT40 Gateway', ?, NOW())");
+                $stmtLog->execute([
+                    $isAlarmBool ? 'REEFER_ALARM' : 'REEFER_TELEMETRY_PING',
+                    $ctr_num,
+                    "LoRaWAN 868MHz: Slot $slot_id, Suhu {$temp_actual}°C (SP {$setpoint}°C, deviasi {$devVal}°C vs batas ±{$maxDevC}°C) -> " . ($isAlarmBool ? 'KEPUTUSAN: ALARM & INSPEKSI KOMPRESOR' : 'NORMAL')
+                ]);
                 get_live_twin_state($pdo, true);
             } catch (Exception $e) {}
         }
 
         $action_alert = [
-            'type' => 'success',
-            'title' => '📡 Paket Telemetri LoRaWAN Berhasil Diterima (Real IoT Sensor)',
-            'msg' => "Gateway LoRaWAN 868 MHz (HW-23 Node) menerima transmisi dari kontainer <strong>$ctr_num</strong> (Slot <strong>$slot_id</strong>). Suhu Aktual: <strong class='font-mono text-cyan-800'>{$temp_actual}°C</strong> (Setpoint: {$setpoint}°C), Tegangan: <strong class='font-mono'>{$voltage}V</strong>, Kelembaban: <strong class='font-mono'>{$humidity}% RH</strong>, RSSI: <strong>$rssi</strong> (Kualitas Sinyal Unggul). Event telah dicatat permanen ke database YMS."
+            'type' => $isAlarmBool ? 'warning' : 'success',
+            'title' => $isAlarmBool ? "🚨 ALARM SUHU REEFER (Deviasi {$devVal}°C > ±{$maxDevC}°C)" : '📡 Paket Telemetri LoRaWAN Berhasil Diterima (Normal)',
+            'msg' => "Gateway LoRaWAN 868 MHz menerima dari <strong>$ctr_num</strong> ($slot_id): Suhu <strong>{$temp_actual}°C</strong> vs Setpoint <strong>{$setpoint}°C</strong>. " . ($isAlarmBool ? "<strong>Keputusan Sistem:</strong> Kirim teknisi ke soket $slot_id, siapkan backup daya Genset ATS & tandai peringatan sertifikat HACCP!" : "<strong>Keputusan Sistem:</strong> Suhu stabil dalam toleransi ±{$maxDevC}°C, pertahankan monitoring normal.")
         ];
     } elseif (isset($_POST['action_type']) && $_POST['action_type'] === 'trigger_thermal_scan') {
         $rack_id   = trim($_POST['rack_id'] ?? 'Rack 03');
         $max_temp  = floatval($_POST['max_temp'] ?? 68.9);
         $camera_id = trim($_POST['camera_id'] ?? 'HW-16 Hikvision DS-2TD2636B');
-        $is_alarm  = ($max_temp > 85.0);
+        $th        = isset($pdo) ? cidp_get_thresholds($pdo) : ['reefer_thermal_trip_c' => 85.0];
+        $tripLimit = (float)$th['reefer_thermal_trip_c'];
+        $is_alarm  = ($max_temp > $tripLimit);
 
         if (isset($pdo)) {
             try {
                 $event_name = $is_alarm ? 'K3_THERMAL_ALARM' : 'K3_THERMAL_SCAN';
                 $stmtLog = $pdo->prepare("INSERT INTO yard_events (event_type, to_block, operator_name, notes, created_at) VALUES (?, 'REEFER', 'AI Thermal Cam HW-16', ?, NOW())");
-                $stmtLog->execute([$event_name, "Pemindaian Termal HW-16: $rack_id Kompresor {$max_temp}°C (Ambang batas trip 85.0°C - Status: " . ($is_alarm ? 'ALARM OVERHEAT' : 'NORMAL') . ")"]);
+                $stmtLog->execute([$event_name, "Pemindaian Termal HW-16: $rack_id Kompresor {$max_temp}°C (Batas trip kalibrasi {$tripLimit}°C - Status: " . ($is_alarm ? 'ALARM OVERHEAT' : 'NORMAL') . ")"]);
                 get_live_twin_state($pdo, true);
             } catch (Exception $e) {}
         }
@@ -134,7 +143,7 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
         $action_alert = [
             'type' => $is_alarm ? 'warning' : 'success',
             'title' => $is_alarm ? '🔥 PERINGATAN K3: Hotspot Kompresor Terdeteksi!' : '✅ Pemindaian Kamera Termal Inframerah HW-16 Berhasil',
-            'msg' => "Kamera termal bi-spektrum HW-16 di Menara Timur telah memindai <strong>$rack_id</strong>. Titik panas kompresor tertinggi: <strong class='font-mono text-red-600'>{$max_temp}°C</strong> (" . ($is_alarm ? 'MELEBIHI AMBANG BATAS 85°C — Solenoid proteksi trip siaga!' : 'Di bawah batas aman 85.0°C — Sistem pendingin beroperasi normal') . "). Log audit K3 tersimpan di database."
+            'msg' => "Kamera termal HW-16 memindai <strong>$rack_id</strong> (Hotspot: <strong class='font-mono text-red-600'>{$max_temp}°C</strong> vs batas trip <strong>{$tripLimit}°C</strong>). " . ($is_alarm ? '<strong>Keputusan K3:</strong> Solenoid proteksi trip siaga & isolasi soket aktif!' : 'Sistem pendingin beroperasi aman di bawah ambang trip.')
         ];
     } elseif (isset($_POST['action_type']) && $_POST['action_type'] === 'trigger_ats_test') {
         $load_kw     = floatval($_POST['load_kw'] ?? 740.5);
@@ -287,9 +296,9 @@ $alarm_count = $warning_count + $critical_count;
                 <i class="fa-solid fa-plug text-[10px]"></i>
                 <span>+ Plug-In Baru</span>
             </button>
-            <a href="dashboard.php?page=simulator&view=reefer&block=REEFER" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer" title="Simulasi 3D Digital Twin Reefer Yard">
+            <a href="dashboard.php?page=twin&view=reefer&block=REEFER" class="px-2.5 py-1 bg-cyan-600 hover:bg-cyan-700 text-white text-[11px] font-bold rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer" title="Pantau 3D Digital Twin Reefer Yard">
                 <i class="fa-solid fa-cube text-amber-300 text-[10px]"></i>
-                <span>Simulasi 3D</span>
+                <span>Digital Twin 3D</span>
             </a>
             <button onclick="exportReeferExcel()" class="px-2 py-1 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-[11px] font-semibold rounded-lg shadow-2xs transition flex items-center space-x-1.5 cursor-pointer" title="Ekspor Log Suhu HACCP ke Excel">
                 <i class="fa-solid fa-file-excel text-emerald-600 text-[10px]"></i>
@@ -421,9 +430,9 @@ $alarm_count = $warning_count + $critical_count;
                 </div>
             </div>
             <div class="flex items-center space-x-2 text-xs">
-                <a href="dashboard.php?page=denah&zone=reefer&hw_id=16" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-cyan-200 font-semibold transition flex items-center space-x-1.5">
-                    <i class="fa-solid fa-map-pin text-cyan-400"></i>
-                    <span>Posisi HW-16 di Denah</span>
+                <a href="dashboard.php?page=twin&zone=reefer&hw_id=16" class="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 border border-white/15 text-cyan-200 font-semibold transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-diagram-project text-cyan-400"></i>
+                    <span>Pantau di Digital Twin</span>
                 </a>
             </div>
         </div>
@@ -672,7 +681,7 @@ $alarm_count = $warning_count + $critical_count;
                                         <a href="dashboard.php?page=kontainer&search=<?= urlencode($r['id']) ?>&open=1" class="w-7 h-7 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs transition" title="Lacak Siklus &amp; Milestone Kontainer">
                                             <i class="fa-solid fa-route"></i>
                                         </a>
-                                        <a href="dashboard.php?page=simulator&focus_box=<?= urlencode($r['id']) ?>&view=reefer" class="w-7 h-7 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs transition" title="Sorot Posisi Fisik di Simulasi 3D">
+                                        <a href="dashboard.php?page=twin&focus_box=<?= urlencode($r['id']) ?>&view=reefer" class="w-7 h-7 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 flex items-center justify-center text-xs transition" title="Sorot Posisi Fisik di Digital Twin 3D">
                                             <i class="fa-solid fa-cube"></i>
                                         </a>
                                         <button onclick='selectReeferGraph("<?= $r['id'] ?>", "<?= $r['commodity'] ?>", <?= $r['setpoint'] ?>)' class="w-7 h-7 rounded-lg bg-cyan-50 hover:bg-cyan-100 text-cyan-700 flex items-center justify-center text-xs transition" title="Lihat Grafik Fluktuasi Suhu 24 Jam">
@@ -1179,8 +1188,8 @@ $alarm_count = $warning_count + $critical_count;
                     <a id="btnReeferLink3D" href="#" class="px-2.5 py-1 bg-white hover:bg-indigo-600 hover:text-white text-indigo-700 font-bold text-[10.5px] rounded-lg border border-indigo-200 transition flex items-center gap-1 shadow-2xs">
                         <i class="fa-solid fa-cube"></i> Twin 3D
                     </a>
-                    <a id="btnReeferLinkDenah" href="dashboard.php?page=denah&highlight_block=R" class="px-2.5 py-1 bg-white hover:bg-amber-600 hover:text-white text-amber-700 font-bold text-[10.5px] rounded-lg border border-amber-200 transition flex items-center gap-1 shadow-2xs">
-                        <i class="fa-solid fa-map-location-dot"></i> Denah 2D
+                    <a id="btnReeferLinkDenah" href="dashboard.php?page=yard&block=REEFER" class="px-2.5 py-1 bg-white hover:bg-amber-600 hover:text-white text-amber-700 font-bold text-[10.5px] rounded-lg border border-amber-200 transition flex items-center gap-1 shadow-2xs" title="Lihat Slot Cold Chain di Matriks Yard">
+                        <i class="fa-solid fa-grip"></i> Matriks Yard
                     </a>
                     <a id="btnReeferLinkBill" href="#" class="px-2.5 py-1 bg-white hover:bg-blue-600 hover:text-white text-blue-700 font-bold text-[10.5px] rounded-lg border border-blue-200 transition flex items-center gap-1 shadow-2xs">
                         <i class="fa-solid fa-file-invoice-dollar"></i> Billing Listrik
@@ -1574,7 +1583,10 @@ function showReeferDetailModal(data) {
     if (linkTrack) linkTrack.href = 'dashboard.php?page=kontainer&search=' + cleanCtr + '&open=1';
 
     const link3D = document.getElementById('btnReeferLink3D');
-    if (link3D) link3D.href = 'dashboard.php?page=simulator&focus_box=' + cleanCtr + '&view=reefer&block=REEFER';
+    if (link3D) link3D.href = 'dashboard.php?page=twin&focus_box=' + cleanCtr + '&view=reefer&block=REEFER';
+
+    const linkYard = document.getElementById('btnReeferLinkDenah');
+    if (linkYard) linkYard.href = 'dashboard.php?page=yard&block=REEFER&focus_box=' + cleanCtr;
 
     const linkBill = document.getElementById('btnReeferLinkBill');
     if (linkBill) linkBill.href = 'dashboard.php?page=billing&search=' + cleanCtr;
@@ -1592,7 +1604,7 @@ function printReeferMonitoringSheet() {
         currentReeferData = window.activeReefersData[0];
     }
     if (!currentReeferData) {
-        alert("Pilih kontainer reefer terlebih dahulu untuk mencetak dokumen monitoring.");
+        if (window.cidpToast) cidpToast('Pilih Kontainer Reefer', 'Pilih kontainer reefer terlebih dahulu untuk mencetak dokumen monitoring.', 'warning');
         return;
     }
     const ctr = encodeURIComponent(currentReeferData.container_number || '');
@@ -1744,12 +1756,20 @@ function updateReeferChartFromSelect() {
 
 // Data Global Peti Kemas Reefer Aktif
 window.activeReefersData = <?= json_encode($active_reefers) ?>;
+window.cidpOnSoftRefresh = function () {
+    const sel = document.getElementById('selectReeferGraphBox');
+    if (sel && sel.options && sel.options.length > 0) {
+        updateReeferChartFromSelect();
+    } else if (document.getElementById('reeferTempChart')) {
+        initReeferChart();
+    }
+};
 
 // Ekspor Excel Data Reefer HACCP via SheetJS (dengan Fallback CSV Instan)
 function exportReeferExcel() {
     const reefers = window.activeReefersData || [];
     if (!reefers.length) {
-        alert("Tidak ada data kontainer reefer untuk diekspor.");
+        if (window.cidpToast) cidpToast('Data Kosong', 'Tidak ada data kontainer reefer untuk diekspor.', 'warning');
         return;
     }
     const exportData = reefers.map((r, i) => ({
